@@ -1,11 +1,11 @@
 export type Edition = '2014' | '2024';
-export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition';
-export const KIND_LABELS: Record<Kind, string> = { class: '职业', subclass: '子职', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', feature: '特性', condition: '状态' };
+export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule';
+export const KIND_LABELS: Record<Kind, string> = { class: '职业', subclass: '子职', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', feature: '特性', condition: '状态', rule: '规则' };
 export const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
 export type Ability = typeof ABILITIES[number];
 export const ABILITY_LABELS: Record<Ability, string> = { str: '力量', dex: '敏捷', con: '体质', int: '智力', wis: '感知', cha: '魅力' };
 export const SKILLS: Record<string, { name: string; ability: Ability }> = {
-  athletics: { name: '运动', ability: 'str' }, acrobatics: { name: '体操', ability: 'dex' }, sleightOfHand: { name: '巧手', ability: 'dex' }, stealth: { name: '隐匿', ability: 'dex' },
+  athletics: { name: '运动', ability: 'str' }, acrobatics: { name: '特技', ability: 'dex' }, sleightOfHand: { name: '巧手', ability: 'dex' }, stealth: { name: '隐匿', ability: 'dex' },
   arcana: { name: '奥秘', ability: 'int' }, history: { name: '历史', ability: 'int' }, investigation: { name: '调查', ability: 'int' }, nature: { name: '自然', ability: 'int' }, religion: { name: '宗教', ability: 'int' },
   animalHandling: { name: '驯兽', ability: 'wis' }, insight: { name: '洞悉', ability: 'wis' }, medicine: { name: '医药', ability: 'wis' }, perception: { name: '察觉', ability: 'wis' }, survival: { name: '生存', ability: 'wis' },
   deception: { name: '欺瞒', ability: 'cha' }, intimidation: { name: '威吓', ability: 'cha' }, performance: { name: '表演', ability: 'cha' }, persuasion: { name: '游说', ability: 'cha' },

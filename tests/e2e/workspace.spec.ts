@@ -116,3 +116,17 @@ test('narrow layout retains accessible catalog and keyboard modal controls', asy
   await page.keyboard.press('Escape'); await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test('another tab cannot overwrite the active editor and can resume after it closes', async ({ page, context }) => {
+  await page.getByRole('textbox', { name: '角色姓名', exact: true }).fill('受保护的记录');
+  await expect(page.locator('.save-status')).toContainText('已保存到本机');
+  const second = await context.newPage(); await mockSource(second); await second.goto('/');
+  await expect(second.locator('.read-only-banner')).toBeVisible();
+  await second.getByRole('textbox', { name: '角色姓名', exact: true }).fill('不应覆盖');
+  await expect(second.getByRole('textbox', { name: '角色姓名', exact: true })).toHaveValue('受保护的记录');
+  await page.close();
+  await expect(second.locator('.read-only-banner')).toHaveCount(0);
+  await second.getByRole('textbox', { name: '角色姓名', exact: true }).fill('继续编辑');
+  await expect(second.locator('.save-status')).toContainText('已保存到本机');
+  await second.reload(); await expect(second.getByRole('textbox', { name: '角色姓名', exact: true })).toHaveValue('继续编辑');
+});

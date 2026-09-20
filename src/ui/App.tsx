@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, type DragEvent } from 'react';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, signed, uid, type Character, type Edition, type Entry, type Kind, type Requirement, type Selection } from '../core/model';
-import { candidateReason, choiceLabel, evaluate } from '../core/engine';
+import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, validateCharacter, validatePack } from '../core/validation';
-import { exportCharacter, exportOwlbear, exportReview } from '../core/export';
+import { exportCharacter, exportOwlbear, exportReview, exportRulePack } from '../core/export';
 import { loadCatalog, DEFAULT_SOURCE, type LoadProgress } from '../data/catalog';
 import { download, loadWorkspace, pickFile, restoreBackup, saveWorkspace, type Workspace } from '../platform/storage';
-import { Entries } from './Entries';
+import { ContentBoundary, Entries } from './Entries';
+import { EntryFacts } from './EntryFacts';
+import { registerOffline } from '../platform/offline';
 
 const emptyProgress: LoadProgress = { done: 0, total: 1, label: '等待资料', failed: [], cached: 0 };
 const clamp = (value: string, min = 0, max = 100) => Math.max(min, Math.min(max, Number(value) || 0));
@@ -45,12 +47,18 @@ export default function App() {
   const [workspace, setWorkspace] = useState<Workspace>();
   const workspaceRef = useRef<Workspace | undefined>(undefined);
   const [startupError, setStartupError] = useState('');
+  const [readOnly, setReadOnly] = useState(false);
+  const [activateUpdate, setActivateUpdate] = useState<(() => void)>();
+  const writable = useRef(false);
   const [notice, setNotice] = useState('');
   const [saving, setSaving] = useState('正在读取');
   const queue = useRef(Promise.resolve());
+  const pendingSaves = useRef(0);
+  const saveFailed = useRef(false);
   const history = useRef(new Map<string, { past: Character[]; future: Character[]; key?: string; time: number }>());
   const [historyTick, setHistoryTick] = useState(0);
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [bookNames, setBookNames] = useState<Record<string, string>>({});
   const catalogRef = useRef(new Map<string, Entry>());
   const [progress, setProgress] = useState(emptyProgress);
   const [loading, setLoading] = useState(false);
@@ -62,6 +70,8 @@ export default function App() {
   const [enabledOnly, setEnabledOnly] = useState(true);
   const [detail, setDetail] = useState<Entry>();
   const [backStack, setBackStack] = useState<Entry[]>([]);
+  const detailPane = useRef<HTMLElement>(null);
+  const readingPositions = useRef<Record<string, number>>({});
   const [targetId, setTargetId] = useState('');
   const [modal, setModal] = useState('');
   const [ruleSearch, setRuleSearch] = useState('');
@@ -79,24 +89,39 @@ export default function App() {
   const [resourceMax, setResourceMax] = useState(1);
 
   function persist(next: Workspace) {
-    workspaceRef.current = next; setWorkspace(next); setSaving('保存中…');
+    if (!writable.current) { setNotice('另一标签页正在编辑；此页仅供查阅与导出。关闭另一页后刷新即可编辑。'); return; }
+    workspaceRef.current = next; setWorkspace(next); setSaving('保存中…'); pendingSaves.current++;
     queue.current = queue.current.catch(() => {}).then(() => saveWorkspace(next)).then(() => {
-      if (workspaceRef.current === next) setSaving('已保存到本机');
-    }).catch(error => { setSaving('保存失败'); setNotice(`本机保存失败，请立即导出角色备份。${String(error)}`); });
+      if (workspaceRef.current === next) { saveFailed.current = false; setSaving('已保存到本机'); }
+    }).catch(error => { saveFailed.current = true; setSaving('保存失败'); setNotice(`本机保存失败，请立即导出角色备份。${String(error)}`); }).finally(() => { pendingSaves.current--; });
   }
   function acceptWorkspace(value: Workspace) {
     if (value.schemaVersion !== 1 || !Array.isArray(value.characters) || !value.characters.length || !Array.isArray(value.packs)) throw new Error('工作区结构不完整');
     value.characters.forEach(validateCharacter);
+    if (new Set(value.characters.map(c => c.id)).size !== value.characters.length) throw new Error('角色身份重复');
+    for (const pack of value.packs) validatePack({ ...pack, entries: pack.entries.map(e => ({ ...e, id: e.id.slice(pack.id.length + 1) })) }, value.packs);
     if (!value.characters.some(c => c.id === value.activeId)) value.activeId = value.characters[0].id;
     workspaceRef.current = value; setWorkspace(value); setSaving('已保存到本机'); setStartupError('');
   }
   useEffect(() => {
-    let alive = true;
-    loadWorkspace().then(value => {
-      if (!alive) return;
-      if (value) acceptWorkspace(value); else { const first = newCharacter(); persist({ schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }); }
-    }).catch(e => { if (alive) setStartupError(String(e)); });
-    return () => { alive = false; };
+    let alive = true; let release = () => {}; const lockAbort = new AbortController();
+    const initialize = async (canWrite: boolean) => {
+      writable.current = canWrite; setReadOnly(!canWrite);
+      try {
+        const value = await loadWorkspace(); if (!alive) return;
+        if (value) acceptWorkspace(value); else { const first = newCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
+      } catch (e) { if (alive) setStartupError(String(e)); }
+    };
+    if (navigator.locks) navigator.locks.request('dnd-card-editor', { ifAvailable: true }, async lock => {
+      const held = new Promise<void>(resolve => { release = resolve; });
+      if (!alive) return; await initialize(!!lock);
+      if (lock && alive) await held;
+      else if (alive) await navigator.locks.request('dnd-card-editor', { signal: lockAbort.signal }, async () => {
+        if (!alive) return; await initialize(true); if (alive) await held;
+      });
+    }).catch(e => { if (alive && !lockAbort.signal.aborted) setStartupError(String(e)); });
+    else void initialize(true);
+    return () => { alive = false; lockAbort.abort(); release(); };
   }, []);
   async function load(refresh = false) {
     loadController.current?.abort(); const controller = new AbortController(); loadController.current = controller;
@@ -104,11 +129,13 @@ export default function App() {
     try {
       await loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e)); setEntries([...catalogRef.current.values()]);
-      }, setProgress, controller.signal, refresh);
+      }, setProgress, controller.signal, refresh, DEFAULT_SOURCE, setBookNames);
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
     finally { if (!controller.signal.aborted) setLoading(false); }
   }
   useEffect(() => { void load(); return () => loadController.current?.abort(); }, []);
+  useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
+  useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const c = workspace?.characters.find(x => x.id === workspace.activeId);
   const d = useMemo(() => c ? evaluate(c) : undefined, [c]);
   const allEntries = useMemo(() => [...entries, ...(workspace?.packs.flatMap(p => p.entries) || [])], [entries, workspace?.packs]);
@@ -124,7 +151,10 @@ export default function App() {
   }, [allEntries, c, kind, source, query, enabledOnly, editionFilter, target]);
   useEffect(() => { setLimit(80); }, [kind, query, source, enabledOnly, editionFilter, targetId]);
   useEffect(() => { setException(''); }, [detail?.id]);
+  useEffect(() => { if (detailPane.current && detail) detailPane.current.scrollTop = readingPositions.current[detail.id] || 0; }, [detail?.id]);
+  useEffect(() => { if (!notice.startsWith('已')) return; const timer = setTimeout(() => setNotice(''), 5500); return () => clearTimeout(timer); }, [notice]);
   const edit: Edit = (action, key) => {
+    if (!writable.current) { setNotice('此标签页为只读。关闭另一编辑页并刷新后可继续。'); return; }
     const current = workspaceRef.current; if (!current) return;
     const character = current.characters.find(x => x.id === current.activeId)!;
     const record = history.current.get(character.id) || { past: [], future: [], time: 0 };
@@ -147,9 +177,12 @@ export default function App() {
     }; window.addEventListener('keydown', handle); return () => window.removeEventListener('keydown', handle);
   }, []);
   function inspect(entry: Entry, push = true) { if (detail && push) setBackStack(s => [...s.slice(-29), detail]); setDetail(entry); setTab('wiki'); }
-  function link(name: string) {
-    const found = allEntries.find(e => (e.name === name || e.english.toLowerCase() === name.toLowerCase()) && c && selectionAllowed(c, e));
-    if (found) inspect(found); else { setQuery(name); setTargetId(''); setNotice(`已搜索「${name}」。若未收录，可开启其他来源或在中文站查阅。`); }
+  function link(reference: string, tag?: string) {
+    const [name, source] = reference.split('|');
+    const tagKind = ['variantrule', 'action', 'skill', 'sense', 'language'].includes(tag || '') ? 'rule' : tag === 'optfeature' ? 'feature' : tag;
+    const matches = allEntries.filter(e => (!tagKind || e.kind === tagKind) && [e.name, e.english].some(n => n.toLowerCase() === name.toLowerCase()));
+    const found = tagKind === 'feature' ? matches.find(e => !requirementMismatch(e, { refs: [reference] })) : source ? matches.find(e => e.source.toLowerCase() === source.toLowerCase()) : matches.find(e => e.edition === detail?.edition && e.source === (detail?.source || 'PHB')) || matches.find(e => e.source === 'PHB') || matches[0];
+    if (found) inspect(found); else { setQuery(name); if (tagKind && Object.hasOwn(KIND_LABELS, tagKind)) setKind(tagKind as Kind); setTargetId(''); setDetail(undefined); setNotice(`已搜索「${name}」。若未收录，可开启其他来源或在中文站查阅。`); }
   }
   function find(r: Requirement) { setTargetId(r.id); setKind(r.kind || 'feature'); setQuery(''); setSource(''); setEditionFilter('character'); setEnabledOnly(true); setDetail(undefined); setTab('wiki'); }
   function add(entry: Entry, requirement: Requirement | null | undefined = target) {
@@ -208,6 +241,8 @@ export default function App() {
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault(); setModal('help'); }}><span className="brand-mark">▧</span><strong>角色卡工坊</strong><span className="brand-en">DND CARD</span></a>
       <div className="header-tools"><button onClick={() => setModal('characters')}>角色簿 <span>{workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>规则与扩展</button><button className="primary" onClick={() => setModal('export')}>导入 / 导出</button><button className="help-button" aria-label="使用说明" onClick={() => setModal('help')}>?</button></div>
     </header>
+    {readOnly && <div className="read-only-banner" role="status">另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。<button onClick={() => location.reload()}>重新检查</button></div>}
+    {activateUpdate && <div className="read-only-banner" role="status">网页有新版本。<button onClick={async () => { await queue.current; if (saveFailed.current) { setNotice('保存未成功，请先导出角色备份，再重新打开网页。'); return; } navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true }); activateUpdate(); }}>保存后更新</button></div>}
     <nav className="mobile-tabs" aria-label="工作区"><button className={tab === 'sheet' ? 'active' : ''} onClick={() => setTab('sheet')}>角色卡{remaining ? ` · ${remaining} 项待填` : ''}</button><button className={tab === 'wiki' ? 'active' : ''} onClick={() => setTab('wiki')}>规则资料</button></nav>
     <main className="workspace">
       <section className={`sheet-pane ${tab === 'sheet' ? 'mobile-active' : ''}`} aria-label="角色卡工作区">
@@ -225,7 +260,7 @@ export default function App() {
           <div className="paper-main"><div className="stats-columns"><div className="stats-left">
             <div className="combat-numbers"><Box label="护甲等级" className="numeric" hint={d.trace.ac.join('；')}><strong>{d.ac}</strong></Box><Box label="先攻" className="numeric"><strong>{signed(d.initiative)}</strong></Box><Box label="速度 / 尺" className="numeric" hint={d.trace.speed.join('；')}><strong>{d.speed}</strong></Box></div>
             <Box label="生命值" className="hp-box" hint={d.trace.hp.join('；')}><div className="hp-top"><span>生命值上限 <strong>{d.maxHp}</strong></span><button className="text-link" onClick={() => edit(draft => { draft.runtime.hp = d.maxHp; })}>补满</button></div><div className="hp-inputs"><label>当前<input aria-label="当前生命值" type="number" min="0" max="9999" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value, 0, 9999); }, 'hp')}/></label><label>临时<input aria-label="临时生命值" type="number" min="0" max="9999" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value, 0, 9999); }, 'tempHp')}/></label></div><details><summary>手动调整上限</summary><label>0 使用计算值 <input aria-label="手动生命值上限" type="number" min="0" max="9999" value={c.baseHp} onChange={e => edit(draft => { draft.baseHp = clamp(e.target.value, 0, 9999); })}/></label></details></Box>
-            <Box label="特性与专长" className="traits-box"><div onDragOver={e => e.preventDefault()} onDrop={e => drop(e, undefined, ['feature', 'feat'])}>{selections(['feature', 'feat'])}{requirements(['feature', 'feat', 'abilities'])}<div className="add-row">{addButton('feature')}{addButton('feat')}</div></div></Box>
+            <Box label="特性与专长" className="traits-box"><div onDragOver={e => e.preventDefault()} onDrop={e => drop(e, undefined, ['feature', 'feat', 'rule'])}>{selections(['feature', 'feat', 'rule'])}{requirements(['feature', 'feat', 'abilities', 'rule'])}<div className="add-row">{addButton('feature')}{addButton('feat')}</div></div></Box>
             <Box label="冒险笔记" className="notes-box"><textarea aria-label="冒险笔记" placeholder="记录人物故事、战术与 DM 裁定…" value={c.notes} onChange={e => edit(draft => { draft.notes = e.target.value; }, 'notes')}/></Box>
           </div><div className="stats-right">
             <div className="secondary-stats"><Box label="激励" className="numeric"><input aria-label="激励" type="checkbox" checked={!!c.runtime.inspiration} onChange={e => edit(draft => { draft.runtime.inspiration = Number(e.target.checked); })}/></Box><div className="small-stats"><Box label="熟练加值" hint={d.trace.proficiency.join('；')}><strong>{signed(d.proficiency)}</strong></Box><Box label="被动察觉"><strong>{d.passive}</strong></Box></div><Box label="生命骰"><strong className="hit-dice">{d.hitDice}</strong></Box></div>
@@ -243,15 +278,15 @@ export default function App() {
       <section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料"><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
         <div className="wiki-search"><span aria-hidden="true">⌕</span><input aria-label="搜索规则资料" placeholder="搜索中文名、英文名或来源…" value={query} onChange={e => { setQuery(e.target.value); setDetail(undefined); }}/>{query && <button aria-label="清空搜索" onClick={() => setQuery('')}>×</button>}</div>
         <nav className="category-tabs" aria-label="资料分类">{Object.entries(KIND_LABELS).map(([key, label]) => <button key={key} className={kind === key ? 'active' : ''} onClick={() => { setKind(key as Kind); setDetail(undefined); setTargetId(''); }}>{label}</button>)}</nav>
-        <div className="wiki-filters"><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><select aria-label="资料来源" value={source} onChange={e => setSource(e.target.value)}><option value="">全部来源</option>{sources.map(s => <option key={s}>{s}</option>)}</select><label><input type="checkbox" checked={enabledOnly} onChange={e => setEnabledOnly(e.target.checked)}/>已启用</label></div>
+        <div className="wiki-filters"><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><select aria-label="资料来源" value={source} onChange={e => setSource(e.target.value)}><option value="">全部来源</option>{sources.map(s => <option key={s} value={s}>{bookNames[s] ? `${s} · ${bookNames[s]}` : s}</option>)}</select><label><input type="checkbox" checked={enabledOnly} onChange={e => setEnabledOnly(e.target.checked)}/>已启用</label></div>
         {target && <div className="target-banner"><div><strong>正在填写：{target.label}</strong><small>{target.origin} · {target.selected.length}/{target.count}</small></div><button onClick={() => setTargetId('')}>退出筛选</button></div>}
         <div className="catalog-status"><span>{loading ? `${progress.done}/${progress.total} 份资料` : `${allEntries.length.toLocaleString()} 条资料`}{progress.cached > 0 ? ` · ${progress.cached} 份缓存` : ''}</span><span>{filtered.length} 条符合筛选</span></div>
         {progress.failed.length > 0 && <details className="load-errors"><summary>{progress.failed.length} 份资料读取异常 · 可重试</summary>{progress.failed.map((e, i) => <p key={i}>{e}</p>)}<button disabled={loading} onClick={() => load(true)}>重试加载</button></details>}
         <div className={`library-body ${detail ? 'has-detail' : ''}`}><div className="catalog-list" aria-label="资料列表">{filtered.slice(0, limit).map(entry => <button key={entry.id} draggable onDragStart={e => { e.dataTransfer.setData('application/x-dnd-entry', entry.id); e.dataTransfer.effectAllowed = 'copy'; }} className={`catalog-row ${detail?.id === entry.id ? 'active' : ''}`} onClick={() => inspect(entry)}><span className="entry-name">{entry.name}<small>{entry.english !== entry.name ? entry.english : ''}</small></span><span className="catalog-row-meta">{entry.kind === 'spell' ? `${entry.raw.level === 0 ? '戏法' : `${entry.raw.level}环`} · ` : ''}{entry.source}<small>{entry.edition === 'both' ? '通用' : entry.edition}</small></span></button>)}{filtered.length > limit && <button className="load-more" onClick={() => setLimit(n => n + 80)}>再显示 80 条（共 {filtered.length} 条）</button>}{!filtered.length && <div className="empty-state"><span>没有符合条件的条目</span><p>{loading ? '资料正在逐批载入。' : target ? '可以检查规则来源、退出候选筛选，或更新资料后重试。' : '试试其他关键词，或取消“已启用”查看全部来源。'}</p><button onClick={() => setModal('rules')}>查看规则设置</button></div>}</div>
-        {detail && <article className="entry-detail"><div className="detail-navigation"><button onClick={() => { const last = backStack.at(-1); if (last) { setDetail(last); setBackStack(s => s.slice(0, -1)); } else setDetail(undefined); }}>← {backStack.length ? '上一条' : '返回列表'}</button><button aria-label="关闭条目" onClick={() => { setDetail(undefined); setBackStack([]); }}>×</button></div><div className="detail-heading"><span className="eyebrow">{KIND_LABELS[detail.kind]} · {detail.edition === 'both' ? '通用资料' : detail.edition}</span><h1>{detail.name}</h1>{detail.english !== detail.name && <p>{detail.english}</p>}<small>{detail.source}{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div>
-          {detail.raw.level !== undefined && <div className="detail-facts">{detail.kind === 'spell' ? `法术环阶：${detail.raw.level === 0 ? '戏法' : detail.raw.level}` : `获得等级：${detail.raw.level}`}</div>}
+        {detail && <article className="entry-detail" ref={detailPane} onScroll={e => { readingPositions.current[detail.id] = e.currentTarget.scrollTop; }}><div className="detail-navigation"><button onClick={() => { const last = backStack.at(-1); if (last) { setDetail(last); setBackStack(s => s.slice(0, -1)); } else setDetail(undefined); }}>← {backStack.length ? '上一条' : '返回列表'}</button><button aria-label="关闭条目" onClick={() => { setDetail(undefined); setBackStack([]); }}>×</button></div><div className="detail-heading"><span className="eyebrow">{KIND_LABELS[detail.kind]} · {detail.edition === 'both' ? '通用资料' : detail.edition}</span><h1>{detail.name}</h1>{detail.english !== detail.name && <p>{detail.english}</p>}<small>{bookNames[detail.source] || detail.source} · {detail.source}{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div>
+          <ContentBoundary key={`facts:${detail.id}`}><EntryFacts entry={detail} onLink={link}/></ContentBoundary>
           {detail.raw._copy && <p className="inline-warning">此资料继承了另一条目；未展开的继承内容需要在原站核对。</p>}
-          <div className="rules-prose"><Entries value={detail.entries} onLink={link}/>{!detail.entries.length && <p>此条目的内容以结构化规则为主。加入后可在角色卡查看需要填写的选择。</p>}</div>
+          <div className="rules-prose"><ContentBoundary key={detail.id}><Entries value={detail.entries} onLink={link}/></ContentBoundary>{!detail.entries.length && <p>此条目的内容以结构化规则为主。加入后可在角色卡查看需要填写的选择。</p>}</div>
           <details className="raw-details"><summary>数据与追溯</summary><dl><dt>条目身份</dt><dd>{detail.id}</dd><dt>资料修订</dt><dd>{detail.revision}</dd></dl><pre>{JSON.stringify(detail.raw, null, 2)}</pre></details>
           <div className="detail-actions">{blocked && <p className="inline-warning">{blocked}</p>}<button className="primary" disabled={!!blocked} onClick={() => add(detail)}>{target ? '填入当前要求' : '加入角色卡'}</button><a href={DEFAULT_SOURCE} target="_blank" rel="noreferrer">在中文站查阅 ↗</a>
           {blocked === '此来源或规则版本未启用' && <details><summary>记录 DM 特许</summary><p>仅对此条目启用；会随角色及审卡导出保留。</p><input aria-label="DM 特许说明" value={exception} placeholder="填写原因或 DM 的裁定" onChange={e => setException(e.target.value)}/><button disabled={!exception.trim()} onClick={() => edit(draft => { draft.profile.exceptions[detail.id] = exception.trim(); })}>保存特许</button></details>}
@@ -268,8 +303,8 @@ export default function App() {
       {modal === 'characters' && <><div className="dialog-actions"><button onClick={() => create('2024')}>＋ 2024 角色</button><button onClick={() => create('2014')}>＋ 2014 角色</button><button onClick={() => create(c.edition, true)}>复制当前角色</button></div><div className="character-list">{workspace.characters.map(character => <div key={character.id}><button className="character-title" onClick={() => { persist({ ...workspace, activeId: character.id }); setTargetId(''); setModal(''); }}><strong>{character.name}</strong><small>{character.edition} · {character.player || '未填玩家'}{character.id === c.id ? ' · 当前角色' : ''}</small></button>{confirmDelete === character.id ? <span className="delete-confirm">删除后需通过导入恢复。<button onClick={() => { const characters = workspace.characters.filter(x => x.id !== character.id); persist({ ...workspace, characters, activeId: workspace.activeId === character.id ? characters[0].id : workspace.activeId }); setConfirmDelete(''); setTargetId(''); }}>确认删除</button><button onClick={() => setConfirmDelete('')}>取消</button></span> : <button disabled={workspace.characters.length === 1} onClick={() => setConfirmDelete(character.id)}>删除</button>}</div>)}</div><p className="muted">不同角色拥有独立的规则配置、选择与撤销记录。数据保存在本机浏览器。</p></>}
       {modal === 'rules' && <>
         <section className="settings-section"><h3>当前角色的规则</h3><label className="setting-row"><span>基础版本<small>切换会保留所有内容，并标记不兼容条目。</small></span><select aria-label="角色规则版本" value={c.edition} onChange={e => edit(draft => { draft.edition = e.target.value as Edition; })}><option>2024</option><option>2014</option></select></label>{([['feats', '专长规则', '允许选择专长'], ['multiclass', '兼职规则', '允许增加职业；兼职前提需与 DM 核对'], ['legacy', '兼容旧版内容', '允许 2024 角色使用 2014 条目，具体替换关系由 DM 裁定']] as const).map(([key, label, desc]) => <label className="setting-row" key={key}><span>{label}<small>{desc}</small></span><input type="checkbox" checked={c.profile.optional[key]} onChange={e => edit(draft => { draft.profile.optional[key] = e.target.checked; })}/></label>)}</section>
-        <section className="settings-section"><h3>资料来源 <small>已启用 {c.profile.enabledSources.length}</small></h3><p>关闭后，已选条目仍保留，效果暂停。不同角色可使用不同书目。</p><div className="dialog-actions"><button onClick={() => edit(draft => { draft.profile.enabledSources = ['PHB', 'XPHB']; })}>仅基础规则</button><button onClick={() => edit(draft => { draft.profile.enabledSources = sources; })}>全部开启</button><button onClick={() => edit(draft => { draft.profile.enabledSources = []; })}>全部禁用</button></div><input className="source-search" aria-label="筛选资料来源" placeholder="筛选书籍简称或扩展包名称…" value={ruleSearch} onChange={e => setRuleSearch(e.target.value)}/><div className="source-grid">{sources.filter(s => `${s} ${workspace.packs.find(p => p.id === s)?.name || ''}`.toLowerCase().includes(ruleSearch.toLowerCase())).map(s => <label key={s}><input type="checkbox" checked={c.profile.enabledSources.includes(s)} onChange={e => edit(draft => { draft.profile.enabledSources = e.target.checked ? [...new Set([...draft.profile.enabledSources, s])] : draft.profile.enabledSources.filter(x => x !== s); })}/><span>{workspace.packs.find(p => p.id === s)?.name || s}<small>{s === 'PHB' ? '玩家手册 2014' : s === 'XPHB' ? '玩家手册 2024' : `${allEntries.filter(e => e.source === s).length} 条资料`}</small></span></label>)}</div><div className="dialog-actions"><button onClick={() => download(`${fileName(c.name)}-规则配置.json`, { profile: c.profile })}>导出配置</button><button onClick={() => importFile('profile')}>导入配置</button></div></section>
-        <section className="settings-section"><h3>自定义扩展包</h3><p>以 JSON 声明条目、效果与选择。导入前检查格式、依赖和冲突；更新包不会替换角色内已选的旧快照。</p><div className="dialog-actions"><button onClick={() => importFile('pack')}>导入扩展包</button><button onClick={() => download('我的扩展-示例.json', EXAMPLE_PACK)}>下载编写示例</button></div><input className="file-input" data-testid="pack-file" type="file" accept=".json" aria-label="导入扩展包文件" onChange={e => { if (e.target.files?.[0]) importFile('pack', e.target.files[0]); e.target.value = ''; }}/>{workspace.packs.map(pack => <div className="pack-row" key={pack.id}><span><strong>{pack.name}</strong><small>{pack.id} · {pack.version} · {pack.entries.length} 条</small></span><button onClick={() => { const dependent = workspace.packs.find(p => p.requires.some(dep => dep.id === pack.id)); if (dependent) { setImportError(`「${dependent.name}」依赖这个包，请先移除依赖方。`); return; } persist({ ...workspace, packs: workspace.packs.filter(p => p.id !== pack.id) }); setNotice('已移除资料包；角色中的条目快照仍保留。可关闭其来源以暂停效果。'); }}>移除</button></div>)}</section>
+        <section className="settings-section"><h3>资料来源 <small>已启用 {c.profile.enabledSources.length}</small></h3><p>关闭后，已选条目仍保留，效果暂停。不同角色可使用不同书目。</p><div className="dialog-actions"><button onClick={() => edit(draft => { draft.profile.enabledSources = ['PHB', 'XPHB']; })}>仅基础规则</button><button onClick={() => edit(draft => { draft.profile.enabledSources = sources; })}>全部开启</button><button onClick={() => edit(draft => { draft.profile.enabledSources = []; })}>全部禁用</button></div><input className="source-search" aria-label="筛选资料来源" placeholder="筛选书籍简称或扩展包名称…" value={ruleSearch} onChange={e => setRuleSearch(e.target.value)}/><div className="source-grid">{sources.filter(s => `${s} ${bookNames[s] || ''} ${workspace.packs.find(p => p.id === s)?.name || ''}`.toLowerCase().includes(ruleSearch.toLowerCase())).map(s => <label key={s}><input type="checkbox" checked={c.profile.enabledSources.includes(s)} onChange={e => edit(draft => { draft.profile.enabledSources = e.target.checked ? [...new Set([...draft.profile.enabledSources, s])] : draft.profile.enabledSources.filter(x => x !== s); })}/><span>{workspace.packs.find(p => p.id === s)?.name || bookNames[s] || s}<small>{s === 'PHB' ? '玩家手册 2014' : s === 'XPHB' ? '玩家手册 2024' : `${s} · ${allEntries.filter(e => e.source === s).length} 条资料`}</small></span></label>)}</div><div className="dialog-actions"><button onClick={() => download(`${fileName(c.name)}-规则配置.json`, { profile: c.profile })}>导出配置</button><button onClick={() => importFile('profile')}>导入配置</button></div></section>
+        <section className="settings-section"><h3>自定义扩展包</h3><p>以 JSON 声明条目、效果与选择。导入前检查格式、依赖和冲突；更新包不会替换角色内已选的旧快照。</p><div className="dialog-actions"><button onClick={() => importFile('pack')}>导入扩展包</button><button onClick={() => download('我的扩展-示例.json', EXAMPLE_PACK)}>下载编写示例</button></div><input className="file-input" data-testid="pack-file" type="file" accept=".json" aria-label="导入扩展包文件" onChange={e => { if (e.target.files?.[0]) importFile('pack', e.target.files[0]); e.target.value = ''; }}/>{workspace.packs.map(pack => <div className="pack-row" key={pack.id}><span><strong>{pack.name}</strong><small>{pack.id} · {pack.version} · {pack.entries.length} 条</small></span><button onClick={() => download(`${pack.id}-${pack.version}.json`, exportRulePack(pack))}>导出</button><button onClick={() => { const dependent = workspace.packs.find(p => p.requires.some(dep => dep.id === pack.id)); if (dependent) { setImportError(`「${dependent.name}」依赖这个包，请先移除依赖方。`); return; } persist({ ...workspace, packs: workspace.packs.filter(p => p.id !== pack.id) }); setNotice('已移除资料包；角色中的条目快照仍保留。可关闭其来源以暂停效果。'); }}>移除</button></div>)}</section>
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button onClick={() => edit(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
       </>}
       {modal === 'export' && <><section className="settings-section"><h3>带走当前角色</h3><div className="export-options"><button onClick={() => exportFile('character')}><strong>角色完整备份 · JSON</strong><span>保存基础输入、条目快照、选择与规则配置，可完整恢复。</span></button><button onClick={() => exportFile('review')}><strong>DM 审卡 · HTML / 打印</strong><span>离线打开即可阅读。包含计算依据、缺项、来源及裁定；浏览器打印可保存 PDF。</span></button><button onClick={() => exportFile('owlbear')}><strong>枭熊角色卡 · JSON</strong><span>导出 schema 0.3；复杂效果和未映射内容附带说明。</span></button></div></section><section className="settings-section"><h3>导入为新角色</h3><p>导入不覆盖已有角色。枭熊文件只迁入可识别的数据，需重新核对规则来源。</p><div className="dialog-actions"><button onClick={() => importFile('character')}>导入完整备份</button><button onClick={() => importFile('owlbear')}>导入枭熊 JSON</button></div><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e => { if (e.target.files?.[0]) importFile('character', e.target.files[0]); e.target.value = ''; }}/></section><section className="settings-section"><h3>本机恢复</h3><p>自动保留上一次保存的工作区。请先导出当前角色，再恢复。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup); history.current.clear(); setNotice('已读取上一次保存；确认内容后继续编辑即可保存。'); setModal(''); } catch (error) { setImportError(String(error)); } }}>读取上一次保存</button></section></>}

@@ -20,6 +20,14 @@ function validateChoices(value: unknown) {
     assert(c.spellLevel === undefined || Number.isInteger(c.spellLevel) && c.spellLevel >= 0 && c.spellLevel <= 9, '法术环阶无效。');
   }
 }
+function validateContent(value: unknown, depth = 0, budget = { left: 60000 }): void {
+  assert(depth <= 35 && --budget.left > 0, '正文层级或节点数量过多。');
+  if (Array.isArray(value)) { value.forEach(v => validateContent(v, depth + 1, budget)); return; }
+  if (!plain(value)) return;
+  for (const key of ['name', 'type', 'caption', 'by']) assert(value[key] === undefined || typeof value[key] === 'string', `正文的 ${key} 字段需要文本。`);
+  for (const key of ['entries', 'items', 'rows', 'colLabels', 'row']) assert(value[key] === undefined || Array.isArray(value[key]), `正文的 ${key} 字段需要数组。`);
+  Object.values(value).forEach(v => validateContent(v, depth + 1, budget));
+}
 function validateEffects(effects: unknown): asserts effects is Effect[] {
   assert(Array.isArray(effects) && effects.length <= 100, 'effects 必须是最多 100 项的数组。');
   for (const effect of effects) {
@@ -48,6 +56,7 @@ export function validateCharacter(value: unknown): Character {
     assert(typeof s.equipped === 'boolean' && (s.requirementId === undefined || typeof s.requirementId === 'string'), '条目选择数据不合法。');
     if (s.entry.effects) validateEffects(s.entry.effects);
     if (s.entry.choices) validateChoices(s.entry.choices);
+    validateContent(s.entry.entries);
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
@@ -85,6 +94,7 @@ export function validatePack(value: unknown, installed: RulePack[]): RulePack {
     assert(plain(item) && typeof item.id === 'string' && /^[a-zA-Z0-9._-]+$/.test(item.id) && !ids.has(item.id), '包内条目需要互不重复的简单 id。'); ids.add(item.id);
     assert(typeof item.name === 'string' && item.name.length > 0 && item.name.length <= 300 && Object.hasOwn(KIND_LABELS, item.kind), '条目名称或类型不正确。');
     assert(Array.isArray(item.entries), '条目正文 entries 必须为数组。');
+    validateContent(item.entries);
     if (item.effects) validateEffects(item.effects);
     if (item.choices) validateChoices(item.choices);
     const dependencies = [...new Set<string>(value.requires.flatMap((dep: any) => [dep.id, ...(others.find(p => p.id === dep.id)?.entries[0].dependencies || [])]))];

@@ -3,10 +3,10 @@ import { readCache, writeCache } from '../platform/storage';
 import { inheritSubrace, readableEntries } from './adapt';
 export const DEFAULT_SOURCE = 'https://5e.kiwee.top';
 export interface LoadProgress { done: number; total: number; label: string; failed: string[]; cached: number }
-const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition' };
+const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition', variantrule: 'rule', action: 'rule', sense: 'rule', skill: 'rule', language: 'rule' };
 const canonical = (s: unknown) => String(s ?? '').trim().toLowerCase();
 export function entryIdentity(kind: Kind, raw: Raw, packId = 'kiwee'): string {
-  return [packId, kind, raw.source, raw.ENG_name || raw.name, raw.classSource, raw.className, raw.subclassSource, raw.subclassShortName, kind === 'feature' ? raw.level : undefined, raw.raceName].map(canonical).map(encodeURIComponent).join(':');
+  return [packId, kind, raw.source, raw.ENG_name || raw.name, raw.classSource, raw.className, raw.subclassSource, raw.subclassShortName, kind === 'feature' ? raw.level : undefined, raw.raceName, ...(kind === 'rule' ? [raw._category] : [])].map(canonical).map(encodeURIComponent).join(':');
 }
 export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): Entry[] {
   const result: Entry[] = [];
@@ -17,7 +17,7 @@ export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): En
       const raw = key === 'subrace' ? inheritSubrace(item, body.race || []) : item;
       const source = String(raw.source || raw.classSource || 'CUSTOM').toUpperCase();
       const edition = raw.edition === 'one' || ['XPHB', 'XDMG', 'XMM'].includes(source) ? '2024' : raw.edition === 'classic' || ['PHB', 'DMG', 'MM'].includes(source) ? '2014' : 'both';
-      result.push({ id: entryIdentity(kind, { ...raw, source }, packId), kind, name: raw.name, english: raw.ENG_name || raw.name, source, edition,
+      result.push({ id: entryIdentity(kind, { ...raw, source, _category: key }, packId), kind, name: raw.name, english: raw.ENG_name || raw.name, source, edition,
         packId, revision, page: raw.page, entries: readableEntries(raw, key), raw: { ...raw, _category: key } });
     }
   }
@@ -52,10 +52,10 @@ export async function hashJson(body: unknown): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(body)));
   return [...new Uint8Array(digest)].map(n => n.toString(16).padStart(2, '0')).join('');
 }
-export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgress: (p: LoadProgress) => void, signal: AbortSignal, refresh = false, base = DEFAULT_SOURCE): Promise<void> {
+export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgress: (p: LoadProgress) => void, signal: AbortSignal, refresh = false, base = DEFAULT_SOURCE, onSources?: (names: Record<string, string>) => void): Promise<void> {
   const url = new URL(base); if (url.protocol !== 'https:' && url.hostname !== 'localhost') throw new Error('资料源需要 HTTPS 地址');
   base = base.replace(/\/$/, '');
-  const paths = ['data/races.json', 'data/backgrounds.json', 'data/feats.json', 'data/items-base.json', 'data/items.json', 'data/optionalfeatures.json', 'data/conditionsdiseases.json'];
+  const paths = ['data/races.json', 'data/backgrounds.json', 'data/feats.json', 'data/items-base.json', 'data/items.json', 'data/optionalfeatures.json', 'data/conditionsdiseases.json', 'data/books.json', 'data/variantrules.json', 'data/actions.json', 'data/skills.json', 'data/senses.json', 'data/languages.json'];
   const progress: LoadProgress = { done: 0, total: paths.length + 2, label: '读取资料索引', failed: [], cached: 0 };
   onProgress({ ...progress });
   let spellLookup: Raw = {}; let lookupRevision = '';
@@ -84,6 +84,7 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
         if (signal.aborted) return;
         if (result.cached) progress.cached++;
         if (result.warning) progress.failed.push(`${path}：${result.warning}`);
+        if (path === 'data/books.json') onSources?.(Object.fromEntries((result.body.book || []).map((book: Raw) => [String(book.source || book.id).toUpperCase(), book.name])));
         const normalized = normalizeData(result.body, result.revision);
         for (const entry of normalized) if (entry.kind === 'spell') {
           const lookup = spellLookup[entry.source.toLowerCase()]?.[entry.name.toLowerCase()] || spellLookup[entry.source.toLowerCase()]?.[entry.english.toLowerCase()];

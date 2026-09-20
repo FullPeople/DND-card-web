@@ -18,17 +18,19 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     const selected = rest.kind ? active.filter(s => s.requirementId === id && !requirementMismatch(s.entry, rest)).map(s => s.entry.id) : c.answers[id] || [];
     const valid = rest.options ? selected.filter(x => rest.options!.includes(x)) : selected;
     requirements.push({ ...rest, id, label, section, count, origin, selected, complete: new Set(valid).size >= count });
+    if (valid.length > count) issues.push({ id: `overflow:${id}`, message: `${label} 超过当前允许的 ${count} 项，请移除或解除多余条目的关联。`, severity: 'error' });
   }
   for (const kind of ['class', 'race', 'background'] as Kind[]) {
     if (!active.some(s => s.entry.kind === kind)) requirement(`base:${kind}`, kind === 'class' ? '选择职业' : kind === 'race' ? '选择种族' : '选择背景', kind, 1, `${c.edition} 基础规则`, { kind });
   }
   if (classes.length > 1 && !c.profile.optional.multiclass) issues.push({ id: 'multiclass', message: '已选择多个职业，但尚未启用兼职规则。', severity: 'error' });
   if (level > 20) issues.push({ id: 'levels', message: '职业总等级超过 20，请检查等级或记录 DM 裁定。', severity: 'error' });
-  let speed = 30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined;
+  const raceSpeed = active.find(s => s.entry.kind === 'race')?.entry.raw.speed;
+  let speed = typeof raceSpeed === 'number' ? raceSpeed : raceSpeed?.walk ?? 30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
   const sizes = new Set<string>();
   for (const selection of active) {
     const e = selection.entry; const origin = `${e.name} · ${e.source}`; const raw = e.raw;
-    if (e.kind === 'race') { speed = typeof raw.speed === 'number' ? raw.speed : raw.speed?.walk ?? speed; (raw.size || []).forEach((s: string) => sizes.add(s)); }
+    if (e.kind === 'race') { (raw.size || []).forEach((s: string) => sizes.add(s)); }
     if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
     const abilityOptions = Array.isArray(raw.ability) ? raw.ability : [];
     let abilityIndex = Number(c.answers[`${selection.id}:ability-mode`]?.[0] ?? 0);
@@ -67,7 +69,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     if (selection.id === classes[0]?.id && Array.isArray(raw.proficiency)) raw.proficiency.forEach((a: string) => proficientSaves.add(a));
     if (Array.isArray(raw.feats)) raw.feats.forEach((block: any, i: number) => {
       const refs = Object.keys(block).filter(k => k !== 'any' && block[k] === true);
-      requirement(`${selection.id}:feat:${i}`, '选择授予的专长', 'feat', refs.length || block.any || 1, origin, { kind: 'feat', refs });
+      requirement(`${selection.id}:feat:${i}`, block.anyFromCategory?.category?.[0] === 'O' ? '选择起源专长' : '选择授予的专长', 'feat', refs.length || block.any || block.anyFromCategory?.count || 1, origin, { kind: 'feat', refs, featCategory: block.anyFromCategory?.category?.[0] });
     });
     if (e.kind === 'class') {
       const refs: string[] = (raw.classFeatures || []).flatMap((f: any) => { const ref = typeof f === 'string' ? f : f.classFeature; const n = Number(ref?.split('|')[3]); const source = ref?.split('|')[4] || ref?.split('|')[2] || 'PHB'; return ref && n <= selection.level && c.profile.enabledSources.includes(source.toUpperCase()) ? [ref] : []; });
@@ -77,9 +79,14 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
       }
       const gainsSubclass = (raw.classFeatures || []).find((f: any) => f?.gainSubclassFeature && Number(f.classFeature?.split('|')[3]) <= selection.level);
       if (gainsSubclass) requirement(`${selection.id}:subclass`, `选择${raw.subclassTitle || '子职'}`, 'subclass', 1, origin, { kind: 'subclass', parentClass: { name: e.name, source: e.source } });
+      for (const [i, progression] of (raw.optionalfeatureProgression || []).entries()) {
+        const values = progression.progression;
+        const count = Array.isArray(values) ? values[selection.level - 1] : Object.entries(values || {}).filter(([level]) => Number(level) <= selection.level).sort((a, b) => Number(b[0]) - Number(a[0]))[0]?.[1];
+        if (typeof count === 'number' && count > 0) requirement(`${selection.id}:optional:${i}`, `选择 ${count} 项${progression.name}`, 'feature', count, origin, { kind: 'feature', featureType: progression.featureType });
+      }
       const spellClass = { name: e.name, source: e.source };
       const rows = (raw.classTableGroups || []).find((g: any) => Array.isArray(g.rowsSpellProgression))?.rowsSpellProgression?.[selection.level - 1];
-      const maxSpellLevel = rows ? rows.reduce((max: number, n: number, i: number) => n > 0 ? i + 1 : max, 0) : Math.min(9, Math.ceil(selection.level / 2));
+      const maxSpellLevel = rows ? rows.reduce((max: number, n: number, i: number) => n > 0 ? i + 1 : max, 0) : Math.min(raw.casterProgression === 'pact' ? 5 : 9, Math.ceil(selection.level / 2));
       const cantrips = raw.cantripProgression?.[selection.level - 1];
       if (typeof cantrips === 'number' && cantrips > 0) requirement(`${selection.id}:cantrips`, `选择 ${cantrips} 个戏法`, 'spell', cantrips, origin, { kind: 'spell', spellLevel: 0, spellClass });
       const known = raw.spellsKnownProgression?.[selection.level - 1];
@@ -135,7 +142,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
         trace[a].push(`${origin} ${effect.op === 'set' ? '=' : '+'}${effect.value}`);
       } else if (effect.target === 'speed') speed = effect.op === 'set' ? effect.value : speed + effect.value;
       else if (effect.target === 'ac') { if (effect.op === 'set') acOverride = effect.value; else acBonus += effect.value; }
-      else if (effect.target === 'hp') hpBonus += effect.value;
+      else if (effect.target === 'hp') { if (effect.op === 'set') hpOverride = effect.value; else hpBonus += effect.value; }
     }
     if (['feature', 'feat', 'subclass', 'race', 'background'].includes(e.kind)) {
       const key = `${selection.id}:review`;
@@ -153,14 +160,16 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     const raw = armor[0].entry.raw; const t = String(raw.type);
     ac = raw.ac + (t.startsWith('HA') ? 0 : t.startsWith('MA') ? Math.min(2, modifiers.dex) : modifiers.dex);
   }
-  ac += (shields[0]?.entry.raw.ac || 0) + acBonus;
-  const hpFromClasses = classes.reduce((sum, s, i) => { const faces = Number(s.entry.raw.hd?.faces || 8); return sum + (i === 0 ? faces + (s.level - 1) * (Math.floor(faces / 2) + 1) : s.level * (Math.floor(faces / 2) + 1)); }, 0);
-  let maxHp = Math.max(1, (c.baseHp > 0 ? c.baseHp : hpFromClasses + modifiers.con * level) + hpBonus);
+  ac = (acOverride ?? (ac + (shields[0]?.entry.raw.ac || 0))) + acBonus;
+  const hpFromClasses = classes.reduce((sum, s, i) => { const faces = Number(s.entry.raw.hd?.faces || 8); const nextLevel = Math.max(1, Math.floor(faces / 2) + 1 + modifiers.con); return sum + (i === 0 ? Math.max(1, faces + modifiers.con) + (s.level - 1) * nextLevel : s.level * nextLevel); }, 0);
+  let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
   trace.ac = [armor[0] ? `${armor[0].entry.name} ${armor[0].entry.raw.ac}` : `基础 10 + 敏捷 ${modifiers.dex}`, ...(shields[0] ? [`${shields[0].entry.name} +${shields[0].entry.raw.ac}`] : []), ...(acBonus ? [`规则修正 +${acBonus}`] : [])];
-  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级生命骰满值、以后取固定平均值 ${hpFromClasses} + 体质 ${modifiers.con} × ${level}`, ...(hpBonus ? [`规则修正 +${hpBonus}`] : [])];
+  if (acOverride !== undefined) trace.ac.push(`规则设定基础结果 ${acOverride}`);
+  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级生命骰满值、以后取固定平均值，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...(hpOverride !== undefined ? [`规则设定 ${hpOverride}`] : []), ...(hpBonus ? [`规则修正 +${hpBonus}`] : [])];
   trace.proficiency = [`总等级 ${level || 1}`]; trace.speed = [active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'];
   // Orphaned choices remain in the document for undo/review, never silently deleted.
-  const invalid = active.filter(s => s.requirementId && (!requirements.some(r => r.id === s.requirementId) || requirementMismatch(s.entry, requirements.find(r => r.id === s.requirementId)!)));
+  const overflow = new Set(requirements.filter(r => r.kind).flatMap(r => active.filter(s => s.requirementId === r.id).slice(r.count).map(s => s.id)));
+  const invalid = active.filter(s => s.requirementId && (overflow.has(s.id) || !requirements.some(r => r.id === s.requirementId) || requirementMismatch(s.entry, requirements.find(r => r.id === s.requirementId)!)));
   if (invalid.length) {
     const next = new Set([...excluded, ...invalid.map(s => s.id)]);
     return evaluate(c, next, [...inheritedIssues, ...invalid.map(s => ({ id: `orphan:${s.id}`, message: `${s.entry.name} 原来的填写要求已改变，保留条目但暂停效果。请重新填写或解除关联。`, severity: 'error' as const, selectionId: s.id }))]);

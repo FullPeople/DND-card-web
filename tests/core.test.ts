@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { newCharacter, uid, type Entry, type Character } from '../src/core/model';
 import { candidateReason, evaluate, requirementMismatch } from '../src/core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, validateCharacter, validatePack } from '../src/core/validation';
-import { exportCharacter, exportOwlbear, exportReview } from '../src/core/export';
+import { exportCharacter, exportOwlbear, exportReview, exportRulePack } from '../src/core/export';
 import { normalizeData } from '../src/data/catalog';
 
 const entry = (kind: Entry['kind'], raw: Record<string, any> = {}, edition: Entry['edition'] = '2024'): Entry => ({ id: uid(), name: raw.name || '自制测试条目', english: raw.ENG_name || 'Test', kind, edition, source: edition === '2014' ? 'PHB' : 'XPHB', packId: 'test', revision: 'test-1', raw, entries: ['测试内容。'] });
@@ -30,6 +30,12 @@ describe('independent identity and source constraints', () => {
 });
 
 describe('requirements and transitions', () => {
+  it('applies speed bonuses independently of race selection order, supports set HP and minimum HP per level', () => {
+    const c = newCharacter(); const feat = entry('feat'); feat.effects = [{ op: 'add', target: 'speed', value: 10 }]; add(c, feat); add(c, entry('race', { speed: 25 }));
+    expect(evaluate(c).speed).toBe(35);
+    c.abilities.con = 1; add(c, entry('class', { hd: { faces: 6 } }), undefined, 10); expect(evaluate(c).maxHp).toBe(10);
+    feat.effects.push({ op: 'set', target: 'hp', value: 25 }); expect(evaluate(c).maxHp).toBe(25);
+  });
   it('uses namespaced choice IDs and applies selected skill proficiency', () => {
     const pack = validatePack(EXAMPLE_PACK, []); const c = newCharacter(); c.profile.enabledSources.push(pack.id);
     const s = add(c, pack.entries[0]); const id = `${s.id}:custom:knowledge`;
@@ -94,6 +100,7 @@ describe('safe import and extension contracts', () => {
     const a = validatePack(EXAMPLE_PACK, []); const c = newCharacter(); c.profile.enabledSources.push(a.id); add(c, structuredClone(a.entries[0]));
     const updated = structuredClone(EXAMPLE_PACK); updated.version = '1.1.0'; updated.entries[0].effects[0].value = 5; validatePack(updated, [a]);
     expect(evaluate(c).abilities.int).toBe(11); expect(c.selections[0].entry.revision).toBe('1.0.0');
+    expect(validatePack(exportRulePack(a), [])).toEqual(a);
   });
   it('round trips native characters and preserves actual Owlbear schema 0.3 shapes', () => {
     const c = newCharacter(); c.name = '测试冒险者'; c.abilities.dex = 14; c.baseHp = 22; c.runtime.hp = 17; c.runtime.tempHp = 3;
