@@ -107,6 +107,11 @@ test('failed updates expose stale-cache use and corrupt storage does not overwri
 });
 
 test('narrow layout retains accessible catalog and keyboard modal controls', async ({ page }) => {
+  const before = await page.getByRole('textbox', { name: '角色姓名', exact: true }).boundingBox();
+  await page.getByRole('combobox', { name: '卡片缩放' }).selectOption('130');
+  const after = await page.getByRole('textbox', { name: '角色姓名', exact: true }).boundingBox();
+  expect(after!.height / before!.height).toBeGreaterThan(1.25);
+  await page.getByRole('combobox', { name: '卡片缩放' }).selectOption('100');
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('region', { name: '角色卡工作区' })).toBeVisible();
   await page.getByRole('navigation', { name: '工作区' }).getByRole('button', { name: '规则资料', exact: true }).click();

@@ -249,7 +249,7 @@ export default function App() {
         <div className="pane-toolbar"><div><span className="eyebrow">角色卡</span><select aria-label="当前角色" value={c.id} onChange={e => { persist({ ...workspace, activeId: e.target.value }); setTargetId(''); }}>{workspace.characters.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
           <div className="toolbar-actions"><button aria-label="撤销" disabled={!record?.past.length} onClick={() => undo()}>↶</button><button aria-label="重做" disabled={!record?.future.length} onClick={() => undo(true)}>↷</button><select aria-label="卡片缩放" value={zoom} onChange={e => setZoom(Number(e.target.value))}>{[85, 100, 115, 130].map(z => <option key={z} value={z}>{z}%</option>)}</select></div>
         </div>
-        <div className="sheet-scroll"><div className="paper" style={{ width: `${zoom}%`, minWidth: `${Math.round(590 * zoom / 100)}px` }}>
+        <div className="sheet-scroll"><div className="paper" style={{ width: '100%', minWidth: '590px', zoom: zoom / 100 }}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span>{c.edition} · 人物记录</span></div>
           <div className="identity-grid"><div className="identity-main">
             <Box label="角色姓名" className="name-box"><input aria-label="角色姓名" value={c.name} onChange={e => edit(d => { d.name = e.target.value; }, 'name')}/></Box>
@@ -269,7 +269,7 @@ export default function App() {
           </div></div>
           <Box label="法术记录" className="spells-box"><div onDragOver={e => e.preventDefault()} onDrop={e => drop(e, target?.kind === 'spell' ? target : undefined, ['spell'])}>{requirements(['spell'])}<div className="spell-selections">{selections(['spell'])}</div>{addButton('spell')}</div></Box>
           </div></div>
-          <footer className="paper-footer"><span>{c.edition} · {d.level || '—'} 级 · 修订 {c.revision}</span><span>每一次选择，都留在这张纸上。</span></footer>
+          <footer className="paper-footer"><span>{c.edition} · {d.level || '—'} 级 · 修订 {c.revision}</span><span>资料快照随角色保存</span></footer>
         </div>
         <aside className="sheet-checks"><div className="checks-heading"><strong>{remaining ? `${remaining} 项待填写或核对` : '当前填写要求已完成'}</strong><label><input type="checkbox" checked={showAllRequirements} onChange={e => setShowAllRequirements(e.target.checked)}/>显示已完成选择</label></div><p>基础数值自动计算；特殊特性、资源恢复和复杂联动请核对条目。计算依据可在导出审卡中查看。</p><div className="dialog-actions"><button onClick={() => setModal('adjust')}>数值依据与人工修正{c.adjustments?.length ? ` · ${c.adjustments.length}` : ''}</button><button onClick={() => setModal('resources')}>法术位与资源记录</button></div>{Object.entries(c.runtime.resources).map(([name, resource]) => <div className="resource-line" key={name}><span>{name}</span><button aria-label={`消耗${name}`} disabled={resource.current <= 0} onClick={() => edit(draft => { draft.runtime.resources[name].current--; })}>−</button><strong>{resource.current} / {resource.max}</strong><button aria-label={`恢复${name}`} disabled={resource.current >= resource.max} onClick={() => edit(draft => { draft.runtime.resources[name].current++; })}>＋</button></div>)}{d.issues.map(issue => <p className={`issue ${issue.severity}`} key={issue.id}>{issue.message}{issue.selectionId && <button onClick={() => inspect(c.selections.find(s => s.id === issue.selectionId)!.entry)}>查看</button>}</p>)}</aside>
         </div><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} role="status"><span className="status-dot"/>{saving}<span>资料与角色保存在当前浏览器 · 请定期导出</span></div>
