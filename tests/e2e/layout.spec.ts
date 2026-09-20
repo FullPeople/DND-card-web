@@ -18,9 +18,13 @@ test('A4 stays fixed while only the content region scrolls; all five pages edit 
   expect(await page.locator('.sheet-viewport').evaluate(el => el.scrollTop)).toBe(0);
   await page.getByRole('tab', { name: /背景/ }).click();
   await page.getByRole('textbox', { name: '冒险笔记' }).fill('纸页固定，故事继续。');
+  await page.getByRole('textbox', { name: '性别', exact: true }).fill('女');
+  await page.getByRole('textbox', { name: '阵营', exact: true }).fill('中立善良');
   await page.getByRole('tab', { name: /法术/ }).click(); await expect(page.locator('.sheet-page-heading h2')).toHaveText('法术');
   await page.getByRole('tab', { name: /法术/ }).press('ArrowRight'); await expect(page.locator('.sheet-page-heading h2')).toHaveText('背包');
   await page.getByRole('tab', { name: /背景/ }).click(); await expect(page.getByRole('textbox', { name: '冒险笔记' })).toHaveValue('纸页固定，故事继续。');
+  await expect(page.getByRole('textbox', { name: '性别', exact: true })).toHaveValue('女');
+  await expect(page.getByRole('textbox', { name: '阵营', exact: true })).toHaveValue('中立善良');
   for (const viewport of [{ width: 1920, height: 1080 }, { width: 1100, height: 720 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
     await expect.poll(async () => { const b = (await paper.boundingBox())!; return b.x >= 0 && b.y >= 0 && b.x + b.width <= viewport.width && b.y + b.height < viewport.height - 30; }).toBe(true);
