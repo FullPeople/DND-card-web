@@ -1,0 +1,158 @@
+/* Reference-sheet composition: identity/resources, two ability columns, action ledger. */
+.paper:has(.overview-sheet){background:#ededeb;gap:6px;padding:12px 12px 10px}
+.paper:has(.overview-sheet)>.paper-heading{font-size:8px;flex-basis:12px}
+.overview-sheet{flex:1;min-height:0;display:grid;grid-template-rows:108px 23px minmax(0,1fr);gap:6px;color:#343532}
+.overview-top{display:grid;grid-template-columns:minmax(0,2.75fr) .48fr .54fr 1.15fr .51fr .42fr;gap:6px;min-height:0}
+.paper .overview-identity{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:29px 1fr 1fr;gap:4px;min-width:0;min-height:0}
+.identity-name{grid-column:1/3}.identity-background{grid-area:2/1}.identity-race{grid-area:3/1}.identity-class{grid-area:2/2/4/3}
+.sheet-cell{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;background:#f7f7f4;isolation:isolate;padding:4px;overflow:hidden;clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px),0 5px)}
+.cell-perimeter{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
+.cell-perimeter path{fill:none;stroke:#565755;stroke-width:1.8px;stroke-linejoin:round}
+.cell-missing{cursor:pointer}
+.cell-missing>.cell-perimeter path,.cell-missing>.cell-drop-surface>.cell-perimeter path{stroke:#353633;stroke-width:1.8px;stroke-dasharray:7 4;animation:missing-perimeter 1.6s linear infinite}
+.cell-missing:focus-within>.cell-perimeter path,.cell-missing:hover>.cell-perimeter path{stroke:#20221e}
+@keyframes missing-perimeter{to{stroke-dashoffset:-22}}
+.cell-heading{flex:none;display:flex;align-items:center;justify-content:center;position:relative;margin:0 3px;border-bottom:1px solid #9f9f98;min-height:18px;gap:4px}
+.cell-heading h3{margin:0;font-size:12px;font-weight:600;line-height:17px;letter-spacing:.3px}
+.cell-heading .cell-add{position:absolute;right:1px;top:0;border:0;padding:0 2px;font-size:9px;background:transparent;color:#84877a;line-height:17px}
+.cell-content{min-height:0;min-width:0;flex:1;overflow:auto;padding:3px 4px;scrollbar-width:thin;scrollbar-color:#b3b5a9 transparent;overscroll-behavior:contain}
+.cell-fill{display:block;border:0;background:transparent!important;border-radius:0;text-align:center;color:#7b7e73;font-size:10px!important;line-height:1.6;padding:4px 0!important;margin:0 auto;max-width:100%;white-space:normal}
+.cell-drop-surface{position:static;display:flex;flex-direction:column;min-height:0;height:100%;border-radius:0}
+.sheet-cell:has(.drop-ready){background:#e7edde}
+.sheet-cell:has(.drop-ready) .cell-perimeter path{stroke:#6a7d49;stroke-width:2.3px}
+.sheet-cell:has(.drop-over) .cell-perimeter path{stroke:#4c6a2f;stroke-width:3px;animation:none}
+.sheet-cell .drop-ready,.sheet-cell .drop-over{box-shadow:none;background:transparent;animation:none}
+.sheet-cell .drop-ready .cell-perimeter{animation:cell-drop-breathe 1.2s ease-in-out infinite}
+@keyframes cell-drop-breathe{50%{filter:drop-shadow(0 0 2px #798d5f)}}
+.overview-sheet .pending-labels{display:flex;flex-direction:column;gap:2px;padding:4px 0;color:#898e80}
+.pending-labels button{border:0;background:transparent;font-size:9px;text-align:left;padding:1px 0;line-height:1.5;color:inherit}
+.pending-labels small{white-space:nowrap;color:#a2a592;margin-left:3px}
+.overview-sheet .selected-entry{padding:3px 0;border-color:#d2d3ca}
+.overview-sheet .selected-title .text-link{font-size:11px}
+.overview-sheet .selected-title .remove{font-size:12px;line-height:14px}
+.overview-sheet .entry-meta{font-size:8px;line-height:12px;gap:4px}
+.overview-sheet .review-requirement{font-size:8px;margin:4px 0;border:0;padding:0;color:#9b9079}
+.overview-sheet .review-requirement button{font-size:8px;padding:0 2px}
+.overview-identity .sheet-cell{padding:3px;clip-path:none}
+.overview-identity .cell-perimeter path{stroke-width:1.1px}
+.overview-identity .cell-heading{min-height:12px;justify-content:flex-start;border:0;margin:0 4px}
+.overview-identity .cell-heading h3{font-size:9px;line-height:12px;letter-spacing:0}
+.overview-identity .cell-content{padding:0 4px}
+.overview-identity .identity-name{flex-direction:row;align-items:center}
+.overview-identity .identity-name .cell-content{display:flex;align-items:center;gap:7px}
+.overview-identity .identity-name .cell-heading{flex:none;margin-right:4px}
+.paper .identity-name input[aria-label="角色姓名"]{font-size:13px;font-weight:600;min-width:0;flex:1;width:0;border:0}
+.paper .identity-name input[aria-label="玩家姓名"]{font-size:8px;width:46px;border:0}
+.overview-identity .identity-field .cell-fill{font-size:8px!important;line-height:11px;padding:0!important;text-align:left;margin:0;white-space:nowrap}
+.overview-identity .selected-entry{padding:0;border:0}
+.overview-identity .selected-title .text-link{font-size:10px;line-height:12px}
+.overview-identity .selected-title .remove{font-size:10px;line-height:12px;padding:0 1px}
+.overview-identity .entry-meta{font-size:7px;line-height:11px;gap:2px}
+.paper .overview-identity .entry-meta input[type=number]{width:20px!important;font-size:10px;height:13px;line-height:12px;padding:0}
+.overview-identity .class-title{line-height:12px}
+.overview-identity .choose-subclass{font-size:8px!important;line-height:10px}
+.overview-identity .inline-subclass .text-link{font-size:8px!important}
+.overview-top>.sheet-cell>.cell-heading{border:0;min-height:28px;align-items:start}
+.overview-top>.sheet-cell>.cell-heading h3{font-size:10px;line-height:13px;text-align:center}
+.overview-top>.sheet-cell>.cell-content{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;gap:5px}
+.overview-top .total-level{border-radius:35%;clip-path:none}
+.total-level .cell-perimeter{border:1.8px solid #666963;border-radius:48%;width:calc(100% - 2px);height:calc(100% - 2px);inset:1px}
+.total-level .cell-perimeter path{display:none}
+.overview-top .total-level strong,.overview-top .armor-cell strong{font-size:28px;font-weight:500;line-height:1.2}
+.total-level small,.armor-cell small{font-size:8px;color:#8b8e82}
+.overview-top .life-cell .cell-content{justify-content:flex-start;gap:3px}
+.life-fields{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;font-size:9px;color:#777c6e}
+.life-fields label{text-align:center;min-width:0}
+.paper .life-fields input{font-size:19px!important;text-align:center;color:#393e32}
+.life-fields>span{grid-column:1/3;display:flex;justify-content:space-between;border-top:1px solid #d6d8cc;padding:2px 5px}
+.life-fields strong{font-size:12px;color:#444b38}
+.life-cell button,.life-cell details{font-size:8px;line-height:12px}
+.life-cell details{width:100%;text-align:center}
+.dice-cell strong{font-size:14px;overflow-wrap:anywhere;text-align:center}
+.dice-cell button{font-size:8px;line-height:1.4}
+.inspiration-cell label{display:grid;place-items:center;cursor:pointer}
+.inspiration-cell input{position:absolute;opacity:0;width:27px!important;height:27px!important}
+.inspiration-cell span{font-size:28px;color:#a6a99f;line-height:1}
+.inspiration-cell input:checked+span{color:#47543b;text-shadow:0 0 5px #7f926a77}
+.inspiration-cell input:focus-visible+span{outline:2px solid #838f6a}
+.edition-divider{display:flex;align-items:center;gap:15px;color:#484b43}
+.edition-divider strong{font:600 17px Georgia,serif;white-space:nowrap;letter-spacing:1px}
+.edition-divider>span{height:5px;border-block:1px solid #a0a294;flex:1;transform:skewX(-30deg)}
+.overview-body{min-height:0;display:grid;grid-template-columns:35% minmax(0,1fr);gap:10px}
+.overview-left{min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) 132px;gap:9px}
+.physical-abilities{min-height:0;display:grid;grid-template-rows:49px minmax(92px,1.2fr) minmax(125px,1.6fr) minmax(78px,1fr) minmax(52px,.75fr);gap:8px}
+.mental-abilities{min-height:0;display:grid;grid-template-rows:1fr 1fr 1fr;gap:10px}
+.ability-slot{min-height:0}
+.ability-slot>.sheet-cell{height:100%}
+.overview-sheet .ability-box{border:0;border-radius:0}
+.overview-sheet .ability-box .cell-content{padding:3px 3px}
+.overview-sheet .ability-values{display:flex;align-items:center;justify-content:space-between;gap:4px;position:relative;border-bottom:1px solid #bebfb6;padding-bottom:2px}
+.overview-sheet .ability-values>div{display:flex;flex-direction:column;align-items:center}
+.overview-sheet .ability-modifier{font-size:22px;font-weight:500;line-height:1.05;border:1px solid #919589;border-radius:50%;width:33px;height:30px;display:grid;place-items:center}
+.overview-sheet .ability-values small,.overview-sheet .ability-values label>span{font-size:7px;line-height:11px;display:block;color:#85897b;text-align:center}
+.overview-sheet .ability-values label{width:34px;position:relative;z-index:1}
+.paper .overview-sheet .ability-values input{font-size:17px;text-align:center;border-bottom:1px solid #a7aca0;padding:0;line-height:22px}
+.overview-sheet .ability-code{position:absolute;top:10px;left:30px;width:45px;font-size:18px;opacity:.14;pointer-events:none;line-height:1}
+.ability-total{font-size:8px;color:#6d755e;text-align:right;line-height:11px;border-bottom:1px solid #d7dbcd}
+.ability-save,.ability-skill{display:grid;grid-template-columns:9px 19px minmax(0,1fr) auto;gap:3px;align-items:center;min-height:16px;font-size:10px;line-height:16px}
+.ability-save{border-bottom:1px solid #a9ada1;margin-bottom:2px;padding-block:2px}
+.ability-save strong,.ability-skill strong{font-size:10px;font-weight:500;text-align:center;font-variant-numeric:tabular-nums}
+.ability-save>span:first-child,.ability-skill>span:first-child{color:#888e7e;font-size:10px}
+.ability-skills input{width:10px;height:10px;margin:0;display:block}
+.ability-skills label{cursor:pointer}
+.skill-choice-inputs{display:flex;gap:2px;align-items:center}
+.ability-box .cell-fill{font-size:8px!important;line-height:12px;padding-top:4px!important}
+.proficiency-cell .cell-heading{border:0}
+.proficiency-cell .cell-content{text-align:center;padding:0}
+.proficiency-cell strong{font-size:22px;line-height:24px;font-weight:500}
+.training-cell{grid-column:1/3}
+.training-cell .cell-heading h3{font-size:11px}
+.training-cell dl{margin:0;font-size:10px;line-height:1.6}
+.training-cell dl>div{display:grid;grid-template-columns:27px 1fr;gap:7px;border-bottom:1px solid #c9cebd;padding:4px 0}
+.training-cell dt{font-size:9px;font-weight:500}
+.training-cell dd{margin:0;color:#6e775f}
+.training-note{display:block;font-size:8px;color:#a4aa99;margin-top:6px}
+.overview-right{min-height:0;display:grid;grid-template-rows:48px minmax(95px,1fr) minmax(150px,1.6fr) minmax(130px,1.35fr);gap:10px}
+.overview-vitals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;min-height:0}
+.overview-vitals .cell-content{text-align:center;padding:0;display:grid;place-items:center}
+.overview-vitals strong{font-size:21px;line-height:24px;font-weight:500}
+.overview-vitals strong small{font-size:8px}
+.overview-vitals .cell-heading{border:0;min-height:15px}
+.overview-vitals .cell-heading h3{font-size:11px;line-height:15px}
+.overview-vitals .cell-fill{font-size:8px!important;line-height:10px;padding:0!important}
+.overview-lower{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.overview-sheet .traits-box,.overview-sheet .spells-box{min-height:0;margin:0}
+.class-features .cell-content,.heritage-features .cell-content,.overview-spells .cell-content{background-image:linear-gradient(#979c8709 1px,transparent 1px),linear-gradient(90deg,#979c8709 1px,transparent 1px);background-size:6px 6px}
+.quickbar-columns,.quickbar-row{display:grid;grid-template-columns:minmax(0,1fr) 36px 40px 12px;gap:5px;align-items:center;padding:6px 2px;border-bottom:1px solid #c4c9b9}
+.quickbar-columns{font-size:8px;color:#949c86;padding-block:2px}
+.quickbar-row .text-link{font-size:11px;text-align:left}
+.quickbar-row small{font-size:8px;color:#909980;overflow-wrap:anywhere}
+.quickbar-row>button{border:0;background:transparent;padding:0;font-size:11px;color:#959c8a}
+.quickbar-cell .cell-fill{margin-top:12px!important}
+.quickbar-cell:not(:has(.quickbar-row)) .cell-content{background:repeating-linear-gradient(transparent,transparent 22px,#bfc5b344 22px,#bfc5b344 23px)}
+.inherited-traits{padding:4px 0;display:flex;flex-direction:column;align-items:start;border-bottom:1px solid #ccd1c1}
+.inherited-traits .text-link{font-size:10px;line-height:1.7;text-align:left}
+.paper:has(.overview-sheet)>.sheet-checks{flex:0 0 52px;padding-top:3px;font-size:9px}
+.paper:has(.overview-sheet)>.sheet-checks>p:not(.issue){display:none}
+.paper:has(.overview-sheet)>.sheet-checks .checks-heading strong{font-size:9px;font-weight:500}
+.paper:has(.overview-sheet)>.sheet-checks .checks-heading label{font-size:8px}
+.paper:has(.overview-sheet)>.sheet-checks .dialog-actions{margin:2px 0}
+.paper:has(.overview-sheet)>.paper-footer{font-size:8px;flex-basis:11px;line-height:11px}
+.requirement-field{margin:6px 0;min-height:50px;clip-path:none;padding:6px}
+.requirement-field .cell-perimeter path{stroke-width:1.2px}
+.requirement-field .cell-content{overflow:visible;flex:none}
+.requirement-field .cell-heading{justify-content:space-between;border:0;min-height:15px}
+.requirement-field .cell-heading h3{font-size:11px;line-height:15px}
+.requirement-field .choice-options{margin-top:7px}
+.requirement-field.is-target{background:#ecf1e1}
+.wiki-choice-editor{margin:2px 17px 5px;padding:6px 0;border-block:1px solid #cbd5bc;max-height:160px;overflow:auto;flex:none}
+.wiki-choice-editor h3{font-size:12px;margin:0 0 5px;font-weight:500}
+.wiki-choice-editor small{font-size:10px;color:#8a9778;margin-left:10px}
+.wiki-choice-editor .choice-options label{font-size:12px;gap:5px;padding:3px}
+.quickbar-options{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow:auto}
+.quickbar-options button{text-align:left;font-size:12px;background:transparent;border:0;border-bottom:1px solid #d5dccc;padding:8px 2px}
+.quickbar-options small{float:right;font-size:10px;color:#9aa68c}
+.quickbar-manager button{margin-left:5px}
+@media(prefers-reduced-motion:reduce){.cell-missing>.cell-perimeter path,.cell-missing>.cell-drop-surface>.cell-perimeter path,.sheet-cell .drop-ready .cell-perimeter{animation:none}}
+
+.sheet-cell .cell-fill{flex-shrink:0;z-index:1}.sheet-cell .cell-content:empty+.cell-fill{position:absolute;top:50%;left:5px;right:5px;transform:translateY(-25%)}

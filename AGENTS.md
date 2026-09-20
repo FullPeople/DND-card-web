@@ -3,7 +3,8 @@
 Read docs/PRODUCT.md, docs/ACCEPTANCE.md and docs/STATUS.md before continuing.
 
 - This is an independent web migration; never edit or reset the Godot source or the reference native apps.
-- Preserve the original character sheet's gray StyleBox framing, bottom labels, paper layout and information hierarchy. Do not replace it with a generic dashboard.
+- Preserve gray paper framing and the approved reference-sheet hierarchy: top identity/resources, two ability columns containing skills/saves, right quickbar and features. Labels may sit at the top or side. Keep fixed A4 and five page tabs; never replace this with a generic dashboard.
+- Missing content belongs to the whole field's animated dashed outer perimeter, with a click-to-fill hint. Do not restore nested rectangular missing-choice cards in the overview.
 - Rules identify missing choices on the sheet. Users browse and drag content themselves; no compulsory next-next wizard.
 - 2014 and 2024 have separate identities and rule profiles. Never merge by display name.
 - Rule evaluation must be pure and independent of React, browser storage and native interfaces.
@@ -13,4 +14,3 @@ Read docs/PRODUCT.md, docs/ACCEPTANCE.md and docs/STATUS.md before continuing.
 - Meaningful tests cover transitions, persistence recovery, rules, imports and real browser flows. Never call the product complete based only on a build or mocked tests.
 - User authorized creating the public GitHub repository and advancing implementation. Record concrete validation and limitations in docs/STATUS.md.
 - C++ is a later stage; keep small async platform interfaces without building a speculative native framework now.
-

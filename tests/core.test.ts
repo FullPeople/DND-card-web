@@ -8,6 +8,14 @@ import { normalizeData } from '../src/data/catalog';
 const entry = (kind: Entry['kind'], raw: Record<string, any> = {}, edition: Entry['edition'] = '2024'): Entry => ({ id: uid(), name: raw.name || '自制测试条目', english: raw.ENG_name || 'Test', kind, edition, source: edition === '2014' ? 'PHB' : 'XPHB', packId: 'test', revision: 'test-1', raw, entries: ['测试内容。'] });
 const add = (c: Character, e: Entry, requirementId?: string, level = 1) => { const s = { id: uid(), entry: e, level, quantity: 1, equipped: false, requirementId }; c.selections.push(s); return s; };
 
+it('preserves optional quickbar references in backups and rejects malformed pin lists', () => {
+  const c = newCharacter(); const s = add(c, entry('item')); c.quickbar = [s.id];
+  expect(validateCharacter(exportCharacter(c)).quickbar).toEqual([s.id]);
+  const old = newCharacter(); expect(validateCharacter(old).quickbar).toBeUndefined();
+  expect(() => validateCharacter({ ...c, quickbar: [s.id, s.id] })).toThrow('快捷栏');
+  expect(() => validateCharacter({ ...c, quickbar: [{ id: s.id }] })).toThrow('快捷栏');
+});
+
 describe('independent identity and source constraints', () => {
   it('keeps editions and class-feature context distinct', () => {
     const entries = normalizeData({ spell: [{ name: '同名', ENG_name: 'Same', source: 'PHB' }, { name: '同名', ENG_name: 'Same', source: 'XPHB' }], classFeature: [{ name: '同名', source: 'PHB', className: '甲', level: 1 }, { name: '同名', source: 'PHB', className: '乙', level: 1 }] }, 'fixed');

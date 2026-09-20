@@ -26,6 +26,7 @@ export interface Character {
   identity: { gender: string; alignment: string; age: string; description: string };
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
   profile: RuleProfile; notes: string;
+  quickbar?: string[];
   adjustments?: { id: string; target: string; value: number; reason: string }[];
   externalSnapshot?: Raw;
   runtime: { hp: number; tempHp: number; inspiration: number; resources: Record<string, { current: number; max: number }> };

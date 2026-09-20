@@ -60,6 +60,7 @@ export function validateCharacter(value: unknown): Character {
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
+  assert(c.quickbar === undefined || Array.isArray(c.quickbar) && c.quickbar.length <= 100 && c.quickbar.every((id: unknown) => typeof id === 'string') && new Set(c.quickbar).size === c.quickbar.length, '快捷栏需要最多 100 个互不重复的条目身份。');
   assert(plain(c.profile) && Array.isArray(c.profile.enabledSources) && c.profile.enabledSources.every((v: unknown) => typeof v === 'string') && plain(c.profile.optional) && ['feats', 'multiclass', 'legacy'].every(k => typeof c.profile.optional[k] === 'boolean') && plain(c.profile.exceptions) && Object.values(c.profile.exceptions).every(v => typeof v === 'string'), '角色规则配置不正确。');
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   assert(Object.values(c.runtime.resources).every(v => plain(v) && Number.isFinite(v.current) && Number.isFinite(v.max) && v.current >= 0 && v.max >= 0), '资源计数无效。');

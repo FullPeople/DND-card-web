@@ -81,7 +81,7 @@ test('real drag highlights eligible zones, previews the entry and clears after a
   const feature = (await page.locator('.catalog-row').first().boundingBox())!;
   await page.mouse.move(feature.x + 25, feature.y + 10); await page.mouse.down();
   await page.mouse.move(feature.x + 60, feature.y + 15, { steps: 5 });
-  await expect(page.locator('.skills-box .drop-ready')).toHaveCount(0);
+  await expect(page.locator('.ability-box .drop-ready')).toHaveCount(0);
   const tab = (await page.getByRole('tab', { name: /特性/ }).boundingBox())!;
   await page.mouse.move(tab.x + tab.width / 2, tab.y + tab.height / 2, { steps: 10 });
   await expect(page.locator('.sheet-page-heading h2')).toHaveText('特性');

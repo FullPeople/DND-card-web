@@ -14,11 +14,11 @@ test('card-led creation, constrained drag, choice, undo and refresh persistence'
   await page.getByRole('button', { name: '测试法师 Test Mage XPHB 2024', exact: true }).click();
   await page.getByRole('button', { name: '填入当前要求', exact: true }).click();
   await expect(page.getByRole('spinbutton', { name: '测试法师等级' })).toHaveValue('1');
-  await expect(page.locator('.skills-box')).toContainText('选择 2 项技能熟练');
-  await page.locator('.skills-box').getByRole('checkbox', { name: '奥秘', exact: true }).check();
-  await page.locator('.skills-box').getByRole('checkbox', { name: '洞悉', exact: true }).check();
+  await expect(page.locator('.ability-int')).toHaveClass(/cell-missing/);
+  await page.locator('.ability-box').getByRole('checkbox', { name: '奥秘', exact: true }).check();
+  await page.locator('.ability-box').getByRole('checkbox', { name: '洞悉', exact: true }).check();
   const featureRequirement = page.locator('[data-requirement]').filter({ hasText: '填写「初始特性」' });
-  await featureRequirement.getByRole('button').click();
+  await featureRequirement.getByRole('button', { name: '尚未填写，点击跳转' }).click();
   await page.locator('.catalog-row').filter({ hasText: '初始特性' }).dragTo(featureRequirement);
   await expect(page.locator('.traits-box .selected-entry')).toContainText('初始特性');
   await page.getByRole('button', { name: '撤销', exact: true }).click();
@@ -59,7 +59,7 @@ test('custom pack import is atomic, its nested choice works and disabling preser
   await expect(page.locator('.pack-row')).toHaveCount(1); await closeDialog(page);
   await page.getByRole('navigation', { name: '资料分类' }).getByRole('button', { name: '专长', exact: true }).click();
   await page.locator('.catalog-row').filter({ hasText: '学者笔记' }).click(); await page.getByRole('button', { name: '加入角色卡', exact: true }).click();
-  await page.locator('.skills-box').getByRole('radio', { name: '历史', exact: true }).check();
+  await page.locator('.ability-box').getByRole('radio', { name: '历史', exact: true }).check();
   await expect(page.locator('.ability-box').filter({ hasText: 'INT' })).toContainText('总值 11');
   await page.getByRole('button', { name: '规则与扩展', exact: true }).click();
   await page.locator('.source-grid').getByRole('checkbox', { name: /我的扩展/ }).uncheck(); await closeDialog(page);
