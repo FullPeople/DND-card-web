@@ -1,0 +1,132 @@
+import { ABILITIES, KIND_LABELS, SKILLS, skillKey, newCharacter, uid, type Character, type Effect, type Entry, type Raw, type RulePack } from './model';
+import { evaluate } from './engine';
+const plain = (v: unknown): v is Raw => !!v && typeof v === 'object' && !Array.isArray(v);
+function assert(condition: unknown, message: string): asserts condition { if (!condition) throw new Error(message); }
+export function parseFile(text: string): unknown {
+  assert(text.length <= 20_000_000, '文件超过 20 MB，请拆分规则包。');
+  return JSON.parse(text, (key, value) => { assert(!['__proto__', 'prototype', 'constructor'].includes(key), '文件包含不允许的对象字段。'); return value; });
+}
+function validEntry(e: unknown): e is Entry {
+  return plain(e) && typeof e.id === 'string' && typeof e.english === 'string' && typeof e.name === 'string' && e.name.length <= 300 && Object.hasOwn(KIND_LABELS, e.kind) &&
+    typeof e.source === 'string' && typeof e.packId === 'string' && typeof e.revision === 'string' && ['2014', '2024', 'both'].includes(e.edition) && Array.isArray(e.entries) && plain(e.raw);
+}
+function validateChoices(value: unknown) {
+  assert(Array.isArray(value) && value.length <= 200, 'choices 应为最多 200 项的数组。');
+  const ids = new Set<string>();
+  for (const c of value) {
+    assert(plain(c) && typeof c.id === 'string' && !ids.has(c.id) && typeof c.label === 'string' && Number.isInteger(c.count) && c.count >= 1 && c.count <= 100, '选择要求的身份、数量或说明无效。'); ids.add(c.id);
+    assert(c.kind === undefined || Object.hasOwn(KIND_LABELS, c.kind), '未知的选择条目类型。');
+    for (const key of ['options', 'refs', 'featureType']) assert(c[key] === undefined || Array.isArray(c[key]) && c[key].every((v: unknown) => typeof v === 'string'), `选择的 ${key} 需要字符串数组。`);
+    assert(c.spellLevel === undefined || Number.isInteger(c.spellLevel) && c.spellLevel >= 0 && c.spellLevel <= 9, '法术环阶无效。');
+  }
+}
+function validateEffects(effects: unknown): asserts effects is Effect[] {
+  assert(Array.isArray(effects) && effects.length <= 100, 'effects 必须是最多 100 项的数组。');
+  for (const effect of effects) {
+    assert(plain(effect), '效果格式不正确。');
+    if (effect.op === 'proficiency') assert(typeof effect.skill === 'string', '熟练效果需要 skill。');
+    else {
+      assert(['add', 'set'].includes(effect.op), `不支持的效果操作：${String(effect.op)}。未安装该规则包。`);
+      assert([...ABILITIES, 'ac', 'speed', 'hp'].includes(effect.target), `未知效果目标：${String(effect.target)}`);
+      assert(Number.isFinite(effect.value) && Math.abs(effect.value) <= 10000, '效果数值不在允许范围。');
+    }
+  }
+}
+export function validateCharacter(value: unknown): Character {
+  assert(plain(value), '角色文件应为一个对象。');
+  const c = value.character ?? value;
+  assert(plain(c) && c.schemaVersion === 1, '不支持的角色格式版本。请保留原文件，使用兼容版本打开。');
+  assert(typeof c.id === 'string' && typeof c.name === 'string' && c.name.length <= 300 && typeof c.player === 'string', '角色身份数据不完整。');
+  assert(['2014', '2024'].includes(c.edition), '角色规则版本必须为 2014 或 2024。');
+  assert(plain(c.abilities) && ABILITIES.every(a => Number.isInteger(c.abilities[a]) && c.abilities[a] >= 1 && c.abilities[a] <= 100), '六项基础属性需要 1–100 的整数。');
+  assert(Array.isArray(c.selections) && c.selections.length <= 3000, '角色条目数量或格式不正确。');
+  const selectionIds = new Set();
+  for (const s of c.selections) {
+    assert(plain(s) && typeof s.id === 'string' && !selectionIds.has(s.id) && validEntry(s.entry), '角色中有无效或重复的条目身份。');
+    selectionIds.add(s.id);
+    assert(Number.isInteger(s.level) && s.level >= 1 && s.level <= 20 && Number.isInteger(s.quantity) && s.quantity >= 1 && s.quantity <= 100000, '角色条目数量或等级不合法。');
+    assert(typeof s.equipped === 'boolean' && (s.requirementId === undefined || typeof s.requirementId === 'string'), '条目选择数据不合法。');
+    if (s.entry.effects) validateEffects(s.entry.effects);
+    if (s.entry.choices) validateChoices(s.entry.choices);
+    assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
+  }
+  assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
+  assert(plain(c.profile) && Array.isArray(c.profile.enabledSources) && c.profile.enabledSources.every((v: unknown) => typeof v === 'string') && plain(c.profile.optional) && ['feats', 'multiclass', 'legacy'].every(k => typeof c.profile.optional[k] === 'boolean') && plain(c.profile.exceptions) && Object.values(c.profile.exceptions).every(v => typeof v === 'string'), '角色规则配置不正确。');
+  assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
+  assert(Object.values(c.runtime.resources).every(v => plain(v) && Number.isFinite(v.current) && Number.isFinite(v.max) && v.current >= 0 && v.max >= 0), '资源计数无效。');
+  if (c.adjustments !== undefined) assert(Array.isArray(c.adjustments) && c.adjustments.every((v: unknown) => plain(v) && typeof v.id === 'string' && ['ac', 'hp', 'speed', 'initiative', 'passive', ...Object.keys(SKILLS).map(k => `skill:${k}`), ...ABILITIES.map(k => `save:${k}`)].includes(v.target) && Number.isFinite(v.value) && Math.abs(v.value) <= 10000 && typeof v.reason === 'string' && v.reason.trim()), '人工修正需要合法目标、数值和原因。');
+  assert(plain(c.identity) && ['gender', 'alignment', 'age', 'description'].every(k => typeof c.identity[k] === 'string'), '角色描述数据不正确。');
+  assert(typeof c.notes === 'string' && Number.isFinite(c.baseHp) && c.baseHp >= 0 && Array.isArray(c.reviewed) && c.reviewed.every((v: unknown) => typeof v === 'string'), '角色笔记或核对记录不正确。');
+  assert(Number.isInteger(c.revision) && c.revision > 0 && typeof c.createdAt === 'string' && typeof c.updatedAt === 'string', '角色修订记录不完整。');
+  try { const result = evaluate(c as Character); assert([result.ac, result.speed, result.maxHp, ...Object.values(result.abilities)].every(Number.isFinite), '计算产生无效数值。'); } catch (error) { throw new Error(`条目规则结构无法读取：${String(error)}`); }
+  return structuredClone(c as Character);
+}
+export function validatePack(value: unknown, installed: RulePack[]): RulePack {
+  assert(plain(value) && value.schemaVersion === 1, '扩展包需要 schemaVersion: 1。');
+  assert(typeof value.id === 'string' && /^[a-z0-9][a-z0-9._-]{2,79}$/.test(value.id) && value.id !== 'kiwee', '扩展包 id 应为 3–80 位小写字母、数字、点、横线或下划线。');
+  assert(typeof value.name === 'string' && value.name.length > 0 && typeof value.version === 'string' && /^\d+\.\d+\.\d+$/.test(value.version), '扩展包需要名称与 x.y.z 版本。');
+  assert(Array.isArray(value.editions) && value.editions.length > 0 && value.editions.every((v: unknown) => v === '2014' || v === '2024'), '扩展包需要声明适用的规则版本。');
+  assert(Array.isArray(value.requires) && value.requires.every((x: unknown) => plain(x) && typeof x.id === 'string' && typeof x.version === 'string'), 'requires 应为依赖列表。');
+  assert(Array.isArray(value.conflicts) && value.conflicts.every((x: unknown) => typeof x === 'string'), 'conflicts 应为包 ID 列表。');
+  const others = installed.filter(p => p.id !== value.id);
+  for (const dep of value.requires) assert(others.some(p => p.id === dep.id && p.version === dep.version), `缺少依赖 ${dep.id} ${dep.version}。请先安装该版本。`);
+  assert(!value.requires.some((d: any) => d.id === value.id), '规则包不能依赖自己。');
+  const packageId = value.id; const packageRequires = value.requires;
+  function visit(id: string, seen: Set<string>) {
+    assert(!seen.has(id), '规则包依赖构成循环。'); const next = new Set([...seen, id]);
+    for (const dep of (id === packageId ? packageRequires : others.find(p => p.id === id)?.requires || [])) visit(dep.id, next);
+  }
+  visit(value.id, new Set());
+  for (const p of others) assert(!value.conflicts.includes(p.id) && !p.conflicts.includes(value.id), `与已安装的「${p.name}」冲突。`);
+  for (const p of others) for (const dep of p.requires) if (dep.id === value.id) assert(dep.version === value.version, `「${p.name}」需要旧版本 ${dep.version}，不能直接替换。`);
+  assert(Array.isArray(value.entries) && value.entries.length > 0 && value.entries.length <= 3000, '扩展包应有 1–3000 个条目。');
+  const ids = new Set<string>();
+  const entries: Entry[] = value.entries.map((item: unknown) => {
+    assert(plain(item) && typeof item.id === 'string' && /^[a-zA-Z0-9._-]+$/.test(item.id) && !ids.has(item.id), '包内条目需要互不重复的简单 id。'); ids.add(item.id);
+    assert(typeof item.name === 'string' && item.name.length > 0 && item.name.length <= 300 && Object.hasOwn(KIND_LABELS, item.kind), '条目名称或类型不正确。');
+    assert(Array.isArray(item.entries), '条目正文 entries 必须为数组。');
+    if (item.effects) validateEffects(item.effects);
+    if (item.choices) validateChoices(item.choices);
+    const dependencies = [...new Set<string>(value.requires.flatMap((dep: any) => [dep.id, ...(others.find(p => p.id === dep.id)?.entries[0].dependencies || [])]))];
+    return { id: `${value.id}:${item.id}`, name: item.name, english: item.english || item.name, kind: item.kind, source: value.id, edition: value.editions.length > 1 ? 'both' : value.editions[0], packId: value.id, revision: value.version, entries: item.entries, raw: plain(item.raw) ? item.raw : {}, effects: item.effects || [], choices: item.choices || [], dependencies };
+  });
+  for (const entry of entries) { const sample = newCharacter(value.editions[0]); sample.profile.enabledSources = [value.id, ...(entry.dependencies || [])]; sample.selections = [{ id: 'check', entry, level: 1, quantity: 1, equipped: false }]; validateCharacter(sample); }
+  return { schemaVersion: 1, id: value.id, name: value.name, version: value.version, author: value.author, editions: value.editions, requires: value.requires, conflicts: value.conflicts, entries };
+}
+export function importOwlbear(value: unknown): Character {
+  assert(plain(value) && value.schema_version === '0.3' && plain(value.identity) && plain(value.abilities), '需要枭熊 schema_version 0.3 的角色 JSON。');
+  const c = newCharacter(value.meta?.ruleset === '2014' ? '2014' : '2024');
+  c.name = String(value.identity.character_name || value.identity.display_name || '导入的冒险者'); c.player = String(value.identity.player || '');
+  for (const a of ABILITIES) { const n = Number(value.abilities[a]?.total); assert(Number.isInteger(n) && n >= 1 && n <= 100, `枭熊 ${a} 属性无效。`); c.abilities[a] = n; }
+  c.profile.enabledSources.push('IMPORTED'); c.notes = `${String(value.background?.story || '')}\n从枭熊角色卡导入。数值按原卡总值保留；条目来源与内部选择需要重新核对。`;
+  c.externalSnapshot = structuredClone(value);
+  const add = (kind: Entry['kind'], name: string, level = 1, description = '', raw: Raw = {}, quantity = 1, equipped = false) => c.selections.push({ id: uid(), entry: { id: `imported:${kind}:${name}`, kind, name, english: name, source: 'IMPORTED', edition: 'both', packId: 'imported', revision: '0.3', entries: [description, '外部角色卡条目；请在规则资料中核对并替换为有来源的条目。'].filter(Boolean), raw }, level, quantity, equipped });
+  if (value.identity.race?.name) add('race', String(value.identity.race.name));
+  for (const cls of value.classes || []) if (cls.name && cls.level) { const level = Number(cls.level); assert(Number.isInteger(level) && level >= 1 && level <= 20, '导入职业等级无效'); add('class', String(cls.name), level); }
+  c.profile.optional.multiclass = c.selections.filter(s => s.entry.kind === 'class').length > 1;
+  if (value.background?.background_name) add('background', String(value.background.background_name), 1, String(value.background.description || ''));
+  const featureGroups = value.features || {};
+  for (const [key, kind] of [['class_features', 'feature'], ['race_features', 'feature'], ['feats', 'feat'], ['fighting_style_feats', 'feature'], ['special_abilities', 'feature']] as const) {
+    assert(featureGroups[key] === undefined || Array.isArray(featureGroups[key]), '枭熊特性列表格式无效。');
+    for (const item of featureGroups[key] || []) if (item?.name) add(kind, String(item.name), 1, String(item.description || ''));
+  }
+  const seenSpells = new Set<string>();
+  for (const key of ['cantrips_known', 'prepared', 'always_known']) {
+    const list = value.spellcasting?.[key] || []; assert(Array.isArray(list), '枭熊法术列表格式无效。');
+    for (const item of list) if (item?.name && !seenSpells.has(item.name)) { seenSpells.add(item.name); add('spell', String(item.name), 1, String(item.description || ''), { level: Number(item.level || 0) }); }
+  }
+  for (const item of value.inventory?.items || []) if (item?.name) add('item', String(item.name), 1, String(item.description || ''), { weight: Number(item.weight || 0) }, Number(item.quantity || 1), !!item.equipped);
+  c.identity.description = String(value.background?.appearance || ''); c.identity.alignment = String(value.identity.alignment || ''); c.identity.gender = String(value.identity.gender || ''); c.identity.age = String(value.identity.age || '');
+  c.baseHp = Number(value.core_stats?.hp?.max || 0); c.runtime.hp = Number(value.core_stats?.hp?.current || 0); c.runtime.tempHp = Number(value.core_stats?.hp?.temp || 0); c.runtime.inspiration = Number(value.core_stats?.inspiration || 0);
+  c.adjustments = [];
+  const adjust = (target: string, v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) c.adjustments!.push({ id: uid(), target, value: v, reason: '保留枭熊原卡总值；更换规则条目后请重新核对此修正。' }); };
+  for (const [key, target] of [['ac', 'ac'], ['initiative', 'initiative'], ['speed', 'speed'], ['passive_perception', 'passive']]) adjust(target, value.core_stats?.[key]);
+  for (const a of ABILITIES) adjust(`save:${a}`, value.abilities[a]?.save?.bonus);
+  assert(value.skills === undefined || Array.isArray(value.skills), '枭熊 skills 应为数组。');
+  for (const skill of value.skills || []) {
+    const key = skill.name === '特技' ? 'acrobatics' : skillKey(String(skill.name));
+    if (SKILLS[key]) adjust(`skill:${key}`, skill.total);
+  }
+  return validateCharacter(c);
+}
+export const EXAMPLE_PACK = { schemaVersion: 1, id: 'homebrew.study', name: '我的扩展 · 示例', version: '1.0.0', author: '', editions: ['2014', '2024'], requires: [], conflicts: [], entries: [ { id: 'scholar-notes', name: '学者笔记', kind: 'feat', entries: ['你记录了旅途中的见闻。智力提高 1，并选择一项知识技能。此条目为展示导入格式而创作的自定义规则。'], effects: [{ op: 'add', target: 'int', value: 1 }], choices: [{ id: 'knowledge', label: '选择一项知识技能', count: 1, options: ['arcana', 'history', 'nature', 'religion'] }] } ] };

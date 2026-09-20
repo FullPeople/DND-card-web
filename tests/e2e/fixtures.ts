@@ -1,0 +1,21 @@
+import type { Page } from '@playwright/test';
+// Authored fixtures: no copied publisher rules or personal character data.
+const core = (source: string) => ({ name: '测试法师', ENG_name: 'Test Mage', source, hd: { faces: 6 }, proficiency: ['int', 'wis'], startingProficiencies: { skills: [{ choose: { from: ['arcana', 'history', 'insight'], count: 2 } }] }, classFeatures: [`初始特性|测试法师|${source}|1`], cantripProgression: [1, 1, 1], classTableGroups: [{ rowsSpellProgression: [[2], [3], [4, 2]] }] });
+const classes = { class: [core('PHB'), core('XPHB')], classFeature: ['PHB', 'XPHB'].map(source => ({ name: '初始特性', ENG_name: 'First Feature', source, className: '测试法师', classSource: source, level: 1, entries: ['这是一条为软件验收创作的测试规则。'] })) };
+const data: Record<string, unknown> = {
+  'class/index.json': { test: 'class-test.json' }, 'class/class-test.json': classes,
+  'spells/index.json': { XPHB: 'spells-test.json' },
+  'spells/spells-test.json': { spell: [{ name: '微光术', ENG_name: 'Test Glow', source: 'XPHB', level: 0, entries: ['为测试而创作的一点微光。'] }] },
+  'generated/gendata-spell-source-lookup.json': { xphb: { 微光术: { class: { XPHB: { 测试法师: true } } } } },
+  'races.json': { race: [{ name: '测试旅人', ENG_name: 'Test Traveller', source: 'XPHB', speed: 30, entries: ['自制测试种族。'] }] },
+  'backgrounds.json': { background: [{ name: '抄书员', ENG_name: 'Test Scribe', source: 'XPHB', skillProficiencies: [{ history: true }], ability: [{ choose: { weighted: { from: ['int', 'wis', 'cha'], weights: [2, 1] } } }], feats: [{ '旅行笔记|xphb': true }], entries: ['用于验证背景的选择要求。'] }] },
+  'feats.json': { feat: [{ name: '旅行笔记', ENG_name: 'Travel Notes', source: 'XPHB', entries: ['记录旅途。'] }] },
+  'items-base.json': { baseitem: [{ name: '测试皮甲', ENG_name: 'Test Armor', source: 'XPHB', ac: 11, type: 'LA', entries: ['测试护甲。'] }] },
+  'items.json': {}, 'optionalfeatures.json': {}, 'conditionsdiseases.json': {},
+};
+export async function mockSource(page: Page) {
+  await page.route('https://5e.kiwee.top/data/**', async route => {
+    const key = new URL(route.request().url()).pathname.replace('/data/', '');
+    await route.fulfill({ json: data[key] || {}, headers: { 'access-control-allow-origin': '*', etag: 'fixture-1' } });
+  });
+}
