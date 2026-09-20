@@ -1,8 +1,8 @@
 # 进度
 
-2026-09-21：网页首版已实现并发布。在线地址：https://fullpeople.github.io/DND-card-web/ ，源码：https://github.com/FullPeople/DND-card-web 。
+2026-09-21：网页首版已实现并发布，当前 v0.1.1 完成固定 A4 和五页角色卡交互修订。在线地址：https://fullpeople.github.io/DND-card-web/ ，源码：https://github.com/FullPeople/DND-card-web 。
 
-完成原位引导和拖拽、2014/2024、中文站目录、规则与扩展包、角色管理与恢复、撤销重做、离线工作区、审卡及枭熊文件交换。16 项核心测试、9 项浏览器端到端通过；GitHub Actions 执行同样的验证后部署。最后发布状态可在仓库 Actions 页面核对。
+完成原位引导和拖拽、2014/2024、中文站目录、规则与扩展包、角色管理与恢复、撤销重做、离线工作区、审卡及枭熊文件交换。新增主要/特性/背景/法术/背包五页，整纸固定且内容区域独立滚动；子职合并职业，Wiki 上方紧凑列表与下方正文同时可见，关键词提供悬停预览，拖拽提供专用影像和有效落点动效。验证为 16 项核心测试、12 项浏览器端到端；GitHub Actions 执行同样的验证后部署。最后发布状态可在仓库 Actions 页面核对。
 
 真实中文站浏览器载入 7,750 条资料；2014 与 2024 实际填卡、全量缓存断网重开、关闭浏览器进程后恢复、审卡离线及打印样式已验证。记录见 [VALIDATION.md](VALIDATION.md)，完整清单见 [ACCEPTANCE.md](ACCEPTANCE.md)。
 
