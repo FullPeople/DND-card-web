@@ -5,22 +5,24 @@
 .overview-top{display:grid;grid-template-columns:minmax(0,2.75fr) .48fr .54fr 1.15fr .51fr .42fr;gap:6px;min-height:0}
 .paper .overview-identity{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:29px 1fr 1fr;gap:4px;min-width:0;min-height:0}
 .identity-name{grid-column:1/3}.identity-background{grid-area:2/1}.identity-race{grid-area:3/1}.identity-class{grid-area:2/2/4/3}
-.sheet-cell{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;background:#f7f7f4;isolation:isolate;padding:4px;overflow:hidden;clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px),0 5px)}
+.sheet-cell{--cell-border:#595959;position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;background:#e8e8e8;isolation:isolate;padding:4px;overflow:hidden;clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px),0 5px)}
 .cell-perimeter{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
-.cell-perimeter path{fill:none;stroke:#565755;stroke-width:1.8px;stroke-linejoin:round}
+.cell-perimeter :is(path,rect){fill:none;stroke:var(--cell-border);stroke-width:3px;stroke-linejoin:round}
+.cell-rounded-perimeter{display:none}
+.cell-rounded-perimeter rect{width:calc(100% - 3px);height:calc(100% - 3px)}
 .cell-missing{cursor:pointer}
-.cell-missing>.cell-perimeter path,.cell-missing>.cell-drop-surface>.cell-perimeter path{stroke:#353633;stroke-width:1.8px;stroke-dasharray:7 4;animation:missing-perimeter 1.6s linear infinite}
-.cell-missing:focus-within>.cell-perimeter path,.cell-missing:hover>.cell-perimeter path{stroke:#20221e}
+.cell-missing>.cell-perimeter :is(path,rect),.cell-missing>.cell-drop-surface>.cell-perimeter :is(path,rect){stroke:#353633;stroke-dasharray:7 4;animation:missing-perimeter 1.6s linear infinite}
+.cell-missing:focus-within>.cell-perimeter :is(path,rect),.cell-missing:hover>.cell-perimeter :is(path,rect){stroke:#20221e}
 @keyframes missing-perimeter{to{stroke-dashoffset:-22}}
-.cell-heading{flex:none;display:flex;align-items:center;justify-content:center;position:relative;margin:0 3px;border-bottom:1px solid #9f9f98;min-height:18px;gap:4px}
+.cell-heading{flex:none;display:flex;align-items:center;justify-content:center;position:relative;margin:0;background:#7c7c7c;color:#f3f3f3;min-height:18px;gap:4px}
 .cell-heading h3{margin:0;font-size:12px;font-weight:600;line-height:17px;letter-spacing:.3px}
-.cell-heading .cell-add{position:absolute;right:1px;top:0;border:0;padding:0 2px;font-size:9px;background:transparent;color:#84877a;line-height:17px}
+.cell-heading .cell-add{position:absolute;right:1px;top:0;border:0;padding:0 2px;font-size:9px;background:transparent;color:#f3f3f3;line-height:17px}
 .cell-content{min-height:0;min-width:0;flex:1;overflow:auto;padding:3px 4px;scrollbar-width:thin;scrollbar-color:#b3b5a9 transparent;overscroll-behavior:contain}
 .cell-fill{display:block;border:0;background:transparent!important;border-radius:0;text-align:center;color:#7b7e73;font-size:10px!important;line-height:1.6;padding:4px 0!important;margin:0 auto;max-width:100%;white-space:normal}
 .cell-drop-surface{position:static;display:flex;flex-direction:column;min-height:0;height:100%;border-radius:0}
 .sheet-cell:has(.drop-ready){background:#e7edde}
-.sheet-cell:has(.drop-ready) .cell-perimeter path{stroke:#6a7d49;stroke-width:2.3px}
-.sheet-cell:has(.drop-over) .cell-perimeter path{stroke:#4c6a2f;stroke-width:3px;animation:none}
+.sheet-cell:has(.drop-ready) .cell-perimeter :is(path,rect){stroke:#6a7d49}
+.sheet-cell:has(.drop-over) .cell-perimeter :is(path,rect){stroke:#4c6a2f;stroke-width:4px;animation:none}
 .sheet-cell .drop-ready,.sheet-cell .drop-over{box-shadow:none;background:transparent;animation:none}
 .sheet-cell .drop-ready .cell-perimeter{animation:cell-drop-breathe 1.2s ease-in-out infinite}
 @keyframes cell-drop-breathe{50%{filter:drop-shadow(0 0 2px #798d5f)}}
@@ -34,8 +36,7 @@
 .overview-sheet .review-requirement{font-size:8px;margin:4px 0;border:0;padding:0;color:#9b9079}
 .overview-sheet .review-requirement button{font-size:8px;padding:0 2px}
 .overview-identity .sheet-cell{padding:3px;clip-path:none}
-.overview-identity .cell-perimeter path{stroke-width:1.1px}
-.overview-identity .cell-heading{min-height:12px;justify-content:flex-start;border:0;margin:0 4px}
+.overview-identity .cell-heading{min-height:12px;justify-content:flex-start;border:0;margin:0;padding-inline:4px}
 .overview-identity .cell-heading h3{font-size:9px;line-height:12px;letter-spacing:0}
 .overview-identity .cell-content{padding:0 4px}
 .overview-identity .identity-name{flex-direction:row;align-items:center}
@@ -52,12 +53,9 @@
 .overview-identity .class-title{line-height:12px}
 .overview-identity .choose-subclass{font-size:8px!important;line-height:10px}
 .overview-identity .inline-subclass .text-link{font-size:8px!important}
-.overview-top>.sheet-cell>.cell-heading{border:0;min-height:28px;align-items:start}
+.overview-top>.sheet-cell>.cell-heading{border:0;min-height:18px;align-items:center}
 .overview-top>.sheet-cell>.cell-heading h3{font-size:10px;line-height:13px;text-align:center}
 .overview-top>.sheet-cell>.cell-content{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;gap:5px}
-.overview-top .total-level{border-radius:35%;clip-path:none}
-.total-level .cell-perimeter{border:1.8px solid #666963;border-radius:48%;width:calc(100% - 2px);height:calc(100% - 2px);inset:1px}
-.total-level .cell-perimeter path{display:none}
 .overview-top .total-level strong,.overview-top .armor-cell strong{font-size:28px;font-weight:500;line-height:1.2}
 .total-level small,.armor-cell small{font-size:8px;color:#8b8e82}
 .overview-top .life-cell .cell-content{justify-content:flex-start;gap:3px}
@@ -84,7 +82,12 @@
 .mental-abilities{min-height:0;display:grid;grid-template-rows:1fr 1fr 1fr;gap:10px}
 .ability-slot{min-height:0}
 .ability-slot>.sheet-cell{height:100%}
-.overview-sheet .ability-box{border:0;border-radius:0}
+.overview-sheet .ability-box{border:0}
+/* Match the original StyleBox: rounded numeric fields, clipped content frames. */
+.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell),.overview-vitals>.sheet-cell{--cell-border:#494949;border-radius:11px;clip-path:none}
+.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell)>.cell-perimeter,.overview-vitals>.sheet-cell>.cell-perimeter{display:none}
+.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell)>.cell-rounded-perimeter,.overview-vitals>.sheet-cell>.cell-rounded-perimeter{display:block}
+.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell)>.cell-heading,.overview-vitals>.sheet-cell>.cell-heading{border-radius:6px 6px 0 0}
 .overview-sheet .ability-box .cell-content{padding:3px 3px}
 .overview-sheet .ability-values{display:flex;align-items:center;justify-content:space-between;gap:4px;position:relative;border-bottom:1px solid #bebfb6;padding-bottom:2px}
 .overview-sheet .ability-values>div{display:flex;flex-direction:column;align-items:center}
@@ -139,7 +142,6 @@
 .paper:has(.overview-sheet)>.sheet-checks .dialog-actions{margin:2px 0}
 .paper:has(.overview-sheet)>.paper-footer{font-size:8px;flex-basis:11px;line-height:11px}
 .requirement-field{margin:6px 0;min-height:50px;clip-path:none;padding:6px}
-.requirement-field .cell-perimeter path{stroke-width:1.2px}
 .requirement-field .cell-content{overflow:visible;flex:none}
 .requirement-field .cell-heading{justify-content:space-between;border:0;min-height:15px}
 .requirement-field .cell-heading h3{font-size:11px;line-height:15px}
@@ -153,6 +155,7 @@
 .quickbar-options button{text-align:left;font-size:12px;background:transparent;border:0;border-bottom:1px solid #d5dccc;padding:8px 2px}
 .quickbar-options small{float:right;font-size:10px;color:#9aa68c}
 .quickbar-manager button{margin-left:5px}
-@media(prefers-reduced-motion:reduce){.cell-missing>.cell-perimeter path,.cell-missing>.cell-drop-surface>.cell-perimeter path,.sheet-cell .drop-ready .cell-perimeter{animation:none}}
+@media(prefers-reduced-motion:reduce){.cell-missing>.cell-perimeter :is(path,rect),.cell-missing>.cell-drop-surface>.cell-perimeter :is(path,rect),.sheet-cell .drop-ready .cell-perimeter{animation:none}}
+@media print{.sheet-cell{print-color-adjust:exact}}
 
 .sheet-cell .cell-fill{flex-shrink:0;z-index:1}.sheet-cell .cell-content:empty+.cell-fill{position:absolute;top:50%;left:5px;right:5px;transform:translateY(-25%)}
