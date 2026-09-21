@@ -1,24 +1,29 @@
 import type { Entry, Kind, Raw } from '../core/model';
 import { readCache, writeCache } from '../platform/storage';
+import { prepareBody, specificMagicItems, expandVersions, expandCopies } from './expand';
 import { inheritSubrace, readableEntries } from './adapt';
 export const DEFAULT_SOURCE = 'https://5e.kiwee.top';
 export interface LoadProgress { done: number; total: number; label: string; failed: string[]; cached: number }
-const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition', variantrule: 'rule', action: 'rule', sense: 'rule', skill: 'rule', language: 'rule' };
+const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition', variantrule: 'rule', action: 'rule', sense: 'rule', skill: 'rule', language: 'rule', status: 'condition', disease: 'condition', itemGroup: 'item', magicvariant: 'item', itemMastery: 'feature', itemProperty: 'rule', itemType: 'rule', reward: 'feature', charoption: 'feature', psionic: 'feature', deity: 'rule', cult: 'rule', boon: 'feature', facility: 'rule', table: 'rule', tableGroup: 'rule', monster: 'monster' };
 const canonical = (s: unknown) => String(s ?? '').trim().toLowerCase();
 export function entryIdentity(kind: Kind, raw: Raw, packId = 'kiwee'): string {
-  return [packId, kind, raw.source, raw.ENG_name || raw.name, raw.classSource, raw.className, raw.subclassSource, raw.subclassShortName, kind === 'feature' ? raw.level : undefined, raw.raceName, ...(kind === 'rule' ? [raw._category] : [])].map(canonical).map(encodeURIComponent).join(':');
+  return [packId, kind, raw.source, raw.ENG_name || raw.name, raw.classSource, raw.className, raw.subclassSource, raw.subclassShortName, kind === 'feature' ? raw.level : undefined, raw.raceName, ...(kind === 'rule' ? [raw._category] : []), ...(raw._variantIdentity ? [raw._variantIdentity] : []), ...(raw._category === 'deity' ? [raw.pantheon] : []), ...(['table', 'tableGroup'].includes(raw._category) ? [raw.name, raw.page] : []), ...(['itemGroup', 'magicvariant', 'status', 'disease'].includes(raw._category) ? [raw._category] : [])].map(canonical).map(encodeURIComponent).join(':');
 }
 export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): Entry[] {
+  body = prepareBody(body);
   const result: Entry[] = [];
   for (const [key, kind] of Object.entries(categories)) {
     if (!Array.isArray(body[key])) continue;
-    for (const item of body[key]) {
-      if (!item || typeof item.name !== 'string') continue;
-      const raw = key === 'subrace' ? inheritSubrace(item, body.race || []) : item;
+    for (const sourceItem of body[key]) {
+      const item = sourceItem && !sourceItem.name && sourceItem.abbreviation ? { ...sourceItem, name: sourceItem.entries?.[0]?.name || sourceItem.abbreviation, ENG_name: sourceItem.entries?.[0]?.ENG_name || sourceItem.abbreviation } : sourceItem;
+      if (!item || typeof item.name !== 'string' && key !== 'subrace') continue;
+      const inherited = key === 'subrace' ? inheritSubrace(item, body.race || []) : item;
+      for (const raw of [inherited, ...expandVersions(inherited)]) {
       const source = String(raw.source || raw.classSource || 'CUSTOM').toUpperCase();
       const edition = raw.edition === 'one' || ['XPHB', 'XDMG', 'XMM'].includes(source) ? '2024' : raw.edition === 'classic' || ['PHB', 'DMG', 'MM'].includes(source) ? '2014' : 'both';
       result.push({ id: entryIdentity(kind, { ...raw, source, _category: key }, packId), kind, name: raw.name, english: raw.ENG_name || raw.name, source, edition,
         packId, revision, page: raw.page, entries: readableEntries(raw, key), raw: { ...raw, _category: key } });
+      }
     }
   }
   return result;
@@ -52,11 +57,11 @@ export async function hashJson(body: unknown): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(body)));
   return [...new Uint8Array(digest)].map(n => n.toString(16).padStart(2, '0')).join('');
 }
-export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgress: (p: LoadProgress) => void, signal: AbortSignal, refresh = false, base = DEFAULT_SOURCE, onSources?: (names: Record<string, string>) => void): Promise<void> {
+export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgress: (p: LoadProgress) => void, signal: AbortSignal, refresh = false, base = DEFAULT_SOURCE, onSources?: (names: Record<string, {name:string;date?:string}>) => void): Promise<void> {
   const url = new URL(base); if (url.protocol !== 'https:' && url.hostname !== 'localhost') throw new Error('资料源需要 HTTPS 地址');
   base = base.replace(/\/$/, '');
-  const paths = ['data/races.json', 'data/backgrounds.json', 'data/feats.json', 'data/items-base.json', 'data/items.json', 'data/optionalfeatures.json', 'data/conditionsdiseases.json', 'data/books.json', 'data/variantrules.json', 'data/actions.json', 'data/skills.json', 'data/senses.json', 'data/languages.json'];
-  const progress: LoadProgress = { done: 0, total: paths.length + 2, label: '读取资料索引', failed: [], cached: 0 };
+  const paths = ['data/bestiary/template.json','data/bestiary/legendarygroups.json','data/generated/gendata-variantrules.json', 'data/magicvariants.json', 'data/charcreationoptions.json', 'data/rewards.json', 'data/psionics.json', 'data/deities.json', 'data/cultsboons.json', 'data/bastions.json', 'data/tables.json', 'data/generated/gendata-tables.json', 'data/races.json', 'data/backgrounds.json', 'data/feats.json', 'data/items-base.json', 'data/items.json', 'data/optionalfeatures.json', 'data/conditionsdiseases.json', 'data/books.json', 'data/adventures.json', 'data/variantrules.json', 'data/actions.json', 'data/skills.json', 'data/senses.json', 'data/languages.json'];
+  const progress: LoadProgress = { done: 0, total: paths.length + 3, label: '读取资料索引', failed: [], cached: 0 };
   onProgress({ ...progress });
   let spellLookup: Raw = {}; let lookupRevision = '';
   try {
@@ -64,17 +69,19 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
     spellLookup = lookup.body; lookupRevision = lookup.revision; if (lookup.cached) progress.cached++;
     if (lookup.warning) progress.failed.push(`法术职业索引：${lookup.warning}`);
   } catch (error) { if (signal.aborted) return; progress.failed.push(`法术职业索引：${String(error)}`); }
-  for (const category of ['class', 'spells']) {
+  for (const category of ['class', 'spells', 'bestiary']) {
     try {
       const { body, cached, warning } = await fetchJson(base, `data/${category}/index.json`, signal, refresh);
       if (warning) progress.failed.push(`${category} 索引：${warning}`);
       if (cached) progress.cached++;
       for (const value of Object.values(body)) if (typeof value === 'string' && /^[\w.-]+\.json$/.test(value)) paths.push(`data/${category}/${value}`);
     } catch (error) { if (signal.aborted) return; progress.failed.push(`${category} 索引：${String(error)}`); }
-    progress.done++; progress.total = paths.length + 2; onProgress({ ...progress });
+    progress.done++; progress.total = paths.length + 3; onProgress({ ...progress });
   }
   // Core rulebooks first; remaining books arrive incrementally.
   paths.sort((a, b) => Number(!/(phb|wizard|fighter|races|backgrounds|feats)/.test(a)) - Number(!/(phb|wizard|fighter|races|backgrounds|feats)/.test(b)));
+  const monsters: Raw[]=[];let monsterTemplates:Raw[]=[],legendaryGroups:Raw[]=[];
+  const equipment: Raw = {}; const equipmentRevisions: string[] = [];
   let cursor = 0;
   await Promise.all(Array.from({ length: 4 }, async () => {
     while (cursor < paths.length && !signal.aborted) {
@@ -84,7 +91,11 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
         if (signal.aborted) return;
         if (result.cached) progress.cached++;
         if (result.warning) progress.failed.push(`${path}：${result.warning}`);
-        if (path === 'data/books.json') onSources?.(Object.fromEntries((result.body.book || []).map((book: Raw) => [String(book.source || book.id).toUpperCase(), book.name])));
+        if (['data/books.json','data/adventures.json'].includes(path)) onSources?.(Object.fromEntries((result.body.book || result.body.adventure || []).map((book: Raw) => [String(book.source || book.id).toUpperCase(), {name:book.name,date:book.published}])));
+        if (['data/items-base.json', 'data/items.json', 'data/magicvariants.json'].includes(path)) { Object.assign(equipment, result.body); equipmentRevisions.push(`${path}:${result.revision}`); }
+        if(result.body.monster)monsters.push(...result.body.monster);
+        if(result.body.monsterTemplate)monsterTemplates=result.body.monsterTemplate;
+        if(result.body.legendaryGroup)legendaryGroups=result.body.legendaryGroup;
         const normalized = normalizeData(result.body, result.revision);
         for (const entry of normalized) if (entry.kind === 'spell') {
           const lookup = spellLookup[entry.source.toLowerCase()]?.[entry.name.toLowerCase()] || spellLookup[entry.source.toLowerCase()]?.[entry.english.toLowerCase()];
@@ -97,4 +108,15 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
       progress.done++; progress.label = path.replace('data/', ''); onProgress({ ...progress, failed: [...progress.failed] });
     }
   }));
+  if(!signal.aborted && monsters.length){
+    const groups=expandCopies(legendaryGroups),templates=expandCopies(monsterTemplates);
+    const expanded=expandCopies(monsters,templates).map(raw=>{const group=raw.legendaryGroup&&groups.find(g=>[g.name,g.ENG_name].includes(raw.legendaryGroup.name)&&g.source===raw.legendaryGroup.source);return group?{...raw,_legendaryGroup:group}:raw;});
+    onBatch(normalizeData({monster:expanded},await hashJson(expanded)));
+  }
+  if (!signal.aborted && Object.keys(equipment).length) {
+    const revision = equipmentRevisions.sort().join('|');
+    onBatch(normalizeData(equipment, revision));
+    const expanded = prepareBody(equipment);
+    onBatch(normalizeData({ ...equipment, baseitem: [], itemGroup: [], magicvariant: [], item: specificMagicItems(expanded) }, revision));
+  }
 }

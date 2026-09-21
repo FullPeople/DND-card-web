@@ -19,3 +19,14 @@ export async function mockSource(page: Page) {
     await route.fulfill({ json: data[key] || {}, headers: { 'access-control-allow-origin': '*', etag: 'fixture-1' } });
   });
 }
+export async function fillFromDetail(page: Page) {
+  const kind = await page.locator('.entry-detail').getAttribute('data-entry-kind');
+  const preferred: Record<string, string> = { class: '.identity-class', subclass: '.identity-subclass', race: '.identity-race', background: '.identity-background', spell: '.overview-spells', condition: '.portrait-cell', feat: '.heritage-features', feature: '.class-features', rule: '.class-features', item: '.quickbar-cell' };
+  const target = page.locator(preferred[kind || ''] || '.class-features');
+  if (await target.isVisible()) await page.locator('.detail-title').dragTo(target);
+  else {
+    const zones = page.locator('.paper [data-drop-kind]');
+    for (let i = 0; i < await zones.count(); i++) if (await zones.nth(i).isVisible() && (await zones.nth(i).getAttribute('data-drop-kind'))?.split(',').includes(kind || '')) { await page.locator('.detail-title').dragTo(zones.nth(i)); return; }
+    throw new Error(`No visible drop region for ${kind}`);
+  }
+}

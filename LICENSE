@@ -1,21 +1,119 @@
-MIT License
-
+DND Card Noncommercial Share-Alike License 1.0
 Copyright (c) 2026 FullPeople
+SPDX-License-Identifier: LicenseRef-DND-Card-NC-SA-1.0
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Scope and definitions
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This license applies to the original code, documentation, and artwork in this
+release of DND Card Web, except material identified as having another license
+(the "Software"). "You" includes a person or organization exercising rights
+under this license. "Licensor" means the copyright holders of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+A "Covered Work" is the Software or a work that modifies, adapts, incorporates,
+or is otherwise derived from a substantial copyright-protected portion of it.
+A separate, independent program is not a Covered Work merely because it is
+stored alongside the Software, communicates through an ordinary interface,
+or was used to produce or run it.
+
+"Commercial Use" means use primarily intended for commercial advantage or
+monetary compensation, including selling or licensing a Covered Work,
+charging for access, subscriptions, hosting or related paid functionality,
+advertising or sponsorship monetization, or using it to provide paid services.
+A charge described as covering hosting costs is still a charge for access.
+Unconditional voluntary donations are not Commercial Use if they confer no
+access, features, priority, services, or other consideration and the activity
+is not otherwise primarily intended for commercial advantage. Mere use by an
+individual employed by a business does not itself make personal recreational
+use commercial.
+
+"Corresponding Source" is the complete preferred form for making changes to
+a Covered Work, including all modifications, incorporated covered modules,
+interface definitions, build and installation scripts, dependency manifests,
+and configuration templates needed to build, install, and run that version.
+Obfuscated or minified code alone is not Corresponding Source. Independent
+standard tools or dependencies available separately under their own licenses
+may be identified by exact version and accessible source location. Secrets,
+credentials, user records, private character data, and independent third-party
+rule databases are not required; use documented placeholders and data-loading
+interfaces instead. Material must not be withheld merely by moving covered
+code into another repository or service.
+
+2. Permission for noncommercial purposes
+
+Subject to all terms of this license, each Licensor grants You a worldwide,
+nonexclusive, royalty-free copyright license to use, reproduce, study,
+modify, distribute, and make Covered Works available for noncommercial
+purposes. Private noncommercial use and private modification alone do not
+require publication. All rights not expressly granted are reserved.
+
+Commercial Use requires separate prior written permission from the relevant
+copyright holders. Public availability of the source is not commercial
+permission. This license is not the MIT License, the GNU AGPL, or an
+OSI-approved open-source license.
+
+3. Distribution, network services, and source availability
+
+If You distribute a Covered Work in any form, or make it available for use by
+other people over a network, You must:
+
+(a) Publish the complete Corresponding Source of the exact version offered,
+    under this same license, at a publicly accessible network location,
+    without a fee, subscription, or mandatory account.
+(b) Provide a clear, readily accessible source link and license link with
+    distributed copies and in the user interface of any network service.
+    The source must be downloadable, not merely viewable through a service.
+(c) Keep that source available for as long as the network service is offered
+    and for at least three years after Your last distribution of that version
+    or Your last provision of that version as a network service, whichever
+    occurs later. A public source repository with downloadable revisions is
+    sufficient while it meets these requirements.
+(d) Include this license, retain copyright and attribution notices, identify
+    material modifications and their authors, and avoid implying endorsement
+    by the original project or any other contributor.
+
+These requirements apply to original and modified versions, including
+self-hosted services made available to other people. A publicly distributed
+Covered Work as a whole must remain under this license. You may not use a
+more permissive license, impose further restrictions on the rights granted
+here, or use technical measures that prevent recipients from exercising them.
+Independent dependencies remain subject to their own licenses; if their terms
+cannot be satisfied together with this license, You have no permission under
+this license to distribute the incompatible combination.
+
+4. Third-party material and user data
+
+This license grants no rights to third-party dependencies, Dungeons & Dragons
+rules, translations, trademarks, images, or external datasets. Their separate
+licenses and permissions continue to govern them. Users retain their rights
+in independently created characters, notes, and other data; merely entering
+or exporting such data does not make it a Covered Work. Existing grants for
+older releases under another license are not revoked by this license.
+
+5. Termination and reinstatement
+
+Your permissions terminate automatically when You violate this license.
+If You cease the violation, Your permissions are provisionally reinstated
+unless and until a Licensor expressly terminates them. Reinstatement becomes
+permanent if no Licensor notifies You of the violation within 60 days after
+You cease it, or if this is Your first notice of violation from that Licensor
+and You cure the violation within 30 days after receiving notice. Termination
+does not revoke rights of recipients who comply with this license.
+
+6. No warranty; limitation of liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED
+"AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+NONINFRINGEMENT. THE LICENSORS ARE NOT LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE, WHETHER IN CONTRACT,
+TORT, OR OTHERWISE. MANDATORY STATUTORY RIGHTS ARE NOT EXCLUDED.
+
+7. Interpretation and separate permissions
+
+If a provision is unenforceable, the remaining provisions continue to apply
+to the extent permitted by law. No trademark license is granted. A separate
+written commercial or other license may grant additional rights, but one
+Licensor cannot waive rights owned by another. Only permissions expressly
+granted in such a separate agreement override these terms for its recipients.
+The English text of this license is authoritative; explanatory summaries are
+not substitutes for its terms.

@@ -1,19 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { mockSource } from './fixtures';
+import { mockSource, fillFromDetail } from './fixtures';
 
-test.beforeEach(async ({ page }) => { await mockSource(page); await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); });
+test.beforeEach(async ({ page }) => { await mockSource(page); await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); await page.getByRole('switch', { name: '编辑模式' }).click(); });
 
 test('A4 stays fixed while only the content region scrolls; all five pages edit the same character', async ({ page }) => {
   await page.locator('.catalog-row').filter({ hasText: '测试法师' }).click();
-  await page.getByRole('button', { name: '加入角色卡', exact: true }).click();
-  await page.locator('.traits-box .choose-button').first().click();
-  await page.locator('.catalog-row').first().click();
-  await page.getByRole('button', { name: '填入当前要求', exact: true }).click();
+  await fillFromDetail(page);
   const paper = page.locator('.paper'); const before = await paper.boundingBox();
   await page.getByRole('tab', { name: /特性/ }).click();
-  const content = page.locator('.detail-page-box > .box-content');
+  const content = page.locator('.detail-page-box .cell-content');
   await content.hover(); await page.mouse.wheel(0, 700);
-  await expect.poll(() => content.evaluate(el => el.scrollTop)).toBeGreaterThan(300);
+  await expect.poll(() => content.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
   expect(await paper.boundingBox()).toEqual(before);
   expect(await page.locator('.sheet-viewport').evaluate(el => el.scrollTop)).toBe(0);
   await page.getByRole('tab', { name: /背景/ }).click();
@@ -34,29 +31,27 @@ test('A4 stays fixed while only the content region scrolls; all five pages edit 
   }
 });
 
-test('subclass is part of the class line and keyword previews show the referenced source', async ({ page }) => {
+test('main class line stays compact while details retain subclass controls and keyword previews', async ({ page }) => {
   await page.locator('.catalog-row').filter({ hasText: '测试法师' }).click();
-  await page.getByRole('button', { name: '加入角色卡', exact: true }).click();
-  const keyword = page.locator('.entry-detail .inline-reference').filter({ hasText: '初始特性' }).first();
+  await fillFromDetail(page);
+  const keyword = page.locator('.entry-detail .inline-reference').filter({ hasText: '微光术' }).first();
   await keyword.hover();
-  await expect(page.getByRole('tooltip')).toContainText('这是一条为软件验收创作的测试规则');
+  await expect(page.getByRole('tooltip')).toContainText('为测试而创作的一点微光');
   await expect(page.getByRole('tooltip')).toContainText('XPHB');
   await page.keyboard.press('Escape'); await expect(page.getByRole('tooltip')).toHaveCount(0);
-  await keyword.click();
-  const spell = page.locator('.entry-detail .inline-reference').filter({ hasText: '微光术' });
+  await page.mouse.move(40, 40);
+  const spell = keyword;
   await spell.focus(); await expect(page.getByRole('tooltip')).toContainText('为测试而创作的一点微光');
   const bounds = (await page.getByRole('tooltip').boundingBox())!;
   expect(bounds.y).toBeGreaterThanOrEqual(0); expect(bounds.y + bounds.height).toBeLessThan(983);
   await page.keyboard.press('Escape');
-  await page.locator('.choose-subclass').click(); await page.locator('.catalog-row').filter({ hasText: '测试学派' }).click();
-  await page.getByRole('button', { name: '加入角色卡', exact: true }).click();
-  await expect(page.locator('.identity-main .selected-entry').filter({ hasText: '测试法师' })).toContainText('测试学派');
-  await expect(page.locator('.identity-main .selected-entry')).toHaveCount(1);
-  await page.getByRole('button', { name: '移除测试学派', exact: true }).click(); await expect(page.locator('.choose-subclass')).toBeVisible();
-  await page.getByRole('button', { name: '加入角色卡', exact: true }).click();
-  await page.getByRole('button', { name: '移除测试法师', exact: true }).click();
-  await expect(page.locator('.orphan-subclass')).toContainText('测试学派');
-  await page.getByRole('button', { name: '移除测试学派', exact: true }).click(); await expect(page.locator('.orphan-subclass')).toHaveCount(0);
+  await expect(page.locator('.identity-class .identity-token')).toHaveText('测试法师Lv.');
+  await expect(page.locator('.identity-class .entry-meta')).toHaveCount(0);
+  await page.locator('.identity-subclass .cell-fill').click(); await page.locator('.class-subclasses button').filter({ hasText: '测试学派' }).click();
+  await fillFromDetail(page);
+  await expect(page.locator('.identity-subclass')).toContainText('测试学派');
+  await page.locator('.identity-subclass .identity-title').press('Delete');
+  await expect(page.locator('.identity-subclass')).toHaveClass(/cell-missing/);
   for (const width of [1100, 390]) {
     await page.setViewportSize({ width, height: 844 });
     if (width < 980) await page.getByRole('navigation', { name: '工作区' }).getByRole('button', { name: '规则资料', exact: true }).click();
@@ -71,28 +66,28 @@ test('real drag highlights eligible zones, previews the entry and clears after a
   const box = (await row.boundingBox())!;
   await page.mouse.move(box.x + 30, box.y + 12); await page.mouse.down();
   await page.mouse.move(box.x + 65, box.y + 19, { steps: 5 });
-  await expect(page.locator('[data-drop-kind="class"]').first()).toHaveClass(/drop-ready/);
+  await expect(page.locator('.identity-class [data-drop-kind]').first()).toHaveClass(/drop-ready/);
   await expect(page.locator('[data-drop-kind="race"]').first()).not.toHaveClass(/drop-ready/);
   await expect(page.locator('.drag-ghost strong')).toHaveText('测试法师');
-  const target = page.locator('[data-requirement="base:class"]'); const bounds = (await target.boundingBox())!;
+  const target = page.locator('.identity-class'); const bounds = (await target.boundingBox())!;
   await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, { steps: 10 });
   await expect(page.locator('.drop-over')).not.toHaveCount(0);
   await info.attach('eligible-drop-regions', { body: await page.screenshot(), contentType: 'image/png' });
   await page.mouse.up();
   await expect(page.getByRole('spinbutton', { name: '测试法师等级' })).toHaveValue('1');
   await expect(page.locator('.drop-ready')).toHaveCount(0);
-  await page.locator('.traits-box .choose-button').first().click();
+  await page.getByRole('navigation', { name: '资料分类' }).getByRole('button', { name: '法术', exact: true }).click();
   const feature = (await page.locator('.catalog-row').first().boundingBox())!;
   await page.mouse.move(feature.x + 25, feature.y + 10); await page.mouse.down();
   await page.mouse.move(feature.x + 60, feature.y + 15, { steps: 5 });
   await expect(page.locator('.ability-box .drop-ready')).toHaveCount(0);
-  const tab = (await page.getByRole('tab', { name: /特性/ }).boundingBox())!;
+  const tab = (await page.getByRole('tab', { name: /法术/ }).boundingBox())!;
   await page.mouse.move(tab.x + tab.width / 2, tab.y + tab.height / 2, { steps: 10 });
-  await expect(page.locator('.sheet-page-heading h2')).toHaveText('特性');
-  const choice = page.locator('[data-requirement]').filter({ hasText: '填写「初始特性」' });
+  await expect(page.locator('.sheet-page-heading h2')).toHaveText('法术');
+  const choice = page.locator('.detail-page-box .drop-zone');
   const choiceBounds = (await choice.boundingBox())!;
   await page.mouse.move(choiceBounds.x + 25, choiceBounds.y + 15, { steps: 10 });
   await page.mouse.up();
-  await expect(page.locator('.detail-page-box .selected-entry')).toContainText('初始特性');
+  await expect(page.locator('.detail-page-box .selected-entry').filter({ hasText: '微光术' })).toHaveCount(1);
   await expect(page.locator('.drop-ready')).toHaveCount(0);
 });

@@ -3,9 +3,11 @@
 Read docs/PRODUCT.md, docs/ACCEPTANCE.md and docs/STATUS.md before continuing.
 
 - This is an independent web migration; never edit or reset the Godot source or the reference native apps.
-- Preserve the original StyleBox appearance: thick dark-gray frames, light-gray contents and gray title bands with white text; round numeric/ability frames and clipped content frames. Keep the approved reference-sheet hierarchy: top identity/resources, two ability columns containing skills/saves, right quickbar and features. Labels may sit at the top or side. Keep fixed A4 and five page tabs; never replace this with a generic dashboard.
-- Missing content belongs to the whole field's animated dashed outer perimeter, with a click-to-fill hint. Do not restore nested rectangular missing-choice cards in the overview.
-- Rules identify missing choices on the sheet. Users browse and drag content themselves; no compulsory next-next wizard.
+- Preserve the original StyleBox appearance: thick dark-gray frames, light-gray contents and gray title bands with white text. The current local UI revision uses cut corners on every frame, with the title and content clipped together. Keep the approved reference-sheet hierarchy and fixed A4/five tabs; never replace this with a generic dashboard.
+- Only background, race, class, subclass and size use animated dashed outer frames. Other outer frames stay solid; internal missing-entry styling is a later UI iteration. Preserve working fill links and choices.
+- Latest status visual contract: design/STATE-EFFECTS-PROPOSAL.md. All effects may coexist across all five pages; editing restores normal layout. Invisible status temporarily makes otherwise solid frames dashed. Death saves replace the former status box; status bubbles live beside the edition title.
+- During the current UI feedback phase, make local changes and provide screenshots. Batch full validation and publication after the user requests it; do not push each visual iteration.
+- The current manual-sheet mode does not generate quota/choice prerequisites or a right-side filling state. Players freely edit proficiency and choices. Attach only explicit source references and named feature content; never branch on specific class/feature names. Identity gaps still link to the catalog.
 - 2014 and 2024 have separate identities and rule profiles. Never merge by display name.
 - Rule evaluation must be pure and independent of React, browser storage and native interfaces.
 - Source snapshots, rule behavior, user choices and runtime resources have distinct ownership. Refresh must not grant one-time resources again.

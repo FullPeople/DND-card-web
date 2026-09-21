@@ -1,0 +1,117 @@
+/* Card decorations and transforms never change character rules. */
+.paper{isolation:isolate}
+.paper>.overview-sheet,.paper>.sheet-details,.paper>.paper-footer{position:relative;z-index:1}
+.paper>.paper-heading{position:relative;z-index:8}
+.paper>.card-art-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;user-select:none}
+.card-art-layer *,.cell-state-art,.cell-halo{pointer-events:none!important}
+.card-art-background{z-index:0}.card-art-edge{z-index:3}
+.watermark-anchor{position:absolute;left:50%;top:51%;width:64%;aspect-ratio:1;transform:translate(-50%,-50%)}
+.class-watermarks{position:absolute;inset:0;opacity:.2}
+.class-watermarks img{display:block;width:100%;height:100%;object-fit:contain;animation:badge-arrive .7s ease-out both}
+.class-watermarks.badge-leaving{animation:badge-depart .75s ease-in both}
+@keyframes badge-arrive{from{opacity:0;transform:scale(.82);filter:blur(6px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes badge-depart{from{opacity:.2;transform:scale(1);filter:blur(0)}to{opacity:0;transform:scale(1.13);filter:blur(8px)}}
+.magic-seal{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .8s;fill:none;stroke:#333d40;stroke-width:5}
+.magic-seal.seal-active{opacity:.56}.magic-rotation{transform-origin:500px 500px;animation:magic-revolve 28s linear infinite;animation-play-state:paused}
+.seal-active .magic-rotation{animation-play-state:running}
+@keyframes magic-revolve{to{transform:rotate(360deg)}}
+
+/* The stationary section remains the hit box for fear. Gravity moves the section itself. */
+.paper.has-card-art .sheet-cell{padding:0;background:transparent;clip-path:none;overflow:visible}
+.cell-face{position:absolute;inset:0;display:flex;flex-direction:column;padding:3px;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px);isolation:isolate;transition:filter .7s,rotate .8s,opacity .7s}
+.cell-face::before{content:'';position:absolute;inset:0;background:var(--cell-border);z-index:0;transition:opacity .7s;clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,8.6px 3px,3px 8.6px,3px calc(100% - 8.6px),8.6px calc(100% - 3px),calc(100% - 8.6px) calc(100% - 3px),calc(100% - 3px) calc(100% - 8.6px),calc(100% - 3px) 8.6px,calc(100% - 8.6px) 3px,8.6px 3px)}
+.cell-missing .cell-face::before{opacity:0}
+.cell-surface{position:relative;z-index:1;background:rgb(232 232 232 / 66%)}
+.cell-perimeter{z-index:4}.cell-sheen{z-index:5}
+.cell-state-art{position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible}
+.cell-edge-art path{fill:none;vector-effect:non-scaling-stroke;transition:opacity .7s;opacity:0}
+.cell-cracks{opacity:0;transition:opacity .8s;fill:none;stroke:#484b49;stroke-width:1.15;filter:drop-shadow(1px 1px 0 #fff7)}
+.cell-cracks .stone-highlight{stroke:#ddd;stroke-width:.65}
+.condition-petrified .cell-cracks{opacity:.7}.condition-petrified .cell-surface{filter:grayscale(1) brightness(.9)}
+.cell-surface{transition:filter .7s,background .7s}
+.cell-edge-art .invisible-cell-edge{stroke:#515651;stroke-width:3;stroke-dasharray:7 5}
+.condition-invisible .sheet-cell:not(.cell-missing) .cell-face::before{opacity:0}
+.condition-invisible .invisible-cell-edge{opacity:1}
+.portrait-cell .cell-content>svg{transition:opacity .9s}
+.condition-invisible .portrait-cell .cell-content>svg{opacity:.17}
+.cell-edge-art .exhaustion-segment{stroke:#b8232a;stroke-width:3.5;stroke-linecap:butt}
+.condition-exhaustion .exhaustion-segment.segment-on{opacity:1}
+.cell-edge-art .poison-edge{stroke:#357436;stroke-width:7;filter:blur(1.5px)}
+.condition-poisoned .poison-edge{opacity:.65}
+.poison-soak{opacity:0;transition:opacity 1s;box-shadow:inset 0 0 11px 4px #366b3980;background:radial-gradient(ellipse at 0% 25%,#54863350,transparent 14%),radial-gradient(ellipse at 100% 75%,#36693c65,transparent 15%)}
+.condition-poisoned .poison-soak{opacity:1}
+.portrait-cell{rotate:0deg;transition:rotate .9s cubic-bezier(.3,.8,.3,1)}
+.condition-prone .portrait-cell{rotate:180deg}
+.speed-cell .cell-face::after{content:'';position:absolute;inset:0;z-index:7;background:#090a09;opacity:0;transition:opacity .85s;pointer-events:none}
+.condition-unconscious .speed-cell .cell-face::after{opacity:1}
+.condition-frightened .cell-face::before,.condition-frightened .cell-perimeter,.condition-frightened .cell-edge-art{animation:frame-tremor .31s linear infinite}
+.condition-frightened .sheet-cell:nth-child(2n) .cell-face::before,.condition-frightened .sheet-cell:nth-child(2n) .cell-perimeter,.condition-frightened .sheet-cell:nth-child(2n) .cell-edge-art{animation-delay:-.11s;animation-duration:.37s}
+@keyframes frame-tremor{0%,100%{transform:translate(0,0)}20%{transform:translate(1px,-.8px)}40%{transform:translate(-1.3px,.6px)}60%{transform:translate(.8px,.9px)}80%{transform:translate(-.5px,-1px)}}
+.cell-halo{position:absolute;z-index:6;opacity:0;transition:opacity .7s;overflow:visible}
+.halo-portrait{left:-15%;top:-17%;width:130%;height:58%;fill:#70663f;stroke:#655e42;stroke-width:1.5}
+.condition-stunned .halo-portrait{opacity:.85}.portrait-star-orbit>ellipse{fill:none;stroke-width:1;opacity:.55}
+.ellipse-star{offset-path:path('M147 28 A67 20 0 1 1 13 28 A67 20 0 1 1 147 28');offset-rotate:0deg;animation:stars-orbit 3s linear infinite;animation-play-state:paused}
+.condition-stunned .ellipse-star{animation-play-state:running}.star-1{animation-delay:-1s}.star-2{animation-delay:-2s}
+@keyframes stars-orbit{to{offset-distance:100%}}
+.halo-initiative{inset:-9px -11px;width:calc(100% + 22px);height:calc(100% + 18px);fill:#32352e}
+.condition-surprised .halo-initiative{opacity:.7}.initiative-burst{transform-origin:center;transform:scale(.7);transition:transform .65s cubic-bezier(.2,.8,.2,1.3)}
+.condition-surprised .initiative-burst{transform:scale(1)}
+
+/* Persistent status ribbon; its contents remain accessible during gravity. */
+.edition-divider{gap:8px;min-width:0;position:relative;z-index:7;flex-shrink:0;min-height:23px}
+.edition-divider>span{min-width:12px;transition:flex-basis .3s}
+.status-strip{flex:0 1 auto;min-width:0;max-width:60%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;padding:0;min-height:20px}
+.status-strip:has(.feature-bubble){flex-basis:auto}.status-strip:not(:has(.feature-bubble)){width:0;min-width:0}
+.status-strip .feature-groups,.status-strip .feature-flow{display:flex;flex-wrap:nowrap;gap:3px;width:max-content;align-items:center}
+.status-strip .feature-group{margin:0}.status-strip .feature-bubble{display:flex;flex:none;align-items:center;border-radius:4px;white-space:nowrap}
+.status-strip .feature-caption{padding:1px 5px;font-size:10px;line-height:16px;white-space:nowrap}
+.status-strip .exhaustion-level{padding:0!important;width:24px!important;min-width:24px;height:18px;font-size:10px;border:0;border-left:1px solid #aaa;border-radius:0;text-align:center;background:transparent}
+.physical-abilities{grid-template-rows:49px 49px minmax(92px,1.2fr) minmax(125px,1.6fr) minmax(78px,1fr);gap:7px}
+.death-saves-cell .cell-heading{min-height:16px}.death-saves-cell .cell-heading h3{font-size:10px}
+.death-saves-cell .cell-content{padding:1px 4px;overflow:hidden}
+.death-saves>div{display:flex;align-items:center;justify-content:center;gap:4px;font-size:8px;line-height:12px}
+.death-saves input{appearance:none;width:8px!important;height:8px!important;min-width:8px;padding:0!important;border:1px solid #494b46;border-radius:50%;margin:0;background:transparent}
+.death-saves input:checked{background:#41443f}
+.detail-cell .cell-content{padding:7px;overflow:auto}.detail-cell.notes-box .cell-content{display:flex;flex-direction:column}
+
+.card-state-effect{position:absolute;inset:0;color:#434641;animation:effect-arrive .8s ease-out both}
+.card-state-effect>svg{display:block;width:100%;height:100%;overflow:visible;fill:currentColor}
+.card-state-effect.is-leaving{animation:effect-leave .95s ease-in both}
+.effects-paused *{animation-play-state:paused!important}
+@keyframes effect-arrive{from{opacity:0}to{opacity:1}}
+@keyframes effect-leave{from{opacity:1}to{opacity:0}}
+.chain-link{fill:none;stroke:#454843;stroke-width:2.8;opacity:.75}.chain-joint{fill:none;stroke:#777e71;stroke-width:4;opacity:.7}
+.chain-run{animation:chain-arrive .95s cubic-bezier(.18,.7,.25,1) both}.is-leaving .chain-run{animation:chain-depart .85s ease-in both}
+@keyframes chain-arrive{from{transform:translateX(-1500px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes chain-depart{to{transform:translateX(-1500px);opacity:0}}
+.grapple-clasp{opacity:.36;animation:clasp-arrive .8s cubic-bezier(.15,.9,.2,1.2) both}.hand-crease{fill:none;stroke:#eee;stroke-width:2;opacity:.5}
+.is-leaving .grapple-clasp{animation:clasp-leave .85s ease-in both}
+@keyframes clasp-arrive{from{transform:translateX(-115px)}to{transform:translateX(0)}}
+@keyframes clasp-leave{to{transform:translateX(-115px)}}
+.charm-vine{opacity:.65;fill:#7a576a}.vine-stem,.vine-curl{fill:none;stroke:#755c6b;stroke-width:3}
+.vine-stem{stroke-dasharray:1000;animation:vine-grow 1s ease-out both}.vine-heart{animation:leaf-open 1s ease-out both;transform-box:fill-box;transform-origin:center}
+.is-leaving .vine-stem{animation:vine-recede .9s ease-in both}.is-leaving .vine-heart{animation:leaf-close .85s ease-in both}
+@keyframes vine-grow{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}@keyframes vine-recede{to{stroke-dashoffset:1000}}
+@keyframes leaf-open{from{scale:0;opacity:0}to{scale:1;opacity:1}}@keyframes leaf-close{to{scale:0;opacity:0}}
+.prohibition-symbol{fill:none;stroke:#454941;stroke-width:10;opacity:.25}.symbol-fill{fill:#454941;stroke:none}.prohibition-slash{stroke-width:14;paint-order:stroke;stroke:#3e433a}
+.blood-spatter{fill:#963132;opacity:.43}
+.glitch-flash{fill:#e9ffff;mix-blend-mode:difference;animation:glitch-flash 6.3s steps(1,end) infinite}
+.glitch-slices{fill:#784768;opacity:0;animation:glitch-slices 6.3s steps(1,end) infinite}
+@keyframes glitch-flash{0%,77%,82%,100%{opacity:0}78%{opacity:.35}79%{opacity:.04}80%{opacity:.25}81%{opacity:.08}}
+@keyframes glitch-slices{0%,77%,82%,100%{opacity:0;transform:translateX(0)}78%{opacity:.23;transform:translateX(8px)}80%{opacity:.17;transform:translateX(-9px)}}
+.paper-poison-rim{fill:none;stroke:#436f38;stroke-width:19;filter:blur(5px);opacity:.4}
+.visual-editing .card-state-effect,.visual-editing .magic-seal{opacity:0;transition:opacity .3s;animation:none}
+@media(prefers-reduced-motion:reduce){.card-art-layer *,.cell-face,.cell-face::before,.cell-perimeter,.cell-edge-art,.cell-halo *{animation:none!important;transition:none!important}.sheet-cell{transition:none!important}.card-state-effect.is-leaving,.badge-leaving{opacity:0}.glitch-flash,.glitch-slices{opacity:0}.star-0{offset-distance:0%}.star-1{offset-distance:33%}.star-2{offset-distance:66%}}
+@media print{.card-art-edge,.card-state-effect,.magic-seal,.cell-state-art,.cell-halo{display:none}.class-watermarks{opacity:.07}.class-watermarks img{animation:none}.paper .sheet-cell{translate:none!important;rotate:none!important}.paper .cell-face{animation:none!important}.speed-cell .cell-face::after{display:none}}
+.detail-status-anchors{width:230px;height:70px;display:grid;grid-template-columns:1fr 1fr 68px;gap:7px}.detail-status-anchors .cell-heading{min-height:17px}.detail-status-anchors .cell-heading h3{font-size:10px}.detail-status-anchors .cell-content{display:grid;place-items:center;overflow:hidden}.detail-status-anchors .adjusted-value>strong{font-size:20px}.detail-status-anchors .portrait-cell .cell-content{padding:0}
+.edition-divider{transition:translate .7s cubic-bezier(.2,.7,.2,1)}
+.condition-incapacitated .overview-sheet>.edition-divider{translate:0 -144px}
+.condition-incapacitated .edition-divider{background:rgb(237 237 235 / 90%)}
+.cell-face{transition:filter .7s,rotate .8s,opacity .7s,transform .35s}
+.cell-edge-art{z-index:4}
+.portrait-cell>.halo-portrait{height:58%;max-width:none;fill:#70663f;stroke:#655e42;stroke-width:1.5}
+.portrait-cell .cell-cracks{fill:none;stroke:#484b49;stroke-width:1.15}
+.poison-drips{fill:#3b6432;opacity:0;transition:opacity 1s;filter:blur(.8px)}.condition-poisoned .poison-drips{opacity:.25}
+
+.paper .sheet-cell{transform:rotate(var(--fall-tilt,0deg));transform-origin:center}
+@media print{.paper .sheet-cell{transform:none!important}}

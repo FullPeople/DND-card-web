@@ -1,0 +1,104 @@
+[
+  {
+    "id": "barbarian",
+    "name": "野蛮人",
+    "english": "Barbarian",
+    "motif": "战斧 · 裂口"
+  },
+  {
+    "id": "bard",
+    "name": "吟游诗人",
+    "english": "Bard",
+    "motif": "竖琴 · 共鸣"
+  },
+  {
+    "id": "cleric",
+    "name": "牧师",
+    "english": "Cleric",
+    "motif": "圣日 · 祭坛"
+  },
+  {
+    "id": "druid",
+    "name": "德鲁伊",
+    "english": "Druid",
+    "motif": "橡叶 · 新生"
+  },
+  {
+    "id": "fighter",
+    "name": "战士",
+    "english": "Fighter",
+    "motif": "交剑 · 格挡"
+  },
+  {
+    "id": "monk",
+    "name": "武僧",
+    "english": "Monk",
+    "motif": "掌印 · 内劲"
+  },
+  {
+    "id": "ranger",
+    "name": "游侠",
+    "english": "Ranger",
+    "motif": "弓矢 · 追猎"
+  },
+  {
+    "id": "rogue",
+    "name": "游荡者",
+    "english": "Rogue",
+    "motif": "兜帽 · 匕首"
+  },
+  {
+    "id": "paladin",
+    "name": "圣武士",
+    "english": "Paladin",
+    "motif": "誓盾 · 长剑"
+  },
+  {
+    "id": "sorcerer",
+    "name": "术士",
+    "english": "Sorcerer",
+    "motif": "本源火 · 魔力"
+  },
+  {
+    "id": "warlock",
+    "name": "魔契师",
+    "english": "Warlock",
+    "motif": "异眼 · 契约"
+  },
+  {
+    "id": "wizard",
+    "name": "法师",
+    "english": "Wizard",
+    "motif": "法典 · 星芒"
+  },
+  {
+    "id": "artificer",
+    "name": "奇械师",
+    "english": "Artificer",
+    "motif": "齿轮 · 扳手"
+  },
+  {
+    "id": "mystic",
+    "name": "秘术师",
+    "english": "Mystic",
+    "motif": "第三眼 · 灵能"
+  },
+  {
+    "id": "expert-sidekick",
+    "name": "专家协力者",
+    "english": "Expert Sidekick",
+    "motif": "羽笔 · 钥匙"
+  },
+  {
+    "id": "spellcaster-sidekick",
+    "name": "施法者协力者",
+    "english": "Spellcaster Sidekick",
+    "motif": "魔杖 · 火花"
+  },
+  {
+    "id": "warrior-sidekick",
+    "name": "武者协力者",
+    "english": "Warrior Sidekick",
+    "motif": "短盾 · 长矛"
+  }
+]

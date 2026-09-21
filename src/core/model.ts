@@ -1,6 +1,6 @@
 export type Edition = '2014' | '2024';
-export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule';
-export const KIND_LABELS: Record<Kind, string> = { class: '职业', subclass: '子职', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', feature: '特性', condition: '状态', rule: '规则' };
+export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule' | 'monster';
+export const KIND_LABELS: Record<Kind, string> = { class: '职业', subclass: '子职', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', feature: '特性', condition: '状态', rule: '规则', monster: '怪物' };
 export const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
 export type Ability = typeof ABILITIES[number];
 export const ABILITY_LABELS: Record<Ability, string> = { str: '力量', dex: '敏捷', con: '体质', int: '智力', wis: '感知', cha: '魅力' };
@@ -11,6 +11,10 @@ export const SKILLS: Record<string, { name: string; ability: Ability }> = {
   deception: { name: '欺瞒', ability: 'cha' }, intimidation: { name: '威吓', ability: 'cha' }, performance: { name: '表演', ability: 'cha' }, persuasion: { name: '游说', ability: 'cha' },
 };
 export type Raw = Record<string, any>;
+export const SHEET_BONUS_KEYS = ['proficiency', 'initiative', 'speed', 'passive', 'hp'] as const;
+export type SheetBonus = typeof SHEET_BONUS_KEYS[number];
+export const SIZE_LABELS = { T: '微型', S: '小型', M: '中型', L: '大型', H: '巨型', G: '超巨型' } as const;
+export type Size = keyof typeof SIZE_LABELS;
 export type Effect = { op: 'add' | 'set'; target: Ability | 'ac' | 'speed' | 'hp'; value: number } | { op: 'proficiency'; skill: string };
 export interface ChoiceDefinition { id: string; label: string; kind?: Kind; count: number; options?: string[]; optionLabels?: Record<string, string>; refs?: string[]; abilityBonus?: number; featureType?: string[]; spellLevel?: number; maxSpellLevel?: number; parentClass?: { name: string; source: string }; spellClass?: { name: string; source: string }; featCategory?: string }
 export interface Entry {
@@ -18,8 +22,8 @@ export interface Entry {
   packId: string; revision: string; page?: number; entries: unknown[]; raw: Raw;
   effects?: Effect[]; choices?: ChoiceDefinition[]; dependencies?: string[];
 }
-export interface Selection { id: string; entry: Entry; quantity: number; level: number; equipped: boolean; requirementId?: string }
-export interface RuleProfile { enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
+export interface Selection { id: string; entry: Entry; quantity: number; level: number; equipped: boolean; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
+export interface RuleProfile { disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface Character {
   schemaVersion: 1; id: string; revision: number; name: string; player: string; edition: Edition;
   createdAt: string; updatedAt: string; abilities: Record<Ability, number>; baseHp: number;
@@ -27,9 +31,17 @@ export interface Character {
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
   profile: RuleProfile; notes: string;
   quickbar?: string[];
+  proficiencies?: Record<string, boolean>;
+  expertise?: Record<string, boolean>;
+  jackOfAllTrades?: boolean;
+  training?: Record<string, string>;
+  size?: Size;
+  sheetBonuses?: Partial<Record<SheetBonus, number>>;
+  dismissedFeatures?: string[];
+  featureLayout?: { order: string[]; expanded: string[] };
   adjustments?: { id: string; target: string; value: number; reason: string }[];
   externalSnapshot?: Raw;
-  runtime: { hp: number; tempHp: number; inspiration: number; resources: Record<string, { current: number; max: number }> };
+  runtime: { deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string, { current: number; max: number }> };
 }
 export interface RulePack { schemaVersion: 1; id: string; name: string; version: string; author?: string; editions: Edition[]; requires: { id: string; version: string }[]; conflicts: string[]; entries: Entry[] }
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }
@@ -37,7 +49,7 @@ export interface Issue { id: string; message: string; selectionId?: string; seve
 export interface Derived {
   abilities: Record<Ability, number>; modifiers: Record<Ability, number>; level: number; proficiency: number;
   ac: number; initiative: number; speed: number; maxHp: number; passive: number;
-  skills: Record<string, { value: number; proficient: boolean; sources: string[] }>;
+  skills: Record<string, { value: number; proficient: boolean; expertise: boolean; sources: string[] }>;
   saves: Record<Ability, { value: number; proficient: boolean }>; requirements: Requirement[]; issues: Issue[];
   trace: Record<string, string[]>; hitDice: string;
 }
@@ -51,6 +63,7 @@ export function newCharacter(edition: Edition = '2024'): Character {
     runtime: { hp: 0, tempHp: 0, inspiration: 0, resources: {} } };
 }
 export function selectionAllowed(c: Character, e: Entry): boolean {
+  if (c.profile.disabledEntries?.includes(e.id)) return false;
   if (c.profile.exceptions[e.id]?.trim()) return true;
   return c.profile.enabledSources.includes(e.source) && (e.kind !== 'feat' || c.profile.optional.feats) && (e.dependencies || []).every(id => c.profile.enabledSources.includes(id)) && (e.edition === 'both' || e.edition === c.edition || (c.edition === '2024' && c.profile.optional.legacy));
 }

@@ -1,31 +1,32 @@
 /* Reference-sheet composition: identity/resources, two ability columns, action ledger. */
 .paper:has(.overview-sheet){background:#ededeb;gap:6px;padding:12px 12px 10px}
 .paper:has(.overview-sheet)>.paper-heading{font-size:8px;flex-basis:12px}
-.overview-sheet{flex:1;min-height:0;display:grid;grid-template-rows:108px 23px minmax(0,1fr);gap:6px;color:#343532}
-.overview-top{display:grid;grid-template-columns:minmax(0,2.75fr) .48fr .54fr 1.15fr .51fr .42fr;gap:6px;min-height:0}
+.overview-sheet{flex:1;min-height:0;display:grid;grid-template-rows:138px 23px minmax(0,1fr);gap:6px;color:#343532}
+.overview-top{display:grid;grid-template-columns:minmax(0,2.65fr) .95fr 1.45fr 1.05fr;gap:6px;min-height:0}
 .paper .overview-identity{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:29px 1fr 1fr;gap:4px;min-width:0;min-height:0}
 .identity-name{grid-column:1/3}.identity-background{grid-area:2/1}.identity-race{grid-area:3/1}.identity-class{grid-area:2/2/4/3}
-.sheet-cell{--cell-border:#595959;position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;background:#e8e8e8;isolation:isolate;padding:4px;overflow:hidden;clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px),0 5px)}
-.cell-perimeter{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
-.cell-perimeter :is(path,rect){fill:none;stroke:var(--cell-border);stroke-width:3px;stroke-linejoin:round}
-.cell-rounded-perimeter{display:none}
-.cell-rounded-perimeter rect{width:calc(100% - 3px);height:calc(100% - 3px)}
-.cell-missing{cursor:pointer}
-.cell-missing>.cell-perimeter :is(path,rect),.cell-missing>.cell-drop-surface>.cell-perimeter :is(path,rect){stroke:#353633;stroke-dasharray:7 4;animation:missing-perimeter 1.6s linear infinite}
-.cell-missing:focus-within>.cell-perimeter :is(path,rect),.cell-missing:hover>.cell-perimeter :is(path,rect){stroke:#20221e}
+/* One cut-corner shell and one inset surface share the same geometry. */
+.sheet-cell{--cell-border:#595959;position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;background:var(--cell-border);isolation:isolate;padding:3px;overflow:hidden;border-radius:0;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.cell-surface{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;background:#e8e8e8;overflow:hidden;clip-path:polygon(6.25px 0,calc(100% - 6.25px) 0,100% 6.25px,100% calc(100% - 6.25px),calc(100% - 6.25px) 100%,6.25px 100%,0 calc(100% - 6.25px),0 6.25px)}
+.cell-perimeter{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:hidden}
+.cell-perimeter path{fill:none;stroke:#353633;stroke-width:3px;stroke-linejoin:miter;stroke-dasharray:7 4;animation:missing-perimeter 1.6s linear infinite}
+.cell-missing{background:transparent;cursor:pointer}
+.cell-missing:focus-within>.cell-perimeter path,.cell-missing:hover>.cell-perimeter path{stroke:#20221e}
 @keyframes missing-perimeter{to{stroke-dashoffset:-22}}
-.cell-heading{flex:none;display:flex;align-items:center;justify-content:center;position:relative;margin:0;background:#7c7c7c;color:#f3f3f3;min-height:18px;gap:4px}
-.cell-heading h3{margin:0;font-size:12px;font-weight:600;line-height:17px;letter-spacing:.3px}
-.cell-heading .cell-add{position:absolute;right:1px;top:0;border:0;padding:0 2px;font-size:9px;background:transparent;color:#f3f3f3;line-height:17px}
-.cell-content{min-height:0;min-width:0;flex:1;overflow:auto;padding:3px 4px;scrollbar-width:thin;scrollbar-color:#b3b5a9 transparent;overscroll-behavior:contain}
+.cell-heading{flex:none;display:flex;align-items:center;justify-content:center;position:relative;margin:0;padding:0 7px;background:#7c7c7c;color:#f3f3f3;min-height:20px;gap:4px}
+.cell-heading h3{margin:0;font-size:12px;font-weight:600;line-height:1;letter-spacing:.3px}
+.cell-heading .cell-add{position:absolute;right:5px;top:50%;transform:translateY(-50%);border:0;padding:0 2px;font-size:9px;background:transparent;color:#f3f3f3;line-height:17px}
+.cell-content{min-height:0;min-width:0;flex:1;overflow:auto;padding:3px 5px;scrollbar-width:thin;scrollbar-color:#b3b5a9 transparent;overscroll-behavior:contain}
 .cell-fill{display:block;border:0;background:transparent!important;border-radius:0;text-align:center;color:#7b7e73;font-size:10px!important;line-height:1.6;padding:4px 0!important;margin:0 auto;max-width:100%;white-space:normal}
-.cell-drop-surface{position:static;display:flex;flex-direction:column;min-height:0;height:100%;border-radius:0}
-.sheet-cell:has(.drop-ready){background:#e7edde}
-.sheet-cell:has(.drop-ready) .cell-perimeter :is(path,rect){stroke:#6a7d49}
-.sheet-cell:has(.drop-over) .cell-perimeter :is(path,rect){stroke:#4c6a2f;stroke-width:4px;animation:none}
-.sheet-cell .drop-ready,.sheet-cell .drop-over{box-shadow:none;background:transparent;animation:none}
-.sheet-cell .drop-ready .cell-perimeter{animation:cell-drop-breathe 1.2s ease-in-out infinite}
-@keyframes cell-drop-breathe{50%{filter:drop-shadow(0 0 2px #798d5f)}}
+.cell-drop-surface{position:static;display:flex;flex-direction:column;flex:1;min-height:0;height:100%;border-radius:0}
+.sheet-cell:has(.drop-ready){--cell-border:#6a7d49}
+.sheet-cell:has(.drop-ready) .cell-surface{background:#e7edde;animation:cell-drop-breathe 1.2s ease-in-out infinite}
+.sheet-cell:has(.drop-ready) .cell-perimeter path{stroke:#6a7d49}
+.sheet-cell:has(.drop-over){--cell-border:#4c6a2f}
+.sheet-cell:has(.drop-over) .cell-surface{background:#ccdfb7;animation:none}
+.sheet-cell:has(.drop-over) .cell-perimeter path{stroke:#4c6a2f;stroke-width:4px;animation:none}
+.sheet-cell .drop-ready,.sheet-cell .drop-over{box-shadow:none;background:transparent!important;animation:none}
+@keyframes cell-drop-breathe{50%{background:#d7e4c9}}
 .overview-sheet .pending-labels{display:flex;flex-direction:column;gap:2px;padding:4px 0;color:#898e80}
 .pending-labels button{border:0;background:transparent;font-size:9px;text-align:left;padding:1px 0;line-height:1.5;color:inherit}
 .pending-labels small{white-space:nowrap;color:#a2a592;margin-left:3px}
@@ -35,16 +36,17 @@
 .overview-sheet .entry-meta{font-size:8px;line-height:12px;gap:4px}
 .overview-sheet .review-requirement{font-size:8px;margin:4px 0;border:0;padding:0;color:#9b9079}
 .overview-sheet .review-requirement button{font-size:8px;padding:0 2px}
-.overview-identity .sheet-cell{padding:3px;clip-path:none}
-.overview-identity .cell-heading{min-height:12px;justify-content:flex-start;border:0;margin:0;padding-inline:4px}
-.overview-identity .cell-heading h3{font-size:9px;line-height:12px;letter-spacing:0}
+.overview-identity .sheet-cell{padding:3px}
+.overview-identity .cell-heading{min-height:16px;align-items:center;justify-content:flex-start;border:0;margin:0;padding-inline:4px}
+.overview-identity .cell-heading h3{font-size:10px;line-height:1;letter-spacing:0}
 .overview-identity .cell-content{padding:0 4px}
-.overview-identity .identity-name{flex-direction:row;align-items:center}
+.overview-identity .identity-field .cell-content{display:flex;flex-direction:column;justify-content:safe center;position:relative}
+.overview-identity .identity-name .cell-surface{flex-direction:row;align-items:stretch}
 .overview-identity .identity-name .cell-content{display:flex;align-items:center;gap:7px}
-.overview-identity .identity-name .cell-heading{flex:none;margin-right:4px}
+.overview-identity .identity-name .cell-heading{flex:none;margin:0;padding-inline:7px}
 .paper .identity-name input[aria-label="角色姓名"]{font-size:13px;font-weight:600;min-width:0;flex:1;width:0;border:0}
 .paper .identity-name input[aria-label="玩家姓名"]{font-size:8px;width:46px;border:0}
-.overview-identity .identity-field .cell-fill{font-size:8px!important;line-height:11px;padding:0!important;text-align:left;margin:0;white-space:nowrap}
+.overview-identity .identity-field .cell-fill{font-size:10px!important;line-height:1.2;padding:0!important;text-align:center;margin:auto;white-space:nowrap}
 .overview-identity .selected-entry{padding:0;border:0}
 .overview-identity .selected-title .text-link{font-size:10px;line-height:12px}
 .overview-identity .selected-title .remove{font-size:10px;line-height:12px;padding:0 1px}
@@ -53,26 +55,31 @@
 .overview-identity .class-title{line-height:12px}
 .overview-identity .choose-subclass{font-size:8px!important;line-height:10px}
 .overview-identity .inline-subclass .text-link{font-size:8px!important}
-.overview-top>.sheet-cell>.cell-heading{border:0;min-height:18px;align-items:center}
-.overview-top>.sheet-cell>.cell-heading h3{font-size:10px;line-height:13px;text-align:center}
-.overview-top>.sheet-cell>.cell-content{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;gap:5px}
-.overview-top .total-level strong,.overview-top .armor-cell strong{font-size:28px;font-weight:500;line-height:1.2}
-.total-level small,.armor-cell small{font-size:8px;color:#8b8e82}
-.overview-top .life-cell .cell-content{justify-content:flex-start;gap:3px}
-.life-fields{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;font-size:9px;color:#777c6e}
+.overview-ratings{min-height:0;display:grid;grid-template-rows:1fr 1fr;gap:6px}
+.overview-ratings .cell-surface{flex-direction:row}
+.overview-ratings .cell-heading{width:39%;padding:0 3px;background:#666}
+.overview-ratings .cell-heading h3{font-size:10px;line-height:15px;letter-spacing:0;white-space:nowrap}
+.armor-cell .cell-heading h3{max-width:2em;white-space:normal}
+.overview-ratings .cell-content{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 3px;overflow:hidden}
+.overview-ratings strong{font-size:32px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.overview-ratings small{font-size:7px;font-weight:700;letter-spacing:1px;color:#8a8a85;line-height:11px}
+.overview-health{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) 31px;gap:5px}
+.life-cell .cell-content{padding:3px 5px}
+.life-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;width:100%;font-size:9px;color:#777c6e}
 .life-fields label{text-align:center;min-width:0}
-.paper .life-fields input{font-size:19px!important;text-align:center;color:#393e32}
-.life-fields>span{grid-column:1/3;display:flex;justify-content:space-between;border-top:1px solid #d6d8cc;padding:2px 5px}
-.life-fields strong{font-size:12px;color:#444b38}
+.paper .life-fields input,.life-fields strong{display:block;font-size:22px!important;font-weight:700;line-height:25px;text-align:center;color:#393e32;padding:0!important}
+.life-fields strong{border-bottom:1px dotted transparent}
+.life-actions{display:flex;align-items:start;justify-content:space-between;border-top:1px solid #bdbdb7;margin-top:3px;padding-top:2px;gap:5px}
 .life-cell button,.life-cell details{font-size:8px;line-height:12px}
-.life-cell details{width:100%;text-align:center}
-.dice-cell strong{font-size:14px;overflow-wrap:anywhere;text-align:center}
+.life-cell details{min-width:0;text-align:right}
+.dice-cell .cell-surface{flex-direction:row}
+.dice-cell .cell-heading{padding:0 6px}
+.dice-cell .cell-heading h3{font-size:10px}
+.dice-cell .cell-content{display:flex;align-items:center;justify-content:space-between;gap:3px;padding:0 5px}
+.dice-cell strong{font-size:14px;font-weight:700;overflow-wrap:anywhere;text-align:center}
 .dice-cell button{font-size:8px;line-height:1.4}
-.inspiration-cell label{display:grid;place-items:center;cursor:pointer}
-.inspiration-cell input{position:absolute;opacity:0;width:27px!important;height:27px!important}
-.inspiration-cell span{font-size:28px;color:#a6a99f;line-height:1}
-.inspiration-cell input:checked+span{color:#47543b;text-shadow:0 0 5px #7f926a77}
-.inspiration-cell input:focus-visible+span{outline:2px solid #838f6a}
+.portrait-cell .cell-content{display:grid;place-items:center;padding:0;overflow:hidden;background:linear-gradient(135deg,#dededc,#efefed)}
+.portrait-cell svg{height:100%;max-width:100%;fill:#c7c7c3;stroke:#aaa9a3;stroke-width:1}
 .edition-divider{display:flex;align-items:center;gap:15px;color:#484b43}
 .edition-divider strong{font:600 17px Georgia,serif;white-space:nowrap;letter-spacing:1px}
 .edition-divider>span{height:5px;border-block:1px solid #a0a294;flex:1;transform:skewX(-30deg)}
@@ -83,19 +90,14 @@
 .ability-slot{min-height:0}
 .ability-slot>.sheet-cell{height:100%}
 .overview-sheet .ability-box{border:0}
-/* Match the original StyleBox: rounded numeric fields, clipped content frames. */
-.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell),.overview-vitals>.sheet-cell{--cell-border:#494949;border-radius:11px;clip-path:none}
-.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell)>.cell-perimeter,.overview-vitals>.sheet-cell>.cell-perimeter{display:none}
-.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell)>.cell-rounded-perimeter,.overview-vitals>.sheet-cell>.cell-rounded-perimeter{display:block}
-.overview-sheet :is(.ability-box,.total-level,.armor-cell,.inspiration-cell)>.cell-heading,.overview-vitals>.sheet-cell>.cell-heading{border-radius:6px 6px 0 0}
 .overview-sheet .ability-box .cell-content{padding:3px 3px}
 .overview-sheet .ability-values{display:flex;align-items:center;justify-content:space-between;gap:4px;position:relative;border-bottom:1px solid #bebfb6;padding-bottom:2px}
 .overview-sheet .ability-values>div{display:flex;flex-direction:column;align-items:center}
-.overview-sheet .ability-modifier{font-size:22px;font-weight:500;line-height:1.05;border:1px solid #919589;border-radius:50%;width:33px;height:30px;display:grid;place-items:center}
-.overview-sheet .ability-values small,.overview-sheet .ability-values label>span{font-size:7px;line-height:11px;display:block;color:#85897b;text-align:center}
-.overview-sheet .ability-values label{width:34px;position:relative;z-index:1}
-.paper .overview-sheet .ability-values input{font-size:17px;text-align:center;border-bottom:1px solid #a7aca0;padding:0;line-height:22px}
-.overview-sheet .ability-code{position:absolute;top:10px;left:30px;width:45px;font-size:18px;opacity:.14;pointer-events:none;line-height:1}
+.overview-sheet .ability-modifier{font-size:23px;font-weight:800;line-height:32px;border:0;border-radius:0;min-width:32px;text-align:center}
+.overview-sheet .ability-values small,.overview-sheet .ability-values label>span{font-size:8px;font-weight:700;line-height:11px;display:block;color:#777b70;text-align:center}
+.overview-sheet .ability-values label{width:47px;position:relative;z-index:1}
+.paper .overview-sheet .ability-values input{font-size:32px;font-weight:800;text-align:center;border-bottom:0;padding:0;line-height:34px}
+.overview-sheet .ability-code{position:absolute;top:8px;left:26px;width:45px;font-size:18px;opacity:.1;pointer-events:none;line-height:1}
 .ability-total{font-size:8px;color:#6d755e;text-align:right;line-height:11px;border-bottom:1px solid #d7dbcd}
 .ability-save,.ability-skill{display:grid;grid-template-columns:9px 19px minmax(0,1fr) auto;gap:3px;align-items:center;min-height:16px;font-size:10px;line-height:16px}
 .ability-save{border-bottom:1px solid #a9ada1;margin-bottom:2px;padding-block:2px}
@@ -105,9 +107,9 @@
 .ability-skills label{cursor:pointer}
 .skill-choice-inputs{display:flex;gap:2px;align-items:center}
 .ability-box .cell-fill{font-size:8px!important;line-height:12px;padding-top:4px!important}
-.proficiency-cell .cell-heading{border:0}
-.proficiency-cell .cell-content{text-align:center;padding:0}
-.proficiency-cell strong{font-size:22px;line-height:24px;font-weight:500}
+.proficiency-cell .cell-heading{border:0;min-height:18px}
+.proficiency-cell .cell-content{text-align:center;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.proficiency-cell strong{font-size:18px;line-height:1.2;font-weight:500}
 .training-cell{grid-column:1/3}
 .training-cell .cell-heading h3{font-size:11px}
 .training-cell dl{margin:0;font-size:10px;line-height:1.6}
@@ -117,11 +119,11 @@
 .training-note{display:block;font-size:8px;color:#a4aa99;margin-top:6px}
 .overview-right{min-height:0;display:grid;grid-template-rows:48px minmax(95px,1fr) minmax(150px,1.6fr) minmax(130px,1.35fr);gap:10px}
 .overview-vitals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;min-height:0}
-.overview-vitals .cell-content{text-align:center;padding:0;display:grid;place-items:center}
-.overview-vitals strong{font-size:21px;line-height:24px;font-weight:500}
+.overview-vitals .cell-content{text-align:center;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.overview-vitals strong{font-size:18px;line-height:1.2;font-weight:500}
 .overview-vitals strong small{font-size:8px}
-.overview-vitals .cell-heading{border:0;min-height:15px}
-.overview-vitals .cell-heading h3{font-size:11px;line-height:15px}
+.overview-vitals .cell-heading{border:0;min-height:18px}
+.overview-vitals .cell-heading h3{font-size:11px;line-height:1}
 .overview-vitals .cell-fill{font-size:8px!important;line-height:10px;padding:0!important}
 .overview-lower{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .overview-sheet .traits-box,.overview-sheet .spells-box{min-height:0;margin:0}
@@ -135,13 +137,9 @@
 .quickbar-cell:not(:has(.quickbar-row)) .cell-content{background:repeating-linear-gradient(transparent,transparent 22px,#bfc5b344 22px,#bfc5b344 23px)}
 .inherited-traits{padding:4px 0;display:flex;flex-direction:column;align-items:start;border-bottom:1px solid #ccd1c1}
 .inherited-traits .text-link{font-size:10px;line-height:1.7;text-align:left}
-.paper:has(.overview-sheet)>.sheet-checks{flex:0 0 52px;padding-top:3px;font-size:9px}
-.paper:has(.overview-sheet)>.sheet-checks>p:not(.issue){display:none}
-.paper:has(.overview-sheet)>.sheet-checks .checks-heading strong{font-size:9px;font-weight:500}
-.paper:has(.overview-sheet)>.sheet-checks .checks-heading label{font-size:8px}
-.paper:has(.overview-sheet)>.sheet-checks .dialog-actions{margin:2px 0}
+.paper:has(.overview-sheet)>.sheet-checks{display:none}
 .paper:has(.overview-sheet)>.paper-footer{font-size:8px;flex-basis:11px;line-height:11px}
-.requirement-field{margin:6px 0;min-height:50px;clip-path:none;padding:6px}
+.requirement-field{margin:6px 0;min-height:50px}
 .requirement-field .cell-content{overflow:visible;flex:none}
 .requirement-field .cell-heading{justify-content:space-between;border:0;min-height:15px}
 .requirement-field .cell-heading h3{font-size:11px;line-height:15px}
@@ -155,7 +153,107 @@
 .quickbar-options button{text-align:left;font-size:12px;background:transparent;border:0;border-bottom:1px solid #d5dccc;padding:8px 2px}
 .quickbar-options small{float:right;font-size:10px;color:#9aa68c}
 .quickbar-manager button{margin-left:5px}
-@media(prefers-reduced-motion:reduce){.cell-missing>.cell-perimeter :is(path,rect),.cell-missing>.cell-drop-surface>.cell-perimeter :is(path,rect),.sheet-cell .drop-ready .cell-perimeter{animation:none}}
+@media(prefers-reduced-motion:reduce){.cell-perimeter path,.sheet-cell:has(.drop-ready) .cell-surface{animation:none}}
 @media print{.sheet-cell{print-color-adjust:exact}}
 
-.sheet-cell .cell-fill{flex-shrink:0;z-index:1}.sheet-cell .cell-content:empty+.cell-fill{position:absolute;top:50%;left:5px;right:5px;transform:translateY(-25%)}
+.sheet-cell .cell-fill{flex-shrink:0;z-index:1}
+.cell-content:has(>.cell-fill:only-child){display:flex;align-items:center;justify-content:center;padding:0}
+.cell-content>.cell-fill{margin:auto;text-align:center}
+.cell-content:has(>.cell-fill:not(:only-child))>.cell-fill{position:static;flex:none;margin:2px auto}
+
+/* Feature chips retain source headings while the content area alone scrolls. */
+.feature-panel .cell-heading{padding-right:48px;padding-left:48px;min-height:22px}
+.feature-toggle-all{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;border-radius:0;background:transparent;color:#fff;font-size:9px;line-height:14px;padding:0 2px}
+.feature-toggle-all:hover:not(:disabled){background:#656565}
+.feature-panel .cell-content{padding:6px 8px;background-image:none}
+.feature-group{margin:0 0 10px}
+.feature-group h4{font-size:11px;font-weight:600;line-height:18px;margin:0 0 6px;padding:0 0 2px;border-bottom:1px solid #ababA5;color:#62635f}
+.feature-flow{display:flex;flex-wrap:wrap;align-items:start;gap:5px}
+.feature-bubble{max-width:100%;min-width:0;cursor:grab;border:1px solid #a2a49c;border-radius:5px;background:#f5f5f1;padding:0;transition:background .12s}
+.feature-bubble:active{cursor:grabbing}
+.feature-caption{display:block;max-width:100%;border:0;border-radius:4px;padding:3px 8px;font-size:11px;line-height:17px;background:transparent;color:#3e4739;text-align:left;cursor:inherit;overflow-wrap:anywhere}
+.feature-bubble.is-expanded{flex:0 0 100%;border:0;border-radius:0;background:transparent;font-size:11px;line-height:1.85;padding:1px 0 6px}
+.feature-bubble.is-expanded .feature-caption{display:inline;padding:0;font:inherit;color:#424a3c}
+.feature-prose{display:contents;font-size:11px;line-height:1.85;color:#525a49}
+.feature-prose>p:first-child{display:inline}
+.feature-prose p{margin:5px 0}
+.feature-prose h4{font-size:11px;border:0;margin:5px 0 0;font-style:italic;font-weight:700}
+.feature-prose table{font-size:9px}
+.feature-bubble.is-restricted{opacity:.6}
+.feature-bubble.is-restricted .feature-caption{text-decoration:line-through}
+.feature-browse,.feature-pending{display:block;border:0;background:transparent;font-size:9px;color:#79836b;padding:3px 0;text-align:left}
+
+/* Compact paper spacing and pointer-driven interactions. */
+.overview-body,.overview-right,.overview-lower,.mental-abilities{gap:8px}
+.overview-left,.overview-vitals{gap:7px}
+.feature-panel .cell-content{padding:4px 6px}
+.feature-group{margin-bottom:6px}
+.feature-group h4{margin-bottom:4px;padding-bottom:1px}
+.feature-flow{gap:4px}
+.feature-caption{padding:2px 6px;touch-action:none}
+.feature-bubble.is-expanded{padding-bottom:4px;line-height:1.7}
+.feature-bubble.is-dragging{opacity:.25;outline:1px dashed #657255;outline-offset:2px}
+.compact-class{display:flex;align-items:center;justify-content:center;gap:6px;min-height:23px;font-size:12px;font-weight:600}
+.compact-class .inline-reference{font:inherit;border:0;padding:0;background:none;white-space:nowrap}
+.compact-class label{display:flex;align-items:center;gap:0;white-space:nowrap}
+.paper .compact-class input[type=number]{width:22px;font:inherit;text-align:left;border:0;padding:0}
+.identity-class .cell-content:has(.compact-class)>.cell-fill{display:none}
+.pointer-dragging,.pointer-dragging *{cursor:grabbing!important;user-select:none!important}
+.catalog-row{touch-action:none}
+.drag-ghost.pointer-ghost{top:0;left:0;z-index:1000;width:max-content;min-width:130px;max-width:270px;display:block;padding:9px 15px;border:2px solid #636b59;border-left:5px solid #738164;border-radius:0;box-shadow:0 12px 25px #27301e40;will-change:transform;transform-origin:20px 15px}
+.pointer-ghost small{margin-bottom:2px}
+.pointer-ghost strong{font-size:14px}
+.library-body .catalog-list{flex:0 0 var(--catalog-height,122px);border-bottom:0;min-height:0}
+.wiki-splitter{height:9px;flex:0 0 9px;display:flex;align-items:center;justify-content:center;cursor:row-resize;touch-action:none;position:relative;background:#edf0e6;outline-offset:-2px}
+.wiki-splitter:before{content:'';position:absolute;inset:4px 0 auto;border-top:1px solid #c4ccba}
+.wiki-splitter span{position:relative;width:36px;height:3px;background:#a0aa90;border-radius:2px;transition:width .15s,background .15s}
+.wiki-splitter:hover span,.wiki-splitter:focus-visible span{width:55px;background:#6d7b5a}
+.wiki-resizing,.wiki-resizing *{cursor:row-resize!important;user-select:none!important}
+.tooltip-backdrop{position:fixed;inset:0;z-index:100;background:transparent;touch-action:none}
+.keyword-preview{max-height:min(460px,calc(100dvh - 16px))}
+.keyword-preview.is-pinned{border-color:#687855;box-shadow:0 9px 28px #29351c40}
+.keyword-preview header{padding:9px 12px 7px;flex:none}
+.keyword-preview header strong{font-size:15px;font-weight:600}
+.keyword-preview footer{flex:none;padding:5px 12px}
+.keyword-preview .keyword-content{min-height:0;overscroll-behavior:contain}
+.tooltip-pin{color:#62714f}
+@media(prefers-reduced-motion:reduce){.feature-bubble,.wiki-splitter span{transition:none}}
+
+/* Manual sheet: identity blocks fill their cells; a single class has its own subclass row. */
+.overview-identity .identity-class{grid-area:2/2}
+.overview-identity .identity-subclass{grid-area:3/2}
+.overview-identity .identity-class.identity-multiclass{grid-area:2/2/4/3}
+.overview-identity .identity-field .cell-content{padding:0;align-items:stretch;justify-content:center}
+.identity-record{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;justify-content:center}
+.identity-token{display:flex;align-items:center;justify-content:center;flex:1;min-width:0;min-height:25px;gap:4px;padding:2px 4px;cursor:grab;touch-action:none}
+.identity-token .identity-title{display:block;min-width:0;max-width:100%;padding:0;border:0;background:transparent;font-size:14px;font-weight:600;line-height:1.2;text-align:center;cursor:inherit;overflow-wrap:anywhere}
+.identity-token .identity-level{display:flex;align-items:center;white-space:nowrap;flex:none;font-size:11px;font-weight:600;gap:0}
+.paper .identity-token input[type=number]{width:19px;padding:0;font:inherit;border:0;text-align:left}
+.identity-multiclass .identity-record+.identity-record{border-top:1px solid #babcb3}
+.identity-multiclass .identity-title{font-size:12px}
+.identity-multiclass .identity-record>.identity-token:not(:first-child){min-height:16px;flex:0 0 auto;padding-top:0}
+.identity-multiclass .identity-record>.identity-token:not(:first-child) .identity-title{font-size:10px;font-weight:400}
+.identity-dragging .identity-token{opacity:.35}
+.identity-field.will-remove{--cell-border:#a37b67}
+.cell-sheen{position:absolute;inset:0;z-index:9;pointer-events:none;background:linear-gradient(110deg,transparent 30%,#fff0 38%,#ffffffb3 49%,#fff0 60%,transparent 70%);animation:identity-sheen .85s ease-out both}
+@keyframes identity-sheen{from{transform:translateX(-110%)}to{transform:translateX(110%)}}
+.life-cell .cell-content{display:flex;align-items:center;padding:4px}
+.life-fields{grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr) minmax(0,1fr);gap:2px;align-items:center}
+.life-fields label{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px}
+.paper .life-fields input,.life-fields .hp-slash{font-size:22px!important;font-weight:700;line-height:25px;color:#393e32;text-align:center}
+.hp-slash{padding-top:15px;align-self:center}
+.paper .ability-skill input[type=checkbox],.paper .ability-save input[type=checkbox]{width:10px;height:10px;min-width:10px;margin:0;accent-color:#68765b}
+.ability-skill{cursor:pointer}
+.paper .training-cell textarea{font-size:10px;line-height:1.4;min-height:25px;height:30px;resize:none;border:0;padding:0;overflow:auto}
+.training-cell dd{min-width:0;flex:1}
+.drag-ghost.pointer-ghost{min-width:0;max-width:180px;padding:3px 6px;border-width:2px;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 12px #27301e35;transition:border-color .12s,background .12s}
+.pointer-ghost strong{font-size:11px;font-weight:600;line-height:1.2;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pointer-ghost.removal-preview{border-color:#ad7765;background:#f9e9e1;opacity:.8}
+.feature-bubble{transform-origin:center center}
+.heritage-features.feature-panel .cell-heading{padding-left:3px;padding-right:40px}
+.heritage-features.feature-panel .cell-heading h3{font-size:10px}
+.heritage-features .feature-caption{font-size:10px;padding:2px 5px}
+@media(prefers-reduced-motion:reduce){.cell-sheen{display:none}.pointer-ghost{transition:none}}
+.toolbar-actions .adjust-shortcut{font-size:11px;padding:3px 7px}
+.keyword-preview:not(.is-pinned){pointer-events:none}
+.dice-cell strong{font-size:11px;line-height:13px;min-width:0}.dice-cell .cell-content{gap:3px}.dice-cell button{flex:none}

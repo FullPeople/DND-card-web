@@ -1,4 +1,4 @@
-import { ABILITIES, KIND_LABELS, SKILLS, skillKey, newCharacter, uid, type Character, type Effect, type Entry, type Raw, type RulePack } from './model';
+import { ABILITIES, KIND_LABELS, SKILLS, SHEET_BONUS_KEYS, SIZE_LABELS, skillKey, newCharacter, uid, type Character, type Effect, type Entry, type Raw, type RulePack } from './model';
 import { evaluate } from './engine';
 const plain = (v: unknown): v is Raw => !!v && typeof v === 'object' && !Array.isArray(v);
 function assert(condition: unknown, message: string): asserts condition { if (!condition) throw new Error(message); }
@@ -54,15 +54,27 @@ export function validateCharacter(value: unknown): Character {
     selectionIds.add(s.id);
     assert(Number.isInteger(s.level) && s.level >= 1 && s.level <= 20 && Number.isInteger(s.quantity) && s.quantity >= 1 && s.quantity <= 100000, '角色条目数量或等级不合法。');
     assert(typeof s.equipped === 'boolean' && (s.requirementId === undefined || typeof s.requirementId === 'string'), '条目选择数据不合法。');
+    assert(['parentId', 'grantKey'].every(key => s[key] === undefined || typeof s[key] === 'string' && s[key].length <= 2000), '条目来源关联无效。');
+    assert(s.section === undefined || ['features', 'heritage'].includes(s.section), '条目放置区域无效。');
     if (s.entry.effects) validateEffects(s.entry.effects);
     if (s.entry.choices) validateChoices(s.entry.choices);
     validateContent(s.entry.entries);
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
+  assert(c.proficiencies === undefined || plain(c.proficiencies) && Object.entries(c.proficiencies).every(([key, value]) => [...Object.keys(SKILLS), ...ABILITIES.map(a => `save:${a}`)].includes(key) && typeof value === 'boolean'), '熟练记录无效。');
+  assert(c.training === undefined || plain(c.training) && Object.entries(c.training).every(([key, value]) => ['armor', 'weapons', 'tools', 'languages'].includes(key) && typeof value === 'string' && value.length <= 10000), '装备训练记录无效。');
+  assert(c.expertise === undefined || plain(c.expertise) && Object.entries(c.expertise).every(([key, value]) => Object.hasOwn(SKILLS, key) && typeof value === 'boolean'), '专精记录无效。');
+  assert(c.jackOfAllTrades === undefined || typeof c.jackOfAllTrades === 'boolean', '万事通记录无效。');
+  assert(c.size === undefined || typeof c.size === 'string' && Object.hasOwn(SIZE_LABELS, c.size), '体型记录无效。');
+  assert(c.sheetBonuses === undefined || plain(c.sheetBonuses) && Object.entries(c.sheetBonuses).every(([key, value]) => (SHEET_BONUS_KEYS as readonly string[]).includes(key) && typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 9999), '卡面调整值无效。');
+  assert(c.dismissedFeatures === undefined || Array.isArray(c.dismissedFeatures) && c.dismissedFeatures.length <= 10000 && c.dismissedFeatures.every((value: unknown) => typeof value === 'string' && value.length <= 4000), '移除特性记录无效。');
   assert(c.quickbar === undefined || Array.isArray(c.quickbar) && c.quickbar.length <= 100 && c.quickbar.every((id: unknown) => typeof id === 'string') && new Set(c.quickbar).size === c.quickbar.length, '快捷栏需要最多 100 个互不重复的条目身份。');
+  if (c.featureLayout !== undefined) assert(plain(c.featureLayout) && ['order', 'expanded'].every(key => Array.isArray(c.featureLayout[key]) && c.featureLayout[key].length <= 10000 && c.featureLayout[key].every((id: unknown) => typeof id === 'string' && id.length <= 2000) && new Set(c.featureLayout[key]).size === c.featureLayout[key].length), '特性显示设置需要合法且不重复的条目身份。');
   assert(plain(c.profile) && Array.isArray(c.profile.enabledSources) && c.profile.enabledSources.every((v: unknown) => typeof v === 'string') && plain(c.profile.optional) && ['feats', 'multiclass', 'legacy'].every(k => typeof c.profile.optional[k] === 'boolean') && plain(c.profile.exceptions) && Object.values(c.profile.exceptions).every(v => typeof v === 'string'), '角色规则配置不正确。');
+  assert(c.profile.disabledEntries === undefined || Array.isArray(c.profile.disabledEntries) && c.profile.disabledEntries.length <= 100000 && c.profile.disabledEntries.every((id:unknown) => typeof id === 'string' && id.length <= 4000), '禁用条目列表无效。');
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
+  if (c.runtime.deathSaves !== undefined) assert(plain(c.runtime.deathSaves) && ['success', 'failure'].every(key => Number.isInteger(c.runtime.deathSaves[key]) && c.runtime.deathSaves[key] >= 0 && c.runtime.deathSaves[key] <= 3), '死亡豁免记录无效。');
   assert(Object.values(c.runtime.resources).every(v => plain(v) && Number.isFinite(v.current) && Number.isFinite(v.max) && v.current >= 0 && v.max >= 0), '资源计数无效。');
   if (c.adjustments !== undefined) assert(Array.isArray(c.adjustments) && c.adjustments.every((v: unknown) => plain(v) && typeof v.id === 'string' && ['ac', 'hp', 'speed', 'initiative', 'passive', ...Object.keys(SKILLS).map(k => `skill:${k}`), ...ABILITIES.map(k => `save:${k}`)].includes(v.target) && Number.isFinite(v.value) && Math.abs(v.value) <= 10000 && typeof v.reason === 'string' && v.reason.trim()), '人工修正需要合法目标、数值和原因。');
   assert(plain(c.identity) && ['gender', 'alignment', 'age', 'description'].every(k => typeof c.identity[k] === 'string'), '角色描述数据不正确。');
@@ -136,7 +148,11 @@ export function importOwlbear(value: unknown): Character {
   assert(value.skills === undefined || Array.isArray(value.skills), '枭熊 skills 应为数组。');
   for (const skill of value.skills || []) {
     const key = skill.name === '特技' ? 'acrobatics' : skillKey(String(skill.name));
-    if (SKILLS[key]) adjust(`skill:${key}`, skill.total);
+    if (SKILLS[key]) {
+      (c.proficiencies ||= {})[key] = ['proficient', 'expertise', 'expert'].includes(skill.proficiency);
+      (c.expertise ||= {})[key] = ['expertise', 'expert'].includes(skill.proficiency);
+      adjust(`skill:${key}`, skill.total);
+    }
   }
   return validateCharacter(c);
 }
