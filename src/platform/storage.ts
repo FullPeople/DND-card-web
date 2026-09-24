@@ -1,7 +1,8 @@
 import {standalone} from './buildMode';
 import { openDB } from 'idb';
 import type { Character, Entry, Raw, RulePack } from '../core/model';
-export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[] }
+import type {SiteSources} from '../core/siteSources';
+export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[]; siteSources?:SiteSources; legacySourceProfiles?:Record<string,SiteSources> }
 let connection: ReturnType<typeof openDB> | undefined;
 const db = () => connection ??= openDB(standalone?'dnd-card-standalone':'dnd-card-workspace', 1, { upgrade(db) { db.createObjectStore('documents'); db.createObjectStore('cache'); } });
 export async function loadWorkspace(): Promise<Workspace | undefined> { return (await db()).get('documents', 'workspace'); }

@@ -56,7 +56,7 @@ test('column and row divider sizes are independently draggable, keyboard accessi
  await expect(separator).toBeVisible();expect(await page.evaluate(()=>localStorage.getItem('dnd-card:wiki-column-ratio'))).toBe(width);
  expect(await page.evaluate(()=>localStorage.getItem('dnd-card:wiki-split-ratio'))).toBe(height);
 });
-test('new cards enable extensions; a manual uncheck survives refresh and new cards still get all sources',async({page,baseURL})=>{
+test('fresh site enables extensions; manual source choices survive refresh and new cards',async({page,baseURL})=>{
  await ready(page,baseURL!);await page.getByRole('button',{name:'规则与扩展',exact:true}).click();
  const book=page.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XGE',exact:true})});
  await expect(book.getByRole('checkbox')).toBeChecked();await book.getByRole('checkbox').uncheck();
@@ -66,7 +66,7 @@ test('new cards enable extensions; a manual uncheck survives refresh and new car
  await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expect(book.getByRole('checkbox')).not.toBeChecked();
  await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('button',{name:/角色簿/}).click();
  await page.getByRole('button',{name:/2014 角色/}).click();
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expect(book.getByRole('checkbox')).toBeChecked();
+ await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expect(book.getByRole('checkbox')).not.toBeChecked();
  await page.getByRole('button',{name:'全部禁用',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();
  await page.getByRole('button',{name:'更新资料',exact:true}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await expect(page.locator('.catalog-row')).toHaveCount(0);
