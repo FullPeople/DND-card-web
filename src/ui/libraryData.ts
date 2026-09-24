@@ -6,7 +6,11 @@ export const LIBRARY_TABS = { class: '职业', race: '种族', background: '背�
 export type LibraryTab = keyof typeof LIBRARY_TABS;
 export type FacetSelection = Record<string, { include: string[]; exclude: string[] }>;
 export type Column = { key: string; label: string; value: (e: Entry) => string | number };
-export const explicitlyExcluded = (c:Character,e:Entry):boolean => c.profile.enabledSources.includes(e.source) && !!c.profile.disabledEntries?.includes(e.id);
+export const librarySourceEnabled = (c:Character,e:Entry):boolean => c.profile.enabledSources.includes(e.source)
+  // Personal snapshots have no expansion switch. Authored Wiki packs still do.
+  || e.source==='IMPORTED'&&e.packId==='imported'
+  || e.source==='CUSTOM'&&e.packId==='custom'&&e.raw._custom===true&&!e.raw._workbenchCustom;
+export const explicitlyExcluded = (c:Character,e:Entry):boolean => librarySourceEnabled(c,e) && !!c.profile.disabledEntries?.includes(e.id);
 export const tabOf = (e: Entry): LibraryTab => {
   if(e.raw._workbenchCustom)return 'custom';
   const category=e.raw._category;

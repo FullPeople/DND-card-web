@@ -104,6 +104,7 @@ export function requirementMismatch(e: Entry, r?: Partial<Requirement>): string 
   return undefined;
 }
 export function candidateReason(c: Character, e: Entry, r?: Requirement): string | undefined {
+  if(c.profile.disabledEntries?.includes(e.id))return '此条目已在规则与扩展中单独禁用';
   if(e.kind==='subclass'&&!subclassOwner(c,e))return '需要先加入该子职所属的职业';
   if (e.kind === 'feat' && !c.profile.optional.feats) return '当前角色未启用专长选项';
   if (!selectionAllowed(c, e)) return '此来源或规则版本未启用';

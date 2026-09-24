@@ -1,4 +1,4 @@
-import { explicitlyExcluded } from './libraryData';
+import { explicitlyExcluded, librarySourceEnabled } from './libraryData';
 import { useEffect, useMemo, useRef } from 'react';
 import { entryEdition, editionAllows, type Character, type Entry } from '../core/model';
 import { ContentBoundary, Entries, Inline } from './Entries';
@@ -15,7 +15,7 @@ function featureReference(ref: string, category: string, entries: Entry[]) {
 export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false }: { subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void }) {
   const {registry}=useSources();
   const showSubclasses=subclassesOpen&&['class','subclass'].includes(entry.kind);
-  const roots=useMemo(()=>{if(!showSubclasses)return [entry];const parent=entry.kind==='class'?entry:entries.find(e=>e.kind==='class'&&[e.name,e.english].includes(entry.raw.className)&&e.source===(entry.raw.classSource||'PHB').toUpperCase());return parent?entries.filter(e=>e.kind==='subclass'&&[parent.name,parent.english].includes(e.raw.className)&&(e.raw.classSource||'PHB').toUpperCase()===parent.source&&(character.profile.enabledSources.includes(e.source)||!!character.profile.exceptions[e.id])).sort((a,b)=>compareSources(a.source,b.source,registry)||a.name.localeCompare(b.name,'zh')):[entry];},[entry,entries,showSubclasses,registry,character.profile.enabledSources,character.profile.exceptions]);
+  const roots=useMemo(()=>{if(!showSubclasses)return [entry];const parent=entry.kind==='class'?entry:entries.find(e=>e.kind==='class'&&[e.name,e.english].includes(entry.raw.className)&&e.source===(entry.raw.classSource||'PHB').toUpperCase());return parent?entries.filter(e=>e.kind==='subclass'&&[parent.name,parent.english].includes(e.raw.className)&&(e.raw.classSource||'PHB').toUpperCase()===parent.source&&librarySourceEnabled(character,e)).sort((a,b)=>compareSources(a.source,b.source,registry)||a.name.localeCompare(b.name,'zh')):[entry];},[entry,entries,showSubclasses,registry,character.profile.enabledSources,character.profile.exceptions]);
   const effectiveCollapsed=focus?[]:collapsed;
   const ref = useRef<HTMLDivElement>(null);
   const sections = useMemo(() => {
@@ -28,6 +28,7 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
         const v = value as Record<string, any>, pointer = v.classFeature || v.subclassFeature || v.optionalfeature;
         if (typeof v.type === 'string' && v.type.startsWith('ref') && typeof pointer === 'string') {
           const found = v.type === 'refOptionalfeature' ? entries.find(e => e.kind === 'feature' && [e.name, e.english].includes(pointer.split('|')[0]) && e.source.toLowerCase() === (pointer.split('|')[1] || 'phb').toLowerCase()) : featureReference(pointer, v.type, entries);
+          if (found && !librarySourceEnabled(character,found)) return;
           if (found && !seen.has(found.id)) {
             const visited = new Set(seen).add(found.id);
             result.push({ id: path, name: found.name, english: found.english, level: found.raw.level || level, source: found.source, page: found.page, body: [], depth, reference: found, excluded:excluded||explicitlyExcluded(character,found) });
@@ -51,7 +52,7 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
     if(showSubclasses)result.push({id:prefix+'body',name:root.name,english:root.english,source:root.source,page:root.page,depth:0,body:[],reference:root,excluded:explicitlyExcluded(character,root),subclassHeading:true});
     walk(root.entries, prefix+'section',baseDepth,new Set(),undefined,root);
     for (const [index, group] of (root.raw.optionalfeatureProgression || []).entries()) {
-      const options = entries.filter(e => e.raw._category === 'optionalfeature' && editionAllows(e,entryEdition(root)==='both'?character.edition:entryEdition(root) as '2014'|'2024') && (character.profile.enabledSources.includes(e.source)||!!character.profile.exceptions[e.id]) && (e.raw.featureType || []).some((t: string) => (group.featureType || []).includes(t)));
+      const options = entries.filter(e => e.raw._category === 'optionalfeature' && editionAllows(e,entryEdition(root)==='both'?character.edition:entryEdition(root) as '2014'|'2024') && librarySourceEnabled(character,e) && (e.raw.featureType || []).some((t: string) => (group.featureType || []).includes(t)));
       if (!options.length) continue;
       result.push({id:`${prefix}options-${index}`, name:group.name, english:group.ENG_name, depth:baseDepth, body:[],excluded:explicitlyExcluded(character,root)});
       for (const option of options) result.push({id:`${prefix}option-${option.id}`,name:option.name,english:option.english,source:option.source,page:option.page,depth:baseDepth+1,body:option.entries,reference:option,excluded:explicitlyExcluded(character,root)||explicitlyExcluded(character,option)});

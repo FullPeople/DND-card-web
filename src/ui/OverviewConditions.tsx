@@ -1,10 +1,11 @@
+import {useEntryMenu} from './EntrySharing';
 import {useContext,type PointerEvent} from 'react';
 import {landingWithin,pointerDrag} from './pointerDrag';
 import {ReferenceContext} from './Reference';
 import {overviewConditionEntry,type OverviewCondition} from './OverviewVisuals';
 
 export function OverviewConditions({conditions,editable,source,change}:{conditions:OverviewCondition[];editable:boolean;source:string;change:(action:'remove'|'transfer',condition:OverviewCondition,to?:string)=>void}){
- const preview=useContext(ReferenceContext);
+ const preview=useContext(ReferenceContext),menu=useEntryMenu();
  function drag(event:PointerEvent,condition:OverviewCondition){
   if(!editable)return;
   let marked:HTMLElement|null=null;
@@ -17,5 +18,5 @@ export function OverviewConditions({conditions,editable,source,change}:{conditio
    change('remove',condition);return {removed:true};
   }});
  }
- return <div className="resource179-conditions">{conditions.map(condition=>{const entry=overviewConditionEntry(condition);return <button key={condition.id} className="resource179-condition" data-overview-condition={condition.id} data-can-drag={editable} onPointerDown={event=>drag(event,condition)} onMouseEnter={event=>preview?.show(event.currentTarget,`entry:${entry.id}`,undefined,{x:event.clientX,y:event.clientY},entry)} onMouseMove={event=>preview?.move(event.currentTarget,{x:event.clientX,y:event.clientY})} onMouseLeave={()=>preview?.leave()} onClick={event=>preview?.commit?.(event.currentTarget,`entry:${entry.id}`,undefined,entry)}>{condition.name}{condition.level&&condition.level>1?` ${condition.level}`:''}</button>;})}</div>;
+ return <div className="resource179-conditions">{conditions.map(condition=>{const entry=overviewConditionEntry(condition);return <button key={condition.id} className="resource179-condition" data-entry-context-menu={menu?true:undefined} onContextMenu={event=>{if(menu){preview?.close();menu(event,entry);}}} data-overview-condition={condition.id} data-can-drag={editable} onPointerDown={event=>drag(event,condition)} onMouseEnter={event=>preview?.show(event.currentTarget,`entry:${entry.id}`,undefined,{x:event.clientX,y:event.clientY},entry)} onMouseMove={event=>preview?.move(event.currentTarget,{x:event.clientX,y:event.clientY})} onMouseLeave={()=>preview?.leave()} onClick={event=>preview?.commit?.(event.currentTarget,`entry:${entry.id}`,undefined,entry)}>{condition.name}{condition.level&&condition.level>1?` ${condition.level}`:''}</button>;})}</div>;
 }

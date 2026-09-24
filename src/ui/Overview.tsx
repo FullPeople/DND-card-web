@@ -111,7 +111,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
             <DropZone referenceOnly onReceive={pinDrop} className="quickbar-copy-zone"><Quickbar c={c} d={d} edit={edit} inspect={inspect} manage={openResources} manageQuickbar={openQuickbar}/></DropZone>
         </SheetCell>
         <FeaturePanel receive={entry => addEntry(entry, 'features')} c={c} rows={classFeatures} edit={edit} browse={() => browse('feature')} onLink={onLink}/>
-        <div className="overview-lower"><FeaturePanel receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}/>{contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spells.mode!=='prepared'||spells.prepared.includes(s.id)), ['spell'], 'overview-spells spells-box')}</div>
+        <div className="overview-lower"><FeaturePanel receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}/>{contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spells.mode!=='prepared'||Number(s.entry.raw.level)===0||spells.prepared.includes(s.id)), ['spell'], 'overview-spells spells-box')}</div>
       </div>
     </div>
   </div>;

@@ -60,7 +60,7 @@ import { Reference } from './Reference';
 import { LibraryFilters } from './LibraryFilters';
 import { LibraryDocument } from './LibraryDocument';
 import { useLibrary } from './useLibrary';
-import { explicitlyExcluded, LIBRARY_TABS, tabOf, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
+import { explicitlyExcluded, librarySourceEnabled, LIBRARY_TABS, tabOf, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
 import { WikiSplitter } from './WikiSplitter';
 import { registerOffline } from '../platform/offline';
 
@@ -143,15 +143,18 @@ export default function App() {
   useEffect(()=>{if(activePacks.length)sourceDisplay.merge(Object.fromEntries(activePacks.map(pack=>[pack.id,{name:pack.name}])));},[activePacks,sourceDisplay.merge]);
   const canAuthor=!inWorkbench||wb.role==='GM';
   const customEntries=useMemo(()=>inWorkbench?roomRules?.customEntries||[]:workspace?.customEntries||[],[roomRules?.customEntries,workspace?.customEntries]);
+  const storedCharacter=workspace?.characters.find(x=>x.id===workspace.activeId);
+  const c=useMemo(()=>storedCharacter&&inWorkbench&&wb.shared?{...storedCharacter,edition:roomRules!.edition,profile:roomRules!.profile,rulePacks:roomRules!.packs}:storedCharacter,[storedCharacter,roomRules]);
   const allEntries = useMemo(() => [...SIZE_ENTRIES, ...entries, ...activePacks.flatMap(p => p.entries), ...(canAuthor?customEntries:[])].filter(e=>monstersVisible||e.kind!=='monster'), [entries, activePacks,monstersVisible,canAuthor,customEntries]);
+  const libraryEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
   const readableEntries = useMemo(()=>[...allEntries,...(workspace?.characters.flatMap(c=>c.selections.map(s=>s.entry))||[])],[allEntries,workspace?.characters]);
   const library = useLibrary(readableEntries);
-  const { kind, setKind, detail, setDetail, state: libraryState } = library;
+  const { kind, setKind, detail: storedDetail, setDetail, state: libraryState } = library;
+  const detail=storedDetail&&c&&librarySourceEnabled(c,storedDetail)?storedDetail:undefined;
   useEffect(()=>{if(!monstersVisible&&kind==='monster')setKind('class');if(!monstersVisible&&detail?.kind==='monster')setDetail(undefined);},[monstersVisible,kind,detail?.id]);
-  const { edition: editionFilter, enabled: enabledOnly, filters, sort, descending } = libraryState;
+  const { edition: editionFilter, filters, sort, descending } = libraryState;
   const { globalQuery:query, setGlobalQuery:setQuery } = library;
   const setEditionFilter = (edition: string) => library.patch({ edition });
-  const setEnabledOnly = (enabled: boolean) => library.patch({ enabled });
   const detailPane = useRef<HTMLElement>(null);
   const previewCommit=useRef<{id:string;top:number}|undefined>(undefined);
   const [modal, setModal] = useState('');
@@ -225,8 +228,6 @@ export default function App() {
   useEffect(() => { void load(); return () => loadController.current?.abort(); }, []);
   useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
-  const storedCharacter=workspace?.characters.find(x=>x.id===workspace.activeId);
-  const c=useMemo(()=>storedCharacter&&inWorkbench&&wb.shared?{...storedCharacter,edition:roomRules!.edition,profile:roomRules!.profile,rulePacks:roomRules!.packs}:storedCharacter,[storedCharacter,roomRules]);
   const d = useMemo(() => c ? evaluate(c) : undefined, [c]);
   useLayoutEffect(()=>{
     if(!inWorkbench||!workspace||!writable.current||!wb.target||wb.target.kind!=='character')return;
@@ -269,10 +270,10 @@ export default function App() {
   const facets = useMemo(() => facetsFor(kind), [kind]);
   const categoryEntries = useMemo(() => {
     if (!c) return [];
-    return allEntries.filter(e => tabOf(e) === kind && (kind!=='class'||e.kind==='class') &&
+    return libraryEntries.filter(e => tabOf(e) === kind && (kind!=='class'||e.kind==='class') &&
       (editionFilter === 'all' || editionAllows(e,(editionFilter === 'character' ? c.edition : editionFilter) as Edition,editionFilter === 'character' && c.profile.optional.legacy)));
-  }, [allEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter]);
-  const filtered = useMemo(() => categoryEntries.filter(e => (!enabledOnly || c?.profile.enabledSources.includes(e.source)) && matchesFacets(e, filters, facets)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending, enabledOnly, c?.profile.enabledSources,sourceDisplay.registry]);
+  }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter]);
+  const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry]);
   useEffect(() => { setException(''); }, [detail?.id]);
   useEffect(() => { if (detailPane.current && detail) { const pending=previewCommit.current;detailPane.current.scrollTop=pending?.id===detail.id?pending.top:libraryState.positions[detail.id]||0;previewCommit.current=undefined; } }, [kind, detail?.id, !!library.hover,library.navigationKey]);
 
@@ -328,22 +329,23 @@ export default function App() {
     }; window.addEventListener('keydown', handle); return () => window.removeEventListener('keydown', handle);
   }, []);
   function readingTarget(entry:Entry){
-    if(entry.raw._inlineOwner){const owner=allEntries.find(e=>e.id===entry.raw._inlineOwner);if(owner)return {entry:owner,focus:`name:${entry.raw._inlineName||entry.name}`};}
+    if(entry.raw._inlineOwner){const owner=libraryEntries.find(e=>e.id===entry.raw._inlineOwner);if(owner)return {entry:owner,focus:`name:${entry.raw._inlineName||entry.name}`};}
     const selected=c?.selections.find(s=>s.entry.id===entry.id),parent=selected?.parentId?c?.selections.find(s=>s.id===selected.parentId):undefined;
-    if(parent && selected?.grantKey?.startsWith('inline:'))return {entry:allEntries.find(e=>e.id===parent.entry.id)||parent.entry,focus:`name:${entry.name}`};
-    if(entry.kind==='feature' && entry.raw.subclassShortName){const subclass=allEntries.find(e=>e.kind==='subclass'&&e.raw.shortName===entry.raw.subclassShortName&&e.source===(entry.raw.subclassSource||entry.raw.classSource||'PHB').toUpperCase());if(subclass)return {entry:subclass,focus:entry.id};}
+    if(parent && selected?.grantKey?.startsWith('inline:'))return {entry:libraryEntries.find(e=>e.id===parent.entry.id)||parent.entry,focus:`name:${entry.name}`};
+    if(entry.kind==='feature' && entry.raw.subclassShortName){const subclass=libraryEntries.find(e=>e.kind==='subclass'&&e.raw.shortName===entry.raw.subclassShortName&&e.source===(entry.raw.subclassSource||entry.raw.classSource||'PHB').toUpperCase());if(subclass)return {entry:subclass,focus:entry.id};}
     if(entry.kind==='feature' && entry.raw._category!=='itemMastery'){
-      const owner=allEntries.find(e=>e.kind==='class' && (entry.raw.className ? [e.name,e.english].includes(entry.raw.className) && (entry.raw.classSource||'PHB').toUpperCase()===e.source : e.edition===entry.edition && e.raw.optionalfeatureProgression?.some((p:any)=>p.featureType?.some((t:string)=>entry.raw.featureType?.includes(t)))));
+      const owner=libraryEntries.find(e=>e.kind==='class' && (entry.raw.className ? [e.name,e.english].includes(entry.raw.className) && (entry.raw.classSource||'PHB').toUpperCase()===e.source : e.edition===entry.edition && e.raw.optionalfeatureProgression?.some((p:any)=>p.featureType?.some((t:string)=>entry.raw.featureType?.includes(t)))));
       if(owner)return {entry:owner,focus:entry.id};
     }
     return {entry};
   }
   function inspect(entry: Entry, push = true) { exitSheetFullscreen(); if(detail && !library.hover && detailPane.current)library.savePosition(detail.id,detailPane.current.scrollTop);const target=readingTarget(entry);if(library.hover){previewCommit.current={id:target.entry.id,top:detailPane.current?.scrollTop||0};setReadingFlash(n=>n+1);}else setReadingFlash(0);library.navigate(target.entry,target.focus,push);setTab('wiki'); }
+  useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){setTableOpen(false);inspect(allEntries.find(e=>e.id===entry.id)||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
   function resolveReference(reference: string, tag?: string) {
-    if (reference.startsWith('entry:')) return c?.selections.find(s => s.entry.id === reference.slice(6))?.entry || allEntries.find(e => e.id === reference.slice(6));
+    if (reference.startsWith('entry:')) return c?.selections.find(s => s.entry.id === reference.slice(6)&&librarySourceEnabled(c,s.entry))?.entry || libraryEntries.find(e => e.id === reference.slice(6));
     const [name, source] = reference.split('|');
     const tagKind = ['variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
-    const known = [...(c?.selections.map(s => s.entry) || []), ...allEntries];
+    const known = [...(c?.selections.filter(s=>librarySourceEnabled(c,s.entry)).map(s => s.entry) || []), ...libraryEntries];
     const matches = known.filter(e => (!tagKind || e.kind === tagKind) && [e.name, e.english].some(n => n.toLowerCase() === name.toLowerCase()));
     const found = tagKind === 'feature' ? matches.find(e => !requirementMismatch(e, { refs: [reference] })) : source ? matches.find(e => e.source.toLowerCase() === source.toLowerCase()) : matches.find(e => e.edition === detail?.edition && e.source === (detail?.source || 'PHB')) || matches.find(e => e.source === 'PHB') || matches[0];
     return found;
@@ -415,7 +417,7 @@ export default function App() {
   if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?'DND 角色卡':'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup); } catch (e) { setStartupError(String(e)); } }}>读取备份</button><button onClick={() => { const next = newCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button></> : <p>正在打开你的角色卡…</p>}</main>;
   void historyTick;
   const blocked = detail ? candidateReason(c, detail) : '';
-  return <KeywordPreview isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider editing={editing&&(!inWorkbench||!!wb.target?.write)} character={c} receive={entry => add(entry)}><div className="app-shell" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
+  return <KeywordPreview isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider editing={editing&&(!inWorkbench||!!wb.target?.write)} character={c} receive={entry => add(entry)}><div className="app-shell" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src="./exe_icon.png" alt=""/><strong>{standalone?'DND 角色卡':'Full Suite'}</strong></a>
       <div className="header-tools">{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<button aria-pressed={tableOpen} onClick={()=>{setTableOpen(value=>!value);setTab('wiki');}}>三龙牌</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{setWorkbenchPage('features');setTab('sheet');}}>功能开关</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{setWorkbenchPage('settings');setTab('sheet');}}>设置</button>}<button onClick={() => setModal('characters')}>角色簿 <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>规则与扩展</button><button className="primary" onClick={() => setModal('export')}>导入 / 导出</button></div>
     </header>
@@ -442,15 +444,15 @@ export default function App() {
       </section>
 
       {tableOpen?<><WorkspaceSplitter/><section className={`wiki-pane table-pane ${tab==='wiki'?'mobile-active':''}`} aria-label="三龙牌"><WorkbenchPanel panel="table" close={()=>setTableOpen(false)}/></section></>:wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料"><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
-        <GlobalSearch query={query} change={setQuery} entries={allEntries} c={c} inspect={inspect}/>
+        <GlobalSearch query={query} change={setQuery} entries={libraryEntries} c={c} inspect={inspect}/>
         <nav className="category-tabs" aria-label="资料分类">{Object.entries(LIBRARY_TABS).filter(([key])=>(key!=='custom'||canAuthor)&&(key!=='monster'||monstersVisible)&&(key!=='weaponMastery'||c.edition==='2024'||editionFilter==='2024'||editionFilter==='all')).map(([key, label]) => <button key={key} className={kind === key ? 'active' : ''} onClick={() => setKind(key as keyof typeof LIBRARY_TABS)}>{label}</button>)}</nav>
-        <div className="wiki-filters"><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames} enabledOnly={enabledOnly} setEnabledOnly={setEnabledOnly} enabledSources={c.profile.enabledSources}/>
-        <label><input type="checkbox" checked={enabledOnly} onChange={e => setEnabledOnly(e.target.checked)}/>已启用</label></div>
-        <div className="catalog-status"><span>{loading ? `${progress.done}/${progress.total} 份资料` : `${allEntries.length.toLocaleString()} 条资料`}{progress.cached > 0 ? ` · ${progress.cached} 份缓存` : ''}</span><span>{filtered.length} 条符合筛选</span></div>
+        <div className="wiki-filters"><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames}/>
+        </div>
+        <div className="catalog-status"><span>{loading ? `${progress.done}/${progress.total} 份资料` : `${libraryEntries.length.toLocaleString()} 条资料`}{progress.cached > 0 ? ` · ${progress.cached} 份缓存` : ''}</span><span>{filtered.length} 条符合筛选</span></div>
         {progress.failed.length > 0 && <details className="load-errors"><summary>{progress.failed.length} 份资料读取异常 · 可重试</summary>{progress.failed.map((e, i) => <p key={i}>{e}</p>)}<button disabled={loading} onClick={() => load(true)}>重试加载</button></details>}
-        <div className={`library-body ${detail ? 'has-detail' : ''}`}><CatalogList entries={filtered} columns={columns} kind={kind} character={c} selected={detail} inspect={inspect} sort={sort} descending={descending} onSort={key=>library.patch({sort:key,descending:sort===key?!descending:false})} resetKey={JSON.stringify([kind,filters,enabledOnly,editionFilter,sort,descending])} loading={loading} onSettings={()=>setModal('rules')} pulse={fillPulse}/>
+        <div className={`library-body ${detail ? 'has-detail' : ''}`}><CatalogList entries={filtered} columns={columns} kind={kind} character={c} selected={detail} inspect={inspect} sort={sort} descending={descending} onSort={key=>library.patch({sort:key,descending:sort===key?!descending:false})} resetKey={JSON.stringify([kind,filters,editionFilter,sort,descending])} loading={loading} onSettings={()=>setModal('rules')} pulse={fillPulse}/>
         <WikiSplitter/>{kind==='custom'&&canAuthor&&<><CustomEntryEditor newEntry={()=>setDetail(undefined)} entry={detail?.raw._workbenchCustom?detail:undefined} busy={rulesBusy} save={entry=>changeCustom(entry)} remove={entry=>changeCustom(entry,true)}/></>}
-        {detail && !(kind==='custom'&&canAuthor) && <article key={`${detail.kind}:${detail.id}`} className={`entry-detail ${explicitlyExcluded(c,detail)?'entry-disabled':''} ${library.hover?'is-sheet-preview':readingFlash?'sheet-preview-committed':''} ${library.focus?'has-reading-focus':''}`} data-described-entry={detail.id} data-entry-kind={detail.kind} ref={detailPane} onScroll={e => { if(!library.hover)library.savePosition(detail.id, e.currentTarget.scrollTop); }}><div className="detail-frozen"><div className="detail-navigation"><button disabled={!library.canGoBack} onClick={library.back}>← 上一条</button><button aria-label="收起正文" onClick={() => { setDetail(undefined); }}>×</button></div><div className="detail-heading">{detail.kind==='monster'&&<MonsterPortrait entry={detail}/>}<EntryBadges entry={detail}/><span className="eyebrow">{KIND_LABELS[detail.kind]} · {entryEdition(detail) === 'both' ? '通用资料' : entryEdition(detail)}</span><h1><EntryDraggable className="detail-title" entry={detail} >{entryLabel(detail)}{detail.english !== detail.name && <small className="english-name"> {detail.english}</small>}</EntryDraggable></h1><small>{detail.raw._authoredBy ? `${detail.raw._authoredBy} · ` : ''}<SourceName id={detail.source}/>{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div><ClassNavigation subclassesOpen={!!libraryState.subclassesOpen} onToggleSubclasses={()=>library.patch({subclassesOpen:!libraryState.subclassesOpen})} entry={detail} entries={allEntries} character={c} navigate={(entry,focus)=>library.navigate(entry,focus)}/></div>
+        {detail && !(kind==='custom'&&canAuthor) && <article key={`${detail.kind}:${detail.id}`} className={`entry-detail ${explicitlyExcluded(c,detail)?'entry-disabled':''} ${library.hover?'is-sheet-preview':readingFlash?'sheet-preview-committed':''} ${library.focus?'has-reading-focus':''}`} data-described-entry={detail.id} data-entry-kind={detail.kind} ref={detailPane} onScroll={e => { if(!library.hover)library.savePosition(detail.id, e.currentTarget.scrollTop); }}><div className="detail-frozen"><div className="detail-navigation"><button disabled={!library.canGoBack} onClick={library.back}>← 上一条</button><button aria-label="收起正文" onClick={() => { setDetail(undefined); }}>×</button></div><div className="detail-heading">{detail.kind==='monster'&&<MonsterPortrait entry={detail}/>}<EntryBadges entry={detail}/><span className="eyebrow">{KIND_LABELS[detail.kind]} · {entryEdition(detail) === 'both' ? '通用资料' : entryEdition(detail)}</span><h1><EntryDraggable className="detail-title" entry={detail} >{entryLabel(detail)}{detail.english !== detail.name && <small className="english-name"> {detail.english}</small>}</EntryDraggable></h1><small>{detail.raw._authoredBy ? `${detail.raw._authoredBy} · ` : ''}<SourceName id={detail.source}/>{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div><ClassNavigation subclassesOpen={!!libraryState.subclassesOpen} onToggleSubclasses={()=>library.patch({subclassesOpen:!libraryState.subclassesOpen})} entry={detail} entries={libraryEntries} character={c} navigate={(entry,focus)=>library.navigate(entry,focus)}/></div>
           {detail.kind==='monster'?<ContentBoundary key={detail.id}><MonsterDocument entry={detail} onLink={link}/></ContentBoundary>:<><ContentBoundary key={`facts:${detail.id}`}><EntryFacts entry={detail} onLink={link}/></ContentBoundary>
           <LibraryDocument subclassesOpen={!!libraryState.subclassesOpen} preview={!!library.hover} highlight={readingFlash} focus={library.focus} character={c} entry={detail} entries={allEntries} onLink={link} inspect={inspect} collapsed={libraryState.collapsed[detail.id] || []} onCollapse={ids => library.patch({ focus:undefined, collapsed: { ...libraryState.collapsed, [detail.id]: ids } })}/></>}
 

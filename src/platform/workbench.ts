@@ -87,6 +87,7 @@ if(inWorkbench){
   if(!state.online)update({online:true,message:''});
   if(m.type==='ready'||m.type==='rolls')update({rolls:Array.isArray(m.rolls)?m.rolls:[]});
   if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:(m.monsters||[]).map((card:CardChoice)=>{const previous=state.monsters.find(c=>c.itemId===card.itemId);if(previous&&(monsterRuntimeSequence.get(card.itemId)||0)>(m.sequence||0))return {...card,...runtimeFrom(previous)};monsterRuntimeSequence.set(card.itemId,m.sequence||0);return card;}),role:m.role,enabled:m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
+  if(m.type==='showWiki')window.dispatchEvent(new CustomEvent('workbench-open-entry',{detail:m.entry}));
   if(m.type==='navigate')window.dispatchEvent(new Event('workbench-show-sheet'));
   if(m.type==='panelEvent')window.dispatchEvent(new CustomEvent('workbench-panel-event',{detail:m}));
   if(m.type==='diceEvent'&&m.event==='com.obr-suite/sfx')playWorkbenchSound(m.data?.data?.name);
