@@ -1,4 +1,5 @@
 /* Only the domestic standalone build opts in. Paper contents and fit math stay unchanged. */
+.domestic-compact .brand-logo{image-rendering:auto;object-fit:contain;flex-shrink:0;aspect-ratio:1;display:block}
 .app-shell.domestic-compact .save-status{display:none}
 .domestic-compact .pane-toolbar{height:28px;min-height:28px;padding:0 10px;gap:8px}
 .domestic-compact .pane-toolbar>div:first-child{flex:1;min-width:0;gap:6px}
@@ -18,3 +19,21 @@
  .domestic-compact .header-tools{gap:6px}
  .domestic-compact .header-tools button{padding:2px 9px;font-size:12px;line-height:22px}
 }
+
+/* Keep the same reading/list nodes when the workspace divider changes pane width. */
+.domestic-compact .wiki-layout{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0}
+.domestic-compact .wiki-layout.wiki-columns{display:grid;grid-template-columns:var(--catalog-width,42%) 9px minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto minmax(0,1fr);overflow:hidden}
+.wiki-columns>.wiki-header{grid-column:1;grid-row:1;padding:0 12px}
+.wiki-columns>.global-search{grid-column:1;grid-row:2;min-width:0}
+.wiki-columns>.category-tabs{grid-column:1;grid-row:3;padding:0 8px}
+.wiki-columns>.wiki-filters{grid-column:1;grid-row:4;padding:5px 12px}
+.wiki-columns>.catalog-status{grid-column:1;grid-row:5;padding:0 12px 4px}
+.wiki-columns>.load-errors{grid-column:1;grid-row:6;max-height:150px;overflow:auto}
+.wiki-columns>.library-body{display:contents}
+.wiki-columns .catalog-shell{grid-column:1;grid-row:7;min-width:0;min-height:0}
+.wiki-columns .library-body>.entry-detail,.wiki-columns .library-body>.reading-placeholder,.wiki-columns .library-body>.custom-entry-editor{grid-column:3;grid-row:1/-1;min-width:0;min-height:0}
+.wiki-columns .wiki-splitter{grid-column:2;grid-row:1/-1;width:9px;height:auto;cursor:col-resize}
+.wiki-columns .wiki-splitter:before{inset:0 auto 0 4px;border-top:0;border-left:1px solid var(--suite-line,#c4c8ce)}
+.wiki-columns .wiki-splitter span{width:3px;height:36px}
+.wiki-columns .wiki-splitter:hover span,.wiki-columns .wiki-splitter:focus-visible span{width:3px;height:55px}
+body.wiki-resizing-columns,body.wiki-resizing-columns *{cursor:col-resize!important}

@@ -1,3 +1,5 @@
+import {includeNewDefaultSources,startAllSources} from '../core/sourceDefaults';
+import {WikiLayout,WikiEmptyPrompt} from './WikiLayout';
 import {standalone,domesticCompact} from '../platform/buildMode';
 import {LocalDice} from '../standalone/LocalDice';
 import {pinEntry} from '../core/quickbar';
@@ -146,6 +148,14 @@ export default function App() {
   const storedCharacter=workspace?.characters.find(x=>x.id===workspace.activeId);
   const c=useMemo(()=>storedCharacter&&inWorkbench&&wb.shared?{...storedCharacter,edition:roomRules!.edition,profile:roomRules!.profile,rulePacks:roomRules!.packs}:storedCharacter,[storedCharacter,roomRules]);
   const allEntries = useMemo(() => [...SIZE_ENTRIES, ...entries, ...activePacks.flatMap(p => p.entries), ...(canAuthor?customEntries:[])].filter(e=>monstersVisible||e.kind!=='monster'), [entries, activePacks,monstersVisible,canAuthor,customEntries]);
+  const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
+  function createLocalCharacter(edition:Edition='2024'){const next=newCharacter(edition);return domesticCompact?startAllSources(next,defaultSources):next;}
+  useEffect(()=>{
+    const current=workspaceRef.current;
+    if(!domesticCompact||!current||!writable.current)return;
+    const characters=current.characters.map(row=>includeNewDefaultSources(row,defaultSources));
+    if(characters.some((row,i)=>row!==current.characters[i]))persist({...current,characters});
+  },[defaultSources,workspace]);
   const libraryEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
   const readableEntries = useMemo(()=>[...allEntries,...(workspace?.characters.flatMap(c=>c.selections.map(s=>s.entry))||[])],[allEntries,workspace?.characters]);
   const library = useLibrary(readableEntries);
@@ -198,7 +208,7 @@ export default function App() {
       writable.current = canWrite; setReadOnly(!canWrite);
       try {
         const value = await loadWorkspace(); if (!alive) return;
-        if (value) acceptWorkspace(value); else { const first = newCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
+        if (value) acceptWorkspace(value); else { const first = createLocalCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
       } catch (e) { if (alive) setStartupError(String(e)); }
     };
     if (navigator.locks) navigator.locks.request('dnd-card-editor', { ifAvailable: true }, async lock => {
@@ -406,7 +416,7 @@ export default function App() {
     try{const card=newCharacter(edition);if(roomRules){card.profile=structuredClone(roomRules.profile);card.rulePacks=structuredClone(roomRules.packs);}const data={...exportOwlbear(card,evaluate(card)),dnd_card_web:card};const result=await workbenchRequest('createCard',{key:undefined,itemId:undefined,data});chooseWorkbench(`card:${result.created.id}`);setModal('');setWorkbenchPage('sheet');setSheetPage('主要');setTab('sheet');}catch(e){setNotice(String(e));}finally{setCreatingCard(false);}
   }
   function create(edition: Edition, copy = false) {
-    if (!workspace || !c) return; const next = copy ? structuredClone(c) : newCharacter(edition); next.id = uid(); next.name = copy ? `${c.name}（副本）` : next.name; next.createdAt = next.updatedAt = new Date().toISOString(); next.revision = 1;
+    if (!workspace || !c) return; const next = copy ? structuredClone(c) : createLocalCharacter(edition); next.id = uid(); next.name = copy ? `${c.name}（副本）` : next.name; next.createdAt = next.updatedAt = new Date().toISOString(); next.revision = 1;
     persist({ ...workspace, characters: [...workspace.characters, next], activeId: next.id }); setModal(''); setSheetPage('主要'); setTab('sheet');
   }
   const renderSelection = (s: Selection) => <Selected key={s.id} s={s} c={c!} edit={edit} inspect={inspect}/>;
@@ -414,7 +424,7 @@ export default function App() {
   const addButton = (kind: Kind) => <button className="sheet-add" onClick={() => browse(kind)}>＋ 查阅{KIND_LABELS[kind]}</button>;
 
 
-  if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?'DND 角色卡':'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup); } catch (e) { setStartupError(String(e)); } }}>读取备份</button><button onClick={() => { const next = newCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button></> : <p>正在打开你的角色卡…</p>}</main>;
+  if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?'DND 角色卡':'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup); } catch (e) { setStartupError(String(e)); } }}>读取备份</button><button onClick={() => { const next = createLocalCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button></> : <p>正在打开你的角色卡…</p>}</main>;
   void historyTick;
   const blocked = detail ? candidateReason(c, detail) : '';
   return <KeywordPreview isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider editing={editing&&(!inWorkbench||!!wb.target?.write)} character={c} receive={entry => add(entry)}><div className={`app-shell ${domesticCompact?'domestic-compact':''}`} data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
@@ -443,7 +453,7 @@ export default function App() {
         </PaperFrame></SheetEditContext.Provider><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} role="status"><span className="status-dot"/>{inWorkbench?(workbenchUncertain.current.has(c.id)?'待核对 · 本地修改已保留':workbenchDirty.current.has(c.id)?'正在同步至枭熊…':workbenchFailed.current.has(c.id)?'同步失败 · 已保留本地备份':wb.target?.projectionPending?'资料已保存 · 棋子显示待同步':wb.online?'与枭熊同步':'等待枭熊重连'):saving}{workbenchUncertain.current.has(c.id)&&wb.document&&<button onClick={()=>{window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:workbenchUncertain.current.get(c.id)?.requestId}}));workbenchUncertain.current.delete(c.id);workbenchDirty.current.delete(c.id);workbenchFailed.current.delete(c.id);workbenchDocuments.current.delete(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已采用枭熊当前数据；未确认的本地修改仍保留在恢复备份中。');}}>核对并采用枭熊数据</button>}{syncDiagnostic&&<CopyDiagnostic text={syncDiagnostic}/>}<span>{inWorkbench?'角色资料自动保存':'资料与角色保存在当前浏览器 · 请定期导出'}</span></div></>}
       </section>
 
-      {tableOpen?<><WorkspaceSplitter/><section className={`wiki-pane table-pane ${tab==='wiki'?'mobile-active':''}`} aria-label="三龙牌"><WorkbenchPanel panel="table" close={()=>setTableOpen(false)}/></section></>:wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料"><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
+      {tableOpen?<><WorkspaceSplitter/><section className={`wiki-pane table-pane ${tab==='wiki'?'mobile-active':''}`} aria-label="三龙牌"><WorkbenchPanel panel="table" close={()=>setTableOpen(false)}/></section></>:wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料"><WikiLayout><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
         <GlobalSearch query={query} change={setQuery} entries={libraryEntries} c={c} inspect={inspect}/>
         <nav className="category-tabs" aria-label="资料分类">{Object.entries(LIBRARY_TABS).filter(([key])=>(key!=='custom'||canAuthor)&&(key!=='monster'||monstersVisible)&&(key!=='weaponMastery'||c.edition==='2024'||editionFilter==='2024'||editionFilter==='all')).map(([key, label]) => <button key={key} className={kind === key ? 'active' : ''} onClick={() => setKind(key as keyof typeof LIBRARY_TABS)}>{label}</button>)}</nav>
         <div className="wiki-filters"><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames}/>
@@ -460,7 +470,7 @@ export default function App() {
           <div className="detail-actions">{blocked && <p className="inline-warning">{blocked}</p>}<a href={DEFAULT_SOURCE} target="_blank" rel="noreferrer">在中文站查阅 ↗</a>
           {blocked === '此来源或规则版本未启用' && <details><summary>记录 DM 特许</summary><p>仅对此条目启用；会随角色及审卡导出保留。</p><input aria-label="DM 特许说明" value={exception} placeholder="填写原因或 DM 的裁定" onChange={e => setException(e.target.value)}/><button disabled={rulesReadonly||!exception.trim()} onClick={() => editRules(draft => { draft.profile.exceptions[detail.id] = exception.trim(); })}>保存特许</button></details>}
           {c.profile.exceptions[detail.id] && <p>DM 特许：{c.profile.exceptions[detail.id]} <button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[detail.id]; })}>撤回</button></p>}</div>
-        </article>}{!detail && kind!=='custom' && <div className="reading-placeholder"><span>选择上方条目</span></div>}</div>
+        </article>}{!detail && kind!=='custom' && <div className="reading-placeholder"><WikiEmptyPrompt/></div>}</div></WikiLayout>
         <footer className="wiki-footer">{inWorkbench&&<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">单机版 ↗</a>}<a href={inWorkbench||domesticCompact?'./source.zip':'https://github.com/FullPeople/DND-card-web'} target="_blank" rel="noreferrer">源码 ↗</a><a href="https://github.com/FullPeople/DND-card-web/blob/main/LICENSE" target="_blank" rel="noreferrer">非商用共享许可 ↗</a></footer>
       </section></>}
     </main>
