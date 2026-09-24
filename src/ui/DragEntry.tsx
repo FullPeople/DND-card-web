@@ -4,6 +4,7 @@ import { type Character, type Entry, type Kind, type Requirement } from '../core
 import { useSources } from './SourceName';
 import { landingWithin, pointerDrag } from './pointerDrag';
 import { trainingCategory } from './trainingData';
+import './wikiTouch.css';
 
 export const requiresEditing=(entry:Entry)=>!['condition','item'].includes(entry.kind);
 type Zone = { element: HTMLElement; requirement?: Requirement; kinds?: Kind[]; onReceive?: (entry: Entry) => void; allowExisting?: boolean; accepts?: (entry: Entry) => boolean; wholePaper?: boolean; referenceOnly?:boolean };

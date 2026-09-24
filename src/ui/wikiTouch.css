@@ -1,0 +1,3 @@
+/* Catalog and document title gestures give scrolling priority. Holding a finger
+   arms the custom drag; prose remains selectable for reading/copying. */
+.wiki-pane [data-drag-enabled]{touch-action:pan-y pinch-zoom!important;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}

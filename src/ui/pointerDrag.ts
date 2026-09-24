@@ -9,16 +9,27 @@ type Gesture = { appearance?:'source'; title: string; subtitle?: string; outside
 let cancelActive: (() => void) | undefined;
 window.addEventListener('sheet-gesture',()=>cancelActive?.());
 
+function suppressTouchClick() {
+  // Touch compatibility clicks may arrive after pointerup, not in the same task.
+  // A new contact or keyboard activation must remain usable immediately.
+  const stop = (e: MouseEvent) => { if (!e.detail || ('pointerType' in e && e.pointerType && e.pointerType !== 'touch')) return; e.preventDefault(); e.stopImmediatePropagation(); clear(); };
+  const clear = () => { clearTimeout(timer); document.removeEventListener('click',stop,true); document.removeEventListener('pointerdown',clear,true); };
+  const timer=setTimeout(clear,700);
+  document.addEventListener('click',stop,true);document.addEventListener('pointerdown',clear,true);
+}
+
 /** One pointer gesture for catalog entries and sheet chips; never uses HTML drag images. */
 export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
   if (event.button !== 0 || !event.isPrimary) return;
   cancelActive?.();
   const source = event.currentTarget as HTMLElement;
+  const touchReading = event.pointerType === 'touch' && !!source.closest('.wiki-pane');
   const bounds = source.getBoundingClientRect();
   const width = gesture.appearance==='source'?bounds.width:Math.max(48, Math.min(240, bounds.width)), height = gesture.appearance==='source'?bounds.height:Math.max(24, Math.min(80, bounds.height));
   const grab = { x: Math.max(0, Math.min(width, (event.clientX - bounds.x) / Math.max(1, bounds.width) * width)), y: Math.max(0, Math.min(height, (event.clientY - bounds.y) / Math.max(1, bounds.height) * height)) };
   const origin = { x: event.clientX, y: event.clientY };
   let point = origin, painted = origin, active = false, finished = false, frame = 0, ghost: HTMLDivElement | undefined;
+  let hold: ReturnType<typeof setTimeout> | undefined, touchMoved = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function paint() {
     if (!ghost) return;
@@ -39,10 +50,8 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
     }
     frame = requestAnimationFrame(paint);
   }
-  function move(e: PointerEvent) {
-    if (e.pointerId !== event.pointerId) return;
-    point = { x: e.clientX, y: e.clientY };
-    if (!active && Math.hypot(point.x - origin.x, point.y - origin.y) >= 5) {
+  function lift() {
+    if (finished || active || !source.isConnected) return;
       active = true;
       document.body.classList.add('pointer-dragging');
       ghost = document.createElement('div');ghost.setAttribute('aria-hidden','true');ghost.inert=true; ghost.className = 'drag-ghost pointer-ghost';
@@ -57,18 +66,29 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
         const scale=bounds.width/source.offsetWidth||1;copy.style.width=`${source.offsetWidth}px`;copy.style.height=`${source.offsetHeight}px`;copy.style.minHeight='0';copy.style.margin='0';copy.style.translate='none';copy.style.transform=`scale(${scale})`;copy.style.transformOrigin='0 0';copy.style.visibility='visible';ghost.append(copy);
       }else ghost.append(title); document.body.append(ghost);source.classList.add('drag-lifted');
       window.dispatchEvent(new CustomEvent('card-drag-start',{detail:{source}})); gesture.start?.(); paint();
+  }
+  function move(e: PointerEvent) {
+    if (e.pointerId !== event.pointerId) return;
+    point = { x: e.clientX, y: e.clientY };
+    const distance=Math.hypot(point.x-origin.x,point.y-origin.y);
+    if (!active && touchReading) {
+      if (distance >= 8) { touchMoved=true; finish(true); }
+      return;
     }
+    if (!active && distance >= 5) lift();
     if (active) e.preventDefault();
   }
   function finish(cancelled: boolean) {
     if (finished) return; finished = true;
+    clearTimeout(hold);
     document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', cancel);
+    document.removeEventListener('touchmove',touchMove,true);document.removeEventListener('pointerdown',extraContact,true);document.removeEventListener('contextmenu',touchMenu,true);document.removeEventListener('scroll',scroll,true);
     document.removeEventListener('keydown', key); window.removeEventListener('blur', cancel);
     cancelAnimationFrame(frame); cancelActive = undefined; document.body.classList.remove('pointer-dragging');
+    if (touchReading && (active || touchMoved)) suppressTouchClick();
     if (!active) return;
     const suppress = (e: MouseEvent) => { e.preventDefault(); e.stopImmediatePropagation(); };
-    document.addEventListener('click', suppress, true);
-    setTimeout(() => document.removeEventListener('click', suppress, true), 0);
+    if (!touchReading) { document.addEventListener('click', suppress, true); setTimeout(() => document.removeEventListener('click', suppress, true), 0); }
     let destination:Landing|void;
     const hit=document.elementFromPoint(point.x,point.y);
     try{flushSync(()=>{destination=cancelled?(gesture.cancel(),undefined):gesture.finish(point,hit);});}catch(error){gesture.cancel();ghost?.remove();source.classList.remove('drag-lifted');window.dispatchEvent(new Event('card-drag-end'));throw error;}
@@ -106,9 +126,18 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
 
   }
   function up(e: PointerEvent) { if (e.pointerId === event.pointerId) {point={x:e.clientX,y:e.clientY};finish(false);} }
-  function cancel() { finish(true); }
+  function cancel(e?: Event) { if (!e || !('pointerId' in e) || e.pointerId === event.pointerId) finish(true); }
+  function touchMove(e: TouchEvent) { if (active && e.touches.length === 1 && e.cancelable) e.preventDefault(); }
+  function extraContact(e: PointerEvent) { if (e.pointerId !== event.pointerId) finish(true); }
+  function touchMenu(e: MouseEvent) { if (source.contains(e.target as Node) || active) { e.preventDefault(); e.stopImmediatePropagation(); } }
+  function scroll() { if (!active) finish(true); }
   function key(e: KeyboardEvent) { if (e.key === 'Escape') { e.preventDefault(); cancel(); } }
   cancelActive = cancel;
+  if (touchReading) {
+    hold=setTimeout(lift,320);
+    document.addEventListener('touchmove',touchMove,{capture:true,passive:false});document.addEventListener('pointerdown',extraContact,true);
+    document.addEventListener('contextmenu',touchMenu,true);document.addEventListener('scroll',scroll,true);
+  }
   document.addEventListener('pointermove', move, { passive: false }); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', cancel);
   document.addEventListener('keydown', key); window.addEventListener('blur', cancel);
   return cancel;
