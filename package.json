@@ -15,6 +15,7 @@
     "build:sync-prototype": "tsc -p prototype/tsconfig.json && vite build --config prototype/vite.config.ts",
     "test:sync-prototype": "playwright test --config prototype/playwright.config.ts",
     "build:standalone": "tsc -b && vite build --mode standalone",
+    "build:domestic": "node tools/buildDomestic.mjs",
     "dev:standalone": "vite --mode standalone --host 127.0.0.1 --port 5183",
     "test:release": "playwright test --config playwright.release.config.ts",
     "test:standalone": "playwright test --config playwright.standalone.config.ts"

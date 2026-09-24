@@ -1,0 +1,20 @@
+/* Only the domestic standalone build opts in. Paper contents and fit math stay unchanged. */
+.app-shell.domestic-compact .save-status{display:none}
+.domestic-compact .pane-toolbar{height:28px;min-height:28px;padding:0 10px;gap:8px}
+.domestic-compact .pane-toolbar>div:first-child{flex:1;min-width:0;gap:6px}
+.domestic-compact .pane-toolbar .eyebrow{display:none}
+.domestic-compact .character-tabs{flex:1;min-width:0;gap:3px;scrollbar-width:none}
+.domestic-compact .character-tabs::-webkit-scrollbar{display:none}
+.domestic-compact .character-tabs button{max-width:220px;padding:1px 8px;font-size:12px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.domestic-compact .toolbar-actions{flex:none;gap:3px}
+.domestic-compact .toolbar-actions button{height:24px;padding:1px 5px;font-size:20px}
+.domestic-compact .toolbar-actions .adjust-shortcut{font-size:11px}
+.domestic-compact .paper-size{font-size:10px;white-space:nowrap}
+@media screen and (min-width:701px){
+ .domestic-compact .app-header{height:36px;min-height:36px;padding:0 12px;gap:10px}
+ .domestic-compact .brand{gap:7px}
+ .domestic-compact .brand-logo{width:26px;height:26px}
+ .domestic-compact .brand strong{font-size:14px;letter-spacing:1px}
+ .domestic-compact .header-tools{gap:6px}
+ .domestic-compact .header-tools button{padding:2px 9px;font-size:12px;line-height:22px}
+}
