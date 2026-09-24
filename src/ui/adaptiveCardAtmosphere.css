@@ -1,0 +1,65 @@
+/* This layer belongs to resizable overview / monster surfaces only. */
+.adaptive-card-host{position:relative;isolation:isolate}
+.adaptive-card-atmosphere,.adaptive-frame-art{position:absolute;inset:0;pointer-events:none!important;user-select:none;overflow:hidden}
+.adaptive-card-atmosphere{z-index:0;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.adaptive-frame-art{z-index:3;overflow:visible}
+.adaptive-card-atmosphere *,.adaptive-frame-art *{pointer-events:none!important}
+.adaptive-card-atmosphere>svg,.adaptive-frame-art>svg{display:block;width:100%;height:100%;overflow:visible}
+.adaptive-card-atmosphere>svg{color:#50525b}
+.adaptive-effect{animation:adaptive-arrive .7s ease-out both}
+.adaptive-effect.adaptive-leaving{animation:adaptive-leave .8s ease-in both}
+.adaptive-suppressed{opacity:0;transition:opacity .18s}
+.adaptive-frame-art.adaptive-suppressed,.adaptive-card-atmosphere.adaptive-suppressed{opacity:1}.adaptive-suppressed .adaptive-effect{opacity:0;animation:none}
+.adaptive-paused *,.adaptive-suppressed .adaptive-effect *{animation-play-state:paused!important}
+@keyframes adaptive-arrive{from{opacity:0}to{opacity:1}}
+@keyframes adaptive-leave{from{opacity:1}to{opacity:0}}
+.adaptive-frame-outline{fill:none;stroke:var(--paper-frame,#50525b);stroke-width:3;transition:opacity .7s;vector-effect:non-scaling-stroke}
+.adaptive-outline-hidden{opacity:0}
+.adaptive-invisible-rim{fill:none;stroke:#50525b;stroke-width:2;stroke-dasharray:6 4}
+.adaptive-exhaustion-rim{fill:none;stroke:#b8232a;stroke-width:3;stroke-linecap:butt}
+.adaptive-stone-cracks{fill:none;stroke:#55565b;stroke-width:1.7;opacity:.6;filter:drop-shadow(.7px .7px 0 #fff9)}
+.adaptive-poison-frame{fill:none;stroke:#477439;stroke-width:5;opacity:.32;filter:blur(1px)}
+.adaptive-poison-drip{fill:#447838;opacity:.28}
+.adaptive-poison-rim{fill:none;stroke:#477439;stroke-width:12;opacity:.32;filter:blur(2px)}
+.adaptive-chain-run{color:#53555a;opacity:.43;animation:adaptive-chain-enter .9s cubic-bezier(.2,.7,.25,1) both}
+.adaptive-leaving .adaptive-chain-run{animation:adaptive-chain-exit .8s ease-in both}
+@keyframes adaptive-chain-enter{from{transform:translateX(var(--adaptive-chain-distance));opacity:0}to{transform:translateX(0);opacity:.43}}
+@keyframes adaptive-chain-exit{to{transform:translateX(var(--adaptive-chain-distance));opacity:0}}
+.adaptive-vines{opacity:.62}.adaptive-vine-stem,.adaptive-vine-curl{fill:none;stroke:#866074;stroke-width:1.5}
+.adaptive-vine-stem{stroke-dasharray:1000;animation:adaptive-vine-enter 1s ease-out both}.adaptive-heart{fill:#866074;opacity:.75;animation:adaptive-heart-enter .85s ease-out both;transform-box:fill-box;transform-origin:center}
+.adaptive-leaving .adaptive-vine-stem{animation:adaptive-vine-exit .8s ease-in both}.adaptive-leaving .adaptive-heart{animation:adaptive-heart-exit .75s ease-in both}
+@keyframes adaptive-vine-enter{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}@keyframes adaptive-vine-exit{to{stroke-dashoffset:1000}}
+@keyframes adaptive-heart-enter{from{scale:0}to{scale:1}}@keyframes adaptive-heart-exit{to{scale:0}}
+.adaptive-hand{fill:#50525b;opacity:.3;animation:adaptive-hand-enter .8s cubic-bezier(.2,.8,.2,1) both}.adaptive-hand-crease{fill:none;stroke:#fff;stroke-width:2;opacity:.55}
+.adaptive-leaving .adaptive-hand{animation:adaptive-hand-exit .8s ease-in both}
+@keyframes adaptive-hand-enter{from{transform:translateX(-75px)}to{transform:translateX(0)}}@keyframes adaptive-hand-exit{to{transform:translateX(-75px)}}
+.adaptive-prohibition{fill:none;stroke:#50525b;stroke-width:9;opacity:.28}.adaptive-symbol-fill{fill:#50525b;stroke:none}.adaptive-symbol-slash{stroke-width:12}
+.adaptive-blood{fill:#9b3438;opacity:.38}
+.adaptive-magic-seal{fill:none;stroke:#50525b;stroke-width:1.5;opacity:.38;animation:adaptive-magic-turn 24s linear infinite;transform-origin:0 0}
+.adaptive-watermark{opacity:.17;transform-box:fill-box;transform-origin:center;animation:adaptive-watermark-enter .7s ease-out both}
+.adaptive-watermark-leaving{animation:adaptive-watermark-exit .75s ease-in both}
+@keyframes adaptive-watermark-enter{from{opacity:0;scale:.88}to{opacity:.17;scale:1}}
+@keyframes adaptive-watermark-exit{from{opacity:.17;scale:1}to{opacity:0;scale:1.1}}
+@keyframes adaptive-magic-turn{to{transform:rotate(360deg)}}
+.adaptive-star-halo{fill:#8b7844;stroke:#76643c;stroke-width:.9;opacity:.85}.adaptive-star-halo>ellipse{fill:none;stroke-width:.7;opacity:.5}
+.adaptive-orbit-star{offset-path:path('M45 0 A45 13 0 1 1 -45 0 A45 13 0 1 1 45 0');offset-rotate:0deg;animation:adaptive-star-orbit 3s linear infinite}.adaptive-star-1{animation-delay:-1s}.adaptive-star-2{animation-delay:-2s}
+@keyframes adaptive-star-orbit{to{offset-distance:100%}}
+.adaptive-surprise-rays{fill:#50525b;opacity:.48;transform-origin:0 0;animation:adaptive-rays-enter .7s cubic-bezier(.2,.8,.2,1.3) both}
+@keyframes adaptive-rays-enter{from{scale:.6}to{scale:1}}
+.adaptive-glitch-flash{fill:#bce0ed;mix-blend-mode:difference;animation:adaptive-glitch 6.3s steps(1,end) infinite}.adaptive-glitch-slices{fill:#825476;animation:adaptive-glitch-lines 6.3s steps(1,end) infinite}
+@keyframes adaptive-glitch{0%,77%,82%,100%{opacity:0}78%{opacity:.25}79%{opacity:.03}80%{opacity:.2}81%{opacity:.07}}
+@keyframes adaptive-glitch-lines{0%,77%,82%,100%{opacity:0;transform:translateX(0)}78%{opacity:.18;transform:translateX(4px)}80%{opacity:.15;transform:translateX(-4px)}}
+.adaptive-frame-tremor>svg{animation:adaptive-frame-shiver .33s linear infinite}
+@keyframes adaptive-frame-shiver{0%,100%{transform:translate(0,0)}20%{transform:translate(.65px,-.5px)}40%{transform:translate(-.75px,.5px)}60%{transform:translate(.5px,.65px)}80%{transform:translate(-.5px,-.65px)}}
+.adaptive-card-host [data-adaptive-prone]{rotate:0deg;transition:rotate .9s cubic-bezier(.3,.8,.3,1),opacity .7s}
+.adaptive-condition-prone [data-adaptive-prone]{rotate:180deg}
+.adaptive-condition-invisible [data-adaptive-portrait]{opacity:.2}
+.adaptive-card-host [data-adaptive-speed]{position:relative;isolation:isolate}
+.adaptive-card-host [data-adaptive-speed]::after{content:'';position:absolute;inset:0;pointer-events:none;background:#16171b;border-radius:inherit;opacity:0;z-index:4;transition:opacity .7s}
+.adaptive-condition-unconscious [data-adaptive-speed]::after{opacity:1}
+.adaptive-card-host [data-adaptive-physical]{transition:filter .7s;transform:rotate(var(--adaptive-fall-tilt,0deg));transform-origin:center;position:relative;max-width:100%;min-width:0}
+.adaptive-condition-petrified [data-adaptive-physical]{filter:grayscale(1) brightness(.94)}
+.adaptive-physics-area{position:relative;min-height:var(--adaptive-gravity-height,0px)}
+.adaptive-editing [data-adaptive-physical]{filter:none}
+@media(prefers-reduced-motion:reduce){.adaptive-card-atmosphere *,.adaptive-frame-art *{animation:none!important}.adaptive-leaving{opacity:0}.adaptive-glitch-flash,.adaptive-glitch-slices{opacity:0}.adaptive-star-1{offset-distance:33%}.adaptive-star-2{offset-distance:66%}.adaptive-card-host [data-adaptive-prone]{transition:none}}
+@media print{.adaptive-card-atmosphere,.adaptive-frame-art .adaptive-effect{display:none}.adaptive-card-host [data-adaptive-physical]{translate:none!important;transform:none!important}.adaptive-card-host [data-adaptive-speed]::after{display:none}}

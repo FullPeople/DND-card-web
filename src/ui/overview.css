@@ -226,7 +226,7 @@
 .overview-identity .identity-field .cell-content{padding:0;align-items:stretch;justify-content:center}
 .identity-record{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;justify-content:center}
 .identity-token{display:flex;align-items:center;justify-content:center;flex:1;min-width:0;min-height:25px;gap:4px;padding:2px 4px;cursor:grab;touch-action:none}
-.identity-token .identity-title{display:block;min-width:0;max-width:100%;padding:0;border:0;background:transparent;font-size:14px;font-weight:600;line-height:1.2;text-align:center;cursor:inherit;overflow-wrap:anywhere}
+.identity-token .identity-title{display:block;min-width:0;max-width:100%;padding:0;border:0;background:transparent;font-size:14px;font-weight:600;line-height:1.2;text-align:center;cursor:inherit;white-space:nowrap;overflow:hidden;flex:0 1 auto}
 .identity-token .identity-level{display:flex;align-items:center;white-space:nowrap;flex:none;font-size:11px;font-weight:600;gap:0}
 .paper .identity-token input[type=number]{width:19px;padding:0;font:inherit;border:0;text-align:left}
 .identity-multiclass .identity-record+.identity-record{border-top:1px solid #babcb3}
@@ -257,3 +257,5 @@
 .toolbar-actions .adjust-shortcut{font-size:11px;padding:3px 7px}
 .keyword-preview:not(.is-pinned){pointer-events:none}
 .dice-cell strong{font-size:11px;line-height:13px;min-width:0}.dice-cell .cell-content{gap:3px}.dice-cell button{flex:none}
+
+.overview-sheet .ability-cha .cell-content{padding:3px 5px;overflow:hidden}.overview-sheet .ability-cha .ability-values{min-height:45px;height:45px}.overview-sheet .ability-cha .ability-save,.overview-sheet .ability-cha .ability-skill{min-height:15px;line-height:15px}

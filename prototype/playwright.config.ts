@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests',timeout:30000,expect:{timeout:7000},workers:2,reporter:'list',outputDir:'../test-results/sync-prototype',use:{baseURL:'http://localhost:5189',channel:process.env.CI?undefined:'msedge',viewport:{width:1100,height:950},trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:'npm run dev:sync-prototype',url:'http://127.0.0.1:5189/demo.html',reuseExistingServer:!process.env.CI}});

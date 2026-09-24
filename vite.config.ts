@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import { createHash } from 'node:crypto';
 import react from '@vitejs/plugin-react';
+import {standalonePlugin} from './tools/standalonePlugin.ts';
 function offlineShell(): Plugin {
   return { name: 'offline-app-shell', apply: 'build', generateBundle(_, bundle) {
     const files = [...new Set(['index.html', ...Object.keys(bundle).filter(name => !name.endsWith('.map'))])];
@@ -8,7 +9,7 @@ function offlineShell(): Plugin {
     this.emitFile({ type: 'asset', fileName: 'sw.js', source: `
 const PREFIX = 'dnd-card-shell:' + new URL('./', self.location.href).pathname + ':';
 const CACHE = PREFIX + ${JSON.stringify(revision)};
-const FILES = ${JSON.stringify([...files, 'favicon.svg'])};
+const FILES = ${JSON.stringify([...files, 'favicon.svg', 'exe_icon.png'])};
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(file => new URL(file, self.location.href).href)))));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('message', event => { if (event.data === 'activate-update') self.skipWaiting(); });
@@ -20,4 +21,4 @@ self.addEventListener('fetch', event => {
 });` });
   } };
 }
-export default defineConfig({ plugins: [react(), offlineShell()], base: './', server: { port: 5178, strictPort: true } });
+export default defineConfig(({mode})=>({ plugins: [...(mode==='standalone'?[standalonePlugin()]:[]),react(), offlineShell()], base: './', build:{outDir:mode==='standalone'?'dist-standalone':'dist'},server: { port: 5178, strictPort: true } }));

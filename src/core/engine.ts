@@ -1,4 +1,4 @@
-import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
+import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
   const abilities = { ...c.abilities }; const trace: Record<string, string[]> = {};
@@ -17,10 +17,13 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const skillSources: Record<string, string[]> = {}; const proficientSaves = new Set<string>();
   const grantSkill = (s: string, origin: string) => { const key = skillKey(s); if (SKILLS[key]) (skillSources[key] ??= []).push(origin); };
   const raceSpeed = active.find(s => s.entry.kind === 'race')?.entry.raw.speed;
-  let speed = typeof raceSpeed === 'number' ? raceSpeed : raceSpeed?.walk ?? 30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
+  const walking=typeof raceSpeed==='number'?raceSpeed:raceSpeed?.walk;
+  let speed = typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
   const sizes = new Set<string>();
   for (const selection of active) {
     const e = selection.entry; const origin = `${e.name} · ${e.source}`; const raw = e.raw;
+    // Background ability choices are annotations. The sheet's base scores
+    // already contain the player's allocation, so do not apply it a second time.
     if (e.kind === 'race') { (raw.size || []).forEach((s: string) => sizes.add(s)); }
     if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
     // Fixed declarations only. Choice counts, progression checks and name-based rules
@@ -35,6 +38,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     for (const effect of e.effects || []) {
       if (effect.op === 'proficiency') grantSkill(effect.skill, origin);
       else if (ABILITIES.includes(effect.target as Ability)) {
+        if(e.kind==='background')continue;
         const a = effect.target as Ability; abilities[a] = effect.op === 'set' ? effect.value : abilities[a] + effect.value;
         trace[a].push(`${origin} ${effect.op === 'set' ? '=' : '+'}${effect.value}`);
       } else if (effect.target === 'speed') speed = effect.op === 'set' ? effect.value : speed + effect.value;
@@ -53,18 +57,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     return [key, { value: modifiers[s.ability] + (proficient ? proficiency * (expertise ? 2 : 1) : half), proficient, expertise, sources: [...(skillSources[key] || []), ...(expertise ? ['专精'] : half ? ['万事通'] : [])] }];
   }));
   let ac = acOverride ?? (10 + modifiers.dex);
-  const armors = active.filter(s => s.entry.kind === 'item' && s.equipped && typeof s.entry.raw.ac === 'number');
-  const armor = armors.filter(s => !String(s.entry.raw.type).startsWith('S'));
-  const shields = armors.filter(s => String(s.entry.raw.type).startsWith('S'));
-  if (armor.length > 1 || shields.length > 1) issues.push({ id: 'armor', message: '同时装备了多件护甲或盾牌，请选择生效的一件。', severity: 'error' });
-  if (armor[0]) {
-    const raw = armor[0].entry.raw; const t = String(raw.type);
-    ac = raw.ac + (t.startsWith('HA') ? 0 : t.startsWith('MA') ? Math.min(2, modifiers.dex) : modifiers.dex);
-  }
-  ac = (acOverride ?? (ac + (shields[0]?.entry.raw.ac || 0))) + acBonus;
+  // Equipment and attunement markers are visual references, not rule automation.
+  ac += acBonus;
   const hpFromClasses = classes.reduce((sum, s, i) => { const faces = Number(s.entry.raw.hd?.faces || 8); const nextLevel = Math.max(1, Math.floor(faces / 2) + 1 + modifiers.con); return sum + (i === 0 ? Math.max(1, faces + modifiers.con) + (s.level - 1) * nextLevel : s.level * nextLevel); }, 0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [armor[0] ? `${armor[0].entry.name} ${armor[0].entry.raw.ac}` : `基础 10 + 敏捷 ${modifiers.dex}`, ...(shields[0] ? [`${shields[0].entry.name} +${shields[0].entry.raw.ac}`] : []), ...(acBonus ? [`规则修正 +${acBonus}`] : [])];
+  trace.ac = [`基础 10 + 敏捷 ${modifiers.dex}`, ...(acBonus ? [`规则修正 +${acBonus}`] : [])];
   if (acOverride !== undefined) trace.ac.push(`规则设定基础结果 ${acOverride}`);
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级生命骰满值、以后取固定平均值，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...(hpOverride !== undefined ? [`规则设定 ${hpOverride}`] : []), ...(hpBonus ? [`规则修正 +${hpBonus}`] : [])];
   trace.proficiency = [`总等级 ${level || 1}`]; trace.speed = [active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'];
@@ -107,6 +104,7 @@ export function requirementMismatch(e: Entry, r?: Partial<Requirement>): string 
   return undefined;
 }
 export function candidateReason(c: Character, e: Entry, r?: Requirement): string | undefined {
+  if(e.kind==='subclass'&&!subclassOwner(c,e))return '需要先加入该子职所属的职业';
   if (e.kind === 'feat' && !c.profile.optional.feats) return '当前角色未启用专长选项';
   if (!selectionAllowed(c, e)) return '此来源或规则版本未启用';
   const mismatch = requirementMismatch(e, r); if (mismatch) return mismatch;

@@ -1,0 +1,11 @@
+import {describe,it,expect} from 'vitest';
+import {newCharacter,type Character} from '../src/core/model';
+import {syncAutoResources,setResource} from '../src/core/resources';
+import {spellState} from '../src/core/characterDetails';
+const add=(c:Character,id:string,level:number,progression:string,faces:number)=>c.selections.push({id,level,quantity:1,equipped:false,entry:{id,kind:'class',name:id,english:id,source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:[],raw:{casterProgression:progression,hd:{faces}}}});
+describe('automatic consumables',()=>{
+ it('preserves spent dice across refresh and level increases',()=>{const c=newCharacter();add(c,'caster',3,'full',6);syncAutoResources(c);setResource(c,'hit-die:6',1);expect(syncAutoResources(c)).toBe(false);expect(c.runtime.resources['hit-die:6'].current).toBe(1);c.selections[0].level=4;syncAutoResources(c);expect(c.runtime.resources['hit-die:6']).toMatchObject({current:2,max:4});});
+ it('combines multiclass caster levels, keeps different hit dice, and separates pact slots',()=>{const c=newCharacter();add(c,'a',3,'full',6);add(c,'b',3,'half',10);add(c,'pact',3,'pact',8);syncAutoResources(c);expect(c.runtime.resources['spell-slot:3'].max).toBe(2);expect(c.runtime.resources['pact-slot:2'].max).toBe(2);expect(c.runtime.resources['hit-die:10'].max).toBe(3);c.edition='2014';syncAutoResources(c);expect(c.runtime.resources['spell-slot:3']).toBeUndefined();expect(c.runtime.resources['spell-slot:2'].max).toBe(3);});
+ it('keeps spell-page usage and quickbar usage consistent in both directions',()=>{const c=newCharacter();add(c,'a',3,'full',6);c.spellSettings=spellState(c);syncAutoResources(c);setResource(c,'spell-slot:1',2);expect(c.spellSettings.slots['1'].used).toBe(2);const before=structuredClone(c);c.spellSettings.slots['1'].used=3;syncAutoResources(c,before);expect(c.runtime.resources['spell-slot:1'].current).toBe(1);});
+ it('retains custom display types and resources when removing a class',()=>{const c=newCharacter();add(c,'a',3,'full',6);c.runtime.resources.custom={current:3,max:5,type:'bar',icon:'heart'};syncAutoResources(c);c.selections=[];syncAutoResources(c);expect(c.runtime.resources.custom).toEqual({current:3,max:5,type:'bar',icon:'heart'});expect(c.runtime.resources['hit-die:6']).toBeUndefined();});
+});

@@ -1,0 +1,14 @@
+/* Restricted source entries stay readable and draggable, with every text node marked. */
+.entry-detail.entry-disabled .detail-heading,
+.entry-detail.entry-disabled .detail-heading *,
+.entry-detail.entry-disabled .entry-facts,
+.entry-detail.entry-disabled .entry-facts *,
+.entry-detail.entry-disabled .rules-prose,
+.entry-detail.entry-disabled .rules-prose *,
+.document-section.entry-disabled,
+.document-section.entry-disabled *,
+.keyword-preview.entry-disabled>header,
+.keyword-preview.entry-disabled>header *,
+.keyword-preview.entry-disabled .keyword-content,
+.keyword-preview.entry-disabled .keyword-content *{text-decoration-line:line-through;text-decoration-thickness:1px}
+.class-jumps button[aria-expanded=true]{background:#dce5f1;border-color:#728baa}

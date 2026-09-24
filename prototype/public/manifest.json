@@ -1,0 +1,1 @@
+{"name":"DND Card · 生命同步原型","version":"0.0.1","manifest_version":1,"description":"无新增服务器的独立窗口生命值联动验证；仅操作明确选中的棋子。","author":"FullPeople","icon":"./icon.svg","background_url":"./background.html","action":{"title":"生命同步原型","icon":"./icon.svg","popover":"./index.html","width":360,"height":410}}

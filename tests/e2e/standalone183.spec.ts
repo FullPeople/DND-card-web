@@ -1,0 +1,31 @@
+import {test,expect} from '@playwright/test';
+import {mockSource} from './fixtures';
+
+test('standalone has no room transport, survives offline reload and rolls without a host',async({page,context})=>{
+ const errors:string[]=[],forbidden:string[]=[],sockets:string[]=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('websocket',s=>sockets.push(s.url()));
+ page.on('request',r=>{if(/owlbear|obr\.dnd|\/relay|\/characters\/|\/api\//i.test(r.url()))forbidden.push(r.url());});
+ await mockSource(page);await page.goto('/#suite=ignored&bridge=http%3A%2F%2F127.0.0.1%3A5194');
+ await expect(page.locator('.brand')).toContainText('DND 角色卡');
+ await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
+ await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
+ await page.getByRole('switch',{name:'编辑模式'}).click();
+ await page.getByRole('textbox',{name:'角色姓名',exact:true}).fill('单机冒险者');
+ await page.getByRole('button',{name:'管理快捷栏',exact:true}).click();
+ await page.getByLabel('名字',{exact:true}).fill('训练剑');await page.getByLabel('命中加值',{exact:true}).fill('+4');await page.getByLabel('伤害',{exact:true}).fill('1d6+2');await page.getByRole('button',{name:'添加',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await expect.poll(()=>page.evaluate(async()=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open('dnd-card-standalone');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});return new Promise<string>(resolve=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{const w=req.result;db.close();resolve(w.characters.find((c:any)=>c.id===w.activeId).name);};});})).toBe('单机冒险者');
+ await context.setOffline(true);await page.reload();await expect.poll(()=>page.locator('.brand-logo').evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>0)).toBe(true);
+ await expect(page.getByRole('textbox',{name:'角色姓名',exact:true})).toHaveValue('单机冒险者');
+ await expect(page.locator('.quick-weapon').filter({hasText:'训练剑'})).toBeVisible();
+ await page.locator('.quick-weapon').filter({hasText:'训练剑'}).getByRole('button',{name:'+4',exact:true}).click();
+ await expect(page.getByRole('dialog',{name:'本地投骰'})).toBeVisible();await page.getByRole('button',{name:'投骰',exact:true}).click();
+ await expect(page.getByRole('dialog',{name:'本地投骰'}).getByRole('status')).toContainText('1d20');await page.getByRole('button',{name:'关闭',exact:true}).click();
+ await page.getByRole('spinbutton',{name:'当前生命值',exact:true}).fill('17');await page.locator('.brand').click();
+ await expect(page.getByRole('spinbutton',{name:'当前生命值',exact:true})).toHaveValue('17');
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await expect(page.getByText(/枭熊/)).toHaveCount(0);await page.getByRole('button',{name:'关闭弹窗'}).click();
+ await page.locator('.catalog-row').first().click();await expect(page.locator('.entry-detail')).toContainText('测试法师');
+ await page.screenshot({path:'test-results-standalone/standalone-desktop.png'});
+ await page.setViewportSize({width:420,height:900});await page.getByRole('button',{name:'功能页',exact:true}).click();await page.screenshot({path:'test-results-standalone/standalone-mobile.png'});
+ expect(forbidden).toEqual([]);expect(sockets).toEqual([]);expect(errors).toEqual([]);
+});

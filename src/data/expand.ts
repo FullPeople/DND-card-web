@@ -134,6 +134,7 @@ export function expandVersions(raw: Raw): Raw[] {
       const base = { ...raw }; delete base._versions;
       const item = { ...variant, _copy: { name: base.name, source: base.source, _preserve: { '*': true }, _mod: variant._mod } };
       const expanded = expandCopies([base, item])[1];
+      expanded._versionBaseName = raw.name;
       delete expanded._mod; delete expanded._variables;
       output.push(expanded);
     }

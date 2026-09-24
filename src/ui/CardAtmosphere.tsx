@@ -49,7 +49,7 @@ export function CardAtmosphere({ character }: { character: Character }) {
   useEffect(()=>{const update=()=>setPaused(document.hidden);document.addEventListener('visibilitychange',update);return()=>document.removeEventListener('visibilitychange',update);},[]);
   return <>
     <div className={`card-art-layer card-art-background ${paused?'effects-paused':''}`} aria-hidden="true">
-      <div className="watermark-anchor"><MagicSeal badge={shown} active={active.has('concentration')}/>{shown&&<div className={`class-watermarks ${leaving?'badge-leaving':'badge-present'}`} data-watermark-count="1" data-phase={leaving?'leaving':'present'}><img key={shown.id} data-class-badge={shown.id} src={shown.url} alt="" draggable={false}/></div>}</div>
+      <div className="watermark-anchor"><MagicSeal badge={shown} active={active.has('concentration')}/>{shown&&<div className={`class-watermarks ${leaving?'badge-leaving':'badge-present'}`} data-watermark-count="1" data-phase={leaving?'leaving':'present'}><span className="badge-tint" style={{maskImage:`url("${shown.url}")`,WebkitMaskImage:`url("${shown.url}")`}}><img key={shown.id} data-class-badge={shown.id} src={shown.url} alt="" draggable={false}/></span></div>}</div>
       <Effect id="restrained" active={active.has('restrained')}/><Effect id="charmed" active={active.has('charmed')}/>
     </div>
     <div className={`card-art-layer card-art-edge ${paused?'effects-paused':''}`} aria-hidden="true">

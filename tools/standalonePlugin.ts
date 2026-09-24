@@ -1,0 +1,7 @@
+import {resolve,dirname} from 'node:path';
+import type {Plugin} from 'vite';
+/** Exclude multiplayer modules from the graph, rather than disabling them at runtime. */
+export function standalonePlugin():Plugin{
+ const targets=['Workbench','WorkbenchPanel','DmNotes','SupporterEffect'];
+ return {name:'single-player-only',enforce:'pre',resolveId(id,importer){if(!importer||!id.startsWith('.'))return;const path=resolve(dirname(importer),id).replaceAll('\\','/').replace(/\.(tsx?|jsx?)$/,'');if(path.endsWith('/src/platform/workbench'))return resolve('src/standalone/bridge.ts');if(targets.some(name=>path.endsWith('/src/ui/'+name)))return resolve('src/standalone/ui.tsx');},transformIndexHtml(html){return html.replace('Full Suite · 角色卡与 Wiki','DND 角色卡 · 单机版');},generateBundle(_,bundle){const modules=Object.values(bundle).flatMap(item=>item.type==='chunk'?Object.keys(item.modules):[]);const forbidden=modules.filter(id=>/src\/(platform\/(?:relay|workbench|wire|resources|conditions|stats|mutationQueue)\.ts|ui\/Workbench(?:Console|Panel)?\.tsx)/.test(id.replaceAll('\\','/'))||id.includes('@owlbear-rodeo'));if(forbidden.length)this.error('Standalone contains multiplayer modules: '+forbidden.join(', '));this.emitFile({type:'asset',fileName:'standalone-audit.json',source:JSON.stringify({singlePlayer:true,multiplayerModules:forbidden,modules:modules.filter(id=>id.includes('/src/')).map(id=>id.slice(id.indexOf('/src/')+1))},null,2)});}};
+}

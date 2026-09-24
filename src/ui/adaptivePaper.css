@@ -1,0 +1,19 @@
+/* Only the responsive layout and monster sheets use these layers. */
+.paper.adaptive-card-host{position:relative;isolation:isolate}
+.paper.adaptive-card-host [data-adaptive-frame],.paper.adaptive-card-host [data-adaptive-physical]{position:relative}
+.paper.adaptive-card-host [data-adaptive-physical]{transform:rotate(var(--adaptive-fall-tilt,0deg))}
+.paper.adaptive-condition-invisible .sheet-cell:not(.cell-missing) .cell-face::before,.paper.adaptive-condition-invisible .stock-outline{opacity:0}
+.paper.adaptive-condition-invisible .stock-board,.paper.adaptive-condition-invisible .stock-item,.paper.adaptive-condition-invisible .stock-empty{border-color:transparent}
+.paper.adaptive-condition-frightened .cell-face::before,.paper.adaptive-condition-frightened .cell-perimeter,.paper.adaptive-condition-frightened .stock-outline{animation:adaptive-frame-shiver .33s linear infinite}
+.paper.adaptive-card-host>.workbench-monster{position:relative;z-index:1;background:transparent}
+.paper.adaptive-card-host .workbench-monster>header{gap:6px;flex-wrap:wrap}
+.paper.adaptive-card-host .workbench-monster>header h1{flex:0 1 auto;max-width:100%;min-width:0}
+.paper.adaptive-card-host .workbench-monster .resource179-conditions{max-width:100%;margin-left:auto;flex-wrap:wrap;overflow:visible}
+.paper.adaptive-card-host .workbench-monster .resource179-condition{font-size:11px;line-height:17px}
+.paper.adaptive-card-host .workbench-monster .monster-section,.paper.adaptive-card-host .workbench-monster .monster-defenses{isolation:isolate}
+.paper.adaptive-card-host .workbench-monster .monster-paper-content .cell-surface{background:#e8e8e89e}
+.paper.adaptive-card-host .workbench-monster .monster-paper-content .cell-content{isolation:isolate}
+.paper.adaptive-card-host .workbench-monster .assign-token-name{transform-origin:center;transition:rotate .8s,opacity .6s}
+.paper.adaptive-card-host .workbench-monster.drop-ready{outline:1px dashed #aa8b32;outline-offset:-3px}
+.paper.adaptive-card-host .workbench-monster.drop-over{outline:2px solid #aa8b32;outline-offset:-3px}
+@media print{.paper.adaptive-card-host [data-adaptive-physical]{translate:none!important;transform:none!important;rotate:none!important}.paper.adaptive-card-host [data-adaptive-prone]{rotate:none!important}}

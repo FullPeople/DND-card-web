@@ -2,6 +2,7 @@ import type { Entry, Kind, Raw } from '../core/model';
 import { readCache, writeCache } from '../platform/storage';
 import { prepareBody, specificMagicItems, expandVersions, expandCopies } from './expand';
 import { inheritSubrace, readableEntries } from './adapt';
+import {DEFAULT_HOMEBREW,homebrewPaths,homebrewMetadata,homebrewBody} from './homebrew';
 export const DEFAULT_SOURCE = 'https://5e.kiwee.top';
 export interface LoadProgress { done: number; total: number; label: string; failed: string[]; cached: number }
 const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition', variantrule: 'rule', action: 'rule', sense: 'rule', skill: 'rule', language: 'rule', status: 'condition', disease: 'condition', itemGroup: 'item', magicvariant: 'item', itemMastery: 'feature', itemProperty: 'rule', itemType: 'rule', reward: 'feature', charoption: 'feature', psionic: 'feature', deity: 'rule', cult: 'rule', boon: 'feature', facility: 'rule', table: 'rule', tableGroup: 'rule', monster: 'monster' };
@@ -37,13 +38,16 @@ export function resolveReference(ref: string, entries: Entry[], kind?: Kind): En
 }
 async function fetchJson(base: string, path: string, signal: AbortSignal, refresh: boolean): Promise<{ body: Raw; revision: string; cached: boolean; warning?: string }> {
   const key = `${base}/${path}`;
-  const prior = await readCache(key);
+  const cached = await readCache(key);
+  const valid=(body:Raw)=>!path.endsWith('/index.json')||Object.values(body).some(v=>typeof v==='string'&&v.endsWith('.json'));
+  const prior=cached&&valid(cached.body)?cached:undefined;
   if (!refresh && prior) return { ...prior, cached: true };
   try {
     const response = await fetch(key, { signal: AbortSignal.any([signal, AbortSignal.timeout(20000)]), cache: 'no-cache' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const body = await response.json();
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('资料格式不正确');
+    if(!valid(body))throw Error('资料索引为空，请重试');
     const revision = response.headers.get('etag') || await hashJson(body);
     await writeCache(key, { body, revision });
     return { body, revision, cached: false };
@@ -78,6 +82,7 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
     } catch (error) { if (signal.aborted) return; progress.failed.push(`${category} 索引：${String(error)}`); }
     progress.done++; progress.total = paths.length + 3; onProgress({ ...progress });
   }
+  for(const file of ['spells-phb.json','spells-xphb.json']){const path=`data/spells/${file}`;if(!paths.includes(path))paths.push(path);}
   // Core rulebooks first; remaining books arrive incrementally.
   paths.sort((a, b) => Number(!/(phb|wizard|fighter|races|backgrounds|feats)/.test(a)) - Number(!/(phb|wizard|fighter|races|backgrounds|feats)/.test(b)));
   const monsters: Raw[]=[];let monsterTemplates:Raw[]=[],legendaryGroups:Raw[]=[];
@@ -118,5 +123,26 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
     onBatch(normalizeData(equipment, revision));
     const expanded = prepareBody(equipment);
     onBatch(normalizeData({ ...equipment, baseitem: [], itemGroup: [], magicvariant: [], item: specificMagicItems(expanded) }, revision));
+  }
+  // The mirror keeps third-party books in a separate repository, outside data/*.
+  // Load its generated index rather than maintaining a list of book titles here.
+  if(!signal.aborted&&base===DEFAULT_SOURCE){
+    let brewFiles:string[]=[];
+    try{const index=await fetchJson(DEFAULT_HOMEBREW,'_generated/index-sources.json',signal,refresh);brewFiles=homebrewPaths(index.body);if(index.cached)progress.cached++;if(index.warning)progress.failed.push(`三方索引：${index.warning}`);}
+    catch(error){if(signal.aborted)return;progress.failed.push(`三方资料索引：${String(error)}`);}
+    progress.total+=brewFiles.length;let brewCursor=0;
+    await Promise.all(Array.from({length:3},async()=>{while(brewCursor<brewFiles.length&&!signal.aborted){
+      const path=brewFiles[brewCursor++];
+      try{
+        const result=await fetchJson(DEFAULT_HOMEBREW,path.split('/').map(encodeURIComponent).join('/'),signal,refresh);
+        if(signal.aborted)return;if(result.cached)progress.cached++;if(result.warning)progress.failed.push(`${path}：${result.warning}`);
+        onSources?.(homebrewMetadata(result.body));
+        const body=homebrewBody(result.body);
+        onBatch(normalizeData(body,result.revision,'kiwee-homebrew'));
+        if(body.magicvariant?.length&&body.baseitem?.length)onBatch(normalizeData({item:specificMagicItems(prepareBody(body))},result.revision,'kiwee-homebrew'));
+      }catch(error){if(signal.aborted)return;progress.failed.push(`${path}：${String(error)}`);}
+      progress.done++;progress.label=path;onProgress({...progress,failed:[...progress.failed]});
+    }}));
+    onProgress({...progress,failed:[...progress.failed]});
   }
 }

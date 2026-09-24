@@ -1,0 +1,68 @@
+/* Compact resources wrap from the left instead of stretching to fill a row. */
+.resource179-flow,.paper .quickbar-resources{display:flex;flex-flow:row wrap;align-items:flex-start;align-content:flex-start;justify-content:flex-start;gap:4px}
+.paper .quickbar-resources>.quick-resource{flex:0 1 auto;max-width:100%;min-width:0}
+.resource179-flow .resource179-row,.paper .quickbar-resources .resource179-row{display:inline-grid;width:fit-content;max-width:100%;min-width:0;box-sizing:border-box;margin:0;padding:3px 5px!important;gap:2px;align-self:start}
+.resource179-row .resource-title{min-height:15px;line-height:15px;padding-right:30px;max-width:100%;overflow-wrap:anywhere}
+.resource179-row .resource-title>strong{font-size:12px;line-height:15px}
+.paper .quickbar-resources .resource179-row .resource-title>strong{font-size:10px;line-height:13px}
+.resource179-row .resource-title>.resource-actions{top:1px}
+.resource179-row .resource-title .resource-actions>button{height:14px!important;line-height:14px!important}
+.resource179-row .console-resource-controls{width:max-content;max-width:100%;flex:0 1 auto;gap:3px;margin:0}
+.resource179-row .console-resource-controls>.resource-numeric{flex:0 0 auto!important;min-width:32px;width:auto;padding-inline:4px}
+.resource179-row .console-resource-controls>.resource-bar{flex:0 1 94px;min-width:64px;width:94px}
+.resource179-row .console-resource-controls>.resource-pips{flex:0 1 auto;width:max-content;max-width:160px;justify-content:flex-start}
+.resource179-row .resource-manual{flex:0 1 56px;max-width:72px}
+.resource179-row .resource-manual>.stat-input{width:40px}
+.resource179-flow .resource179-row .console-resource-controls>button{height:18px;min-height:18px;font-size:11px}
+.resource179-flow .resource179-row .resource-bar b,.resource179-flow .resource179-row .resource-numeric{font-size:11px}
+.resource179-flow .resource179-row .console-resource-controls .resource-bar{height:18px!important}
+.resource179-flow .resource179-row .console-resource-controls .resource-pips button{width:15px;min-width:15px;height:18px;min-height:18px}
+
+/* The fill and its SVG outline share one exact border box and corner polygon. */
+.console-roster .console-resource-card.resource179-card{--paper-frame:#50525b;position:relative;isolation:isolate;overflow:visible;display:block;border:0;border-radius:0;padding:0!important;background:transparent;min-width:0;color:var(--suite-ink)}
+.resource179-card>.resource179-face{position:relative;isolation:isolate;min-width:0;padding:7px;overflow:hidden;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px);background:var(--suite-paper);transition:background .7s}
+.resource179-card>.stock-frame-art>.stock-outline{stroke-width:3}
+.resource179-card .resource179-heading{position:relative;z-index:5;display:flex;align-items:center;gap:4px;min-height:23px;height:auto;margin:0 0 5px;padding:0 0 3px;border-bottom:1px solid #9996;isolation:isolate}
+.resource179-card .resource179-heading>.resource179-name{font-size:14px;line-height:20px;font-weight:700;min-width:28px;flex:0 1 auto;max-width:100%;border:0;background:none;padding:0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;rotate:0deg;transition:rotate .9s cubic-bezier(.3,.8,.3,1)}
+.resource179-card .resource179-heading>.resource179-add{margin-left:auto;padding:0 3px;flex:none;min-width:20px;height:20px;font-size:15px;line-height:18px}
+.resource179-conditions{position:relative;z-index:6;display:flex;flex:0 1 auto;align-items:center;gap:3px;min-width:0;max-width:66%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding-block:2px}
+.resource179-conditions:empty{display:none}
+.resource179-conditions>.resource179-condition{flex:none;padding:1px 5px;border:1px solid #a7a7ab;border-radius:4px;background:var(--suite-surface);font-size:10px;line-height:15px;white-space:nowrap;color:var(--suite-ink);touch-action:none}
+.resource179-conditions>.resource179-condition[data-can-drag=true]{cursor:grab}
+.resource179-conditions>.resource179-condition:hover{outline:1px solid var(--suite-tone);outline-offset:0;background:var(--suite-hover)}
+.resource179-body{position:relative;z-index:1;display:flex;flex-direction:column;gap:5px;min-width:0;min-height:110px}
+.resource179-body>.overview-passive{margin:0}
+.resource179-body>.overview-character-facts{margin:0;padding:0;border:0}
+.resource179-body [data-physical-frame]{position:relative;transform:rotate(var(--fall-tilt,0deg));transform-origin:center;transition:filter .7s,background .7s}
+.resource179-card .resource179-flow{gap:4px;min-width:0}
+.resource179-card .resource179-physical{flex:0 1 auto;max-width:100%;min-width:0}
+.resource179-card .resource179-physical>.stock-frame-art{z-index:3}
+.resource179-card .resource179-physical>.stock-frame-art>.stock-outline{opacity:0}
+.resource179-card .card-art-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none}
+.resource179-card .card-art-edge{z-index:3}
+.resource179-card .card-art-background{z-index:0}
+.resource179-card .card-art-layer .watermark-anchor{width:54%;top:55%}
+.resource179-card .resource179-heading>.cell-halo{inset:-4px auto auto 5px;width:90px;height:32px}
+.resource179-card.condition-prone .resource179-name{rotate:180deg}
+.resource179-card.condition-invisible>.stock-frame-art>.stock-outline{opacity:0}
+.resource179-card.condition-petrified>.resource179-face{background:color-mix(in srgb,var(--suite-paper) 85%,#999)}
+.resource179-card.condition-petrified .resource179-body{filter:grayscale(1) brightness(.92)}
+.resource179-card.condition-frightened>.stock-frame-art>.stock-outline{animation:frame-tremor .31s linear infinite}
+.resource179-card.condition-incapacitated .resource179-body{min-height:165px}
+.resource179-card.condition-unconscious .resource179-vitals{filter:grayscale(1);background:#23242a;color:#fff;border-radius:8px}
+.resource179-card.condition-invisible .resource179-name{opacity:.55}
+.resource179-card .resource179-body .overview-character-facts:empty{display:none}
+@media(hover:none){.resource179-row .resource-title>.resource-actions{opacity:1;pointer-events:auto}}
+@media(prefers-reduced-motion:reduce){.resource179-card .resource179-name{transition:none}}
+
+.resource179-transfer-ready{outline:2px solid #c8a13a55;outline-offset:2px}.resource179-card.inventory-drop-over{outline:2px solid #b48d24;outline-offset:2px}
+
+.resource179-card .resource179-name>span{display:block;overflow:hidden;text-overflow:ellipsis}.resource179-card .resource179-name>small{display:block;font-size:12px;line-height:15px;font-weight:400;color:var(--suite-muted)}
+
+/* Responsive overview effects have their own geometry and never reuse A4 SVGs. */
+.resource179-card .resource179-body.adaptive-physics-area{min-height:max(110px,var(--adaptive-gravity-height,0px))}
+.resource179-card.adaptive-condition-prone .resource179-heading>.resource179-name{rotate:180deg}
+.resource179-card.adaptive-condition-invisible .resource179-name{opacity:.55}
+.resource179-card.adaptive-condition-invisible .console-resource{border-color:transparent}
+.resource179-card.adaptive-condition-petrified>.resource179-face{background:color-mix(in srgb,var(--suite-paper) 85%,#999)}
+.resource179-card .resource179-physical>.adaptive-frame-art{z-index:3}

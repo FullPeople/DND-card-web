@@ -15,12 +15,12 @@ test.beforeEach(async({page})=>{
 
 test('source radio display, per-entry exclusion and opaque configuration survive import and refresh',async({page})=>{
  await page.getByRole('button',{name:'规则与扩展',exact:true}).click();
- const dialog=page.getByRole('dialog');await dialog.getByRole('radio',{name:'纯文本',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'规则与扩展',exact:true});await dialog.getByRole('radio',{name:'纯文本',exact:true}).click();
  await dialog.getByRole('button',{name:'设置来源 XPHB'}).click();
  await dialog.getByLabel('搜索来源内条目').fill('微光术');await dialog.getByRole('checkbox',{name:'启用条目 微光术',exact:true}).uncheck();
- await dialog.getByRole('button',{name:'导出配置',exact:true}).click();await expect(dialog.getByLabel('规则配置码')).toHaveValue(/^DND1\.[\w-]+$/);
- const code=await dialog.getByLabel('规则配置码').inputValue();await dialog.getByRole('checkbox',{name:'启用条目 微光术',exact:true}).check();await dialog.getByRole('radio',{name:'简写',exact:true}).click();
- await dialog.getByLabel('规则配置码').fill(code);await dialog.getByRole('button',{name:'导入配置',exact:true}).click();await expect(dialog.getByRole('radio',{name:'纯文本',exact:true})).toHaveAttribute('aria-checked','true');await expect(dialog.getByRole('checkbox',{name:'启用条目 微光术',exact:true})).not.toBeChecked();
+ await page.getByRole('button',{name:'关闭来源设置'}).click();await dialog.getByRole('button',{name:'导出配置',exact:true}).click();await expect(dialog.getByLabel('规则配置码')).toHaveValue(/^DND1\.[\w-]+$/);
+ const code=await dialog.getByLabel('规则配置码').inputValue();await dialog.getByRole('button',{name:'设置来源 XPHB'}).click();await page.getByRole('dialog',{name:/来源设置/}).getByRole('checkbox',{name:'启用条目 微光术',exact:true}).check();await page.getByRole('button',{name:'关闭来源设置'}).click();await dialog.getByRole('radio',{name:'简写',exact:true}).click();
+ await dialog.getByLabel('规则配置码').fill(code);await dialog.getByRole('button',{name:'导入配置',exact:true}).click();await expect(dialog.getByRole('radio',{name:'纯文本',exact:true})).toHaveAttribute('aria-checked','true');await dialog.getByRole('button',{name:'设置来源 XPHB'}).click();await expect(page.getByRole('dialog',{name:/来源设置/}).getByRole('checkbox',{name:'启用条目 微光术',exact:true})).not.toBeChecked();await page.getByRole('button',{name:'关闭来源设置'}).click();
  await dialog.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();
  await expect(page.locator('.catalog-row')).toHaveClass(/entry-disabled/);await expect(page.locator('.catalog-row')).toContainText('玩家手册');await expect(page.locator('.catalog-row')).not.toContainText('XPHB');await expect(page.locator('.catalog-row')).toHaveClass(/ritual-row/);
  await page.reload();await expect(page.locator('.catalog-row')).toHaveClass(/entry-disabled/);

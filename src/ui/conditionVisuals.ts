@@ -22,9 +22,32 @@ export const CONDITION_VISUALS = {
   surprised: { name: '突袭', layer: 'edge' },
 } as const;
 export type ConditionVisual = keyof typeof CONDITION_VISUALS;
+
+// Exact presentation aliases, including historical Suite IDs. Do not use these
+// aliases for source identity, rule matching, deduplication or automatic grants.
+const names: Partial<Record<ConditionVisual, readonly string[]>> = {
+  frightened: ['恐惧'], stunned: ['眩晕'], invisible: ['隐身'], concentration: ['focused'],
+};
+const suiteAliases: Record<string, ConditionVisual> = {
+  u_paralyzed: 'paralyzed', u_stunned: 'stunned', u_charmed: 'charmed', u_invisible: 'invisible',
+  u_restrained: 'restrained', u_focused: 'concentration',
+};
+const canonical = (value: unknown) => typeof value === 'string' ? value.normalize('NFKC')
+  .replace(/[\p{Extended_Pictographic}\uFE0E\uFE0F\u200D]/gu, '').replace(/['’`]/g, '')
+  .replace(/[\s_-]+/g, ' ').trim().toLowerCase() : '';
+const aliases = new Map<string, ConditionVisual>();
+for (const [id, visual] of Object.entries(CONDITION_VISUALS) as [ConditionVisual, typeof CONDITION_VISUALS[ConditionVisual]][]) {
+  for (const name of [id, visual.name, ...(names[id] || [])]) aliases.set(canonical(name), id);
+}
+for (const [id, visual] of Object.entries(suiteAliases)) aliases.set(canonical(id), visual);
+
 export function conditionVisual(entry: Entry): ConditionVisual | undefined {
   if (entry.kind !== 'condition') return;
-  const id = String(entry.raw.visual?.condition || entry.english).toLowerCase();
-  if (Object.hasOwn(CONDITION_VISUALS, id)) return id as ConditionVisual;
-  return (Object.keys(CONDITION_VISUALS) as ConditionVisual[]).find(key => CONDITION_VISUALS[key].name === entry.name);
+  // An explicitly unknown visual ID is an intentional opt-out. Runtime Suite
+  // IDs, however, may be UUIDs or web:<source-entry-id>; they are not visual IDs.
+  if (entry.raw.visual?.condition != null) return aliases.get(canonical(entry.raw.visual.condition));
+  const suiteVisual = aliases.get(canonical(entry.raw._suiteStatusId));
+  if (suiteVisual) return suiteVisual;
+  if (entry.raw._workbenchCustom || entry.source === 'CUSTOM') return;
+  return aliases.get(canonical(entry.english)) || aliases.get(canonical(entry.name));
 }

@@ -18,3 +18,5 @@ export function visualConditions(character: Character) {
   return { active, exhaustion };
 }
 export const CardVisualContext = createContext<{ active: Set<ConditionVisual>; exhaustion: number }>({ active: new Set(), exhaustion: 0 });
+
+export const CardIdentityContext = createContext('');

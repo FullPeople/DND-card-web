@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { CardVisualContext } from './cardVisualState';
-export function CellArt({ width: w, height: h, missing }: { width: number; height: number; missing: boolean }) {
+export function CellArt({ width: w, height: h, missing, rounded=false }: { width: number; height: number; missing: boolean; rounded?:boolean }) {
   const { exhaustion } = useContext(CardVisualContext);
   if (!w || !h) return null;
-  const perimeter = `M8.6 1.5H${w-8.6}L${w-1.5} 8.6V${h-8.6}L${w-8.6} ${h-1.5}H8.6L1.5 ${h-8.6}V8.6Z`;
+  const perimeter = rounded ? `M9 1.5H${w-9}Q${w-1.5} 1.5 ${w-1.5} 9V${h-9}Q${w-1.5} ${h-1.5} ${w-9} ${h-1.5}H9Q1.5 ${h-1.5} 1.5 ${h-9}V9Q1.5 1.5 9 1.5Z` : `M8.6 1.5H${w-8.6}L${w-1.5} 8.6V${h-8.6}L${w-8.6} ${h-1.5}H8.6L1.5 ${h-8.6}V8.6Z`;
   return <>
     <svg className="cell-state-art cell-edge-art" viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
       {!missing && <path className="invisible-cell-edge" d={perimeter}/>}

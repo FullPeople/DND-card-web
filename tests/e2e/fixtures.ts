@@ -14,6 +14,7 @@ const data: Record<string, unknown> = {
   'items.json': {}, 'optionalfeatures.json': {}, 'conditionsdiseases.json': {},
 };
 export async function mockSource(page: Page) {
+  await page.route('https://homebrew.kiwee.top/**',route=>route.fulfill({json:{},headers:{'access-control-allow-origin':'*'}}));
   await page.route('https://5e.kiwee.top/data/**', async route => {
     const key = new URL(route.request().url()).pathname.replace('/data/', '');
     await route.fulfill({ json: data[key] || {}, headers: { 'access-control-allow-origin': '*', etag: 'fixture-1' } });

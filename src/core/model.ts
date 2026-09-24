@@ -22,15 +22,28 @@ export interface Entry {
   packId: string; revision: string; page?: number; entries: unknown[]; raw: Raw;
   effects?: Effect[]; choices?: ChoiceDefinition[]; dependencies?: string[];
 }
-export interface Selection { id: string; entry: Entry; quantity: number; level: number; equipped: boolean; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
+export interface Selection { id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
+export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface Character {
+  locked?:boolean;
   schemaVersion: 1; id: string; revision: number; name: string; player: string; edition: Edition;
   createdAt: string; updatedAt: string; abilities: Record<Ability, number>; baseHp: number;
   identity: { gender: string; alignment: string; age: string; description: string };
+  biography?: Partial<Record<'hometown'|'height'|'weight'|'traits'|'ideals'|'bonds'|'flaws'|'story'|'backgroundDescription'|'portraitNotes',string>>;
+  portrait?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
+  illustration?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
+  palette?: Partial<Record<'paper'|'surface'|'frame'|'heading'|'ink'|'badge',string>>;
+  spellSettings?: SpellSettings;
+  inventory?: {capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
+  backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
   profile: RuleProfile; notes: string;
+  rulePacks?: RulePack[];
+  quickbarLayout?: {order:string[];hidden:string[]};
   quickbar?: string[];
+  quickbarCopies?: {id:string;entry:Entry}[];
+  quickbarActions?: {id:string;name:string;attack:string;damage:string}[];
   proficiencies?: Record<string, boolean>;
   expertise?: Record<string, boolean>;
   jackOfAllTrades?: boolean;
@@ -38,10 +51,10 @@ export interface Character {
   size?: Size;
   sheetBonuses?: Partial<Record<SheetBonus, number>>;
   dismissedFeatures?: string[];
-  featureLayout?: { order: string[]; expanded: string[] };
+  featureLayout?: { detailsExpanded?:string[]; order: string[]; expanded: string[] };
   adjustments?: { id: string; target: string; value: number; reason: string }[];
   externalSnapshot?: Raw;
-  runtime: { deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string, { current: number; max: number }> };
+  runtime: { deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string, { current: number; max: number; name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean }> };
 }
 export interface RulePack { schemaVersion: 1; id: string; name: string; version: string; author?: string; editions: Edition[]; requires: { id: string; version: string }[]; conflicts: string[]; entries: Entry[] }
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }
@@ -62,12 +75,25 @@ export function newCharacter(edition: Edition = '2024'): Character {
     profile: { enabledSources: ['PHB', 'XPHB'], optional: { feats: true, multiclass: false, legacy: false }, exceptions: {} },
     runtime: { hp: 0, tempHp: 0, inspiration: 0, resources: {} } };
 }
+/** Edition switches govern core handbooks, not expansion provenance. A source
+ * can provide a separate subclass adaptation for the other parent class. */
+export function entryEdition(e:Entry):Edition|'both' {
+  const core:Record<string,Edition>={PHB:'2014',DMG:'2014',XPHB:'2024',XDMG:'2024'};
+  const published=core[e.source.toUpperCase()];
+  if(!published)return 'both';
+  return (e.kind==='subclass'||e.kind==='feature')&&core[String(e.raw.classSource||'').toUpperCase()]||published;
+}
+export function editionAllows(e:Entry,edition:Edition,legacy=false){const required=entryEdition(e);return required==='both'||required===edition||edition==='2024'&&legacy;}
 export function selectionAllowed(c: Character, e: Entry): boolean {
   if (c.profile.disabledEntries?.includes(e.id)) return false;
   if (c.profile.exceptions[e.id]?.trim()) return true;
-  return c.profile.enabledSources.includes(e.source) && (e.kind !== 'feat' || c.profile.optional.feats) && (e.dependencies || []).every(id => c.profile.enabledSources.includes(id)) && (e.edition === 'both' || e.edition === c.edition || (c.edition === '2024' && c.profile.optional.legacy));
+  // Unmapped external card records have no publisher source to enable. Keep
+  // their manually supplied values until the player replaces the snapshot.
+  if (e.source === 'IMPORTED' && e.packId === 'imported') return true;
+  return c.profile.enabledSources.includes(e.source) && (e.kind !== 'feat' || c.profile.optional.feats) && (e.dependencies || []).every(id => c.profile.enabledSources.includes(id)) && editionAllows(e,c.edition,c.profile.optional.legacy);
 }
 export const signed = (n: number) => n >= 0 ? `+${n}` : String(n);
+export function subclassOwner(c:Character,e:Entry){const key=(v:unknown)=>String(v||'').trim().toLowerCase();const names=[e.raw.className,e.raw.classEnglish,e.raw.classENG_name].map(key).filter(Boolean);return c.selections.find(s=>s.entry.kind==='class'&&[s.entry.name,s.entry.english,s.entry.raw.name,s.entry.raw.ENG_name].map(key).some(n=>names.includes(n))&&key(s.entry.source)===key(e.raw.classSource||'PHB'));}
 export function skillKey(name: string): string {
   const compact = name.toLowerCase().replace(/[\s_-]/g, '');
   return Object.keys(SKILLS).find(k => k.toLowerCase() === compact || SKILLS[k].name === name) ?? name;

@@ -9,3 +9,9 @@ playwright-report/
 *.log
 *.tsbuildinfo
 .DS_Store
+
+dist-sync-prototype/
+
+dist-standalone/
+
+test-results-standalone/

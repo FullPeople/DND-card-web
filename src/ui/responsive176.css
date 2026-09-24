@@ -1,0 +1,39 @@
+/* Keep the paper at the top and spend narrow-pane space on its contents. */
+.sheet-viewport{align-items:flex-start}
+.sheet-compact .sheet-pages{width:100%;height:26px;flex-direction:row;gap:2px;padding:0;align-items:stretch}
+.sheet-compact .sheet-pages button,.sheet-compact .sheet-pages button[aria-selected=true]{writing-mode:horizontal-tb;flex:1;width:auto;min-width:0;min-height:26px;height:26px;padding:3px 4px;border:1px solid #a4a69e;border-radius:4px 4px 0 0;margin:0;line-height:18px;font-size:11px;box-shadow:none}
+.sheet-compact .sheet-pages button[aria-selected=true]{border-bottom:2px solid #595959;background:#f2f2f0;color:#333}
+.toolbar-actions .sheet-fullscreen-toggle{display:grid;place-items:center;padding:3px 5px}
+.sheet-pane.sheet-fullscreen{display:flex!important;flex-direction:column;position:fixed;inset:0;z-index:80;width:100vw;height:100dvh;border:0;overflow:hidden;background:color-mix(in srgb,var(--suite-tone) 17%,#f0f0f2)}
+.sheet-pane.sheet-fullscreen .sheet-viewport{margin:5px 8px 3px}
+.sheet-pane.sheet-fullscreen .pane-toolbar{height:30px;padding:0 8px}
+.sheet-pane.sheet-fullscreen .save-status{display:none}
+
+/* Columns follow the functional pane, including when the split handle moves. */
+.resource-overview{container-type:inline-size;container-name:roster}
+.resource-overview .console-roster{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.console-roster>.overview-give-zone{min-width:0}
+@container roster (max-width:660px){.resource-overview .console-roster{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container roster (max-width:430px){.resource-overview .console-roster{grid-template-columns:minmax(0,1fr)}}
+.public-stock>header[role=button]{cursor:pointer;user-select:none}
+.public-stock>header[role=button]:hover{filter:brightness(.96)}
+.public-stock>header[role=button]:focus-visible{outline:2px solid var(--suite-tone);outline-offset:2px}
+.public-stock>header .warehouse-toggle{display:inline-grid;place-items:center}
+
+@media(max-width:700px){
+ .app-shell{min-height:0}
+ .app-header{height:auto;min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:1px;padding:3px 6px}
+ .app-header .brand{height:22px;gap:6px;align-self:flex-start}
+ .app-header .brand-logo{width:21px;height:21px}.app-header .brand strong{font-size:12px;letter-spacing:.2px}.app-header .brand-en{font-size:9px}
+ .header-tools{gap:4px;min-width:0;width:100%;overflow-x:auto;scrollbar-width:none;padding:1px 0}
+ .header-tools button{flex:none;white-space:nowrap;padding:3px 6px;font-size:10px;line-height:14px;min-height:22px}.header-tools button span{margin-left:2px;font-size:9px}
+ .workbench-bar{padding:2px 6px!important;gap:5px!important;min-height:24px;font-size:10px}.workbench-bar>strong{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}.workbench-bar label{flex:none;white-space:nowrap;font-size:10px}.workbench-bar input[type=checkbox]{width:12px;height:12px;margin:0 3px 0 0}
+ .workbench-cards{padding:3px 6px!important;gap:4px!important;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+ .workbench-cards>button,.workbench-cards .workbench-mode{flex:none;min-height:28px;min-width:42px;padding:3px 7px;font-size:11px;line-height:14px;white-space:nowrap}.workbench-cards small{font-size:8px;line-height:10px}
+ .mobile-tabs{min-height:25px!important}.mobile-tabs button{padding:4px 6px;font-size:11px;line-height:16px}
+ .pane-toolbar{height:28px;padding:0 6px;gap:4px}.pane-toolbar>div{gap:5px}.pane-toolbar .eyebrow{font-size:10px;letter-spacing:0}.toolbar-actions button{font-size:18px;padding:2px 5px}.toolbar-actions .paper-size{display:none}
+ .sheet-viewport{margin:4px 4px 2px}.save-status{min-height:18px;padding:2px 6px!important;font-size:9px;line-height:14px}.save-status>span:last-child:not(.status-dot){display:none}
+ .sheet-pane .character-tabs{min-width:0}.sheet-pane .character-tabs button{font-size:10px;white-space:nowrap}
+ .dm-console{padding:8px!important}.resource-section-heading{flex-wrap:wrap}
+}
+@media print{.sheet-fullscreen-toggle{display:none!important}}

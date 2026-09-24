@@ -28,7 +28,7 @@ test('right and middle buttons pin nested tooltips; one outside click dismisses 
 
 test('wiki separator resizes, remembers height and clamps on small screens', async ({ page }) => {
   await page.locator('.catalog-row').first().click();
-  const separator = page.getByRole('separator'), list = page.locator('.catalog-list');
+  const separator = page.getByRole('separator', { name: '调整资料列表与正文高度' }), list = page.locator('.catalog-list');
   const before = (await list.boundingBox())!.height, b = (await separator.boundingBox())!;
   await page.mouse.move(b.x + b.width / 2, b.y + 4); await page.mouse.down(); await page.mouse.move(b.x + b.width / 2, b.y + 144, { steps: 8 }); await page.mouse.up();
   await expect.poll(async () => (await list.boundingBox())!.height).toBeGreaterThan(before + 120);

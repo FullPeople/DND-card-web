@@ -24,7 +24,7 @@ test('category documents, scroll positions, sorting and facet choices survive sw
   await expect.poll(() => page.locator('.entry-detail').evaluate(e => e.scrollTop)).toBeGreaterThan(200);
   const top = await page.locator('.entry-detail').evaluate(e => e.scrollTop);
   await tabs.getByRole('button', { name: '法术', exact: true }).click();
-  await page.getByRole('columnheader', { name: '环阶' }).click();
+  await expect(page.getByRole('columnheader', { name: /环阶/ })).toHaveAttribute('aria-sort','ascending');
   await expect(page.locator('.catalog-row').first()).toContainText('低环甲');
   await page.getByRole('columnheader', { name: '环阶' }).click();
   await expect(page.locator('.catalog-row').first()).toContainText('高环乙');
@@ -63,7 +63,7 @@ test('filter exclusions and paragraph collapse persist without changing the sele
   await dialog.getByRole('button', { name: '完成 · 查看结果' }).click();
   await expect(page.locator('.catalog-row')).toHaveCount(1); await expect(page.locator('.catalog-row')).toContainText('幻影丙');
   await page.getByRole('button', { name: '清空', exact: true }).click(); await expect(page.locator('.catalog-row')).toHaveCount(3);
-  await expect(page.locator('.identity-class')).toContainText('点击填写');
+  await expect(page.locator('.identity-class')).toContainText('点击并拖拽填写');
 });
 
 test('empty training has no overflow and condition/spell chips respond immediately and persist manual training', async ({ page }) => {

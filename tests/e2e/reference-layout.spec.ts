@@ -7,7 +7,7 @@ test('reference layout groups skills by ability and marks the whole incomplete f
   await expect(page.locator('.overview-sheet .cell-missing')).toHaveCount(5);
   const field = page.locator('.identity-class');
   await expect(field).toHaveClass(/cell-missing/);
-  await expect(field).toContainText('点击填写');
+  await expect(field).toContainText('点击并拖拽填写');
   const perimeter = field.locator('.cell-perimeter path');
   expect(await perimeter.evaluate(el => getComputedStyle(el).strokeDasharray)).not.toBe('none');
   expect(await perimeter.evaluate(el => getComputedStyle(el).animationName)).toBe('missing-perimeter');

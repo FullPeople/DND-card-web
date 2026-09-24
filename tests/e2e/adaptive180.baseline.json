@@ -1,0 +1,355 @@
+{
+  "character": {
+    "schemaVersion": 1,
+    "id": "adaptive180-reference",
+    "revision": 1,
+    "name": "纸卡基线",
+    "player": "",
+    "edition": "2024",
+    "createdAt": "2026-09-23T15:46:01.076Z",
+    "updatedAt": "2026-09-23T15:46:01.076Z",
+    "abilities": {
+      "str": 10,
+      "dex": 10,
+      "con": 10,
+      "int": 10,
+      "wis": 10,
+      "cha": 10
+    },
+    "baseHp": 0,
+    "identity": {
+      "gender": "",
+      "alignment": "",
+      "age": "",
+      "description": ""
+    },
+    "selections": [
+      {
+        "id": "wizard",
+        "entry": {
+          "id": "wizard",
+          "kind": "class",
+          "name": "法师",
+          "english": "wizard",
+          "source": "XPHB",
+          "edition": "2024",
+          "packId": "test",
+          "revision": "1",
+          "raw": {
+            "hd": {
+              "faces": 6
+            }
+          },
+          "entries": [
+            "测试角色状态。"
+          ]
+        },
+        "level": 1,
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "id": "charmed",
+        "entry": {
+          "id": "charmed",
+          "kind": "condition",
+          "name": "魅惑",
+          "english": "charmed",
+          "source": "XPHB",
+          "edition": "2024",
+          "packId": "test",
+          "revision": "1",
+          "raw": {},
+          "entries": [
+            "测试角色状态。"
+          ]
+        },
+        "level": 1,
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "id": "poisoned",
+        "entry": {
+          "id": "poisoned",
+          "kind": "condition",
+          "name": "中毒",
+          "english": "poisoned",
+          "source": "XPHB",
+          "edition": "2024",
+          "packId": "test",
+          "revision": "1",
+          "raw": {},
+          "entries": [
+            "测试角色状态。"
+          ]
+        },
+        "level": 1,
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "id": "concentration",
+        "entry": {
+          "id": "concentration",
+          "kind": "condition",
+          "name": "专注",
+          "english": "concentration",
+          "source": "XPHB",
+          "edition": "2024",
+          "packId": "test",
+          "revision": "1",
+          "raw": {},
+          "entries": [
+            "测试角色状态。"
+          ]
+        },
+        "level": 1,
+        "quantity": 1,
+        "equipped": false
+      }
+    ],
+    "answers": {},
+    "reviewed": [],
+    "notes": "",
+    "profile": {
+      "enabledSources": [
+        "PHB",
+        "XPHB"
+      ],
+      "optional": {
+        "feats": true,
+        "multiclass": false,
+        "legacy": false
+      },
+      "exceptions": {}
+    },
+    "runtime": {
+      "hp": 0,
+      "tempHp": 0,
+      "inspiration": 0,
+      "resources": {}
+    }
+  },
+  "geometry": {
+    "width": 678,
+    "height": 960,
+    "classes": "paper has-card-art  condition-charmed condition-poisoned condition-concentration page-0",
+    "transform": "matrix(0.864082, 0, 0, 0.864082, 0, 0)",
+    "cells": [
+      {
+        "classes": "sheet-cell identity-name  ",
+        "x": 12.961765689804164,
+        "y": 43.87058885671842,
+        "w": 275.46865342431647,
+        "h": 28.914709093045165
+      },
+      {
+        "classes": "sheet-cell identity-field identity-background  cell-incomplete cell-missing",
+        "x": 12.961765689804164,
+        "y": 76.77351729399084,
+        "w": 135.74020823653368,
+        "h": 50.35148710776463
+      },
+      {
+        "classes": "sheet-cell identity-field identity-class   ",
+        "x": 152.69020647583147,
+        "y": 76.77351729399084,
+        "w": 135.74020823653368,
+        "h": 50.35148710776463
+      },
+      {
+        "classes": "sheet-cell identity-field identity-race  cell-incomplete cell-missing",
+        "x": 12.961765689804164,
+        "y": 131.1132237459827,
+        "w": 135.74020823653368,
+        "h": 50.3515047147865
+      },
+      {
+        "classes": "sheet-cell identity-field identity-subclass  cell-incomplete cell-missing",
+        "x": 152.69020647583147,
+        "y": 131.1132237459827,
+        "w": 135.74020823653368,
+        "h": 50.3515047147865
+      },
+      {
+        "classes": "sheet-cell total-level  ",
+        "x": 294.4127877462607,
+        "y": 43.87058885671842,
+        "w": 98.77113177624935,
+        "h": 65.8058744815667
+      },
+      {
+        "classes": "sheet-cell armor-cell  ",
+        "x": 294.4127877462607,
+        "y": 115.65883637218066,
+        "w": 98.77113177624935,
+        "h": 65.80589208858856
+      },
+      {
+        "classes": "sheet-cell life-cell  ",
+        "x": 399.16625734236186,
+        "y": 43.87058885671842,
+        "w": 150.72723482189016,
+        "h": 101.70000704280875
+      },
+      {
+        "classes": "sheet-cell dice-cell  ",
+        "x": 399.16625734236186,
+        "y": 150.55588328507764,
+        "w": 150.72723482189016,
+        "h": 30.908845175691592
+      },
+      {
+        "classes": "sheet-cell portrait-cell   ",
+        "x": 555.8758651981476,
+        "y": 43.87058885671842,
+        "w": 109.14677369242933,
+        "h": 137.5941396040508
+      },
+      {
+        "classes": "sheet-cell death-saves-cell  ",
+        "x": 12.961765689804164,
+        "y": 216.3617753736662,
+        "w": 110.61122012921996,
+        "h": 48.85589384929075
+      },
+      {
+        "classes": "sheet-cell proficiency-cell  ",
+        "x": 12.961765689804164,
+        "y": 272.1970574771101,
+        "w": 110.61122012921996,
+        "h": 48.85589384929075
+      },
+      {
+        "classes": "sheet-cell ability-box ability-str  ",
+        "x": 12.961765689804164,
+        "y": 328.032339580554,
+        "w": 110.61122012921996,
+        "h": 134.9768381964551
+      },
+      {
+        "classes": "sheet-cell ability-box ability-dex  ",
+        "x": 12.961765689804164,
+        "y": 469.988601245206,
+        "w": 110.61122012921996,
+        "h": 179.96911759527347
+      },
+      {
+        "classes": "sheet-cell ability-box ability-con  ",
+        "x": 12.961765689804164,
+        "y": 656.9371423086764,
+        "w": 110.61122012921996,
+        "h": 112.48069849704592
+      },
+      {
+        "classes": "sheet-cell ability-box ability-int  ",
+        "x": 130.5523872784437,
+        "y": 216.3617753736662,
+        "w": 110.62680234357252,
+        "h": 187.18222145769315
+      },
+      {
+        "classes": "sheet-cell ability-box ability-wis  ",
+        "x": 130.5523872784437,
+        "y": 410.5233850855125,
+        "w": 110.62680234357252,
+        "h": 187.19782127906757
+      },
+      {
+        "classes": "sheet-cell ability-box ability-cha  ",
+        "x": 130.5523872784437,
+        "y": 604.7006298327769,
+        "w": 110.62680234357252,
+        "h": 164.73277558027604
+      },
+      {
+        "classes": "sheet-cell training-cell  ",
+        "x": 12.961765689804164,
+        "y": 776.4128288812499,
+        "w": 228.21742833396752,
+        "h": 154.544085022283
+      },
+      {
+        "classes": "sheet-cell initiative-cell  ",
+        "x": 249.15562831047072,
+        "y": 216.3617753736662,
+        "w": 98.72443795425727,
+        "h": 47.85880820094567
+      },
+      {
+        "classes": "sheet-cell speed-cell  ",
+        "x": 354.85945451888114,
+        "y": 216.3617753736662,
+        "w": 98.74000256158797,
+        "h": 47.85880820094567
+      },
+      {
+        "classes": "sheet-cell size-cell cell-incomplete cell-missing",
+        "x": 460.57884533462226,
+        "y": 216.3617753736662,
+        "w": 98.7400377756317,
+        "h": 47.85880820094567
+      },
+      {
+        "classes": "sheet-cell   ",
+        "x": 566.2983065784508,
+        "y": 216.3617753736662,
+        "w": 98.73989691945675,
+        "h": 47.85880820094567
+      },
+      {
+        "classes": "sheet-cell quickbar-cell cell-incomplete ",
+        "x": 249.15562831047072,
+        "y": 272.1970574771101,
+        "w": 415.8825751874369,
+        "h": 162.72311010434265
+      },
+      {
+        "classes": "sheet-cell class-features traits-box feature-panel  ",
+        "x": 249.15562831047072,
+        "y": 442.896641483951,
+        "w": 415.8825751874369,
+        "h": 260.3881687668883
+      },
+      {
+        "classes": "sheet-cell heritage-features traits-box feature-panel  ",
+        "x": 249.15562831047072,
+        "y": 711.2612841533376,
+        "w": 203.94530355284772,
+        "h": 219.6956297501953
+      },
+      {
+        "classes": "sheet-cell overview-spells spells-box traits-box feature-panel  ",
+        "x": 461.07740576581665,
+        "y": 711.2612841533376,
+        "w": 203.96079773209095,
+        "h": 219.6956297501953
+      }
+    ],
+    "effects": [
+      {
+        "tag": "DIV",
+        "effect": "charmed",
+        "parent": "card-art-layer card-art-background "
+      },
+      {
+        "tag": "DIV",
+        "effect": "poisoned",
+        "parent": "card-art-layer card-art-edge "
+      }
+    ],
+    "layers": [
+      {
+        "tag": "DIV",
+        "class": "card-art-layer card-art-background ",
+        "viewBox": null
+      },
+      {
+        "tag": "DIV",
+        "class": "card-art-layer card-art-edge ",
+        "viewBox": null
+      }
+    ]
+  }
+}

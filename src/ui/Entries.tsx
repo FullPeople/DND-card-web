@@ -1,15 +1,18 @@
 import { Reference } from './Reference';
-import { Component, Fragment, type ReactNode } from 'react';
+import {inWorkbench,composeRoll} from '../platform/workbench';
+import { Component, Fragment, createContext, useContext, type ReactNode } from 'react';
 import { ABILITY_LABELS, type Ability } from '../core/model';
 export class ContentBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() { return this.state.failed ? <p className="inline-warning">正文结构暂不支持。</p> : this.props.children; }
 }
+export const RollLabelContext=createContext('');
 type LinkHandler = (reference: string, kind?: string) => void;
 export function Inline({ text, onLink }: { text: string; onLink?: LinkHandler }) {
+  const rollLabel=useContext(RollLabelContext);
   text = typeof text === 'string' ? text : String(text ?? '');
-  text = text.replace('（阅读后自行填入）', '').replace('职业等级可在角色卡中调整。', '');
+  text = text.replace('外部角色卡条目；请在规则资料中核对并替换为有来源的条目。','').replace('（阅读后自行填入）', '').replace('职业等级可在角色卡中调整。', '');
   const parts: ReactNode[] = []; const regex = /\{@(\w+)(?:\s+([^{}]*))?\}/g; let cursor = 0; let match;
   while ((match = regex.exec(text))) {
     parts.push(text.slice(cursor, match.index)); const [all, tag, body = ''] = match; const args = body.split('|'); const label = tag === 'filter' ? args[0] : ['dice', 'damage', 'd20'].includes(tag) ? args[1] || args[0] : args[2] || args[0];
@@ -21,6 +24,7 @@ export function Inline({ text, onLink }: { text: string; onLink?: LinkHandler })
     else if(['actSaveFail','actSaveSuccess','actSaveSuccessOrFail','actTrigger','actResponse'].includes(tag))parts.push(<em key={match.index}>{({actSaveFail:'失败',actSaveSuccess:'成功',actSaveSuccessOrFail:'无论成败',actTrigger:'触发',actResponse:'响应'} as Record<string,string>)[tag]}：</em>);
     else if(tag==='actSaveFailBy')parts.push(<em key={match.index}>失败差值至少{label}：</em>);
     else if (tag === 'dc') parts.push(`DC ${label}`);
+    else if(inWorkbench&&['dice','damage','d20','hit'].includes(tag))parts.push(<button className="text-link" key={match.index} onClick={()=>{const expression=['hit','d20'].includes(tag)?`1d20${Number(args[0])>=0?'+':''}${Number(args[0])||0}`:args[0];composeRoll(expression,rollLabel?`${rollLabel} · ${tag==='hit'||tag==='d20'?'命中':tag==='damage'?'伤害':'投骰'}`:label);}}>{tag==='hit'&&Number(label)>=0?`+${label}`:label}</button>);
     else if (tag === 'hit') parts.push(Number(label) >= 0 ? `+${label}` : label);
     else if(tag==='atk')parts.push(args[0].split(',').map(v=>({mw:'近战武器攻击',rw:'远程武器攻击',ms:'近战法术攻击',rs:'远程法术攻击'}[v]||v)).join(' / '));
     else if (tag === 'h') parts.push('命中：');
@@ -38,6 +42,9 @@ export function Entries({ value, onLink, depth = 0 }: { value: unknown; onLink?:
   if (Array.isArray(value)) return value.map((v, i) => <Fragment key={i}><Entries value={v} onLink={onLink} depth={depth + 1}/></Fragment>);
   if (typeof value !== 'object') return null;
   const v = value as Record<string, any>;
+  if (v.type === 'dice') return v.toRoll ? (Array.isArray(v.toRoll) ? v.toRoll : [v.toRoll]).map((r:any)=>`${r.number ?? 1}d${r.faces}${r.modifier ? `${r.modifier>0?'+':''}${r.modifier}` : ''}`).join(' + ') : v.expression || v.displayText || null;
+  if (v.type === 'bonus') return `${Number(v.value)>=0?'+':''}${v.value ?? 0}`;
+  if (v.type === 'bonusSpeed') return `${v.value ?? 0} 尺`;
   if (['abilityDc', 'abilityAttackMod'].includes(v.type)) return <p className="ability-formula"><strong>{v.name || '法术'}{v.type === 'abilityDc' ? '豁免 DC' : '攻击加值'}</strong> = {v.type === 'abilityDc' ? '8 + ' : ''}{(v.attributes || []).map((a: Ability) => ABILITY_LABELS[a] || a).join(' / ')}调整值 + 熟练加值</p>;
   if (v.type === 'table') {
   const rows: any[][] = (v.rows || []).map((row: any) => Array.isArray(row) ? row : row.row || []);

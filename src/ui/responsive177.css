@@ -1,0 +1,98 @@
+/* 177: the shell stays stationary while connection state changes. */
+.workbench-bar{height:27px;min-height:27px;max-height:27px;flex:none;overflow:hidden;white-space:nowrap}
+.workbench-bar>span{flex:0 0 66px;width:66px;overflow:hidden;white-space:nowrap}
+.workbench-bar>strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.workbench-bar>label{flex:none;white-space:nowrap}
+.workbench-modes{display:flex;gap:5px;align-items:center;padding:4px 10px;background:var(--suite-surface,#ededf0);flex:none;border-bottom:1px solid var(--suite-line,#ccc)}
+.workbench-modes>button{display:flex;align-items:center;justify-content:center;min-height:28px;padding:4px 10px;font-size:12px;line-height:18px}
+.workbench-modes>button.active{background:var(--suite-tone,#50525b);color:white;border-color:var(--suite-tone,#50525b)}
+.character-tabs.workbench-cards{display:flex;flex-wrap:nowrap;gap:4px;padding:3px 10px;min-height:30px;max-height:30px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x;user-select:none;flex:none}
+.character-tabs.workbench-cards:empty{display:none}.character-tabs.workbench-cards::-webkit-scrollbar{display:none}
+.character-tabs.workbench-cards>button{display:block;flex:none;min-height:24px;padding:2px 8px;font-size:11px;line-height:18px;text-align:center;white-space:nowrap}
+.stock-board>header>.warehouse-lock{flex:none;width:24px;height:24px;min-width:24px;padding:3px;display:grid;place-items:center;margin-left:2px;background:var(--suite-tone,#50525b);color:#fff;border:0;border-radius:3px}
+.stock-board>header>.warehouse-lock[aria-pressed=true]{color:#ff6269}.warehouse-lock svg{width:16px;height:16px}.warehouse-lock:disabled{opacity:1}
+.portrait-controls>.portrait-settings-row{display:flex;flex:1;min-height:0;align-items:stretch}
+.portrait-view.has-portrait .portrait-settings-row{border-top:1px solid #fff9}
+.paper .portrait-settings-row button{flex:1;width:50%;min-width:0;font-size:11px;line-height:1;border:0!important}
+.paper .portrait-settings-row button+button{border-left:1px solid #fff9!important}
+.portrait-view:not(.has-portrait) .portrait-settings-row button{font-size:25px}
+.portrait-view.portrait-moving .portrait-settings-row,.portrait-view.portrait-moving .portrait-settings-row button{border-color:transparent!important}
+.portrait-confirm-shade{position:fixed;inset:0;z-index:2147482010;background:#20212a66;display:grid;place-items:center}
+.portrait-confirm{width:min(290px,92vw);padding:18px;background:var(--suite-paper,#fafafa);color:var(--suite-ink,#303039);border:1px solid var(--suite-line,#aaa);box-shadow:0 10px 35px #0004;border-radius:5px;font-size:14px}
+.portrait-confirm>div{display:flex;justify-content:end;gap:8px;margin-top:20px}
+
+/* Below 560 CSS pixels, use document flow instead of scaling an A4 photograph. */
+@media screen{
+.sheet-viewport.sheet-reflow{display:block;overflow:auto;overscroll-behavior:contain;touch-action:pan-y pinch-zoom;scrollbar-width:thin;align-items:stretch;justify-content:normal;container-type:inline-size;container-name:reading-sheet}
+.sheet-reflow>.paper-stack{display:flex;flex-direction:column;min-width:0;max-width:100%;transform:none!important;height:auto!important;min-height:100%}
+.sheet-reflow .paper-stack>.paper:not(.sheet-export){position:relative;inset:auto;padding:7px 6px 10px;min-height:0;height:auto;gap:7px;overflow:hidden;box-shadow:none;font-size:13px;line-height:1.45;flex:none}
+.sheet-reflow .paper-stack>.sheet-pages{position:sticky;order:-1;left:0!important;top:0!important;z-index:20;flex:none;height:32px;padding:0;background:#dededf}
+.sheet-reflow .sheet-pages button,.sheet-reflow .sheet-pages button[aria-selected=true]{height:32px;min-height:32px;padding:4px;font-size:12px;line-height:22px}
+.sheet-reflow .paper:not(.sheet-export) .sheet-cell{min-height:56px;height:auto;padding:0;flex:none}
+.sheet-reflow .paper:not(.sheet-export) .cell-face{position:relative;inset:auto;min-height:inherit;flex:1;width:100%;height:100%}
+.sheet-reflow .paper:not(.sheet-export) .cell-surface{min-height:inherit;flex:1}
+.sheet-reflow .paper:not(.sheet-export) .cell-content{flex:1;min-height:26px;overflow:visible;padding:5px 6px;overscroll-behavior:auto}
+.sheet-reflow .paper:not(.sheet-export) .cell-drop-surface{height:auto;min-height:inherit}
+.sheet-reflow .paper:not(.sheet-export) .cell-heading{min-height:24px;padding:3px 5px;align-items:center;justify-content:center}
+.sheet-reflow .paper:not(.sheet-export) .cell-heading h3{font-size:12px;line-height:17px}
+.sheet-reflow .paper:not(.sheet-export) .cell-fill{font-size:12px!important;line-height:19px;padding:4px 0!important;white-space:normal}
+.sheet-reflow .paper-heading{height:auto;flex:none!important;min-height:22px;gap:4px;align-items:center;letter-spacing:0;flex-wrap:wrap}
+.sheet-reflow .paper-heading>span:first-child{font-size:8px;letter-spacing:.3px}
+.sheet-reflow .paper-heading-right{gap:5px;margin-left:auto;max-width:100%;flex-wrap:wrap;justify-content:end}
+.sheet-reflow .paper-heading .edit-mode-toggle{font-size:11px;line-height:22px}
+.sheet-reflow .paper:not(.sheet-export) .overview-sheet{display:flex;flex-direction:column;gap:8px;flex:none}
+.sheet-reflow .paper:not(.sheet-export) .overview-top{grid-template-columns:58px minmax(0,1fr) 68px;gap:5px;min-height:0}
+.sheet-reflow .paper:not(.sheet-export) .overview-identity{grid-column:1/-1;grid-template-rows:38px auto auto;gap:5px}
+.sheet-reflow .overview-identity .identity-name{min-height:38px!important}
+.sheet-reflow .paper:not(.sheet-export) .identity-name input[aria-label="角色姓名"]{font-size:15px}
+.sheet-reflow .paper:not(.sheet-export) .identity-name input[aria-label="玩家姓名"]{font-size:11px;width:65px}
+.sheet-reflow .overview-identity .identity-name .cell-heading{padding:0 5px}
+.sheet-reflow .paper:not(.sheet-export) .identity-token{min-height:28px;padding:3px 2px}
+.sheet-reflow .paper:not(.sheet-export) .identity-title{font-size:14px;line-height:20px}
+.sheet-reflow .paper:not(.sheet-export) .identity-level{font-size:12px}
+.sheet-reflow .paper:not(.sheet-export) .overview-ratings{grid-template-rows:auto auto;gap:5px}
+.sheet-reflow .overview-ratings .cell-surface{flex-direction:column}
+.sheet-reflow .overview-ratings .cell-heading{width:100%;padding:2px!important;min-height:20px!important}
+.sheet-reflow .overview-ratings .cell-heading h3{font-size:10px!important;white-space:nowrap;max-width:none}
+.sheet-reflow .overview-ratings .cell-content{padding:1px!important;min-height:26px!important;overflow:hidden!important}
+.sheet-reflow .overview-ratings strong{font-size:23px;line-height:27px}.sheet-reflow .overview-ratings small{display:none}
+.sheet-reflow .paper:not(.sheet-export) .overview-health{grid-template-rows:minmax(68px,1fr) 42px;gap:5px}
+.sheet-reflow .paper:not(.sheet-export) .overview-health .sheet-cell{min-height:0}
+.sheet-reflow .paper:not(.sheet-export) .life-cell .cell-content{padding:2px;min-height:50px}
+.sheet-reflow .paper:not(.sheet-export) .life-fields{gap:0;grid-template-columns:minmax(0,1fr) 7px minmax(0,1fr) minmax(0,1fr)}
+.sheet-reflow .life-fields label,.sheet-reflow .hp-maximum>span{font-size:10px}.sheet-reflow .paper:not(.sheet-export) .life-fields input,.sheet-reflow .life-fields .hp-slash{font-size:20px!important;line-height:25px}
+.sheet-reflow .paper:not(.sheet-export) .dice-cell .cell-surface{flex-direction:column}.sheet-reflow .dice-cell .cell-heading{min-height:18px!important;padding:1px!important}.sheet-reflow .dice-cell .cell-content{min-height:20px!important;padding:0 2px!important}
+.sheet-reflow .paper:not(.sheet-export) .overview-top>.portrait-cell{min-height:118px}.sheet-reflow .portrait-cell .cell-content{overflow:hidden!important;padding:0!important;min-height:70px}
+.sheet-reflow .paper:not(.sheet-export) .portrait-cell .cell-face{height:100%;position:absolute;inset:0}
+.sheet-reflow .paper:not(.sheet-export) .portrait-view{position:absolute;inset:0}
+.sheet-reflow .edition-divider{gap:5px;min-height:26px;flex-wrap:wrap}.sheet-reflow .edition-divider strong{font-size:13px;letter-spacing:0}.sheet-reflow .edition-divider>span{min-width:4px}.sheet-reflow .status-ribbon{flex-wrap:wrap}
+.sheet-reflow .paper:not(.sheet-export) .overview-body{display:flex;flex-direction:column;gap:8px}
+.sheet-reflow .paper:not(.sheet-export) .overview-left{display:grid;order:2;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;align-items:start;gap:6px}
+.sheet-reflow .paper:not(.sheet-export) .physical-abilities,.sheet-reflow .paper:not(.sheet-export) .mental-abilities{display:contents}
+.sheet-reflow .paper:not(.sheet-export) .death-saves-cell{order:0}.sheet-reflow .paper:not(.sheet-export) .proficiency-cell{order:1;align-self:stretch}
+.sheet-reflow .paper:not(.sheet-export) .ability-slot{order:2;height:auto}.sheet-reflow .paper:not(.sheet-export) .training-cell{order:3;grid-column:1/-1}
+.sheet-reflow .paper:not(.sheet-export) .ability-box .cell-content{padding:4px 5px;overflow:visible}.sheet-reflow .paper:not(.sheet-export) .ability-values{min-height:42px;height:auto}
+.sheet-reflow .paper:not(.sheet-export) .ability-values input{font-size:30px}.sheet-reflow .paper:not(.sheet-export) .ability-modifier{font-size:24px;min-width:32px;min-height:32px}
+.sheet-reflow .paper:not(.sheet-export) .ability-save,.sheet-reflow .paper:not(.sheet-export) .ability-skill{font-size:12px;line-height:24px;min-height:24px;grid-template-columns:12px 23px minmax(0,1fr);gap:3px}
+.sheet-reflow .paper:not(.sheet-export) .ability-skill.skill-editing{grid-template-columns:12px 12px 23px minmax(0,1fr)}
+.sheet-reflow .paper:not(.sheet-export) .ability-save input[type=checkbox],.sheet-reflow .paper:not(.sheet-export) .ability-skill input[type=checkbox]{width:12px;height:12px;min-width:12px}
+.sheet-reflow .death-saves>div{font-size:11px;line-height:22px;gap:6px}.sheet-reflow .death-saves input{width:11px!important;height:11px!important;min-width:11px}
+.sheet-reflow .paper:not(.sheet-export) .overview-right{display:contents}.sheet-reflow .paper:not(.sheet-export) .overview-vitals{order:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.sheet-reflow .paper:not(.sheet-export) .quickbar-cell{order:1;min-height:70px}.sheet-reflow .paper:not(.sheet-export) .overview-right>.feature-panel{order:3;min-height:74px}
+.sheet-reflow .paper:not(.sheet-export) .overview-lower{order:4;display:flex;flex-direction:column;gap:8px}
+.sheet-reflow .paper:not(.sheet-export) .quickbar-split{display:flex;flex-direction:column;height:auto;font-size:12px;gap:5px}.sheet-reflow .quickbar-resources{border-left:0;border-top:1px solid #bbb}.sheet-reflow .quickbar-attacks,.sheet-reflow .quickbar-resources{overflow:visible;padding:2px}
+.sheet-reflow .paper:not(.sheet-export) .feature-caption{font-size:12px;line-height:20px;padding:3px 5px}.sheet-reflow .paper:not(.sheet-export) .feature-prose,.sheet-reflow .paper:not(.sheet-export) .feature-bubble.is-expanded{font-size:13px;line-height:1.5}.sheet-reflow .paper:not(.sheet-export) .feature-group h4{font-size:12px;line-height:20px}
+.sheet-reflow .training-cell dl,.sheet-reflow .training-cell textarea{font-size:12px!important}.sheet-reflow .training-cell dt{font-size:11px}.sheet-reflow .training-cell .training-row{padding:3px 0;min-height:26px}
+.sheet-reflow .paper:not(.sheet-export) .sheet-details{display:flex;flex-direction:column;flex:none;gap:8px;min-height:0}
+.sheet-reflow .paper:not(.sheet-export) .detail-page-header{height:auto;display:flex;flex-direction:column;gap:5px}.sheet-reflow .detail-page-header .page-caption{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}.sheet-reflow .page-caption h2{font-size:19px;flex:none;margin:0}.sheet-reflow .page-caption small{font-size:11px;max-height:none}
+.sheet-reflow .paper:not(.sheet-export) .page-header-fields{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(68px,auto);gap:6px}.sheet-reflow .page-header-fields>.portrait-cell{min-height:95px;max-width:120px}.sheet-reflow .page-header-fields .stock-mark-area{min-height:75px}.sheet-reflow .page-header-fields .stock-mark-area .stock-mark{font-size:12px;line-height:20px}.sheet-reflow .stock-mark-empty{font-size:12px;line-height:20px}
+.sheet-reflow .paper:not(.sheet-export) .features-page-grid,.sheet-reflow .paper:not(.sheet-export) .biography-grid{display:flex;flex-direction:column;flex:none;gap:8px}.sheet-reflow .features-page-grid>.sheet-cell{min-height:85px}.sheet-reflow .biography-grid>.sheet-cell{min-height:85px}
+.sheet-reflow .paper:not(.sheet-export) .biography-field{font-size:13px;line-height:24px}.sheet-reflow .biography-field>span{font-size:12px;width:50px}.sheet-reflow .biography-multi{min-height:80px;height:auto}.sheet-reflow .biography-multi textarea{min-height:120px}.sheet-reflow .biography-text{overflow:visible;min-height:28px}.sheet-reflow .bio-personality .cell-content{gap:5px}.sheet-reflow .bio-personality .biography-multi{min-height:36px}.sheet-reflow .paper:not(.sheet-export) .bio-portrait{min-height:270px}.sheet-reflow .paper:not(.sheet-export) .bio-portrait>.portrait-cell{height:300px;min-height:300px}
+.sheet-reflow .paper:not(.sheet-export) .spell-slots-cell,.sheet-reflow .paper:not(.sheet-export) .prepared-cell{height:auto;min-height:70px}.sheet-reflow .spell-slot-levels{grid-template-columns:repeat(auto-fit,minmax(48px,1fr));height:auto;row-gap:8px}.sheet-reflow .spell-slot-levels>div{font-size:12px}.sheet-reflow .spell-slot-levels button{width:13px;height:13px}.sheet-reflow .spell-settings{font-size:12px;gap:6px}.sheet-reflow .spell-settings button,.sheet-reflow .spell-settings input,.sheet-reflow .spell-settings select{font-size:12px}.sheet-reflow .spell-prepare-hint{font-size:10px;white-space:normal;margin-left:3px}.sheet-reflow .spell-stock-grid,.sheet-reflow .spell-library-level>.spell-stock-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.sheet-reflow .spell-stock-cell .spell-stock-tile.stock-item{height:46px;min-height:46px;grid-template-rows:20px 14px;padding:4px 8px}.sheet-reflow .spell-stock-tile .stock-name{font-size:12px;line-height:20px}.sheet-reflow .spell-stock-tile .stock-value,.sheet-reflow .spell-stock-tile .stock-weight{font-size:10px;line-height:14px}.sheet-reflow .spell-stock-empty.prepared-slot{height:46px;min-height:46px;grid-template-columns:1fr;grid-template-rows:1fr;text-align:center;place-content:center}
+.sheet-reflow .paper:not(.sheet-export) .stock-board{flex:none;min-height:0}.sheet-reflow .stock-board>header{flex-wrap:wrap;padding:5px 8px;gap:4px}.sheet-reflow .stock-board>header h3{font-size:13px}.sheet-reflow .stock-board>header small{font-size:11px}.sheet-reflow .stock-drop-zone{max-height:none;overflow:visible;flex:none}.sheet-reflow .stock-collection.stock-grid{grid-template-columns:repeat(2,minmax(0,1fr));min-height:0;gap:4px}.sheet-reflow .stock-grid .stock-item,.sheet-reflow .stock-grid .stock-empty{height:46px;min-height:46px;grid-template-rows:20px 14px}.sheet-reflow .stock-name{font-size:12px;line-height:20px}.sheet-reflow .stock-value,.sheet-reflow .stock-weight{font-size:10px;line-height:14px}.sheet-reflow .stock-list .stock-item{grid-template-columns:minmax(0,1fr) 40px;grid-template-rows:20px 14px;height:46px}.sheet-reflow .stock-list .stock-value{text-align:left}.sheet-reflow .stock-list .stock-weight{text-align:right}
+.sheet-reflow .paper:not(.sheet-export)>.workbench-monster{padding:3px 0;flex:none;overflow:visible;gap:7px}.sheet-reflow .workbench-monster>header h1{font-size:20px;line-height:1.3}.sheet-reflow .workbench-monster .suite-vitals{width:100%;margin:2px 0}.sheet-reflow .paper:not(.sheet-export) .monster-paper-content{overflow:visible;flex:none}.sheet-reflow .monster-paper-content .cell-content{padding:6px}.sheet-reflow .workbench-monster .monster-document{font-size:13px;line-height:1.5}.sheet-reflow .monster-abilities{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.sheet-reflow .monster-ability-row{font-size:12px;line-height:27px}.sheet-reflow .monster-abilities>.monster-ability-group:last-child{grid-column:1/-1}.sheet-reflow .monster-basics{gap:4px;flex-wrap:wrap}.sheet-reflow .monster-initiative{margin-left:0!important}.sheet-reflow .monster-editor{padding:5px;margin:0;font-size:12px}.sheet-reflow .monster-editor-fields{grid-template-columns:minmax(0,1fr)}.sheet-reflow .monster-editor-field{grid-template-columns:60px minmax(0,1fr) 16px}
+.sheet-reflow .paper-footer{font-size:10px!important;line-height:17px!important;flex:none!important}
+.sheet-reflow .sheet-zoom-reset{display:none}
+.sheet-reflow .paper:not(.sheet-export) .cell-halo{left:0;max-width:100%;overflow:hidden}
+}
+@media(max-width:700px){.workbench-modes{padding:3px 6px}.workbench-modes>button{min-height:27px;padding:3px 9px;font-size:11px}.character-tabs.workbench-cards{padding:2px 6px!important}.character-tabs.workbench-cards>button{min-height:24px;font-size:11px;padding:2px 7px}.public-stock .stock-collection{grid-template-columns:repeat(2,minmax(0,1fr))}.public-stock>header{gap:4px}.public-stock>header h3{font-size:12px}.public-stock>header small{font-size:10px}}

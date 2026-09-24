@@ -10,14 +10,23 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "check": "npm run test && npm run build"
+    "check": "npm run test && npm run build",
+    "dev:sync-prototype": "vite --config prototype/vite.config.ts",
+    "build:sync-prototype": "tsc -p prototype/tsconfig.json && vite build --config prototype/vite.config.ts",
+    "test:sync-prototype": "playwright test --config prototype/playwright.config.ts",
+    "build:standalone": "tsc -b && vite build --mode standalone",
+    "dev:standalone": "vite --mode standalone --host 127.0.0.1 --port 5183",
+    "test:release": "playwright test --config playwright.release.config.ts",
+    "test:standalone": "playwright test --config playwright.standalone.config.ts"
   },
   "dependencies": {
+    "html-to-image": "1.11.13",
     "idb": "8.0.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@owlbear-rodeo/sdk": "^3.1.0",
     "@playwright/test": "1.63.0",
     "@types/node": "26.6.2",
     "@types/react": "19.3.0",

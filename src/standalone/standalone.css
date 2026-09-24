@@ -1,0 +1,8 @@
+/* Shared card affordances whose former stylesheet belonged to the room panel. */
+.quickbar-split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);height:100%;min-height:0;font-size:10px}
+.quickbar-attacks,.quickbar-resources{overflow:auto;min-width:0;padding:3px}.quickbar-resources{border-left:1px solid #888}
+.quick-weapon{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid #ccc;transition:background .15s,transform .15s}.quick-weapon:first-child{background:#00000008}
+.quick-resource{position:relative;display:block}.quick-resource>.quick-drag-handle{display:none}.visual-editing .quick-resource>.quick-drag-handle{display:block;font-size:9px;cursor:grab}
+.quick-pin{font-size:10px;padding:2px 4px}.quick-drag-handle[data-editing=true]{cursor:grab}.quick-drag-over{background:#dde4eb;box-shadow:inset 0 -2px #555}
+.rollable-stat{border:0!important;background:transparent!important;color:inherit!important;font:inherit;padding:0 3px;font-weight:bold}.rollable-stat:not(:disabled){cursor:pointer;text-decoration:none}.rollable-stat:not(:disabled):hover{background:#d8e1e9!important}.rollable-stat:disabled{opacity:1;cursor:inherit}
+.card-lock{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;padding:3px;border:0}

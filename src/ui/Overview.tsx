@@ -1,4 +1,10 @@
-import { useContext, useState, type ReactNode } from 'react';
+import {spellState} from '../core/characterDetails';
+import {workbenchRequest} from '../platform/workbench';
+import {Quickbar} from './Quickbar';
+import {inWorkbench,composeRoll} from '../platform/workbench';
+import {NumberInput} from './NumberInput';
+import {Portrait} from './Portrait';
+import { useContext, useMemo, useState, type ReactNode } from 'react';
 import { AdjustedValue, SheetEditContext } from './SheetEdit';
 import { sizeEntry } from '../data/sizes';
 import { TrainingChips } from './TrainingChips';
@@ -8,22 +14,23 @@ import { FeaturePanel } from './FeaturePanel';
 import { Reference } from './Reference';
 import { IdentityToken } from './IdentityToken';
 import { DropZone } from './DragEntry';
-import { SourceName } from './SourceName';
 import { trainingCategory } from './trainingData';
 import { belongsToClass } from '../core/sheet';
 
 type Edit = (action: (draft: Character) => void, key?: string) => void;
 type Props = {
-  statusRibbon: ReactNode;
+  catalog?:Entry[]; statusRibbon: ReactNode;
   addEntry: (entry: Entry, section?: Selection['section']) => void; c: Character; d: Derived; edit: Edit; browse: (kind: Kind | 'size') => void; inspect: (e: Entry) => void;
   renderSelection: (s: Selection) => ReactNode;
-  onLink: (reference: string, kind?: string) => void; openResources: () => void; openQuickbar: () => void; pinDrop: (entry: Entry) => void;
+  onLink: (reference: string, kind?: string) => void; openResources: () => void;openQuickbar:()=>void; pinDrop: (entry: Entry) => void;
 };
 const clamp = (value: string, min = 0, max = 9999) => Math.max(min, Math.min(max, Number(value) || 0));
 const sizes: Record<string, string> = { T: '微型', S: '小型', M: '中型', L: '大型', H: '巨型', G: '超巨型' };
 
-export function Overview({ statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openQuickbar, pinDrop }: Props) {
+export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openResources, openQuickbar, pinDrop }: Props) {
   const editing = useContext(SheetEditContext);
+  const spells = spellState(c);
+  const trainingNames=useMemo(()=>{const map=new Map<string,Entry[]>();for(const e of catalog)if(e.kind==='item'||e.raw._category==='language'){for(const name of [e.name,e.english]){const key=name.toLowerCase();map.set(key,[...(map.get(key)||[]),e]);}}return map;},[catalog]);
   const [trainingEditor, setTrainingEditor] = useState(false);
   function receiveTraining(entry:Entry,key:string) {edit(draft=>{const current=draft.training?.[key]??training.find(t=>t.key===key)!.values.join('、');const token=`{@${entry.raw._category==='language'?'language':entry.raw._category==='itemProperty'?'itemProperty':entry.raw._category==='itemMastery'?'itemMastery':'item'} ${entry.name}|${entry.source}}`; (draft.training||={})[key]=[...new Set([...current.split(/[、\n；;]/).filter(Boolean),token])].join('、');});}
   const selected = (kinds: Kind[]) => c.selections.filter(s => kinds.includes(s.entry.kind));
@@ -54,12 +61,12 @@ export function Overview({ statusRibbon, addEntry, c, d, edit, browse, inspect, 
   function abilityCell(a: Ability) {
     const skills = Object.entries(SKILLS).filter(([, s]) => s.ability === a);
     return <SheetCell label={ABILITY_LABELS[a]} className={`ability-box ability-${a}`} hint={d.trace[a].join('；')}>
-      <div className="ability-values"><span className="ability-code">{a.toUpperCase()}</span><label><input aria-label={`${ABILITY_LABELS[a]}基础值`} type="number" readOnly={!editing} min="1" max="30" value={c.abilities[a]} onChange={e => edit(draft => { draft.abilities[a] = clamp(e.target.value, 1, 30); }, a)}/><span>基础属性</span></label><div><strong className="ability-modifier">{signed(d.modifiers[a])}</strong><small>调整值</small></div></div>
+      <div className="ability-values"><span className="ability-code">{a.toUpperCase()}</span><label><NumberInput aria-label={`${ABILITY_LABELS[a]}基础值`} type="number" readOnly={!editing} min="1" max="30" value={c.abilities[a]} onChange={e => edit(draft => { draft.abilities[a] = clamp(e.target.value, 1, 30); }, a)}/><span>基础属性</span></label><div><button className="ability-modifier rollable-stat" disabled={!inWorkbench} onClick={()=>composeRoll(`1d20${signed(d.modifiers[a])}`,`${ABILITY_LABELS[a]}检定`)}>{signed(d.modifiers[a])}</button><small>调整值</small></div></div>
       {d.abilities[a] !== c.abilities[a] && <div className="ability-total">总值 {d.abilities[a]}</div>}
-      <div className="ability-save">{editing ? <input type="checkbox" aria-label={`${ABILITY_LABELS[a]}豁免熟练`} checked={d.saves[a].proficient} onChange={e => setProficiency(`save:${a}`, e.target.checked)}/> : <span className={`proficiency-mark ${d.saves[a].proficient ? 'trained' : ''}`} aria-label={`${ABILITY_LABELS[a]}豁免${d.saves[a].proficient ? '熟练' : '无熟练'}`}/>}<strong>{signed(d.saves[a].value)}</strong><span>豁免</span></div>
-      <div className="ability-skills">{skills.map(([key, skill]) => <div className={`ability-skill ${editing ? 'skill-editing' : ''}`} key={key} title={d.skills[key].sources.join('；')}>
+      <div className={`ability-save ${!editing&&inWorkbench?'roll-row':''}`} role={!editing&&inWorkbench?'button':undefined} tabIndex={!editing&&inWorkbench?0:undefined} onClick={()=>{if(!editing&&inWorkbench)composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}} onKeyDown={e=>{if(!editing&&inWorkbench&&['Enter',' '].includes(e.key)){e.preventDefault();composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}}}>{editing ? <input type="checkbox" aria-label={`${ABILITY_LABELS[a]}豁免熟练`} checked={d.saves[a].proficient} onChange={e => setProficiency(`save:${a}`, e.target.checked)}/> : <span className={`proficiency-mark ${d.saves[a].proficient ? 'trained' : ''}`} aria-label={`${ABILITY_LABELS[a]}豁免${d.saves[a].proficient ? '熟练' : '无熟练'}`}/>}<b>{signed(d.saves[a].value)}</b><span>豁免</span></div>
+      <div className="ability-skills">{skills.map(([key, skill]) => <div className={`ability-skill ${editing ? 'skill-editing' : inWorkbench?'roll-row':''}`} role={!editing&&inWorkbench?'button':undefined} tabIndex={!editing&&inWorkbench?0:undefined} onClick={()=>{if(!editing&&inWorkbench)composeRoll(`1d20${signed(d.skills[key].value)}`,skill.name);}} onKeyDown={e=>{if(!editing&&inWorkbench&&['Enter',' '].includes(e.key)){e.preventDefault();composeRoll(`1d20${signed(d.skills[key].value)}`,skill.name);}}} key={key} title={d.skills[key].sources.join('；')}>
         {editing ? <><input aria-label={`${skill.name}熟练`} type="checkbox" checked={d.skills[key].proficient} onChange={e => setProficiency(key, e.target.checked)}/><input className="expertise-check" aria-label={`${skill.name}专精`} type="checkbox" checked={d.skills[key].expertise} onChange={e => edit(draft => { (draft.expertise ||= {})[key] = e.target.checked; if (e.target.checked) (draft.proficiencies ||= {})[key] = true; })}/></> : <span className={`proficiency-mark ${d.skills[key].expertise ? 'expert' : d.skills[key].proficient ? 'trained' : ''}`} aria-label={`${skill.name}${d.skills[key].expertise ? '专精' : d.skills[key].proficient ? '熟练' : '无熟练'}`}/>}
-        <strong>{signed(d.skills[key].value)}</strong><span>{skill.name}</span></div>)}</div>
+        <b>{signed(d.skills[key].value)}</b><span>{skill.name}</span></div>)}</div>
       {a === 'dex' && (editing || c.jackOfAllTrades) && <label className="jack-of-all-trades"><input type="checkbox" aria-label="万事通" disabled={!editing} checked={!!c.jackOfAllTrades} onChange={e => edit(draft => { draft.jackOfAllTrades = e.target.checked; })}/><span>万事通</span></label>}
     </SheetCell>;
   }
@@ -71,12 +78,12 @@ export function Overview({ statusRibbon, addEntry, c, d, edit, browse, inspect, 
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
       return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
     });
-    return { key, label, values: [...new Set<string>(values.map(v => names[v] || v))] };
+    return { key, label, values: [...new Set<string>(values.map(v => {const entry=(trainingNames.get(v.toLowerCase())||[]).find(e=>e.source===(c.edition==='2024'?'XPHB':'PHB'))||(trainingNames.get(v.toLowerCase())||[])[0];return names[v] || (entry?`{@${key==='languages'?'language':'item'} ${entry.name}|${entry.source}}`:v);}))] };
   });
   return <div className="overview-sheet">
     <div className="overview-top">
       <div className="identity-main overview-identity">
-        <SheetCell label="角色名" className="identity-name"><input aria-label="角色姓名" value={c.name} onChange={e => edit(draft => { draft.name = e.target.value; }, 'name')}/><input aria-label="玩家姓名" placeholder="玩家姓名" value={c.player} onChange={e => edit(draft => { draft.player = e.target.value; }, 'player')}/></SheetCell>
+        <SheetCell label="角色名" className="identity-name">{!editing&&inWorkbench?<button className="assign-token-name" onClick={()=>void workbenchRequest('assignName',{name:c.name}).catch(e=>window.dispatchEvent(new CustomEvent('workbench-error',{detail:String(e)})))}>{c.name}</button>:<input aria-label="角色姓名" readOnly={!editing} value={c.name} onChange={e => edit(draft => { draft.name = e.target.value; }, 'name')}/>}<input aria-label="玩家姓名" readOnly={!editing} placeholder="玩家姓名" value={c.player} onChange={e => edit(draft => { draft.player = e.target.value; }, 'player')}/></SheetCell>
         {identityCell('background', '背景')}{identityCell('class', multi ? '职业与子职' : '职业')}{identityCell('race', '种族')}{!multi && identityCell('subclass', '子职')}
       </div>
       <div className="overview-ratings">
@@ -84,10 +91,10 @@ export function Overview({ statusRibbon, addEntry, c, d, edit, browse, inspect, 
         <SheetCell label="护甲等级" className="armor-cell" hint={d.trace.ac.join('；')}><strong>{d.ac}</strong><small>AC</small></SheetCell>
       </div>
       <div className="overview-health">
-        <SheetCell label="生命值" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<input aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<input aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
+        <SheetCell label="生命值" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
         <SheetCell label="生命骰" className="dice-cell"><strong>{d.hitDice}</strong></SheetCell>
       </div>
-      <SheetCell label="头像" className="portrait-cell"><svg viewBox="0 0 80 90" aria-hidden="true"><path d="M28 27 L33 17 H47 L52 27 V39 L45 49 H35 L28 39 Z M35 49 V56 L17 65 L12 82 H68 L63 65 L45 56 V49"/></svg></SheetCell>
+      <Portrait c={c} edit={edit}/>
     </div>
     {statusRibbon}
     <div className="overview-body">
@@ -98,14 +105,13 @@ export function Overview({ statusRibbon, addEntry, c, d, edit, browse, inspect, 
       </div>
       <div className="overview-right">
         <div className="overview-vitals"><SheetCell label="先攻" className="initiative-cell"><AdjustedValue c={c} value={d.initiative} target="initiative" label="先攻" sign edit={edit}/></SheetCell><SheetCell label="速度" className="speed-cell"><AdjustedValue c={c} value={d.speed} target="speed" label="速度" unit="尺" edit={edit}/></SheetCell><SheetCell label="体型" className="size-cell" dropKinds={['rule']} accepts={entry => entry.raw._category === 'size'} onReceive={entry => edit(draft => { draft.size = entry.raw.size; })} dashed missing={!sizeCode} onFill={() => browse('size')} onHeadingClick={() => { if (sizeInfo) inspect(sizeInfo); }}>
-          {editing ? <select aria-label="体型" value={c.size || ''} onChange={e => edit(draft => { draft.size = e.target.value ? e.target.value as Size : undefined; })}><option value="">{race ? `种族 · ${size}` : '—'}</option>{Object.entries(SIZE_LABELS).map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select> : sizeInfo ? <Reference className="size-value" reference={`entry:${sizeInfo.id}`} entry={sizeInfo} onClick={() => inspect(sizeInfo)}>{size}</Reference> : <strong>{size}</strong>}
+          {editing ? <select aria-label="体型" value={c.size || ''} onChange={e => edit(draft => { draft.size = e.target.value ? e.target.value as Size : undefined; })}><option value="">{race ? `种族 · ${size}` : '—'}</option>{Object.entries(SIZE_LABELS).map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select> : sizeInfo ? <Reference className="size-value" reference={`entry:${sizeInfo.id}`} entry={sizeInfo} onClick={() => inspect(sizeInfo)}>{size}</Reference> : null}
         </SheetCell><SheetCell label="被动察觉"><AdjustedValue c={c} value={d.passive} target="passive" label="被动察觉" edit={edit}/></SheetCell></div>
-        <SheetCell label="快捷栏" className="quickbar-cell" missing={!pins.length} onFill={openQuickbar} dropKinds={['item', 'spell', 'feature', 'feat', 'rule']} onReceive={pinDrop} allowExisting onHeadingClick={openQuickbar} headingActionLabel="管理快捷栏">
-            {pins.length > 0 && <div className="quickbar-columns"><span>常用条目</span><span>类型</span><span>来源</span></div>}
-            {pins.map(s => <div className={`quickbar-row ${selectionAllowed(c, s.entry) ? '' : 'restricted'}`} key={s.id}><Reference className="text-link" reference={`entry:${s.entry.id}`} kind={s.entry.kind} onClick={() => inspect(s.entry)}>{s.entry.name}</Reference><small>{KIND_LABELS[s.entry.kind]}</small><small><SourceName id={s.entry.source}/></small><button aria-label={`取消固定${s.entry.name}`} onClick={() => edit(draft => { draft.quickbar = draft.quickbar?.filter(id => id !== s.id); })}>×</button></div>)}
+        <SheetCell label="快捷栏" className="quickbar-cell" missing={!pins.length}   >
+            <DropZone referenceOnly onReceive={pinDrop} className="quickbar-copy-zone"><Quickbar c={c} d={d} edit={edit} inspect={inspect} manage={openResources} manageQuickbar={openQuickbar}/></DropZone>
         </SheetCell>
         <FeaturePanel receive={entry => addEntry(entry, 'features')} c={c} rows={classFeatures} edit={edit} browse={() => browse('feature')} onLink={onLink}/>
-        <div className="overview-lower"><FeaturePanel receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}/>{contentCell('法术', selected(['spell']), ['spell'], 'overview-spells spells-box')}</div>
+        <div className="overview-lower"><FeaturePanel receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}/>{contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spells.mode!=='prepared'||spells.prepared.includes(s.id)), ['spell'], 'overview-spells spells-box')}</div>
       </div>
     </div>
   </div>;

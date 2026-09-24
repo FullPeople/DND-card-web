@@ -1,10 +1,13 @@
-import { useLayoutEffect, type RefObject } from 'react';
+import { useLayoutEffect, useState, type RefObject } from 'react';
 
 /** Conservative rotated bounds keep real DOM hit areas inside the pile. */
-export function useCardGravity(ref: RefObject<HTMLDivElement | null>, enabled: boolean, page: string, identity: string) {
+export function useCardGravity(ref: RefObject<HTMLDivElement | null>, enabled: boolean, page: string, identity: string, layoutKey='', inset=12) {
+  const [structure,setStructure]=useState(0);
+  const getCells=(root:HTMLElement)=>[...root.querySelectorAll<HTMLElement>('.sheet-cell,[data-physical-frame]')].filter(node=>{const parent=node.parentElement?.closest('.sheet-cell,[data-physical-frame]');return !parent||!root.contains(parent);});
+  useLayoutEffect(()=>{const root=ref.current;if(!root)return;let cells=getCells(root);const observer=new MutationObserver(()=>{const next=getCells(root);if(next.length!==cells.length||next.some((node,i)=>node!==cells[i])){cells=next;setStructure(n=>n+1);}});observer.observe(root,{childList:true,subtree:true});return()=>observer.disconnect();},[ref]);
   useLayoutEffect(() => {
     const paper = ref.current; if (!paper) return;
-    const cells = [...paper.querySelectorAll<HTMLElement>('.sheet-cell')];
+    const cells = getCells(paper);
     let frame = 0;
     if (!enabled) {
       for (const cell of cells) {
@@ -25,7 +28,7 @@ export function useCardGravity(ref: RefObject<HTMLDivElement | null>, enabled: b
       const desired = index % 3 === 1 && width < 210 && height < 210 ? (index % 2 ? -1 : 1) * (3 + index % 3) : 0;
       return { element, left, top, width, height, desired, angle:0, x:left, y:top, w:width, h:height, dy:0, velocity:0, target:0 };
     }).sort((a,b)=>(b.top+b.height)-(a.top+a.height));
-    const floor = paper.clientHeight - 12;
+    const floor = paper.clientHeight - inset;
     const overlaps = (a:typeof bodies[number],b:typeof bodies[number]) => a.x < b.x+b.w && a.x+a.w > b.x;
     // Reserve enough room for the entire rotation, including the neighbouring column.
     // Dense layouts automatically reduce the angle instead of overlapping or pushing a box upward.
@@ -69,5 +72,5 @@ export function useCardGravity(ref: RefObject<HTMLDivElement | null>, enabled: b
     }
     frame=requestAnimationFrame(tick);
     return()=>cancelAnimationFrame(frame);
-  },[ref,enabled,page,identity]);
+  },[ref,enabled,page,identity,structure,layoutKey,inset]);
 }

@@ -1,0 +1,47 @@
+import { test,expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { mockSource,fillFromDetail } from './fixtures';
+
+test.beforeEach(async({page})=>{await mockSource(page);});
+test('large catalog has bounded DOM, sorted sources and instant access to the tail',async({page})=>{
+ await page.route('**/data/items.json',r=>r.fulfill({json:{item:Array.from({length:4000},(_,i)=>({name:`装备${String(i).padStart(4,'0')}`,source:i<2000?'XGE':'XPHB',entries:['测试正文。']}))}}));
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备',exact:true}).click();
+ const list=page.locator('.catalog-list');await expect(list).toHaveAttribute('data-total-rows','4001');await expect(page.getByRole('columnheader',{name:/来源/})).toHaveAttribute('aria-sort','ascending');
+ await expect(page.locator('.catalog-row').first()).toContainText('玩家手册');expect(await page.locator('.catalog-row').count()).toBeLessThan(60);
+ await list.evaluate(e=>{e.scrollTop=e.scrollHeight;});await expect(page.locator('.catalog-row').last()).toContainText('装备1999');expect(await page.locator('.catalog-row').count()).toBeLessThan(60);
+ await list.evaluate(e=>{e.scrollTop=0;});await expect(page.locator('.catalog-row').first()).toContainText('玩家手册');
+ await page.getByRole('textbox',{name:'搜索规则资料'}).fill('装备');const global=page.locator('.global-results .virtual-list');await expect(global).toHaveAttribute('data-total-rows','4000');await global.evaluate(e=>{e.scrollTop=e.scrollHeight;});await expect(page.locator('.global-result').last()).toContainText('装备3999');expect(await page.locator('.global-result').count()).toBeLessThan(60);
+});
+test('fill prompts have no size dash, pulse the catalog, and skills use an ordinary cursor',async({page})=>{
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
+ await expect(page.locator('.size-cell .cell-content')).toHaveText('点击并拖拽填写');await page.locator('.size-cell .cell-fill').click();await expect(page.locator('.catalog-fill-glow')).toBeVisible();await expect(page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'体型',exact:true})).toHaveClass(/active/);
+ await expect(page.locator('.ability-skill').first()).toHaveCSS('cursor','default');
+});
+test('source defaults show all conditions at the end and spells start at low levels',async({page})=>{
+ await page.route('**/data/conditionsdiseases.json',r=>r.fulfill({json:{condition:[{name:'主状态',source:'XPHB'},{name:'扩展状态',source:'XGE'}],status:[{name:'额外状态',source:'XPHB'}]}}));
+ await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'一术',source:'XPHB',level:3},{name:'二术',source:'XPHB',level:0}]}}));
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();const tabs=page.getByRole('navigation',{name:'资料分类'});await tabs.getByRole('button',{name:'状态',exact:true}).click();await expect(page.locator('.catalog-row .entry-name')).toHaveText(['主状态','扩展状态','额外状态']);
+ await tabs.getByRole('button',{name:'法术',exact:true}).click();await expect(page.locator('.catalog-row .entry-name')).toHaveText(['二术','一术']);await expect(page.getByRole('columnheader',{name:/环阶/})).toHaveAttribute('aria-sort','ascending');
+});
+test('race families expand without merging distinct identities',async({page})=>{
+ await page.route('**/data/races.json',r=>r.fulfill({json:{race:[{name:'精灵',ENG_name:'Elf',source:'XPHB'},{name:'精灵',ENG_name:'Elf',source:'XGE'},{name:'矮人',ENG_name:'Dwarf',source:'XPHB',_versions:[{name:'矮人；山地',ENG_name:'Dwarf; Mountain',source:'XPHB'}]}],subrace:[{name:'高等',ENG_name:'High',raceName:'精灵',raceSource:'XPHB',source:'XPHB'}]}}));
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'种族',exact:true}).click();const group=page.getByRole('button',{name:/精灵.*个条目/});await expect(group).toHaveAttribute('aria-expanded','false');await group.click();await expect(page.locator('.catalog-row.race-child')).toHaveCount(3);await page.getByRole('button',{name:/矮人.*个条目/}).click();await expect(page.locator('.catalog-row.race-child')).toHaveCount(5);await group.click();await expect(page.locator('.catalog-row')).toHaveCount(2);
+});
+test('class dice, sticky subclass navigation and hover highlight work together',async({page})=>{
+ await page.route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'测试法师',source:'XPHB',classFeatures:['施法|测试法师|XPHB|1'],classTableGroups:[{colLabels:['骰子'],rows:[[{type:'dice',toRoll:[{number:1,faces:4}]}],[{type:'dice',toRoll:[{number:1,faces:6}]}]]}]}],classFeature:[{name:'施法',source:'XPHB',className:'测试法师',classSource:'XPHB',level:1,entries:['测试正文。']}],subclass:[{name:'测试学派',source:'XPHB',className:'测试法师',classSource:'XPHB',entries:['子职正文。']}]}}));
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.locator('.catalog-row').click();await expect(page.locator('.document-prose table')).toContainText('1d4');await expect(page.locator('.document-prose table')).toContainText('1d6');await fillFromDetail(page);
+ await page.locator('.class-subclasses button').click();await expect(page.locator('.detail-heading')).toContainText('测试学派');await expect(page.locator('.detail-frozen').getByRole('button',{name:'主体',exact:true})).toBeVisible();await expect(page.locator('.detail-frozen .class-subclasses button')).toBeVisible();
+ await page.locator('.class-features .feature-caption').hover();await expect(page.locator('.document-section.reading-highlight')).toContainText('测试正文');await page.locator('.class-features .feature-caption').click();await page.mouse.move(40,40);await expect(page.locator('.document-section.reading-highlight-fade')).toContainText('测试正文');
+});
+test('sources use their own modal, config is first, and Escape returns to rules',async({page})=>{
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expect(page.locator('.dialog-body>.settings-section').first()).toContainText('自定义扩展包');
+ const positions=await page.locator('.profile-transfer,.source-books').evaluateAll(nodes=>nodes.map(e=>e.getBoundingClientRect().top));expect(positions[0]).toBeLessThan(positions[1]);await page.getByRole('button',{name:'设置来源 XPHB'}).click();const child=page.getByRole('dialog',{name:/来源设置/});await expect(child).toBeVisible();await child.getByRole('checkbox',{name:'启用条目 微光术'}).uncheck();await page.keyboard.press('Escape');await expect(child).toHaveCount(0);await expect(page.getByRole('dialog',{name:'规则与扩展',exact:true})).toBeVisible();
+});
+test('Owlbear text roundtrip, native picker cancellation and A4 PNG download',async({page})=>{
+ test.setTimeout(60000);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('textbox',{name:'角色姓名',exact:true}).fill('图片与文本测试');await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
+ await page.getByRole('button',{name:'生成枭熊 JSON',exact:true}).click();const text=await page.getByLabel('枭熊 JSON 文本').inputValue();expect(JSON.parse(text).schema_version).toBe('0.3');await page.getByRole('button',{name:'从文本导入枭熊',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.getByRole('combobox',{name:'当前角色'}).locator('option')).toHaveCount(2);
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'导入完整备份',exact:true}).click();await (await chooser).setFiles([]);await expect(page.locator('[data-file-picker]')).toHaveCount(0);await page.getByRole('button',{name:'生成枭熊 JSON',exact:true}).click();await expect(page.getByLabel('枭熊 JSON 文本')).not.toBeEmpty();
+ await page.getByRole('button',{name:'生成当前页 PNG',exact:true}).click();await expect(page.getByAltText('当前角色卡 PNG 预览')).toBeVisible({timeout:25000});const download=page.waitForEvent('download');await page.getByRole('button',{name:'下载 PNG',exact:true}).click();const bytes=await readFile((await (await download).path())!);expect(bytes.toString('ascii',1,4)).toBe('PNG');expect(bytes.readUInt32BE(16)).toBe(2480);expect(bytes.readUInt32BE(20)).toBe(3508);
+ const darkFraction=await page.getByAltText('当前角色卡 PNG 预览').evaluate(async(node)=>{const img=node as HTMLImageElement;await img.decode();const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d')!;ctx.drawImage(img,0,0);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;let dark=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]<50&&pixels[i+1]<50&&pixels[i+2]<50)dark++;return dark/(pixels.length/4);});expect(darkFraction).toBeLessThan(.2);
+ await page.context().addInitScript(()=>{window.print=()=>{document.documentElement.dataset.printed='true';};});const popup=page.waitForEvent('popup');await page.getByRole('button',{name:'打印 PNG',exact:true}).click();const printed=await popup;await expect(printed.locator('html')).toHaveAttribute('data-printed','true');await expect(printed.locator('img')).toHaveJSProperty('naturalWidth',2480);await printed.close();
+});
