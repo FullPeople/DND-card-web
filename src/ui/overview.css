@@ -63,6 +63,9 @@
 .overview-ratings .cell-content{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 3px;overflow:hidden}
 .overview-ratings strong{font-size:32px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
 .overview-ratings small{font-size:7px;font-weight:700;letter-spacing:1px;color:#8a8a85;line-height:11px}
+.armor-cell .cell-content:has(.adjusted-value){padding:0}
+.armor-cell .adjusted-value.has-adjustment>strong{font-size:26px}
+.armor-cell .stat-adjustment{flex-basis:23px;margin-left:0}
 .overview-health{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) 31px;gap:5px}
 .life-cell .cell-content{padding:3px 5px}
 .life-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;width:100%;font-size:9px;color:#777c6e}

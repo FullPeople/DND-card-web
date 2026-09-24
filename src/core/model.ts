@@ -11,7 +11,7 @@ export const SKILLS: Record<string, { name: string; ability: Ability }> = {
   deception: { name: '欺瞒', ability: 'cha' }, intimidation: { name: '威吓', ability: 'cha' }, performance: { name: '表演', ability: 'cha' }, persuasion: { name: '游说', ability: 'cha' },
 };
 export type Raw = Record<string, any>;
-export const SHEET_BONUS_KEYS = ['proficiency', 'initiative', 'speed', 'passive', 'hp'] as const;
+export const SHEET_BONUS_KEYS = ['proficiency', 'initiative', 'speed', 'passive', 'hp', 'ac'] as const;
 export type SheetBonus = typeof SHEET_BONUS_KEYS[number];
 export const SIZE_LABELS = { T: '微型', S: '小型', M: '中型', L: '大型', H: '巨型', G: '超巨型' } as const;
 export type Size = keyof typeof SIZE_LABELS;

@@ -275,7 +275,7 @@ export default function App() {
       if(typeof stats.health==='number')next.runtime.hp=stats.health;
       if(typeof stats['temporary health']==='number')next.runtime.tempHp=stats['temporary health'];
       if(typeof stats['max health']==='number'){next.baseHp=stats['max health'];next.sheetBonuses={...next.sheetBonuses,hp:0};next.adjustments=next.adjustments?.filter(a=>a.target!=='hp');}
-      if(typeof stats['armor class']==='number'){next.adjustments=next.adjustments?.filter(a=>a.target!=='ac')||[];next.adjustments.push({id:'suite-ac',target:'ac',value:stats['armor class'],reason:'枭熊场景'});}
+      if(typeof stats['armor class']==='number'){next.adjustments=next.adjustments?.filter(a=>a.target!=='ac')||[];next.adjustments.push({id:'suite-ac',target:'ac',value:stats['armor class']-(next.sheetBonuses?.ac||0),reason:'枭熊场景'});}
       }
       syncAutoResources(next);
       appliedWorkbench.current=signature;

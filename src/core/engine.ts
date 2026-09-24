@@ -77,6 +77,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     (trace[target] ??= []).push(`人工修正为 ${value}：${adjustment.reason}`);
   }
   if (!(c.adjustments || []).some(a => a.target === 'passive')) passive = 10 + skills.perception.value;
+  ac += c.sheetBonuses?.ac || 0;
   initiative += c.sheetBonuses?.initiative || 0;
   speed += c.sheetBonuses?.speed || 0;
   passive += c.sheetBonuses?.passive || 0;

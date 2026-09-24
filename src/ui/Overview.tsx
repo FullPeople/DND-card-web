@@ -89,7 +89,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       </div>
       <div className="overview-ratings">
         <SheetCell label="总等级" className="total-level"><strong>{d.level}</strong><small>LEVEL</small></SheetCell>
-        <SheetCell label="护甲等级" className="armor-cell" hint={d.trace.ac.join('；')}><strong>{d.ac}</strong><small>AC</small></SheetCell>
+        <SheetCell label="护甲等级" className="armor-cell" hint={d.trace.ac.join('；')}><AdjustedValue c={c} value={d.ac} target="ac" label="护甲等级" edit={edit}/><small>AC</small></SheetCell>
       </div>
       <div className="overview-health">
         <SheetCell label="生命值" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
