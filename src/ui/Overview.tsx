@@ -1,4 +1,5 @@
 import {spellState} from '../core/characterDetails';
+import {HitDiceResources} from './HitDiceResources';
 import {workbenchRequest} from '../platform/workbench';
 import {Quickbar} from './Quickbar';
 import {inWorkbench,composeRoll} from '../platform/workbench';
@@ -92,7 +93,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       </div>
       <div className="overview-health">
         <SheetCell label="生命值" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
-        <SheetCell label="生命骰" className="dice-cell"><strong>{d.hitDice}</strong></SheetCell>
+        <SheetCell label="生命骰" className="dice-cell"><HitDiceResources c={c} edit={edit}/></SheetCell>
       </div>
       <Portrait c={c} edit={edit}/>
     </div>

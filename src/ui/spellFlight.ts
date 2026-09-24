@@ -1,3 +1,25 @@
+const reflows=new WeakMap<HTMLElement,Animation>();
+/** Capture before the edit, then let every remaining tile settle into its new cell.
+ * Coordinates are converted back from the scaled paper into local CSS pixels. */
+export function captureSpellReflow(root:HTMLElement|null){
+ const before=new Map<string,DOMRect>();
+ const nodes=()=>Array.from(root?.querySelectorAll<HTMLElement>('[data-spell-id],.spell-library-level>h4')||[]);
+ const key=(el:HTMLElement)=>el.dataset.spellId||`level:${el.parentElement?.getAttribute('data-spell-level')}`;
+ for(const el of nodes())before.set(key(el),el.getBoundingClientRect());
+ return ()=>{
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  for(const el of nodes()){
+   const old=before.get(key(el));if(!old)continue;
+   reflows.get(el)?.cancel();
+   const next=el.getBoundingClientRect(),scale=next.width/el.offsetWidth||1;
+   const x=(old.x-next.x)/scale,y=(old.y-next.y)/scale;
+   if(Math.abs(x)<.25&&Math.abs(y)<.25)continue;
+   const animation=el.animate([{translate:`${x}px ${y}px`},{translate:'0px 0px'}],{duration:260,easing:'cubic-bezier(.22,.7,.22,1)',composite:'add'});
+   animation.id='spell-reflow';reflows.set(el,animation);
+   animation.finished.then(()=>{if(reflows.get(el)===animation)reflows.delete(el);},()=>{});
+  }
+ };
+}
 /** A clicked spell travels as its actual tile; no fade or second card skin. */
 export function liftSpellTile(source:HTMLElement){
  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return (_?:HTMLElement|null)=>{};

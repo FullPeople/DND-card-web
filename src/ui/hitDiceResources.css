@@ -1,0 +1,17 @@
+.dice-cell .cell-content:has(.hit-dice-groups){padding:0 4px;overflow:hidden;min-width:0}
+.hit-dice-groups{width:100%;height:100%;min-width:0;display:flex;align-items:center;justify-content:space-evenly;gap:4px;container-type:inline-size;padding-right:1px}
+.hit-dice-group{--die-size:clamp(12px,calc((100cqw - (var(--hit-groups) - 1) * 4px) / var(--hit-groups) - 5px),23px);display:grid;flex:var(--hit-count) 1 0;max-width:calc(var(--hit-count) * 24px);min-width:calc(var(--die-size) + 5px);isolation:isolate}
+.paper .dice-cell .hit-die{position:relative;display:flex;align-items:center;width:100%;height:23px;min-width:0;min-height:0;padding:0;border:0;background:transparent!important;border-radius:0;color:var(--paper-ink,#343434);line-height:1;box-shadow:none;cursor:pointer}
+.hit-die>svg{display:block;flex:none;width:var(--die-size);height:var(--die-size);max-width:none;overflow:visible;pointer-events:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.hit-die-face{fill:var(--paper-surface,#ededed)}.hit-die-facets{fill:none;opacity:.55}
+.hit-die text{fill:currentColor;stroke:none;font:750 12px Arial,sans-serif}
+.hit-die.spent{color:color-mix(in srgb,var(--paper-ink,#343434) 28%,var(--paper-surface,#ededed))!important}
+.hit-die:hover,.hit-die:focus-visible{z-index:2;filter:drop-shadow(0 0 1px var(--paper-ink,#343434))}
+.hit-dice-popover{min-width:180px;max-width:min(360px,calc(100vw - 16px))}
+.hit-dice-tabs{display:flex;gap:4px;margin:7px 0;flex-wrap:wrap}.hit-dice-tabs button{font-size:12px;padding:3px 7px}.hit-dice-tabs [aria-selected=true]{background:var(--suite-tone,#50525b);color:#fff}.hit-dice-tabs small{font-size:10px;opacity:.8}
+.hit-dice-popover .resource179-row .resource-title .resource-actions{display:none}.hit-dice-popover .resource-pips{flex-wrap:wrap}
+.hit-dice-popover .resource-pips button{min-width:26px;min-height:26px}
+.hit-dice-popover .resource-title>strong{font-size:13px}
+@media print{.hit-dice-popover{display:none}}
+
+.hit-dice-group.single-die{min-width:var(--die-size);max-width:var(--die-size)}

@@ -16,8 +16,9 @@
 .sheet-reflow .spell-stock-cell.prepared-cell{height:190px;min-height:190px}
 .header-法术 .cell-content:has(.adjusted-value){padding:0}.header-法术 .adjusted-value{min-height:42px}
 .spell-stock-cell .spell-stock-tile.spell-ritual{background-image:linear-gradient(90deg,#5f9ec42b,transparent 85%)}
-.spell-stock-cell .spell-stock-tile.spell-concentration .spell-tile-frame{stroke:#837141;stroke-dasharray:5 3;animation:spell-focus-dash 5s linear infinite}
-.spell-stock-cell .spell-stock-tile.spell-concentration .stock-name{padding-left:3px;border-left:2px solid #a79560}
-@keyframes spell-focus-dash{to{stroke-dashoffset:-32}}
+.spell-stock-meta{display:flex;align-items:center;justify-content:flex-end;gap:3px;min-width:0}
+.spell-stock-cell .spell-stock-tile.stock-item{grid-template-columns:minmax(0,1fr) auto}
+.spell-concentration-mark{display:block;flex:none;width:12px;height:12px;fill:none;stroke:#807047;stroke-width:1.2;animation:spell-concentration-turn 9s linear infinite}
+@keyframes spell-concentration-turn{to{transform:rotate(360deg)}}
 @media(max-width:520px){.quick-action-editor{grid-template-columns:1fr 1fr}.quick-action-editor label:first-child{grid-column:1/-1}}
-@media(prefers-reduced-motion:reduce){.spell-slot-popover,.spell-concentration .spell-tile-frame{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.spell-slot-popover,.spell-concentration-mark{animation:none!important}}

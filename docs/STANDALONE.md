@@ -7,7 +7,7 @@
 ## 使用
 
 - [在线单机网页（国内地址）](https://obr.dnd.center/card/)；[GitHub Pages 备用地址](https://fullpeople.github.io/DND-card-web/)。两者都是静态网页，角色数据不会上传。
-- [Windows 185 下载包（国内直链）](https://obr.dnd.center/card/downloads/DND-Card-Standalone-185.zip)；[对应源码](https://obr.dnd.center/card/source.zip)。
+- [Windows 186 下载包（国内直链）](https://obr.dnd.center/card/downloads/DND-Card-Standalone-186.zip)；[对应源码](https://obr.dnd.center/card/source.zip)。
 - Windows 下载包：解压后双击 `Start.cmd`，浏览器打开 `http://127.0.0.1:5183/`。无需安装 Node、Python或枭熊；保留启动窗口，关闭窗口即停止本地静态文件服务。
 - 不要直接双击 `site/index.html`：浏览器对 `file://` 的模块、缓存和存储支持不一致。
 - 首次使用 Wiki 需要联网下载资料，此后读取本机缓存。尚未下载的资料、手动更新资料仍需联网。下载包不附带上游资料快照。

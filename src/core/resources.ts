@@ -1,6 +1,7 @@
 import type {Character} from './model';
 import {spellState} from './characterDetails';
 import {parentClass} from './featureOwnership';
+export function isHitDieResource(id:string){return /^hit-die:\d+$/.test(id);}
 // Standard multiclass caster progression, indexed by effective caster level.
 const fullSlots=[[],[2],[3],[4,2],[4,3],[4,3,2],[4,3,3],[4,3,3,1],[4,3,3,2],[4,3,3,3,1],[4,3,3,3,2],[4,3,3,3,2,1],[4,3,3,3,2,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1,1],[4,3,3,3,3,1,1,1,1],[4,3,3,3,3,2,1,1,1],[4,3,3,3,3,2,2,1,1]];
 export function syncAutoResources(c:Character,before?:Character){
