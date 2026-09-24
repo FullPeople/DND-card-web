@@ -142,6 +142,7 @@ export default function App() {
   const activePacks=useMemo(()=>inWorkbench?(roomRules?.packs||[]):workspace?.packs||[],[workspace,roomRules?.packs]);
   const [rulesBusy,setRulesBusy]=useState(false);
   const [creatingCard,setCreatingCard]=useState(false);
+  const remoteCreatePending=useRef(false);
   const rulesReadonly=inWorkbench&&(!wb.online||wb.role!=='GM'||!wb.shared?.key||rulesBusy);
   useEffect(()=>{if(activePacks.length)sourceDisplay.merge(Object.fromEntries(activePacks.map(pack=>[pack.id,{name:pack.name}])));},[activePacks,sourceDisplay.merge]);
   const canAuthor=!inWorkbench||wb.role==='GM';
@@ -427,13 +428,21 @@ export default function App() {
       } else {
         const character = mode === 'owlbear' ? importOwlbear(value) : validateCharacter(value);
         character.id = uid(); character.revision = 1; character.name += '（导入）';
-        persist({ ...w, characters: [...w.characters, character], activeId: character.id }); setNotice('角色已作为新副本导入。');
+        if(inWorkbench)await createRemoteCard(character);
+        else persist({ ...w, characters: [...w.characters, character], activeId: character.id });
+        setNotice(inWorkbench?'角色已导入枭熊角色簿。':'角色已作为新副本导入。');
       }
     } catch (error) { setImportError(error instanceof Error ? error.message : String(error)); }
   }
+  async function createRemoteCard(card:Character){
+    if(!wb.online)throw Error('枭熊未连接，角色尚未导入。');
+    if(remoteCreatePending.current)throw Error('正在创建角色，请等待当前操作完成。');
+    remoteCreatePending.current=true;setCreatingCard(true);
+    try{const data={...exportOwlbear(card,evaluate(card)),dnd_card_web:card};const result=await workbenchRequest('createCard',{key:undefined,itemId:undefined,data});chooseWorkbench(`card:${result.created.id}`);setModal('');setWorkbenchPage('sheet');setSheetPage('主要');setTab('sheet');}finally{remoteCreatePending.current=false;setCreatingCard(false);}
+  }
   async function createRemote(edition:Edition){
-    if(creatingCard||!wb.online)return;setCreatingCard(true);
-    try{const card=newCharacter(edition);if(roomRules){card.profile=structuredClone(roomRules.profile);card.rulePacks=structuredClone(roomRules.packs);}const data={...exportOwlbear(card,evaluate(card)),dnd_card_web:card};const result=await workbenchRequest('createCard',{key:undefined,itemId:undefined,data});chooseWorkbench(`card:${result.created.id}`);setModal('');setWorkbenchPage('sheet');setSheetPage('主要');setTab('sheet');}catch(e){setNotice(String(e));}finally{setCreatingCard(false);}
+    if(creatingCard||!wb.online)return;
+    try{const card=newCharacter(edition);if(roomRules){card.profile=structuredClone(roomRules.profile);card.rulePacks=structuredClone(roomRules.packs);}await createRemoteCard(card);}catch(e){setNotice(String(e));}
   }
   function create(edition: Edition, copy = false) {
     if (!workspace || !c) return; const next = copy ? structuredClone(c) : createLocalCharacter(edition); next.id = uid(); next.name = copy ? `${c.name}（副本）` : next.name; next.createdAt = next.updatedAt = new Date().toISOString(); next.revision = 1;
