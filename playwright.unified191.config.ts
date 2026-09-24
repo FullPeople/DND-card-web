@@ -1,0 +1,4 @@
+import {defineConfig} from '@playwright/test';
+const remote=process.env.RELEASE_URL;
+export default defineConfig({testDir:'./tests/e2e',testMatch:['domestic189.spec.ts','domestic190.spec.ts','unified191.spec.ts'],outputDir:'test-results-unified191',workers:2,timeout:45000,reporter:'list',use:{channel:process.env.CI?undefined:'msedge',viewport:{width:2560,height:1080},screenshot:'only-on-failure'},projects:remote?[{name:process.env.RELEASE_KIND||'standalone',use:{baseURL:remote}}]:[{name:'standalone',use:{baseURL:'http://127.0.0.1:5411/'}},{name:'integrated',use:{baseURL:'http://127.0.0.1:5410/'}}],webServer:remote?undefined:[{command:'node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 5410 --strictPort',url:'http://127.0.0.1:5410',reuseExistingServer:false},{command:'node node_modules/vite/bin/vite.js preview --mode standalone --host 127.0.0.1 --port 5411 --strictPort',url:'http://127.0.0.1:5411',reuseExistingServer:false}]});
+

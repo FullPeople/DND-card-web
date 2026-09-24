@@ -14,7 +14,7 @@ async function loaded(page:Page){await page.goto('/');await expect(page.getByRol
 test('disabled expansions disappear from browsing, facets, search and retained documents; exclusions remain struck through',async({page})=>{
  await mockSource(page);
  await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'扩展法术',source:'XGE',level:1,entries:['扩展正文。']}]}}));
- await loaded(page);await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();
+ await loaded(page);await source(page,false);await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();
  await expect(page.locator('.catalog-row')).toHaveCount(0);await expect(page.locator('.wiki-filters').getByRole('checkbox')).toHaveCount(0);
  await page.getByRole('textbox',{name:'搜索规则资料'}).fill('扩展法术');await expect(page.locator('.global-results')).toContainText('没有匹配结果');await page.getByRole('button',{name:'关闭搜索结果'}).click();
  await source(page,true,'扩展法术');await expect(page.locator('.catalog-row')).toHaveClass(/entry-disabled/);await page.locator('.catalog-row').click();await expect(page.locator('.entry-detail')).toHaveClass(/entry-disabled/);
@@ -32,7 +32,7 @@ test('disabled expansions disappear from browsing, facets, search and retained d
 test('class composition hides unchecked expansion features and subclasses, including history snapshots',async({page})=>{
  await mockSource(page);
  await page.route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'核心职业',source:'XPHB',classFeatures:['扩展能力|核心职业|XPHB|1|XGE'],entries:['主体正文。']}],classFeature:[{name:'扩展能力',source:'XGE',className:'核心职业',classSource:'XPHB',level:1,entries:['隐藏能力正文。']}],subclass:[{name:'扩展子职',source:'XGE',className:'核心职业',classSource:'XPHB',shortName:'扩展子职',entries:['隐藏子职正文。']}]}}));
- await loaded(page);await page.locator('.catalog-row').click();await expect(page.locator('.document-prose')).not.toContainText('隐藏能力正文');
+ await loaded(page);await source(page,false);await page.locator('.catalog-row').click();await expect(page.locator('.document-prose')).not.toContainText('隐藏能力正文');
  await page.getByRole('button',{name:'子职',exact:true}).click();await expect(page.locator('.document-prose')).not.toContainText('扩展子职');
  await source(page,true,'扩展子职');await expect(page.locator('.document-prose')).toContainText('隐藏子职正文');await expect(page.locator('.document-section').filter({has:page.locator('h4',{hasText:'扩展子职'})})).toHaveClass(/entry-disabled/);
  await page.getByRole('textbox',{name:'搜索规则资料'}).fill('扩展子职');await page.locator('.global-result').click();await expect(page.locator('.detail-heading')).toContainText('扩展子职');

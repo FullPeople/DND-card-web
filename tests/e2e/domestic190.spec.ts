@@ -11,7 +11,8 @@ async function newCard(page:Page,edition='2014'){
  await page.getByRole('button',{name:/角色簿/}).click();await page.getByRole('button',{name:new RegExp(edition+' 角色')}).click();
 }
 async function stored(page:Page){return page.evaluate(async()=>{
- const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open('dnd-card-standalone');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+ const databaseName=(await indexedDB.databases()).find(db=>['dnd-card-standalone','dnd-card-workspace'].includes(db.name||''))!.name!;
+ const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open(databaseName);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
  return new Promise<any>(resolve=>{const request=db.transaction('documents').objectStore('documents').get('workspace');request.onsuccess=()=>{db.close();resolve(request.result);};});
 });}
 
@@ -51,7 +52,8 @@ test('per-entry disabled marks are shared and remain searchable; rule toggles an
 test('legacy per-card sources migrate from the active card once, preserving original choices',async({page,baseURL})=>{
  await ready(page,baseURL!);await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.evaluate(async()=>{
-  const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('dnd-card-standalone');r.onsuccess=()=>resolve(r.result);});
+  const databaseName=(await indexedDB.databases()).find(db=>['dnd-card-standalone','dnd-card-workspace'].includes(db.name||''))!.name!;
+  const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open(databaseName);r.onsuccess=()=>resolve(r.result);});
   const read=db.transaction('documents').objectStore('documents').get('workspace');const w:any=await new Promise(resolve=>{read.onsuccess=()=>resolve(read.result);});
   const a=w.characters[0],b=structuredClone(a);a.name='旧角色甲';a.edition='2014';a.profile.enabledSources=['PHB'];delete a.profile.autoSourceDefaults;
   b.id='legacy-b';b.name='旧角色乙';b.edition='2024';b.profile.enabledSources=['XPHB','XGE'];delete b.profile.autoSourceDefaults;

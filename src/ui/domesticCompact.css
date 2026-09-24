@@ -1,28 +1,28 @@
-/* Only the domestic standalone build opts in. Paper contents and fit math stay unchanged. */
-.domestic-compact .brand-logo{image-rendering:auto;object-fit:contain;flex-shrink:0;aspect-ratio:1;display:block}
-.app-shell.domestic-compact .save-status{display:none}
-.domestic-compact .pane-toolbar{height:28px;min-height:28px;padding:0 10px;gap:8px}
-.domestic-compact .pane-toolbar>div:first-child{flex:1;min-width:0;gap:6px}
-.domestic-compact .pane-toolbar .eyebrow{display:none}
-.domestic-compact .character-tabs{flex:1;min-width:0;gap:3px;scrollbar-width:none}
-.domestic-compact .character-tabs::-webkit-scrollbar{display:none}
-.domestic-compact .character-tabs button{max-width:220px;padding:1px 8px;font-size:12px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.domestic-compact .toolbar-actions{flex:none;gap:3px}
-.domestic-compact .toolbar-actions button{height:24px;padding:1px 5px;font-size:20px}
-.domestic-compact .toolbar-actions .adjust-shortcut{font-size:11px}
-.domestic-compact .paper-size{font-size:10px;white-space:nowrap}
+/* Shared compact chrome across standalone and Suite. Paper contents and fit math stay unchanged. */
+.compact-layout .brand-logo{image-rendering:auto;object-fit:contain;flex-shrink:0;aspect-ratio:1;display:block}
+.app-shell.compact-layout .save-status{display:none}
+.compact-layout .pane-toolbar{height:28px;min-height:28px;padding:0 10px;gap:8px}
+.compact-layout .pane-toolbar>div:first-child{flex:1;min-width:0;gap:6px}
+.compact-layout .pane-toolbar .eyebrow{display:none}
+.compact-layout .pane-toolbar .character-tabs{flex:1;min-width:0;gap:3px;scrollbar-width:none}
+.compact-layout .pane-toolbar .character-tabs::-webkit-scrollbar{display:none}
+.compact-layout .pane-toolbar .character-tabs button{max-width:220px;padding:1px 8px;font-size:12px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compact-layout .toolbar-actions{flex:none;gap:3px}
+.compact-layout .toolbar-actions button{height:24px;padding:1px 5px;font-size:20px}
+.compact-layout .toolbar-actions .adjust-shortcut{font-size:11px}
+.compact-layout .paper-size{font-size:10px;white-space:nowrap}
 @media screen and (min-width:701px){
- .domestic-compact .app-header{height:36px;min-height:36px;padding:0 12px;gap:10px}
- .domestic-compact .brand{gap:7px}
- .domestic-compact .brand-logo{width:26px;height:26px}
- .domestic-compact .brand strong{font-size:14px;letter-spacing:1px}
- .domestic-compact .header-tools{gap:6px}
- .domestic-compact .header-tools button{padding:2px 9px;font-size:12px;line-height:22px}
+ .compact-layout .app-header{height:36px;min-height:36px;padding:0 12px;gap:10px}
+ .compact-layout .brand{gap:7px}
+ .compact-layout .brand-logo{width:26px;height:26px}
+ .compact-layout .brand strong{font-size:14px;letter-spacing:1px}
+ .compact-layout .header-tools{gap:6px}
+ .compact-layout .header-tools button{padding:2px 9px;font-size:12px;line-height:22px}
 }
 
 /* Keep the same reading/list nodes when the workspace divider changes pane width. */
-.domestic-compact .wiki-layout{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0}
-.domestic-compact .wiki-layout.wiki-columns{display:grid;grid-template-columns:var(--catalog-width,42%) 9px minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto minmax(0,1fr);overflow:hidden}
+.compact-layout .wiki-layout{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0}
+.compact-layout .wiki-layout.wiki-columns{display:grid;grid-template-columns:var(--catalog-width,42%) 9px minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto minmax(0,1fr);overflow:hidden}
 .wiki-columns>.wiki-header{grid-column:1;grid-row:1;padding:0 12px}
 .wiki-columns>.global-search{grid-column:1;grid-row:2;min-width:0}
 .wiki-columns>.category-tabs{grid-column:1;grid-row:3;padding:0 8px}
@@ -37,3 +37,6 @@
 .wiki-columns .wiki-splitter span{width:3px;height:36px}
 .wiki-columns .wiki-splitter:hover span,.wiki-columns .wiki-splitter:focus-visible span{width:3px;height:55px}
 body.wiki-resizing-columns,body.wiki-resizing-columns *{cursor:col-resize!important}
+
+.compact-layout .character-tabs.workbench-cards{flex:none;height:24px;min-height:24px;max-height:24px;padding:1px 10px;gap:3px}
+.compact-layout .character-tabs.workbench-cards>button{min-height:20px;max-height:20px;padding:1px 8px;font-size:11px;line-height:16px}

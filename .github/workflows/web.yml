@@ -25,6 +25,7 @@ jobs:
       - run: npx playwright test --config playwright.touch.config.ts
       - run: npm run build:standalone
       - run: npm run test:standalone
+      - run: npx playwright test --config playwright.unified191.config.ts
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

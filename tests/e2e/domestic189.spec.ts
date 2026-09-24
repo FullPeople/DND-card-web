@@ -80,12 +80,3 @@ test('mobile keeps stacked touch scrolling and the original A4 height savings',a
  await page.screenshot({path:info.outputPath('mobile-stacked.png')});
  await page.setViewportSize({width:1920,height:1080});await expect.poll(async()=>(await bounds(page)).paper.height).toBeCloseTo(997,0);
 });
-test('ordinary standalone build retains original layout and source defaults',async({page})=>{
- await mockSource(page);await page.goto('http://127.0.0.1:5270');
- await expect(page.locator('.paper')).toBeVisible();await expect(page.locator('.wiki-layout')).toHaveCount(0);
- await expect(page.locator('.save-status')).toBeVisible();await expect(page.locator('.app-shell')).not.toHaveClass(/domestic-compact/);
- const sources=await page.evaluate(async()=>{
-  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open('dnd-card-standalone');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
-  return new Promise<string[]>(resolve=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{db.close();resolve(req.result.characters[0].profile.enabledSources);};});
- });expect(sources).toEqual(['PHB','XPHB']);
-});
