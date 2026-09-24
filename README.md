@@ -2,7 +2,7 @@
 
 左边是角色卡，右边是规则资料。卡片在需要填写的位置给出提示，玩家查阅并拖入条目，逐步完成角色。
 
-**[打开单机角色卡与 Wiki](https://fullpeople.github.io/DND-card-web/)** · [验收记录](docs/ACCEPTANCE.md) · [规则覆盖范围](docs/RULE-COVERAGE.md)
+**[打开单机角色卡与 Wiki（国内地址）](https://obr.dnd.center/card/)** · [GitHub Pages 备用地址](https://fullpeople.github.io/DND-card-web/) · [验收记录](docs/ACCEPTANCE.md) · [规则覆盖范围](docs/RULE-COVERAGE.md)
 
 网页端先行，之后由 C++ 桌面客户端复用界面、数据和规则。首版是引导手动选择的完整网页工作区；特殊规则的自动适配范围单独记录，不声称模拟所有 D&D 规则。
 
