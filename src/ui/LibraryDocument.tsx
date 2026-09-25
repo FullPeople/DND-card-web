@@ -1,3 +1,4 @@
+import {resolveEntryReference} from '../core/entryReferences';
 import { explicitlyExcluded, librarySourceEnabled } from './libraryData';
 import { useEffect, useMemo, useRef } from 'react';
 import { entryEdition, editionAllows, type Character, type Entry } from '../core/model';
@@ -6,16 +7,10 @@ import { EntryDraggable } from './DragEntry';
 import { SourceName, compareSources, useSources } from './SourceName';
 
 type Section = { id: string; name: string; english?: string; level?: number; source?: string; page?: number; body: unknown; depth: number; reference?: Entry; excluded?:boolean; subclassHeading?:boolean };
-function featureReference(ref: string, category: string, entries: Entry[]) {
-  const p = ref.split('|'), sub = category === 'refSubclassFeature';
-  const same = (a: unknown, b: string) => String(a || '').toLowerCase() === b.toLowerCase();
-  return entries.find(e => e.kind === 'feature' && [e.name, e.english].some(n => same(n, p[0])) && same(e.raw.className, p[1]) && same(e.raw.classSource || 'PHB', p[2] || 'PHB') &&
-    (sub ? same(e.raw.subclassShortName, p[3]) && same(e.raw.subclassSource || p[2] || 'PHB', p[4] || p[2] || 'PHB') && Number(e.raw.level) === Number(p[5]) && same(e.source, p[6] || p[4] || p[2] || 'PHB') : Number(e.raw.level) === Number(p[3]) && same(e.source, p[4] || p[2] || 'PHB')));
-}
 export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false }: { subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void }) {
   const {registry}=useSources();
   const showSubclasses=subclassesOpen&&['class','subclass'].includes(entry.kind);
-  const roots=useMemo(()=>{if(!showSubclasses)return [entry];const parent=entry.kind==='class'?entry:entries.find(e=>e.kind==='class'&&[e.name,e.english].includes(entry.raw.className)&&e.source===(entry.raw.classSource||'PHB').toUpperCase());return parent?entries.filter(e=>e.kind==='subclass'&&[parent.name,parent.english].includes(e.raw.className)&&(e.raw.classSource||'PHB').toUpperCase()===parent.source&&librarySourceEnabled(character,e)).sort((a,b)=>compareSources(a.source,b.source,registry)||a.name.localeCompare(b.name,'zh')):[entry];},[entry,entries,showSubclasses,registry,character.profile.enabledSources,character.profile.exceptions]);
+  const roots=useMemo(()=>{if(!showSubclasses||entry.kind==='subclass')return [entry];const parent=entry.kind==='class'?entry:entries.find(e=>e.kind==='class'&&[e.name,e.english].includes(entry.raw.className)&&e.source===(entry.raw.classSource||'PHB').toUpperCase());return parent?entries.filter(e=>e.kind==='subclass'&&[parent.name,parent.english].includes(e.raw.className)&&(e.raw.classSource||'PHB').toUpperCase()===parent.source&&librarySourceEnabled(character,e)).sort((a,b)=>compareSources(a.source,b.source,registry)||a.name.localeCompare(b.name,'zh')):[entry];},[entry,entries,showSubclasses,registry,character.profile.enabledSources,character.profile.exceptions]);
   const effectiveCollapsed=focus?[]:collapsed;
   const ref = useRef<HTMLDivElement>(null);
   const sections = useMemo(() => {
@@ -27,7 +22,7 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
       if (typeof value === 'object') {
         const v = value as Record<string, any>, pointer = v.classFeature || v.subclassFeature || v.optionalfeature;
         if (typeof v.type === 'string' && v.type.startsWith('ref') && typeof pointer === 'string') {
-          const found = v.type === 'refOptionalfeature' ? entries.find(e => e.kind === 'feature' && [e.name, e.english].includes(pointer.split('|')[0]) && e.source.toLowerCase() === (pointer.split('|')[1] || 'phb').toLowerCase()) : featureReference(pointer, v.type, entries);
+          const found = resolveEntryReference(pointer,entries,'feature');
           if (found && !librarySourceEnabled(character,found)) return;
           if (found && !seen.has(found.id)) {
             const visited = new Set(seen).add(found.id);
@@ -35,7 +30,7 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
             walk(found.entries, `${path}-body`, depth + 1, visited, found.raw.level || level, found, excluded); return;
           }
         }
-        if (v.name && ['entries', 'section', undefined].includes(v.type) && (v.entries || v.entry)) {
+        if (owner.kind!=='feature' && v.name && ['entries', 'section', undefined].includes(v.type) && (v.entries || v.entry)) {
           result.push({ id: path, excluded, name: v.name, english: v.ENG_name, body: [], depth, level, reference: ['race','background','feat','class','subclass','feature'].includes(entry.kind) && !(v.entries?.length===1 && v.entries[0]?.type==='list' && v.entries[0].items?.every((item:any)=>item?.type?.startsWith('ref'))) ? {...owner,id:`${owner.id}#trait:${path.replace(/^section-/, '')}`,kind:'feature',effects:undefined,choices:undefined,name:v.name,english:v.ENG_name||v.name,entries:Array.isArray(v.entries)?v.entries:[v.entry].filter(Boolean),raw:{_inlineOwner:owner.id,_inlineName:v.name,className:owner.kind==='class'?owner.name:owner.raw.className,classEnglish:owner.kind==='class'?owner.english:owner.raw.classEnglish,classSource:owner.kind==='class'?owner.source:owner.raw.classSource,subclassShortName:owner.kind==='subclass'?owner.raw.shortName||owner.name:owner.raw.subclassShortName,subclassSource:owner.kind==='subclass'?owner.source:owner.raw.subclassSource,level}} : undefined });
           walk(v.entries || v.entry, `${path}-body`, depth + 1, seen, level, owner, excluded); return;
         }
@@ -87,12 +82,12 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
   useEffect(()=>{if(!focus)return;const section=sections.find(s=>s.reference?.id===focus || focus===`name:${s.name}`);go(section?.id || focus);},[focus,entry.id,showSubclasses]);
   const focusSection=sections.find(s=>s.reference?.id===focus||focus===`name:${s.name}`||s.id===focus)?.id;
   return <div className="library-document" ref={ref}>
-    {navigation.length > 0 && <nav className="document-nav" aria-label="正文目录"><strong>目录</strong><div>{navigation.map((s, index) => <div key={s.id}>{s.level && s.level !== navigation[index - 1]?.level && <span className="nav-level">等级 {s.level}</span>}<button data-nav-section={s.id} title={s.name} onClick={() => go(s.id)}>{s.name}</button></div>)}</div></nav>}
+    {navigation.length > 0 && <nav className="document-nav" aria-label="正文目录"><strong>目录</strong><div>{navigation.map((s, index) => <div key={s.id}>{s.level && s.level !== navigation[index - 1]?.level && <span className="nav-level">等级 {s.level}</span>}<button data-nav-section={s.id} title={s.name} onClick={() => go(s.id)}>{s.name}{s.subclassHeading&&s.source&&<small> <SourceName id={s.source}/></small>}</button></div>)}</div></nav>}
     <div className={`document-prose rules-prose ${navigation.length ? 'with-nav' : ''}`}><ContentBoundary key={entry.id}>{sections.filter(s => !hidden.has(s.id)).map(s => <section key={`${s.id}:${s.id===focusSection?highlight||0:0}`} data-anchor={s===sections.find(x=>x.id!=='progression')?'body':undefined} data-section={s.name ? s.id : undefined} data-entry-id={s.reference?.id} data-described-entry={s.reference?.id} className={`document-section ${s.id===focusSection && (preview||highlight) ? preview?'reading-highlight':'reading-highlight-fade' : ''} depth-${Math.min(s.depth, 2)} ${s.excluded ? 'entry-disabled' : ''}`}>
       {s.name && <h4><EntryDraggable className="document-heading-toggle" dragEnabled={!!s.reference} entry={s.reference || entry} aria-expanded={!effectiveCollapsed.includes(s.id)} aria-label={`${effectiveCollapsed.includes(s.id) ? '展开' : '折叠'}段落 ${s.name}`} onClick={() => onCollapse(effectiveCollapsed.includes(s.id) ? collapsed.filter(x => x !== s.id) : [...collapsed, s.id])}>
         {s.level && s.reference && <span>等级 {s.level}：</span>}<Inline text={s.name}/> {s.english && s.english !== s.name && <small>{s.english}</small>}{s.source && <span className="section-tools"><small><SourceName id={s.source}/>{s.page ? ` p${s.page}` : ''}</small></span>}
       </EntryDraggable></h4>}
-      {!effectiveCollapsed.includes(s.id) && <Entries value={s.body} onLink={onLink}/>}
+      {!effectiveCollapsed.includes(s.id) && <Entries compact={entry.kind==='feature'||s.reference?.kind==='feature'} value={s.body} onLink={onLink}/>}
     </section>)}</ContentBoundary></div>
   </div>;
 }

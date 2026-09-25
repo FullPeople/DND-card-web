@@ -29,13 +29,7 @@ export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): En
   }
   return result;
 }
-export function resolveReference(ref: string, entries: Entry[], kind?: Kind): Entry | undefined {
-  const parts = ref.split('|'); const name = canonical(parts[0]);
-  return entries.find(e => (!kind || e.kind === kind) && [e.name, e.english].some(n => canonical(n) === name) &&
-    (!parts[1] || (kind === 'feature' ? [e.raw.className, e.raw.classEnglish].some(n => canonical(n) === canonical(parts[1])) : canonical(e.source) === canonical(parts[1]))) &&
-    (kind !== 'feature' || !parts[2] || canonical(e.raw.classSource) === canonical(parts[2])) &&
-    (kind !== 'feature' || !parts[3] || String(e.raw.level) === parts[3]));
-}
+export {resolveEntryReference as resolveReference} from '../core/entryReferences';
 async function fetchJson(base: string, path: string, signal: AbortSignal, refresh: boolean): Promise<{ body: Raw; revision: string; cached: boolean; warning?: string }> {
   const key = `${base}/${path}`;
   const cached = await readCache(key);

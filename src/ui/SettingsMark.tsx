@@ -1,0 +1,1 @@
+export function SettingsMark(){return <svg className="heading-settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 3 3-1 2 2 3-1 1-3 3-2-1-3 1-3-3-2-3 1Z"/><circle cx="12" cy="11" r="3"/></svg>;}

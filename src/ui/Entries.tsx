@@ -1,4 +1,5 @@
-import { Reference } from './Reference';
+import {EntryDraggable} from './DragEntry';
+import { Reference, ReferenceContext } from './Reference';
 import { inlineLabel } from '../core/inlineTags';
 import {inWorkbench,composeRoll} from '../platform/workbench';
 import { Component, Fragment, createContext, useContext, type ReactNode } from 'react';
@@ -36,11 +37,17 @@ export function Inline({ text, onLink }: { text: string; onLink?: LinkHandler })
   parts.push(text.slice(cursor));
   return <>{parts}</>;
 }
-export function Entries({ value, onLink, depth = 0 }: { value: unknown; onLink?: LinkHandler; depth?: number }): ReactNode {
+const ReferencePath=createContext<string[]>([]);
+function ExpandedReference({reference,onLink,depth}:{reference:string;onLink?:LinkHandler;depth:number}){
+ const context=useContext(ReferenceContext),path=useContext(ReferencePath),entry=context?.resolve?.(reference,'feature');
+ if(!entry||path.includes(entry.id))return <p><Inline text={reference.split('|')[0]}/></p>;
+ return <ReferencePath.Provider value={[...path,entry.id]}><section className="entry-section resolved-feature" data-described-entry={entry.id}><h4><EntryDraggable className="document-heading-toggle" entry={entry}><Inline text={entry.name}/>{entry.english!==entry.name&&<small> {entry.english}</small>}</EntryDraggable></h4><Entries compact value={entry.entries} onLink={onLink} depth={depth+1}/></section></ReferencePath.Provider>;
+}
+export function Entries({ value, onLink, depth = 0, compact=false }: { value: unknown; onLink?: LinkHandler; depth?: number; compact?:boolean }): ReactNode {
   if (depth > 14 || value == null) return null;
   if (typeof value === 'string') return /^生命骰：d\d+。职业等级可在角色卡中调整。$/.test(value) ? null : <p><Inline text={value} onLink={onLink}/></p>;
   if (typeof value === 'number') return String(value);
-  if (Array.isArray(value)) return value.map((v, i) => <Fragment key={i}><Entries value={v} onLink={onLink} depth={depth + 1}/></Fragment>);
+  if (Array.isArray(value)) return value.map((v, i) => <Fragment key={i}><Entries value={v} onLink={onLink} depth={depth + 1} compact={compact}/></Fragment>);
   if (typeof value !== 'object') return null;
   const v = value as Record<string, any>;
   if (v.type === 'dice') return v.toRoll ? (Array.isArray(v.toRoll) ? v.toRoll : [v.toRoll]).map((r:any)=>`${r.number ?? 1}d${r.faces}${r.modifier ? `${r.modifier>0?'+':''}${r.modifier}` : ''}`).join(' + ') : v.expression || v.displayText || null;
@@ -49,14 +56,18 @@ export function Entries({ value, onLink, depth = 0 }: { value: unknown; onLink?:
   if (['abilityDc', 'abilityAttackMod'].includes(v.type)) return <p className="ability-formula"><strong>{v.name || '法术'}{v.type === 'abilityDc' ? '豁免 DC' : '攻击加值'}</strong> = {v.type === 'abilityDc' ? '8 + ' : ''}{(v.attributes || []).map((a: Ability) => ABILITY_LABELS[a] || a).join(' / ')}调整值 + 熟练加值</p>;
   if (v.type === 'table') {
   const rows: any[][] = (v.rows || []).map((row: any) => Array.isArray(row) ? row : row.row || []);
-    return <div className="table-scroll">{v.caption && <p className="table-caption"><Inline text={v.caption} onLink={onLink}/></p>}<Entries value={v.intro} onLink={onLink} depth={depth + 1}/><table><thead><tr>{v.colLabels?.map((l: string, i: number) => <th key={i} scope="col"><Inline text={l} onLink={onLink}/></th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell: any, j) => <td key={j} className={typeof cell==='number'||typeof cell==='string'&&/^[+−–—\d\s./~～-]+$/.test(cell)?'numeric-cell':undefined} rowSpan={cell?.rowSpan || cell?.rowspan || 1} colSpan={cell?.colSpan || cell?.colspan || 1}><Entries value={cell} onLink={onLink} depth={depth + 1}/></td>)}</tr>)}</tbody></table><Entries value={v.footnotes} onLink={onLink} depth={depth + 1}/></div>;
+    return <div className="table-scroll">{v.caption && <p className="table-caption"><Inline text={v.caption} onLink={onLink}/></p>}<Entries value={v.intro} onLink={onLink} depth={depth + 1} compact={compact}/><table><thead><tr>{v.colLabels?.map((l: string, i: number) => <th key={i} scope="col"><Inline text={l} onLink={onLink}/></th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell: any, j) => <td key={j} className={typeof cell==='number'||typeof cell==='string'&&/^[+−–—\d\s./~～-]+$/.test(cell)?'numeric-cell':undefined} rowSpan={cell?.rowSpan || cell?.rowspan || 1} colSpan={cell?.colSpan || cell?.colspan || 1}><Entries value={cell} onLink={onLink} depth={depth + 1} compact={compact}/></td>)}</tr>)}</tbody></table><Entries value={v.footnotes} onLink={onLink} depth={depth + 1} compact={compact}/></div>;
   }
   if (v.headerEntries || v.spells || v.daily || v.will) {
     const frequencies: Record<string,string>={daily:'每日',rest:'每次休息',weekly:'每周',monthly:'每月',yearly:'每年',recharge:'充能',legendary:'传奇动作'};
-    return <section className="entry-section spellcasting-block">{v.name&&<h4><Inline text={v.name}/></h4>}<Entries value={v.headerEntries} onLink={onLink} depth={depth+1}/>{v.will&&<p><strong>随意施展：</strong><Inline text={v.will.join('、')} onLink={onLink}/></p>}{Object.entries(v.spells||{}).map(([level,data]:[string,any])=><p key={level}><strong>{level==='0'?'戏法':`${level}环`}{data.slots?`（${data.slots}法术位）`:''}：</strong><Inline text={(data.spells||[]).join('、')} onLink={onLink}/></p>)}{Object.entries(frequencies).flatMap(([key,label])=>Object.entries(v[key]||{}).map(([count,spells]:[string,any])=><p key={`${key}-${count}`}><strong>{label}{count.replace('e','')}次{count.includes('e')?'各自':''}：</strong><Inline text={Array.isArray(spells)?spells.join('、'):String(spells)} onLink={onLink}/></p>))}<Entries value={v.footerEntries} onLink={onLink} depth={depth+1}/></section>;
+    return <section className="entry-section spellcasting-block">{v.name&&<h4><Inline text={v.name}/></h4>}<Entries value={v.headerEntries} onLink={onLink} depth={depth+1} compact={compact}/>{v.will&&<p><strong>随意施展：</strong><Inline text={v.will.join('、')} onLink={onLink}/></p>}{Object.entries(v.spells||{}).map(([level,data]:[string,any])=><p key={level}><strong>{level==='0'?'戏法':`${level}环`}{data.slots?`（${data.slots}法术位）`:''}：</strong><Inline text={(data.spells||[]).join('、')} onLink={onLink}/></p>)}{Object.entries(frequencies).flatMap(([key,label])=>Object.entries(v[key]||{}).map(([count,spells]:[string,any])=><p key={`${key}-${count}`}><strong>{label}{count.replace('e','')}次{count.includes('e')?'各自':''}：</strong><Inline text={Array.isArray(spells)?spells.join('、'):String(spells)} onLink={onLink}/></p>))}<Entries value={v.footerEntries} onLink={onLink} depth={depth+1} compact={compact}/></section>;
   }
-  if (v.type === 'list') return <ul>{v.items?.map((item: unknown, i: number) => <li key={i}><Entries value={item} onLink={onLink} depth={depth + 1}/></li>)}</ul>;
+  if (v.type === 'list') return <ul>{v.items?.map((item: unknown, i: number) => <li key={i}><Entries value={item} onLink={onLink} depth={depth + 1} compact={compact}/></li>)}</ul>;
   if (v.type === 'cell' && v.roll) return `${v.roll.exact ?? `${v.roll.min}–${v.roll.max}`}`;
-  if (typeof v.type === 'string' && v.type.startsWith('ref')) { const ref = v.classFeature || v.subclassFeature || v.optionalfeature; return typeof ref === 'string' ? <p><Reference reference={ref} kind="feature" onClick={() => onLink?.(ref, 'feature')}>{ref.split('|')[0]}</Reference></p> : null; }
-  return <section className={['inset', 'insetReadaloud', 'quote'].includes(v.type) ? 'entry-inset' : 'entry-section'}>{v.name && <h4><Inline text={v.name} onLink={onLink}/>{v.ENG_name && v.ENG_name !== v.name && <small> {v.ENG_name}</small>}</h4>}<Entries value={v.entries || v.entry || v.items || v.text} onLink={onLink} depth={depth + 1}/>{v.by && <small>— {v.by}</small>}</section>;
+  if (typeof v.type === 'string' && v.type.startsWith('ref')) { const ref = v.classFeature || v.subclassFeature || v.optionalfeature; return typeof ref === 'string' ? <ExpandedReference reference={ref} onLink={onLink} depth={depth}/> : null; }
+  if(compact&&v.name&&['entries','section','item',undefined].includes(v.type)){
+    const body=v.entries||v.entry||v.items||v.text,parts=Array.isArray(body)?body:[body],first=typeof parts[0]==='string'?parts[0]:undefined;
+    return <section className="feature-subentry"><p><strong><em><Inline text={v.name} onLink={onLink}/>{v.ENG_name&&v.ENG_name!==v.name&&<> <Inline text={v.ENG_name}/></>}。</em></strong>{first&&<> <Inline text={first} onLink={onLink}/></>}</p><Entries compact value={first?parts.slice(1):parts} onLink={onLink} depth={depth+1}/></section>;
+  }
+  return <section className={['inset', 'insetReadaloud', 'quote'].includes(v.type) ? 'entry-inset' : 'entry-section'}>{v.name && <h4><Inline text={v.name} onLink={onLink}/>{v.ENG_name && v.ENG_name !== v.name && <small> {v.ENG_name}</small>}</h4>}<Entries value={v.entries || v.entry || v.items || v.text} onLink={onLink} depth={depth + 1} compact={compact}/>{v.by && <small>— {v.by}</small>}</section>;
 }

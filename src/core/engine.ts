@@ -1,3 +1,4 @@
+import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
 import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
@@ -92,15 +93,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
 export function requirementMismatch(e: Entry, r?: Partial<Requirement>): string | undefined {
   if (r?.kind && r.kind !== e.kind) return '这不是该位置需要的条目类型';
   if (r?.refs?.length) {
-    const match = r.refs.some(ref => {
-      const parts = ref.split('|'); const [name, source, classSource] = parts;
-      if (![e.name.toLowerCase(), e.english.toLowerCase()].includes(name.toLowerCase())) return false;
-      if (e.kind === 'feature' && parts.length > 2) {
-        const subclass = parts.length >= 6; const level = subclass ? parts[5] : parts[3]; const featureSource = (subclass ? parts[6] || parts[4] : parts[4]) || classSource || 'PHB';
-        return (!source || [e.raw.className, e.raw.classEnglish].some(n => n?.toLowerCase() === source.toLowerCase())) && e.raw.classSource?.toLowerCase() === (classSource || 'PHB').toLowerCase() && e.source.toLowerCase() === featureSource.toLowerCase() && (!level || String(e.raw.level) === level) && (!subclass || e.raw.subclassShortName === parts[3] && e.raw.subclassSource?.toLowerCase() === (parts[4] || 'PHB').toLowerCase());
-      }
-      return !source || e.source.toLowerCase() === source.toLowerCase();
-    });
+    const match = r.refs.some(ref => matchesReference(e,ref));
     if (!match) return '此要求限定了特定条目或来源';
   }
   return undefined;
@@ -113,7 +106,8 @@ export function candidateReason(c: Character, e: Entry, r?: Requirement): string
   if (!selectionAllowed(c, e)) return '此来源或规则版本未启用';
   const mismatch = requirementMismatch(e, r); if (mismatch) return mismatch;
   const existing = c.selections.some(s => s.entry.id === e.id && (!r || s.requirementId === r.id));
-  if (existing && e.kind !== 'item' && !e.raw.repeatable) return '这个条目已经在角色卡中';
+  if(e.kind==='class'&&c.selections.filter(s=>s.entry.kind==='class').reduce((sum,s)=>sum+s.level,0)>=20)return '职业总等级已达到 20';
+  if (existing && e.kind !== 'class' && e.kind !== 'item' && !e.raw.repeatable) return '这个条目已经在角色卡中';
 
   return undefined;
 }

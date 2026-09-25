@@ -23,7 +23,7 @@ export interface Entry {
   effects?: Effect[]; choices?: ChoiceDefinition[]; dependencies?: string[];
 }
 export interface Selection { id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
-export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; slots:Record<string,{max:number;used:number}> }
+export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface Character {
   locked?:boolean;

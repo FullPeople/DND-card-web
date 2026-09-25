@@ -6,14 +6,8 @@ import {inWorkbench,useWorkbench} from '../platform/workbench';
 import {ResourceRow} from './ResourceRow';
 import './hitDiceResources.css';
 
-const shapes:Record<number,{outline:string;facets:string}>={
-  4:{outline:'M16 2 30 28H2Z',facets:'M16 2v6M2 28l6-4m22 4-6-4'},
-  6:{outline:'M6 3H26L30 7V25L26 29H6L2 25V7Z',facets:'M6 3v5H2m28 0h-5V3M2 24h5v5m18 0v-5h5'},
-  8:{outline:'M16 1 30 16 16 31 2 16Z',facets:'M16 1v7M2 16h5m18 0h5m-14 8v7'},
-  10:{outline:'M16 1 29 10 27 23 16 31 5 23 3 10Z',facets:'M16 1v7M3 10l6 1m20-1-6 1M16 24v7'},
-  12:{outline:'M10 2h12l9 10-4 14-11 5L5 26 1 12Z',facets:'M10 2l1 5m11-5-1 5M1 12l6 2m24-2-6 2M5 26l5-4m17 4-5-4'},
-};
-function Die({faces}:{faces:number}){const shape=shapes[faces]||shapes[12];return <svg viewBox="0 0 32 32" aria-hidden="true"><path className="hit-die-face" d={shape.outline}/><path className="hit-die-facets" d={shape.facets}/><text x="16" y="17" textAnchor="middle" dominantBaseline="central">{faces}</text></svg>;}
+// Same assets used by the Full Suite dice panel; preserve the established art.
+function Die({faces}:{faces:number}){return <span className="hit-die-art"><img src={`${import.meta.env.BASE_URL}dice/d${faces}.png`} alt=""/><b>{faces}</b></span>;}
 
 export function HitDiceResources({c,edit}:{c:Character;edit:(action:(draft:Character)=>void)=>void}){
  const wb=useWorkbench(),root=useRef<HTMLDivElement>(null),panel=useRef<HTMLDivElement>(null);

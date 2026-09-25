@@ -1,3 +1,4 @@
+import {SettingsMark} from './SettingsMark';
 import { useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { type Entry, type Kind, type Requirement } from '../core/model';
 import { CellArt, CellHalo } from './CellArt';
@@ -5,8 +6,8 @@ import { DropZone } from './DragEntry';
 import {CardIdentityContext} from './cardVisualState';
 
 /** The inner surface clips both the title band and contents to the same cut corners. */
-export function SheetCell({ label, children, className = '', missing = false, dashed = false, onFill, requirementId, hint, trailing, dropKinds, dropRequirement, onReceive, allowExisting, flashKey, onHeadingClick, headingActionLabel, headingExpanded, accepts, wholePaper }: {
-  accepts?: (entry: Entry) => boolean; wholePaper?: boolean;
+export function SheetCell({ label, children, className = '', missing = false, dashed = false, onFill, requirementId, hint, trailing, dropKinds, dropRequirement, onReceive, allowExisting, flashKey, onHeadingClick, headingActionLabel, headingExpanded, settingsIcon, accepts, wholePaper }: {
+  settingsIcon?:boolean; accepts?: (entry: Entry) => boolean; wholePaper?: boolean;
   onHeadingClick?: () => void; headingActionLabel?: string; headingExpanded?: boolean;
   flashKey?: string; label: string; children?: ReactNode; className?: string; missing?: boolean; dashed?: boolean; onFill?: () => void; requirementId?: string; hint?: string; trailing?: ReactNode;
   dropKinds?: Kind[]; dropRequirement?: Requirement; onReceive?: (entry: Entry) => void; allowExisting?: boolean;
@@ -27,7 +28,7 @@ export function SheetCell({ label, children, className = '', missing = false, da
     return () => observer.disconnect();
   }, []);
   const { width: w, height: h } = size;
-  const content = <><header className={`cell-heading ${onHeadingClick ? 'heading-action' : ''}`} role={onHeadingClick ? 'button' : undefined} tabIndex={onHeadingClick ? 0 : undefined} aria-label={onHeadingClick ? headingActionLabel || label : undefined} aria-expanded={headingExpanded} onClick={onHeadingClick ? event => { event.stopPropagation(); onHeadingClick(); } : undefined} onKeyDown={onHeadingClick ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); onHeadingClick(); } } : undefined}><h3>{label}</h3>{trailing}</header><div className="cell-content">{children}{outlined && onFill && <button className="cell-fill choose-button" onClick={event => { event.stopPropagation(); onFill(); }}>点击并拖拽填写</button>}</div></>;
+  const content = <><header className={`cell-heading ${onHeadingClick ? 'heading-action' : ''}`} role={onHeadingClick ? 'button' : undefined} tabIndex={onHeadingClick ? 0 : undefined} aria-label={onHeadingClick ? headingActionLabel || label : undefined} aria-expanded={headingExpanded} onClick={onHeadingClick ? event => { event.stopPropagation(); onHeadingClick(); } : undefined} onKeyDown={onHeadingClick ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); onHeadingClick(); } } : undefined}><h3>{label}{settingsIcon&&onHeadingClick&&<SettingsMark/>}</h3>{trailing}</header><div className="cell-content">{children}{outlined && onFill && <button className="cell-fill choose-button" onClick={event => { event.stopPropagation(); onFill(); }}>点击并拖拽填写</button>}</div></>;
   return <section ref={ref} className={`sheet-cell ${className} ${missing ? 'cell-incomplete' : ''} ${outlined ? 'cell-missing' : ''}`} aria-label={label} data-requirement={requirementId} title={hint} onClick={event => {
     if (missing && onFill && !(event.target as HTMLElement).closest('button,input,select,textarea,a,summary,label')) onFill();
   }}>

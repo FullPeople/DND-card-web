@@ -12,7 +12,7 @@ export function expandCopies(items: Raw[], templates: Raw[] = []): Raw[] {
     if (memo.has(item)) return memo.get(item)!;
     if (seen.has(item)) return item;
     const copy = item._copy;
-    const parent = items.find(p => p !== item && (copy.abbreviation ? p.abbreviation === copy.abbreviation : [p.name, p.ENG_name].includes(copy.name)) && (p.source || p.inherits?.source) === copy.source && (!copy.raceName || p.raceName === copy.raceName) && (!copy.raceSource || p.raceSource === copy.raceSource));
+    const parent = items.find(p => p !== item && (copy.abbreviation ? p.abbreviation === copy.abbreviation : [p.name, p.ENG_name].includes(copy.name)) && (p.source || p.inherits?.source) === copy.source && ['className','classSource','subclassShortName','subclassSource','shortName','level'].every(k=>copy[k]===undefined||String(p[k]??(['classSource','subclassSource'].includes(k)?'PHB':'')).toLowerCase()===String(copy[k]).toLowerCase()) && (!copy.raceName || p.raceName === copy.raceName) && (!copy.raceSource || p.raceSource === copy.raceSource));
     if (!parent) return item;
     const base = structuredClone(resolve(parent, new Set([...seen, item])));
     if (base._copy) return item;
