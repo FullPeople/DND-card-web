@@ -21,7 +21,8 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
       if (Array.isArray(value)) { value.forEach((v, i) => walk(v, `${path}-${i}`, depth, seen, level, owner, excluded)); return; }
       if (typeof value === 'object') {
         const v = value as Record<string, any>, pointer = v.classFeature || v.subclassFeature || v.optionalfeature;
-        if (typeof v.type === 'string' && v.type.startsWith('ref') && typeof pointer === 'string') {
+        // 特性正文里的引用是它自己的选项（如圣职的保护者/奇术使），留在正文里内联，不再提升成同级段落。
+        if (typeof v.type === 'string' && v.type.startsWith('ref') && typeof pointer === 'string' && owner.kind !== 'feature') {
           const found = resolveEntryReference(pointer,entries,'feature');
           if (found && !librarySourceEnabled(character,found)) return;
           if (found && !seen.has(found.id)) {

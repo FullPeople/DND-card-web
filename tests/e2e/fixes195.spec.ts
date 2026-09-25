@@ -11,6 +11,18 @@ test('Wiki preserves nested feature prose and separate edition-qualified subclas
  await expect(feature).not.toContainText('独立的旧版正文');await expect(page.locator('.document-section').filter({has:page.getByRole('button',{name:'折叠段落 旧影',exact:true})})).toContainText('独立的旧版正文');
  await feature.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('195-wiki-hierarchy.png')});
 });
+test('feature options that reference other class features stay inline while sibling features remain sections',async({page})=>{
+ await start(page);await page.locator('.catalog-row').first().click();
+ const doc=page.locator('.library-document');
+ await expect(doc.locator('.document-section').filter({has:page.getByRole('button',{name:'折叠段落 起始法术',exact:true})})).toHaveCount(1);
+ const choice=doc.locator('.document-section').filter({has:page.getByRole('button',{name:'折叠段落 试炼抉择',exact:true})});
+ await expect(choice).toContainText('选择下列其中一项');
+ await expect(choice.locator('.feature-subentry')).toHaveCount(2);
+ await expect(choice).toContainText('以盾护身');await expect(choice).toContainText('以矛制敌');
+ await expect(doc.getByRole('button',{name:'折叠段落 守方',exact:true})).toHaveCount(0);
+ await expect(doc.getByRole('button',{name:'折叠段落 攻方',exact:true})).toHaveCount(0);
+ await choice.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('195-feature-options.png')});
+});
 test('dragging the identical class increments its existing level and can be undone',async({page})=>{
  await start(page);await page.getByRole('switch',{name:'编辑模式'}).click();await page.locator('.catalog-row').first().click();await fillFromDetail(page);await expect(page.locator('.identity-class input')).toHaveValue('1');await fillFromDetail(page);await expect(page.locator('.identity-class input')).toHaveValue('2');await expect(page.locator('.identity-class .identity-token')).toHaveCount(1);
  await page.keyboard.press('Control+z');await expect(page.locator('.identity-class input')).toHaveValue('1');await page.keyboard.press('Control+Shift+z');await expect(page.locator('.identity-class input')).toHaveValue('2');

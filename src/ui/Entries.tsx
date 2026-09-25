@@ -38,9 +38,13 @@ export function Inline({ text, onLink }: { text: string; onLink?: LinkHandler })
   return <>{parts}</>;
 }
 const ReferencePath=createContext<string[]>([]);
-function ExpandedReference({reference,onLink,depth}:{reference:string;onLink?:LinkHandler;depth:number}){
+function ExpandedReference({reference,onLink,depth,compact}:{reference:string;onLink?:LinkHandler;depth:number;compact?:boolean}){
  const context=useContext(ReferenceContext),path=useContext(ReferencePath),entry=context?.resolve?.(reference,'feature');
  if(!entry||path.includes(entry.id))return <p><Inline text={reference.split('|')[0]}/></p>;
+ if(compact){
+  const parts=Array.isArray(entry.entries)?entry.entries:[entry.entries].filter(v=>v!=null),first=typeof parts[0]==='string'?parts[0]:undefined;
+  return <ReferencePath.Provider value={[...path,entry.id]}><section className="feature-subentry"><p><strong><em><Inline text={entry.name} onLink={onLink}/>{entry.english!==entry.name&&<> <Inline text={entry.english}/></>}。</em></strong>{first&&<> <Inline text={first} onLink={onLink}/></>}</p><Entries compact value={first?parts.slice(1):parts} onLink={onLink} depth={depth+1}/></section></ReferencePath.Provider>;
+ }
  return <ReferencePath.Provider value={[...path,entry.id]}><section className="entry-section resolved-feature" data-described-entry={entry.id}><h4><EntryDraggable className="document-heading-toggle" entry={entry}><Inline text={entry.name}/>{entry.english!==entry.name&&<small> {entry.english}</small>}</EntryDraggable></h4><Entries compact value={entry.entries} onLink={onLink} depth={depth+1}/></section></ReferencePath.Provider>;
 }
 export function Entries({ value, onLink, depth = 0, compact=false }: { value: unknown; onLink?: LinkHandler; depth?: number; compact?:boolean }): ReactNode {
@@ -64,7 +68,7 @@ export function Entries({ value, onLink, depth = 0, compact=false }: { value: un
   }
   if (v.type === 'list') return <ul>{v.items?.map((item: unknown, i: number) => <li key={i}><Entries value={item} onLink={onLink} depth={depth + 1} compact={compact}/></li>)}</ul>;
   if (v.type === 'cell' && v.roll) return `${v.roll.exact ?? `${v.roll.min}–${v.roll.max}`}`;
-  if (typeof v.type === 'string' && v.type.startsWith('ref')) { const ref = v.classFeature || v.subclassFeature || v.optionalfeature; return typeof ref === 'string' ? <ExpandedReference reference={ref} onLink={onLink} depth={depth}/> : null; }
+  if (typeof v.type === 'string' && v.type.startsWith('ref')) { const ref = v.classFeature || v.subclassFeature || v.optionalfeature; return typeof ref === 'string' ? <ExpandedReference reference={ref} onLink={onLink} depth={depth} compact={compact}/> : null; }
   if(compact&&v.name&&['entries','section','item',undefined].includes(v.type)){
     const body=v.entries||v.entry||v.items||v.text,parts=Array.isArray(body)?body:[body],first=typeof parts[0]==='string'?parts[0]:undefined;
     return <section className="feature-subentry"><p><strong><em><Inline text={v.name} onLink={onLink}/>{v.ENG_name&&v.ENG_name!==v.name&&<> <Inline text={v.ENG_name}/></>}。</em></strong>{first&&<> <Inline text={first} onLink={onLink}/></>}</p><Entries compact value={first?parts.slice(1):parts} onLink={onLink} depth={depth+1}/></section>;

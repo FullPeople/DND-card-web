@@ -1,7 +1,12 @@
 // Deliberately shared names and reordered copy parents reproduce edition ambiguity.
 export const source195={
- class:[{name:'测试祭司',source:'XPHB',hd:{faces:8},spellcastingAbility:'wis',casterProgression:'full',classFeatures:['起始法术|测试祭司|XPHB|1']}],
- classFeature:[{name:'起始法术',source:'XPHB',className:'测试祭司',classSource:'XPHB',level:1,entries:['软件验收正文。']}],
+ class:[{name:'测试祭司',source:'XPHB',hd:{faces:8},spellcastingAbility:'wis',casterProgression:'full',classFeatures:['起始法术|测试祭司|XPHB|1','试炼抉择|测试祭司|XPHB|1']}],
+ classFeature:[
+  {name:'起始法术',source:'XPHB',className:'测试祭司',classSource:'XPHB',level:1,entries:['软件验收正文。']},
+  {name:'试炼抉择',source:'XPHB',className:'测试祭司',classSource:'XPHB',level:1,entries:['选择下列其中一项：',{type:'entries',entries:[{type:'options',count:1,entries:[{type:'refClassFeature',classFeature:'守方|测试祭司|XPHB|1|XPHB'},{type:'refClassFeature',classFeature:'攻方|测试祭司|XPHB|1|XPHB'}]}]}]},
+  {name:'守方',source:'XPHB',className:'测试祭司',classSource:'XPHB',level:1,entries:['以盾护身。']},
+  {name:'攻方',source:'XPHB',className:'测试祭司',classSource:'XPHB',level:1,entries:['以矛制敌。']},
+ ],
  subclass:[
   {name:'镜之路',shortName:'镜',source:'PHB',className:'测试祭司',classSource:'XPHB',_copy:{name:'镜之路',source:'PHB',className:'测试祭司',classSource:'PHB'},subclassFeatures:['旧影|测试祭司|XPHB|镜||3']},
   {name:'镜之路',shortName:'镜',source:'PHB',className:'测试祭司',classSource:'PHB',entries:['原版介绍'],subclassFeatures:['旧影|测试祭司||镜||2']},
