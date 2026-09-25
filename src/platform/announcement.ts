@@ -1,6 +1,6 @@
 // 单机网站公告以这个版本号为准：勾选“下次版本更新之前不再弹出”后，
 // 只有版本号变化才会再次弹出。发布时与 package.json 的 version 一起修改。
-export const APP_VERSION = '0.1.4';
+export const APP_VERSION = '0.1.5';
 export const ANNOUNCEMENT_KEY = 'dnd-card:announcement-ack';
 
 export const announcementPending = (stored: string, version = APP_VERSION) => stored !== version;

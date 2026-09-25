@@ -5,10 +5,11 @@ import './announcement.css';
 const ISSUES = [
   '主要界面的法术栏目更新不及时，特别是在预备法术制的情况下。',
   '导入卡时如果版本不对或者卡内有禁用资源，应该给予提示，不然会出现等级不记录，熟练项异常之类的问题（例如在24规则开启的情况下导入了14规则的卡）',
-  '兼职功能勾选与否都可以兼职。',
-  '生命值上限目前只能按照期望取值。',
-  '选择子职的时候默认跳转的是主职，并且提示框也是主职部分，如果更贴心的话可以默认选中对应子职。',
-  '每个资料条目界面需要独立有一个属于自己的搜索栏。',
+  '首次加载时wiki会很卡顿，界面需要卡顿一段时间。',
+  '优化导入/导出功能，包括json直接复制不导出文件/png全导出和自定义关闭/pdf导出等。',
+  '在武器词条处增加军用武器和简易武器这样的词条，便于填写熟练项。',
+  'dm专门的审卡界面和数据展示，便利于dm真的方便审卡！',
+  '添加类似于锁定法术栏/次数法术栏的功能，用于天生施法或者自带的某种施法。',
 ];
 const QUESTIONS: [string, string][] = [
   ['可以车20145e/20245r的卡吗？', '可以的，在右上角规则与扩展中切换'],
@@ -36,6 +37,7 @@ export function Announcement({close}:{close:()=>void}){
     <header className="announcement-head"><h2 id="announcement-title">欢迎使用这款开源禁商用车卡/Wiki网站！</h2><p className="announcement-version">版本 v{APP_VERSION}</p></header>
     <div className="announcement-body">
       <p>目前还有诸多没有完善的内容。携手各位dnd领域的大佬和热心测试的网友们，目前还在修复各种各样的问题。</p>
+      <p>感谢各位老师们的反馈！下一次统一大修特修将会在10月1号结束前。</p>
       <h3>以下是目前的问题清单：</h3>
       <ul className="announcement-issues">{ISSUES.map(issue=><li key={issue}>{issue}</li>)}</ul>
       <p>这些问题会在不久的将来修复！</p>
