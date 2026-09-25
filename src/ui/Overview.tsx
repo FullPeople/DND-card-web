@@ -1,3 +1,4 @@
+import {spellUsesPreparation} from '../core/spellcastingRules';
 import {spellState} from '../core/characterDetails';
 import {HitDiceResources} from './HitDiceResources';
 import {workbenchRequest} from '../platform/workbench';
@@ -23,12 +24,12 @@ type Props = {
   catalog?:Entry[]; statusRibbon: ReactNode;
   addEntry: (entry: Entry, section?: Selection['section']) => void; c: Character; d: Derived; edit: Edit; browse: (kind: Kind | 'size') => void; inspect: (e: Entry) => void;
   renderSelection: (s: Selection) => ReactNode;
-  onLink: (reference: string, kind?: string) => void; openResources: () => void;openQuickbar:()=>void; pinDrop: (entry: Entry) => void;
+  onLink: (reference: string, kind?: string) => void; openResources: () => void;openQuickbar:()=>void;openHp?:()=>void; pinDrop: (entry: Entry) => void;
 };
 const clamp = (value: string, min = 0, max = 9999) => Math.max(min, Math.min(max, Number(value) || 0));
 const sizes: Record<string, string> = { T: '微型', S: '小型', M: '中型', L: '大型', H: '巨型', G: '超巨型' };
 
-export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openResources, openQuickbar, pinDrop }: Props) {
+export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openResources, openQuickbar, openHp, pinDrop }: Props) {
   const editing = useContext(SheetEditContext);
   const spells = spellState(c);
   const trainingNames=useMemo(()=>{const map=new Map<string,Entry[]>();for(const e of catalog)if(e.kind==='item'||e.raw._category==='language'){for(const name of [e.name,e.english]){const key=name.toLowerCase();map.set(key,[...(map.get(key)||[]),e]);}}return map;},[catalog]);
@@ -92,7 +93,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
         <SheetCell label="护甲等级" className="armor-cell" hint={d.trace.ac.join('；')}><AdjustedValue c={c} value={d.ac} target="ac" label="护甲等级" edit={edit}/><small>AC</small></SheetCell>
       </div>
       <div className="overview-health">
-        <SheetCell label="生命值" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
+        <SheetCell label="生命值" onHeadingClick={editing?openHp:undefined} headingActionLabel="设置生命值取值方式" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
         <SheetCell label="生命骰" className="dice-cell"><HitDiceResources c={c} edit={edit}/></SheetCell>
       </div>
       <Portrait c={c} edit={edit}/>
@@ -112,7 +113,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
             <DropZone referenceOnly onReceive={pinDrop} className="quickbar-copy-zone"><Quickbar c={c} d={d} edit={edit} inspect={inspect} manage={openResources} manageQuickbar={openQuickbar}/></DropZone>
         </SheetCell>
         <FeaturePanel receive={entry => addEntry(entry, 'features')} c={c} rows={classFeatures} edit={edit} browse={() => browse('feature')} onLink={onLink}/>
-        <div className="overview-lower"><FeaturePanel receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}/>{contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spells.mode!=='prepared'||Number(s.entry.raw.level)===0||spells.prepared.includes(s.id)), ['spell'], 'overview-spells spells-box')}</div>
+        <div className="overview-lower"><FeaturePanel receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}/>{contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spells.mode!=='prepared'||!spellUsesPreparation(c,s.entry)||spells.prepared.includes(s.id)), ['spell'], 'overview-spells spells-box')}</div>
       </div>
     </div>
   </div>;

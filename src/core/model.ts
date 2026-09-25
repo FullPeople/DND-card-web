@@ -38,6 +38,7 @@ export interface Character {
   inventory?: {capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
   backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
+  hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];
   quickbarLayout?: {order:string[];hidden:string[]};
@@ -90,6 +91,7 @@ export function selectionAllowed(c: Character, e: Entry): boolean {
   // Unmapped external card records have no publisher source to enable. Keep
   // their manually supplied values until the player replaces the snapshot.
   if (e.source === 'IMPORTED' && e.packId === 'imported') return true;
+  if(e.source==='CUSTOM'&&e.raw._custom&&!e.raw._workbenchCustom)return e.kind!=='feat'||c.profile.optional.feats;
   return c.profile.enabledSources.includes(e.source) && (e.kind !== 'feat' || c.profile.optional.feats) && (e.dependencies || []).every(id => c.profile.enabledSources.includes(id)) && editionAllows(e,c.edition,c.profile.optional.legacy);
 }
 export const signed = (n: number) => n >= 0 ? `+${n}` : String(n);

@@ -1,4 +1,5 @@
 import { Reference } from './Reference';
+import { inlineLabel } from '../core/inlineTags';
 import {inWorkbench,composeRoll} from '../platform/workbench';
 import { Component, Fragment, createContext, useContext, type ReactNode } from 'react';
 import { ABILITY_LABELS, type Ability } from '../core/model';
@@ -15,8 +16,8 @@ export function Inline({ text, onLink }: { text: string; onLink?: LinkHandler })
   text = text.replace('外部角色卡条目；请在规则资料中核对并替换为有来源的条目。','').replace('（阅读后自行填入）', '').replace('职业等级可在角色卡中调整。', '');
   const parts: ReactNode[] = []; const regex = /\{@(\w+)(?:\s+([^{}]*))?\}/g; let cursor = 0; let match;
   while ((match = regex.exec(text))) {
-    parts.push(text.slice(cursor, match.index)); const [all, tag, body = ''] = match; const args = body.split('|'); const label = tag === 'filter' ? args[0] : ['dice', 'damage', 'd20'].includes(tag) ? args[1] || args[0] : args[2] || args[0];
-    if (['creature', 'spell', 'item', 'class', 'race', 'feat', 'condition', 'skill', 'sense', 'variantrule', 'action', 'language', 'optfeature', 'background', 'status', 'disease', 'itemMastery', 'itemProperty', 'itemType', 'table', 'deity', 'reward', 'charoption', 'psionic', 'facility'].includes(tag)) parts.push(<Reference key={match.index} reference={body} kind={tag} onClick={() => onLink?.(body, tag)}>{label}</Reference>);
+    parts.push(text.slice(cursor, match.index)); const [all, tag, body = ''] = match; const args = body.split('|'); const label = inlineLabel(tag, body);
+    if (['quickref', 'creature', 'spell', 'item', 'class', 'race', 'feat', 'condition', 'skill', 'sense', 'variantrule', 'action', 'language', 'optfeature', 'background', 'status', 'disease', 'itemMastery', 'itemProperty', 'itemType', 'table', 'deity', 'reward', 'charoption', 'psionic', 'facility'].includes(tag)) parts.push(<Reference key={match.index} reference={body} kind={tag} onClick={() => onLink?.(body, tag)}>{label}</Reference>);
     else if (['b', 'bold', 'strong'].includes(tag)) parts.push(<strong key={match.index}>{label}</strong>);
     else if (['i', 'italic', 'note'].includes(tag)) parts.push(<em key={match.index}>{label}</em>);
     else if(tag==='atkr')parts.push(<em key={match.index}>{args[0].split(',').map(v=>({m:'近战攻击检定',r:'远程攻击检定',a:'攻击检定'}[v]||v)).join('或')}：</em>);

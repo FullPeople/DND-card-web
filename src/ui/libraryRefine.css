@@ -98,3 +98,5 @@
 @media(prefers-reduced-motion:reduce){.catalog-fill-glow{animation:catalog-fill-rest 3s step-end both}.reading-highlight-fade{animation-duration:.1ms}}
 
 @keyframes catalog-fill-rest{0%{border-color:#d9b65d88;background:#ffe18b22}100%{border-color:transparent;background:transparent}}
+
+.category-search{min-width:6rem;width:12rem;flex:1;max-width:24rem}.hp-levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 18px}.hp-levels label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 6px;background:#50525b08}.hp-levels input{width:4em}

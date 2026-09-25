@@ -1,3 +1,4 @@
+import {hitPointLevels} from './hitPoints';
 import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
@@ -59,11 +60,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   let ac = acOverride ?? (10 + modifiers.dex);
   // Equipment and attunement markers are visual references, not rule automation.
   ac += acBonus;
-  const hpFromClasses = classes.reduce((sum, s, i) => { const faces = Number(s.entry.raw.hd?.faces || 8); const nextLevel = Math.max(1, Math.floor(faces / 2) + 1 + modifiers.con); return sum + (i === 0 ? Math.max(1, faces + modifiers.con) + (s.level - 1) * nextLevel : s.level * nextLevel); }, 0);
+  const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
   trace.ac = [`基础 10 + 敏捷 ${modifiers.dex}`, ...(acBonus ? [`规则修正 +${acBonus}`] : [])];
   if (acOverride !== undefined) trace.ac.push(`规则设定基础结果 ${acOverride}`);
-  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级生命骰满值、以后取固定平均值，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...(hpOverride !== undefined ? [`规则设定 ${hpOverride}`] : []), ...(hpBonus ? [`规则修正 +${hpBonus}`] : [])];
+  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...(hpOverride !== undefined ? [`规则设定 ${hpOverride}`] : []), ...(hpBonus ? [`规则修正 +${hpBonus}`] : [])];
   trace.proficiency = [`总等级 ${level || 1}`]; trace.speed = [active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
   let initiative = modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value;
@@ -105,6 +106,7 @@ export function requirementMismatch(e: Entry, r?: Partial<Requirement>): string 
   return undefined;
 }
 export function candidateReason(c: Character, e: Entry, r?: Requirement): string | undefined {
+  if(e.kind==='class'&&!c.profile.optional.multiclass&&c.selections.some(s=>s.entry.kind==='class'&&s.entry.id!==e.id))return '当前规则未启用兼职，不能加入第二个职业';
   if(c.profile.disabledEntries?.includes(e.id))return '此条目已在规则与扩展中单独禁用';
   if(e.kind==='subclass'&&!subclassOwner(c,e))return '需要先加入该子职所属的职业';
   if (e.kind === 'feat' && !c.profile.optional.feats) return '当前角色未启用专长选项';

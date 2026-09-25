@@ -1,3 +1,4 @@
+import {inlineLabel} from './inlineTags';
 import {spellState,spellValues,inventoryState,carriedWeight} from './characterDetails';
 import {belongsToClass} from './sheet';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SIZE_LABELS, SKILLS, selectionAllowed, signed, type Character, type Derived, type RulePack } from './model';
@@ -21,13 +22,13 @@ export function exportOwlbear(c: Character, d: Derived) {
     combat: { armor: null, shield: null, weapons: [] },
     features: { class_features: features(['feature', 'subclass']), race_features: features(['race']), feats: features(['feat']), fighting_style_feats: [], special_abilities: [] },
     inventory: { items: active.filter(s => s.entry.kind === 'item').map(s => ({ name: s.entry.name, quantity: s.quantity, equipped: s.equipped, attuned:!!s.attuned, weight: s.entry.raw.weight || 0, description: plainText(s.entry.entries) })), coins:inventoryState(c).coins, total_weight:carriedWeight(c).items+carriedWeight(c).coins, wondrous_items: [], consumables: [], containers: [] },
-    spellcasting: { spellcasting_ability: ability || null, save_dc: spellStats.dc, attack_bonus: spellStats.attack, spell_slots: Object.fromEntries(Object.entries(settings.slots).map(([level,slot])=>[level,{max:slot.max,current:slot.max-slot.used}])), cantrips_known: spells.filter(s => s.level === 0), prepared: spells.filter(s => s.level > 0 && (c.spellSettings?settings.mode==='prepared'&&preparedNames.has(s.name):true)), always_known: c.spellSettings?spells.filter(s=>s.level>0&&(settings.mode==='known'||!preparedNames.has(s.name))):[] },
+    spellcasting: { spellcasting_ability: ability || null, save_dc: spellStats.dc, attack_bonus: spellStats.attack, spell_slots: Object.fromEntries(Object.entries(settings.slots).map(([level,slot])=>[level,{max:slot.max,current:slot.max-slot.used}])), cantrips_known: spells.filter(s => s.level === 0), prepared: spells.filter(s => s.level > 0 && settings.mode==='prepared'&&preparedNames.has(s.name)), always_known: spells.filter(s=>s.level>0&&(settings.mode==='known'||!preparedNames.has(s.name))) },
     background: { background_name: entryName('background'), appearance: c.identity.description, story: c.biography?.story??c.notes, description: plainText(active.find(s => s.entry.kind === 'background')?.entry.entries) },
     web_resources: c.runtime.resources,
     export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };
 }
 export function plainText(value: unknown): string {
-  if (typeof value === 'string') return value.replace(/\{@\w+\s+([^{}]+)\}/g, (_, body: string) => body.split('|')[2] || body.split('|')[0]);
+  if (typeof value === 'string') return value.replace(/\{@(\w+)(?:\s+([^{}]*))?\}/g, (_, tag: string, body = '') => inlineLabel(tag, body));
   if (Array.isArray(value)) return value.map(plainText).filter(Boolean).join('\n');
   if (value && typeof value === 'object') { const v = value as Record<string, unknown>; return [v.name, v.entries, v.entry, v.items, v.rows].map(plainText).filter(Boolean).join('\n'); }
   return '';
