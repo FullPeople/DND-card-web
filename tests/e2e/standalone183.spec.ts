@@ -1,11 +1,11 @@
 import {test,expect} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 
 test('standalone has no room transport, survives offline reload and rolls without a host',async({page,context})=>{
  const errors:string[]=[],forbidden:string[]=[],sockets:string[]=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('websocket',s=>sockets.push(s.url()));
  page.on('request',r=>{if(/owlbear|obr\.dnd|\/relay|\/characters\/|\/api\//i.test(r.url()))forbidden.push(r.url());});
- await mockSource(page);await page.goto('/#suite=ignored&bridge=http%3A%2F%2F127.0.0.1%3A5194');
+ await mockSource(page);await suppressAnnouncement(page);await page.goto('/#suite=ignored&bridge=http%3A%2F%2F127.0.0.1%3A5194');
  await expect(page.locator('.brand')).toContainText('DND 角色卡');
  await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await page.waitForFunction(()=>!!navigator.serviceWorker.controller);

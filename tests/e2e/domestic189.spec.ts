@@ -1,8 +1,8 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 const items=Array.from({length:220},(_,i)=>({name:`旅行用品 ${String(i+1).padStart(3,'0')}`,ENG_name:`Travel Gear ${i+1}`,source:'XGE',type:'G',weight:1,value:100,entries:Array.from({length:80},(_,n)=>`阅读片段 ${n+1}：旅人可以在这里记录用途、来源与使用方式。这是为界面验收编写的测试条目。`)}));
 async function ready(page:Page,baseURL:string){
- await mockSource(page);await page.route('https://5e.kiwee.top/data/items.json',route=>route.fulfill({json:{item:items},headers:{'access-control-allow-origin':'*'}}));
+ await mockSource(page);await page.route('https://5e.kiwee.top/data/items.json',route=>route.fulfill({json:{item:items},headers:{'access-control-allow-origin':'*'}}));await suppressAnnouncement(page);
  await page.goto(baseURL);await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await page.getByRole('button',{name:'装备',exact:true}).click();
  await expect(page.locator('.catalog-row')).not.toHaveCount(0);
@@ -72,7 +72,7 @@ test('fresh site enables extensions; manual source choices survive refresh and n
  await expect(page.locator('.catalog-row')).toHaveCount(0);
 });
 test('mobile keeps stacked touch scrolling and the original A4 height savings',async({page,baseURL},info)=>{
- await page.setViewportSize({width:390,height:844});await mockSource(page);await page.goto(baseURL!);
+ await page.setViewportSize({width:390,height:844});await mockSource(page);await suppressAnnouncement(page);await page.goto(baseURL!);
  await page.getByRole('button',{name:'Wiki',exact:true}).click();await page.locator('.catalog-row').first().click();
  await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
  await expect(page.getByRole('separator',{name:'调整资料列表与正文高度'})).toBeVisible();

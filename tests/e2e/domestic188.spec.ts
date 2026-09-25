@@ -1,9 +1,9 @@
 import {test,expect,type Page} from '@playwright/test';
 import {writeFileSync} from 'node:fs';
-import {mockSource,fillFromDetail} from './fixtures';
+import {mockSource,fillFromDetail,suppressAnnouncement} from './fixtures';
 
 async function ready(page:Page,url:string){
- await mockSource(page);await page.goto(url);
+ await mockSource(page);await suppressAnnouncement(page);await page.goto(url);
  await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await expect(page.locator('.paper')).toBeVisible();
  await page.getByRole('switch',{name:'编辑模式'}).click();

@@ -1,7 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 async function ready(page:Page,url:string){
- await mockSource(page);await page.route('https://5e.kiwee.top/data/items.json',r=>r.fulfill({json:{item:[{name:'全站测试物品',ENG_name:'Shared Test Item',source:'XGE',type:'G',entries:['此条目用于验证资料来源共享。']}]}}));
+ await mockSource(page);await page.route('https://5e.kiwee.top/data/items.json',r=>r.fulfill({json:{item:[{name:'全站测试物品',ENG_name:'Shared Test Item',source:'XGE',type:'G',entries:['此条目用于验证资料来源共享。']}]}}));await suppressAnnouncement(page);
  await page.goto(url);await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
 }
 const xge=(page:Page)=>page.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XGE',exact:true})});

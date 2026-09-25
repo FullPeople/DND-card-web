@@ -3,11 +3,12 @@ import {APP_VERSION,announcementPending,forgetAnnouncementVersion,readAnnounceme
 import './announcement.css';
 
 const ISSUES = [
-  '已修复主卡预备法术更新、旧卡施法制度识别与导入版本核对。',
-  '已修复玩家绑定棋子的编辑权限与职业、子职资料解析。',
-  '新增卡内自定义条目、集中调整职业等级与独立分类搜索。',
-  '生命值支持固定平均值、逐级骰值和手填上限；同一职业重复拖入升一级。',
-  '施法属性跟随职业，法术页可单独调整；生命骰使用原插件素材。',
+  '主要界面的法术栏目更新不及时，特别是在预备法术制的情况下。',
+  '导入卡时如果版本不对或者卡内有禁用资源，应该给予提示，不然会出现等级不记录，熟练项异常之类的问题（例如在24规则开启的情况下导入了14规则的卡）',
+  '兼职功能勾选与否都可以兼职。',
+  '生命值上限目前只能按照期望取值。',
+  '选择子职的时候默认跳转的是主职，并且提示框也是主职部分，如果更贴心的话可以默认选中对应子职。',
+  '每个资料条目界面需要独立有一个属于自己的搜索栏。',
 ];
 const QUESTIONS: [string, string][] = [
   ['可以车20145e/20245r的卡吗？', '可以的，在右上角规则与扩展中切换'],
@@ -35,9 +36,9 @@ export function Announcement({close}:{close:()=>void}){
     <header className="announcement-head"><h2 id="announcement-title">欢迎使用这款开源禁商用车卡/Wiki网站！</h2><p className="announcement-version">版本 v{APP_VERSION}</p></header>
     <div className="announcement-body">
       <p>目前还有诸多没有完善的内容。携手各位dnd领域的大佬和热心测试的网友们，目前还在修复各种各样的问题。</p>
-      <h3>本次更新：</h3>
+      <h3>以下是目前的问题清单：</h3>
       <ul className="announcement-issues">{ISSUES.map(issue=><li key={issue}>{issue}</li>)}</ul>
-      <p>遇到问题请继续反馈。</p>
+      <p>这些问题会在不久的将来修复！</p>
       <details className="announcement-faq" open><summary>以下是可能用到的Q&amp;A</summary>
         {QUESTIONS.map(([question,answer])=><details key={question} onToggle={reveal}><summary>{question}</summary><p>{answer}</p></details>)}
       </details>
