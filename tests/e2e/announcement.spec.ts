@@ -62,7 +62,7 @@ test('弹窗高度固定：展开答案只滚动正文，超出部分可滑下�
  await expect.poll(()=>body.evaluate(node=>node.scrollTop)).toBeGreaterThan(0);
  await settle(page,body);
  const last=questions.last();
- expect(await last.evaluate(node=>{const outer=node.closest('.announcement-body')!.getBoundingClientRect(),box=node.getBoundingClientRect();return box.top>=outer.top-1&&box.bottom<=outer.bottom+1;})).toBe(true);
+ await expect.poll(()=>last.evaluate(node=>{const outer=node.closest('.announcement-body')!.getBoundingClientRect(),box=node.getBoundingClientRect();return box.top>=outer.top-1&&box.bottom<=outer.bottom+1;})).toBe(true);
  await body.evaluate(node=>{node.scrollTop=node.scrollHeight;});
  await settle(page,body);
  await expect(questions.nth(1).locator('p')).toBeVisible();
