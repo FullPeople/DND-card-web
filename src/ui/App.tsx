@@ -44,7 +44,7 @@ import { MonsterDocument, MonsterPortrait } from './MonsterDocument';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, subclassOwner, entryEdition, editionAllows, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
-import { EXAMPLE_PACK, importOwlbear, parseFile, validateCharacter, validatePack } from '../core/validation';
+import { EXAMPLE_PACK, importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
 import { exportCharacter, exportOwlbear, exportReview, exportRulePack } from '../core/export';
 import { loadCatalog, DEFAULT_SOURCE, type LoadProgress } from '../data/catalog';
 import { download,saveRecovery,loadRecoveries, loadWorkspace, pickFile, restoreBackup, saveWorkspace, type Workspace } from '../platform/storage';
@@ -219,13 +219,15 @@ export default function App() {
   }
   function acceptWorkspace(value: Workspace) {
     if (value.schemaVersion !== 1 || !Array.isArray(value.characters) || !value.characters.length || !Array.isArray(value.packs)) throw new Error('工作区结构不完整');
-    value.characters.forEach(validateCharacter);
+    const repaired: string[] = [];
+    value = {...value, characters: value.characters.map(character => { const read = readCharacter(character); if (read.repaired.length) repaired.push(`${character.name || '未命名'}（${read.repaired.join('、')}）`); return read.character; })};
     if(value.siteSources){const probe=newCharacter();probe.profile={...probe.profile,...value.siteSources};validateCharacter(probe);}
     if (new Set(value.characters.map(c => c.id)).size !== value.characters.length) throw new Error('角色身份重复');
     for (const pack of value.packs) validatePack({ ...pack, entries: pack.entries.map(e => ({ ...e, id: e.id.slice(pack.id.length + 1) })) }, value.packs);
     if (!value.characters.some(c => c.id === value.activeId)) value.activeId = value.characters[0].id;
     if(localSources)value=ensureSiteSources(value);
     workspaceRef.current = value; setWorkspace(value); setSaving('已保存到本机'); setStartupError('');
+    if(repaired.length)setNotice(`这些角色的图片数据无法读取，已忽略并保留其余内容：${repaired.join('；')}。请重新设置后再保存。`);
   }
   useEffect(() => {
     let alive = true; let release = () => {}; const lockAbort = new AbortController();
@@ -264,6 +266,12 @@ export default function App() {
   useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const d = useMemo(() => c ? evaluate(c) : undefined, [c]);
+  /** 一张坏图片只丢弃它自己：头像或立绘读不出来时仍然打开整张角色卡。 */
+  function readDocument(document: unknown): Character {
+    const { character, repaired } = readCharacter(document);
+    if (repaired.length) setNotice(`${repaired.join('、')}数据无法读取，已忽略并打开角色卡；重新设置后保存会覆盖损坏的记录。`);
+    return character;
+  }
   useLayoutEffect(()=>{
     if(!inWorkbench||!workspace||!writable.current||!wb.target||wb.target.kind!=='character')return;
     const target=wb.target,id=workbenchCharacterId(target),signature=JSON.stringify([target,wb.document,wb.inventory?.revision]);
@@ -271,10 +279,10 @@ export default function App() {
     const current=workspaceRef.current!;let next=current.characters.find(row=>row.id===id);
     try{
       const documentSignature=JSON.stringify(wb.document);
-      if(!next||(wb.document&&workbenchDocuments.current.get(id)!==documentSignature&&!workbenchDirty.current.has(id))){if(!wb.document)return;next=wb.document.dnd_card_web?structuredClone(validateCharacter(wb.document.dnd_card_web)):importOwlbear(wb.document);next.id=id;}
+      if(!next||(wb.document&&workbenchDocuments.current.get(id)!==documentSignature&&!workbenchDirty.current.has(id))){if(!wb.document)return;next=wb.document.dnd_card_web?structuredClone(readDocument(wb.document.dnd_card_web)):importOwlbear(wb.document);next.id=id;}
       else next=structuredClone(next);
       const uncertain=workbenchUncertain.current.get(id);
-      if(uncertain&&wb.document?.dnd_card_web&&confirmedChanges(uncertain.before,uncertain.after,wb.document.dnd_card_web)){window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:uncertain.requestId}}));workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);workbenchFailed.current.delete(id);next=structuredClone(validateCharacter(wb.document.dnd_card_web));next.id=id;}
+      if(uncertain&&wb.document?.dnd_card_web&&confirmedChanges(uncertain.before,uncertain.after,wb.document.dnd_card_web)){window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:uncertain.requestId}}));workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);workbenchFailed.current.delete(id);next=structuredClone(readDocument(wb.document.dnd_card_web));next.id=id;}
       if(workbenchDirty.current.has(id)){if(current.activeId!==id)persist({...current,activeId:id});return;}
       const stock=wb.inventory?.containers[`card:${target.cardId}`];if(stock&&!workbenchDirty.current.has(id))applyInventory(next,stock);
       if(wb.document)workbenchDocuments.current.set(id,documentSignature);

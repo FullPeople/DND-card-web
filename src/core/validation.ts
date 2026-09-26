@@ -8,6 +8,27 @@ export function parseFile(text: string): unknown {
   assert(text.length <= 20_000_000, '文件超过 20 MB，请拆分规则包。');
   return JSON.parse(text, (key, value) => { assert(!['__proto__', 'prototype', 'constructor'].includes(key), '文件包含不允许的对象字段。'); return value; });
 }
+/** A stored avatar or illustration: bounded data URL plus usable framing. A live
+ * token image URL is a display reference and never a valid stored value. */
+export function storedImage(value: unknown): value is NonNullable<Character['portrait']> {
+  if(!plain(value))return false;
+  const image=value as Record<string,unknown>;
+  return typeof image.data==='string'&&image.data.length<=650000&&/^data:image\/(webp|png|jpeg);base64,[a-z\d+/=]+$/i.test(image.data)&&['x','y','zoom'].every(k=>Number.isFinite(image[k]))&&Math.abs(image.x as number)<=300&&Math.abs(image.y as number)<=300&&(image.zoom as number)>=1&&(image.zoom as number)<=5&&['frameWidth','frameHeight'].every(k=>image[k]===undefined||Number.isFinite(image[k])&&(image[k] as number)>0&&(image[k] as number)<=2000);
+}
+/** Open a stored character without letting one unreadable image lock the whole
+ * card. Only image fields are dropped, and every other rule still applies. */
+export function readCharacter(value: unknown): { character: Character; repaired: string[] } {
+  try { return { character: validateCharacter(value), repaired: [] }; }
+  catch (error) {
+    const wrapped=plain(value)&&plain((value as Raw).character)?value as Raw:undefined;
+    const source=wrapped?wrapped.character:value;
+    if(!plain(source))throw error;
+    const trimmed: Raw={...source},repaired: string[]=[];
+    for(const key of ['portrait','illustration'] as const)if(trimmed[key]!==undefined&&!storedImage(trimmed[key])){delete trimmed[key];repaired.push(key==='portrait'?'头像':'立绘');}
+    if(!repaired.length)throw error;
+    return { character: validateCharacter(wrapped?{...wrapped,character:trimmed}:trimmed), repaired };
+  }
+}
 function validEntry(e: unknown): e is Entry {
   return plain(e) && typeof e.id === 'string' && typeof e.english === 'string' && typeof e.name === 'string' && e.name.length <= 300 && Object.hasOwn(KIND_LABELS, e.kind) &&
     typeof e.source === 'string' && typeof e.packId === 'string' && typeof e.revision === 'string' && ['2014', '2024', 'both'].includes(e.edition) && Array.isArray(e.entries) && plain(e.raw);
@@ -88,7 +109,7 @@ export function validateCharacter(value: unknown): Character {
   if(c.hpProgression!==undefined){const h=c.hpProgression;assert(plain(h)&&['average','rolled'].includes(h.mode)&&plain(h.rolls)&&Object.keys(h.rolls).length<=100&&Object.values(h.rolls).every(v=>Array.isArray(v)&&v.length<=20&&v.every(n=>n===null||Number.isInteger(n)&&n>=1&&n<=100)),'逐级生命骰记录无效。');}
   if(c.biography!==undefined)assert(plain(c.biography)&&Object.values(c.biography).every(v=>typeof v==='string'&&v.length<=100000),'人物背景无效。');
   if(c.palette!==undefined)assert(plain(c.palette)&&Object.entries(c.palette).every(([key,v])=>['paper','surface','frame','heading','ink','badge'].includes(key)&&typeof v==='string'&&/^#[\da-f]{6}$/i.test(v)),'角色卡颜色无效。');
-  for(const key of ['portrait','illustration'])if(c[key]!==undefined){const image=c[key];assert(plain(image)&&typeof image.data==='string'&&image.data.length<=650000&&/^data:image\/(webp|png|jpeg);base64,[a-z\d+/=]+$/i.test(image.data)&&['x','y','zoom'].every(k=>Number.isFinite(image[k]))&&Math.abs(image.x)<=300&&Math.abs(image.y)<=300&&image.zoom>=1&&image.zoom<=5&&['frameWidth','frameHeight'].every(k=>image[k]===undefined||Number.isFinite(image[k])&&image[k]>0&&image[k]<=2000),key==='portrait'?'头像数据无效。':'立绘数据无效。');}
+  for(const key of ['portrait','illustration'])if(c[key]!==undefined)assert(storedImage(c[key]),key==='portrait'?'头像数据无效。':'立绘数据无效。');
   if(c.featureLayout?.detailsExpanded!==undefined)assert(Array.isArray(c.featureLayout.detailsExpanded)&&c.featureLayout.detailsExpanded.every((id:unknown)=>typeof id==='string'),'详细特性展开记录无效。');
   if(c.backgroundChoices!==undefined)assert(plain(c.backgroundChoices)&&Object.values(c.backgroundChoices).every(v=>plain(v)&&(!v.abilities||plain(v.abilities)&&Object.entries(v.abilities).every(([key,n])=>ABILITIES.includes(key as any)&&Number.isInteger(n)&&Number(n)>=0&&Number(n)<=10))&&(!v.equipment||plain(v.equipment)&&Object.values(v.equipment).every(k=>typeof k==='string'))),'背景选择无效。');
   if(c.spellSettings!==undefined){const s=c.spellSettings;assert(plain(s)&&['known','prepared'].includes(s.mode)&&(s.modeOverride===undefined||typeof s.modeOverride==='boolean')&&(s.abilityOverride===undefined||typeof s.abilityOverride==='boolean')&&(s.abilityClassId===undefined||typeof s.abilityClassId==='string')&&ABILITIES.includes(s.ability)&&Number.isInteger(s.capacity)&&s.capacity>=0&&s.capacity<=100&&(s.capacityAdjustment===undefined||Number.isInteger(s.capacityAdjustment)&&Math.abs(s.capacityAdjustment)<=100)&&['attackBonus','dcBonus'].every(k=>Number.isFinite(s[k])&&Math.abs(s[k])<=100)&&Array.isArray(s.prepared)&&s.prepared.length<=3000&&s.prepared.every((id:unknown)=>typeof id==='string')&&new Set(s.prepared.filter(Boolean)).size===s.prepared.filter(Boolean).length&&plain(s.slots)&&Object.entries(s.slots).every(([level,v])=>/^[1-9]$/.test(level)&&plain(v)&&Number.isInteger(v.max)&&v.max>=0&&v.max<=30&&Number.isInteger(v.used)&&v.used>=0&&v.used<=v.max),'法术设置无效。');}
