@@ -21,12 +21,13 @@ test('standalone has no room transport, survives offline reload and rolls withou
  await context.setOffline(true);await page.reload();await expect.poll(()=>page.locator('.brand-logo').evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>0)).toBe(true);
  await expect(page.getByRole('textbox',{name:'角色姓名',exact:true})).toHaveValue('单机冒险者');
  await expect(page.locator('.quick-weapon').filter({hasText:'训练剑'})).toBeVisible();
+ await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','true');await page.getByRole('switch',{name:'编辑模式'}).click();
  await page.locator('.quick-weapon').filter({hasText:'训练剑'}).getByRole('button',{name:'+4',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'})).toBeVisible();await page.getByRole('button',{name:'投骰',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'}).getByRole('status')).toContainText('1d20');await page.getByRole('button',{name:'关闭',exact:true}).click();
- await page.getByRole('spinbutton',{name:'当前生命值',exact:true}).fill('17');await page.locator('.brand').click();
- await expect(page.getByRole('spinbutton',{name:'当前生命值',exact:true})).toHaveValue('17');
- await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await expect(page.getByText(/枭熊/)).toHaveCount(0);await page.getByRole('button',{name:'关闭弹窗'}).click();
+ await page.getByRole('textbox',{name:'当前生命值',exact:true}).fill('17');await page.locator('.brand').click();
+ await expect(page.getByRole('textbox',{name:'当前生命值',exact:true})).toHaveValue('17');
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await expect(page.getByRole('button',{name:'导入枭熊 JSON'})).toHaveCount(0);await expect(page.getByText('完整 JSON 备份 · 网站与枭熊通用')).toBeVisible();await page.getByRole('button',{name:'关闭弹窗'}).click();
  await page.locator('.catalog-row').first().click();await expect(page.locator('.entry-detail')).toContainText('测试法师');
  await page.screenshot({path:'test-results-standalone/standalone-desktop.png'});
  await page.setViewportSize({width:420,height:900});await page.getByRole('button',{name:'功能页',exact:true}).click();await page.screenshot({path:'test-results-standalone/standalone-mobile.png'});

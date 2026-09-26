@@ -22,3 +22,7 @@
 .sheet-reflow .spell-stock-cell .spell-stock-tile.stock-item .stock-name{font-size:11px;line-height:48px}
 .condition-invisible .spell-tile-frame{stroke-dasharray:4 3}
 @media print{.spell-menu-shade{display:none}}
+
+.special-spells-cell{flex:none;height:170px;min-height:120px;max-height:210px}.special-spells-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.special-spell-row{min-width:0;border-bottom:1px solid #888;padding:3px}.special-spell-row>.spell-stock-tile{width:100%}.special-spell-type{font-size:10px}.special-spell-uses,.special-spell-config{display:flex;align-items:center;gap:4px;font-size:10px;flex-wrap:wrap}.special-spell-uses input,.special-spell-config input{width:38px}.special-spell-uses button{padding:2px 4px}.special-spell-uses small{display:block;width:100%}.paper .spell-stock-tile[data-drag-enabled=false]{cursor:pointer}.paper .spell-stock-empty:disabled{cursor:default}
+
+.paper .special-spell-uses>input,.paper .special-spell-config input{flex:0 0 38px;max-width:38px;width:38px;text-align:center}

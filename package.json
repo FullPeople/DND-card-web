@@ -1,6 +1,6 @@
 {
   "name": "dnd-card-web",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -23,6 +23,7 @@
   "dependencies": {
     "html-to-image": "1.11.13",
     "idb": "8.0.3",
+    "pinyin-pro": "3.29.4",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

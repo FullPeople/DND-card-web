@@ -1,5 +1,6 @@
 import {test,expect,type Locator,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
+import {RELEASE_DATE,RELEASE_NOTES} from '../../src/platform/releaseNotes';
 import {ANNOUNCEMENT_KEY,APP_VERSION} from '../../src/platform/announcement';
 
 const dialog=(page:Page)=>page.getByRole('dialog',{name:'欢迎使用这款开源禁商用车卡/Wiki网站！'});
@@ -20,17 +21,11 @@ async function settle(page:Page,scroller:Locator){let last=-1;for(let i=0;i<25;i
 test('首次打开单机站弹出公告，版本、问题清单与默认展开的 Q&A 完整',async({page})=>{
  await open(page);
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
- await expect(dialog(page)).toContainText('目前还有诸多没有完善的内容');
- await expect(dialog(page)).toContainText('感谢各位老师们的反馈！下一次统一大修特修将会在10月1号结束前。');
- await expect(dialog(page).locator('.announcement-issues li')).toHaveCount(7);
- await expect(dialog(page).locator('.announcement-issues')).toContainText('法术栏目更新不及时');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('导入卡时如果版本不对');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('首次加载时wiki会很卡顿');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('优化导入/导出功能');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('军用武器和简易武器');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('dm专门的审卡界面和数据展示');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('锁定法术栏/次数法术栏');
- await expect(dialog(page)).toContainText('这些问题会在不久的将来修复！');
+ await expect(dialog(page)).toContainText(`${RELEASE_DATE} · 更新与修复`);
+ await expect(dialog(page).locator('.announcement-issues li')).toHaveCount(RELEASE_NOTES.length);
+ await expect(dialog(page).locator('.announcement-issues')).toContainText('网站与枭熊统一使用完整 JSON');
+ await expect(dialog(page).locator('.announcement-issues')).toContainText('部分玩家缺少投骰按钮：待验证');
+ await expect(dialog(page).locator('.announcement-issues')).toContainText('blocks.map');
  const faq=dialog(page).locator('.announcement-faq').first();
  await expect(faq.locator('details')).toHaveCount(4);
  expect(await faq.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(true);

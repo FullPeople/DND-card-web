@@ -14,8 +14,9 @@ function read(): { active: LibraryTab; globalQuery:string; tabs: Partial<Record<
       tabs[tab] = next;
     } return { active: Object.hasOwn(LIBRARY_TABS, v.active) ? v.active : 'class', globalQuery:typeof v.globalQuery==='string'?v.globalQuery:typeof v.tabs?.[v.active]?.query==='string'?v.tabs[v.active].query:'', tabs,conditionDefault:true,sortDefaults:2 }; } catch { return { active: 'class', globalQuery:'', tabs: {},conditionDefault:true,sortDefaults:2 }; }
 }
-export function useLibrary(entries: Entry[]) {
+export function useLibrary(entries: Entry[],selectedEntries:Entry[]=[]) {
   const byId=useMemo(()=>new Map(entries.map(e=>[e.id,e])),[entries]);
+  const selectedById=useMemo(()=>new Map(selectedEntries.map(e=>[e.id,e])),[selectedEntries]);
   const [saved, setSaved] = useState(read), snapshots = useRef(new Map<string, Entry>());
   const scrollSave = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [hover, setHover] = useState<{entry:Entry;focus?:string}>();
@@ -27,13 +28,13 @@ export function useLibrary(entries: Entry[]) {
   const flush = () => { try { localStorage.setItem(key, JSON.stringify(latest.current)); } catch { /* Reading preferences must not block character editing. */ } };
   useEffect(() => { const timer = setTimeout(flush, 120); return () => clearTimeout(timer); }, [saved]);
   useEffect(() => { window.addEventListener('pagehide', flush); return () => { clearTimeout(scrollSave.current); flush(); window.removeEventListener('pagehide', flush); }; }, []);
-  function patch(value: Partial<TabState>) { setSaved(s => ({ ...s, tabs: { ...s.tabs, [s.active]: { ...initial(s.active), ...s.tabs[s.active], ...value } } })); }
+  function patch(value: Partial<TabState>,tab?:LibraryTab) { setSaved(s => {const target=tab||s.active;return { ...s, tabs: { ...s.tabs, [target]: { ...initial(target), ...s.tabs[target], ...value } } };}); }
   return { kind, state, patch, globalQuery:saved.globalQuery, setGlobalQuery:(globalQuery:string)=>setSaved(s=>({...s,globalQuery})), hover, preview:setHover, navigationKey, canGoBack:backStack.length>0,
     back:()=>{const target=backStack.at(-1);if(!target)return;setHover(undefined);setBackStack(s=>s.slice(0,-1));setSaved(s=>({...s,active:target.tab,tabs:{...s.tabs,[target.tab]:structuredClone(target.state)}}));setNavigationKey(n=>n+1);},
     navigate:(entry:Entry,focus?:string,push=true)=>{const current=latest.current,previous=current.tabs[current.active];if(push && previous?.detailId && (previous.detailId!==entry.id || previous.focus!==focus))setBackStack(stack=>[...stack.slice(-99),{tab:current.active,state:structuredClone(previous)}]);setNavigationKey(n=>n+1);snapshots.current.set(entry.id,entry);setHover(undefined);const next=tabOf(entry);setSaved(s=>({...s,active:next,tabs:{...s.tabs,[next]:{...initial(next),...s.tabs[next],detailId:entry.id,focus,...(focus==='subclasses'?{subclassesOpen:true}:{})}}}));},
     focus:hover ? hover.focus : state.focus,
     setKind: (next: Kind | LibraryTab) => {setHover(undefined);setSaved(s => ({ ...s, active: next === 'subclass' || next === 'feature' ? 'class' : next }));},
-    detail: hover?.entry || byId.get(state.detailId || '') || snapshots.current.get(state.detailId || ''),
+    detail: hover?.entry || selectedById.get(state.detailId || '') || byId.get(state.detailId || '') || snapshots.current.get(state.detailId || ''),
     setDetail: (entry?: Entry) => {setHover(undefined);if(entry){snapshots.current.set(entry.id,entry);const next=tabOf(entry);setSaved(s=>({...s,active:next,tabs:{...s.tabs,[next]:{...initial(next),...s.tabs[next],detailId:entry.id,focus:undefined}}}));}else patch({detailId:undefined,focus:undefined});},
     savePosition: (id: string, top: number) => { if(hover)return; const current = latest.current; const tab = current.tabs[current.active] || initial(current.active); tab.positions = { ...tab.positions, [id]: top }; current.tabs[current.active] = tab; clearTimeout(scrollSave.current); scrollSave.current = setTimeout(flush, 120); },
   };

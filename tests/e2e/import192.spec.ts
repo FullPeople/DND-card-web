@@ -18,12 +18,12 @@ async function setup(page:Page,url:string,role='PLAYER',connected=true){
 async function upload(page:Page){await page.getByTestId('character-file').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(card)))});}
 for(const legacy of [false,true])test(legacy?'Owlbear pasted JSON creates a shared character':'complete backup creates a shared character without a selected token',async({page,baseURL})=>{
  await setup(page,baseURL!,legacy?'GM':'PLAYER');
- if(legacy){await page.getByLabel('枭熊 JSON 文本').fill(JSON.stringify(exportOwlbear(card,evaluate(card))));await page.getByRole('button',{name:'从文本导入枭熊',exact:true}).click();}else await upload(page);
+ if(legacy){await page.getByLabel('角色 JSON 文本').fill(JSON.stringify(exportOwlbear(card,evaluate(card))));await page.getByRole('button',{name:'校验并导入 JSON 文本',exact:true}).click();await page.getByRole('button',{name:'确认导入这批角色',exact:true}).click();}else await upload(page);
  await expect.poll(()=>page.evaluate(()=>(window as any).creates.length)).toBe(1);await expect(page.getByText('角色已导入枭熊角色簿。',{exact:true})).toHaveCount(0);
  const sent=await page.evaluate(()=>(window as any).creates[0]);expect(sent.key).toBeUndefined();expect(sent.itemId).toBeUndefined();expect(sent.data.dnd_card_web.abilities.int).toBe(18);expect(sent.data.dnd_card_web.runtime.hp).toBe(17);expect(sent.data.dnd_card_web.id).not.toBe(card.id);
  if(!legacy)expect(sent.data.dnd_card_web.runtime.resources.test.current).toBe(2);
- await page.evaluate(()=>(window as any).finish());await expect(page.getByRole('tab',{name:'导入验收角色（导入）',exact:true})).toBeVisible();await expect(page.getByRole('region',{name:'角色名',exact:true}).getByRole('button',{name:'导入验收角色（导入）',exact:true})).toBeVisible();await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('17');
- await page.getByRole('button',{name:/角色簿/}).click();await expect(page.locator('.character-list')).toContainText('导入验收角色（导入）');
+ await page.evaluate(()=>(window as any).finish());const name=legacy?'导入验收角色':'导入验收角色（导入）';if(legacy){await page.locator('.character-title').filter({hasText:'导入验收角色'}).click();}await expect(page.getByRole('tab',{name,exact:true})).toBeVisible();await expect(page.getByRole('region',{name:'角色名',exact:true}).getByRole('button',{name,exact:true})).toBeVisible();await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('17');
+ await page.getByRole('button',{name:/角色簿/}).click();await expect(page.locator('.character-manager')).toContainText(name);
 });
 test('host rejection keeps import open, reports failure and creates no hidden local copy',async({page,baseURL})=>{
  await setup(page,baseURL!);await upload(page);await expect.poll(()=>page.evaluate(()=>(window as any).creates.length)).toBe(1);await page.evaluate(()=>(window as any).finish(true));await expect(page.getByRole('alert')).toContainText('测试拒绝创建');await expect(page.getByText('角色已作为新副本导入。',{exact:true})).toHaveCount(0);

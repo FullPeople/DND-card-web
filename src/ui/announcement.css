@@ -26,3 +26,6 @@
  .announcement-foot{padding:11px 16px}
  .announcement-faq details{padding:8px 10px}
 }
+.announcement-owner{border-bottom:1px solid #bbb;padding-bottom:16px;margin-bottom:16px}.announcement-owner img{display:block;max-width:100%;height:auto;margin:10px 0}.announcement-owner li{margin:12px 0}
+.announcement-owner>summary{color:#ae2727;font-weight:700;cursor:pointer}
+.spell-learners{margin-top:18px;padding-top:12px;border-top:1px solid #aaa}

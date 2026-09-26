@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',outputDir:'./test-results-feedback',testMatch:['feedback-management.spec.ts'],timeout:90000,expect:{timeout:15000},workers:1,reporter:'list',use:{baseURL:'http://127.0.0.1:5427',channel:'msedge',viewport:{width:1512,height:982},screenshot:'only-on-failure',trace:'retain-on-failure'},webServer:{command:'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5427',url:'http://127.0.0.1:5427',reuseExistingServer:true}});

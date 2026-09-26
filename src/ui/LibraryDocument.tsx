@@ -1,4 +1,5 @@
 import {resolveEntryReference} from '../core/entryReferences';
+import {SpellLearners} from './SpellLearners';
 import { explicitlyExcluded, librarySourceEnabled } from './libraryData';
 import { useEffect, useMemo, useRef } from 'react';
 import { entryEdition, editionAllows, type Character, type Entry } from '../core/model';
@@ -6,7 +7,7 @@ import { ContentBoundary, Entries, Inline } from './Entries';
 import { EntryDraggable } from './DragEntry';
 import { SourceName, compareSources, useSources } from './SourceName';
 
-type Section = { id: string; name: string; english?: string; level?: number; source?: string; page?: number; body: unknown; depth: number; reference?: Entry; excluded?:boolean; subclassHeading?:boolean };
+type Section = { id: string; name: string; english?: string; level?: number; source?: string; page?: number; body: unknown; depth: number; reference?: Entry; excluded?:boolean; subclassHeading?:boolean; starting?:boolean };
 export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false }: { subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void }) {
   const {registry}=useSources();
   const showSubclasses=subclassesOpen&&['class','subclass'].includes(entry.kind);
@@ -32,7 +33,7 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
           }
         }
         if (owner.kind!=='feature' && v.name && ['entries', 'section', undefined].includes(v.type) && (v.entries || v.entry)) {
-          result.push({ id: path, excluded, name: v.name, english: v.ENG_name, body: [], depth, level, reference: ['race','background','feat','class','subclass','feature'].includes(entry.kind) && !(v.entries?.length===1 && v.entries[0]?.type==='list' && v.entries[0].items?.every((item:any)=>item?.type?.startsWith('ref'))) ? {...owner,id:`${owner.id}#trait:${path.replace(/^section-/, '')}`,kind:'feature',effects:undefined,choices:undefined,name:v.name,english:v.ENG_name||v.name,entries:Array.isArray(v.entries)?v.entries:[v.entry].filter(Boolean),raw:{_inlineOwner:owner.id,_inlineName:v.name,className:owner.kind==='class'?owner.name:owner.raw.className,classEnglish:owner.kind==='class'?owner.english:owner.raw.classEnglish,classSource:owner.kind==='class'?owner.source:owner.raw.classSource,subclassShortName:owner.kind==='subclass'?owner.raw.shortName||owner.name:owner.raw.subclassShortName,subclassSource:owner.kind==='subclass'?owner.source:owner.raw.subclassSource,level}} : undefined });
+          result.push({ id: path, excluded, starting:!!v._startingSection, name: v.name, english: v.ENG_name, body: [], depth, level, reference: !v._startingSection && ['race','background','feat','class','subclass','feature'].includes(entry.kind) && !(v.entries?.length===1 && v.entries[0]?.type==='list' && v.entries[0].items?.every((item:any)=>item?.type?.startsWith('ref'))) ? {...owner,id:`${owner.id}#trait:${path.replace(/^section-/, '')}`,kind:'feature',effects:undefined,choices:undefined,name:v.name,english:v.ENG_name||v.name,entries:Array.isArray(v.entries)?v.entries:[v.entry].filter(Boolean),raw:{_inlineOwner:owner.id,_inlineName:v.name,className:owner.kind==='class'?owner.name:owner.raw.className,classEnglish:owner.kind==='class'?owner.english:owner.raw.classEnglish,classSource:owner.kind==='class'?owner.source:owner.raw.classSource,subclassShortName:owner.kind==='subclass'?owner.raw.shortName||owner.name:owner.raw.subclassShortName,subclassSource:owner.kind==='subclass'?owner.source:owner.raw.subclassSource,level}} : undefined });
           walk(v.entries || v.entry, `${path}-body`, depth + 1, seen, level, owner, excluded); return;
         }
         if (v.type === 'list' && v.items?.some((i: any) => i?.type?.startsWith('ref'))) { walk(v.items, path, depth, seen, level, owner, excluded); return; }
@@ -54,7 +55,7 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
       for (const option of options) result.push({id:`${prefix}option-${option.id}`,name:option.name,english:option.english,source:option.source,page:option.page,depth:baseDepth+1,body:option.entries,reference:option,excluded:explicitlyExcluded(character,root)||explicitlyExcluded(character,option)});
     }
     const tables=root.raw.classTableGroups||root.raw.subclassTableGroups;
-    if (tables?.some((g: any) => g.colLabels?.length)){const table={ id: prefix+'progression', excluded:explicitlyExcluded(character,root), name: '职业成长表', depth: baseDepth, body: tables.filter((g: any) => g.colLabels?.length).map((g: any) => ({ type: 'table', caption: g.title, colLabels: ['等级', ...g.colLabels], rows: (g.rows || g.rowsSpellProgression || []).map((row: unknown[], index: number) => [index + 1, ...row]) })) };if(showSubclasses)result.push(table);else result.unshift(table);}
+    if (tables?.some((g: any) => g.colLabels?.length)){const table={ id: prefix+'progression', excluded:explicitlyExcluded(character,root), name: '职业成长表', depth: baseDepth, body: tables.filter((g: any) => g.colLabels?.length).map((g: any) => ({ type: 'table', caption: g.title, colLabels: ['等级', ...g.colLabels], rows: (g.rows || g.rowsSpellProgression || []).map((row: unknown[], index: number) => [index + 1, ...row]) })) };if(showSubclasses)result.push(table);else {let index=0;while(index<result.length&&(result[index].starting||result[index].depth>baseDepth))index++;result.splice(index,0,table);}}
     }
     return result;
   }, [entry, entries, roots,showSubclasses, character.profile.enabledSources, character.profile.disabledEntries]);
@@ -89,6 +90,6 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
         {s.level && s.reference && <span>等级 {s.level}：</span>}<Inline text={s.name}/> {s.english && s.english !== s.name && <small>{s.english}</small>}{s.source && <span className="section-tools"><small><SourceName id={s.source}/>{s.page ? ` p${s.page}` : ''}</small></span>}
       </EntryDraggable></h4>}
       {!effectiveCollapsed.includes(s.id) && <Entries compact={entry.kind==='feature'||s.reference?.kind==='feature'} value={s.body} onLink={onLink}/>}
-    </section>)}</ContentBoundary></div>
+    </section>)}<SpellLearners entry={entry} onLink={onLink}/></ContentBoundary></div>
   </div>;
 }

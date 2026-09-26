@@ -48,6 +48,7 @@ export function availableClassSpells(c:Character,entries:Entry[]):Entry[]{
 }
 
 export function spellUsesPreparation(c:Character,entry:Entry):boolean{
+ if(c.selections.some(s=>s.entry.id===entry.id&&c.spellSettings?.special?.[s.id]))return false;
  if(!(Number(entry.raw.level)>0))return false;
  if(c.spellSettings?.modeOverride)return c.spellSettings.mode==='prepared';
  const profiles=casterProfiles(c),matching=profiles.filter(p=>spellOnClassList(entry,p));

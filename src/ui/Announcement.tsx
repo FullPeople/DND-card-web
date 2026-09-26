@@ -1,16 +1,8 @@
+import {RELEASE_DATE,RELEASE_NOTES} from '../platform/releaseNotes';
 import {useEffect,useRef,useState} from 'react';
-import {APP_VERSION,announcementPending,forgetAnnouncementVersion,readAnnouncementVersion,rememberAnnouncementVersion} from '../platform/announcement';
+import {APP_VERSION,announcementPending,forgetAnnouncementVersion,readAnnouncementVersion,rememberAnnouncementVersion,type AnnouncementMode} from '../platform/announcement';
 import './announcement.css';
 
-const ISSUES = [
-  '主要界面的法术栏目更新不及时，特别是在预备法术制的情况下。',
-  '导入卡时如果版本不对或者卡内有禁用资源，应该给予提示，不然会出现等级不记录，熟练项异常之类的问题（例如在24规则开启的情况下导入了14规则的卡）',
-  '首次加载时wiki会很卡顿，界面需要卡顿一段时间。',
-  '优化导入/导出功能，包括json直接复制不导出文件/png全导出和自定义关闭/pdf导出等。',
-  '在武器词条处增加军用武器和简易武器这样的词条，便于填写熟练项。',
-  'dm专门的审卡界面和数据展示，便利于dm真的方便审卡！',
-  '添加类似于锁定法术栏/次数法术栏的功能，用于天生施法或者自带的某种施法。',
-];
 const QUESTIONS: [string, string][] = [
   ['可以车20145e/20245r的卡吗？', '可以的，在右上角规则与扩展中切换'],
   ['所有扩展都有吗？第三方也有吗？', '都有啊都有，目前数据来源是来自5etool网站，kiwee老师那边有什么我这边就有什么（他们那边翻译有问题我这边翻译也会同样有问题x）'],
@@ -20,27 +12,26 @@ const QUESTIONS: [string, string][] = [
 
 // 只有“我知道了”能关闭：Esc 与点击遮罩都不生效，确认前挡住角色卡操作。
 // 高度固定，展开答案只滚动正文区；展开后把该条滑入可见范围，手机上纵向滑动照常。
-export function Announcement({close}:{close:()=>void}){
+export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:AnnouncementMode}){
   const ref=useRef<HTMLDialogElement>(null);
   const confirmRef=useRef<HTMLButtonElement>(null);
-  const [remember,setRemember]=useState(()=>!announcementPending(readAnnouncementVersion()));
+  const [remember,setRemember]=useState(()=>!announcementPending(readAnnouncementVersion(mode)));
   useEffect(()=>{ref.current?.showModal();confirmRef.current?.focus();},[]);
   const confirm=()=>{
-    if(remember)rememberAnnouncementVersion();
-    else forgetAnnouncementVersion();
+    if(remember)rememberAnnouncementVersion(APP_VERSION,mode);
+    else forgetAnnouncementVersion(mode);
     ref.current?.close();close();
   };
   const reveal=(event:React.SyntheticEvent<HTMLDetailsElement>)=>{
     if(event.currentTarget.open)event.currentTarget.scrollIntoView({block:'nearest',behavior:'smooth'});
   };
   return <dialog className="announcement" ref={ref} aria-labelledby="announcement-title" onCancel={event=>event.preventDefault()}>
-    <header className="announcement-head"><h2 id="announcement-title">欢迎使用这款开源禁商用车卡/Wiki网站！</h2><p className="announcement-version">版本 v{APP_VERSION}</p></header>
+    <header className="announcement-head"><h2 id="announcement-title">{mode==='suite'?'欢迎使用 Full Suite 枭熊工作台！':'欢迎使用这款开源禁商用车卡/Wiki网站！'}</h2><p className="announcement-version">版本 v{APP_VERSION}</p></header>
     <div className="announcement-body">
-      <p>目前还有诸多没有完善的内容。携手各位dnd领域的大佬和热心测试的网友们，目前还在修复各种各样的问题。</p>
-      <p>感谢各位老师们的反馈！下一次统一大修特修将会在10月1号结束前。</p>
-      <h3>以下是目前的问题清单：</h3>
-      <ul className="announcement-issues">{ISSUES.map(issue=><li key={issue}>{issue}</li>)}</ul>
-      <p>这些问题会在不久的将来修复！</p>
+      {mode==='suite'&&<details className="announcement-owner" onToggle={reveal}><summary>关于设置玩家单独权限的重要说明</summary><p>由 DM 完成下面两步，每位玩家就能操作自己的角色。DM 仍可管理所有角色。</p><ol><li>打开 Players 面板，点击盾牌权限按钮，展开 Map → Character，勾选 Owner Only，再点击 SAVE。<img src="./owner-step1.png" alt="Players 面板中的盾牌权限按钮"/><img src="./owner-step2.png" alt="Map 的 Character 权限勾选 Owner Only 后保存"/></li><li>在地图上选中角色 Token，点击悬浮工具栏的人形 Set Owner，指定所属玩家。<img src="./owner-step3.png" alt="选择角色棋子后通过 Set Owner 指定所属玩家"/></li></ol><p>设置后玩家可以掷自己的先攻、修改加值并结束自己的回合。未指定所属玩家时，玩家可能无法修改角色。</p></details>}
+      {mode==='suite'&&<p><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">进入独立车卡网站</a></p>}
+      <h3>{RELEASE_DATE} · 更新与修复</h3>
+      <ul className="announcement-issues">{RELEASE_NOTES.map(issue=><li key={issue}>{issue}</li>)}</ul>
       <details className="announcement-faq" open><summary>以下是可能用到的Q&amp;A</summary>
         {QUESTIONS.map(([question,answer])=><details key={question} onToggle={reveal}><summary>{question}</summary><p>{answer}</p></details>)}
       </details>

@@ -1,4 +1,10 @@
 import {Announcement} from './Announcement';
+import {useEntryMenuActions} from './EntrySharing';
+import {CharacterManager,localCharacterRow,type CharacterRow} from './CharacterManager';
+import {TransferPanel} from './TransferPanel';
+import {CharacterReview} from './CharacterReview';
+import {readCharacterTransfer,deleteLocalCharacters} from '../core/transfers';
+import {matchesEntrySearch} from '../core/search';
 import {announcementPending,readAnnouncementVersion} from '../platform/announcement';
 import {SpellAbilityEditor} from './SpellAbilityEditor';
 import {ownsSubclassFeature} from '../core/entryReferences';
@@ -37,7 +43,7 @@ import {DmNotes} from './DmNotes';
 import {InventoryPage} from './InventoryPage';
 import {WorkspaceSplitter} from './WorkspaceSplitter';
 import {Palette} from './Portrait';
-import { captureSheet, saveSheetPng, printSheetPng } from '../platform/sheetImage';
+import { captureSheet, type SheetCaptureOptions } from '../platform/sheetImage';
 import { ClassNavigation } from './ClassNavigation';
 import { CatalogList } from './CatalogList';
 import { MonsterDocument, MonsterPortrait } from './MonsterDocument';
@@ -45,7 +51,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, subclassOwner, entryEdition, editionAllows, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
-import { exportCharacter, exportOwlbear, exportReview, exportRulePack } from '../core/export';
+import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
 import { loadCatalog, DEFAULT_SOURCE, type LoadProgress } from '../data/catalog';
 import { download,saveRecovery,loadRecoveries, loadWorkspace, pickFile, restoreBackup, saveWorkspace, type Workspace } from '../platform/storage';
 import { ContentBoundary, Entries } from './Entries';
@@ -71,7 +77,7 @@ import { Reference } from './Reference';
 import { LibraryFilters } from './LibraryFilters';
 import { LibraryDocument } from './LibraryDocument';
 import { useLibrary } from './useLibrary';
-import { explicitlyExcluded, librarySourceEnabled, LIBRARY_TABS, tabOf, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
+import { explicitlyExcluded, librarySourceEnabled, LIBRARY_TABS, tabOf, matchesLibraryTab, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
 import { WikiSplitter } from './WikiSplitter';
 import { registerOffline } from '../platform/offline';
 
@@ -177,8 +183,8 @@ export default function App() {
     if(profile!==current.siteSources)persist({...current,siteSources:sourceSettings(profile)});
   },[defaultSources,workspace]);
   const libraryEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
-  const readableEntries = useMemo(()=>[...allEntries,...(workspace?.characters.flatMap(c=>c.selections.map(s=>s.entry))||[])],[allEntries,workspace?.characters]);
-  const library = useLibrary(readableEntries);
+  const selectedEntries = useMemo(()=>workspace?.characters.flatMap(c=>c.selections.map(s=>s.entry))||[],[workspace?.characters]);
+  const library = useLibrary(allEntries,selectedEntries);
   const { kind, setKind, detail: storedDetail, setDetail, state: libraryState } = library;
   const detail=storedDetail&&c&&librarySourceEnabled(c,storedDetail)?storedDetail:undefined;
   useEffect(()=>{if(!monstersVisible&&kind==='monster')setKind('class');if(!monstersVisible&&detail?.kind==='monster')setDetail(undefined);},[monstersVisible,kind,detail?.id]);
@@ -187,25 +193,29 @@ export default function App() {
   const setEditionFilter = (edition: string) => library.patch({ edition });
   const detailPane = useRef<HTMLElement>(null);
   const previewCommit=useRef<{id:string;top:number}|undefined>(undefined);
-  const [announcement,setAnnouncement]=useState(()=>standalone&&announcementPending(readAnnouncementVersion()));
+  const [announcement,setAnnouncement]=useState(()=>(standalone||inWorkbench)&&announcementPending(readAnnouncementVersion(inWorkbench?'suite':'standalone')));
   const [modal, setModal] = useState('');
   const [pendingImport,setPendingImport]=useState<{card:Character;review:ReturnType<typeof reviewImport>}>();
+  const [pendingBatch,setPendingBatch]=useState<{card:Character;review:ReturnType<typeof reviewImport>}[]>([]);
+  const [batchBusy,setBatchBusy]=useState(false);
+  const [batchUncertain,setBatchUncertain]=useState(false);
+  const [reviewTarget,setReviewTarget]=useState<Character>();
+  const [exportView,setExportView]=useState<SheetCaptureOptions>();
+  const exportInProgress=useRef(false);
 
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
-  const [editing, setEditing] = useState(false);
-  useEffect(() => { setEditing(false); }, [workspace?.activeId]);
+  const [editing, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
+  useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editing));}catch{/* A session still keeps the global editing preference. */}},[editing]);
   const [sheetPage, setSheetPage] = useState<SheetPage>('主要');
+  useEntryMenuActions({character:c,editing,writable:!readOnly&&(!inWorkbench||!!wb.target?.write),add:entry=>add(entry),inspect,remove:id=>edit(draft=>removeSelection(draft,id))});
   const [tab, setTab] = useState('sheet');
   useNarrowWikiDrag(tab,setTab,!tableOpen&&(!inWorkbench||workbenchPage==='console'||workbenchPage==='sheet'&&!!wb.target));
   const [exception, setException] = useState('');
   const [importError, setImportError] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState('');
   const [adjustTarget, setAdjustTarget] = useState('ac');
   const [adjustValue, setAdjustValue] = useState(0);
   const [adjustReason, setAdjustReason] = useState('');
-  const [transferText,setTransferText]=useState(''),[imageBusy,setImageBusy]=useState(false),[png,setPng]=useState<{url:string;blob:Blob}>();
-  useEffect(()=>()=>{if(png)URL.revokeObjectURL(png.url);},[png]);
   const [editingResource,setEditingResource]=useState('');
   useEffect(()=>{const open=(event:Event)=>{setEditingResource((event as CustomEvent).detail);setModal('resources');};window.addEventListener('edit-character-resource',open);return()=>window.removeEventListener('edit-character-resource',open);},[]);
 
@@ -313,17 +323,19 @@ export default function App() {
   const facets = useMemo(() => facetsFor(kind), [kind]);
   const categoryEntries = useMemo(() => {
     if (!c) return [];
-    return libraryEntries.filter(e => tabOf(e) === kind && (kind!=='class'||e.kind==='class') &&
+    return libraryEntries.filter(e => matchesLibraryTab(e,kind) && (kind!=='class'||e.kind==='class') &&
       (editionFilter === 'all' || editionAllows(e,(editionFilter === 'character' ? c.edition : editionFilter) as Edition,editionFilter === 'character' && c.profile.optional.legacy)));
   }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter]);
-  const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&(!categoryQuery.trim()||`${e.name} ${e.english} ${e.source}`.toLocaleLowerCase().includes(categoryQuery.trim().toLocaleLowerCase()))).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery]);
+  const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery]);
   useEffect(() => { setException(''); }, [detail?.id]);
   useEffect(() => { if (detailPane.current && detail) { const pending=previewCommit.current;detailPane.current.scrollTop=pending?.id===detail.id?pending.top:libraryState.positions[detail.id]||0;previewCommit.current=undefined; } }, [kind, detail?.id, !!library.hover,library.navigationKey]);
 
   function sendCharacter(before:Character,after:Character,target=wb.target){
     if(!inWorkbench)return Promise.resolve();const id=after.id;
     workbenchDirty.current.add(id);workbenchPending.current.set(id,(workbenchPending.current.get(id)||0)+1);
-    return Promise.resolve(patchWorkbenchStats(before,after,evaluate(before),evaluate(after),target)).then(()=>{workbenchFailed.current.delete(id);}).catch(e=>{workbenchFailed.current.add(id);if(e?.uncertain&&!e?.queueBlocked){const old=workbenchUncertain.current.get(id);workbenchUncertain.current.set(id,{requestId:e.requestId,before:old?.before||before,after:old&&old.after.revision>after.revision?old.after:after});}void saveRecovery(after).catch(()=>{});setSyncDiagnostic(diagnosticText(e));setNotice(`同步失败，已保留本地备份：${e instanceof Error?e.message:String(e)}`);throw e;}).finally(()=>{const pending=Math.max(0,(workbenchPending.current.get(id)||1)-1);workbenchPending.current.set(id,pending);if(!pending&&!workbenchUncertain.current.has(id))workbenchDirty.current.delete(id);appliedWorkbench.current='';setHistoryTick(x=>x+1);});
+    const project=(value:Character)=>roomRules?{...value,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:value;
+    const projectedBefore=project(before),projectedAfter=project(after);
+    return Promise.resolve(patchWorkbenchStats(before,after,evaluate(projectedBefore),evaluate(projectedAfter),target,{before:projectedBefore,after:projectedAfter})).then(()=>{workbenchFailed.current.delete(id);}).catch(e=>{workbenchFailed.current.add(id);if(e?.uncertain&&!e?.queueBlocked){const old=workbenchUncertain.current.get(id);workbenchUncertain.current.set(id,{requestId:e.requestId,before:old?.before||before,after:old&&old.after.revision>after.revision?old.after:after});}void saveRecovery(after).catch(()=>{});setSyncDiagnostic(diagnosticText(e));setNotice(`同步失败，已保留本地备份：${e instanceof Error?e.message:String(e)}`);throw e;}).finally(()=>{const pending=Math.max(0,(workbenchPending.current.get(id)||1)-1);workbenchPending.current.set(id,pending);if(!pending&&!workbenchUncertain.current.has(id))workbenchDirty.current.delete(id);appliedWorkbench.current='';setHistoryTick(x=>x+1);});
   }
   function rememberCharacter(before:Character,after:Character){const target=wb.target;
     const restore=async(from:Character,to:Character)=>{const w=workspaceRef.current!;const live=w.characters.find(c=>c.id===before.id);if(!live)throw Error('角色已经删除');const canonical=(value:Character)=>{const result=structuredClone(value);for(const row of result.selections)delete row.entry.raw._suiteStatusId;return result;};const normalize=(value:Character)=>canonical(localSources?withSiteSources(value,w.siteSources,w.packs):value);const restored=applyPatch(normalize(live),normalize(from),normalize(to)) as Character;for(const row of restored.selections){const previous=live.selections.find(s=>s.id===row.id);if(previous?.entry.raw._suiteStatusId)row.entry.raw._suiteStatusId=previous.entry.raw._suiteStatusId;}restored.revision=live.revision+1;restored.updatedAt=new Date().toISOString();persist({...w,characters:w.characters.map(c=>c.id===restored.id?restored:c)});await sendCharacter(live,restored,target);};
@@ -340,6 +352,8 @@ export default function App() {
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
     const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
     const draft = structuredClone(effective); hydrateImportedCasting(draft,allEntries); action(draft); syncFeatures(draft, allEntries); syncAutoResources(draft,effective); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return; draft.updatedAt = new Date().toISOString(); draft.revision++;
+    // Room rules are an evaluation view, not a migration of a character's identity.
+    if(inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
     rememberCharacter(character,draft);void sendCharacter(character,draft).catch(()=>{});setHistoryTick(x=>x+1);
   };
@@ -438,12 +452,52 @@ export default function App() {
     });
     setNotice(`已填入「${entry.name}」`);
   }
-  function exportFile(mode: string) {
-    if (!c || !d) return;
-    if (mode === 'review') download(`${fileName(c.name)}-审卡.html`, exportReview(c, d, sourceDisplay.format), 'text/html');
-    else if (mode === 'owlbear') download(`${fileName(c.name)}-枭熊.json`, exportOwlbear(c, d));
-    else download(`${fileName(c.name)}.json`, exportCharacter(c));
-    setNotice('已生成下载文件。');
+  async function readCards(ids:string[]):Promise<Character[]>{
+    if(!inWorkbench)return ids.map(id=>{const card=workspaceRef.current?.characters.find(c=>c.id===id);if(!card)throw Error('角色已不存在');return withSiteSources(card,workspaceRef.current?.siteSources,workspaceRef.current?.packs||[]);});
+    const cards:Character[]=[];
+    for(const id of ids){
+      if(id===wb.target?.cardId&&storedCharacter){cards.push(structuredClone(storedCharacter));continue;}
+      const result=await workbenchRequest('readCard',{key:undefined,itemId:`card:${id}`});
+      const card=result.document?.dnd_card_web?readCharacter(result.document.dnd_card_web).character:importOwlbear(result.document);
+      cards.push(card);
+    }
+    return cards;
+  }
+  async function importTexts(texts:string[]){
+    const cards=readCharacterTransfer(texts),w=workspaceRef.current!;
+    const batch=cards.map(card=>{hydrateImportedCasting(card,allEntries);const effective=inWorkbench&&roomRules?{...card,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(card,w.siteSources,w.packs);return {card,review:reviewImport(card,effective,c?.edition||card.edition)};});
+    setPendingBatch(batch);setBatchUncertain(false);setImportError('');setModal('batchImport');
+  }
+  async function finishBatch(){
+    if(!writable.current){setImportError('当前标签页只读，尚未导入任何角色');return;}
+    if(batchBusy||batchUncertain)return;setBatchBusy(true);setImportError('');let completed=0;
+    try{
+      if(inWorkbench){for(const row of pendingBatch){await createRemoteCard(row.card,false);completed++;}}
+      else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,...pendingBatch.map(r=>r.card)]});completed=pendingBatch.length;}
+      setPendingBatch([]);setModal('characters');setNotice(`已导入 ${completed} 张角色卡。`);
+    }catch(e){setPendingBatch(rows=>rows.slice(completed));if((e as {uncertain?:boolean}).uncertain)setBatchUncertain(true);setImportError(`已确认导入 ${completed} 张，剩余已停止：${String(e)}${(e as {uncertain?:boolean}).uncertain?' 请先在角色簿核对本次结果，不能重复提交。':''}`);}
+    finally{setBatchBusy(false);}
+  }
+  async function removeCards(ids:string[]){
+    if(!writable.current)throw Error('当前标签页只读，不能删除角色');
+    if(inWorkbench){let done=0;try{for(const id of ids){await workbenchRequest('delete',{key:undefined,itemId:`card:${id}`});done++;}}catch(e){throw Error(`已删除 ${done} 张；其余已停止：${String(e)}`);}}
+    else{const w=workspaceRef.current!;persist({...w,...deleteLocalCharacters(w.characters,w.activeId,ids)});}
+  }
+  async function createCards(names:string[],edition:Edition){
+    if(!writable.current)throw Error('当前标签页只读，不能创建角色');
+    const cards=names.map(name=>{const card=createLocalCharacter(edition);card.name=name;if(inWorkbench&&roomRules){card.profile=structuredClone(roomRules.profile);card.rulePacks=structuredClone(roomRules.packs);}return card;});
+    if(inWorkbench){let done=0;try{for(const card of cards){await createRemoteCard(card,false);done++;}}catch(e){throw Object.assign(Error(`已创建 ${done} 张；其余已停止：${String(e)}`),{completed:done,uncertain:!!(e as {uncertain?:boolean}).uncertain});}}
+    else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,...cards]});}
+  }
+  async function capturePages(pages:SheetPage[],options:SheetCaptureOptions){
+    if(inWorkbench&&wb.target?.kind!=='character')throw Error('请先打开需要导出的五页人物角色卡');
+    if(exportInProgress.current)throw Error('上一项导出尚未完成');
+    exportInProgress.current=true;
+    const original={page:sheetPage,editing,workbenchPage,tab,id:workspaceRef.current?.activeId};
+    const result:{page:SheetPage;blob:Blob}[]=[];
+    const settle=()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
+    try{setExportView(options);setEditing(false);setWorkbenchPage('sheet');setTab('sheet');for(const page of (['主要','特性','背景','法术','背包'] as SheetPage[]).filter(p=>pages.includes(p))){setSheetPage(page);await settle();if(workspaceRef.current?.activeId!==original.id)throw Error('角色已切换，已停止导出');result.push({page,blob:await captureSheet(options)});}return result;}
+    finally{exportInProgress.current=false;setExportView(undefined);setSheetPage(original.page);setEditing(original.editing);setWorkbenchPage(original.workbenchPage);setTab(original.tab);}
   }
   async function importFile(mode: string, file?: File, text?: string) {
     setImportError('');
@@ -458,7 +512,9 @@ export default function App() {
         const template = newCharacter(); template.profile = (value as { profile?: Character['profile'] })?.profile || value as Character['profile'];
         validateCharacter(template); editRules(d => { d.profile = template.profile; }); setNotice('规则配置已应用，可撤销。');
       } else {
-        const character = mode === 'owlbear' ? importOwlbear(value) : validateCharacter(value);
+        const imported=readCharacterTransfer([JSON.stringify(value)]);
+        if(imported.length>1){await importTexts([JSON.stringify(value)]);return;}
+        const character=imported[0];
         hydrateImportedCasting(character,allEntries);
         character.id = uid(); character.revision = 1; character.name += '（导入）';
         const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(character,w.siteSources,w.packs);
@@ -472,11 +528,11 @@ export default function App() {
     if(inWorkbench)await createRemoteCard(character);else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,character],activeId:character.id});setModal('export');}
     setPendingImport(undefined);setNotice(inWorkbench?'角色已导入枭熊角色簿。':'角色已作为新副本导入。');
   }
-  async function createRemoteCard(card:Character){
+  async function createRemoteCard(card:Character,select=true){
     if(!wb.online)throw Error('枭熊未连接，角色尚未导入。');
     if(remoteCreatePending.current)throw Error('正在创建角色，请等待当前操作完成。');
     remoteCreatePending.current=true;setCreatingCard(true);
-    try{const data={...exportOwlbear(card,evaluate(card)),dnd_card_web:card};const result=await workbenchRequest('createCard',{key:undefined,itemId:undefined,data});chooseWorkbench(`card:${result.created.id}`);setModal('');setWorkbenchPage('sheet');setSheetPage('主要');setTab('sheet');}finally{remoteCreatePending.current=false;setCreatingCard(false);}
+    try{const data={...exportOwlbear(card,evaluate(card)),dnd_card_web:card};const result=await workbenchRequest('createCard',{key:undefined,itemId:undefined,data});if(select){chooseWorkbench(`card:${result.created.id}`);setModal('');setWorkbenchPage('sheet');setSheetPage('主要');setTab('sheet');}}finally{remoteCreatePending.current=false;setCreatingCard(false);}
   }
   async function createRemote(edition:Edition){
     if(creatingCard||!wb.online)return;
@@ -494,9 +550,11 @@ export default function App() {
   if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?'DND 角色卡':'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup); } catch (e) { setStartupError(String(e)); } }}>读取备份</button><button onClick={() => { const next = createLocalCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button></> : <p>正在打开你的角色卡…</p>}</main>;
   void historyTick;
   const blocked = detail ? candidateReason(c, detail) : '';
+  const managerId=inWorkbench?wb.target?.cardId||'':c.id;
+  const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!readOnly}));
   return <KeywordPreview isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider editing={editing&&(!inWorkbench||!!wb.target?.write)} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src="./exe_icon.png" alt=""/><strong>{standalone?'DND 角色卡':'Full Suite'}</strong></a>
-      <div className="header-tools">{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<button aria-pressed={tableOpen} onClick={()=>{setTableOpen(value=>!value);setTab('wiki');}}>三龙牌</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{setWorkbenchPage('features');setTab('sheet');}}>功能开关</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{setWorkbenchPage('settings');setTab('sheet');}}>设置</button>}{standalone&&<button onClick={()=>setAnnouncement(true)}>公告</button>}<button onClick={() => setModal('characters')}>角色簿 <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>规则与扩展</button><button className="primary" onClick={() => setModal('export')}>导入 / 导出</button></div>
+      <div className="header-tools">{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<button aria-pressed={tableOpen} onClick={()=>{setTableOpen(value=>!value);setTab('wiki');}}>三龙牌</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{setWorkbenchPage('features');setTab('sheet');}}>功能开关</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{setWorkbenchPage('settings');setTab('sheet');}}>设置</button>}{(standalone||inWorkbench)&&<button onClick={()=>setAnnouncement(true)}>公告</button>}<button onClick={() => setModal('characters')}>角色簿 <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>规则与扩展</button><button className="primary" onClick={() => setModal('export')}>导入 / 导出</button></div>
     </header>
     {inWorkbench&&<><WorkbenchBar online={wb.online} target={wb.target} message={wb.message} page={workbenchPage} change={page=>{setWorkbenchPage(page);setTab('sheet');}} save={()=>{if(!wb.target||c.id!==workbenchCharacterId(wb.target)){setNotice('当前角色与选中的棋子不一致');return;}void workbenchRequest('save',{native:c,data:exportOwlbear(c,d)}).then(()=>{workbenchDirty.current.delete(c.id);setNotice('已保存角色资料到枭熊');}).catch(e=>setNotice(String(e)));}}/></>}
     {readOnly && <div className="read-only-banner" role="status">另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。<button onClick={() => location.reload()}>重新检查</button></div>}
@@ -504,12 +562,12 @@ export default function App() {
     <nav className="mobile-tabs" aria-label="工作区"><button className={tab === 'sheet' ? 'active' : ''} onClick={() => setTab('sheet')}>功能页</button><button className={tab === 'wiki' ? 'active' : ''} onClick={() => setTab('wiki')} hidden={!wikiVisible&&!tableOpen}>{tableOpen?'三龙牌':'Wiki'}</button></nav>
     <main className={`workspace ${wikiVisible||tableOpen?'':'wiki-hidden'}`}>
       <section data-inventory-recipient={inWorkbench&&workbenchPage==='sheet'&&wb.target?wb.target.cardId?`card:${wb.target.cardId}`:`monster:${wb.target.itemId}`:undefined} className={`sheet-pane ${tab === 'sheet' ? 'mobile-active' : ''}`} aria-label="角色卡工作区">
-        {inWorkbench&&workbenchPage==='music'?<MusicWorkspace close={()=>setWorkbenchPage('console')}/>:inWorkbench&&['settings','features'].includes(workbenchPage)?<WorkbenchPanel key={workbenchPage} panel="settings" section={workbenchPage==='features'?'features':undefined} close={()=>setWorkbenchPage('console')}/>:inWorkbench&&workbenchPage==='notes'&&wb.role==='GM'?<DmNotes/>:inWorkbench&&workbenchPage==='dice'?<DicePage online={wb.online} target={wb.target} rolls={wb.rolls} compose={wb.compose}/>:inWorkbench&&workbenchPage==='console'?<DMConsole navigate={setWorkbenchPage}/>:inWorkbench&&(!wb.target||wb.target.kind==='character'&&!wb.document)?<div className="workbench-monster"><p role="status">{wb.loading?'读取角色资料…':'从上方选择角色卡'}</p></div>:inWorkbench&&(wb.target?.kind==='monster'||wb.target?.kind==='token')?<WorkbenchMonster key={wb.target.key} target={wb.target} raw={wb.document} online={wb.online} onLink={link}/>:<>
+        {inWorkbench&&workbenchPage==='music'?<MusicWorkspace close={()=>setWorkbenchPage('console')}/>:inWorkbench&&['settings','features'].includes(workbenchPage)?<WorkbenchPanel key={workbenchPage} panel="settings" section={workbenchPage==='features'?'features':undefined} close={()=>setWorkbenchPage('console')}/>:inWorkbench&&workbenchPage==='notes'&&wb.role==='GM'?<DmNotes/>:inWorkbench&&workbenchPage==='dice'?<DicePage online={wb.online} target={wb.target} rolls={wb.rolls} compose={wb.compose}/>:inWorkbench&&workbenchPage==='console'?<DMConsole navigate={setWorkbenchPage}/>:inWorkbench&&(!wb.target||wb.target.kind==='character'&&!wb.document)?<div className="workbench-monster"><p role="status">{wb.loading?'读取角色资料…':'从上方选择角色卡'}</p></div>:inWorkbench&&(wb.target?.kind==='monster'||wb.target?.kind==='token')?<WorkbenchMonster editing={editing} setEditing={setEditing} key={wb.target.key} target={wb.target} raw={wb.document} online={wb.online} onLink={link}/>:<>
         <div className="pane-toolbar"><div><span className="eyebrow">角色卡</span><div className="character-tabs" role="tablist" aria-label="当前角色">{!inWorkbench&&workspace.characters.map(x=><button key={x.id} role="tab" aria-selected={x.id===c.id} onClick={()=>persist({...workspace,activeId:x.id})}>{x.name}</button>)}</div></div>
-          <div className="toolbar-actions">{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>同步核对</button>}{editing&&<button onClick={()=>setModal('personal')}>条目 / 等级</button>}{editing && <button className="adjust-shortcut" aria-label="数值依据与人工修正" onClick={() => setModal('adjust')}>修正</button>}<SheetFullscreenButton/><button aria-label="撤销" disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label="重做" disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><span className="paper-size">A4 · 适应窗口</span></div>
+          <div className="toolbar-actions">{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>同步核对</button>}{editing&&<button onClick={()=>setModal('personal')}>条目 / 等级</button>}{editing && <button className="adjust-shortcut" aria-label="数值依据与人工修正" onClick={() => setModal('adjust')}>修正</button>}<SheetFullscreenButton/><button aria-label="撤销" disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label="重做" disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><span className="paper-size">A4 · 适应窗口</span><button disabled={inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label="编辑模式" onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>编辑模式</button></div>
         </div>
-        <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
-          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{c.edition}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button><button disabled={inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label="编辑模式" onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>编辑模式</button></span></div>
+        <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
+          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · 房间 ${c.edition}`}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button></span></div>
           {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>DND 五版角色卡</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => setModal('resources')} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
 </> : <div className="sheet-details">
           <div className="edition-divider"><span/><strong>DND 五版角色卡</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
@@ -521,7 +579,7 @@ export default function App() {
       </section>
 
       {tableOpen?<><WorkspaceSplitter/><section className={`wiki-pane table-pane ${tab==='wiki'?'mobile-active':''}`} aria-label="三龙牌"><WorkbenchPanel panel="table" close={()=>setTableOpen(false)}/></section></>:wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料"><WikiLayout><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
-        <GlobalSearch query={query} change={setQuery} entries={libraryEntries} c={c} inspect={inspect}/>
+        <GlobalSearch query={query} change={setQuery} entries={libraryEntries} c={c} inspect={entry=>{inspect(entry);library.patch({query:"",filters:{},edition:entry.edition==="both"?"all":entry.edition},tabOf(readingTarget(entry).entry));}}/>
         <nav className="category-tabs" aria-label="资料分类">{Object.entries(LIBRARY_TABS).filter(([key])=>(key!=='custom'||canAuthor)&&(key!=='monster'||monstersVisible)&&(key!=='weaponMastery'||c.edition==='2024'||editionFilter==='2024'||editionFilter==='all')).map(([key, label]) => <button key={key} className={kind === key ? 'active' : ''} onClick={() => setKind(key as keyof typeof LIBRARY_TABS)}>{label}</button>)}</nav>
         <div className="wiki-filters"><input className="category-search" type="search" aria-label={`${LIBRARY_TABS[kind]}分类搜索`} placeholder={`搜索${LIBRARY_TABS[kind]}`} value={categoryQuery} onChange={e=>library.patch({query:e.target.value})}/><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames}/>
         </div>
@@ -541,8 +599,8 @@ export default function App() {
         <footer className="wiki-footer">{inWorkbench&&<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">单机版 ↗</a>}<a href={inWorkbench?'./source.zip':'https://github.com/FullPeople/DND-card-web'} target="_blank" rel="noreferrer">源码 ↗</a><a href="https://github.com/FullPeople/DND-card-web/blob/main/LICENSE" target="_blank" rel="noreferrer">非商用共享许可 ↗</a></footer>
       </section></>}
     </main>
-    {standalone?<LocalDice/>:<SupporterEffect/>}{standalone&&announcement&&<Announcement close={()=>setAnnouncement(false)}/>}{notice&&<Toast message={notice} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
-    {modal && <Dialog title={modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? '法术位与资源记录' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { setModal(''); setImportError(''); setConfirmDelete(''); }}>
+    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&announcement&&<Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/>}{notice&&<Toast message={notice} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
+    {modal && <Dialog title={modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? '法术位与资源记录' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!exportInProgress.current){setModal(''); setImportError('');} }}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}
       {modal === 'adjust' && <><p className="muted">特殊规则尚未自动适配时，可填写最终数值与原因。修正会覆盖计算值，持续保留到手动撤回，并列入审卡。</p><div className="adjust-form"><label>数值<select aria-label="人工修正目标" value={adjustTarget} onChange={e => setAdjustTarget(e.target.value)}>{[['ac', '护甲等级'], ['hp', '生命值上限'], ['speed', '速度'], ['initiative', '先攻'], ['passive', '被动察觉'], ...Object.entries(SKILLS).map(([key, s]) => [`skill:${key}`, `${s.name}检定`]), ...ABILITIES.map(a => [`save:${a}`, `${ABILITY_LABELS[a]}豁免`])].map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label><label>最终值<NumberInput aria-label="人工修正数值" type="number" min="-9999" max="9999" value={adjustValue} onChange={e => setAdjustValue(clamp(e.target.value, -9999, 9999))}/></label><label className="full-width">原因<input aria-label="人工修正原因" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="例如：DM 允许的护甲修正，或尚未适配的专长"/></label><button disabled={!adjustReason.trim()} onClick={() => { edit(draft => { draft.adjustments = [...(draft.adjustments || []).filter(a => a.target !== adjustTarget), { id: uid(), target: adjustTarget, value: adjustValue, reason: adjustReason.trim() }]; }); setAdjustReason(''); }}>记录修正</button></div>{(c.adjustments || []).map(a => <div className="pack-row" key={a.id}><span><strong>{a.target} → {a.value}</strong><small>{a.reason}</small></span><button onClick={() => edit(draft => { draft.adjustments = draft.adjustments?.filter(x => x.id !== a.id); })}>撤回</button></div>)}<details className="calculation-trace"><summary>展开计算依据</summary>{Object.entries(d.trace).map(([key, items]) => <p key={key}><strong>{choiceLabel(key)}</strong>：{items.join('；')}</p>)}</details></>}
       {modal === 'quickbar' && <QuickbarManager c={c} edit={edit}/>}
@@ -552,15 +610,16 @@ export default function App() {
       {modal==='personal' &&editing&&<PersonalEntries c={c} edit={edit}/>}
       {modal==='spellAbility'&&<SpellAbilityEditor c={c} edit={edit}/>}
       {modal==='hp'&&editing&&<HitPointEditor c={c} edit={edit}/>}
-      {modal === 'characters' && inWorkbench && <><div className="dialog-actions"><button disabled={creatingCard||!wb.online} onClick={()=>void createRemote(c.edition)}>＋ 空白角色卡</button></div><div className="character-list">{wb.cards.map(card=><div key={card.id}><button className="character-title" onClick={()=>{chooseWorkbench(card.itemId);setModal('');}}><strong>{card.name}</strong><small>{card.write?'可编辑':'只读'}{card.inScene?' · 当前场景':''}{card.locked?' · 已上锁':''}</small></button>{card.write&&(confirmDelete===card.id?<span className="delete-confirm">删除共享角色资料，棋子保留。<button onClick={()=>{setConfirmDelete('');void workbenchRequest('delete',{key:undefined,itemId:`card:${card.id}`}).catch(e=>setNotice(String(e)));}}>确认删除</button><button onClick={()=>setConfirmDelete('')}>取消</button></span>:<button disabled={!wb.online} onClick={()=>setConfirmDelete(card.id)}>删除</button>)}</div>)}</div><button onClick={async()=>download('本机恢复记录.json',{recoveries:await loadRecoveries(),legacy:workspace.characters.filter(c=>c.name.endsWith('（未同步备份）'))})}>导出本机恢复记录</button></>}
-      {modal === 'characters' && !inWorkbench && <><div className="dialog-actions"><button onClick={() => create('2024')}>＋ 2024 角色</button><button onClick={() => create('2014')}>＋ 2014 角色</button><button onClick={() => create(c.edition, true)}>复制当前角色</button></div><div className="character-list">{workspace.characters.map(character => <div key={character.id}><button className="character-title" onClick={() => { persist({ ...workspace, activeId: character.id }); setModal(''); }}><strong>{character.name}</strong><small>{character.edition} · {character.player || '未填玩家'}{character.id === c.id ? ' · 当前角色' : ''}</small></button>{confirmDelete === character.id ? <span className="delete-confirm">删除后需通过导入恢复。<button onClick={() => { const characters = workspace.characters.filter(x => x.id !== character.id); persist({ ...workspace, characters, activeId: workspace.activeId === character.id ? characters[0].id : workspace.activeId }); setConfirmDelete(''); }}>确认删除</button><button onClick={() => setConfirmDelete('')}>取消</button></span> : <button disabled={workspace.characters.length === 1} onClick={() => setConfirmDelete(character.id)}>删除</button>}</div>)}</div><p className="muted">{localSources?'角色保留各自的版本、选择与撤销记录；资料来源由网站共用。数据保存在本机浏览器。':'不同角色拥有独立的规则配置、选择与撤销记录。数据保存在本机浏览器。'}</p></>}
+      {modal === 'characters' && <><div className="dialog-actions">{inWorkbench?<button disabled={creatingCard||!wb.online} onClick={()=>void createRemote(c.edition)}>＋ 空白角色卡</button>:<><button onClick={()=>create('2024')}>＋ 2024 角色</button><button onClick={()=>create('2014')}>＋ 2014 角色</button><button onClick={()=>create(c.edition,true)}>复制当前角色</button></>}</div><CharacterManager rows={managerRows} currentId={managerId} disabled={readOnly||inWorkbench&&!wb.online} open={id=>{if(inWorkbench)chooseWorkbench(`card:${id}`);else persist({...workspace,activeId:id});setModal('');}} read={readCards} remove={removeCards} create={createCards} review={card=>{setReviewTarget(card);setModal('review');}}/>{inWorkbench&&<button onClick={async()=>download('本机恢复记录.json',{recoveries:await loadRecoveries()})}>导出本机恢复记录</button>}</>}
+      {modal==='review'&&reviewTarget&&<CharacterReview c={reviewTarget} ruleContext={inWorkbench&&roomRules?{edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:undefined} inspect={entry=>{setModal('');inspect(entry);}}/>}
+      {modal==='batchImport'&&<section><p>已校验 {pendingBatch.length} 张。确认后创建新副本，原有角色保留。</p>{pendingBatch.map(({card,review})=><article key={card.id}><h3>{card.name} · {card.edition}</h3>{review.editionMismatch&&<p role="alert">版本不同：当前 {c.edition}，导入 {card.edition}。保留原卡版本与条目身份，房间来源限制仍生效。</p>}{review.totalLevel!==review.effectiveLevel&&<p>记录等级 {review.totalLevel}；当前来源下生效等级 {review.effectiveLevel}。</p>}{review.disabled.length>0&&<details open><summary>{review.disabled.length} 项来源或规则禁用；保留内容，暂停效果</summary><ul>{review.disabled.map(row=><li key={row.id}>{row.entry.name} · <SourceName id={row.entry.source}/></li>)}</ul></details>}</article>)}<div className="dialog-actions"><button disabled={batchBusy||batchUncertain||!pendingBatch.length} onClick={()=>void finishBatch()}>确认导入这批角色</button><button disabled={batchBusy} onClick={()=>{setPendingBatch([]);setModal('export');}}>取消</button></div></section>}
       {modal === 'rules' && <fieldset className="rules-fieldset" disabled={rulesBusy} aria-busy={rulesBusy}>{inWorkbench&&wb.role!=='GM'?<RoomRulesSummary character={c} entries={allEntries} scope={wb.shared?.scope}/>:<>
         <section className="settings-section"><h3>自定义扩展包</h3><p>以 JSON 声明条目、效果与选择。导入前检查格式、依赖和冲突；更新包不会替换角色内已选的旧快照。</p><div className="dialog-actions"><button disabled={rulesReadonly} onClick={() => importFile('pack')}>导入扩展包</button><button onClick={() => download('我的扩展-示例.json', EXAMPLE_PACK)}>下载编写示例</button></div><input className="file-input" data-testid="pack-file" type="file" accept=".json" aria-label="导入扩展包文件" onChange={e => { if (e.target.files?.[0]) importFile('pack', e.target.files[0]); e.target.value = ''; }}/>{activePacks.map(pack => <div className="pack-row" key={pack.id}><span><strong>{pack.name}</strong><small>{pack.id} · {pack.version} · {pack.entries.length} 条</small></span><button onClick={() => download(`${pack.id}-${pack.version}.json`, exportRulePack(pack))}>导出</button><button disabled={rulesReadonly} onClick={() => { const dependent = activePacks.find(p => p.requires.some(dep => dep.id === pack.id)); if (dependent) { setImportError(`「${dependent.name}」依赖这个包，请先移除依赖方。`); return; } editSources(draft=>{draft.rulePacks=activePacks.filter(p=>p.id!==pack.id);}); setNotice('已移除资料包；角色中的条目快照仍保留。可关闭其来源以暂停效果。'); }}>移除</button></div>)}</section>
         <section className="settings-section"><h3>{inWorkbench?(wb.shared?.scope==='room'?'房间规则':'场景规则'):'当前角色的规则'}</h3><div className="setting-row"><span>基础版本<small>切换会保留所有内容，并标记不兼容条目。</small></span><div className="segmented" role="radiogroup" aria-label="角色规则版本">{(['2014','2024'] as Edition[]).map(v=><button disabled={rulesReadonly} key={v} role="radio" aria-checked={c.edition===v} onClick={()=>editRules(draft=>{draft.edition=v;})}>{v}</button>)}</div></div>{([['feats', '专长规则', '允许选择专长'], ['multiclass', '兼职规则', '允许增加职业；兼职前提需与 DM 核对'], ['legacy', '兼容旧版内容', '允许 2024 角色使用 2014 条目，具体替换关系由 DM 裁定']] as const).map(([key, label, desc]) => <label className="setting-row" key={key}><span>{label}<small>{desc}</small></span><input disabled={rulesReadonly} type="checkbox" checked={c.profile.optional[key]} onChange={e => editRules(draft => { draft.profile.optional[key] = e.target.checked; })}/></label>)}</section>
         <SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/>
 
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
-      </>}</fieldset>}      {modal === 'export' && <><section className="settings-section"><h3>带走当前角色</h3><div className="export-options"><button onClick={() => exportFile('character')}><strong>角色完整备份 · JSON</strong><span>保存基础输入、条目快照、选择与规则配置，可完整恢复。</span></button><button onClick={() => exportFile('review')}><strong>DM 审卡 · HTML / 打印</strong><span>离线打开即可阅读。包含计算依据、缺项、来源及裁定；浏览器打印可保存 PDF。</span></button>{!standalone&&<button onClick={() => exportFile('owlbear')}><strong>枭熊角色卡 · JSON</strong><span>导出 schema 0.3；复杂效果和未映射内容附带说明。</span></button>}</div></section><section className="settings-section"><h3>导入为新角色</h3><p>{standalone?'导入为本机的新角色副本。':'导入不覆盖已有角色。枭熊文件只迁入可识别的数据，需重新核对规则来源。'}</p><div className="dialog-actions"><button onClick={() => importFile('character')}>导入完整备份</button>{!standalone&&<button onClick={() => importFile('owlbear')}>导入枭熊 JSON</button>}</div><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e => { if (e.target.files?.[0]) importFile('character', e.target.files[0]); e.target.value = ''; }}/></section>{!standalone&&<section className="settings-section transfer-json"><h3>枭熊 JSON · 复制 / 粘贴</h3><textarea aria-label="枭熊 JSON 文本" value={transferText} onChange={e=>setTransferText(e.target.value)} spellCheck={false}/><div className="dialog-actions"><button onClick={()=>setTransferText(JSON.stringify(exportOwlbear(c,d),null,2))}>生成枭熊 JSON</button><button disabled={!transferText.trim()} onClick={async()=>{try{await navigator.clipboard.writeText(transferText);setNotice('已复制枭熊 JSON');}catch{setImportError('无法访问剪贴板，请选中文本复制。');}}}>复制 JSON</button><button onClick={async()=>{try{setTransferText(await navigator.clipboard.readText());}catch{setImportError('无法读取剪贴板，请在文本框中粘贴。');}}}>粘贴 JSON</button><button disabled={!transferText.trim()} onClick={()=>importFile('owlbear',undefined,transferText)}>从文本导入枭熊</button></div></section>}<section className="settings-section"><h3>当前角色卡页 · PNG / 打印</h3><div className="dialog-actions"><button disabled={imageBusy} onClick={async()=>{setImageBusy(true);setImportError('');try{const blob=await captureSheet();setPng({blob,url:URL.createObjectURL(blob)});}catch(e){setImportError(String(e));}finally{setImageBusy(false);}}}>{imageBusy?'正在生成 PNG…':'生成当前页 PNG'}</button>{png&&<><button onClick={()=>saveSheetPng(png.blob,`${fileName(c.name)}-${sheetPage}.png`)}>下载 PNG</button><button onClick={()=>{try{printSheetPng(png.url);}catch(e){setImportError(String(e));}}}>打印 PNG</button></>}</div>{png&&<img className="png-preview" src={png.url} alt="当前角色卡 PNG 预览"/>}</section><section className="settings-section"><h3>本机恢复</h3><p>自动保留上一次保存的工作区。请先导出当前角色，再恢复。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup); history.current.clear(); setNotice('已读取上一次保存；确认内容后继续编辑即可保存。'); setModal(''); } catch (error) { setImportError(String(error)); } }}>读取上一次保存</button></section></>}
+      </>}</fieldset>}      {modal === 'export' && <><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} capture={capturePages} disabled={readOnly||inWorkbench&&!wb.online} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>单文件导入与本机恢复</h3><div className="dialog-actions"><button onClick={()=>importFile('character')}>导入角色 JSON</button></div><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup);history.current.clear();setNotice('已读取上一次保存；确认后继续编辑即可保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
 
     </Dialog>}
 

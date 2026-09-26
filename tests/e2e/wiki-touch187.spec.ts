@@ -50,7 +50,7 @@ test('phone second finger and cancelled contact disarm a pending drag',async({pa
 });
 test('mouse drag, tooltip pinning and keyboard preview remain immediate',async({page},info)=>{
   test.skip(info.project.name!=='desktop');await setup(page,false);await page.getByRole('switch',{name:'编辑模式'}).click();const row=page.locator('.catalog-row').filter({hasText:'测试法师'}).first();
-  await row.click();const reference=page.locator('.entry-detail .inline-reference').filter({hasText:'微光术'}).first();await reference.hover();await expect(page.getByRole('tooltip')).toBeVisible();await reference.click({button:'right'});await expect(page.locator('.keyword-preview.is-pinned')).toHaveCount(1);await page.keyboard.press('Escape');
+  await row.click();const reference=page.locator('.entry-detail .inline-reference').filter({hasText:'微光术'}).first();await reference.hover();await expect(page.getByRole('tooltip')).toBeVisible();await reference.click({button:'right'});await expect(page.getByRole('menuitem',{name:'添加至角色卡'})).toBeVisible();await expect(page.getByRole('menuitem',{name:'在 Wiki 中查看'})).toHaveCount(0);await page.keyboard.press('Escape');await reference.hover();await expect(page.getByRole('tooltip')).toBeVisible();await reference.click({button:'middle'});await expect(page.locator('.keyword-preview.is-pinned')).toHaveCount(1);await page.keyboard.press('Escape');
   await page.mouse.move(1,1);await page.keyboard.press('Tab');await reference.focus();await expect(page.getByRole('tooltip')).toBeVisible();await page.keyboard.press('Escape');
   await row.dragTo(page.locator('.identity-class'));await expect(page.locator('.identity-class')).toContainText('测试法师');expect(await page.evaluate(()=>(window as any).dragStarts)).toBe(1);
 });

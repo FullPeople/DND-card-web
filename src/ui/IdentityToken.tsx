@@ -28,7 +28,7 @@ export function IdentityToken({ row, c, edit, inspect, children }: { row: Select
     return()=>{active=false;observer.disconnect();cancelAnimationFrame(frame);};
   },[row.entry.name,row.level,children]);
   const remove = () => edit(draft => removeSelection(draft, row.id));
-  return <div ref={root} className={`identity-token ${selectionAllowed(c, row.entry) ? '' : 'restricted'}`} data-entry-id={row.entry.id} data-selection-id={row.id} onPointerDown={event => {
+  return <div ref={root} className={`identity-token ${selectionAllowed(c, row.entry) ? '' : 'restricted'}`} data-drag-enabled={editing} data-entry-id={row.entry.id} data-selection-id={row.id} onPointerDown={event => {
     if (!editing || (event.target as Element).closest('input')) return;
     const token=event.currentTarget;const area = event.currentTarget.closest('.identity-field') || event.currentTarget;
     cancel.current = pointerDrag(event, { title: `${row.entry.name}${row.entry.kind === 'class' ? ` Lv.${row.level}` : ''}`, outside: hit => !hit || !area.contains(hit),
@@ -37,7 +37,7 @@ export function IdentityToken({ row, c, edit, inspect, children }: { row: Select
       finish: (_point, hit) => { area.classList.remove('identity-dragging', 'will-remove');const copied=quickbarDrop(hit,row.entry,edit);if(copied)return copied; if (!hit || !area.contains(hit)) { remove(); return {removed:true}; } return {element:token}; }
     });
   }} onKeyDown={event => { if (editing && event.key === 'Delete' && !(event.target as Element).closest('input')) { event.preventDefault(); remove(); } }}>
-    <Reference className="identity-title" reference={`entry:${row.entry.id}`} kind={row.entry.kind} onClick={() => inspect(row.entry)} title="拖出此格移除；Delete 移除，可撤销">{entryLabel(row.entry)}</Reference>
+    <Reference className="identity-title" reference={`entry:${row.entry.id}`} kind={row.entry.kind} entry={row.entry} menuOptions={{origin:'sheet',selectionId:row.id}} onClick={() => inspect(row.entry)} title={editing?'拖出此格移除；Delete 移除，可撤销':'查看条目'}>{entryLabel(row.entry)}</Reference>
     {row.entry.kind === 'class' && <label className="identity-level">Lv.<NumberInput readOnly={!editing} aria-label={`${row.entry.name}等级`} type="number" min="1" max="20" value={row.level} onChange={event => edit(draft => { const found = draft.selections.find(s => s.id === row.id); if (found) found.level = Math.max(1, Math.min(20, Number(event.target.value) || 1)); })}/></label>}{children}
   </div>;
 }

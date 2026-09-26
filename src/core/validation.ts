@@ -43,13 +43,13 @@ function validateChoices(value: unknown) {
     assert(c.spellLevel === undefined || Number.isInteger(c.spellLevel) && c.spellLevel >= 0 && c.spellLevel <= 9, '法术环阶无效。');
   }
 }
-function validateContent(value: unknown, depth = 0, budget = { left: 60000 }): void {
+export function validateEntryContent(value: unknown, depth = 0, budget = { left: 60000 }): void {
   assert(depth <= 35 && --budget.left > 0, '正文层级或节点数量过多。');
-  if (Array.isArray(value)) { value.forEach(v => validateContent(v, depth + 1, budget)); return; }
+  if (Array.isArray(value)) { value.forEach(v => validateEntryContent(v, depth + 1, budget)); return; }
   if (!plain(value)) return;
   for (const key of ['name', 'type', 'caption', 'by']) assert(value[key] === undefined || typeof value[key] === 'string', `正文的 ${key} 字段需要文本。`);
   for (const key of ['entries', 'items', 'rows', 'colLabels', 'row']) assert(value[key] === undefined || Array.isArray(value[key]), `正文的 ${key} 字段需要数组。`);
-  Object.values(value).forEach(v => validateContent(v, depth + 1, budget));
+  Object.values(value).forEach(v => validateEntryContent(v, depth + 1, budget));
 }
 function validateEffects(effects: unknown): asserts effects is Effect[] {
   assert(Array.isArray(effects) && effects.length <= 100, 'effects 必须是最多 100 项的数组。');
@@ -81,7 +81,7 @@ export function validateCharacter(value: unknown): Character {
     assert(s.section === undefined || ['features', 'heritage'].includes(s.section), '条目放置区域无效。');
     if (s.entry.effects) validateEffects(s.entry.effects);
     if (s.entry.choices) validateChoices(s.entry.choices);
-    validateContent(s.entry.entries);
+    validateEntryContent(s.entry.entries);
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
@@ -95,7 +95,7 @@ export function validateCharacter(value: unknown): Character {
   if(c.rulePacks!==undefined){assert(Array.isArray(c.rulePacks)&&c.rulePacks.length<=100,'扩展包列表无效。');for(const pack of c.rulePacks)validatePack({...pack,entries:pack.entries?.map((entry:any)=>({...entry,id:typeof entry.id==='string'&&entry.id.startsWith(pack.id+':')?entry.id.slice(pack.id.length+1):entry.id}))},c.rulePacks.filter((p:any)=>p!==pack));}
   if(c.quickbarLayout!==undefined)assert(plain(c.quickbarLayout)&&['order','hidden'].every(k=>Array.isArray(c.quickbarLayout[k])&&c.quickbarLayout[k].length<=3000&&c.quickbarLayout[k].every((v:unknown)=>typeof v==='string')),'快捷栏排序无效。');
   assert(c.quickbar === undefined || Array.isArray(c.quickbar) && c.quickbar.length <= 100 && c.quickbar.every((id: unknown) => typeof id === 'string') && new Set(c.quickbar).size === c.quickbar.length, '快捷栏需要最多 100 个互不重复的条目身份。');
-  if(c.quickbarCopies!==undefined){assert(Array.isArray(c.quickbarCopies)&&c.quickbarCopies.length<=100&&c.quickbarCopies.every((row:any)=>plain(row)&&typeof row.id==='string'&&validEntry(row.entry))&&new Set(c.quickbarCopies.map((row:any)=>row.id)).size===c.quickbarCopies.length,'快捷栏副本无效。');for(const row of c.quickbarCopies)validateContent(row.entry.entries);}
+  if(c.quickbarCopies!==undefined){assert(Array.isArray(c.quickbarCopies)&&c.quickbarCopies.length<=100&&c.quickbarCopies.every((row:any)=>plain(row)&&typeof row.id==='string'&&validEntry(row.entry))&&new Set(c.quickbarCopies.map((row:any)=>row.id)).size===c.quickbarCopies.length,'快捷栏副本无效。');for(const row of c.quickbarCopies)validateEntryContent(row.entry.entries);}
   if(c.quickbarActions!==undefined)assert(Array.isArray(c.quickbarActions)&&c.quickbarActions.length<=100&&c.quickbarActions.every((row:any)=>plain(row)&&['id','name','attack','damage'].every(k=>typeof row[k]==='string'&&row[k].length<=160))&&new Set(c.quickbarActions.map((row:any)=>row.id)).size===c.quickbarActions.length,'自定义快捷动作无效。');
   if (c.featureLayout !== undefined) assert(plain(c.featureLayout) && ['order', 'expanded'].every(key => Array.isArray(c.featureLayout[key]) && c.featureLayout[key].length <= 10000 && c.featureLayout[key].every((id: unknown) => typeof id === 'string' && id.length <= 2000) && new Set(c.featureLayout[key]).size === c.featureLayout[key].length), '特性显示设置需要合法且不重复的条目身份。');
   assert(plain(c.profile) && Array.isArray(c.profile.enabledSources) && c.profile.enabledSources.every((v: unknown) => typeof v === 'string') && plain(c.profile.optional) && ['feats', 'multiclass', 'legacy'].every(k => typeof c.profile.optional[k] === 'boolean') && plain(c.profile.exceptions) && Object.values(c.profile.exceptions).every(v => typeof v === 'string'), '角色规则配置不正确。');
@@ -112,6 +112,7 @@ export function validateCharacter(value: unknown): Character {
   for(const key of ['portrait','illustration'])if(c[key]!==undefined)assert(storedImage(c[key]),key==='portrait'?'头像数据无效。':'立绘数据无效。');
   if(c.featureLayout?.detailsExpanded!==undefined)assert(Array.isArray(c.featureLayout.detailsExpanded)&&c.featureLayout.detailsExpanded.every((id:unknown)=>typeof id==='string'),'详细特性展开记录无效。');
   if(c.backgroundChoices!==undefined)assert(plain(c.backgroundChoices)&&Object.values(c.backgroundChoices).every(v=>plain(v)&&(!v.abilities||plain(v.abilities)&&Object.entries(v.abilities).every(([key,n])=>ABILITIES.includes(key as any)&&Number.isInteger(n)&&Number(n)>=0&&Number(n)<=10))&&(!v.equipment||plain(v.equipment)&&Object.values(v.equipment).every(k=>typeof k==='string'))),'背景选择无效。');
+  if(c.spellSettings?.special!==undefined){const special=c.spellSettings.special;assert(plain(special)&&Object.keys(special).length<=3000,'固定与次数法术设置无效。');for(const [id,value] of Object.entries(special)){assert(c.selections.some(row=>row.id===id&&row.entry.kind==='spell')&&plain(value)&&['locked','uses'].includes(value.mode)&&(value.mode!=='uses'||Number.isInteger(value.max)&&value.max>=1&&value.max<=100)&&(value.recovery===undefined||['long','short','manual'].includes(value.recovery))&&(value.label===undefined||typeof value.label==='string'&&value.label.length<=160),'固定与次数法术设置无效。');}}
   if(c.spellSettings!==undefined){const s=c.spellSettings;assert(plain(s)&&['known','prepared'].includes(s.mode)&&(s.modeOverride===undefined||typeof s.modeOverride==='boolean')&&(s.abilityOverride===undefined||typeof s.abilityOverride==='boolean')&&(s.abilityClassId===undefined||typeof s.abilityClassId==='string')&&ABILITIES.includes(s.ability)&&Number.isInteger(s.capacity)&&s.capacity>=0&&s.capacity<=100&&(s.capacityAdjustment===undefined||Number.isInteger(s.capacityAdjustment)&&Math.abs(s.capacityAdjustment)<=100)&&['attackBonus','dcBonus'].every(k=>Number.isFinite(s[k])&&Math.abs(s[k])<=100)&&Array.isArray(s.prepared)&&s.prepared.length<=3000&&s.prepared.every((id:unknown)=>typeof id==='string')&&new Set(s.prepared.filter(Boolean)).size===s.prepared.filter(Boolean).length&&plain(s.slots)&&Object.entries(s.slots).every(([level,v])=>/^[1-9]$/.test(level)&&plain(v)&&Number.isInteger(v.max)&&v.max>=0&&v.max<=30&&Number.isInteger(v.used)&&v.used>=0&&v.used<=v.max),'法术设置无效。');}
   if(c.inventory!==undefined){const i=c.inventory;assert(plain(i)&&['grid','list'].includes(i.view)&&Array.isArray(i.order)&&i.order.every((id:unknown)=>typeof id==='string')&&new Set(i.order).size===i.order.length&&Number.isInteger(i.attunementLimit)&&i.attunementLimit>=0&&i.attunementLimit<=30&&plain(i.coins)&&['cp','sp','ep','gp','pp'].every(k=>Number.isFinite(i.coins[k])&&i.coins[k]>=0&&i.coins[k]<=1000000)&&(!i.grantedCoins||plain(i.grantedCoins)&&Object.values(i.grantedCoins).every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0)),'背包设置无效。');assert(i.capacityAdjustment===undefined||typeof i.capacityAdjustment==='string'&&i.capacityAdjustment.length<=180,'负重调整公式无效。');if(i.positions!==undefined)assert(plain(i.positions)&&Object.keys(i.positions).length<=10000&&Object.values(i.positions).every(n=>typeof n==='number'&&Number.isSafeInteger(n)&&n>=0&&n<10000)&&new Set(Object.values(i.positions)).size===Object.keys(i.positions).length,'背包格子位置无效。');}
   assert(c.selections.every((s:any)=>s.attuned===undefined||typeof s.attuned==='boolean'),'同调记录无效。');
@@ -144,7 +145,7 @@ export function validatePack(value: unknown, installed: RulePack[]): RulePack {
     assert(plain(item) && typeof item.id === 'string' && /^[a-zA-Z0-9._-]+$/.test(item.id) && !ids.has(item.id), '包内条目需要互不重复的简单 id。'); ids.add(item.id);
     assert(typeof item.name === 'string' && item.name.length > 0 && item.name.length <= 300 && Object.hasOwn(KIND_LABELS, item.kind), '条目名称或类型不正确。');
     assert(Array.isArray(item.entries), '条目正文 entries 必须为数组。');
-    validateContent(item.entries);
+    validateEntryContent(item.entries);
     if (item.effects) validateEffects(item.effects);
     if (item.choices) validateChoices(item.choices);
     const dependencies = [...new Set<string>(value.requires.flatMap((dep: any) => [dep.id, ...(others.find(p => p.id === dep.id)?.entries[0].dependencies || [])]))];
@@ -155,6 +156,7 @@ export function validatePack(value: unknown, installed: RulePack[]): RulePack {
 }
 export function importOwlbear(value: unknown): Character {
   assert(plain(value) && value.schema_version === '0.3' && plain(value.identity) && plain(value.abilities), '需要枭熊 schema_version 0.3 的角色 JSON。');
+  if(value.dnd_card_web!==undefined)return validateCharacter(value.dnd_card_web);
   const c = newCharacter(value.meta?.ruleset === '2014' ? '2014' : '2024');
   c.name = String(value.identity.character_name || value.identity.display_name || '导入的冒险者'); c.player = String(value.identity.player || '');
   for (const a of ABILITIES) { const n = Number(value.abilities[a]?.total); assert(Number.isInteger(n) && n >= 1 && n <= 100, `枭熊 ${a} 属性无效。`); c.abilities[a] = n; }

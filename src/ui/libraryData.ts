@@ -1,8 +1,9 @@
 import { compareSources, SOURCE_SEED, type SourceMeta } from './SourceName';
 const collator = new Intl.Collator('zh-CN', { numeric: true });
 import { entryEdition, ABILITY_LABELS, type Ability, type Character, type Entry, type Kind } from '../core/model';
+import {trainingCategory} from './trainingData';
 
-export const LIBRARY_TABS = { class: '职业', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', condition: '状态', rule: '术语汇编', language: '语言', size: '体型', weaponProperty: '武器词条', weaponMastery: '武器精通', monster: '怪物图鉴', reference: '其他资料', custom:'自定义' };
+export const LIBRARY_TABS = { class: '职业', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', condition: '状态', rule: '术语汇编', language: '语言', size: '体型', weaponProperty: '装备词条', weaponMastery: '武器精通', monster: '怪物图鉴', reference: '其他资料', custom:'自定义' };
 export type LibraryTab = keyof typeof LIBRARY_TABS;
 export type FacetSelection = Record<string, { include: string[]; exclude: string[] }>;
 export type Column = { key: string; label: string; value: (e: Entry) => string | number };
@@ -24,6 +25,7 @@ export const tabOf = (e: Entry): LibraryTab => {
   return e.kind;
 };
 export const browseTab = (kind: Kind): LibraryTab => kind === 'subclass' || kind === 'feature' ? 'class' : kind;
+export const matchesLibraryTab=(entry:Entry,tab:LibraryTab)=>tabOf(entry)===tab||tab==='weaponProperty'&&entry.kind==='item'&&!!trainingCategory(entry)&&(!entry.raw.rarity||entry.raw.rarity==='none')&&!entry.raw.reqAttune;
 export function speedText(raw: any): string { return typeof raw === 'number' ? `${raw}尺` : raw && typeof raw === 'object' ? Object.entries(raw).filter(([k,v])=>['walk','fly','swim','climb','burrow'].includes(k) && v).map(([k,v]:[string,any])=>`${({walk:'步行',fly:'飞行',swim:'游泳',climb:'攀爬',burrow:'掘穴'} as Record<string,string>)[k]} ${typeof v==='number'?v:v===true?'等同步速':v.number||''}尺`).join(' / ') : '—'; }
 export function abilityText(value: unknown):string {
  if(Array.isArray(value))return value.map(abilityText).join(' 或 ');
@@ -73,8 +75,7 @@ export function compareEntries(a: Entry, b: Entry, column: Column, descending: b
     return column.value(e);
   };
   if (column.key === 'source') {
-    const extra = a.kind === 'condition' && b.kind === 'condition' ? Number(a.raw._category === 'status') - Number(b.raw._category === 'status') : 0;
-    return (extra || compareSources(a.source,b.source,registry) || collator.compare(a.name,b.name) || a.id.localeCompare(b.id)) * (descending ? -1 : 1);
+    return (compareSources(a.source,b.source,registry) || collator.compare(a.name,b.name) || a.id.localeCompare(b.id)) * (descending ? -1 : 1);
   }
   const x = rank(a), y = rank(b);
   const comparison = typeof x === 'number' && typeof y === 'number' ? x - y : collator.compare(String(x), String(y));

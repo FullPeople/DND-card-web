@@ -1,3 +1,4 @@
+import {proficiencyText} from '../core/proficiencyText';
 import {spellUsesPreparation} from '../core/spellcastingRules';
 import {spellState} from '../core/characterDetails';
 import {HitDiceResources} from './HitDiceResources';
@@ -73,14 +74,14 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
     </SheetCell>;
   }
   const training: { key: string; label: string; values: string[] }[] = [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
-    const names: Record<string, string> = { light: '轻甲', medium: '中甲', heavy: '重甲', shields: '盾牌', simple: '简易武器', martial: '军用武器', common: '通用语', elvish: '精灵语' };
+    const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
     const values = c.selections.filter(s => selectionAllowed(c, s.entry)).flatMap(s => {
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
       return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
     });
-    return { key, label, values: [...new Set<string>(values.map(v => {const entry=(trainingNames.get(v.toLowerCase())||[]).find(e=>e.source===(c.edition==='2024'?'XPHB':'PHB'))||(trainingNames.get(v.toLowerCase())||[])[0];return names[v] || (entry?`{@${key==='languages'?'language':'item'} ${entry.name}|${entry.source}}`:v);}))] };
+    return { key, label, values: [...new Set<string>(values.map(v => {const entry=(trainingNames.get(v.toLowerCase())||[]).find(e=>e.source===(c.edition==='2024'?'XPHB':'PHB'))||(trainingNames.get(v.toLowerCase())||[])[0];return names[v] || (entry?`{@${key==='languages'?'language':'item'} ${entry.name}|${entry.source}}`:proficiencyText(v,c.edition==='2024'?'XPHB':'PHB',key));}))] };
   });
   return <div className="overview-sheet">
     <div className="overview-top">
@@ -93,7 +94,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
         <SheetCell label="护甲等级" className="armor-cell" hint={d.trace.ac.join('；')}><AdjustedValue c={c} value={d.ac} target="ac" label="护甲等级" edit={edit}/><small>AC</small></SheetCell>
       </div>
       <div className="overview-health">
-        <SheetCell label="生命值" settingsIcon onHeadingClick={editing?openHp:undefined} headingActionLabel="设置生命值取值方式" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
+        <SheetCell label="生命值" settingsIcon onHeadingClick={editing?openHp:undefined} headingActionLabel="设置生命值取值方式" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput arithmetic aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput arithmetic aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
         <SheetCell label="生命骰" className="dice-cell"><HitDiceResources c={c} edit={edit}/></SheetCell>
       </div>
       <Portrait c={c} edit={edit}/>
@@ -103,7 +104,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       <div className="overview-left">
         <div className="physical-abilities"><SheetCell label="死亡豁免" className="death-saves-cell"><div className="death-saves">{(['success', 'failure'] as const).map(key => <div key={key}><span>{key === 'success' ? '成功' : '失败'}</span>{[1, 2, 3].map(n => <input key={n} type="checkbox" aria-label={`死亡豁免${key === 'success' ? '成功' : '失败'}${n}`} checked={(c.runtime.deathSaves?.[key] || 0) >= n} onChange={() => edit(draft => { const saves = draft.runtime.deathSaves ||= { success: 0, failure: 0 }; saves[key] = saves[key] >= n ? n - 1 : n; })}/>)}</div>)}</div></SheetCell><SheetCell label="熟练加值" className="proficiency-cell" hint={d.trace.proficiency.join('；')}><AdjustedValue c={c} value={d.proficiency} target="proficiency" label="熟练加值" sign edit={edit}/></SheetCell>{(['str', 'dex', 'con'] as Ability[]).map(a => <div className={`ability-slot slot-${a}`} key={a}>{abilityCell(a)}</div>)}</div>
         <div className="mental-abilities">{(['int', 'wis', 'cha'] as Ability[]).map(a => <div className={`ability-slot slot-${a}`} key={a}>{abilityCell(a)}</div>)}</div>
-        <SheetCell label="装备训练与其他熟练" className="training-cell" dropKinds={['rule', 'item', 'feature']} wholePaper accepts={entry => !!trainingCategory(entry)} allowExisting onReceive={entry => receiveTraining(entry,trainingCategory(entry)!)} onHeadingClick={editing ? () => setTrainingEditor(v => !v) : undefined} headingActionLabel="编辑装备训练与其他熟练" headingExpanded={editing && trainingEditor}><dl>{training.map(t => <DropZone key={t.key} className="training-row" kinds={['item','rule','feature']} accepts={entry=>t.key==='languages'?entry.raw._category==='language':entry.kind==='item'||['itemProperty','itemMastery'].includes(entry.raw._category)} allowExisting onReceive={entry=>receiveTraining(entry,t.key)}><dt>{t.label}</dt><dd><TrainingChips editAll={trainingEditor} label={t.label} value={c.training?.[t.key] ?? t.values.join('、')} onChange={value => edit(draft => { (draft.training ||= {})[t.key] = value; })}/></dd></DropZone>)}</dl></SheetCell>
+        <SheetCell label="装备训练与其他熟练" className="training-cell" dropKinds={['rule', 'item', 'feature']} wholePaper accepts={entry => !!trainingCategory(entry)} allowExisting onReceive={entry => receiveTraining(entry,trainingCategory(entry)!)} onHeadingClick={editing ? () => setTrainingEditor(v => !v) : undefined} headingActionLabel="编辑装备训练与其他熟练" headingExpanded={editing && trainingEditor}><dl>{training.map(t => <DropZone key={t.key} className="training-row" kinds={['item','rule','feature']} accepts={entry=>trainingCategory(entry)===t.key} allowExisting onReceive={entry=>receiveTraining(entry,t.key)}><dt>{t.label}</dt><dd><TrainingChips editAll={trainingEditor} label={t.label} value={c.training?.[t.key] ?? t.values.join('、')} onChange={value => edit(draft => { (draft.training ||= {})[t.key] = value; })}/></dd></DropZone>)}</dl></SheetCell>
       </div>
       <div className="overview-right">
         <div className="overview-vitals"><SheetCell label="先攻" className="initiative-cell"><AdjustedValue c={c} value={d.initiative} target="initiative" label="先攻" sign edit={edit}/></SheetCell><SheetCell label="速度" className="speed-cell"><AdjustedValue c={c} value={d.speed} target="speed" label="速度" unit="尺" edit={edit}/></SheetCell><SheetCell label="体型" className="size-cell" dropKinds={['rule']} accepts={entry => entry.raw._category === 'size'} onReceive={entry => edit(draft => { draft.size = entry.raw.size; })} dashed missing={!sizeCode} onFill={() => browse('size')} onHeadingClick={() => { if (sizeInfo) inspect(sizeInfo); }}>

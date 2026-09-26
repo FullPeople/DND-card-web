@@ -5,6 +5,9 @@ import { useSources } from './SourceName';
 import { landingWithin, pointerDrag } from './pointerDrag';
 import { trainingCategory } from './trainingData';
 import './wikiTouch.css';
+import {useEntryMenu} from './EntrySharing';
+import {ReferenceContext} from './Reference';
+import './dragAvailability.css';
 
 export const requiresEditing=(entry:Entry)=>!['condition','item'].includes(entry.kind);
 type Zone = { element: HTMLElement; requirement?: Requirement; kinds?: Kind[]; onReceive?: (entry: Entry) => void; allowExisting?: boolean; accepts?: (entry: Entry) => boolean; wholePaper?: boolean; referenceOnly?:boolean };
@@ -41,10 +44,11 @@ export function EntryDragProvider({ character, receive, children, editing=false 
   }
   return <DragContext.Provider value={{ editing,entry, character, over, hoverTab, register, start }}>{children}</DragContext.Provider>;
 }
-export function EntryDraggable({ entry, children, dragEnabled = true, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { entry: Entry; dragEnabled?: boolean }) {
+export function EntryDraggable({ entry, children, dragEnabled = true, onContextMenu, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { entry: Entry; dragEnabled?: boolean }) {
   const drag = useContext(DragContext);
+  const menu=useEntryMenu(),preview=useContext(ReferenceContext);
   const canDrag=dragEnabled;
-  return <button {...props} data-drag-enabled={canDrag} onPointerDown={event => { if (canDrag) drag?.start(event, entry); }} onDragStart={event => event.preventDefault()}>{children}</button>;
+  return <button {...props} data-entry-context-menu={!!menu} onContextMenu={event=>{if(onContextMenu){onContextMenu(event);return;}preview?.close();menu?.(event,entry);}} data-drag-enabled={canDrag} onPointerDown={event => { if (canDrag) drag?.start(event, entry); }} onDragStart={event => event.preventDefault()}>{children}</button>;
 }
 export function DropZone({ children, requirement, kinds, className = '', onReceive, allowExisting = false, accepts, wholePaper = false, referenceOnly=false, ...props }: HTMLAttributes<HTMLDivElement> & { children: ReactNode; requirement?: Requirement; kinds?: Kind[]; onReceive?: (entry: Entry) => void; allowExisting?: boolean; accepts?: (entry: Entry) => boolean; wholePaper?: boolean;referenceOnly?:boolean }) {
   const drag = useContext(DragContext), id = useId(), element = useRef<HTMLDivElement>(null);
