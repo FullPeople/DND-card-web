@@ -3,12 +3,12 @@ import {mockSource} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 import {exportCharacter,exportOwlbear} from '../../src/core/export';
 import {evaluate} from '../../src/core/engine';
-import {ANNOUNCEMENT_KEY,APP_VERSION} from '../../src/platform/announcement';
+import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
 test('suite notice shows a collapsed red Owner explanation near the front and requires acknowledgement',async({page,baseURL})=>{
  await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=notice197&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);
  const dialog=page.getByRole('dialog',{name:'欢迎使用 Full Suite 枭熊工作台！'}),owner=dialog.locator('.announcement-owner');await expect(dialog).toBeVisible();expect(await owner.evaluate(e=>(e as HTMLDetailsElement).open)).toBe(false);
  await expect(owner.locator('summary')).toHaveText('关于设置玩家单独权限的重要说明');await expect(owner.locator('summary')).toHaveCSS('color','rgb(174, 39, 39)');await expect(dialog.getByRole('link',{name:'进入独立车卡网站',exact:true})).toBeVisible();await page.keyboard.press('Escape');await expect(dialog).toBeVisible();
- await owner.locator('summary').click();await expect(owner).toContainText('Owner Only');await expect(owner.locator('img')).toHaveCount(3);await owner.locator('summary').click();await dialog.getByRole('checkbox').check();await dialog.getByRole('button',{name:'我知道了',exact:true}).click();expect(await page.evaluate(key=>localStorage.getItem(key+':suite'),ANNOUNCEMENT_KEY)).toBe(APP_VERSION);await page.reload();await expect(dialog).toHaveCount(0);
+ await owner.locator('summary').click();await expect(owner).toContainText('Owner Only');await expect(owner.locator('img')).toHaveCount(3);await owner.locator('summary').click();await dialog.getByRole('checkbox').check();await dialog.getByRole('button',{name:'我知道了',exact:true}).click();expect(await page.evaluate(key=>localStorage.getItem(key+':suite'),ANNOUNCEMENT_KEY)).toBe(announcementVersionFor('suite'));await page.reload();await expect(dialog).toHaveCount(0);
 });
 test('starting sections precede growth; equipment inline references drag, remove and preserve book identity',async({page})=>{
  await mockSource(page);

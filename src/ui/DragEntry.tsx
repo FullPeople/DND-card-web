@@ -39,7 +39,8 @@ export function EntryDragProvider({ character, receive, children, editing=false 
     return undefined;
   }
   function start(event: PointerEvent, item: Entry) {
-    cancel.current = pointerDrag(event, { title: item.name, subtitle: `${format(item.source)}`, start: () => {setEntry(item);window.dispatchEvent(new CustomEvent('entry-drag-start',{detail:{entry:item}}));}, cancel: clear,
+    const preservePage=item.kind==='item'&&!!event.currentTarget.closest('.inline-reference,.training-row');
+    cancel.current = pointerDrag(event, { title: item.name, subtitle: `${format(item.source)}`, start: () => {setEntry(item);window.dispatchEvent(new CustomEvent('entry-drag-start',{detail:{entry:item,preservePage}}));}, cancel: clear,
       move: (_point, hit) => {const old=hitCache.current;const match=old&&old.hit===hit&&old.item===item&&old.character===latest.current.character?old.result:find(hit,item);hitCache.current={hit,item,character:latest.current.character,result:match};setOver(match?.id); setHoverTab(hit?.closest<HTMLElement>('[data-sheet-tab]')?.dataset.sheetTab); },
       finish: (_point, hit) => { const target = find(hit, item); clear(); if(!editing&&(target?.zone.referenceOnly||requiresEditing(item))&&(target||hit?.closest('.paper'))){window.dispatchEvent(new CustomEvent('workbench-error',{detail:`添加「${item.name}」前，请先在角色卡右上角开启编辑模式。`}));return;} if(!target){if(hit?.closest('.paper')){const reason=candidateReason(latest.current.character,item);if(reason)window.dispatchEvent(new CustomEvent('workbench-error',{detail:reason}));}return;} if (target.zone.onReceive) target.zone.onReceive(item); else latest.current.receive(item, target.zone.requirement); return landingWithin(target.zone.element,()=>target.zone.element.querySelector<HTMLElement>(`[data-entry-id="${CSS.escape(item.id)}"],[data-overview-condition="${CSS.escape(item.id)}"]`)||target.zone.element.querySelector<HTMLElement>('.stock-empty')); }
     });
