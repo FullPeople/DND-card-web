@@ -27,6 +27,7 @@ export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'
 export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface Character {
+  automation?:import('./automation/state').AutomationState;
   locked?:boolean;
   schemaVersion: 1; id: string; revision: number; name: string; player: string; edition: Edition;
   createdAt: string; updatedAt: string; abilities: Record<Ability, number>; baseHp: number;

@@ -1,11 +1,14 @@
 import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
+import {automationEnabled} from './automation/state';
+import {evaluateArmor,automationCompatibilityIssue} from './automation/equipment';
 import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
   const abilities = { ...c.abilities }; const trace: Record<string, string[]> = {};
   ABILITIES.forEach(a => trace[a] = [`基础 ${abilities[a]}`]);
   const issues: Derived['issues'] = [...inheritedIssues]; const requirements: Requirement[] = [];
+  const compatibility=automationCompatibilityIssue(c);if(compatibility)issues.push(compatibility);
   const active = c.selections.filter(s => {
     if (excluded.has(s.id)) return false;
     let owner = s; const seen = new Set<string>();
@@ -58,12 +61,13 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     const half = c.jackOfAllTrades && !proficient ? Math.floor(proficiency / 2) : 0;
     return [key, { value: modifiers[s.ability] + (proficient ? proficiency * (expertise ? 2 : 1) : half), proficient, expertise, sources: [...(skillSources[key] || []), ...(expertise ? ['专精'] : half ? ['万事通'] : [])] }];
   }));
-  let ac = acOverride ?? (10 + modifiers.dex);
-  // Equipment and attunement markers are visual references, not rule automation.
+  const armor=automationEnabled(c)?evaluateArmor(c,active,modifiers.dex):undefined;
+  if(armor)issues.push(...armor.issues);
+  let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
   ac += acBonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [`基础 10 + 敏捷 ${modifiers.dex}`, ...(acBonus ? [`规则修正 +${acBonus}`] : [])];
+  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...(acBonus ? [`规则修正 +${acBonus}`] : [])];
   if (acOverride !== undefined) trace.ac.push(`规则设定基础结果 ${acOverride}`);
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...(hpOverride !== undefined ? [`规则设定 ${hpOverride}`] : []), ...(hpBonus ? [`规则修正 +${hpBonus}`] : [])];
   trace.proficiency = [`总等级 ${level || 1}`]; trace.speed = [active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'];

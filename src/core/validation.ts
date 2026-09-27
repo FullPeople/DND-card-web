@@ -2,6 +2,7 @@ import { ABILITIES, KIND_LABELS, SKILLS, SHEET_BONUS_KEYS, SIZE_LABELS, skillKey
 import { evaluate } from './engine';
 import {inventoryState,spellState} from './characterDetails';
 import {normalizeCurrency} from './currency';
+import {validateAutomation} from './automation/state';
 const plain = (v: unknown): v is Raw => !!v && typeof v === 'object' && !Array.isArray(v);
 function assert(condition: unknown, message: string): asserts condition { if (!condition) throw new Error(message); }
 export function parseFile(text: string): unknown {
@@ -67,6 +68,7 @@ export function validateCharacter(value: unknown): Character {
   assert(plain(value), '角色文件应为一个对象。');
   const c = value.character ?? value;
   assert(plain(c) && c.schemaVersion === 1, '不支持的角色格式版本。请保留原文件，使用兼容版本打开。');
+  validateAutomation(c.automation);
   assert(typeof c.id === 'string' && typeof c.name === 'string' && c.name.length <= 300 && typeof c.player === 'string', '角色身份数据不完整。');
   assert(['2014', '2024'].includes(c.edition), '角色规则版本必须为 2014 或 2024。');
   assert(plain(c.abilities) && ABILITIES.every(a => Number.isInteger(c.abilities[a]) && c.abilities[a] >= 1 && c.abilities[a] <= 100), '六项基础属性需要 1–100 的整数。');
