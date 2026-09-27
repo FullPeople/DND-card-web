@@ -2,6 +2,7 @@ export const RELEASE_DATE='2026-09-27';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
+ {title:'浏览器兼容与加载',items:['修复了部分旧版浏览器读取 Wiki 和连接服务器时加载失败的问题。','资料缓存写满时，已下载成功的资料仍可查看。','程序加载失败时，现在显示原因和重新加载按钮。']},
  {title:'本次修复：职业与法术',items:[
   '现在每个主职业都可以单独查找和添加子职了。',
   '修复了职业正文中的子职没有跟随 2014 / 2024 筛选的问题。',

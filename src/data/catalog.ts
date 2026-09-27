@@ -1,4 +1,5 @@
 import {catalogNormalizer,type CatalogOperation} from './catalogNormalizer';
+import {withRequestTimeout} from '../platform/requestTimeout';
 import {EQUIPMENT_TRAINING_ENTRIES} from './weaponTraining';
 import type { Entry, Kind, Raw } from '../core/model';
 import { readCache, writeCache } from '../platform/storage';
@@ -43,19 +44,23 @@ export function normalizeCatalogData(body:Raw,revision:string,packId='kiwee',ope
 }
 async function fetchJson(base: string, path: string, signal: AbortSignal, refresh: boolean): Promise<{ body: Raw; revision: string; cached: boolean; warning?: string }> {
   const key = `${base}/${path}`;
-  const cached = await readCache(key);
+  // Wiki caching is optional. A denied/full cache must not discard a valid network response.
+  const cached = await readCache(key).catch(()=>undefined);
   const valid=(body:Raw)=>!path.endsWith('/index.json')||Object.values(body).some(v=>typeof v==='string'&&v.endsWith('.json'));
   const prior=cached&&valid(cached.body)?cached:undefined;
   if (!refresh && prior) return { ...prior, cached: true };
   try {
-    const response = await fetch(key, { signal: AbortSignal.any([signal, AbortSignal.timeout(20000)]), cache: 'no-cache' });
+    const result = await withRequestTimeout(20000,signal,async requestSignal=>{
+    const response = await fetch(key, { signal: requestSignal, cache: 'no-cache' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const body = await response.json();
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('资料格式不正确');
     if(!valid(body))throw Error('资料索引为空，请重试');
     const revision = response.headers.get('etag') || await hashJson(body);
-    await writeCache(key, { body, revision });
     return { body, revision, cached: false };
+    });
+    try{await writeCache(key,result);}catch{return {...result,warning:'资料已加载，但浏览器未能保存资料缓存。'};}
+    return result;
   } catch (error) {
     if (signal.aborted) throw error;
     if (prior) return { ...prior, cached: true, warning: `更新失败，正在使用旧缓存：${String(error)}` };

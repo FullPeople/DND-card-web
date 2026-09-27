@@ -21,4 +21,4 @@ self.addEventListener('fetch', event => {
 });` });
   } };
 }
-export default defineConfig(({mode})=>({ plugins: [...(mode==='standalone'?[standalonePlugin()]:[]),react(), offlineShell()], base: './', build:{outDir:mode==='standalone'?'dist-standalone':'dist'},server: { port: 5178, strictPort: true } }));
+export default defineConfig(({mode})=>({ plugins: [...(mode==='standalone'?[standalonePlugin()]:[]),react(), offlineShell()], base: './', build:{target:['chrome109','edge109','firefox102','safari15.4'],outDir:mode==='standalone'?'dist-standalone':'dist'},server: { port: 5178, strictPort: true } }));

@@ -1,2 +1,19 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#50525B"/><meta name="description" content="左侧角色卡，右侧规则资料。在卡片的提示下，查阅、选择并完成你的冒险者。"/><title>Full Suite · 角色卡与 Wiki</title><link rel="icon" href="./exe_icon.png"/></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<html lang="zh-CN"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#50525B"/><meta name="description" content="左侧角色卡，右侧规则资料。在卡片的提示下，查阅、选择并完成你的冒险者。"/><title>Full Suite · 角色卡与 Wiki</title><link rel="icon" href="./exe_icon.png"/>
+<style>.startup-panel{box-sizing:border-box;max-width:620px;margin:32px auto;padding:20px;background:#eee;color:#333;border:4px solid #50525b;font:16px/1.6 system-ui,sans-serif;clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px)}.startup-panel h1{margin:0 0 12px;font-size:20px}.startup-panel button{font:inherit;padding:5px 14px;cursor:pointer}.startup-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.startup-panel[hidden]{display:none}</style>
+</head><body>
+<section id="startup" class="startup-panel" role="status"><h1 id="startup-title">正在启动角色卡…</h1><p id="startup-message">正在加载程序，请稍候。</p><div id="startup-help" hidden><button id="startup-retry" type="button">重新加载</button><details><summary>错误详情（可复制给开发者）</summary><pre id="startup-detail"></pre></details></div><noscript>浏览器未启用 JavaScript。请允许此网站运行 JavaScript 后重新打开。</noscript></section>
+<script>
+(function(){
+ var ready=false,timer;
+ var panel=document.getElementById('startup'),title=document.getElementById('startup-title'),message=document.getElementById('startup-message'),detail=document.getElementById('startup-detail');
+ function show(text,error){if(ready)return;clearTimeout(timer);title.textContent=text;message.textContent='请检查网络或浏览器扩展是否拦截了本站，再点击重新加载。旧版浏览器也可以尝试升级后打开。';document.getElementById('startup-help').hidden=false;detail.textContent=String(error||'未收到程序启动完成信号')+'\n'+navigator.userAgent;}
+ document.getElementById('startup-retry').onclick=function(){location.reload();};
+ window.addEventListener('dnd-card-ready',function(){ready=true;clearTimeout(timer);panel.hidden=true;});
+ window.addEventListener('error',function(event){var target=event.target;if(target&&target!==window&&(target.tagName==='SCRIPT'||target.tagName==='LINK'))show('程序文件加载失败',target.src||target.href);else if(event.message)show('程序启动失败',event.message);},true);
+ window.addEventListener('unhandledrejection',function(event){show('程序启动失败',event.reason&&event.reason.message||event.reason);});
+ timer=setTimeout(function(){show('程序加载时间较长');},20000);
+ if(!('noModule' in document.createElement('script'))){show('浏览器版本过旧','此浏览器不支持运行角色卡所需的 JavaScript 模块。');}
+})();
+</script>
+<div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
