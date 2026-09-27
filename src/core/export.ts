@@ -1,4 +1,5 @@
 import {sourceSpellEnabled} from './automation/sourceSpellState';
+import {spellIsReady} from './spellWorkspace';
 import {inlineLabel} from './inlineTags';
 import {weaponAttacks} from './weaponAttacks';
 import {spellState,spellValues,inventoryState,carriedWeight} from './characterDetails';
@@ -19,7 +20,7 @@ export function exportOwlbear(c: Character, d: Derived) {
   const features = (kinds: string[]) => active.filter(s => kinds.includes(s.entry.kind)).map(s => ({ name: s.entry.name, source: s.entry.source, description: plainText(s.entry.entries), level: s.entry.raw.level || null }));
   const spells = active.filter(s => s.entry.kind === 'spell'&&sourceSpellEnabled(c,s.id)).map(s => ({ selectionId:s.id,name: s.entry.name, level: s.entry.raw.level || 0, source: s.entry.source, description: plainText(s.entry.entries), meta: { source: s.entry.source } }));
   const settings=spellState(c),spellStats=spellValues(c,d),ability=settings.ability;
-  const preparedIds=new Set(settings.prepared);
+  const preparedIds=new Set(settings.prepared),readyIds=new Set(c.selections.filter(s=>spellIsReady(c,s)).map(s=>s.id));
   return { schema_version: '0.3', meta: { template_name: 'DND Card Web', template_version: '0.1.0', layout_version: 'web-1', ruleset: c.edition, source_file: `${c.name}.json`, parsed_at: c.updatedAt },
     identity: { size: c.size || null, character_name: c.name, display_name: c.name, player: c.player, race: { name: entryName('race'), subrace: null }, background: entryName('background'), alignment: c.identity.alignment || null, gender: c.identity.gender || null, age: c.identity.age || null, languages: [], tool_proficiencies: [] },
     classes: active.filter(s => s.entry.kind === 'class').map((s, i) => ({ role: i === 0 ? '主职' : `兼职${i}`, name: s.entry.name, subclass: active.find(sc => belongsToClass(sc,s))?.entry.name || null, level: s.level })), total_level: d.level,
@@ -30,7 +31,7 @@ export function exportOwlbear(c: Character, d: Derived) {
     combat: { armor: null, shield: null, weapons: weaponAttacks(c,d).map(({key,entry,...attack})=>({...attack,web_action_key:key,...(entry?{source:entry.source,description:plainText(entry.entries)}:{})})) },
     features: { class_features: features(['feature', 'subclass']), race_features: features(['race']), feats: features(['feat']), fighting_style_feats: [], special_abilities: [] },
     inventory: { items: active.filter(s => s.entry.kind === 'item').map(s => ({ name: s.entry.name, quantity: s.quantity, equipped: s.equipped, attuned:!!s.attuned, weight: s.entry.raw.weight || 0, description: plainText(s.entry.entries) })), coins:inventoryState(c).coins, total_weight:carriedWeight(c).items+carriedWeight(c).coins, wondrous_items: [], consumables: [], containers: [] },
-    spellcasting: { spellcasting_ability: ability || null, save_dc: spellStats.dc, attack_bonus: spellStats.attack, spell_slots: Object.fromEntries(Object.entries(settings.slots).map(([level,slot])=>[level,{max:slot.max,current:slot.max-slot.used}])), cantrips_known: spells.filter(s => s.level === 0), prepared: spells.filter(s => s.level > 0 && settings.mode==='prepared'&&preparedIds.has(s.selectionId)), always_known: spells.filter(s=>s.level>0&&(settings.mode==='known'||!preparedIds.has(s.selectionId))) },
+    spellcasting: { spellcasting_ability: ability || null, save_dc: spellStats.dc, attack_bonus: spellStats.attack, spell_slots: Object.fromEntries(Object.entries(settings.slots).map(([level,slot])=>[level,{max:slot.max,current:slot.max-slot.used}])), cantrips_known: spells.filter(s => s.level === 0 && readyIds.has(s.selectionId)), prepared: spells.filter(s => s.level > 0 && settings.mode==='prepared'&&preparedIds.has(s.selectionId)), always_known: spells.filter(s=>s.level>0&&(settings.mode==='known'||!preparedIds.has(s.selectionId))) },
     background: { background_name: entryName('background'), appearance: c.identity.description, story: c.biography?.story??c.notes, description: plainText(active.find(s => s.entry.kind === 'background')?.entry.entries) },
     web_resources: c.runtime.resources,
     export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };

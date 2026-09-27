@@ -24,7 +24,7 @@ export interface Entry {
 }
 export interface Selection { id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
 export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check';castLevel?:number}}
-export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
+export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface Character {
   automation?:import('./automation/state').AutomationState;

@@ -42,12 +42,12 @@ describe('spell and Wiki feedback',()=>{
  });
  it('moves prepared spells to locked/limited sections, preserves expenditure on refresh and native import, and cleans removed references',()=>{
   const c=newCharacter(),spell=entry('每日星光');c.selections.push({id:'s',entry:spell,level:1,quantity:1,equipped:false});c.spellSettings={mode:'prepared',modeOverride:true,ability:'int',capacity:2,capacityAdjustment:2,attackBonus:0,dcBonus:0,prepared:['s'],slots:{}};
-  setSpecialSpell(c,'s',{mode:'uses',max:2,recovery:'long'});expect(c.spellSettings.prepared).toEqual(['']);expect(spellUsesPreparation(c,spell)).toBe(false);expect(setPreparedSpell(c,'s',true)).toBe(false);
+  setSpecialSpell(c,'s',{mode:'uses',max:2,recovery:'long'});expect(c.spellSettings.prepared).toEqual(['']);expect(spellUsesPreparation(c,spell,'s')).toBe(false);expect(setPreparedSpell(c,'s',true)).toBe(false);
   changeSpecialSpellUses(c,'s',1);syncAutoResources(c);const loaded=validateCharacter(JSON.parse(JSON.stringify(c)));expect(loaded.runtime.resources[specialSpellResource('s')].current).toBe(1);
   setSpecialSpell(loaded,'s',{mode:'uses',max:3});expect(loaded.runtime.resources[specialSpellResource('s')].current).toBe(2);
   removeSelection(loaded,'s');expect(loaded.spellSettings?.special).toEqual({});expect(loaded.runtime.resources[specialSpellResource('s')]).toBeUndefined();
-  setSpecialSpell(c,'s',{mode:'locked'});expect(c.runtime.resources[specialSpellResource('s')]).toBeUndefined();expect(spellUsesPreparation(c,spell)).toBe(false);
-  setSpecialSpell(c,'s');expect(spellUsesPreparation(c,spell)).toBe(true);expect(setPreparedSpell(c,'s',true)).toBe(true);
+  setSpecialSpell(c,'s',{mode:'locked'});expect(c.runtime.resources[specialSpellResource('s')]).toBeUndefined();expect(spellUsesPreparation(c,spell,'s')).toBe(false);
+  setSpecialSpell(c,'s');expect(spellUsesPreparation(c,spell,'s')).toBe(true);expect(setPreparedSpell(c,'s',true)).toBe(true);
   c.spellSettings.special={absent:{mode:'locked'}};expect(()=>validateCharacter(c)).toThrow('固定与次数');
  });
 });

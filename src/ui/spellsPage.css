@@ -38,3 +38,32 @@
 .source-spell-actions{display:grid;gap:3px;font-size:10px}.source-spell-actions select{width:100%;max-width:100%;font:inherit}.source-spell-actions>div{display:flex;gap:4px}.source-spell-actions button{padding:2px 4px}.source-spell-actions [role=status]{overflow-wrap:anywhere}
 
 .special-spells-cell.has-source-spells{height:270px;max-height:300px}
+
+/* One prepared area: separate quotas, compact source grants, no third panel. */
+.paper .spell-stock-cell.unified-prepared{height:auto;min-height:220px;flex:1.2}
+.paper .spell-stock-cell.unified-prepared.only-prepared{flex:1}
+.paper .spell-library.spell-stock-cell{min-height:130px;flex:1}
+.prepared-spell-groups{display:flex;flex-direction:column;gap:7px}
+.prepared-spell-group{min-width:0}.prepared-spell-group>h4{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:11px;line-height:17px;margin:0;padding:1px 4px;border-bottom:1px solid #999;background:#5551}
+.prepared-spell-group>h4 small{font-size:9px;font-weight:400;white-space:nowrap}
+.spell-group-hint{font-size:10px;line-height:1.4;margin:3px 4px;color:var(--paper-ink,#555);opacity:.8}
+.spell-source-notices{font-size:11px;line-height:1.5;padding:3px 5px;border-left:2px solid #8b6b40}.spell-source-notices ul{margin:4px 0;padding-left:16px}.spell-source-notices p{margin:3px 0}
+.spell-grants-grid.spell-stock-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.paper .spell-grant-tile.source-spell-row{border:1px solid var(--paper-frame,#555);padding:0;min-width:0;background:#7771}
+.spell-grant-tile .spell-tile-frame{display:none}
+.paper .spell-grant-tile>.spell-stock-tile.stock-item{height:27px;min-height:27px;clip-path:none;background:transparent}
+.spell-use-badge{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:21px;border:0;border-top:1px solid #8885;background:#8881;color:inherit;padding:2px 5px;font:inherit;font-size:9px;line-height:15px;text-align:left;white-space:normal}
+.spell-use-badge:hover{background:#8883}.spell-grant-tile[data-restricted=true]{opacity:.65}
+.spell-stock-cell .spell-choice.is-prepared{height:40px;min-height:40px;grid-template-rows:24px 13px;background:#7a8c801a}
+.spell-choice.is-prepared .stock-name{line-height:24px}.spell-ready-mark{grid-column:1/-1;font-size:9px;line-height:12px;color:var(--paper-ink,#444);opacity:.8}
+.spell-ready-mark:before{content:'✓ ';font-weight:bold}.spell-stock-tile[data-restricted=true]{opacity:.6}
+.paper .spell-library .spell-stock-tile.stock-item{height:40px;min-height:40px;grid-template-rows:24px 13px}.paper .spell-library .spell-stock-tile .stock-name{line-height:24px}
+.spell-detail-shade{position:fixed;inset:0;z-index:2147482650;background:#0005;display:grid;place-items:center;padding:16px}
+.spell-detail-dialog{width:min(380px,calc(100vw - 32px));max-height:80dvh;overflow:auto;background:#eee;color:#333;border:3px solid #555;padding:14px;font-size:13px;box-shadow:0 8px 30px #0004}
+.spell-detail-dialog header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #999;padding-bottom:7px;margin-bottom:8px}.spell-detail-dialog p{margin:7px 0;line-height:1.5}.spell-detail-dialog .source-spell-actions{font-size:13px;margin-top:12px;gap:8px}.spell-detail-dialog button,.spell-detail-dialog select{font-size:12px;padding:5px 8px}.spell-detail-dialog .special-spell-uses{font-size:12px}.spell-detail-dialog .manual-spell-actions{display:flex;gap:6px;margin-top:10px}
+.sheet-reflow .paper:not(.sheet-export) .unified-prepared{min-height:220px;flex:none;height:auto;max-height:none}
+.sheet-reflow .paper:not(.sheet-export) .unified-prepared .cell-content{max-height:none;overflow:visible}
+.sheet-reflow .paper:not(.sheet-export) .unified-prepared .spell-stock-grid,.sheet-reflow .paper:not(.sheet-export) .spell-library .spell-stock-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sheet-reflow .paper:not(.sheet-export) .spell-grants-grid.spell-stock-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sheet-reflow .paper:not(.sheet-export) .spell-grant-tile>.spell-stock-tile.stock-item{height:36px;min-height:36px;grid-template-rows:1fr}.sheet-reflow .spell-grant-tile .stock-name{line-height:36px}.sheet-reflow .spell-use-badge{font-size:11px;min-height:27px}
+@media print{.spell-detail-shade{display:none}}

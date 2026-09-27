@@ -9,9 +9,9 @@ it('drag preparation is idempotent, swaps occupied slots, and leaves learned ide
  c.spellSettings={...spellState(c),mode:'prepared',capacity:2};delete c.spellSettings.capacityAdjustment;
  expect(setPreparedSpell(c,'a',true,1)).toBe(true);expect(c.spellSettings.prepared).toEqual(['','a']);
  expect(setPreparedSpell(c,'a',true)).toBe(false);
- expect(setPreparedSpell(c,'b',true,0)).toBe(true);expect(setPreparedSpell(c,'c',true,0)).toBe(false);
- expect(setPreparedSpell(c,'a',true,0)).toBe(true);expect(c.spellSettings.prepared).toEqual(['a','b']);
+ expect(setPreparedSpell(c,'b',true,0)).toBe(true);expect(setPreparedSpell(c,'c',true,0)).toBe(true);
+ expect(setPreparedSpell(c,'a',true,0)).toBe(true);expect(c.spellSettings.prepared).toEqual(['a','c']);
  expect(setPreparedSpell(c,'a',false)).toBe(true);expect(setPreparedSpell(c,'a',false)).toBe(false);
- expect(c.spellSettings.prepared).toEqual(['','b']);expect(c.selections.map(s=>s.id)).toEqual(['a','b','c']);
+ expect(c.spellSettings.prepared).toEqual(['','c']);expect(c.selections.map(s=>s.id)).toEqual(['a','b','c']);
  c.spellSettings.mode='known';expect(setPreparedSpell(c,'a',true)).toBe(false);
 });

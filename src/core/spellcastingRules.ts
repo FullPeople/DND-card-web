@@ -43,12 +43,17 @@ export function spellOnClassList(entry:Entry,profile:CasterProfile):boolean{
 
 /** Full-list access is a read-only projection. Only an actually prepared spell is stored on the card. */
 export function availableClassSpells(c:Character,entries:Entry[]):Entry[]{
- const profiles=casterProfiles(c).filter(p=>p.mode==='prepared'&&p.pool==='list');
- return entries.filter(e=>e.kind==='spell'&&Number(e.raw.level)>0&&selectionAllowed(c,e)&&profiles.some(p=>Number(e.raw.level)<=p.maxLevel&&spellOnClassList(e,p)));
+ const profiles=casterProfiles(c);
+ return entries.filter(e=>e.kind==='spell'&&selectionAllowed(c,e)&&profiles.some(p=>spellOnClassList(e,p)&&(Number(e.raw.level)===0?fullCantripList(p):Number(e.raw.level)>0&&p.mode==='prepared'&&p.pool==='list'&&Number(e.raw.level)<=p.maxLevel)));
 }
 
+/** Capabilities come from the source's casting model, never its translated name. */
+export const cantripCapacity=(p:CasterProfile):number=>Math.max(0,Math.min(100,Number(p.casting.entry.raw.cantripProgression?.[p.owner.level-1]??p.owner.entry.raw.cantripProgression?.[p.owner.level-1])||0));
+export const fullCantripList=(p:CasterProfile):boolean=>cantripCapacity(p)>0&&(p.pool==='book'||p.casting.entry.raw.casterProgression==='artificer'||p.casting.entry.raw.cantripChange==='restLong');
+export const hasKnownLibrary=(p:CasterProfile):boolean=>p.pool==='book'||p.mode==='prepared'&&cantripCapacity(p)>0;
+
 export function spellUsesPreparation(c:Character,entry:Entry,selectionId?:string):boolean{
- if(selectionId?!!c.spellSettings?.special?.[selectionId]:c.selections.some(s=>s.entry.id===entry.id&&c.spellSettings?.special?.[s.id]&&!c.spellSettings.special[s.id].sourceGrant))return false;
+ if(selectionId&&c.spellSettings?.special?.[selectionId])return false;
  if(!(Number(entry.raw.level)>0))return false;
  if(c.spellSettings?.modeOverride)return c.spellSettings.mode==='prepared';
  const profiles=casterProfiles(c),matching=profiles.filter(p=>spellOnClassList(entry,p));
