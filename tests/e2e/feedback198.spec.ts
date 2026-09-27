@@ -24,7 +24,7 @@ test('edit rejection appears at top and explicitly enables edit mode with a layo
 });
 test('release notes contain only the selected channel and preserve relevant shared changes',async({page,baseURL})=>{
  expect(RELEASE_NOTES.join('')).not.toMatch(/枭熊|Owner|光源|三龙|旧插件|地图血条/);expect(SUITE_RELEASE_NOTES.join('')).not.toContain('旧插件改用');
- await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=198-notice&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.announcement-issues li')).toHaveCount(SUITE_RELEASE_NOTES.length);await expect(page.locator('.announcement-issues')).toContainText('修复了怪物图鉴加载出错的问题');await expect(page.locator('.announcement-issues')).not.toContainText('旧插件公告');
+ await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=198-notice&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.announcement-current li')).toHaveCount(SUITE_RELEASE_NOTES.length);await expect(page.locator('.announcement-issues')).toContainText('修复了怪物图鉴加载出错的问题');await expect(page.locator('.announcement-issues')).not.toContainText('旧插件公告');
 });
 
 test('monster permissions and HP visibility locks explain and send separate actions',async({page,baseURL})=>{

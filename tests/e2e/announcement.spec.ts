@@ -21,12 +21,14 @@ async function settle(page:Page,scroller:Locator){let last=-1;for(let i=0;i<25;i
 test('首次打开单机站弹出公告，版本、问题清单与默认展开的 Q&A 完整',async({page})=>{
  await open(page);
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
- await expect(dialog(page)).toContainText(`${RELEASE_DATE} · 更新与修复`);
- await expect(dialog(page).locator('.announcement-issues li')).toHaveCount(RELEASE_NOTES.length);
+ await expect(dialog(page).locator('.announcement-current>h3')).toHaveText(`${RELEASE_DATE}-二`);
+ await expect(dialog(page).locator('.announcement-current li')).toHaveCount(RELEASE_NOTES.length);
+ const history=dialog(page).locator('.announcement-history');await expect(history.locator('summary')).toHaveText(`${RELEASE_DATE}-一`);expect(await history.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);
+ await expect(history.locator('li').first()).toBeHidden();await history.locator('summary').click();await expect(history.locator('li').first()).toBeVisible();await history.locator('summary').click();
  await expect(dialog(page).locator('.announcement-issues')).toContainText('导出指定角色或多卡备份');
  await expect(dialog(page).locator('.announcement-issues')).not.toContainText('枭熊');await expect(dialog(page).locator('.announcement-issues')).not.toContainText('三龙');
- await expect(dialog(page).locator('.announcement-section h4')).toHaveText(RELEASE_SECTIONS.map(section=>section.title));
- await expect(dialog(page).locator('.announcement-issues hr')).toHaveCount(RELEASE_SECTIONS.length-1);
+ await expect(dialog(page).locator('.announcement-current .announcement-section h4')).toHaveText(RELEASE_SECTIONS.map(section=>section.title));
+ await expect(dialog(page).locator('.announcement-current hr')).toHaveCount(RELEASE_SECTIONS.length-1);
  await expect(dialog(page).locator('.announcement-issues')).not.toContainText('怪物编辑');
  const faq=dialog(page).locator('.announcement-faq').first();
  await expect(faq.locator('details')).toHaveCount(4);

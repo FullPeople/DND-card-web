@@ -31,4 +31,5 @@
 }
 .announcement-owner{border-bottom:1px solid #bbb;padding-bottom:16px;margin-bottom:16px}.announcement-owner img{display:block;max-width:100%;height:auto;margin:10px 0}.announcement-owner li{margin:12px 0}
 .announcement-owner>summary{color:#ae2727;font-weight:700;cursor:pointer}
+.announcement-history{margin:18px 0;padding-top:12px;border-top:1px solid #d8ddcd}.announcement-history>summary{font-size:13px;font-weight:600;color:#4e5a3e;cursor:pointer}
 .spell-learners{margin-top:18px;padding-top:12px;border-top:1px solid #aaa}

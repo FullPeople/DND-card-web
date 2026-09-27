@@ -68,8 +68,8 @@ const SHARED_SECTIONS:ReleaseSection[]=[
 const withJsonNote=(note:string):ReleaseSection[]=>SHARED_SECTIONS.map(section=>
  section.title==='角色管理与导入导出'?{...section,items:[...section.items,note]}:section);
 
-export const RELEASE_SECTIONS=withJsonNote('统一了角色 JSON 备份格式。');
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+export const ARCHIVED_RELEASE_SECTIONS=withJsonNote('统一了角色 JSON 备份格式。');
+export const SUITE_ARCHIVED_RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'本次修复：权限与同步',items:[
   'DM 现在可以在角色卡上点击“分配玩家”，授予和撤回编辑权限。',
   '编辑权限变化后会直接更新开关，不用重新导入角色卡。',
@@ -115,6 +115,19 @@ export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
 ]
 ];
 
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色卡与导入导出',items:['修复了角色 JSON 转换时遗漏已填写武器攻击的问题。','武器命中和伤害公式现在会保留；玩家具体文件待验证。']},
+ {title:'更新公告',items:['旧公告现在按日期折叠，同日更新按批次编号。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ ...RELEASE_SECTIONS,
+ {title:'三龙牌',items:['服务器牌桌的房主离开后，现在会自动交接给在线玩家。','短暂刷新和关闭重复窗口不会立即交接；真实多人房间待验证。','修复了自选特殊牌列表无法向下滚动的问题；实体手机待验证。']},
+ {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
+];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
+export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE+'-二',sections:releaseSectionsFor(mode)},
+ {title:RELEASE_DATE+'-一',sections:mode==='suite'?SUITE_ARCHIVED_RELEASE_SECTIONS:ARCHIVED_RELEASE_SECTIONS},
+];
