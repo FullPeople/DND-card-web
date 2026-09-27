@@ -5,7 +5,7 @@ import {TransferPanel} from './TransferPanel';
 import {CharacterReview} from './CharacterReview';
 import {readCharacterTransfer,deleteLocalCharacters} from '../core/transfers';
 import {matchesEntrySearch} from '../core/search';
-import {announcementPending,readAnnouncementVersion} from '../platform/announcement';
+import {announcementVersionFor,announcementPending,readAnnouncementVersion} from '../platform/announcement';
 import {SpellAbilityEditor} from './SpellAbilityEditor';
 import {ownsSubclassFeature} from '../core/entryReferences';
 import {reviewImport} from '../core/importReview';
@@ -193,7 +193,7 @@ export default function App() {
   const setEditionFilter = (edition: string) => library.patch({ edition });
   const detailPane = useRef<HTMLElement>(null);
   const previewCommit=useRef<{id:string;top:number}|undefined>(undefined);
-  const [announcement,setAnnouncement]=useState(()=>(standalone||inWorkbench)&&announcementPending(readAnnouncementVersion(inWorkbench?'suite':'standalone')));
+  const [announcement,setAnnouncement]=useState(()=>(standalone||inWorkbench)&&announcementPending(readAnnouncementVersion(inWorkbench?'suite':'standalone'),announcementVersionFor(inWorkbench?'suite':'standalone')));
   const [modal, setModal] = useState('');
   const [pendingImport,setPendingImport]=useState<{card:Character;review:ReturnType<typeof reviewImport>}>();
   const [pendingBatch,setPendingBatch]=useState<{card:Character;review:ReturnType<typeof reviewImport>}[]>([]);

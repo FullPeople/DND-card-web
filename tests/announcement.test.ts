@@ -1,5 +1,5 @@
 import {describe,expect,it,vi} from 'vitest';
-import {ANNOUNCEMENT_KEY,APP_VERSION,announcementPending,forgetAnnouncementVersion,readAnnouncementVersion,rememberAnnouncementVersion} from '../src/platform/announcement';
+import {ANNOUNCEMENT_KEY,APP_VERSION,announcementVersionFor,announcementPending,forgetAnnouncementVersion,readAnnouncementVersion,rememberAnnouncementVersion} from '../src/platform/announcement';
 
 class MemoryStorage{
   private data=new Map<string,string>();
@@ -20,6 +20,16 @@ describe('单机站公告的显示规则',()=>{
 });
 
 describe('公告确认记录的读写',()=>{
+  it('枭熊更新只重新提示枭熊公告，保留单机确认记录',()=>{
+    vi.stubGlobal('localStorage',new MemoryStorage());
+    rememberAnnouncementVersion(APP_VERSION,'standalone');
+    rememberAnnouncementVersion(APP_VERSION,'suite');
+    expect(announcementPending(readAnnouncementVersion('suite'),announcementVersionFor('suite'))).toBe(true);
+    rememberAnnouncementVersion(announcementVersionFor('suite'),'suite');
+    expect(announcementPending(readAnnouncementVersion('suite'),announcementVersionFor('suite'))).toBe(false);
+    expect(announcementPending(readAnnouncementVersion('standalone'),announcementVersionFor('standalone'))).toBe(false);
+    vi.unstubAllGlobals();
+  });
   it('勾选后记住当前版本，取消勾选后清除',()=>{
     vi.stubGlobal('localStorage',new MemoryStorage());
     expect(readAnnouncementVersion()).toBe('');
