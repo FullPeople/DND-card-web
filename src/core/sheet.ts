@@ -1,3 +1,4 @@
+import {specialSpellResource} from './spellResourceKeys';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import { requirementMismatch } from './engine';
 import { uid, type Character, type Entry, type Selection } from './model';
@@ -17,10 +18,12 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
     for (const s of c.selections) if (!removed.has(s.id) && (s.parentId && removed.has(s.parentId) || s.requirementId && [...removed].some(key => s.requirementId!.startsWith(`${key}:`)) || [...removed].some(key => { const parent = c.selections.find(p => p.id === key); return parent && belongsToClass(s, parent); }))) { removed.add(s.id); changed = true; }
   }
   rememberSourceSpellUses(c);
+  const spellCounters=[...removed].map(id=>specialSpellResource(id,c));
   c.selections = c.selections.filter(s => !removed.has(s.id));
   c.quickbar = c.quickbar?.filter(key => !removed.has(key));
   if(c.spellSettings)c.spellSettings.prepared=c.spellSettings.prepared.map(key=>removed.has(key)?'':key);
-  for(const key of removed){if(c.spellSettings?.special)delete c.spellSettings.special[key];delete c.runtime.resources[`innate-spell:${key}`];}
+  for(const key of removed)if(c.spellSettings?.special)delete c.spellSettings.special[key];
+  for(const key of spellCounters)if(!Object.keys(c.spellSettings?.special||{}).some(id=>specialSpellResource(id,c)===key))delete c.runtime.resources[key];
   if(c.inventory)c.inventory.order=c.inventory.order.filter(key=>!removed.has(key));
   if(c.backgroundChoices)for(const key of removed)delete c.backgroundChoices[key];
   if (c.featureLayout) { c.featureLayout.order = c.featureLayout.order.filter(key => !removed.has(key)); c.featureLayout.expanded = c.featureLayout.expanded.filter(key => !removed.has(key)); c.featureLayout.detailsExpanded=c.featureLayout.detailsExpanded?.filter(key=>!removed.has(key)); }

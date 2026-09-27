@@ -76,3 +76,33 @@ test('source spells stay fixed, use their own casting ability and keep spent cha
  await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'启用自动计算'}).check();await page.keyboard.press('Escape');await expect(race.getByRole('spinbutton',{name:'验收护幕剩余次数'})).toHaveValue('1');
  const w=await readWorkspace(page),saved=w.characters.find((x:any)=>x.id===w.activeId);expect(saved.selections.filter((s:any)=>s.entry.kind==='spell')).toHaveLength(3);expect(saved.selections.some((s:any)=>s.id==='own-spell'&&!s.parentId)).toBe(true);
 });
+
+async function importSharedSpells(page:Page){
+ const c=manual();c.name='共享施法验收';c.automation=newAutomationState();const base=c.selections[0].entry;
+ const first={...base,id:'fixture:shared-a',kind:'spell' as const,name:'共享甲',english:'Shared A',raw:{level:1,school:'A'}},second={...first,id:'fixture:shared-b',name:'共享乙',english:'Shared B',raw:{level:2,school:'A'}};
+ c.selections=[{id:'manual-a',entry:first,quantity:1,level:1,equipped:false},{id:'manual-b',entry:second,quantity:1,level:1,equipped:false},{id:'shared-owner',entry:{...base,id:'fixture:shared-source',kind:'race',name:'共用来源',raw:{additionalSpells:[{ability:'cha',prepared:{'_':{daily:{'2':['Shared A|XPHB','Shared B|XPHB']}}}}]}},quantity:1,level:1,equipped:false}];
+ c.runtime.resources['spell-slot:1']={current:2,max:2};c.runtime.resources['spell-slot:3']={current:1,max:2};
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'shared-spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await page.keyboard.press('Escape');await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('combobox',{name:'共用来源的次数归属：Shared A、Shared B'}).selectOption('shared');await page.keyboard.press('Escape');await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(page.locator('.source-spell-row')).toHaveCount(2);await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ return {first:page.locator('.source-spell-row').filter({hasText:'共享甲'}),second:page.locator('.source-spell-row').filter({hasText:'共享乙'})};
+}
+
+test('shared spells choose charges or an explicit upcast slot, and undo redo reload preserve one atomic action',async({page})=>{
+ await ready(page);const {first,second}=await importSharedSpells(page);
+ await first.getByRole('button',{name:'使用',exact:true}).click();await expect(second.getByRole('spinbutton',{name:'共享乙剩余次数'})).toHaveValue('1');
+ await second.getByRole('button',{name:'使用',exact:true}).click();await expect(first.getByRole('spinbutton',{name:'共享甲剩余次数'})).toHaveValue('0');await expect(first.getByRole('button',{name:'使用',exact:true})).toBeDisabled();
+ await first.getByRole('combobox',{name:'共享甲施法消耗'}).selectOption('slot:spell-slot:3');await first.getByRole('button',{name:'使用',exact:true}).click();await expect(first.getByRole('status')).toContainText('3 环施法');
+ const slot=async()=>{const w=await readWorkspace(page);return w.characters.find((c:any)=>c.id===w.activeId).runtime.resources['spell-slot:3'].current;};await expect.poll(slot).toBe(0);
+ await page.getByRole('button',{name:'撤销',exact:true}).click();await expect.poll(slot).toBe(1);await expect(first.getByRole('spinbutton',{name:'共享甲剩余次数'})).toHaveValue('0');
+ await page.getByRole('button',{name:'重做',exact:true}).click();await expect.poll(slot).toBe(0);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(second.getByRole('spinbutton',{name:'共享乙剩余次数'})).toHaveValue('0');
+ await second.getByRole('button',{name:'恢复共用次数'}).click();await expect(first.getByRole('spinbutton',{name:'共享甲剩余次数'})).toHaveValue('2');await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ const w=await readWorkspace(page),saved=w.characters.find((c:any)=>c.id===w.activeId);expect(saved.runtime.automationActions.sequence).toBe(4);expect(saved.runtime.automationActions.last.mode).toBe('restore');expect(saved.runtime.resources['spell-slot:1'].current).toBe(2);expect(saved.runtime.resources['spell-slot:3'].current).toBe(0);expect(saved.runtime.resources.fixture.current).toBe(1);await expect(first.locator('.stock-name')).toBeInViewport({ratio:1});await expect(second.locator('.stock-name')).toBeInViewport({ratio:1});await page.screenshot({path:test.info().outputPath('shared-spell-actions.png')});
+});
+
+test('a failed spell-action save retains the prior counter and receipt on disk, then saves both intended casts together',async({page})=>{
+ await ready(page);const {first,second}=await importSharedSpells(page);const before=await readWorkspace(page);
+ await page.evaluate(()=>{const original=IDBObjectStore.prototype.put;(window as any).rejectSpellSave=true;IDBObjectStore.prototype.put=function(...args:any[]){if((window as any).rejectSpellSave&&this.name==='documents'&&args[1]==='workspace')throw new DOMException('injected spell storage failure','QuotaExceededError');return original.apply(this,args as any);};});
+ await first.getByRole('button',{name:'使用',exact:true}).click();await expect(first.getByRole('spinbutton',{name:'共享甲剩余次数'})).toHaveValue('1');await expect(page.locator('.save-status')).toContainText('保存失败');expect(await readWorkspace(page)).toEqual(before);
+ await page.evaluate(()=>{(window as any).rejectSpellSave=false;});await second.getByRole('button',{name:'使用',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ const w=await readWorkspace(page),saved=w.characters.find((c:any)=>c.id===w.activeId);expect(saved.runtime.automationActions.sequence).toBe(2);const pools=Object.entries(saved.runtime.resources).filter(([id])=>id.startsWith('source-spell-pool:'));expect(pools).toHaveLength(1);expect((pools[0][1] as any).current).toBe(0);expect(saved.runtime.resources['spell-slot:1'].current).toBe(2);
+ await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(first.getByRole('spinbutton',{name:'共享甲剩余次数'})).toHaveValue('0');await expect(second.getByRole('spinbutton',{name:'共享乙剩余次数'})).toHaveValue('0');
+});

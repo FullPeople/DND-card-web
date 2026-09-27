@@ -6,9 +6,11 @@ import {evaluate} from '../src/core/engine';
 import {newAutomationState} from '../src/core/automation/state';
 import {automaticWeaponAttacks} from '../src/core/automation/weapons';
 import {planSourceSpells,syncSourceSpells} from '../src/core/automation/sourceSpells';
+import {specialSpellResource,changeSpecialSpellUses} from '../src/core/specialSpells';
 
 // Run against a separately held source snapshot; publisher data is never copied into the repository.
 const path=process.env.DND_AUTOMATION_BASEITEMS;
+const directory=process.env.DND_AUTOMATION_CORE_DATA;
 it.skipIf(!path)('real base equipment in both editions follows the independently known armor and thrown-weapon examples',()=>{
  const raw=JSON.parse(readFileSync(path!,'utf8').replace(/^\uFEFF/,''));
  const entries=normalizeData(raw,'external-corpus');
@@ -24,7 +26,18 @@ it.skipIf(!path)('real base equipment in both editions follows the independently
  }
 });
 
-const directory=process.env.DND_AUTOMATION_CORE_DATA;
+const featsFile=process.env.DND_AUTOMATION_FEATS;
+it.skipIf(!directory||!featsFile)('real multi-spell daily data requires clarification instead of mistaking per-spell grants for a shared pool',()=>{
+ const feats=normalizeData(JSON.parse(readFileSync(featsFile!,'utf8').replace(/^\uFEFF/,'')),'external-corpus');
+ const catalog=normalizeData(JSON.parse(readFileSync(`${directory}/data_spells_spells-xphb.json`,'utf8').replace(/^\uFEFF/,'')),'external-corpus');
+ // This real snapshot's prose says each spell has a use, while its key omits "e".
+ const feat=feats.find(e=>e.english==='Mark of Handling'&&e.raw.additionalSpells?.[0]?.prepared?._?.daily?.['1']?.length===2)!;expect(feat).toBeDefined();
+ const c=newCharacter();c.automation=newAutomationState();c.profile.enabledSources.push(feat.source);c.selections=[{id:'feat',entry:feat,level:1,quantity:1,equipped:false}];
+ const plan=planSourceSpells(c,catalog),choice=plan.choices.find(c=>c.usageModes);expect(choice).toBeDefined();syncSourceSpells(c,catalog);expect(c.selections.filter(s=>s.entry.kind==='spell')).toHaveLength(0);
+ c.automation.spellUsageModes={[choice!.key]:'each'};syncSourceSpells(c,catalog);const granted=c.selections.filter(s=>s.entry.kind==='spell');expect(granted).toHaveLength(2);
+ const keys=granted.map(s=>specialSpellResource(s.id,c));expect(new Set(keys).size).toBe(2);changeSpecialSpellUses(c,granted[0].id,0);expect(keys.map(k=>c.runtime.resources[k].current)).toEqual([0,1]);expect(c.spellSettings!.special![granted[0].id].recovery).toBe('long');
+});
+
 it.skipIf(!directory)('real 2014 and 2024 domain spell grants resolve translated UIDs to their own edition and remain source owned',()=>{
  const load=(name:string)=>normalizeData(JSON.parse(readFileSync(`${directory}/${name}`,'utf8').replace(/^\uFEFF/,'')),'external-corpus');
  const classes=load('data_class_class-cleric.json'),catalog=[...load('data_spells_spells-phb.json'),...load('data_spells_spells-xphb.json')];

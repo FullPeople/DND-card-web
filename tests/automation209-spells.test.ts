@@ -57,9 +57,9 @@ describe('source-owned fixed spell grants',()=>{
   c.automation!.spellSets={'来源':0};c.automation!.spellAbilities={'来源:0':'cha'};syncSourceSpells(c,spells);expect(c.spellSettings!.special![grant(c).id].sourceGrant!.ability).toBe('cha');changeSpecialSpellUses(c,grant(c).id,0);
   c.automation!.spellSets['来源']=1;syncSourceSpells(c,spells);c.automation!.spellSets['来源']=0;syncSourceSpells(c,spells);expect(resource(c).current).toBe(0);
  });
- it('reports choices, expanded access and unsupported shared usage instead of granting all',()=>{
+ it('reports unresolved choices and expanded access while allowing declared shared spells',()=>{
   const c=setup();source(c,{additionalSpells:[{known:{'_':[{choose:'level=0'}]},expanded:{s1:['测试盾|XPHB']},innate:{'_':{daily:{'1':['测试盾|XPHB','测试门|XPHB']}}}}]});
-  expect(planSourceSpells(c,spells).issues).toHaveLength(3);syncSourceSpells(c,spells);expect(grant(c)).toBeUndefined();
+  const plan=planSourceSpells(c,spells);expect(plan.issues).toHaveLength(3);syncSourceSpells(c,spells);expect(grant(c)).toBeUndefined();c.automation!.spellUsageModes={[plan.choices.find(choice=>choice.usageModes)!.key]:'shared'};syncSourceSpells(c,spells);expect(c.selections.filter(s=>s.entry.kind==='spell')).toHaveLength(2);expect(Object.keys(c.runtime.resources)).toHaveLength(1);
  });
  it('distinguishes per-spell uses and refuses malformed imported source metadata',()=>{
   const c=setup();source(c,{additionalSpells:[{prepared:{'_':{daily:{'1e':['测试盾|XPHB','测试门|XPHB']}}}}]});syncSourceSpells(c,spells);expect(Object.keys(c.runtime.resources)).toHaveLength(2);changeSpecialSpellUses(c,grant(c).id,0);expect(Object.values(c.runtime.resources).map(r=>r.current).sort()).toEqual([0,1]);

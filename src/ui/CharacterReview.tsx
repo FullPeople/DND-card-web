@@ -1,3 +1,4 @@
+import {specialSpellResource} from '../core/spellResourceKeys';
 import {useMemo,useState} from 'react';
 import {characterReview} from '../core/characterReview';
 import {plainText} from '../core/export';
@@ -31,7 +32,7 @@ export function CharacterReview({c,inspect,exportHtml,ruleContext}:{c:Character;
   </>}
   {section==='法术与资源'&&<>
    <dl className="review-facts">{fact('施法属性',ABILITY_LABELS[spells.ability])}{fact('法术攻击',signed(stats.attack))}{fact('豁免 DC',stats.dc)}{fact('施法制度',spells.mode==='prepared'?'预备法术':'已知法术')}{fact('预备容量',spells.capacity)}{fact('法术数',spellRows.length)}</dl>
-   <table><thead><tr><th>法术</th><th>环阶</th><th>记录</th><th>来源</th></tr></thead><tbody>{[...spellRows].sort((a,b)=>Number(a.entry.raw.level||0)-Number(b.entry.raw.level||0)).map(s=><tr key={s.id} className={!review.allowed(s)?'review-restricted':''}><th>{name(s.entry)}</th><td>{Number(s.entry.raw.level||0)||'戏法'}</td><td>{!review.allowed(s)?'受限':spells.special?.[s.id]?.mode==='locked'?'固定法术':spells.special?.[s.id]?.mode==='uses'?`次数法术 · ${c.runtime.resources[`innate-spell:${s.id}`]?.current??0}/${spells.special[s.id].max||1}`:spells.prepared.includes(s.id)?'已预备':Number(s.entry.raw.level)===0?'戏法':spells.mode==='known'?'已知':'法术库'}</td><td>{format(s.entry.source)}</td></tr>)}</tbody></table>
+   <table><thead><tr><th>法术</th><th>环阶</th><th>记录</th><th>来源</th></tr></thead><tbody>{[...spellRows].sort((a,b)=>Number(a.entry.raw.level||0)-Number(b.entry.raw.level||0)).map(s=><tr key={s.id} className={!review.allowed(s)?'review-restricted':''}><th>{name(s.entry)}</th><td>{Number(s.entry.raw.level||0)||'戏法'}</td><td>{!review.allowed(s)?'受限':spells.special?.[s.id]?.mode==='locked'?'固定法术':spells.special?.[s.id]?.mode==='uses'?`次数法术 · ${c.runtime.resources[specialSpellResource(s.id,c)]?.current??0}/${spells.special[s.id].max||1}`:spells.prepared.includes(s.id)?'已预备':Number(s.entry.raw.level)===0?'戏法':spells.mode==='known'?'已知':'法术库'}</td><td>{format(s.entry.source)}</td></tr>)}</tbody></table>
    <h4>法术位与资源</h4><table><thead><tr><th>资源</th><th>剩余</th><th>上限</th></tr></thead><tbody>{Object.entries(spells.slots).filter(([,v])=>v.max>0).map(([level,v])=><tr key={`slot:${level}`}><th>{level} 环法术位</th><td>{v.max-v.used}</td><td>{v.max}</td></tr>)}{Object.entries(c.runtime.resources).map(([id,v])=><tr key={id}><th>{v.name||id}</th><td>{v.unlimited?'不限':v.current}</td><td>{v.unlimited?'不限':v.max}</td></tr>)}</tbody></table>
   </>}
   {section==='装备与负重'&&<>

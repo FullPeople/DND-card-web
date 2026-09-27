@@ -9,7 +9,7 @@
 .compact-layout .pane-toolbar .character-tabs button{max-width:220px;padding:1px 8px;font-size:12px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .compact-layout .toolbar-actions{flex:none;gap:3px}
 .compact-layout .toolbar-actions button{height:24px;padding:1px 5px;font-size:20px}
-.compact-layout .toolbar-actions .adjust-shortcut{font-size:11px}
+.compact-layout .toolbar-actions .adjust-shortcut,.compact-layout .toolbar-actions .automation-toggle{font-size:11px}
 .compact-layout .toolbar-actions .edit-mode-toggle{font-size:11px;display:inline-flex;gap:4px;align-items:center;line-height:1;flex-shrink:0;letter-spacing:0}
 .compact-layout .toolbar-actions>button:not([aria-label]):not(.edit-mode-toggle){font-size:11px}
 .compact-layout .paper-size{font-size:10px;white-space:nowrap}

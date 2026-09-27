@@ -34,3 +34,7 @@
 .source-spell-row{border:3px double var(--frame,#555);padding:6px;position:relative}.source-spell-row .spell-tile-frame path{stroke-width:1.75}.source-spell-origin{display:block;line-height:1.5;overflow-wrap:anywhere}.source-spell-row[data-restricted="true"]{opacity:.65}
 
 .toolbar-actions .automation-toggle{font-size:11px;padding:3px 6px;white-space:nowrap}
+
+.source-spell-actions{display:grid;gap:3px;font-size:10px}.source-spell-actions select{width:100%;max-width:100%;font:inherit}.source-spell-actions>div{display:flex;gap:4px}.source-spell-actions button{padding:2px 4px}.source-spell-actions [role=status]{overflow-wrap:anywhere}
+
+.special-spells-cell.has-source-spells{height:270px;max-height:300px}

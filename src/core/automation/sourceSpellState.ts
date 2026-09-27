@@ -1,3 +1,4 @@
+import {specialSpellResource} from '../spellResourceKeys';
 import {selectionAllowed,type Character,type Selection} from '../model';
 import {automationEnabled} from './state';
 
@@ -22,7 +23,13 @@ export function sourceOwnerIdentity(c:Character,row:Selection):string{
 export function rememberSourceSpellUses(c:Character,id?:string){
  for(const [selectionId,config] of Object.entries(c.spellSettings?.special||{})){
   if(id&&selectionId!==id||!config.sourceGrant?.usageKey||config.mode!=='uses')continue;
-  const r=c.runtime.resources[`innate-spell:${selectionId}`];if(!r)continue;
+  const r=c.runtime.resources[specialSpellResource(selectionId,c)];if(!r)continue;
   (c.runtime.sourceSpellSpent||={})[config.sourceGrant.usageKey]=Math.max(0,r.max-r.current);
  }
+}
+
+/** A shared counter remains visible while any of its owning grants is usable. */
+export function sourceSpellResourceEnabled(c:Character,key:string):boolean{
+ if(key.startsWith('source-spell-pool:'))return Object.keys(c.spellSettings?.special||{}).some(id=>specialSpellResource(id,c)===key&&sourceSpellEnabled(c,id));
+ return !key.startsWith('innate-spell:')||specialSpellResource(key.slice(13),c)===key&&sourceSpellEnabled(c,key.slice(13));
 }

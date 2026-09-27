@@ -1,4 +1,4 @@
-import {sourceSpellEnabled} from '../core/automation/sourceSpellState';
+import {sourceSpellResourceEnabled} from '../core/automation/sourceSpellState';
 import {standalone} from '../platform/buildMode';
 import {quickbarEntries,removePin} from '../core/quickbar';
 import './refinement183.css';
@@ -20,7 +20,7 @@ export function Quickbar({c,d,edit,inspect,manage,manageQuickbar}:{c:Character;d
  const root=useRef<HTMLDivElement>(null),cancel=useRef<(()=>void)|undefined>(undefined),[over,setOver]=useState('');useEffect(()=>()=>cancel.current?.(),[]);
  const layout=c.quickbarLayout||{order:[],hidden:[]},rank=(id:string)=>layout.order.includes(id)?layout.order.indexOf(id):9999;
  const visibleWeapons=weaponAttacks(c,d);
- const resources=Object.entries(c.runtime.resources).filter(([id])=>!isHitDieResource(id)&&(!id.startsWith('innate-spell:')||sourceSpellEnabled(c,id.slice(13)))&&!layout.hidden.includes(`resource:${id}`)).sort((a,b)=>rank(`resource:${a[0]}`)-rank(`resource:${b[0]}`)||(a[1].order||0)-(b[1].order||0));
+ const resources=Object.entries(c.runtime.resources).filter(([id])=>!isHitDieResource(id)&&sourceSpellResourceEnabled(c,id)&&!layout.hidden.includes(`resource:${id}`)).sort((a,b)=>rank(`resource:${a[0]}`)-rank(`resource:${b[0]}`)||(a[1].order||0)-(b[1].order||0));
  function drag(e:PointerEvent,id:string,name:string,side:string){
   if(!editing)return;const ids=side==='resources'?resources.map(([id])=>`resource:${id}`):side==='pins'?quickbarEntries(c).map(row=>`pin:${row.id}`):visibleWeapons.map(w=>w.key);
   const target=(hit:Element|null)=>{const row=hit?.closest<HTMLElement>('[data-quick-id]');return row&&root.current?.contains(row)&&row.dataset.quickSide===side?row.dataset.quickId:undefined;};
