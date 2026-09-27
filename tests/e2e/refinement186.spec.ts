@@ -20,18 +20,18 @@ test('hit dice keep their existing resource state through repeated clicks, type 
  await page.getByRole('switch',{name:'编辑模式'}).click();await page.getByRole('button',{name:'管理资源',exact:true}).click();await expect(page.locator('.resource-management-item')).toHaveCount(0);
 });
 
-test('concentration sigil stays beside the tier and both click and drag smoothly close the departing spell gap',async({page})=>{
+test('concentration sigil stays beside the tier while selection stays in place and drag chooses a prepared slot',async({page})=>{
  const c=newCharacter();c.name='法阵与法术移动';add(c,entry('class','法师',{hd:{faces:6},casterProgression:'full',preparedSpellsChange:'restLong',preparedSpellsProgression:[4,5,6],spellsKnownProgressionFixed:[6,2,2]}),3);
  for(let i=0;i<7;i++)add(c,entry('spell',`法术 ${i}`,{level:1,duration:[{concentration:i===0}],meta:{ritual:i===1}}));
  await load(page,c);await page.getByRole('tab',{name:'法术',exact:true}).click();
- const focus=page.locator('.spell-concentration');await expect(focus.locator('.spell-concentration-mark')).toBeVisible();await expect(focus.locator('.spell-tile-frame')).toHaveCSS('stroke-dasharray','none');
+ const focus=page.locator('.spell-library .spell-concentration');await expect(focus.locator('.spell-concentration-mark')).toBeVisible();await expect(focus.locator('.spell-tile-frame')).toHaveCSS('stroke-dasharray','none');
  const marks=await focus.evaluate(el=>{const a=el.querySelector('.spell-concentration-mark')!.getBoundingClientRect(),b=el.querySelector('.spell-stock-level')!.getBoundingClientRect();return {gap:b.left-a.right,animation:getComputedStyle(el.querySelector('.spell-concentration-mark')!).animationName};});expect(marks.gap).toBeGreaterThanOrEqual(0);expect(marks.animation).toBe('spell-concentration-turn');
  await page.evaluate(()=>{(window as any).reflows=[];const native=Element.prototype.animate;Element.prototype.animate=function(frames:any,options:any){if(Array.isArray(frames)&&frames[0]?.translate)(window as any).reflows.push({id:(this as HTMLElement).dataset.spellId,frames});return native.call(this,frames,options);};});
- await page.getByRole('switch',{name:'编辑模式'}).click();await focus.click();await expect(page.locator('.prepared-cell .spell-stock-tile')).toHaveCount(1);expect(await page.evaluate(()=>(window as any).reflows.filter((v:any)=>v.id).length)).toBeGreaterThanOrEqual(6);
+ await page.getByRole('switch',{name:'编辑模式'}).click();await focus.click();await expect(page.locator('.prepared-cell .spell-stock-tile')).toHaveCount(1);expect(await page.evaluate(()=>(window as any).reflows.filter((v:any)=>v.id).length)).toBe(0);
  await page.locator('.prepared-cell .spell-stock-tile').click();await expect(page.locator('.spell-library .spell-stock-tile')).toHaveCount(7);
- await page.evaluate(()=>(window as any).reflows=[]);await page.locator('.spell-library .spell-stock-tile').first().dragTo(page.getByRole('button',{name:'预备空位2',exact:true}));await expect(page.locator('[data-prepared-slot="1"] .spell-stock-tile')).toHaveCount(1);expect(await page.evaluate(()=>(window as any).reflows.filter((v:any)=>v.id).length)).toBeGreaterThan(0);
+ await page.evaluate(()=>(window as any).reflows=[]);await page.locator('.spell-library .spell-stock-tile').first().dragTo(page.getByRole('button',{name:'预备空位2',exact:true}));await expect(page.locator('[data-prepared-slot="1"] .spell-stock-tile')).toHaveCount(1);expect(await page.evaluate(()=>(window as any).reflows.filter((v:any)=>v.id).length)).toBe(0);
  await expect(page.locator('.pointer-ghost')).toHaveCount(0);await page.mouse.move(2,2);await page.screenshot({path:'test-results-186/spell-sigil.png'});
- await page.emulateMedia({reducedMotion:'reduce'});await expect(page.locator('.spell-concentration-mark')).toHaveCSS('animation-name','none');
+ await page.emulateMedia({reducedMotion:'reduce'});await expect(focus.locator('.spell-concentration-mark')).toHaveCSS('animation-name','none');
  await page.evaluate(()=>(window as any).reflows=[]);await page.locator('.prepared-cell .spell-stock-tile').click();expect(await page.evaluate(()=>(window as any).reflows.length)).toBe(0);
 });
 

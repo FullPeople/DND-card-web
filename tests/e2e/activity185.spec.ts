@@ -22,7 +22,7 @@ test('bubble, spell and item menus share only the selected entry; received notif
  const share=async(locator:ReturnType<Page['locator']>,name:string,count:number)=>{await locator.click({button:'right'});await expect(page.locator('[data-testid="tooltip-backdrop"]')).toHaveCount(0);await page.getByRole('menuitem',{name:'向全员展示',exact:true}).click();await expect.poll(()=>host.evaluate(()=>(window as any).requests.length)).toBe(count);expect(await host.evaluate(()=>(window as any).requests.at(-1).entry.name)).toBe(name);};
  await expect(page.locator('.wiki-footer').getByRole('link',{name:'单机版 ↗',exact:true})).toHaveAttribute('href','https://obr.dnd.center/card/');
  await share(page.locator('.feature-caption').filter({hasText:'验收特性'}),'验收特性',1);
- await page.getByRole('tab',{name:'法术',exact:true}).click();await share(page.locator('.spell-stock-tile').filter({hasText:'已备法术'}),'已备法术',2);await page.screenshot({path:'test-results/activity185-spells.png'});
+ await page.getByRole('tab',{name:'法术',exact:true}).click();await share(page.locator('.prepared-cell .spell-stock-tile').filter({hasText:'已备法术'}),'已备法术',2);await page.screenshot({path:'test-results/activity185-spells.png'});
  await page.getByRole('tab',{name:'背包',exact:true}).click();await share(page.locator('[data-stock-id="stock-one"]'),'验收物品',3);
  const requests=await host.evaluate(()=>(window as any).requests);for(const req of requests){expect(req.key).toBeUndefined();expect(req.itemId).toBeUndefined();expect(req.entry).not.toHaveProperty('selections');}
  await send('showWiki',{entry:c.selections[1].entry});await expect(page.locator('.entry-detail .detail-title')).toContainText('已备法术');await expect(page.locator('.entry-detail')).toContainText('原创展示正文');
