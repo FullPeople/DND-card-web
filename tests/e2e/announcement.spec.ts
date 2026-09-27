@@ -1,6 +1,6 @@
 import {test,expect,type Locator,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
-import {RELEASE_DATE,RELEASE_NOTES} from '../../src/platform/releaseNotes';
+import {RELEASE_DATE,RELEASE_NOTES,RELEASE_SECTIONS} from '../../src/platform/releaseNotes';
 import {ANNOUNCEMENT_KEY,APP_VERSION} from '../../src/platform/announcement';
 
 const dialog=(page:Page)=>page.getByRole('dialog',{name:'欢迎使用这款开源禁商用车卡/Wiki网站！'});
@@ -23,9 +23,11 @@ test('首次打开单机站弹出公告，版本、问题清单与默认展开�
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
  await expect(dialog(page)).toContainText(`${RELEASE_DATE} · 更新与修复`);
  await expect(dialog(page).locator('.announcement-issues li')).toHaveCount(RELEASE_NOTES.length);
- await expect(dialog(page).locator('.announcement-issues')).toContainText('完整 JSON 支持指定角色和多卡备份');
+ await expect(dialog(page).locator('.announcement-issues')).toContainText('导出指定角色或多卡备份');
  await expect(dialog(page).locator('.announcement-issues')).not.toContainText('枭熊');await expect(dialog(page).locator('.announcement-issues')).not.toContainText('三龙');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('blocks.map');
+ await expect(dialog(page).locator('.announcement-section h4')).toHaveText(RELEASE_SECTIONS.map(section=>section.title));
+ await expect(dialog(page).locator('.announcement-issues hr')).toHaveCount(RELEASE_SECTIONS.length-1);
+ await expect(dialog(page).locator('.announcement-issues')).not.toContainText('怪物编辑');
  const faq=dialog(page).locator('.announcement-faq').first();
  await expect(faq.locator('details')).toHaveCount(4);
  expect(await faq.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(true);
