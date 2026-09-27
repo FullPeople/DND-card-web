@@ -20,13 +20,20 @@ export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean}
   // Dedicated announcement tests opt out and exercise the real mandatory dialog.
   if(!options.suiteAnnouncement){
     await page.context().addInitScript(([key,version])=>{try{localStorage.setItem(key+':suite',version);}catch{}},[ANNOUNCEMENT_KEY,announcementVersionFor('suite')]);
-    await page.evaluate(([key,version])=>{try{localStorage.setItem(key+':suite',version);if(location.hash.includes('suite=')){const dialog=document.querySelector<HTMLDialogElement>('.announcement');dialog?.querySelector<HTMLButtonElement>('.announcement-foot .primary')?.click();}}catch{}},[ANNOUNCEMENT_KEY,APP_VERSION]).catch(()=>{});
+    await page.evaluate(([key,version])=>{try{localStorage.setItem(key+':suite',version);}catch{}},[ANNOUNCEMENT_KEY,announcementVersionFor('suite')]).catch(()=>{});
   }
   await page.route('https://homebrew.kiwee.top/**',route=>route.fulfill({json:{},headers:{'access-control-allow-origin':'*'}}));
   await page.route('https://5e.kiwee.top/data/**', async route => {
     const key = new URL(route.request().url()).pathname.replace('/data/', '');
     await route.fulfill({ json: data[key] || {}, headers: { 'access-control-allow-origin': '*', etag: 'fixture-1' } });
   });
+  // Popup fixtures can attach after navigation has already read its notice key.
+  // Wait for the actual App mount before acknowledging an already-open notice.
+  if(!options.suiteAnnouncement&&page.url().includes('#suite=')){
+    await page.locator('.app-shell').waitFor();
+    const confirm=page.locator('.announcement-foot .primary');
+    if(await confirm.count())await confirm.click();
+  }
 }
 // 单机构建的公告会挡住其他用例的首屏操作；需要时在 goto 之前按当前版本预置确认记录。
 export async function suppressAnnouncement(page: Page) {
