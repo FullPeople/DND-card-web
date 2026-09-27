@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-09-27';
+export const RELEASE_DATE='2026-09-28';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -115,19 +115,29 @@ export const SUITE_ARCHIVED_RELEASE_SECTIONS:ReleaseSection[]=[
 ]
 ];
 
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const PREVIOUS_RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'角色卡与导入导出',items:['修复了角色 JSON 转换时遗漏已填写武器攻击的问题。','武器命中和伤害公式现在会保留；玩家具体文件待验证。']},
  {title:'更新公告',items:['旧公告现在按日期折叠，同日更新按批次编号。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
- ...RELEASE_SECTIONS,
+const PREVIOUS_SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ ...PREVIOUS_RELEASE_SECTIONS,
  {title:'三龙牌',items:['服务器牌桌的房主离开后，现在会自动交接给在线玩家。','短暂刷新和关闭重复窗口不会立即交接；真实多人房间待验证。','修复了自选特殊牌列表无法向下滚动的问题；实体手机待验证。']},
+ {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'基础自动化',items:['增加了基础自动化，可以在角色卡工具栏中开启。','装备护甲和盾牌后，现在可以自动计算 AC。','装备武器后，现在可以生成对应的快捷攻击。','支持部分特性和种族的赠送法术、免费次数与法术位消耗。']},
+ {title:'法术列表',items:['优化了预备法术和已知法术列表，戏法与赠送法术分组显示。','点击已知法术可以选中打勾，再次点击取消；预备区显示对应法术。','修复了同名赠送法术阻挡普通预备的问题。','恢复了法术格原有样式、专注和仪式效果。']},
+ {title:'待验证',items:['实体手机操作待验证；复杂兼职、动态次数和完整休息规则尚未全部支持。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'枭熊联动',items:['基础自动化的真实多人同步待验证。']},
  {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:RELEASE_DATE+'-二',sections:releaseSectionsFor(mode)},
- {title:RELEASE_DATE+'-一',sections:mode==='suite'?SUITE_ARCHIVED_RELEASE_SECTIONS:ARCHIVED_RELEASE_SECTIONS},
+ {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-09-27-二',sections:mode==='suite'?PREVIOUS_SUITE_RELEASE_SECTIONS:PREVIOUS_RELEASE_SECTIONS},
+ {title:'2026-09-27-一',sections:mode==='suite'?SUITE_ARCHIVED_RELEASE_SECTIONS:ARCHIVED_RELEASE_SECTIONS},
 ];

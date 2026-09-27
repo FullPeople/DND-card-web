@@ -41,7 +41,7 @@ export function spellActionRequest(c:Character,selectionId:string,paymentId:stri
  * This local contract does not claim multiplayer/server delivery guarantees. */
 export function performSpellAction(c:Character,request:SpellActionRequest):SpellActionResult{
  const reject=(message:string):SpellActionResult=>({status:'rejected',message});
- if(!automationEnabled(c))return reject('请先开启此开发卡的自动计算。');
+ if(!automationEnabled(c))return reject('请先开启此角色卡的自动计算。');
  if(typeof request.id!=='string'||!request.id.trim()||request.id.length>128||!Number.isSafeInteger(request.sequence)||request.sequence<0||!Number.isSafeInteger(request.revision)||!['cast','restore'].includes(request.mode))return reject('施法操作格式无效。');
  const state=c.runtime.automationActions;
  if(state&&state.version!==1)return reject('此卡的动作记录版本尚未支持。');
