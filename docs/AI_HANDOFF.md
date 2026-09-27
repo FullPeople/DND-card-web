@@ -1,3 +1,11 @@
+# 2026-09-27 · 207 浏览器兼容修复已上线
+
+新版 1.0.207-dev、独立三龙牌 0.7.19-dev、国内单机 standalone-1.0.207 / 公告 0.1.12 与 GitHub Pages 0.1.12 已发布。修复旧浏览器缺少 AbortSignal.any / timeout 导致请求失败，Wiki 缓存写满不再丢弃下载结果，并增加启动失败诊断和重试。见 [207 回执](RELEASE-207-RESULT.md)、[兼容调查](BROWSER-COMPAT-207.md)、[群公告](ANNOUNCEMENT-207.txt)。
+
+当前 Edge、实际 Chrome 114 的生产构建检查及旧内核公网双入口三龙牌发牌/前注/重连通过；CI 186 项单元与 98 项浏览器通过（另有 2 / 8 项既有或项目跳过）。831 个服务器和 158 个公网文件核验通过。玩家具体设备/报错未获得，仍待验证；不要将语法目标 109 或单一旧内核验收当作全浏览器承诺。Pages 首次 OIDC 超时，仅重试发布后成功。
+
+实际部署源码 Web 7c004a4、Suite 6c7b8ec。两个服务未重启，旧版 1.3.11 的 561 个文件与 XLSX 未变，玩家数据未修改。继续在 F:/CodexWork/2026-09-27/feedback/{web,suite} 工作，主目录只回填文档；F 盘空间不足，Suite 构建目录联接保持原位。证据在 D:/Temp/DND-card-compat207 与 D:/Temp/DND-card-release207-storage/release207。
+
 # 2026-09-27 · 206 已部署，完整 CI 与公网核验通过
 
 新版 1.0.206-dev、单机 standalone-1.0.206 / 公告 0.1.11、GitHub Pages 0.1.11 已发布；独立三龙牌 0.7.18-dev 保留落牌先于回合横幅的修复。完整 CI 181 项单元及 94 项浏览器检查通过（另有 2 / 8 项既有或项目跳过），830 个服务器文件和 80 个公网关键文件核验通过。参见 [206 发布回执](RELEASE-206-RESULT.md)、[本轮 15 项说明](FEEDBACK-206.md)、[群公告](ANNOUNCEMENT-206.txt)。
