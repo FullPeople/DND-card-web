@@ -13,12 +13,12 @@ import {isHitDieResource,setResource} from '../core/resources';
 import {inWorkbench,composeRoll} from '../platform/workbench';
 import {SheetEditContext} from './SheetEdit';
 import {entryLabel} from '../core/entryLabel';
+import {weaponAttacks} from '../core/weaponAttacks';
 export function Quickbar({c,d,edit,inspect,manage,manageQuickbar}:{c:Character;d:Derived;edit:(f:(c:Character)=>void)=>void;inspect:(e:Entry)=>void;manage:()=>void;manageQuickbar:()=>void}){
- const wb=useWorkbench();const editing=useContext(SheetEditContext),spell=spellValues(c,d),old=c.externalSnapshot?.combat?.weapons||[];
+ const wb=useWorkbench();const editing=useContext(SheetEditContext),spell=spellValues(c,d);
  const root=useRef<HTMLDivElement>(null),cancel=useRef<(()=>void)|undefined>(undefined),[over,setOver]=useState('');useEffect(()=>()=>cancel.current?.(),[]);
  const layout=c.quickbarLayout||{order:[],hidden:[]},rank=(id:string)=>layout.order.includes(id)?layout.order.indexOf(id):9999;
- const weapons=[...(c.quickbarActions||[]).map(w=>({...w,attack_bonus:w.attack,key:`custom:${w.id}`})),...old,...c.selections.filter(s=>s.entry.kind==='item'&&s.entry.raw.dmg1&&!old.some((w:any)=>w.name===s.entry.name)).map(s=>({name:s.entry.name,damage:s.entry.raw.dmg1,attack_bonus:s.entry.raw.attackBonus,entry:s.entry}))];
- const visibleWeapons=weapons.map((w:any,i:number)=>({...w,key:w.key||(w.entry?`selection:${w.entry.id}`:`weapon:${i}:${w.name}`)})).filter(w=>!layout.hidden.includes(w.key)).sort((a,b)=>rank(a.key)-rank(b.key));
+ const visibleWeapons=weaponAttacks(c);
  const resources=Object.entries(c.runtime.resources).filter(([id])=>!isHitDieResource(id)&&!layout.hidden.includes(`resource:${id}`)).sort((a,b)=>rank(`resource:${a[0]}`)-rank(`resource:${b[0]}`)||(a[1].order||0)-(b[1].order||0));
  function drag(e:PointerEvent,id:string,name:string,side:string){
   if(!editing)return;const ids=side==='resources'?resources.map(([id])=>`resource:${id}`):side==='pins'?quickbarEntries(c).map(row=>`pin:${row.id}`):visibleWeapons.map(w=>w.key);

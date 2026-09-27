@@ -3,6 +3,7 @@ import {mockSource} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 import {exportCharacter,exportOwlbear} from '../../src/core/export';
 import {evaluate} from '../../src/core/engine';
+import {normalizeLegacyUpload} from '../../src/platform/legacyPlayerBridge';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
 test('suite notice shows a collapsed red Owner explanation near the front and requires acknowledgement',async({page,baseURL})=>{
  await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=notice197&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);
@@ -37,4 +38,16 @@ test('one JSON control accepts native and legacy files and exports the selected 
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await expect(page.getByLabel('JSON格式')).toHaveCount(0);await expect(page.getByRole('button',{name:'导入枭熊 JSON'})).toHaveCount(0);
  for(const data of [exportCharacter(native),exportOwlbear(old,evaluate(old))])await page.getByTestId('character-file').setInputFiles({name:'character.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
  await page.getByLabel('导出角色').selectOption({label:'统一完整备份（导入）'});await page.getByRole('button',{name:'生成并复制 JSON'}).click();const result=JSON.parse(await page.getByLabel('角色 JSON 文本').inputValue());expect(result.format).toBe('dnd-card-web');expect(result.character.name).toBe('统一完整备份（导入）');expect(result.character.training.armor).toBe('盾牌');await page.screenshot({path:test.info().outputPath('unified-json.png')});
+});
+
+test('website weapon attacks stay visible and editable after Owlbear file roundtrip',async({page})=>{
+ await mockSource(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
+ const c=newCharacter();c.name='武器往返验收';c.quickbarActions=[{id:'bow',name:'验收长弓',attack:'+7',damage:'1d8+4'}];
+ const upload=normalizeLegacyUpload(exportCharacter(c));expect(upload.combat.weapons[0]).toMatchObject({attack_bonus:'+7',damage:'1d8+4'});
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
+ await page.getByTestId('character-file').setInputFiles({name:'owlbear-weapon.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(upload))});
+ await page.keyboard.press('Escape');
+ const row=page.locator('.quick-weapon').filter({hasText:'验收长弓'});await expect(row).toHaveCount(1);await expect(row).toContainText('+7');await expect(row).toContainText('1d8+4');
+ await page.reload();await expect(row).toHaveCount(1);await expect(row).toContainText('1d8+4');
+ await page.screenshot({path:test.info().outputPath('weapon-roundtrip208.png')});
 });
