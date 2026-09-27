@@ -43,6 +43,12 @@ test('phone long press can still drag a Wiki entry to the card and restores Wiki
   const p=await center(page.locator('.identity-class'));await touch.move(p);await page.waitForTimeout(60);await expect(page.locator('.pointer-ghost:not([data-landing])')).toHaveCount(1);await touch.up();
   await expect(page.locator('.identity-class')).toContainText('测试法师');await expect(page.locator('.wiki-pane')).toHaveClass(/mobile-active/);await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(page.locator('.catalog-row.active')).toHaveCount(0);
 });
+test('phone inline-reference long press drags without text selection',async({page},info)=>{
+ test.skip(info.project.name!=='phone');await setup(page,true);await page.locator('.catalog-row').filter({hasText:'测试法师'}).first().tap();
+ const reference=page.locator('.entry-detail .inline-reference').filter({hasText:'微光术'}).first();await reference.scrollIntoViewIfNeeded();await expect(reference).toHaveCSS('user-select','none');
+ const touch=await finger(page);await touch.down(await center(reference));await page.waitForTimeout(380);await expect(page.locator('.pointer-ghost:not([data-landing])')).toHaveCount(1);expect(await page.evaluate(()=>window.getSelection()?.toString())).toBe('');
+ await touch.move(await center(page.locator('.paper')));await touch.cancel();await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(page.locator('body')).not.toHaveClass(/pointer-dragging/);await expect(page.locator('.wiki-pane')).toHaveClass(/mobile-active/);
+});
 test('phone second finger and cancelled contact disarm a pending drag',async({page},info)=>{
   test.skip(info.project.name!=='phone');await setup(page,true);const touch=await finger(page),p=await center(page.locator('.catalog-row').first());
   await touch.down(p);await touch.two(p);await page.waitForTimeout(400);await touch.cancel();await expect(page.locator('.pointer-ghost')).toHaveCount(0);expect(await page.evaluate(()=>(window as any).dragStarts)).toBe(0);

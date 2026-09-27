@@ -23,7 +23,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
   if (event.button !== 0 || !event.isPrimary) return;
   cancelActive?.();
   const source = event.currentTarget as HTMLElement;
-  const touchReading = event.pointerType === 'touch' && !!source.closest('.wiki-pane');
+  const touchReading = event.pointerType === 'touch' && !!source.closest('.wiki-pane,.keyword-preview');
   const bounds = source.getBoundingClientRect();
   const width = gesture.appearance==='source'?bounds.width:Math.max(48, Math.min(240, bounds.width)), height = gesture.appearance==='source'?bounds.height:Math.max(24, Math.min(80, bounds.height));
   const grab = { x: Math.max(0, Math.min(width, (event.clientX - bounds.x) / Math.max(1, bounds.width) * width)), y: Math.max(0, Math.min(height, (event.clientY - bounds.y) / Math.max(1, bounds.height) * height)) };
@@ -53,6 +53,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
   function lift() {
     if (finished || active || !source.isConnected) return;
       active = true;
+      if(event.pointerType==='touch')window.getSelection()?.removeAllRanges();
       document.body.classList.add('pointer-dragging');
       ghost = document.createElement('div');ghost.setAttribute('aria-hidden','true');ghost.inert=true; ghost.className = 'drag-ghost pointer-ghost';
       const title = document.createElement('strong'); title.textContent = gesture.title;

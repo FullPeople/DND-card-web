@@ -1,4 +1,4 @@
-import {RELEASE_DATE,RELEASE_NOTES} from '../platform/releaseNotes';
+import {RELEASE_DATE,releaseNotesFor} from '../platform/releaseNotes';
 import {useEffect,useRef,useState} from 'react';
 import {APP_VERSION,announcementPending,forgetAnnouncementVersion,readAnnouncementVersion,rememberAnnouncementVersion,type AnnouncementMode} from '../platform/announcement';
 import './announcement.css';
@@ -31,7 +31,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
       {mode==='suite'&&<details className="announcement-owner" onToggle={reveal}><summary>关于设置玩家单独权限的重要说明</summary><p>由 DM 完成下面两步，每位玩家就能操作自己的角色。DM 仍可管理所有角色。</p><ol><li>打开 Players 面板，点击盾牌权限按钮，展开 Map → Character，勾选 Owner Only，再点击 SAVE。<img src="./owner-step1.png" alt="Players 面板中的盾牌权限按钮"/><img src="./owner-step2.png" alt="Map 的 Character 权限勾选 Owner Only 后保存"/></li><li>在地图上选中角色 Token，点击悬浮工具栏的人形 Set Owner，指定所属玩家。<img src="./owner-step3.png" alt="选择角色棋子后通过 Set Owner 指定所属玩家"/></li></ol><p>设置后玩家可以掷自己的先攻、修改加值并结束自己的回合。未指定所属玩家时，玩家可能无法修改角色。</p></details>}
       {mode==='suite'&&<p><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">进入独立车卡网站</a></p>}
       <h3>{RELEASE_DATE} · 更新与修复</h3>
-      <ul className="announcement-issues">{RELEASE_NOTES.map(issue=><li key={issue}>{issue}</li>)}</ul>
+      <ul className="announcement-issues">{releaseNotesFor(mode).map(issue=><li key={issue}>{issue}</li>)}</ul>
       <details className="announcement-faq" open><summary>以下是可能用到的Q&amp;A</summary>
         {QUESTIONS.map(([question,answer])=><details key={question} onToggle={reveal}><summary>{question}</summary><p>{answer}</p></details>)}
       </details>

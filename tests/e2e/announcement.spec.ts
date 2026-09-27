@@ -23,8 +23,8 @@ test('首次打开单机站弹出公告，版本、问题清单与默认展开�
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
  await expect(dialog(page)).toContainText(`${RELEASE_DATE} · 更新与修复`);
  await expect(dialog(page).locator('.announcement-issues li')).toHaveCount(RELEASE_NOTES.length);
- await expect(dialog(page).locator('.announcement-issues')).toContainText('网站与枭熊统一使用完整 JSON');
- await expect(dialog(page).locator('.announcement-issues')).toContainText('部分玩家缺少投骰按钮：待验证');
+ await expect(dialog(page).locator('.announcement-issues')).toContainText('完整 JSON 支持指定角色和多卡备份');
+ await expect(dialog(page).locator('.announcement-issues')).not.toContainText('枭熊');await expect(dialog(page).locator('.announcement-issues')).not.toContainText('三龙');
  await expect(dialog(page).locator('.announcement-issues')).toContainText('blocks.map');
  const faq=dialog(page).locator('.announcement-faq').first();
  await expect(faq.locator('details')).toHaveCount(4);
