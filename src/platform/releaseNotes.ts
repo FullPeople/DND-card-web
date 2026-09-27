@@ -33,6 +33,7 @@ const SHARED_NOTES=[
 ];
 export const RELEASE_NOTES=[...SHARED_NOTES,'完整 JSON 支持指定角色和多卡备份，并兼容旧格式导入。'];
 export const SUITE_RELEASE_NOTES=[...SHARED_NOTES,...[
+ "修复部分怪物加载时出现循环引用错误，复杂 CR 现在可以正常显示。",
  "移除状态会清理棋子头顶标识；真实多人房间待验证。",
  "怪物卡的资料锁与血条锁增加不同名称和说明。",
  "枭熊工作台统一使用完整 JSON，仍兼容旧枭熊 JSON。",
