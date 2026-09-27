@@ -31,8 +31,8 @@ export function inferredSpellMode(c:Character):'known'|'prepared'|undefined{
 
 /** Match the upstream class lookup by source and either language; never merge translated names. */
 export function spellOnClassList(entry:Entry,profile:CasterProfile):boolean{
- const raw=entry.raw,names=[profile.owner.entry.name,profile.owner.entry.english,profile.owner.entry.raw.name,profile.owner.entry.raw.ENG_name].map(key);
- const source=key(profile.owner.entry.source),lookup=raw._spellClasses;
+ const raw=entry.raw,names=[profile.owner.entry.name,profile.owner.entry.english,profile.owner.entry.raw.name,profile.owner.entry.raw.ENG_name,profile.owner.entry.raw._castingSource?.name,profile.owner.entry.raw._castingSource?.english].map(key);
+ const source=key(profile.owner.entry.raw._castingSource?.source||profile.owner.entry.source),lookup=raw._spellClasses;
  // Expansion books often predate the 2024 lookup. Their class list remains usable
  // with either PHB class, while the spell's own source-qualified identity stays intact.
  const expansion=!['phb','xphb','dmg','xdmg'].includes(key(entry.source));

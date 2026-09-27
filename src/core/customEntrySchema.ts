@@ -35,7 +35,7 @@ export function parseCustomEntryJson(text:string,fallbackType='feature'):Entry{
  if(!object(input.raw)&&input.type===type)delete raw.type;
  validateEntryContent(entries);
  validateCustomFields(type,raw,entries);
- const entry=createCustomEntry({name:String(input.name||''),type,body:'',entries,raw,edition:['2014','2024','both'].includes(input.edition)?input.edition:'both'});
+ const entry=createCustomEntry({name:String(input.name||''),english:input.english||input.ENG_name,type,body:'',entries,raw,edition:['2014','2024','both'].includes(input.edition)?input.edition:'both'});
  if(typeof input.english==='string'||typeof input.ENG_name==='string')entry.english=input.english||input.ENG_name;
  return entry;
 }

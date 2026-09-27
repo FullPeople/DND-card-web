@@ -227,7 +227,9 @@
 .overview-identity .identity-subclass{grid-area:3/2}
 .overview-identity .identity-class.identity-multiclass{grid-area:2/2/4/3}
 .overview-identity .identity-field .cell-content{padding:0;align-items:stretch;justify-content:center}
-.identity-record{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;justify-content:center}
+.identity-record{display:flex;position:relative;flex-direction:column;flex:1;min-height:0;min-width:0;justify-content:center}
+.identity-record:has(.subclass-fill){padding-right:20px}
+.paper .subclass-fill{position:absolute;right:1px;top:50%;transform:translateY(-50%);width:18px;height:20px;padding:0;border:0;background:transparent;font-size:16px;line-height:20px;overflow:hidden}
 .identity-token{display:flex;align-items:center;justify-content:center;flex:1;min-width:0;min-height:25px;gap:4px;padding:2px 4px;cursor:grab;touch-action:none}
 .identity-token .identity-title{display:block;min-width:0;max-width:100%;padding:0;border:0;background:transparent;font-size:14px;font-weight:600;line-height:1.2;text-align:center;cursor:inherit;white-space:nowrap;overflow:hidden;flex:0 1 auto}
 .identity-token .identity-level{display:flex;align-items:center;white-space:nowrap;flex:none;font-size:11px;font-weight:600;gap:0}

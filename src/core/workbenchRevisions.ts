@@ -17,7 +17,7 @@ export class WorkbenchRevisions {
   const key=message.state?.key;if(!key||message.document===undefined||message.document===null)return message;
   const revision=documentRevision(message.document,message.state),old=this.documents.get(key);
   if(old&&revision<documentRevision(old.document,old.state))return {...message,document:old.document,state:retainRuntime(message.state,old.state)};
-  const normalized={...message,state:{...message.state,documentRevision:revision}};
+  const normalized={...message,document:old&&revision>0&&revision===documentRevision(old.document,old.state)?old.document:message.document,state:{...message.state,documentRevision:revision}};
   this.documents.set(key,normalized);
   if(message.state.cardId)this.card({id:message.state.cardId,...normalized.state});
   return normalized;

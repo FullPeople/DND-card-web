@@ -2,6 +2,19 @@ export const RELEASE_DATE='2026-09-27';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
+ {title:'本次修复：职业与法术',items:[
+  '现在每个主职业都可以单独查找和添加子职了。',
+  '修复了职业正文中的子职没有跟随 2014 / 2024 筛选的问题。',
+  '现在可以把 Wiki 法术直接拖进预备栏了，预备上限调整会生效。',
+  '补齐导入职业与原资料的关联，修复法表和子职匹配。',
+  '兼职角色现在可以按职业查看法表、法术攻击和 DC。'
+ ]},
+ {title:'本次修复：拖拽与内容',items:[
+  '拖动法术和装备时，角色卡会切换到对应页面。',
+  '减少拖拽时的重复计算，实际手机手感待验证。',
+  '修复了自定义条目的中文名和英文名互相覆盖的问题。',
+  '宝石和艺术品类型现在显示中文，未知重量不再显示成零。'
+ ]},
  {
   "title": "自定义条目",
   "items": [
@@ -56,6 +69,15 @@ const withJsonNote=(note:string):ReleaseSection[]=>SHARED_SECTIONS.map(section=>
 
 export const RELEASE_SECTIONS=withJsonNote('统一了角色 JSON 备份格式。');
 export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'本次修复：权限与同步',items:[
+  'DM 现在可以在角色卡上点击“分配玩家”，授予和撤回编辑权限。',
+  '编辑权限变化后会直接更新开关，不用重新导入角色卡。',
+  '修复了旧场景角色目录反复互相覆盖、触发大量同步的问题。',
+  '切换角色卡不再反复把所有角色和头像写入本机备份。',
+  '状态目录同步慢时，不再阻塞已保存角色的操作。',
+  '角色修改增加了服务器通知，网页连接开启 HTTP/2。',
+  '真实多人房间、场景棋子切换和海外 VPN 速度：待验证。'
+ ]},
  ...withJsonNote('统一了 JSON，不再区分枭熊 JSON 和普通 JSON。'),
  ...[
  {
@@ -80,6 +102,7 @@ export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
  {
   "title": "三龙牌",
   "items": [
+   "修复了回合横幅抢先播放的问题，现在等落牌动画结束后再显示。",
    "新建三龙牌改由服务器同步，减少出牌、准备和结算的等待。",
    "断线重连和刷新会恢复牌局，重复提交不会重复出牌。",
    "新增时光龙牌组，实际多人网络与手机流畅度待验证。",

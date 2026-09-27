@@ -30,7 +30,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
     <header className="announcement-head"><h2 id="announcement-title">{mode==='suite'?'欢迎使用 Full Suite 枭熊工作台！':'欢迎使用这款开源禁商用车卡/Wiki网站！'}</h2><p className="announcement-version">版本 v{version}</p></header>
     <div className="announcement-body">
       {mode==='suite'&&<details className="announcement-owner" onToggle={reveal}><summary>关于设置玩家单独权限的重要说明</summary><p>由 DM 完成下面两步，每位玩家就能操作自己的角色。DM 仍可管理所有角色。</p><ol><li>打开 Players 面板，点击盾牌权限按钮，展开 Map → Character，勾选 Owner Only，再点击 SAVE。<img src="./owner-step1.png" alt="Players 面板中的盾牌权限按钮"/><img src="./owner-step2.png" alt="Map 的 Character 权限勾选 Owner Only 后保存"/></li><li>在地图上选中角色 Token，点击悬浮工具栏的人形 Set Owner，指定所属玩家。<img src="./owner-step3.png" alt="选择角色棋子后通过 Set Owner 指定所属玩家"/></li></ol><p>设置后玩家可以掷自己的先攻、修改加值并结束自己的回合。未指定所属玩家时，玩家可能无法修改角色。</p></details>}
-      {mode==='suite'&&<p><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">进入独立车卡网站</a></p>}
+      {mode==='suite'&&<p>分配角色卡：DM 打开角色卡，点击工具栏“分配玩家”。玩家姓名只是卡内文字，不会自动授予权限。<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">进入独立车卡网站</a></p>}
       <h3>{RELEASE_DATE} · 更新与修复</h3>
       <div className="announcement-issues">{releaseSectionsFor(mode).map((section,index)=><Fragment key={section.title}>
         {index>0&&<hr/>}

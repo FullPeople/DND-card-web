@@ -63,7 +63,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
       if(gesture.appearance==='source'){
         ghost.className='pointer-ghost stock-drag-source';const copy=source.cloneNode(true) as HTMLElement;
         const originals=[source,...source.querySelectorAll<HTMLElement>('*')],clones=[copy,...copy.querySelectorAll<HTMLElement>('*')];
-        originals.forEach((node,i)=>{const clone=clones[i],style=getComputedStyle(node);clone.removeAttribute('id');for(const property of Array.from(style))clone.style.setProperty(property,style.getPropertyValue(property));clone.style.transition='none';clone.style.animation='none';});
+        originals.forEach((node,i)=>{const clone=clones[i],style=getComputedStyle(node);clone.removeAttribute('id');for(const property of ['display','position','box-sizing','width','height','padding','margin','gap','grid-template-columns','grid-template-rows','grid-area','align-items','justify-content','flex-direction','flex-grow','color','background','border','border-radius','box-shadow','clip-path','font','line-height','letter-spacing','text-align','white-space','overflow','opacity','fill','stroke','stroke-width'])clone.style.setProperty(property,style.getPropertyValue(property));clone.style.transition='none';clone.style.animation='none';});
         const scale=bounds.width/source.offsetWidth||1;copy.style.width=`${source.offsetWidth}px`;copy.style.height=`${source.offsetHeight}px`;copy.style.minHeight='0';copy.style.margin='0';copy.style.translate='none';copy.style.transform=`scale(${scale})`;copy.style.transformOrigin='0 0';copy.style.visibility='visible';ghost.append(copy);
       }else ghost.append(title); document.body.append(ghost);source.classList.add('drag-lifted');
       window.dispatchEvent(new CustomEvent('card-drag-start',{detail:{source}})); gesture.start?.(); paint();
@@ -76,7 +76,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
       if (distance >= 8) { touchMoved=true; finish(true); }
       return;
     }
-    if (!active && distance >= 5) lift();
+    if (!active && distance >= (event.pointerType==='mouse'?3:5)) lift();
     if (active) e.preventDefault();
   }
   function finish(cancelled: boolean) {

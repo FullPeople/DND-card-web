@@ -13,7 +13,7 @@ export function hydrateImportedCasting(c:Character,entries:Entry[]):boolean{
   if(candidates.length!==1)continue;
   const source=candidates[0];if(!keys.some(key=>source.raw[key]!==undefined))continue;
   for(const key of keys)if(s.entry.raw[key]===undefined&&source.raw[key]!==undefined)s.entry.raw[key]=structuredClone(source.raw[key]);
-  s.entry.raw._castingSource={id:source.id,source:source.source,revision:source.revision};changed=true;
+  s.entry.raw._castingSource={id:source.id,source:source.source,name:source.name,english:source.english,revision:source.revision};changed=true;
   // Legacy import used the number currently prepared as the total capacity.
   // Once a rule formula is available, that count is not a manual adjustment.
   if(c.spellSettings&&!c.spellSettings.modeOverride&&c.spellSettings.capacityAdjustment===undefined)c.spellSettings.capacityAdjustment=0;

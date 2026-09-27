@@ -27,18 +27,20 @@ export function EntryDragProvider({ character, receive, children, editing=false 
   const zones = useRef(new Map<string, Zone>()), latest = useRef({ character, receive }), cancel = useRef<(() => void) | undefined>(undefined);
   latest.current = { character, receive };
   useLayoutEffect(() => () => cancel.current?.(), []);
-  const register = useCallback((id: string, zone: Zone) => { zones.current.set(id, zone); return () => { zones.current.delete(id); }; }, []);
+  const hitCache=useRef<{hit:Element|null;item:Entry;character:Character;result:ReturnType<typeof find>}|undefined>(undefined);
+  const register = useCallback((id: string, zone: Zone) => { zones.current.set(id, zone);hitCache.current=undefined; return () => { zones.current.delete(id);hitCache.current=undefined; }; }, []);
   const clear = () => { setEntry(undefined); setOver(undefined); setHoverTab(undefined); };
   function find(hit: Element | null, item: Entry) {
-    const id = hit?.closest<HTMLElement>('[data-drop-zone]')?.dataset.dropZone;
-    const zone = id ? zones.current.get(id) : undefined;
-    if (zone && compatible(latest.current.character, item, zone)) return { id, zone };
+    for(let node=hit?.closest<HTMLElement>('[data-drop-zone]');node;node=node.parentElement?.closest<HTMLElement>('[data-drop-zone]')){
+      const id=node.dataset.dropZone,zone=id?zones.current.get(id):undefined;
+      if(zone&&compatible(latest.current.character,item,zone))return {id,zone};
+    }
     if (hit?.closest('.paper')) for (const [fallbackId, fallback] of zones.current) if (fallback.wholePaper && compatible(latest.current.character, item, fallback)) return { id: fallbackId, zone: fallback };
     return undefined;
   }
   function start(event: PointerEvent, item: Entry) {
-    cancel.current = pointerDrag(event, { title: item.name, subtitle: `${format(item.source)}`, start: () => setEntry(item), cancel: clear,
-      move: (_point, hit) => { setOver(find(hit, item)?.id); setHoverTab(hit?.closest<HTMLElement>('[data-sheet-tab]')?.dataset.sheetTab); },
+    cancel.current = pointerDrag(event, { title: item.name, subtitle: `${format(item.source)}`, start: () => {setEntry(item);window.dispatchEvent(new CustomEvent('entry-drag-start',{detail:{entry:item}}));}, cancel: clear,
+      move: (_point, hit) => {const old=hitCache.current;const match=old&&old.hit===hit&&old.item===item&&old.character===latest.current.character?old.result:find(hit,item);hitCache.current={hit,item,character:latest.current.character,result:match};setOver(match?.id); setHoverTab(hit?.closest<HTMLElement>('[data-sheet-tab]')?.dataset.sheetTab); },
       finish: (_point, hit) => { const target = find(hit, item); clear(); if(!editing&&(target?.zone.referenceOnly||requiresEditing(item))&&(target||hit?.closest('.paper'))){window.dispatchEvent(new CustomEvent('workbench-error',{detail:`添加「${item.name}」前，请先在角色卡右上角开启编辑模式。`}));return;} if(!target){if(hit?.closest('.paper')){const reason=candidateReason(latest.current.character,item);if(reason)window.dispatchEvent(new CustomEvent('workbench-error',{detail:reason}));}return;} if (target.zone.onReceive) target.zone.onReceive(item); else latest.current.receive(item, target.zone.requirement); return landingWithin(target.zone.element,()=>target.zone.element.querySelector<HTMLElement>(`[data-entry-id="${CSS.escape(item.id)}"],[data-overview-condition="${CSS.escape(item.id)}"]`)||target.zone.element.querySelector<HTMLElement>('.stock-empty')); }
     });
   }

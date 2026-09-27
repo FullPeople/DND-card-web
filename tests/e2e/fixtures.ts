@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { ANNOUNCEMENT_KEY, APP_VERSION } from '../../src/platform/announcement';
+import { ANNOUNCEMENT_KEY, APP_VERSION, announcementVersionFor } from '../../src/platform/announcement';
 // Authored fixtures: no copied publisher rules or personal character data.
 const core = (source: string) => ({ name: '测试法师', ENG_name: 'Test Mage', source, hd: { faces: 6 }, proficiency: ['int', 'wis'], startingProficiencies: { skills: [{ choose: { from: ['arcana', 'history', 'insight'], count: 2 } }] }, classFeatures: [`初始特性|测试法师|${source}|1`], cantripProgression: [1, 1, 1], classTableGroups: [{ rowsSpellProgression: [[2], [3], [4, 2]] }] });
 const classes = { class: [core('PHB'), core('XPHB')], subclass: ['PHB', 'XPHB'].map(source => ({ name: '测试学派', shortName: '测试学派', source, className: '测试法师', classSource: source, subclassFeatures: [], entries: ['自制测试子职。'] })), classFeature: ['PHB', 'XPHB'].map(source => ({ name: '初始特性', ENG_name: 'First Feature', source, className: '测试法师', classSource: source, level: 1, entries: ['这是一条为软件验收创作的测试规则。可以查阅 {@spell 微光术|XPHB}。', ...Array.from({ length: 28 }, (_, i) => `记录片段 ${i + 1}：供长正文、关键词提示与区域滚动验收使用。`)] })) };
@@ -19,7 +19,7 @@ export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean}
   // Unrelated room-flow tests start after the version notice has been accepted.
   // Dedicated announcement tests opt out and exercise the real mandatory dialog.
   if(!options.suiteAnnouncement){
-    await page.context().addInitScript(([key,version])=>{try{localStorage.setItem(key+':suite',version);}catch{}},[ANNOUNCEMENT_KEY,APP_VERSION]);
+    await page.context().addInitScript(([key,version])=>{try{localStorage.setItem(key+':suite',version);}catch{}},[ANNOUNCEMENT_KEY,announcementVersionFor('suite')]);
     await page.evaluate(([key,version])=>{try{localStorage.setItem(key+':suite',version);if(location.hash.includes('suite=')){const dialog=document.querySelector<HTMLDialogElement>('.announcement');dialog?.querySelector<HTMLButtonElement>('.announcement-foot .primary')?.click();}}catch{}},[ANNOUNCEMENT_KEY,APP_VERSION]).catch(()=>{});
   }
   await page.route('https://homebrew.kiwee.top/**',route=>route.fulfill({json:{},headers:{'access-control-allow-origin':'*'}}));

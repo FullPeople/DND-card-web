@@ -33,6 +33,7 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const viewport = useRef<HTMLDivElement>(null);
   const {view:zoom,reset:resetZoom}=useSheetZoom(viewport,character.id);
   const drag = useContext(DragContext);
+  useEffect(()=>{const lift=(event:Event)=>{const entry=(event as CustomEvent).detail?.entry;const next=entry?.kind==='spell'?'法术':entry?.kind==='item'?'背包':undefined;if(next&&pages.includes(next)&&next!==page)changePage(next);};window.addEventListener('entry-drag-start',lift);return()=>window.removeEventListener('entry-drag-start',lift);},[page,pages,changePage]);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => { if (drag?.entry && drag.hoverTab && drag.hoverTab !== page) hoverTimer.current = setTimeout(() => changePage(drag.hoverTab as SheetPage), 400); return () => clearTimeout(hoverTimer.current); }, [drag?.entry, drag?.hoverTab, page]);
   useLayoutEffect(()=>{if(compact&&viewport.current)viewport.current.scrollTop=0;},[page,character.id,compact]);

@@ -1,3 +1,4 @@
+import {classMatches} from '../core/model';
 import {proficiencyText} from '../core/proficiencyText';
 import {spellUsesPreparation} from '../core/spellcastingRules';
 import {spellState} from '../core/characterDetails';
@@ -23,7 +24,7 @@ import { belongsToClass } from '../core/sheet';
 type Edit = (action: (draft: Character) => void, key?: string) => void;
 type Props = {
   catalog?:Entry[]; statusRibbon: ReactNode;
-  addEntry: (entry: Entry, section?: Selection['section']) => void; c: Character; d: Derived; edit: Edit; browse: (kind: Kind | 'size') => void; inspect: (e: Entry) => void;
+  addEntry: (entry: Entry, section?: Selection['section']) => void; c: Character; d: Derived; edit: Edit; browse: (kind: Kind | 'size',parent?:Entry) => void; inspect: (e: Entry) => void;
   renderSelection: (s: Selection) => ReactNode;
   onLink: (reference: string, kind?: string) => void; openResources: () => void;openQuickbar:()=>void;openHp?:()=>void; pinDrop: (entry: Entry) => void;
 };
@@ -54,7 +55,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
     const rows = selected([kind]);
     const showRows = kind === 'subclass' && classes.length === 1 ? rows.filter(s => belongsToClass(s, classes[0])) : rows;
     return <SheetCell label={label} className={`identity-field identity-${kind} ${kind === 'class' && multi ? 'identity-multiclass' : ''}`} flashKey={showRows.map(s => s.id).join(',')} dashed missing={!showRows.length} onFill={() => browse(kind)} dropKinds={kind === 'class' ? ['class', 'subclass'] : kind === 'subclass' ? ['subclass', 'class'] : [kind]}>
-      {showRows.map(row => <div className="identity-record" key={row.id}><IdentityToken row={row} c={c} edit={edit} inspect={inspect}/>{kind === 'class' && multi && selected(['subclass']).filter(sub => belongsToClass(sub, row)).map(sub => <IdentityToken key={sub.id} row={sub} c={c} edit={edit} inspect={inspect}/>)}</div>)}
+      {showRows.map(row => <DropZone className="identity-record" key={row.id} kinds={kind==='class'?['subclass']:[kind]} accepts={entry=>kind!=='class'||classMatches(entry,row.entry)} onReceive={entry=>addEntry(entry)}><IdentityToken row={row} c={c} edit={edit} inspect={inspect}/>{kind === 'class' && multi && selected(['subclass']).filter(sub => belongsToClass(sub, row)).map(sub => <IdentityToken key={sub.id} row={sub} c={c} edit={edit} inspect={inspect}/>)}{kind==='class'&&editing&&<button className="subclass-fill" aria-label={`为${row.entry.name}选择子职`} onClick={()=>browse('subclass',row.entry)} title="选择此职业的子职">＋</button>}</DropZone>)}
     </SheetCell>;
   }
   function contentCell(label: string, rows: Selection[], kinds: Kind[], className: string) {

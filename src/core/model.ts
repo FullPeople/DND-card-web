@@ -96,7 +96,8 @@ export function selectionAllowed(c: Character, e: Entry): boolean {
   return c.profile.enabledSources.includes(e.source) && (e.kind !== 'feat' || c.profile.optional.feats) && (e.dependencies || []).every(id => c.profile.enabledSources.includes(id)) && editionAllows(e,c.edition,c.profile.optional.legacy);
 }
 export const signed = (n: number) => n >= 0 ? `+${n}` : String(n);
-export function subclassOwner(c:Character,e:Entry){const key=(v:unknown)=>String(v||'').trim().toLowerCase();const names=[e.raw.className,e.raw.classEnglish,e.raw.classENG_name].map(key).filter(Boolean);return c.selections.find(s=>s.entry.kind==='class'&&[s.entry.name,s.entry.english,s.entry.raw.name,s.entry.raw.ENG_name].map(key).some(n=>names.includes(n))&&key(s.entry.source)===key(e.raw.classSource||'PHB'));}
+export function classMatches(child:Entry,parent:Entry){const key=(v:unknown)=>String(v||'').trim().toLowerCase();const names=[child.raw.className,child.raw.classEnglish,child.raw.classENG_name].map(key).filter(Boolean);const source=parent.source==='IMPORTED'?parent.raw._castingSource?.source||parent.source:parent.source;return parent.kind==='class'&&[parent.name,parent.english,parent.raw.name,parent.raw.ENG_name,parent.raw._castingSource?.name,parent.raw._castingSource?.english].map(key).some(n=>names.includes(n))&&[source,parent.source].map(key).includes(key(child.raw.classSource||'PHB'));}
+export function subclassOwner(c:Character,e:Entry){return c.selections.find(s=>classMatches(e,s.entry));}
 export function skillKey(name: string): string {
   const compact = name.toLowerCase().replace(/[\s_-]/g, '');
   return Object.keys(SKILLS).find(k => k.toLowerCase() === compact || SKILLS[k].name === name) ?? name;

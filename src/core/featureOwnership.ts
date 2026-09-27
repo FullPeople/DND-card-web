@@ -1,11 +1,9 @@
-import type {Character, Entry, Selection} from './model';
+import {classMatches,type Character,type Entry,type Selection} from './model';
+export {classMatches} from './model';
 
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
 const aliases=(e:Entry)=>[e.name,e.english,e.raw.name,e.raw.ENG_name].map(key).filter(Boolean);
 const classNames=(e:Entry)=>[e.raw.className,e.raw.classEnglish,e.raw.classENG_name].map(key).filter(Boolean);
-export function classMatches(child:Entry,parent:Entry){
- return parent.kind==='class'&&classNames(child).some(name=>aliases(parent).includes(name))&&key(child.raw.classSource||'PHB')===key(parent.source);
-}
 export function parentClass(c:Character,row:Selection){
  return c.selections.find(parent=>parent.entry.kind==='class'&&(row.parentId?parent.id===row.parentId&&classMatches(row.entry,parent.entry):classMatches(row.entry,parent.entry)));
 }

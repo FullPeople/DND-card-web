@@ -10,7 +10,7 @@ export async function saveWorkspace(workspace: Workspace): Promise<void> {
   const database = await db(); const tx = database.transaction('documents', 'readwrite');
   const previous = await tx.store.get('workspace');
   if (previous) await tx.store.put(previous, 'backup');
-  await tx.store.put(structuredClone(workspace), 'workspace'); await tx.done;
+  await tx.store.put(workspace, 'workspace'); await tx.done;
 }
 export async function restoreBackup(): Promise<Workspace | undefined> { return (await db()).get('documents', 'backup'); }
 export async function readCache(key: string): Promise<{ body: Raw; revision: string } | undefined> { return (await db()).get('cache', key); }

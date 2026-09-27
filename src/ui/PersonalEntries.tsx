@@ -26,7 +26,7 @@ export function PersonalEntries({c,edit}:Props){
   if(kind==='spell')raw.level=spellLevel;
   if(kind==='item'){raw.value=price*100;raw.weight=weight;}
   if(kind==='subclass'){const owner=classes.find(s=>s.id===parent);if(!owner)throw Error('请选择所属职业');raw.className=owner.entry.name;raw.classSource=owner.entry.source;}
-  const entry=createCustomEntry({id:current?.entry.id,type,name,body,raw,revision:String(Number(current?.entry.revision||0)+1)});delete entry.raw._workbenchCustom;entry.english=english||entry.name;validateCustomFields(type,entry.raw,entry.entries);validateEntryContent(entry.entries);
+  const entry=createCustomEntry({id:current?.entry.id,type,name,english,body,raw,revision:String(Number(current?.entry.revision||0)+1)});delete entry.raw._workbenchCustom;entry.english=english||entry.name;validateCustomFields(type,entry.raw,entry.entries);validateEntryContent(entry.entries);
   const without={...c,selections:c.selections.filter(s=>s.id!==current?.id)},reason=candidateReason(without,entry);if(reason)throw Error(reason);
   edit(draft=>{
    if(current){const row=draft.selections.find(s=>s.id===current.id)!;row.entry=entry;row.level=kind==='class'?level:1;row.parentId=parent||undefined;if(kind==='class')for(const sub of draft.selections.filter(s=>s.entry.kind==='subclass'&&s.parentId===row.id)){sub.entry.raw.className=entry.name;sub.entry.raw.classEnglish=entry.english;}return;}

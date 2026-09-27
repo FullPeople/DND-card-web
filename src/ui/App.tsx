@@ -1,3 +1,4 @@
+import {CardOwnership} from './CardOwnership';
 import {Announcement} from './Announcement';
 import {useEntryMenuActions} from './EntrySharing';
 import {CharacterManager,localCharacterRow,type CharacterRow} from './CharacterManager';
@@ -121,7 +122,8 @@ export default function App() {
   useEffect(()=>{if(wb.compose)setWorkbenchPage('dice');},[wb.compose?.id]);
   useEffect(()=>{if(inWorkbench)document.body.classList.add('suite-workbench');return()=>document.body.classList.remove('suite-workbench');},[]);
   const appliedWorkbench=useRef('');
-  const workbenchDocuments=useRef(new Map<string,string>());
+  const workbenchDocuments=useRef(new Map<string,any>());
+  const appliedDocument=useRef<any>(undefined);
   const workbenchDirty=useRef(new Set<string>());
   const workbenchFailed=useRef(new Set<string>());
   const workbenchUncertain=useRef(new Map<string,{requestId:string;before:Character;after:Character}>());
@@ -284,11 +286,11 @@ export default function App() {
   }
   useLayoutEffect(()=>{
     if(!inWorkbench||!workspace||!writable.current||!wb.target||wb.target.kind!=='character')return;
-    const target=wb.target,id=workbenchCharacterId(target),signature=JSON.stringify([target,wb.document,wb.inventory?.revision]);
-    if(signature===appliedWorkbench.current&&workspaceRef.current?.activeId===id)return;
+    const target=wb.target,id=workbenchCharacterId(target),signature=JSON.stringify([target,wb.inventory?.revision]);
+    if(signature===appliedWorkbench.current&&appliedDocument.current===wb.document&&workspaceRef.current?.activeId===id)return;
     const current=workspaceRef.current!;let next=current.characters.find(row=>row.id===id);
     try{
-      const documentSignature=JSON.stringify(wb.document);
+      const documentSignature=wb.document;
       if(!next||(wb.document&&workbenchDocuments.current.get(id)!==documentSignature&&!workbenchDirty.current.has(id))){if(!wb.document)return;next=wb.document.dnd_card_web?structuredClone(readDocument(wb.document.dnd_card_web)):importOwlbear(wb.document);next.id=id;}
       else next=structuredClone(next);
       const uncertain=workbenchUncertain.current.get(id);
@@ -313,8 +315,11 @@ export default function App() {
       if(typeof stats['armor class']==='number'){next.adjustments=next.adjustments?.filter(a=>a.target!=='ac')||[];next.adjustments.push({id:'suite-ac',target:'ac',value:stats['armor class']-(next.sheetBonuses?.ac||0),reason:'枭熊场景'});}
       }
       syncAutoResources(next);
-      appliedWorkbench.current=signature;
-      persist({...current,activeId:id,characters:[...current.characters.filter(row=>row.id!==id),next]});
+      appliedWorkbench.current=signature;appliedDocument.current=wb.document;
+      // Remote reads are already durable on the server. Keep their view in memory;
+      // saving every snapshot rewrote every imported portrait plus the backup.
+      const visible={...current,activeId:id,characters:[...current.characters.filter(row=>row.id!==id),next]};
+      workspaceRef.current=visible;setWorkspace(visible);
     }catch(e){setNotice(`枭熊角色读取失败：${String(e)}`);appliedWorkbench.current=signature;}
   },[wb.target,wb.document,wb.inventory?.revision,!!workspace,workspace?.activeId,historyTick]);
 
@@ -432,7 +437,7 @@ export default function App() {
     const tagKind = ['quickref', 'variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
     if (found) inspect(found); else { setQuery(name); if (tagKind && Object.hasOwn(KIND_LABELS, tagKind)) setKind(tagKind as Kind); setDetail(undefined); setNotice(`已搜索「${name}」。若未收录，可开启其他来源或在中文站查阅。`); }
   }
-  function browse(kind: Kind | 'size') { exitSheetFullscreen(); setFillPulse(n=>n+1);setKind(kind); if (kind === 'subclass') { const owner = c?.selections.find(s => s.entry.kind === 'class'); if (owner) library.navigate(allEntries.find(e => e.id === owner.entry.id) || owner.entry,'subclasses'); } setTab('wiki'); }
+  function browse(kind: Kind | 'size',parent?:Entry) { exitSheetFullscreen(); setFillPulse(n=>n+1);setKind(kind); if (kind === 'subclass') { const owner = parent||c?.selections.find(s => s.entry.kind === 'class')?.entry; if (owner) {library.navigate(allEntries.find(e => e.id === owner.id) || owner,'subclasses');library.patch({subclassesOpen:true});} } setTab('wiki'); }
   function add(entry: Entry, pin = false, section?: Selection['section']) {
     if (!c) return;
     if(pin){edit(draft=>pinEntry(draft,entry));return;}
@@ -564,7 +569,7 @@ export default function App() {
       <section data-inventory-recipient={inWorkbench&&workbenchPage==='sheet'&&wb.target?wb.target.cardId?`card:${wb.target.cardId}`:`monster:${wb.target.itemId}`:undefined} className={`sheet-pane ${tab === 'sheet' ? 'mobile-active' : ''} ${editing&&(!inWorkbench||workbenchPage==='sheet'&&wb.target?.write)&&!exportView?'sheet-editing':''}`} aria-label="角色卡工作区">
         {inWorkbench&&workbenchPage==='music'?<MusicWorkspace close={()=>setWorkbenchPage('console')}/>:inWorkbench&&['settings','features'].includes(workbenchPage)?<WorkbenchPanel key={workbenchPage} panel="settings" section={workbenchPage==='features'?'features':undefined} close={()=>setWorkbenchPage('console')}/>:inWorkbench&&workbenchPage==='notes'&&wb.role==='GM'?<DmNotes/>:inWorkbench&&workbenchPage==='dice'?<DicePage online={wb.online} target={wb.target} rolls={wb.rolls} compose={wb.compose}/>:inWorkbench&&workbenchPage==='console'?<DMConsole navigate={setWorkbenchPage}/>:inWorkbench&&(!wb.target||wb.target.kind==='character'&&!wb.document)?<div className="workbench-monster"><p role="status">{wb.loading?'读取角色资料…':'从上方选择角色卡'}</p></div>:inWorkbench&&(wb.target?.kind==='monster'||wb.target?.kind==='token')?<WorkbenchMonster editing={editing} setEditing={setEditing} key={wb.target.key} target={wb.target} raw={wb.document} online={wb.online} onLink={link}/>:<>
         <div className="pane-toolbar"><div><span className="eyebrow">角色卡</span><div className="character-tabs" role="tablist" aria-label="当前角色">{!inWorkbench&&workspace.characters.map(x=><button key={x.id} role="tab" aria-selected={x.id===c.id} onClick={()=>persist({...workspace,activeId:x.id})}>{x.name}</button>)}</div></div>
-          <div className="toolbar-actions">{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>同步核对</button>}{editing&&<button onClick={()=>setModal('personal')}>条目 / 等级</button>}{editing && <button className="adjust-shortcut" aria-label="数值依据与人工修正" onClick={() => setModal('adjust')}>修正</button>}<SheetFullscreenButton/><button aria-label="撤销" disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label="重做" disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><span className="paper-size">A4 · 适应窗口</span><button disabled={inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label="编辑模式" onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>编辑模式</button></div>
+          <div className="toolbar-actions">{inWorkbench&&wb.role==='GM'&&wb.cards.find(card=>card.id===wb.target?.cardId)&&<CardOwnership key={wb.target?.cardId} card={wb.cards.find(card=>card.id===wb.target?.cardId)!}/>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>同步核对</button>}{editing&&<button onClick={()=>setModal('personal')}>条目 / 等级</button>}{editing && <button className="adjust-shortcut" aria-label="数值依据与人工修正" onClick={() => setModal('adjust')}>修正</button>}<SheetFullscreenButton/><button aria-label="撤销" disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label="重做" disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><span className="paper-size">A4 · 适应窗口</span><button disabled={inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label="编辑模式" onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>编辑模式</button></div>
         </div>
         <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · 房间 ${c.edition}`}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button></span></div>
@@ -589,7 +594,7 @@ export default function App() {
         <WikiSplitter/>{kind==='custom'&&canAuthor&&<><CustomEntryEditor newEntry={()=>setDetail(undefined)} entry={detail?.raw._workbenchCustom?detail:undefined} busy={rulesBusy} save={entry=>changeCustom(entry)} remove={entry=>changeCustom(entry,true)}/></>}
         {detail && <article key={`${detail.kind}:${detail.id}`} className={`entry-detail ${explicitlyExcluded(c,detail)?'entry-disabled':''} ${library.hover?'is-sheet-preview':readingFlash?'sheet-preview-committed':''} ${library.focus?'has-reading-focus':''}`} data-described-entry={detail.id} data-entry-kind={detail.kind} ref={detailPane} onScroll={e => { if(!library.hover)library.savePosition(detail.id, e.currentTarget.scrollTop); }}><div className="detail-frozen"><div className="detail-navigation"><button disabled={!library.canGoBack} onClick={library.back}>← 上一条</button><button aria-label="收起正文" onClick={() => { setDetail(undefined); }}>×</button></div><div className="detail-heading">{detail.kind==='monster'&&<MonsterPortrait entry={detail}/>}<EntryBadges entry={detail}/><span className="eyebrow">{KIND_LABELS[detail.kind]} · {entryEdition(detail) === 'both' ? '通用资料' : entryEdition(detail)}</span><h1><EntryDraggable className="detail-title" entry={detail} >{entryLabel(detail)}{detail.english !== detail.name && <small className="english-name"> {detail.english}</small>}</EntryDraggable></h1><small>{detail.raw._authoredBy ? `${detail.raw._authoredBy} · ` : ''}<SourceName id={detail.source}/>{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div><ClassNavigation subclassesOpen={!!libraryState.subclassesOpen} onToggleSubclasses={()=>library.patch({subclassesOpen:!libraryState.subclassesOpen})} entry={detail} entries={libraryEntries} character={c} navigate={(entry,focus)=>library.navigate(entry,focus)}/></div>
           {detail.kind==='monster'?<ContentBoundary key={detail.id}><MonsterDocument entry={detail} onLink={link}/></ContentBoundary>:<><ContentBoundary key={`facts:${detail.id}`}><EntryFacts entry={detail} onLink={link}/></ContentBoundary>
-          <LibraryDocument subclassesOpen={!!libraryState.subclassesOpen} preview={!!library.hover} highlight={readingFlash} focus={library.focus} character={c} entry={detail} entries={allEntries} onLink={link} inspect={inspect} collapsed={libraryState.collapsed[detail.id] || []} onCollapse={ids => library.patch({ focus:undefined, collapsed: { ...libraryState.collapsed, [detail.id]: ids } })}/></>}
+          <LibraryDocument editionFilter={editionFilter} subclassesOpen={!!libraryState.subclassesOpen} preview={!!library.hover} highlight={readingFlash} focus={library.focus} character={c} entry={detail} entries={allEntries} onLink={link} inspect={inspect} collapsed={libraryState.collapsed[detail.id] || []} onCollapse={ids => library.patch({ focus:undefined, collapsed: { ...libraryState.collapsed, [detail.id]: ids } })}/></>}
 
           <RawDetails key={detail.id} entry={detail}/>
           <div className="detail-actions">{blocked && <p className="inline-warning">{blocked}</p>}<a href={DEFAULT_SOURCE} target="_blank" rel="noreferrer">在中文站查阅 ↗</a>
