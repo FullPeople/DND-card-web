@@ -4,14 +4,14 @@ import {availableClassSpells,spellUsesPreparation} from './spellcastingRules';
 import {preparationBase} from './preparation';
 
 export function spellLibrary(c:Character,entries:Entry[]=[]):Selection[]{
- const selected=c.selections.filter(s=>s.entry.kind==='spell'),known=new Set(selected.map(s=>s.entry.id));
+ const selected=c.selections.filter(s=>s.entry.kind==='spell'),known=new Set(selected.filter(s=>!c.spellSettings?.special?.[s.id]?.sourceGrant).map(s=>s.entry.id));
  if(spellState(c).mode==='known')return selected;
  return [...selected,...availableClassSpells(c,entries).filter(e=>!known.has(e.id)).map(entry=>({id:`spell-list:${entry.id}`,entry,quantity:1,level:1,equipped:false}))];
 }
 
 /** Copy just the selected full-list spell into durable state; do not persist the whole class list. */
 export function prepareSpellEntry(c:Character,entry:Entry,preferredSlot?:number):string|undefined{
- const existing=c.selections.find(s=>s.entry.kind==='spell'&&s.entry.id===entry.id);
+ const existing=c.selections.find(s=>s.entry.kind==='spell'&&s.entry.id===entry.id&&!c.spellSettings?.special?.[s.id]?.sourceGrant);
  if(existing)return setPreparedSpell(c,existing.id,true,preferredSlot)?existing.id:undefined;
  if(!selectionAllowed(c,entry)||!spellUsesPreparation(c,entry))return undefined;
  const row:Selection={id:uid(),entry:structuredClone(entry),quantity:1,level:1,equipped:false};
@@ -28,7 +28,7 @@ export function togglePreparedSpell(c:Character,id:string,preferredSlot?:number)
 /** Preparation moves references, never duplicates or deletes the learned spell. */
 export function setPreparedSpell(c:Character,id:string,prepare:boolean,preferredSlot?:number):boolean{
  const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell');
- if(!row||!spellUsesPreparation(c,row.entry))return false;
+ if(!row||!spellUsesPreparation(c,row.entry,row.id))return false;
  const effective=spellState(c);
  if(effective.mode!=='prepared')return false;
  const settings=c.spellSettings||=structuredClone(spellState(c));

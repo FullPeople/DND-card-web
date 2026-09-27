@@ -47,8 +47,8 @@ export function availableClassSpells(c:Character,entries:Entry[]):Entry[]{
  return entries.filter(e=>e.kind==='spell'&&Number(e.raw.level)>0&&selectionAllowed(c,e)&&profiles.some(p=>Number(e.raw.level)<=p.maxLevel&&spellOnClassList(e,p)));
 }
 
-export function spellUsesPreparation(c:Character,entry:Entry):boolean{
- if(c.selections.some(s=>s.entry.id===entry.id&&c.spellSettings?.special?.[s.id]))return false;
+export function spellUsesPreparation(c:Character,entry:Entry,selectionId?:string):boolean{
+ if(selectionId?!!c.spellSettings?.special?.[selectionId]:c.selections.some(s=>s.entry.id===entry.id&&c.spellSettings?.special?.[s.id]&&!c.spellSettings.special[s.id].sourceGrant))return false;
  if(!(Number(entry.raw.level)>0))return false;
  if(c.spellSettings?.modeOverride)return c.spellSettings.mode==='prepared';
  const profiles=casterProfiles(c),matching=profiles.filter(p=>spellOnClassList(entry,p));

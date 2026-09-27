@@ -1,3 +1,4 @@
+import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import { requirementMismatch } from './engine';
 import { uid, type Character, type Entry, type Selection } from './model';
 import {inventoryState} from './characterDetails';
@@ -8,12 +9,14 @@ export function belongsToClass(child: Selection, parent: Selection) {
 }
 export function removeSelection(c: Character, id: string, dismiss = true) {
   const row = c.selections.find(s => s.id === id);
+  if(dismiss&&row?.grantKey?.startsWith('source-spell:'))return;
   if (dismiss && row?.parentId && row.grantKey) c.dismissedFeatures = [...new Set([...(c.dismissedFeatures || []), `${row.parentId}|${row.grantKey}`])];
   const removed = new Set([id]);
   for (let changed = true; changed;) {
     changed = false;
     for (const s of c.selections) if (!removed.has(s.id) && (s.parentId && removed.has(s.parentId) || s.requirementId && [...removed].some(key => s.requirementId!.startsWith(`${key}:`)) || [...removed].some(key => { const parent = c.selections.find(p => p.id === key); return parent && belongsToClass(s, parent); }))) { removed.add(s.id); changed = true; }
   }
+  rememberSourceSpellUses(c);
   c.selections = c.selections.filter(s => !removed.has(s.id));
   c.quickbar = c.quickbar?.filter(key => !removed.has(key));
   if(c.spellSettings)c.spellSettings.prepared=c.spellSettings.prepared.map(key=>removed.has(key)?'':key);
@@ -82,7 +85,7 @@ export function syncFeatures(c: Character, catalog: Entry[]): boolean {
       if(money!==before){const inv=c.inventory||=structuredClone(inventoryState(c));(inv.grantedCoins||={})[coinKey]=money;inv.coins.gp=Math.max(0,inv.coins.gp+money-before);changed=true;}
     }
     const expected = new Set(grants.map(g => g.key));
-    for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
+    for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !s.grantKey.startsWith('source-spell:') && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
     for (const grant of grants) {
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);

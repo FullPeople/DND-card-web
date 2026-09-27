@@ -2,6 +2,7 @@ import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 import {exportCharacter} from '../../src/core/export';
+import {newAutomationState} from '../../src/core/automation/state';
 
 function manual(){
  const c=newCharacter();c.name='自动化迁移验收';c.abilities.dex=16;c.training={armor:'轻甲、中甲、重甲、盾牌'};c.runtime.resources={fixture:{name:'剩余次数',current:1,max:3}};
@@ -39,4 +40,39 @@ test('failed equipment save preserves the previous database and the current draf
  await page.evaluate(()=>{(window as any).rejectAutomationSave=false;});await page.getByRole('checkbox',{name:'装备 验收盾牌',exact:true}).check();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const saved=await readWorkspace(page),c=saved.characters.find((c:any)=>c.id===saved.activeId);expect(c.selections.filter((r:any)=>r.equipped).map((r:any)=>r.entry.name)).toEqual(['验收重甲','验收盾牌']);expect(c.runtime.resources.fixture.current).toBe(1);
  await page.reload();await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByTestId('automation-ac')).toHaveText('18');
+});
+
+test('equipped weapon has separate clickable thrown and two-handed formulas, surviving save and reload',async({page})=>{
+ await ready(page);const c=manual();c.name='武器自动化验收';c.automation=newAutomationState();c.abilities.str=18;c.training!.weapons='简易武器';
+ c.quickbarActions=[{id:'manual',name:'保留手写攻击',attack:'+9',damage:'2d8+7'}];
+ c.selections.push({id:'weapon-fixture',entry:{...c.selections[0].entry,id:'fixture:weapon',name:'验收长兵器',english:'Fixture Spear',raw:{type:'M',weaponCategory:'simple',dmg1:'1d6',dmg2:'1d8',dmgType:'P',property:['T','V']}},quantity:4,level:1,equipped:false});
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'weapon.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'装备 验收长兵器'}).check();await page.keyboard.press('Escape');
+ const thrown=page.locator('[data-quick-id="auto-weapon:weapon-fixture:thrown"]'),twohanded=page.locator('[data-quick-id="auto-weapon:weapon-fixture:two-handed"]');
+ await expect(thrown).toContainText('投掷');await expect(thrown).toContainText('1d6+4');await expect(twohanded).toContainText('1d8+4');await expect(page.locator('[data-quick-id="custom:manual"]')).toContainText('2d8+7');
+ const edit=page.getByRole('switch',{name:'编辑模式',exact:true});if(await edit.getAttribute('aria-checked')==='true')await edit.click();
+ const dice=page.getByRole('dialog',{name:'本地投骰'});
+ await thrown.getByRole('button',{name:'+6',exact:true}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d20+6');await dice.getByRole('button',{name:'投骰',exact:true}).click();await expect(dice.getByRole('status')).toContainText('1d20:');const total=Number((await dice.getByRole('status').innerText()).split(' ')[0]);expect(total).toBeGreaterThanOrEqual(7);expect(total).toBeLessThanOrEqual(26);await dice.getByRole('button',{name:'关闭'}).click();
+ await thrown.getByRole('button',{name:/1d6\+4/}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d6+4');await dice.getByRole('button',{name:'关闭'}).click();
+ await twohanded.getByRole('button',{name:/1d8\+4/}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d8+4');await dice.getByRole('button',{name:'关闭'}).click();
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await expect(thrown).toBeVisible();
+ await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'装备 验收长兵器'}).uncheck();await page.keyboard.press('Escape');await expect(thrown).toHaveCount(0);await expect(page.locator('[data-quick-id="custom:manual"]')).toBeVisible();
+});
+
+test('source spells stay fixed, use their own casting ability and keep spent charges after reload and disable',async({page})=>{
+ await ready(page);const c=manual();c.name='来源法术验收';c.automation=newAutomationState();c.abilities.cha=18;c.abilities.wis=14;
+ const base=c.selections[0].entry;
+ const spell={...base,id:'fixture:source-spell',kind:'spell' as const,name:'验收护幕',english:'Fixture Ward',raw:{level:1,school:'A',entries:['原创软件验收法术。']}};
+ c.selections=[{id:'own-spell',entry:spell,quantity:1,level:1,equipped:false},{id:'gift-race',entry:{...base,id:'fixture:race',kind:'race',name:'验收种族',raw:{additionalSpells:[{ability:{choose:['int','cha']},innate:{'_':{daily:{'2':['Fixture Ward|XPHB']}}}}]}},quantity:1,level:1,equipped:false},{id:'gift-class',entry:{...base,id:'fixture:class',kind:'class',name:'验收职业',raw:{hd:{faces:8},spellcastingAbility:'wis',additionalSpells:[{prepared:{'1':['Fixture Ward|XPHB']}}]}},quantity:1,level:1,equipped:false}];
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'source-spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('combobox',{name:'验收种族的施法属性'}).selectOption('cha');await page.keyboard.press('Escape');await page.getByRole('tab',{name:'法术',exact:true}).click();
+ const race=page.locator('.source-spell-row').filter({hasText:'来源：验收种族'}),cls=page.locator('.source-spell-row').filter({hasText:'来源：验收职业'});
+ await expect(race).toContainText('魅力 · 攻击 +6 · DC 14');await expect(cls).toContainText('感知 · 攻击 +4 · DC 12');await expect(race.locator('.spell-stock-tile')).toHaveAttribute('data-drag-enabled','false');
+ const edit=page.getByRole('switch',{name:'编辑模式'});if(await edit.getAttribute('aria-checked')!=='true')await edit.click();
+ await race.locator('.spell-stock-tile').click({button:'right'});await expect(page.getByRole('menu',{name:'法术操作'}).getByRole('menuitem',{name:'从角色卡移除'})).toHaveCount(0);await expect(page.getByRole('menuitem',{name:'恢复为常规法术'})).toHaveCount(0);await page.keyboard.press('Escape');
+ await race.getByRole('button',{name:'使用',exact:true}).click();await expect(race.getByRole('spinbutton',{name:'验收护幕剩余次数'})).toHaveValue('1');
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.screenshot({path:test.info().outputPath('source-spells.png')});await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(race.getByRole('spinbutton',{name:'验收护幕剩余次数'})).toHaveValue('1');
+ await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'启用自动计算'}).uncheck();await page.keyboard.press('Escape');await expect(race.getByRole('button',{name:'使用',exact:true})).toBeDisabled();
+ await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'启用自动计算'}).check();await page.keyboard.press('Escape');await expect(race.getByRole('spinbutton',{name:'验收护幕剩余次数'})).toHaveValue('1');
+ const w=await readWorkspace(page),saved=w.characters.find((x:any)=>x.id===w.activeId);expect(saved.selections.filter((s:any)=>s.entry.kind==='spell')).toHaveLength(3);expect(saved.selections.some((s:any)=>s.id==='own-spell'&&!s.parentId)).toBe(true);
 });

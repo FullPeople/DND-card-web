@@ -1,9 +1,10 @@
+import {rememberSourceSpellUses,sourceSpellEnabled} from './automation/sourceSpellState';
 import {spellState} from './characterDetails';
 import type {Character,SpecialSpell} from './model';
 
 export const specialSpellResource=(id:string)=>`innate-spell:${id}`;
 export function setSpecialSpell(c:Character,id:string,config?:SpecialSpell):boolean{
- const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell');if(!row)return false;
+ const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell');if(!row||row.grantKey?.startsWith('source-spell:'))return false;
  const settings=c.spellSettings||=structuredClone(spellState(c));
  if(!config){if(settings.special)delete settings.special[id];delete c.runtime.resources[specialSpellResource(id)];return true;}
  const next={...config,max:config.mode==='uses'?Math.max(1,Math.min(100,Math.trunc(config.max||1))):undefined};
@@ -13,4 +14,4 @@ export function setSpecialSpell(c:Character,id:string,config?:SpecialSpell):bool
  else delete c.runtime.resources[key];
  return true;
 }
-export function changeSpecialSpellUses(c:Character,id:string,value:number){const config=c.spellSettings?.special?.[id],resource=c.runtime.resources[specialSpellResource(id)];if(config?.mode!=='uses'||!resource)return;resource.current=Math.max(0,Math.min(resource.max,Math.trunc(value)));}
+export function changeSpecialSpellUses(c:Character,id:string,value:number){const config=c.spellSettings?.special?.[id],resource=c.runtime.resources[specialSpellResource(id)];if(config?.mode!=='uses'||!resource||!sourceSpellEnabled(c,id))return;resource.current=Math.max(0,Math.min(resource.max,Math.trunc(value)));rememberSourceSpellUses(c,id);}

@@ -1,6 +1,7 @@
 import type {Character,Entry,Selection,Issue} from '../model';
 import {equipmentTraining} from '../proficiencyText';
 import {automationEnabled,supportedAutomation} from './state';
+import {trainingDeclarations} from './training';
 
 export type ArmorType='LA'|'MA'|'HA'|'S';
 export interface EquipmentOrigin {selectionId:string;entryId:string;source:string;edition:Entry['edition'];revision:string;path:string}
@@ -21,24 +22,8 @@ export function armorRule(row:Selection):{rule?:ArmorRule;issues:Issue[]}{
  if(bonus===undefined||Math.abs(bonus)>100){issue('魔法 AC 加值未支持，未自动应用这部分。');}
  return {issues,rule:{origin:{selectionId:row.id,entryId:row.entry.id,source:row.entry.source,edition:row.entry.edition,revision:row.entry.revision,path:'raw.ac'},slot:type==='S'?'shield':'armor',type,base,usesDex:type==='LA'||type==='MA',...(type==='MA'?{dexCap:2}:{}),bonus:bonus!==undefined&&Math.abs(bonus)<=100?bonus:0,attunementRequired:!!raw.reqAttune}};
 }
-function declarations(value:unknown):string[]{
- if(typeof value==='string')return [value];
- if(Array.isArray(value))return value.flatMap(declarations);
- if(!value||typeof value!=='object')return [];
- // Choice/filter declarations require a recorded player choice, never a guess.
- const object=value as Record<string,unknown>;
- if(typeof object.proficiency==='string'&&!object.optional)return [object.proficiency];
- return Object.entries(object).flatMap(([key,v])=>v===true?[key]:[]);
-}
 export function armorTraining(c:Character,active:Selection[]):Set<string>{
- if(c.training?.armor!==undefined)return new Set(c.training.armor.split(/[,，、;；\n]+/).map(s=>equipmentTraining(s.trim())?.[0]).filter((s):s is NonNullable<typeof s>=>!!s));
- const classes=c.selections.filter(s=>s.entry.kind==='class');
- return new Set(active.flatMap(row=>{
-  const raw=row.entry.raw;
-  if(row.entry.kind==='item'&&(!row.equipped||raw.reqAttune&&!row.attuned))return [];
-  const declared=row.entry.kind==='class'?(row.id===classes[0]?.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;
-  return [...declarations(declared?.armor??declared?.armorProficiencies),...declarations(raw.armorProficiencies)].map(s=>equipmentTraining(s)?.[0]).filter((s):s is NonNullable<typeof s>=>!!s);
- }));
+ return new Set(trainingDeclarations(c,active,'armor').map(s=>equipmentTraining(s)?.[0]).filter((s):s is NonNullable<typeof s>=>!!s));
 }
 /** Called only for an explicit equip action, in the same draft/undo transaction. */
 export function equipSelection(c:Character,id:string,equipped:boolean):void{

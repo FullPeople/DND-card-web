@@ -1,3 +1,4 @@
+import {sourceSpellEnabled} from './automation/sourceSpellState';
 import {inlineLabel} from './inlineTags';
 import {weaponAttacks} from './weaponAttacks';
 import {spellState,spellValues,inventoryState,carriedWeight} from './characterDetails';
@@ -16,7 +17,7 @@ export function exportOwlbear(c: Character, d: Derived) {
   const active = c.selections.filter(s => selectionAllowed(c, s.entry));
   const entryName = (kind: string) => active.find(s => s.entry.kind === kind)?.entry.name || null;
   const features = (kinds: string[]) => active.filter(s => kinds.includes(s.entry.kind)).map(s => ({ name: s.entry.name, source: s.entry.source, description: plainText(s.entry.entries), level: s.entry.raw.level || null }));
-  const spells = active.filter(s => s.entry.kind === 'spell').map(s => ({ selectionId:s.id,name: s.entry.name, level: s.entry.raw.level || 0, source: s.entry.source, description: plainText(s.entry.entries), meta: { source: s.entry.source } }));
+  const spells = active.filter(s => s.entry.kind === 'spell'&&sourceSpellEnabled(c,s.id)).map(s => ({ selectionId:s.id,name: s.entry.name, level: s.entry.raw.level || 0, source: s.entry.source, description: plainText(s.entry.entries), meta: { source: s.entry.source } }));
   const settings=spellState(c),spellStats=spellValues(c,d),ability=settings.ability;
   const preparedIds=new Set(settings.prepared);
   return { schema_version: '0.3', meta: { template_name: 'DND Card Web', template_version: '0.1.0', layout_version: 'web-1', ruleset: c.edition, source_file: `${c.name}.json`, parsed_at: c.updatedAt },
@@ -26,7 +27,7 @@ export function exportOwlbear(c: Character, d: Derived) {
     core_stats: { ac: d.ac, initiative: d.initiative, speed: d.speed, proficiency_bonus: d.proficiency, passive_perception: d.passive, dc: spellStats.dc, dc_ability: ability || null, hp: { current: c.runtime.hp, max: d.maxHp, temp: c.runtime.tempHp }, hit_dice: { current: Object.entries(c.runtime.resources).filter(([id])=>id.startsWith('hit-die:')).reduce((sum,[,r])=>sum+r.current,0), max: d.level, die_size: active.filter(s => s.entry.kind === 'class').length === 1 ? active.find(s => s.entry.kind === 'class')!.entry.raw.hd?.faces || null : null }, inspiration: c.runtime.inspiration },
     skills: Object.entries(d.skills).map(([key, s]) => ({ name: SKILLS[key].name, ability: SKILLS[key].ability, total: s.value, proficiency: s.expertise ? 'expertise' : s.proficient ? 'proficient' : 'none', misc_bonus: s.value - d.modifiers[SKILLS[key].ability] - (s.proficient ? d.proficiency * (s.expertise ? 2 : 1) : 0) })),
     defenses: { resistances: [], immunities: [], advantages: [], disadvantages: [] },
-    combat: { armor: null, shield: null, weapons: weaponAttacks(c).map(({key,entry,...attack})=>({...attack,web_action_key:key,...(entry?{source:entry.source,description:plainText(entry.entries)}:{})})) },
+    combat: { armor: null, shield: null, weapons: weaponAttacks(c,d).map(({key,entry,...attack})=>({...attack,web_action_key:key,...(entry?{source:entry.source,description:plainText(entry.entries)}:{})})) },
     features: { class_features: features(['feature', 'subclass']), race_features: features(['race']), feats: features(['feat']), fighting_style_feats: [], special_abilities: [] },
     inventory: { items: active.filter(s => s.entry.kind === 'item').map(s => ({ name: s.entry.name, quantity: s.quantity, equipped: s.equipped, attuned:!!s.attuned, weight: s.entry.raw.weight || 0, description: plainText(s.entry.entries) })), coins:inventoryState(c).coins, total_weight:carriedWeight(c).items+carriedWeight(c).coins, wondrous_items: [], consumables: [], containers: [] },
     spellcasting: { spellcasting_ability: ability || null, save_dc: spellStats.dc, attack_bonus: spellStats.attack, spell_slots: Object.fromEntries(Object.entries(settings.slots).map(([level,slot])=>[level,{max:slot.max,current:slot.max-slot.used}])), cantrips_known: spells.filter(s => s.level === 0), prepared: spells.filter(s => s.level > 0 && settings.mode==='prepared'&&preparedIds.has(s.selectionId)), always_known: spells.filter(s=>s.level>0&&(settings.mode==='known'||!preparedIds.has(s.selectionId))) },
