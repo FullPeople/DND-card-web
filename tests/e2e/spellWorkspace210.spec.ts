@@ -19,6 +19,50 @@ async function load(page:Page,c=card()){
 }
 async function drag(page:Page,from:Locator,to:Locator){await from.scrollIntoViewIfNeeded();await to.scrollIntoViewIfNeeded();const a=await from.boundingBox(),b=await to.boundingBox();if(!a||!b)throw Error('drag target missing');await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(a.x+a.width/2+12,a.y+a.height/2,{steps:3});await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:15});await page.mouse.up();}
 
+// Observe actual rendered motion over successive browser frames, including its destination.
+async function recordMotion(page:Page){await page.evaluate(()=>{
+ const state={flights:[] as {x:number;y:number}[],landings:[] as string[],reflows:[] as {id:string;x:number}[],dragTargets:[] as string[],stop:false};
+ (window as any).spellMotion=state;
+ const frame=()=>{if(state.stop)return;
+  const flight=document.querySelector('.spell-tile-flight');if(flight){const r=flight.getBoundingClientRect();state.flights.push({x:r.x,y:r.y});}
+  document.querySelectorAll<HTMLElement>('.spell-flight-arrival').forEach(el=>state.landings.push(el.dataset.spellId||''));
+  document.querySelectorAll<HTMLElement>('.drag-landing-hidden').forEach(el=>state.dragTargets.push(el.dataset.spellId||''));
+  document.querySelectorAll<HTMLElement>('[data-spell-id]').forEach(el=>{if(el.getAnimations().some(a=>a.id==='spell-reflow'))state.reflows.push({id:el.dataset.spellId!,x:el.getBoundingClientRect().x});});
+  requestAnimationFrame(frame);
+ };requestAnimationFrame(frame);
+});}
+async function motionResult(page:Page){await expect(page.locator('.spell-tile-flight,.pointer-ghost,.spell-flight-arrival,.drag-landing-hidden')).toHaveCount(0);await expect.poll(()=>page.evaluate(()=>document.getAnimations().filter(a=>a.id==='spell-reflow').length)).toBe(0);return page.evaluate(()=>{const s=(window as any).spellMotion;s.stop=true;return s as {flights:{x:number;y:number}[];landings:string[];reflows:{id:string;x:number}[];dragTargets:string[]};});}
+
+test('original spell height, cut frame, ritual wash and rotating concentration seal survive preparation and narrow layout',async({page})=>{
+ const c=card(),ward=c.selections.find(s=>s.id==='Ward')!;Object.assign(ward.entry.raw,{meta:{ritual:true},duration:[{type:'timed',concentration:true}]});await load(page,c);
+ const known=page.locator('.spell-library [data-spell-id="Ward"]'),gift=page.locator('.source-spell-row .spell-stock-tile'),cantrip=page.locator('[data-cantrip-group="Source Mage"] .spell-stock-tile').first();
+ for(const tile of [known,gift,cantrip]){await expect(tile).toHaveCSS('height','28px');await expect(tile.locator('.spell-tile-frame')).toHaveAttribute('viewBox','0 0 100 28');await expect(tile.locator('.spell-tile-frame')).toBeVisible();}
+ await expect(known.locator('svg.spell-concentration-mark')).toHaveCount(1);await expect(known.locator('.spell-concentration-mark')).toHaveCSS('animation-name','spell-concentration-turn');await expect(known).toHaveCSS('background-image',/linear-gradient/);
+ await known.click();const prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]');await expect(prepared).toBeVisible();await expect(known).toContainText('已预备');
+ for(const tile of [known,prepared,gift]){await expect(tile).toHaveCSS('height','28px');await tile.hover();await expect(tile).toHaveCSS('background-image',/linear-gradient/);}
+ await page.mouse.move(1200,40);await page.screenshot({path:test.info().outputPath('spell-style-desktop.png')});await page.locator('.paper').screenshot({path:test.info().outputPath('spell-style-card.png')});
+ await page.setViewportSize({width:390,height:844});for(const tile of [known,prepared,gift,cantrip])await expect(tile).toHaveCSS('height','48px');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await page.screenshot({path:test.info().outputPath('spell-style-mobile.png'),fullPage:true});await known.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('spell-style-mobile-selected.png')});
+});
+
+test('known spells press in place and toggle a prepared copy, including cantrips, without flight or reflow',async({page})=>{
+ await load(page);const known=page.locator('.spell-library [data-spell-id="Ward"]'),prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]'),gift=page.locator('.source-spell-row');
+ const positions=()=>page.locator('.spell-library .spell-stock-tile').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return {id:(el as HTMLElement).dataset.spellId,x:r.x,y:r.y,w:r.width,h:r.height};}));
+ const before=await positions();await recordMotion(page);await known.click();await expect(prepared).toBeVisible();await expect(known).toHaveAttribute('aria-pressed','true');await expect(known).toHaveCSS('box-shadow',/inset/);await expect(known.locator('.spell-ready-mark')).toContainText('已预备');expect(await positions()).toEqual(before);
+ await known.click();await expect(prepared).toHaveCount(0);await expect(known).toHaveAttribute('aria-pressed','false');await expect(known.locator('.spell-ready-mark')).toHaveCount(0);await expect(gift).toContainText('免费 1/1');expect(await positions()).toEqual(before);
+ const spark=page.locator('.spell-library [data-spell-id="Spark"]'),group=page.locator('[data-cantrip-group="Source Mage"]');await expect(spark).toHaveAttribute('aria-pressed','true');await spark.click();await expect(spark).toHaveAttribute('aria-pressed','false');await expect(group.locator('[data-spell-id="Spark"]')).toHaveCount(0);
+ await spark.click();await expect(spark).toHaveAttribute('aria-pressed','true');await expect(group.locator('[data-spell-id="Spark"]')).toHaveCount(1);expect(await positions()).toEqual(before);
+ const motion=await motionResult(page);expect(motion.flights).toEqual([]);expect(motion.reflows).toEqual([]);expect(motion.landings).toEqual([]);
+ await known.click();await expect(prepared).toHaveCount(1);await prepared.click();await expect(known).toHaveAttribute('aria-pressed','false');await expect(known).toBeVisible();
+ await known.click();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(known).toHaveAttribute('aria-pressed','true');await expect(prepared).toHaveCount(1);await expect(spark).toHaveAttribute('aria-pressed','true');
+ await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await known.click();await expect(known).toHaveAttribute('aria-pressed','true');await expect(prepared).toHaveCount(1);await expect(page.locator('.detail-title')).toContainText('护盾示例');
+});
+
+test('reduced motion preserves spell choices without flight remnants or hidden cards',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await load(page);await recordMotion(page);const known=page.locator('.spell-library [data-spell-id="Ward"]'),prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]');await known.click();await expect(prepared).toBeVisible();
+ await drag(page,prepared,page.locator('.spell-library .cell-heading'));await expect(prepared).toHaveCount(0);await expect(known).toBeVisible();const motion=await motionResult(page);expect(motion.flights).toEqual([]);expect(motion.reflows).toEqual([]);await expect(page.locator('.drag-lifted')).toHaveCount(0);
+});
+
 test('wizard spells share one prepared area with independent cantrip, gift and normal slots; real drags and reload agree with overview',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await load(page);
  await expect(page.locator('.prepared-cell .cell-heading')).toContainText('预备法术');await expect(page.locator('.spell-library .cell-heading')).toContainText('已知法术');await expect(page.getByRole('heading',{name:'固定 / 次数法术'})).toHaveCount(0);
