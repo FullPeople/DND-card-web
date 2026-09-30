@@ -25,7 +25,7 @@ export interface Entry {
 export interface Selection { id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; weaponAbility?:Ability; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
 export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check';castLevel?:number}}
 export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
-export interface RuleProfile { autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
+export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface Character {
   automation?:import('./automation/state').AutomationState;
   locked?:boolean;
@@ -83,8 +83,8 @@ export function newCharacter(edition: Edition = '2024'): Character {
 export function entryEdition(e:Entry):Edition|'both' {
   const core:Record<string,Edition>={PHB:'2014',DMG:'2014',XPHB:'2024',XDMG:'2024'};
   const published=core[e.source.toUpperCase()];
-  if(!published)return 'both';
-  return (e.kind==='subclass'||e.kind==='feature')&&core[String(e.raw.classSource||'').toUpperCase()]||published;
+  const owner=(e.kind==='subclass'||e.kind==='feature')&&(e.raw._classEdition||core[String(e.raw.classSource||'').toUpperCase()]);
+  return owner||published||(['class','subclass','feature'].includes(e.kind)?e.edition:'both');
 }
 export function editionAllows(e:Entry,edition:Edition,legacy=false){const required=entryEdition(e);return required==='both'||required===edition||edition==='2024'&&legacy;}
 export function selectionAllowed(c: Character, e: Entry): boolean {

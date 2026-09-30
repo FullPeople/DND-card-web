@@ -1,13 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import seed from '../data/sourceRegistry.json';
-export type SourceMeta = { name: string; date?: string };
+import type {SourceMeta} from '../core/sourceCatalog';
+export type {SourceMeta} from '../core/sourceCatalog';
 export type SourceMode = 'full' | 'short' | 'both';
-export const SOURCE_SEED: Record<string, SourceMeta> = seed;
+export const SOURCE_SEED = seed as Record<string, SourceMeta>;
 const Context = createContext({ registry: SOURCE_SEED, mode: 'both' as SourceMode, setMode: (_:SourceMode)=>{}, merge: (_:Record<string,SourceMeta>)=>{}, format: (id:string)=>id });
 export function SourceProvider({children}:{children:ReactNode}){
  const [registry,setRegistry]=useState(SOURCE_SEED),[mode,setMode]=useState<SourceMode>(()=>{try{const v=localStorage.getItem('dnd-source-display');return ['full','short','both'].includes(v||'')?v as SourceMode:'both';}catch{return 'both';}});
  useEffect(()=>{try{localStorage.setItem('dnd-source-display',mode);}catch{}},[mode]);
- const merge=useCallback((next:Record<string,SourceMeta>)=>setRegistry(old=>({...old,...Object.fromEntries(Object.entries(next).map(([id,meta])=>[id,{...old[id],...meta,name:SOURCE_SEED[id]?.name||meta.name}]))})),[]);
+ const merge=useCallback((next:Record<string,SourceMeta>)=>setRegistry(old=>({...old,...Object.fromEntries(Object.entries(next).map(([id,meta])=>[id,{...old[id],...meta,category:SOURCE_SEED[id]?.category||(old[id]?.category==='模组内容'?'模组内容':meta.category||old[id]?.category),name:SOURCE_SEED[id]?.name||meta.name}]))})),[]);
  const format=(id:string)=>{const name=registry[id]?.name||id;return mode==='short'?id:mode==='full'||name===id?name:`${name}（${id}）`;};
  return <Context.Provider value={{registry,mode,setMode,merge,format}}>{children}</Context.Provider>;
 }

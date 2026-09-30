@@ -3,7 +3,7 @@ import {WorkbenchRevisions,currentInventory,documentRevision} from '../core/work
 import {recordAction} from './actionHistory';
 import {startWorkbenchSound,playWorkbenchSound} from './workbenchSound';
 import type {InventoryState} from '../core/inventory';
-import {Relay} from './relay';
+import {Relay,type RelayState} from './relay';
 import {documentChanges} from './document-delta';
 import {mutationQueue} from './mutationQueue';
 import {exportOwlbear} from '../core/export';
@@ -13,7 +13,7 @@ const protocol='full-suite-workbench/v1',params=new URLSearchParams(location.has
 const session=params.get('suite'),origin=params.get('bridge');
 export const inWorkbench=!!session&&origin===location.origin;
 export type Target={tokenPortrait?:{url:string;width?:number;height?:number};projectionPending?:boolean;documentRevision?:number;key:string;itemId:string;name:string;cardId:string;slug:string;kind:'character'|'monster'|'token';stats:Record<string,number>;write:boolean;role:string;pinned:boolean;locked?:boolean;statsLocked?:boolean;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];resources?:any[]};
-export type CardChoice={owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
+export type CardChoice={classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
 export type SharedRules={edition:Edition;sourceMode:'full'|'short'|'both';profile:RuleProfile;packs:RulePack[];customEntries:Entry[]};
 export type SharedDocument={key:string;scope:'room'|'scene';revision:number;rules:SharedRules};
 type State={inventory?:InventoryState;shared?:SharedDocument;settings?:Record<string,any>;visibility?:{wiki:boolean;monsters:boolean};console?:{timeStop:boolean;portalEffects:boolean;players:{id:string;name:string}[]};cards:CardChoice[];monsters:CardChoice[];role?:string;enabled:Record<string,boolean>;online:boolean;target?:Target;document?:any;loading?:boolean;message:string;rolls:any[];compose?:{id:string;expression:string;label?:string}};
@@ -22,7 +22,7 @@ const listeners=new Set<()=>void>(),pending=new Map<string,{resolve:(value?:any)
 let authoritativeInventory:InventoryState|undefined;
 const revisions=new WorkbenchRevisions();
 const operationTimings:any[]=[];
-export function workbenchDiagnostics(){return {transport:host&&!host.closed?'direct':relay?'relay':'offline',hostStarted,pending:[...pending].map(([id,p])=>({id,type:p.type,elapsedMs:Math.round(performance.now()-p.started)})),recent:operationTimings.slice(-24)};}
+export function workbenchDiagnostics(){return {relayState,transport:host&&!host.closed?'direct':relay?'relay':'offline',hostStarted,pending:[...pending].map(([id,p])=>({id,type:p.type,elapsedMs:Math.round(performance.now()-p.started)})),recent:operationTimings.slice(-24)};}
 const observedDocuments=new Map<string,{sequence:number;document:any}>();
 function rememberDocument(m:any){if(!m.state?.key||m.document===undefined)return;const old=observedDocuments.get(m.state.key),sequence=m.sequence||0;if(!old||documentRevision(m.document,m.state)>=documentRevision(old.document))observedDocuments.set(m.state.key,{sequence,document:m.document});}
 const stockDrafts=new Map<string,{before:InventoryState;after:InventoryState}>();
@@ -63,6 +63,7 @@ export async function requestInventory(operation:Record<string,unknown>){
  }catch(error){uncertain=!!(error as any)?.uncertain&&!(error as any)?.queueBlocked;throw error;}finally{if(!uncertain){stockDrafts.delete(op.operationId);inventoryCompletions.delete(op.operationId);}update({inventory:authoritativeInventory});}
 }
 
+let relayState:RelayState|undefined;
 let relay:Relay|undefined,selectionSequence=0,catalogSequence=0,hostStarted=0;
 const monsterRuntimeSequence=new Map<string,number>();
 const runtimeFrom=(value:any)=>({stats:value.stats,resources:value.resources,conditions:value.conditions,documentRevision:value.documentRevision});
@@ -120,9 +121,9 @@ if(inWorkbench){
     if(snap.state.key===state.target?.key)acceptSnapshot(snap);}const p=pending.get(m.requestId);if(p){operationTimings.push({requestId:m.requestId,type:p.type,ok:m.ok,totalMs:Math.round(performance.now()-p.started),...m.timing});if(operationTimings.length>24)operationTimings.shift();clearTimeout(p.timer);pending.delete(m.requestId);m.ok?p.resolve(m.result):p.reject(Object.assign(Error(m.message||'操作失败'),{diagnostic:{...m.diagnostic,timing:m.timing,connection:workbenchDiagnostics()},requestId:m.requestId,uncertain:!!m.uncertain}));}}
   if(m.type==='ack')window.dispatchEvent(new CustomEvent('workbench-operation-result',{detail:{requestId:m.requestId,ok:m.ok,uncertain:!!m.uncertain,result:m.result,message:m.message}}));
  }finally{updateDepth--;if(!updateDepth&&updatePending){updatePending=false;publishUpdate();}}}
- if(params.get('relay')){relay=new Relay(new URL('../relay',location.href.split('#')[0]).href,session!,'client',params.get('relay')!,accept);send('hello');}
+ if(params.get('relay')){relay=new Relay(new URL('../relay',location.href.split('#')[0]).href,session!,'client',params.get('relay')!,accept,undefined,undefined,undefined,status=>{relayState=status;if(!host&&!state.online)update({message:status.message});});send('hello');}
  window.addEventListener('message',e=>{if(e.origin!==origin||e.data?.protocol!==protocol||e.data.session!==session||!e.source)return;if(host&&host!==e.source&&!host.closed&&!(e.data.type==='ready'&&e.data.hostStarted>hostStarted))return;if(!host&&e.data.type!=='ready')return;host=e.source as Window;lastDirect=Date.now();try{roomWindow=host.top;if(roomWindow)window.opener=roomWindow;}catch{}accept(e.data);});
- const connect=()=>{let lostDirect=false;if(host&&(host.closed||Date.now()-lastDirect>5000)){host=null;lostDirect=true;}if(last&&Date.now()-last>45000&&state.online)update({online:false,message:'正在重新连接枭熊…'});if(!host){try{const room=roomWindow||window.opener;if(room&&!room.closed)discover(room.top||room);}catch{}if(lostDirect||Date.now()-last>10000)send('hello');}else if(Date.now()-lastDirect>2500)send('ping');};
+ const connect=()=>{let lostDirect=false;if(host&&(host.closed||Date.now()-lastDirect>5000)){host=null;lostDirect=true;}if(last&&Date.now()-last>45000&&state.online)update({online:false,message:relayState?.message||'正在重新连接枭熊…'});if(!host){try{const room=roomWindow||window.opener;if(room&&!room.closed)discover(room.top||room);}catch{}if(lostDirect||Date.now()-last>10000)send('hello');}else if(Date.now()-lastDirect>2500)send('ping');};
  connect();setInterval(connect,1000);window.addEventListener('focus',connect);window.addEventListener('pageshow',connect);
 }
 export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},()=>state);}

@@ -10,6 +10,10 @@ import {validateCharacter} from './validation';
 const key=(value:string)=>value.trim().toLocaleLowerCase();
 const stable=(value:unknown):string=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 export const sameClassSnapshot=(a:Entry,b:Entry)=>stable(a)===stable(b);
+// Cache revisions, translated prose and display metadata do not change rules.
+const classRuleKeys=['hd','proficiency','savingThrows','startingProficiencies','multiclassing','classFeatures','casterProgression','spellcastingAbility','preparedSpells','preparedSpellsProgression','preparedSpellsChange','spellsKnownProgression','spellsKnownProgressionFixed','cantripProgression','cantripChange','optionalfeatureProgression'] as const;
+export const classRuleSnapshot=(e:Entry)=>({effects:e.effects,choices:e.choices,raw:Object.fromEntries(classRuleKeys.filter(k=>e.raw[k]!==undefined).map(k=>[k,e.raw[k]]))});
+export const sameClassRules=(a:Entry,b:Entry)=>stable(classRuleSnapshot(a))===stable(classRuleSnapshot(b));
 export type ClassReview={row:Selection;status:'current'|'updated'|'unlinked'|'edition'|'unavailable'|'custom';suggested?:Entry;message:string};
 
 /** Suggestions require source identity or a unique English identity. Chinese
@@ -20,7 +24,7 @@ export function reviewClasses(c:Character,catalog:Entry[]):ClassReview[]{
   const e=row.entry;
   if(e.raw._custom)return {row,status:'custom',message:'自定义职业，可保留原样，也可手动选择目标资料。'};
   const exact=classes.filter(target=>target.id===e.id&&target.source===e.source&&target.packId===e.packId);
-  if(exact.length===1){const current=sameClassSnapshot(e,exact[0]);return {row,status:current?'current':'updated',suggested:exact[0],message:current?'与当前职业资料一致。':'该职业的资料已更新，可核对后同步。'};}
+  if(exact.length===1){const current=sameClassRules(e,exact[0]);return {row,status:current?'current':'updated',suggested:exact[0],message:current?'与当前职业规则一致。':'该职业的规则声明已更新，可核对后同步。'};}
   const english=key(e.english),matches=english&&/[a-z]/i.test(english)?classes.filter(target=>key(target.english)===english):[];
   const preferred=matches.filter(target=>target.source===(c.edition==='2014'?'PHB':'XPHB'));
   // A native source identity must not silently jump to another expansion.
@@ -29,6 +33,21 @@ export function reviewClasses(c:Character,catalog:Entry[]):ClassReview[]{
   const status=e.packId==='imported'?'unlinked':!editionAllows(e,c.edition)?'edition':'unavailable';
   const message=status==='unlinked'?'旧卡尚未关联当前职业资料。':status==='edition'?`职业来源与 ${c.edition} 规则不同。`:'当前资料库中未找到这份职业资料；请先确认来源已加载。';
   return {row,status,suggested,message:message+(suggested?' 已找到可供确认的目标。':' 请手动选择，或保留原样。')};
+ });
+}
+/** Missing downloads are not evidence of an incompatible class. An imported
+ * name can suppress an alarm, but never authorizes automatic migration. */
+export function classCompatibilityIssues(c:Character,catalog:Entry[]):ClassReview[]{
+ return reviewClasses(c,catalog).filter(review=>{
+  const e=review.row.entry;
+  if(review.status==='current')return false;
+  if(review.status==='edition'&&editionAllows(e,c.edition,c.profile.optional.legacy))return false;
+  if(review.status==='unavailable')return catalog.some(target=>target.kind==='class'&&target.source===e.source);
+  if(review.status==='unlinked'){
+   const names=[key(e.name),key(e.english)];
+   return !catalog.some(target=>target.kind==='class'&&!target.raw._custom&&editionAllows(target,c.edition)&&[key(target.name),key(target.english)].some(name=>names.includes(name)));
+  }
+  return true;
  });
 }
 export type ClassMigrationPlan={card:Character;originalId:string;originalRevision:number;originalFingerprint:string;changed:string[];added:string[];removed:string[];refreshed:string[];resources:string[];stats:string[];warnings:string[]};

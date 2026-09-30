@@ -1,10 +1,11 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 
 async function source(page:Page,on:boolean,disableEntry?:string){
  await page.getByRole('button',{name:'规则与扩展',exact:true}).click();
- const book=page.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XGE',exact:true})});
+ const book=page.locator('.source-book').filter({has:page.locator('button[aria-label="设置来源 XGE"]')});
+ if(!await book.isVisible())await page.locator('.source-group').filter({has:book}).locator(':scope > summary').click();
  await book.locator('input[type=checkbox]').first().setChecked(on);
  if(disableEntry){await book.getByRole('button',{name:'设置来源 XGE',exact:true}).click();await page.getByRole('checkbox',{name:`启用条目 ${disableEntry}`,exact:true}).uncheck();await page.getByRole('button',{name:'关闭来源设置'}).click();}
  await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
@@ -12,7 +13,7 @@ async function source(page:Page,on:boolean,disableEntry?:string){
 async function loaded(page:Page){await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
 
 test('disabled expansions disappear from browsing, facets, search and retained documents; exclusions remain struck through',async({page})=>{
- await mockSource(page);
+ await mockSource(page);await suppressAnnouncement(page);
  await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'扩展法术',source:'XGE',level:1,entries:['扩展正文。']}]}}));
  await loaded(page);await source(page,false);await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();
  await expect(page.locator('.catalog-row')).toHaveCount(0);await expect(page.locator('.wiki-filters').getByRole('checkbox')).toHaveCount(0);
@@ -29,8 +30,21 @@ test('disabled expansions disappear from browsing, facets, search and retained d
  await page.screenshot({path:'test-results/sources185-exclusion.png'});
 });
 
+test('room card tabs use permitted class summaries before selecting the card',async({page})=>{
+ await mockSource(page);await suppressAnnouncement(page);const c=newCharacter();
+ await page.goto('/#suite=class-summary&bridge='+encodeURIComponent(String(test.info().project.use.baseURL)));await expect(page.locator('.app-shell')).toBeVisible();
+ const send=async(type:string,data:any={})=>page.evaluate(({type,data})=>window.dispatchEvent(new MessageEvent('message',{origin:location.origin,source:window,data:{protocol:'full-suite-workbench/v1',session:'class-summary',hostStarted:100,type,...data}})),{type,data});
+ const target={key:'r:card:one',itemId:'card:one',cardId:'one',name:'当前卡',kind:'character',role:'PLAYER',write:true,documentRevision:1,stats:{},resources:[]};
+ const old={id:'old-class',level:1,quantity:1,equipped:false,entry:{id:'legacy-phb-class',kind:'class',name:'测试法师',english:'Test Mage',source:'PHB',edition:'2014',packId:'kiwee',revision:'1',entries:[],raw:{}}};
+ const known={...old,entry:{...old.entry,id:'imported-known',source:'IMPORTED',packId:'imported',edition:'both'}};
+ const cards=[{...target,id:'one',classSummary:[]},{...target,id:'bad',itemId:'card:bad',name:'不兼容职业卡',classSummary:[old]},{...target,id:'good',itemId:'card:good',name:'可识别职业卡',classSummary:[known]}];
+ await send('ready');await send('catalog',{sequence:1,role:'PLAYER',cards,monsters:[],enabled:{},visibility:{wiki:true,monsters:true},shared:{key:'room:fixture',scope:'room',revision:1,rules:{edition:'2024',profile:c.profile,packs:[],customEntries:[]}}});await send('selection',{sequence:2,state:target,document:{dnd_card_web:c,_suiteRevision:1}});
+ await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();const tabs=page.getByRole('tablist',{name:'房间角色卡'});await expect(tabs.getByRole('tab',{name:/不兼容职业卡/}).locator('.class-warning-icon')).toBeVisible();await expect(tabs.getByRole('tab',{name:'可识别职业卡',exact:true}).locator('.class-warning-icon')).toHaveCount(0);
+ await page.screenshot({path:test.info().outputPath('room-class-warnings.png')});
+});
+
 test('class composition hides unchecked expansion features and subclasses, including history snapshots',async({page})=>{
- await mockSource(page);
+ await mockSource(page);await suppressAnnouncement(page);
  await page.route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'核心职业',source:'XPHB',classFeatures:['扩展能力|核心职业|XPHB|1|XGE'],entries:['主体正文。']}],classFeature:[{name:'扩展能力',source:'XGE',className:'核心职业',classSource:'XPHB',level:1,entries:['隐藏能力正文。']}],subclass:[{name:'扩展子职',source:'XGE',className:'核心职业',classSource:'XPHB',shortName:'扩展子职',entries:['隐藏子职正文。']}]}}));
  await loaded(page);await source(page,false);await page.locator('.catalog-row').click();await expect(page.locator('.document-prose')).not.toContainText('隐藏能力正文');
  await page.getByRole('button',{name:'子职',exact:true}).click();await expect(page.locator('.document-prose')).not.toContainText('扩展子职');
@@ -42,12 +56,12 @@ test('class composition hides unchecked expansion features and subclasses, inclu
 });
 
 test('room rule updates hide expansions for a player even when the local card enables them',async({page})=>{
- await mockSource(page);await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'房间扩展法术',source:'XGE',level:1,entries:['房间测试正文。']}]}}));
+ await mockSource(page);await suppressAnnouncement(page);await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'房间扩展法术',source:'XGE',level:1,entries:['房间测试正文。']}]}}));
  const c=newCharacter();c.profile.enabledSources.push('XGE');
  await page.goto('/#suite=sources185&bridge='+encodeURIComponent(String(test.info().project.use.baseURL)));await expect(page.locator('.app-shell')).toBeVisible();
  const send=async(type:string,data:any={})=>page.evaluate(({type,data})=>window.dispatchEvent(new MessageEvent('message',{origin:location.origin,source:window,data:{protocol:'full-suite-workbench/v1',session:'sources185',hostStarted:100,type,...data}})),{type,data});
  const target={key:'r:card:one',itemId:'card:one',cardId:'one',name:c.name,kind:'character',role:'PLAYER',write:true,documentRevision:1,stats:{},resources:[]};
- const disabled=await page.evaluate(async()=>{const path='/src/data/catalog.ts';const {normalizeData}=await import(path);return normalizeData({spell:[{name:'房间扩展法术',source:'XGE',level:1}]},'1')[0].id;});
+ const disabled=['kiwee','spell','xge','房间扩展法术','','','','','',''].map(encodeURIComponent).join(':');
  const shared={key:'room:sources185',scope:'room',revision:1,rules:{edition:c.edition,profile:{...c.profile,enabledSources:['XPHB'],disabledEntries:[disabled]},packs:[],customEntries:[]}};
  await send('ready');await send('catalog',{sequence:1,role:'PLAYER',cards:[{...target,id:'one',inScene:true}],monsters:[],enabled:{},visibility:{wiki:true,monsters:true},shared});await send('selection',{sequence:2,state:target,document:{dnd_card_web:c,_suiteRevision:1}});
  await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(0);

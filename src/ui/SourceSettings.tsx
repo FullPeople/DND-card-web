@@ -1,3 +1,5 @@
+import {SOURCE_GROUPS,sourceGroup,setSourceGroup} from '../core/sourceCatalog';
+import {SourceConflicts} from './SourceConflicts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { VirtualList } from './VirtualList';
 import { KIND_LABELS, type Character, type Entry } from '../core/model';
@@ -25,11 +27,12 @@ export function SourceSettings({c,entries,edit,readOnly=false,summary=false,chan
  <div className="profile-transfer"><h3>配置码</h3><textarea aria-label="规则配置码" value={code} onChange={e=>setCode(e.target.value)} spellCheck={false}/><div className="dialog-actions"><button onClick={async()=>{try{setError('');setCode(await encodeProfile({version:1,edition:c.edition,profile:c.profile,sourceDisplay:mode}));}catch(e){setError(String(e));}}}>导出配置</button><button disabled={readOnly||!code.trim()} onClick={async()=>{try{setError('');const data=await decodeProfile(code);edit(d=>{d.edition=data.edition;d.profile=data.profile;},data.sourceDisplay);setMode(data.sourceDisplay);}catch{setError('配置码无效或已损坏。');}}}>导入配置</button><button disabled={!code} onClick={async()=>{try{await navigator.clipboard.writeText(code);}catch{setError('无法访问剪贴板，请选中配置码复制。');}}}>复制</button></div>{error&&<p role="alert">{error}</p>}</div>
  <div className="dialog-actions"><button disabled={readOnly} onClick={()=>edit(d=>{d.profile.enabledSources=['PHB','XPHB'];delete d.profile.autoSourceDefaults;})}>仅基础规则</button><button disabled={readOnly} onClick={()=>edit(d=>{d.profile.enabledSources=sources;})}>全部开启</button><button disabled={readOnly} onClick={()=>edit(d=>{d.profile.enabledSources=[];delete d.profile.autoSourceDefaults;})}>全部禁用</button></div>
  <input aria-label="筛选资料来源" className="source-search" placeholder="查找书名或简写" value={search} onChange={e=>setSearch(e.target.value)}/>
- <div className="source-books">{sources.filter(s=>`${s} ${registry[s]?.name||''}`.toLowerCase().includes(search.toLowerCase())).map(source=>{
+ <SourceConflicts c={c} entries={entries} edit={edit} readOnly={readOnly}/>
+ <div className="source-groups">{SOURCE_GROUPS.map(group=>{const members=sources.filter(id=>sourceGroup(id,registry,grouped.get(id))===group),visible=members.filter(id=>`${id} ${registry[id]?.name||''}`.toLowerCase().includes(search.toLowerCase())),enabled=members.filter(id=>c.profile.enabledSources.includes(id)).length;return <details className="source-group" key={group} open={search?true:undefined}><summary><strong>{group}</strong><small>{enabled}/{members.length}</small><label onClick={e=>e.stopPropagation()}>全部<input type="checkbox" aria-label={`启用${group}`} disabled={readOnly||!members.length} checked={members.length>0&&enabled===members.length} ref={el=>{if(el)el.indeterminate=enabled>0&&enabled<members.length;}} onChange={e=>edit(d=>setSourceGroup(d.profile,members,e.target.checked))}/></label></summary>{group==='核心规则'&&<p className="source-group-note">基础规则与官方规则扩展；玩家手册、城主指南和怪物图鉴列在三宝书。</p>}{group==='威世智每月更新'&&<p className="source-group-note">启封奥秘及其配套内容。</p>}{!visible.length&&<p className="source-group-note">暂无匹配资料</p>}<div className="source-books">{visible.map(source=>{
 
  return <div className="source-book" key={source}><label><input type="checkbox" disabled={readOnly} checked={c.profile.enabledSources.includes(source)} onChange={e=>edit(d=>{d.profile.enabledSources=e.target.checked?[...new Set([...d.profile.enabledSources,source])]:d.profile.enabledSources.filter(s=>s!==source);})}/><span><strong>{format(source)}</strong><small>{registry[source]?.date}</small><span className="source-counts">{(counts.get(source)||[]).map(([kind,count])=><span key={kind}>{kind} {count}</span>)}</span></span></label><button aria-label={`设置来源 ${source}`} className="source-gear" aria-expanded={active===source} onClick={()=>{setActive(source);setCategory('all');setEntrySearch('');}}>⚙</button>
 
- </div>;})}</div>
+ </div>;})}</div></details>;})}</div>
 
  </section>}
  {active&&<dialog className="dialog source-dialog" ref={modal} aria-label={`来源设置 ${format(active)}`} onCancel={e=>{e.preventDefault();e.stopPropagation();setActive('');}} onClick={e=>{e.stopPropagation();if(e.target===e.currentTarget)setActive('');}}>

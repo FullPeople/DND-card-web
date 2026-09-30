@@ -1,3 +1,4 @@
+import type {SourceMeta} from '../core/sourceCatalog';
 import {catalogNormalizer,type CatalogOperation} from './catalogNormalizer';
 import {withRequestTimeout} from '../platform/requestTimeout';
 import {EQUIPMENT_TRAINING_ENTRIES} from './weaponTraining';
@@ -23,6 +24,11 @@ export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): En
       if (!item || typeof item.name !== 'string' && key !== 'subrace') continue;
       const inherited = key === 'subrace' ? inheritSubrace(item, body.race || []) : item;
       for (const raw of [inherited, ...expandVersions(inherited)]) {
+      if(['subclass','classFeature','subclassFeature'].includes(key)){
+        const parent=body.class?.find((c:Raw)=>c.source===raw.classSource&&[c.name,c.ENG_name].includes(raw.className));
+        const parentEdition=parent?.edition==='one'?'2024':parent?.edition==='classic'?'2014':undefined;
+        if(parentEdition)raw._classEdition=parentEdition;
+      }
       const source = String(raw.source || raw.classSource || 'CUSTOM').toUpperCase();
       const edition = raw.edition === 'one' || ['XPHB', 'XDMG', 'XMM'].includes(source) ? '2024' : raw.edition === 'classic' || ['PHB', 'DMG', 'MM'].includes(source) ? '2014' : 'both';
       result.push({ id: entryIdentity(kind, { ...raw, source, _category: key }, packId), kind, name: raw.name, english: raw.ENG_name || raw.name, source, edition,
@@ -71,7 +77,7 @@ export async function hashJson(body: unknown): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(body)));
   return [...new Uint8Array(digest)].map(n => n.toString(16).padStart(2, '0')).join('');
 }
-export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgress: (p: LoadProgress) => void, signal: AbortSignal, refresh = false, base = DEFAULT_SOURCE, onSources?: (names: Record<string, {name:string;date?:string}>) => void): Promise<void> {
+export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgress: (p: LoadProgress) => void, signal: AbortSignal, refresh = false, base = DEFAULT_SOURCE, onSources?: (names: Record<string, SourceMeta>) => void): Promise<void> {
   const url = new URL(base); if (url.protocol !== 'https:' && url.hostname !== 'localhost') throw new Error('资料源需要 HTTPS 地址');
   base = base.replace(/\/$/, '');
   const normalizer=catalogNormalizer(signal,normalizeCatalogData);
@@ -109,7 +115,7 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
         if (signal.aborted) return;
         if (result.cached) progress.cached++;
         if (result.warning) progress.failed.push(`${path}：${result.warning}`);
-        if (['data/books.json','data/adventures.json'].includes(path)) onSources?.(Object.fromEntries((result.body.book || result.body.adventure || []).map((book: Raw) => [String(book.source || book.id).toUpperCase(), {name:book.name,date:book.published}])));
+        if (['data/books.json','data/adventures.json'].includes(path)) onSources?.(Object.fromEntries((result.body.book || result.body.adventure || []).map((book: Raw) => [String(book.source || book.id).toUpperCase(), {name:book.name,date:book.published,category:path==='data/adventures.json'?'模组内容':'核心规则'}])));
         if (['data/items-base.json', 'data/items.json', 'data/magicvariants.json'].includes(path)) { Object.assign(equipment, result.body); equipmentRevisions.push(`${path}:${result.revision}`); }
         if(result.body.monster)monsters.push(...result.body.monster);
         if(result.body.monster||result.body.monsterTemplate||result.body.legendaryGroup)monsterRevisions.push(`${path}:${result.revision}`);

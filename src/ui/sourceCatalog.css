@@ -1,0 +1,12 @@
+.source-groups{display:grid;gap:8px;max-height:52vh;overflow:auto;padding:2px}
+.source-group{border:2px solid #555;background:#eee;min-width:0}
+.source-group>summary{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:#555;color:white;list-style:none}
+.source-group>summary:before{content:'▸'}.source-group[open]>summary:before{content:'▾'}
+.source-group>summary label{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:12px}
+.source-group .source-books{display:flex;flex-direction:column;max-height:none;overflow:visible;padding:0;gap:0;width:100%;margin:0;border:0;background:#eee;scrollbar-gutter:auto}
+.source-group .source-book{border:0;border-bottom:1px solid #aaa;border-radius:0;background:transparent}
+.source-group-note{margin:8px;font-size:12px}.source-conflict-notice{background:#fff0bd;border:1px solid #b18a26;color:#473810;padding:10px;display:grid;gap:6px;margin:10px 0}
+.source-conflict-heading{display:flex;align-items:center;gap:8px;min-width:0}.source-conflict-heading>strong{flex:1;min-width:0;font-size:13px}.source-conflict-heading .dialog-actions{flex-wrap:nowrap;flex-shrink:0;margin:0 0 0 auto}.source-conflict-heading button{white-space:nowrap}.source-conflict-notice button[aria-pressed=true]{background:#54451c;color:white}
+.source-compare-dialog{width:min(980px,95vw)}.source-compare-dialog input:not([type=checkbox]){width:100%}.source-compare-group{border-bottom:2px solid #777;padding:8px 0}.source-compare-group article{padding:8px;background:#eee;margin:5px 0}.source-compare-group label{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.source-compare-group details{margin-top:8px}.source-compare-dialog footer{padding:12px}
+.class-warning-icon{color:#ffcc38;text-shadow:0 1px #493c09;margin-left:6px}.class-compatibility-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #b18a26;background:#fff0bd;color:#473810;padding:10px;margin:4px 12px 8px}.class-compatibility-banner p{flex:1;margin:0;min-width:180px}
+@media(max-width:560px){.source-conflict-heading{gap:6px}.source-conflict-heading>strong{font-size:12px}.source-conflict-heading .dialog-actions{gap:4px}.source-conflict-heading .dialog-actions button{font-size:11px;padding:5px}.source-conflict-heading .dialog-actions button:first-child{width:78px;white-space:normal}.source-group>summary{gap:5px;font-size:13px}.source-group>summary label{font-size:11px}.source-group .source-counts{display:none}}

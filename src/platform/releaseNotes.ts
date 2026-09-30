@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-09-30';
+export const RELEASE_DATE='2026-09-30-二';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -133,22 +133,33 @@ const SUITE_RELEASE_209_SECTIONS:ReleaseSection[]=[...RELEASE_209_SECTIONS,
  {title:'枭熊联动',items:['基础自动化的真实多人同步待验证。']},
  {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_210_SECTIONS:ReleaseSection[]=[
  {title:'法术与容量',items:['空白角色不再显示空的预备法术框，框体随内容收缩。','已知法术可按戏法、环阶分别折叠；默认使用普通预备分类，额外分类随职业或特性出现。','编辑模式下可在分类标题右侧输入正负数调整容量，格子与上限保持一致；超额内容保留并单独提示。','补齐明确指定的专长赠送戏法；手动调整容量不会自动替你选择赠送法术。']},
  {title:'角色与操作',items:['后添加的盾牌和军用武器熟练项现在能参与基础自动化；主动删除的背景赠品不再自动补回。','修复双列布局下添加、编辑按钮的显示；无法拖入时会说明原因。','单件武器可以选择属性调整值，刷新及 JSON 导入导出后保留。','首次打开会提示选择规则、资料显示方式和扩展，之后可随时从右上角“规则与扩展”调整。']},
  {title:'旧职业同步',items:['可核对旧职业与当前资料的对应关系，预览变化后创建同步副本，原角色保留。','自定义职业可保留原样；同步不会自动补满已有资源。子职和未识别规则仍需自行核对。']},
  {title:'公告与反馈',items:['问题反馈入口集中到公告内，附正确的问题地址、邮箱和反馈说明。','暂时移除语言选项，界面统一显示中文。']},
  {title:'未完成与待验证',items:['自动选择或按条件筛选的专长赠送规则、完整英文翻译尚未完成；复杂兼职、动态次数和完整休息规则尚未全部支持。','实体手机操作与玩家具体旧卡待验证。']},
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_210_SECTIONS:ReleaseSection[]=[...RELEASE_210_SECTIONS,
  {title:'枭熊联动',items:['新版同步本批角色卡修复；旧版仅同步阅读器，继续支持 XLSX。','真实宿主、权限变化和多人同步待验证，独立网站预览不能代替房间联动验收。']},
  {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']},
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'资料来源',items:['资料来源现在按三宝书、核心规则、模组内容、第三方、威世智每月更新分组，可以折叠和整组开关。','滚动列表时，分类标题和开关保持可见。威世智每月更新收录启封奥秘及配套内容。','同名扩展默认按出版时间选择，也可以手动比较、勾选或全部显示；三宝书各版独立保留。','缺少日期或日期并列时保留候选，已填入角色卡的内容继续保留。']},
+ {title:'职业提示',items:['不兼容的职业会在角色名字后显示黄色提示，选中后可从卡面上方核对与同步。','修复了译文、缓存等变化导致的误报。同步仍先预览，再创建副本，保留原卡。']},
+ {title:'未完成与待验证',items:['自动选择或筛选式专长赠送规则、完整英文翻译尚未完成。','玩家具体旧卡与实体手机操作待验证。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'房间连接',items:['修复了中继容量不足后反复报 401、注册重试被限流的问题；连接失败会等待后重试。','角色列表可根据已读取的职业资料提前显示兼容性提示。','保留已上线的 3D 骰子功能；旧插件本批不更新。']},
+ {title:'枭熊联动待验证',items:['真实宿主、权限变化和多人同步仍待验证，独立预览不能证明完整枭熊联动正常。']},
+ {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-09-30-一',sections:mode==='suite'?SUITE_RELEASE_210_SECTIONS:RELEASE_210_SECTIONS},
  {title:'2026-09-28',sections:mode==='suite'?SUITE_RELEASE_209_SECTIONS:RELEASE_209_SECTIONS},
  {title:'2026-09-27-二',sections:mode==='suite'?PREVIOUS_SUITE_RELEASE_SECTIONS:PREVIOUS_RELEASE_SECTIONS},
  {title:'2026-09-27-一',sections:mode==='suite'?SUITE_ARCHIVED_RELEASE_SECTIONS:ARCHIVED_RELEASE_SECTIONS},

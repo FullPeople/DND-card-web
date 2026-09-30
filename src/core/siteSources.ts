@@ -1,9 +1,9 @@
 import type {Character,RulePack,RuleProfile} from './model';
 
-export type SiteSources=Pick<RuleProfile,'enabledSources'|'disabledEntries'|'autoSourceDefaults'>;
+export type SiteSources=Pick<RuleProfile,'enabledSources'|'disabledEntries'|'autoSourceDefaults'|'sourceConflicts'>;
 interface SourceWorkspace {activeId:string;characters:Character[];siteSources?:SiteSources;legacySourceProfiles?:Record<string,SiteSources>}
 export function sourceSettings(profile:SiteSources):SiteSources{
- return {enabledSources:profile.enabledSources,...(profile.disabledEntries?{disabledEntries:profile.disabledEntries}:{}),...(profile.autoSourceDefaults?{autoSourceDefaults:profile.autoSourceDefaults}:{})};
+ return {enabledSources:profile.enabledSources,...(profile.disabledEntries?{disabledEntries:profile.disabledEntries}:{}),...(profile.autoSourceDefaults?{autoSourceDefaults:profile.autoSourceDefaults}:{}),...(profile.sourceConflicts?{sourceConflicts:profile.sourceConflicts}:{})};
 }
 /** Migrate once from the visible card, preserving old per-card choices for recovery. */
 export function ensureSiteSources<T extends SourceWorkspace>(workspace:T):T&SourceWorkspace{
@@ -16,6 +16,6 @@ export function ensureSiteSources<T extends SourceWorkspace>(workspace:T):T&Sour
 /** Source availability is shared; edition, optional rules and exceptions stay on the card. */
 export function withSiteSources(character:Character,sources:SiteSources|undefined,packs?:RulePack[]):Character{
  if(!sources)return character;
- const {enabledSources:_,disabledEntries:__,autoSourceDefaults:___,...personal}=character.profile;
+ const {enabledSources:_,disabledEntries:__,autoSourceDefaults:___,sourceConflicts:____,...personal}=character.profile;
  return {...character,profile:{...personal,...sourceSettings(sources)},...(packs?{rulePacks:packs}:{})};
 }
