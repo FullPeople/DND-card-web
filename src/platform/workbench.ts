@@ -65,6 +65,8 @@ export async function requestInventory(operation:Record<string,unknown>){
 
 let relayState:RelayState|undefined;
 let relay:Relay|undefined,selectionSequence=0,catalogSequence=0,hostStarted=0;
+let handshakeReady=false,handshakeCatalog=false,lastHello:number|undefined,helloAttempts=0;
+function resetHandshake(restartRetries=true){handshakeReady=false;handshakeCatalog=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
 const monsterRuntimeSequence=new Map<string,number>();
 const runtimeFrom=(value:any)=>({stats:value.stats,resources:value.resources,conditions:value.conditions,documentRevision:value.documentRevision});
 function acceptSnapshot(m:any){
@@ -82,12 +84,22 @@ function send(type:string,extra:Record<string,unknown>={}){const m={protocol,typ
 export function chooseWorkbench(itemId:string){send('select',{itemId});window.dispatchEvent(new Event('workbench-show-sheet'));}
 export function composeRoll(expression:string,label=''){window.dispatchEvent(new CustomEvent('workbench-compose-local',{detail:{expression,label,id:crypto.randomUUID()}}));}
 function discover(w:Window,depth=0){if(depth>3)return;try{w.postMessage({protocol,type:'hello',session},origin!);for(let i=0;i<Math.min(w.length,64);i++)discover(w.frames[i],depth+1);}catch{}}
+function requestHello(){
+ // A heartbeat proves transport liveness, not that the initial catalog arrived.
+ // Retry only this read-only handshake; pending mutations keep their own ACK path.
+ const now=Date.now(),delay=Math.min(10000,1000*2**Math.min(Math.max(helloAttempts-1,0),4));
+ if(lastHello!==undefined&&now-lastHello<delay)return;
+ lastHello=now;helloAttempts++;
+ if(!host){try{const room=roomWindow||window.opener;if(room&&!room.closed)discover(room.top||room);}catch{}}
+ send('hello');
+}
 if(inWorkbench){
  startWorkbenchSound();
- function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;monsterRuntimeSequence.clear();}last=Date.now();
+ function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;monsterRuntimeSequence.clear();resetHandshake();}last=Date.now();
   if(!state.online)update({online:true,message:''});
+  if(m.type==='ready')handshakeReady=true;
   if(m.type==='ready'||m.type==='rolls')update({rolls:Array.isArray(m.rolls)?m.rolls:[]});
-  if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:(m.monsters||[]).map((card:CardChoice)=>{const previous=state.monsters.find(c=>c.itemId===card.itemId);if(previous&&(monsterRuntimeSequence.get(card.itemId)||0)>(m.sequence||0))return {...card,...runtimeFrom(previous)};monsterRuntimeSequence.set(card.itemId,m.sequence||0);return card;}),role:m.role,enabled:m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
+  if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){handshakeCatalog=true;catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:(m.monsters||[]).map((card:CardChoice)=>{const previous=state.monsters.find(c=>c.itemId===card.itemId);if(previous&&(monsterRuntimeSequence.get(card.itemId)||0)>(m.sequence||0))return {...card,...runtimeFrom(previous)};monsterRuntimeSequence.set(card.itemId,m.sequence||0);return card;}),role:m.role,enabled:m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
   if(m.type==='catalog'&&state.target){const card=state.target.cardId?state.cards.find(c=>c.id===state.target!.cardId):state.monsters.find(c=>c.itemId===state.target!.itemId);if(card&&card.write!==state.target.write)update({target:{...state.target,write:card.write,locked:card.locked}});}
   if(m.type==='showWiki')window.dispatchEvent(new CustomEvent('workbench-open-entry',{detail:m.entry}));
   if(m.type==='navigate')window.dispatchEvent(new Event('workbench-show-sheet'));
@@ -120,10 +132,16 @@ if(inWorkbench){
     }),cards:state.cards.map(card=>card.id===snap.state.cardId?revisions.card({...card,...runtimeFrom(snap.state),...(currentPermissions?{locked:snap.state.locked??card.locked}:{})}):card)});
     if(snap.state.key===state.target?.key)acceptSnapshot(snap);}const p=pending.get(m.requestId);if(p){operationTimings.push({requestId:m.requestId,type:p.type,ok:m.ok,totalMs:Math.round(performance.now()-p.started),...m.timing});if(operationTimings.length>24)operationTimings.shift();clearTimeout(p.timer);pending.delete(m.requestId);m.ok?p.resolve(m.result):p.reject(Object.assign(Error(m.message||'操作失败'),{diagnostic:{...m.diagnostic,timing:m.timing,connection:workbenchDiagnostics()},requestId:m.requestId,uncertain:!!m.uncertain}));}}
   if(m.type==='ack')window.dispatchEvent(new CustomEvent('workbench-operation-result',{detail:{requestId:m.requestId,ok:m.ok,uncertain:!!m.uncertain,result:m.result,message:m.message}}));
+  if(handshakeReady&&handshakeCatalog){lastHello=undefined;helloAttempts=0;}
  }finally{updateDepth--;if(!updateDepth&&updatePending){updatePending=false;publishUpdate();}}}
- if(params.get('relay')){relay=new Relay(new URL('../relay',location.href.split('#')[0]).href,session!,'client',params.get('relay')!,accept,undefined,undefined,undefined,status=>{relayState=status;if(!host&&!state.online)update({message:status.message});});send('hello');}
+ if(params.get('relay')){relay=new Relay(new URL('../relay',location.href.split('#')[0]).href,session!,'client',params.get('relay')!,accept,undefined,undefined,undefined,status=>{relayState=status;if(!host){resetHandshake(handshakeReady&&handshakeCatalog);if(!state.online)update({message:status.message});}});requestHello();}
  window.addEventListener('message',e=>{if(e.origin!==origin||e.data?.protocol!==protocol||e.data.session!==session||!e.source)return;if(host&&host!==e.source&&!host.closed&&!(e.data.type==='ready'&&e.data.hostStarted>hostStarted))return;if(!host&&e.data.type!=='ready')return;host=e.source as Window;lastDirect=Date.now();try{roomWindow=host.top;if(roomWindow)window.opener=roomWindow;}catch{}accept(e.data);});
- const connect=()=>{let lostDirect=false;if(host&&(host.closed||Date.now()-lastDirect>5000)){host=null;lostDirect=true;}if(last&&Date.now()-last>45000&&state.online)update({online:false,message:relayState?.message||'正在重新连接枭熊…'});if(!host){try{const room=roomWindow||window.opener;if(room&&!room.closed)discover(room.top||room);}catch{}if(lostDirect||Date.now()-last>10000)send('hello');}else if(Date.now()-lastDirect>2500)send('ping');};
+ const connect=()=>{const now=Date.now();let lostDirect=false;
+  if(host&&(host.closed||now-lastDirect>5000)){host=null;lostDirect=true;resetHandshake();}
+  if(last&&now-last>45000&&state.online){resetHandshake();update({online:false,message:relayState?.message||'正在重新连接枭熊…'});}
+  if(!handshakeReady||!handshakeCatalog||!host&&(lostDirect||now-last>10000))requestHello();
+  if(host&&now-lastDirect>2500)send('ping');
+ };
  connect();setInterval(connect,1000);window.addEventListener('focus',connect);window.addEventListener('pageshow',connect);
 }
 export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},()=>state);}
