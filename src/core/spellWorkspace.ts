@@ -9,12 +9,13 @@ export const hasClassLookup=(e:Entry)=>!!e.raw._spellClasses||!!e.raw.classes;
 
 /** Old cards gain a read-only layout; opening the page never changes learned spells. */
 export function cantripGroups(c:Character):CantripGroup[]{
- const profiles=casterProfiles(c).filter(p=>cantripCapacity(p)>0),rows=ordinaryCantrips(c),assigned=new Set<string>();
+ const capacity=(p:CasterProfile)=>Math.max(0,Math.min(100,cantripCapacity(p)+(c.spellSettings?.cantripCapacityAdjustments?.[p.owner.id]||0)));
+ const profiles=casterProfiles(c).filter(p=>cantripCapacity(p)>0||capacity(p)>0||c.spellSettings?.cantrips?.[p.owner.id]!==undefined),rows=ordinaryCantrips(c),assigned=new Set<string>();
  const groups:CantripGroup[]=profiles.map(profile=>{
   const saved=c.spellSettings?.cantrips?.[profile.owner.id];
   const slots=saved?saved.map(id=>rows.some(s=>s.id===id)?id:''):rows.filter(s=>!assigned.has(s.id)&&(spellOnClassList(s.entry,profile)||profiles.length===1&&!hasClassLookup(s.entry))).map(s=>s.id);
   slots.filter(Boolean).forEach(id=>assigned.add(id));
-  return {id:profile.owner.id,name:profile.owner.entry.name,profile,capacity:cantripCapacity(profile),slots};
+  return {id:profile.owner.id,name:profile.owner.entry.name,profile,capacity:capacity(profile),slots};
  });
  // Unselected spells in a saved group remain known, without returning to the active list.
  const remaining=rows.filter(s=>!assigned.has(s.id)&&!profiles.some(p=>c.spellSettings?.cantrips?.[p.owner.id]!==undefined&&(spellOnClassList(s.entry,p)||profiles.length===1&&!hasClassLookup(s.entry))));

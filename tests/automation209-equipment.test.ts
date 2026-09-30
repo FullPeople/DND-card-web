@@ -66,3 +66,10 @@ describe('generic equipment automation on the 208 baseline',()=>{
   expect(()=>setAutomationEnabled(restored,true)).toThrow(/协议/);c.automation={protocol:2,enabled:'yes' as any,rulesVersion:'equipment.1'};expect(()=>readCharacter(c)).toThrow(/自动化/);
  });
 });
+
+it('recognizes dragged shield category references through repeated evaluation and backup restore',()=>{
+ const c=character();c.training={armor:'{@itemProperty 盾牌|XPHB|显示标签}'};item(c,'shield','S',2);equipSelection(c,'shield',true);
+ expect(evaluate(c).ac).toBe(15);expect(evaluate(c).ac).toBe(15);
+ const restored=readCharacter(JSON.parse(JSON.stringify(exportCharacter(c)))).character;expect(restored.training).toEqual(c.training);expect(evaluate(restored).ac).toBe(15);
+ restored.training!.armor='';expect(evaluate(restored).ac).toBe(13);
+});

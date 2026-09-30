@@ -80,6 +80,7 @@ export function validateCharacter(value: unknown): Character {
     selectionIds.add(s.id);
     assert(Number.isInteger(s.level) && s.level >= 1 && s.level <= 20 && Number.isInteger(s.quantity) && s.quantity >= 1 && s.quantity <= 100000, '角色条目数量或等级不合法。');
     assert(typeof s.equipped === 'boolean' && (s.requirementId === undefined || typeof s.requirementId === 'string'), '条目选择数据不合法。');
+    assert(s.weaponAbility===undefined||s.entry.kind==='item'&&ABILITIES.includes(s.weaponAbility),'武器计算属性无效。');
     assert(['parentId', 'grantKey'].every(key => s[key] === undefined || typeof s[key] === 'string' && s[key].length <= 2000), '条目来源关联无效。');
     assert(s.section === undefined || ['features', 'heritage'].includes(s.section), '条目放置区域无效。');
     if (s.entry.effects) validateEffects(s.entry.effects);
@@ -107,6 +108,8 @@ export function validateCharacter(value: unknown): Character {
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   validateActionState(c.runtime.automationActions);
   if(c.spellSettings?.cantrips!==undefined){const groups=c.spellSettings.cantrips;assert(plain(groups)&&Object.keys(groups).length<=100&&Object.values(groups).every(ids=>Array.isArray(ids)&&ids.length<=3000&&ids.every(id=>typeof id==='string')&&new Set(ids.filter(Boolean)).size===ids.filter(Boolean).length),'职业戏法格记录无效。');}
+  for(const [name,values] of Object.entries({cantripCapacityAdjustments:c.spellSettings?.cantripCapacityAdjustments,sourceCantripCapacities:c.spellSettings?.sourceCantripCapacities})){if(values!==undefined)assert(plain(values)&&Object.keys(values).length<=3000&&Object.values(values).every(v=>Number.isInteger(v)&&Math.abs(v)<=100&&(name!=='sourceCantripCapacities'||v>=0)),'戏法数量调整记录无效。');}
+  for(const [id,config] of Object.entries(c.spellSettings?.special||{}) as [string,any][]){if(config?.manualSource!==undefined){assert(plain(config.manualSource)&&typeof config.manualSource.ownerId==='string'&&config.manualSource.ownerId.length<=2000,'手动赠送戏法来源记录无效。');const row=c.selections.find(s=>s.id===id),owner=c.selections.find(s=>s.id===config.manualSource.ownerId);assert(row?.entry.kind==='spell'&&Number(row.entry.raw.level)===0&&row.parentId===owner?.id&&!!owner&&['feat','race','background','feature','subclass'].includes(owner.entry.kind)&&!config.sourceGrant,'手动赠送戏法来源记录无效。');}}
   if(c.runtime.sourceSpellSpent!==undefined)assert(plain(c.runtime.sourceSpellSpent)&&Object.keys(c.runtime.sourceSpellSpent).length<=10000&&Object.values(c.runtime.sourceSpellSpent).every(n=>Number.isInteger(n)&&Number(n)>=0&&Number(n)<=100),'来源法术消耗记录无效。');
   if (c.runtime.deathSaves !== undefined) assert(plain(c.runtime.deathSaves) && ['success', 'failure'].every(key => Number.isInteger(c.runtime.deathSaves[key]) && c.runtime.deathSaves[key] >= 0 && c.runtime.deathSaves[key] <= 3), '死亡豁免记录无效。');
   assert(Object.values(c.runtime.resources).every(v => plain(v) && Number.isFinite(v.current) && Number.isFinite(v.max) && v.current >= 0 && v.max >= 0), '资源计数无效。');

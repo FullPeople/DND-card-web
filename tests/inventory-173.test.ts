@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {capacityFormula,carrying} from '../src/core/carrying';
 import {newCharacter,type Entry} from '../src/core/model';
 import {evaluate} from '../src/core/engine';
-import {sameStock,previewInventory,overlayInventory,type InventoryState} from '../src/core/inventory';
+import {sameStock,previewInventory,overlayInventory,applyInventory,type InventoryState} from '../src/core/inventory';
 const entry:Entry={id:'item:a',name:'测试盔甲',english:'Armor',kind:'item',source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:[],raw:{ac:18,type:'HA',weight:2}};
 function inventory():InventoryState{return {revision:1,publicId:'public',silent:false,containers:{public:{id:'public',kind:'public',name:'公共',write:true,revision:1,capacity:20,columns:4,items:[{id:'a',name:'测试',kind:'item',entry,quantity:6,slot:0,revision:1}]},hero:{id:'hero',kind:'card',name:'角色',write:true,revision:1,capacity:24,columns:4,items:[]}}};}
 describe('capacity and display markers',()=>{
@@ -16,3 +16,25 @@ describe('optimistic stock projection',()=>{
 
 it('exact stack identity is canonical but does not ignore rules, names',()=>{const a=inventory().containers.public.items[0];expect(sameStock(a,{...a,id:'b',quantity:2,slot:2,revision:9,locked:false,entry:{...entry,raw:{weight:2,ac:18,type:'HA'}}})).toBe(true);for(const changed of [{name:'其他'}, {locked:true}, {entry:{...entry,source:'HOME'}}, {entry:{...entry,entries:['不同正文']}}])expect(sameStock(a,{...a,...changed})).toBe(false);});
 it('optimistic merge and acknowledged overlay preserve one exact quantity',()=>{const before=inventory(),a=before.containers.public.items[0];before.containers.public.items.push({...a,id:'b',quantity:2,slot:7});const after=previewInventory(before,{action:'merge',container:'public',id:'b',targetId:'a'});expect(after.containers.public.items).toHaveLength(1);expect(after.containers.public.items[0].quantity).toBe(8);expect(overlayInventory(after,before,after).containers.public.items[0].quantity).toBe(8);});
+
+
+// Authored background and equipment, independent of upstream source snapshots.
+import {syncFeatures} from '../src/core/sheet';
+import {readCharacter} from '../src/core/validation';
+function backgroundGift(){
+ const c=newCharacter();const background:Entry={...entry,id:'background:test',kind:'background',name:'原创赠品背景',raw:{startingEquipment:[{_:['测试盔甲|XPHB']}]}};
+ c.selections=[{id:'background',entry:background,level:1,quantity:1,equipped:false}];syncFeatures(c,[entry]);return c;
+}
+it.each(['remove','update'])('explicit gift %s remains dismissed through inventory projection, repeated sync and restore',action=>{
+ const c=backgroundGift(),gift=c.selections.find(s=>s.entry.kind==='item')!;
+ const state=inventory();state.containers.public.items=[{id:gift.id,name:gift.entry.name,entry:gift.entry,kind:'item',quantity:1,slot:0,revision:1}];
+ const projected=previewInventory(state,action==='remove'?{action,container:'public',ids:[gift.id]}:{action,container:'public',id:gift.id,patch:{quantity:0}});
+ applyInventory(c,projected.containers.public,[gift.id]);syncFeatures(c,[entry]);syncFeatures(c,[entry]);
+ expect(c.selections.filter(s=>s.entry.kind==='item')).toHaveLength(0);expect(c.dismissedFeatures).toEqual([`${gift.parentId}|${gift.grantKey}`]);
+ const restored=readCharacter(JSON.parse(JSON.stringify(c))).character;syncFeatures(restored,[entry]);expect(restored.selections.filter(s=>s.entry.kind==='item')).toHaveLength(0);
+ applyInventory(restored,projected.containers.public,[gift.id]);expect(restored.dismissedFeatures).toHaveLength(1);
+});
+it('a snapshot missing a background gift is not an explicit dismissal',()=>{
+ const c=backgroundGift(),state=inventory();state.containers.public.items=[];applyInventory(c,state.containers.public);
+ expect(c.dismissedFeatures).toBeUndefined();syncFeatures(c,[entry]);expect(c.selections.filter(s=>s.entry.kind==='item')).toHaveLength(1);
+});

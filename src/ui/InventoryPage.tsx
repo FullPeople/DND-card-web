@@ -11,5 +11,14 @@ export function containerFor(c:Character):StockContainer {
  return {id:`local:${c.id}`,name:c.name||'装备与物品',kind:'card',revision:1,write:true,columns:4,capacity:24,items};
 }
 export function InventoryPage({c,d,edit,browse}:PageProps){
- return <><StockBoard key={c.id} container={containerFor(c)} capacity={<CarryCapacity c={c} d={d} edit={edit}/>} operation={async op=>{edit(draft=>{const next=containerFor(draft);if(op.action==='update'){const quantity=(op.patch as Partial<Stock>)?.quantity;if(quantity!==undefined&&(!Number.isSafeInteger(quantity)||quantity<0||quantity>1000000))throw Error('请输入有效数量');}const projected=previewInventory({revision:1,publicId:'',silent:false,containers:{[next.id]:next}},{...op,container:next.id}).containers[next.id];Object.assign(next,projected);applyInventory(draft,next);draft.inventory!.positions=Object.fromEntries(next.items.map(row=>[row.id,row.slot]));});}}/><button className="feature-browse" onClick={()=>browse('item')}>＋ 查阅装备</button></>;
+ const operation=async(op:Record<string,unknown>)=>{edit(draft=>{
+  const next=containerFor(draft),quantity=(op.patch as Partial<Stock>)?.quantity;
+  if(op.action==='update'&&quantity!==undefined&&(!Number.isSafeInteger(quantity)||quantity<0||quantity>1000000))throw Error('请输入有效数量');
+  const projected=previewInventory({revision:1,publicId:'',silent:false,containers:{[next.id]:next}},{...op,container:next.id}).containers[next.id];
+  Object.assign(next,projected);
+  const removedIds=op.action==='remove'&&Array.isArray(op.ids)?op.ids.filter((id):id is string=>typeof id==='string'):op.action==='update'&&quantity===0&&typeof op.id==='string'?[op.id]:[];
+  applyInventory(draft,next,removedIds);
+  draft.inventory!.positions=Object.fromEntries(next.items.map(row=>[row.id,row.slot]));
+ });};
+ return <><StockBoard key={c.id} container={containerFor(c)} capacity={<CarryCapacity c={c} d={d} edit={edit}/>} operation={operation}/><button className="feature-browse" onClick={()=>browse('item')}>＋ 查阅装备</button></>;
 }

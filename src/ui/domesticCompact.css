@@ -34,6 +34,10 @@
 .wiki-columns>.library-body{display:contents}
 .wiki-columns .catalog-shell{grid-column:1;grid-row:7;min-width:0;min-height:0}
 .wiki-columns .library-body>.entry-detail,.wiki-columns .library-body>.reading-placeholder,.wiki-columns .library-body>.custom-entry-editor{grid-column:3;grid-row:1/-1;min-width:0;min-height:0}
+/* Custom reading reserves a separate action row; the expanded form owns the reader area. */
+.wiki-columns .library-body:has(>.custom-entry-editor.is-collapsed)>.custom-entry-editor{grid-row:1}
+.wiki-columns .library-body:has(>.custom-entry-editor.is-collapsed)>.entry-detail{grid-row:2/-1}
+.wiki-columns .library-body:has(>.custom-entry-editor:not(.is-collapsed))>.entry-detail{display:none}
 .wiki-columns .wiki-splitter{grid-column:2;grid-row:1/-1;width:9px;height:auto;cursor:col-resize}
 .wiki-columns .wiki-splitter:before{inset:0 auto 0 4px;border-top:0;border-left:1px solid var(--suite-line,#c4c8ce)}
 .wiki-columns .wiki-splitter span{width:3px;height:36px}

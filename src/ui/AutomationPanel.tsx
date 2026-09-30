@@ -1,6 +1,6 @@
 import {planSourceSpells} from '../core/automation/sourceSpells';
-import {ABILITY_LABELS,type Entry,type Ability} from '../core/model';
-import {automaticWeaponAttacks,weaponType} from '../core/automation/weapons';
+import {ABILITIES,ABILITY_LABELS,type Entry,type Ability} from '../core/model';
+import {automaticWeaponAbility,automaticWeaponAttacks,weaponType} from '../core/automation/weapons';
 import type {Character,Derived} from '../core/model';
 import {automationEnabled,setAutomationEnabled,supportedAutomation} from '../core/automation/state';
 import {armorType,equipSelection} from '../core/automation/equipment';
@@ -15,8 +15,8 @@ export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:E
   {enabled&&c.selections.filter(row=>armorType(row.entry)).map(row=><label key={row.id} style={{display:'block'}}><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>)}
   <ul>{d.trace.ac?.map((line,i)=><li key={i}>{line}</li>)}</ul>
   {d.issues.filter(issue=>issue.id.startsWith('armor-')||issue.id.startsWith('equipment-')||issue.id==='automation-protocol').map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
-  <h3>装备武器与快捷攻击</h3><p>装备后按属性、熟练和武器加值生成攻击。投掷、双手使用分别显示；不自动消耗弹药或判定战场条件，手工动作保留。</p>
-  {enabled&&c.selections.filter(row=>weaponType(row.entry)).map(row=><label key={row.id} style={{display:'block'}}><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>)}
+  <h3>装备武器与快捷攻击</h3><p>装备后按属性、熟练和武器加值生成攻击。每件武器可选择命中与伤害所用属性，默认自动；武器额外加值保留。投掷、双手使用分别显示；不自动消耗弹药或判定战场条件，手工动作保留。</p>
+  {enabled&&c.selections.filter(row=>weaponType(row.entry)).map(row=><div key={row.id} data-weapon-selection={row.id} style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}><label><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>{row.entry.raw.attackBonus===undefined?<label>命中与伤害属性<select aria-label={`${row.entry.name}计算属性`} value={row.weaponAbility||''} onChange={e=>edit(draft=>{const stored=draft.selections.find(s=>s.id===row.id);if(!stored)return;if(e.target.value)stored.weaponAbility=e.target.value as Ability;else delete stored.weaponAbility;})}><option value="">自动（{ABILITY_LABELS[automaticWeaponAbility(row.entry,d)]}）</option>{ABILITIES.map(a=><option key={a} value={a}>{ABILITY_LABELS[a]}</option>)}</select></label>:<small>使用手写命中与伤害公式，计算属性不追加。</small>}</div>)}
   {weapons.attacks.map(attack=><details key={attack.key}><summary>{attack.name}：命中 {attack.attack_bonus}，伤害 {attack.damage}</summary><ul>{attack.trace.map((line,i)=><li key={i}>{line}</li>)}</ul></details>)}
   {weapons.issues.map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <h3>来源固定法术</h3><p>法术附属于赠送它的来源，不占普通预备名额。切换次数归属会保守保留消耗，可手动核对修正。切换方案、关闭来源与刷新不会恢复已用次数；未解析的条目仍需人工处理。</p>

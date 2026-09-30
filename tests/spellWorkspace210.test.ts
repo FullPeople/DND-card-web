@@ -14,6 +14,16 @@ const spell=(id:string,level=1,cls='Source Mage')=>entry(id,'spell',{level,_spel
 const add=(c:Character,e:Entry,id=e.id)=>{const row={id,entry:e,quantity:1,level:1,equipped:false};c.selections.push(row);return row;};
 function setup(){const c=newCharacter();add(c,entry('Source Mage','class',{casterProgression:'full',spellcastingAbility:'int',cantripProgression:[2],preparedSpellsProgression:[2],spellsKnownProgressionFixed:[6]}));c.spellSettings=spellState(c);return c;}
 describe('one prepared workspace with independent source, cantrip and ordinary groups',()=>{
+ it('explicitly adjusts only one class learned-cantrip capacity, preserving slots and prior choices',()=>{
+  const c=setup();chooseCantrip(c,spell('One',0));chooseCantrip(c,spell('Two',0));
+  c.spellSettings!.slots={'1':{max:2,used:1}};c.runtime.resources['spell-slot:1']={max:2,current:1};
+  (c.spellSettings as any).cantripCapacityAdjustments={'Source Mage':1};
+  expect(cantripGroups(c)[0].capacity).toBe(3);expect(chooseCantrip(c,spell('Three',0)).error).toBeUndefined();
+  const restored=validateCharacter(JSON.parse(JSON.stringify(c)));expect(cantripGroups(restored)[0].slots.filter(Boolean)).toHaveLength(3);
+  (restored.spellSettings as any).cantripCapacityAdjustments={'Source Mage':-1};
+  expect(cantripGroups(restored)[0].slots.filter(Boolean)).toHaveLength(3);expect(cantripGroups(restored)[0].capacity).toBe(1);
+  expect(chooseCantrip(restored,spell('Four',0)).error).toContain('已满');expect(restored.spellSettings!.slots).toEqual({'1':{max:2,used:1}});expect(restored.runtime.resources['spell-slot:1']).toEqual({max:2,current:1});
+ });
  it('does not let stale cantrip or extra-spell IDs consume ordinary preparation capacity',()=>{
   const c=setup(),cantrip=add(c,spell('Light',0)),extra=add(c,spell('Gift')),a=add(c,spell('A'));setSpecialSpell(c,extra.id,{mode:'uses',max:2,recovery:'long'});changeSpecialSpellUses(c,extra.id,1);
   c.spellSettings!.prepared=[cantrip.id,extra.id,a.id];expect(ordinaryPrepared(c).filter(Boolean)).toEqual([a.id]);

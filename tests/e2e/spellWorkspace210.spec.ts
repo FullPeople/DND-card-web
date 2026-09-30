@@ -12,8 +12,8 @@ function card(){const c=newCharacter();c.name='法师法术布局验收';c.autom
  c.selections=[row(e('Source Mage','验收法师','class',{casterProgression:'full',spellcastingAbility:'int',cantripProgression:[2],preparedSpellsProgression:[2],spellsKnownProgressionFixed:[6]})),row(spell('Spark','小火花',0)),row(spell('Frost','小冰晶',0)),row(spell('Mist','小雾团',0)),row(spell('Ward','护盾示例',1)),row(spell('Step','闪步示例',1)),row(spell('Beam','光束示例',1)),row(e('Gift Race','验收提夫林','race',{additionalSpells:[{ability:'cha',innate:{'_':{daily:{'1':['Ward|XPHB']}}}}]}))];
  c.spellSettings={...spellState(c),cantrips:{'Source Mage':['Spark','Frost']}};return c;
 }
-async function load(page:Page,c=card()){
- await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();
+async function load(page:Page,c=card(),prepare?:()=>Promise<void>){
+ await mockSource(page);await suppressAnnouncement(page);await prepare?.();await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await page.keyboard.press('Escape');
  const editing=page.getByRole('switch',{name:'编辑模式',exact:true});if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await page.getByRole('tab',{name:'法术',exact:true}).click();
 }
@@ -86,6 +86,44 @@ test('a learned caster has no known-library panel and retains separate cantrip a
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await page.screenshot({path:test.info().outputPath('spell-workspace-mobile.png'),fullPage:true});
 });
 
+test('explicit class cantrip adjustment persists and lowering the limit retains recorded choices',async({page})=>{
+ await load(page);const group=page.locator('[data-cantrip-group="Source Mage"]'),input=page.getByLabel('验收法师所学戏法数量调整',{exact:true});
+ expect((await group.locator('label').boundingBox())!.height).toBeLessThan(35);
+ await expect(input).toHaveValue('0');await input.fill('1');await input.press('Enter');await page.locator('.spell-library').getByRole('button',{name:'小雾团',exact:true}).click();
+ await expect(group.locator('[data-spell-id]')).toHaveCount(3);await expect(group.locator('h4')).toContainText('3 / 3');
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(input).toHaveValue('1');await expect(group.locator('[data-spell-id]')).toHaveCount(3);
+ await input.fill('-1');await input.press('Enter');await expect(group.locator('h4')).toContainText('3 / 1');await expect(group.getByRole('status')).toContainText('已保留原记录');await expect(group.locator('[data-spell-id]')).toHaveCount(3);await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
+});
+test('a declared feat grants its cantrip after a real Wiki drop even when class cantrips are full',async({page})=>{
+ await load(page,card(),async()=>{await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:[{name:'明确赠送验收专长',ENG_name:'Declared Gift',source:'XPHB',additionalSpells:[{known:{'_':['Mist|XPHB#c']}}],entries:['原创资料，明确赠送引用仅用于软件验收。']}]},headers:{'access-control-allow-origin':'*',etag:'declared-gift'}}));});
+ const ordinary=page.locator('[data-cantrip-group="Source Mage"]');await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
+ await page.getByRole('tab',{name:'主要',exact:true}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'专长',exact:true}).click();
+ const feat=page.locator('.catalog-row').filter({hasText:'明确赠送验收专长'});await expect(feat).toBeVisible();await drag(page,feat,page.locator('.heritage-features'));
+ await page.getByRole('tab',{name:'法术',exact:true}).click();const gift=page.locator('.source-spell-group').filter({hasText:'来自明确赠送验收专长'});
+ await expect(gift.getByRole('button',{name:'小雾团',exact:true})).toBeVisible();await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(gift.getByRole('button',{name:'小雾团',exact:true})).toBeVisible();await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
+ await page.getByRole('tab',{name:'主要',exact:true}).click();await drag(page,page.locator('.catalog-row').filter({hasText:'明确赠送验收专长'}),page.locator('.heritage-features'));await expect(page.locator('.suite-toast')).toContainText('已经在角色卡中');
+ await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(gift.locator('.spell-grant-tile')).toHaveCount(1);await page.screenshot({path:test.info().outputPath('declared-feat-cantrip-full.png')});
+});
+test('full class cantrips accept an explicitly recorded feat gift separately across reload, deletion and duplicate drops',async({page})=>{
+ const c=card();c.selections.push(row(e('gift-feat','选学专长','feat',{})));await load(page,c);
+ await page.getByLabel('赠送戏法来源',{exact:true}).selectOption('gift-feat',{timeout:5000});
+ await expect(page.getByLabel('来源赠送戏法数量',{exact:true})).toHaveValue('0');
+ await page.getByLabel('来源赠送戏法数量',{exact:true}).fill('1');await page.getByLabel('来源赠送戏法数量',{exact:true}).press('Enter');
+ const group=page.locator('[data-source-cantrip-group="gift-feat"]'),ordinary=page.locator('[data-cantrip-group="Source Mage"]');
+ const library=page.locator('.spell-library'),mist=library.getByRole('button',{name:'小雾团',exact:true});
+ await drag(page,mist,group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
+ await drag(page,mist,group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
+ await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
+ await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();
+ await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
+ await group.getByRole('button',{name:'小雾团',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'从角色卡移除',exact:true}).click();
+ await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
+ await drag(page,library.getByRole('button',{name:'小雾团',exact:true}),group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
+ await drag(page,library.getByRole('button',{name:'小火花',exact:true}),group);await expect(page.locator('.suite-toast')).toContainText('赠送戏法数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
+ await expect(page.locator('.spell-tile-flight,.entry-drag-ghost,.drag-lifted,.drag-landing-hidden')).toHaveCount(0);await page.screenshot({path:test.info().outputPath('feat-cantrip-separate.png')});
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await group.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('feat-cantrip-separate-mobile.png'),fullPage:true});
+});
 test('an unlearned cantrip from the loaded class list can fill a slot without granting the entire catalog',async({page})=>{
  await mockSource(page);await suppressAnnouncement(page);
  const catalogSpell={name:'目录星火',ENG_name:'Catalog Spark',source:'XPHB',level:0,school:'V',classes:{fromClassList:[{name:'Source Mage',source:'XPHB'}]},entries:['原创目录验收戏法。']};

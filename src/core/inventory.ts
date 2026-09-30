@@ -1,4 +1,5 @@
 import type {Character,Entry} from './model';
+import {removeSelection} from './sheet';
 export type Stock={id:string;kind:'item'|'condition'|'currency'|'resource';name:string;quantity:number;slot:number;revision:number;entry?:Entry;coin?:string;max?:number;locked?:boolean;equipped?:boolean;attuned?:boolean;unitWeight?:number;unlimited?:boolean;type?:string};
 /** Stack identity excludes position, quantity and transport revision, never source or rules. */
 export function sameStock(a:Stock,b:Stock):boolean {
@@ -9,8 +10,10 @@ export function sameStock(a:Stock,b:Stock):boolean {
 }
 export type StockContainer={id:string;name:string;kind:'public'|'card'|'monster';revision:number;items:Stock[];columns:number;capacity:number;write:boolean;locked?:boolean};
 export type InventoryState={access?:string;revision:number;publicId:string;silent:boolean;containers:Record<string,StockContainer>};
-export function applyInventory(c:Character,container:StockContainer){
+// Missing rows in a received snapshot are not proof of a player removal.
+export function applyInventory(c:Character,container:StockContainer,removedIds:string[]=[]){
  const itemRows=container.items.filter(row=>row.kind==='item');
+ for(const id of removedIds)if(c.selections.some(row=>row.id===id&&row.entry.kind==='item')&&!itemRows.some(row=>row.id===id&&row.quantity>0))removeSelection(c,id);
  c.selections=[...c.selections.filter(row=>row.entry.kind!=='item'),...itemRows.filter(row=>row.entry&&row.quantity>0).map(row=>({...c.selections.find(s=>s.id===row.id),id:row.id,entry:row.entry!,quantity:row.quantity,level:1,equipped:!!row.equipped,attuned:!!row.attuned}))];
  const inventory=c.inventory||={view:'grid',order:[],attunementLimit:3,coins:{cp:0,sp:0,ep:0,gp:0,pp:0}};
  inventory.displayEquipment=container.items.filter(r=>r.equipped).map(r=>r.id);inventory.displayAttunement=container.items.filter(r=>r.attuned).map(r=>r.id);

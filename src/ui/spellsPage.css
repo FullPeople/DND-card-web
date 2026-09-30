@@ -47,6 +47,8 @@
 .prepared-spell-group{min-width:0}.prepared-spell-group>h4{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:11px;line-height:17px;margin:0;padding:1px 4px;border-bottom:1px solid #999;background:#5551}
 .prepared-spell-group>h4 small{font-size:9px;font-weight:400;white-space:nowrap}
 .spell-group-hint{font-size:10px;line-height:1.4;margin:3px 4px;color:var(--paper-ink,#555);opacity:.8}
+.source-cantrip-settings select{max-width:180px;min-width:100px}
+.prepared-spell-group>label.spell-group-hint{display:flex;align-items:center;gap:4px;width:auto;white-space:nowrap;flex-direction:row}.prepared-spell-group>label.spell-group-hint input{width:42px;flex:none}
 .spell-source-notices{font-size:11px;line-height:1.5;padding:3px 5px;border-left:2px solid #8b6b40}.spell-source-notices ul{margin:4px 0;padding-left:16px}.spell-source-notices p{margin:3px 0}
 .spell-grants-grid.spell-stock-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
 .paper .spell-grant-tile.source-spell-row{border:0;padding:0;min-width:0}

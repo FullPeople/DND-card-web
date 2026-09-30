@@ -2,7 +2,7 @@ import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
 import {automationEnabled} from './automation/state';
 import {evaluateArmor,automationCompatibilityIssue} from './automation/equipment';
-import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
+import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, editionAllows, entryEdition, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
   const abilities = { ...c.abilities }; const trace: Record<string, string[]> = {};
@@ -107,7 +107,13 @@ export function candidateReason(c: Character, e: Entry, r?: Requirement): string
   if(c.profile.disabledEntries?.includes(e.id))return '此条目已在规则与扩展中单独禁用';
   if(e.kind==='subclass'&&!subclassOwner(c,e))return '需要先加入该子职所属的职业';
   if (e.kind === 'feat' && !c.profile.optional.feats) return '当前角色未启用专长选项';
-  if (!selectionAllowed(c, e)) return '此来源或规则版本未启用';
+  if (!selectionAllowed(c, e)) {
+    if(!editionAllows(e,c.edition,c.profile.optional.legacy))return `此条目属于 ${entryEdition(e)} 规则，当前角色使用 ${c.edition}；请核对规则与扩展中的版本设置`;
+    if(!c.profile.enabledSources.includes(e.source))return `来源 ${e.source} 未启用，请在规则与扩展中核对`;
+    const missing=e.dependencies?.filter(id=>!c.profile.enabledSources.includes(id));
+    if(missing?.length)return `此条目需要先启用依赖来源：${missing.join('、')}`;
+    return '此条目当前未获准加入，请核对规则与扩展';
+  }
   const mismatch = requirementMismatch(e, r); if (mismatch) return mismatch;
   const existing = c.selections.some(s => s.entry.id === e.id && (!r || s.requirementId === r.id));
   if(e.kind==='class'&&c.selections.filter(s=>s.entry.kind==='class').reduce((sum,s)=>sum+s.level,0)>=20)return '职业总等级已达到 20';

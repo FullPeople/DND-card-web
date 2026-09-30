@@ -23,6 +23,7 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
   c.quickbar = c.quickbar?.filter(key => !removed.has(key));
   if(c.spellSettings){c.spellSettings.prepared=c.spellSettings.prepared.map(key=>removed.has(key)?'':key);for(const [owner,ids] of Object.entries(c.spellSettings.cantrips||{})){if(removed.has(owner))delete c.spellSettings.cantrips![owner];else c.spellSettings.cantrips![owner]=ids.map(id=>removed.has(id)?'':id);}}
   for(const key of removed)if(c.spellSettings?.special)delete c.spellSettings.special[key];
+  for(const key of removed){if(c.spellSettings?.sourceCantripCapacities)delete c.spellSettings.sourceCantripCapacities[key];if(c.spellSettings?.cantripCapacityAdjustments)delete c.spellSettings.cantripCapacityAdjustments[key];}
   for(const key of spellCounters)if(!Object.keys(c.spellSettings?.special||{}).some(id=>specialSpellResource(id,c)===key))delete c.runtime.resources[key];
   if(c.inventory)c.inventory.order=c.inventory.order.filter(key=>!removed.has(key));
   if(c.backgroundChoices)for(const key of removed)delete c.backgroundChoices[key];

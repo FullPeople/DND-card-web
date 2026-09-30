@@ -1,4 +1,6 @@
 import {useSheetZoom} from './useSheetZoom';
+import {useUiLanguage} from './UiLanguage';
+import type {UiTextKey} from './uiText';
 import './responsive177.css';
 import { useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Character } from '../core/model';
@@ -14,11 +16,13 @@ import {classBadge} from './classBadges';
 
 export const SHEET_PAGES = ['主要', '特性', '背景', '法术', '背包'] as const;
 export type SheetPage = typeof SHEET_PAGES[number];
+const pageLabels:Record<SheetPage,UiTextKey>={'主要':'pageMain','特性':'pageFeatures','背景':'pageBackground','法术':'pageSpells','背包':'pageInventory'};
 const WIDTH = 680;
 const HEIGHT = WIDTH * 297 / 210;
 
 /** Wide panes keep the A4 composition; narrow panes become a readable scrolling sheet. */
 export function PaperFrame({ children, page, changePage, character, pages=SHEET_PAGES, effectsEnabled=true, effectLayout }: { pages?:readonly SheetPage[]; effectsEnabled?:boolean; effectLayout?:'adaptive'; character: Character; children: ReactNode; page: SheetPage; changePage: (page: SheetPage) => void }) {
+  const {t}=useUiLanguage();
   const editing = useContext(SheetEditContext);
   const [{scale,compact}, setFit] = useState({scale:0.5,compact:false});
   const adaptive=effectsEnabled&&(compact||effectLayout==='adaptive');
@@ -48,13 +52,13 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   return <CardIdentityContext.Provider value={character.id}><CardVisualContext.Provider value={originalVisuals}><div className={`sheet-viewport ${compact?'sheet-compact sheet-reflow':''}`} ref={viewport}>
     <div className="paper-stack" style={{ width:compact?'100%':WIDTH*scale+42,height:compact?'auto':HEIGHT*scale,transform:`translate(${zoom.x}px,${zoom.y}px) scale(${zoom.zoom})` }}>
       <div ref={paper} data-visual-editing={editing} className={`paper has-card-art ${editing ? 'visual-editing' : ''} ${adaptive?adaptiveConditionClasses(visuals.active,editing):[...visuals.active].map(id => `condition-${id}`).join(' ')} page-${SHEET_PAGES.indexOf(page)}`} role="tabpanel" id="sheet-page" aria-labelledby={`page-tab-${page}`} style={{ ...Object.fromEntries(Object.entries(character.palette||{}).map(([key,value])=>[`--paper-${key}`,value])),width:compact?'100%':WIDTH,height:compact?'auto':HEIGHT,top:0,transform:compact?'none':`scale(${scale})` } as CSSProperties}>{effectsEnabled&&(adaptive?<><AdaptiveCardAtmosphere key={character.id} active={effects.active} exhaustion={effects.exhaustion} editing={editing} watermarkUrl={badge?.url}/><AdaptivePaperLayers paper={paper} active={effects.active} exhaustion={effects.exhaustion} editing={editing} layoutKey={`${character.id}:${page}`}/></>:<CardAtmosphere key={character.id} character={character}/>)}{children}</div>
-      <nav className="sheet-pages" role="tablist" aria-label="角色卡页面" style={{ left: compact?0:WIDTH * scale, top: compact?0:25 }} aria-orientation={compact?'horizontal':'vertical'}>
+      <nav className="sheet-pages" role="tablist" aria-label={t('sheetPages')} style={{ left: compact?0:WIDTH * scale, top: compact?0:25 }} aria-orientation={compact?'horizontal':'vertical'}>
         {pages.map((name, index) => <button key={name} id={`page-tab-${name}`} role="tab" aria-selected={page === name} aria-controls="sheet-page" tabIndex={page === name ? 0 : -1} onClick={() => changePage(name)} data-sheet-tab={name} onKeyDown={event => {
           const next = ['ArrowRight','ArrowDown'].includes(event.key) ? (index + 1) % pages.length : ['ArrowLeft','ArrowUp'].includes(event.key) ? (index + pages.length-1) % pages.length : event.key === 'Home' ? 0 : event.key === 'End' ? pages.length-1 : -1;
           if (next >= 0) { event.preventDefault(); changePage(pages[next]); document.getElementById(`page-tab-${pages[next]}`)?.focus(); }
-        }}><span className="page-number">0{index + 1}</span>{name}</button>)}
+        }}><span className="page-number">0{index + 1}</span>{t(pageLabels[name])}</button>)}
       </nav>
     </div>
-    {zoom.zoom>1.01&&<button className="sheet-zoom-reset" onClick={resetZoom} aria-label="还原角色卡缩放">{Math.round(zoom.zoom*100)}% · 还原</button>}
+    {zoom.zoom>1.01&&<button className="sheet-zoom-reset" onClick={resetZoom} aria-label={t('resetZoom')}>{Math.round(zoom.zoom*100)}% · {t('reset')}</button>}
   </div></CardVisualContext.Provider></CardIdentityContext.Provider>;
 }

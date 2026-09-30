@@ -1,4 +1,5 @@
 import {EntryMenuProvider} from './ui/EntrySharing';
+import {UiLanguageProvider} from './ui/UiLanguage';
 import './platform/tone';
 import { createRoot } from 'react-dom/client';
 import { SourceProvider } from './ui/SourceName';
@@ -14,7 +15,7 @@ import './ui/overview.css';
 import './ui/library.css';
 import './ui/cardAtmosphere.css';
 const app=<Suspense fallback={null}><StartupReady><App/></StartupReady></Suspense>;
-createRoot(document.getElementById('root')!).render(<StartupBoundary><SourceProvider>{viewer?app:<EntryMenuProvider>{app}</EntryMenuProvider>}</SourceProvider></StartupBoundary>);
+createRoot(document.getElementById('root')!).render(<StartupBoundary><UiLanguageProvider><SourceProvider>{viewer?app:<EntryMenuProvider>{app}</EntryMenuProvider>}</SourceProvider></UiLanguageProvider></StartupBoundary>);
 import './ui/libraryRefine.css';
 
 import './ui/characterPages.css';
