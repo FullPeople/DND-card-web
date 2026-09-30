@@ -12,7 +12,7 @@ test('local dice is above native dialogs and restores focus without closing the 
  const dice=page.getByRole('dialog',{name:'本地投骰',exact:true});await expect(dice).toBeVisible();
  expect(await dice.evaluate(e=>e.matches(':modal'))).toBe(true);
  await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toBeFocused();
- await dice.getByRole('button',{name:'投骰',exact:true}).click();await expect(dice.getByRole('status')).toContainText('1d20');
+ await dice.getByRole('button',{name:'投骰',exact:true}).click();await expect(dice.getByRole('status',{name:'投骰结果',exact:true})).toContainText('1d20');
  await page.screenshot({path:test.info().outputPath('dice-above-dialog.png')});
  await page.keyboard.press('Escape');await expect(dice).toHaveCount(0);await expect(under).toBeVisible();await expect(previous).toBeFocused();
  await page.evaluate(()=>{document.getElementById('dice-layer-obstruction')?.remove();window.dispatchEvent(new CustomEvent('local-dice',{detail:{expression:'1d6',label:'再次投骰'}}));});
