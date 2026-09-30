@@ -1,6 +1,10 @@
-# 2026-09-30 · 210 发布候选与隔离边界
+# 2026-09-30 · 210 已发布与隔离边界
 
-本轮用户已授权部署网站和枭熊插件，并要求更新公告。当前候选与验收见 RELEASE-210-CANDIDATE.md、STATUS.md；实际上线以 RELEASE-210-RESULT.md 为准。使用 U:/code/DND-card-cloud-feedback-20260930-7f00bead 与 U:/code/DND-card-suite-release210。U:/code/DND-card-automation-209 的手机 A4 脏树保持原样；F:/CodexWork/2026-09-27/feedback/suite 也有其他骰子开发，不能整包发布。这些新边界覆盖下方历史路径建议。
+本轮用户授权的部署与公告更新已完成：国内 standalone-1.0.210 / 公告 0.1.15、新版 1.0.210-dev、旧版阅读器 1.3.14 与 Pages 已上线。发布源码 Web b0f2cb1、Suite 5f1f30f；最终 CI 270 单元、142 浏览器通过（5 / 8 跳过）；服务器 120、公网 111、Pages 12 文件散列通过。完整回执见 RELEASE-210-RESULT.md，群公告见 ANNOUNCEMENT-210.txt。
+
+继续使用 U:/code/DND-card-cloud-feedback-20260930-7f00bead 与 U:/code/DND-card-suite-release210。U:/code/DND-card-automation-209 的手机 A4 脏树保持原样；F:/CodexWork/2026-09-27/feedback/suite 有其他骰子开发，不能整包发布。本机独立预览 5183 保持运行。未修改玩家数据库、中继、三龙牌或 Nginx，未重启服务；回退静态目录为 /var/www/obr-plugins/{card,suite-dev,suite}-before-210。
+
+职业同步先核对与预览再生成副本，原卡保留；子职/自定义/未知规则仍需人工核对。手动容量不等于自动 choose/filter 规则完成；完整英文、真实宿主权限和多人联动仍未验收。这些新边界覆盖下方历史路径建议；本轮授权不代表以后自动部署。
 
 # 2026-09-28 · 209 已发布：基础自动化与法术两栏
 
