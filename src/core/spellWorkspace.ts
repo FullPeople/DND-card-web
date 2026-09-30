@@ -2,6 +2,7 @@ import {selectionAllowed,uid,type Character,type Entry,type Selection} from './m
 import {spellState} from './characterDetails';
 import {cantripCapacity,casterProfiles,spellOnClassList,spellUsesPreparation,type CasterProfile} from './spellcastingRules';
 import {sourceSpellEnabled} from './automation/sourceSpellState';
+import {knownSpellCapacity,sourceCapacity} from './spellCapacity';
 
 export interface CantripGroup {id:string;name:string;profile?:CasterProfile;capacity:number;slots:string[]}
 const ordinaryCantrips=(c:Character)=>c.selections.filter(s=>s.entry.kind==='spell'&&Number(s.entry.raw.level)===0&&!c.spellSettings?.special?.[s.id]);
@@ -10,7 +11,7 @@ export const hasClassLookup=(e:Entry)=>!!e.raw._spellClasses||!!e.raw.classes;
 /** Old cards gain a read-only layout; opening the page never changes learned spells. */
 export function cantripGroups(c:Character):CantripGroup[]{
  const capacity=(p:CasterProfile)=>Math.max(0,Math.min(100,cantripCapacity(p)+(c.spellSettings?.cantripCapacityAdjustments?.[p.owner.id]||0)));
- const profiles=casterProfiles(c).filter(p=>cantripCapacity(p)>0||capacity(p)>0||c.spellSettings?.cantrips?.[p.owner.id]!==undefined),rows=ordinaryCantrips(c),assigned=new Set<string>();
+ const profiles=casterProfiles(c).filter(p=>cantripCapacity(p)>0||capacity(p)>0||c.spellSettings?.cantrips?.[p.owner.id]!==undefined),rows=ordinaryCantrips(c),savedManual=c.spellSettings?.cantrips?.manual,assigned=new Set<string>(savedManual?.filter(Boolean));
  const groups:CantripGroup[]=profiles.map(profile=>{
   const saved=c.spellSettings?.cantrips?.[profile.owner.id];
   const slots=saved?saved.map(id=>rows.some(s=>s.id===id)?id:''):rows.filter(s=>!assigned.has(s.id)&&(spellOnClassList(s.entry,profile)||profiles.length===1&&!hasClassLookup(s.entry))).map(s=>s.id);
@@ -20,7 +21,7 @@ export function cantripGroups(c:Character):CantripGroup[]{
  // Unselected spells in a saved group remain known, without returning to the active list.
  const remaining=rows.filter(s=>!assigned.has(s.id)&&!profiles.some(p=>c.spellSettings?.cantrips?.[p.owner.id]!==undefined&&(spellOnClassList(s.entry,p)||profiles.length===1&&!hasClassLookup(s.entry))));
  const saved=c.spellSettings?.cantrips?.manual;
- if(remaining.length||!profiles.length)groups.push({id:'manual',name:profiles.length?'其他戏法':'戏法',capacity:Math.max(remaining.length,1),slots:saved?saved.map(id=>rows.some(s=>s.id===id)?id:''):remaining.map(s=>s.id)});
+ if(profiles.length&&remaining.length||saved?.length)groups.push({id:'manual',name:profiles.length?'其他戏法':'戏法',capacity:Math.max(0,Math.min(100,(saved?.length??remaining.length)+(c.spellSettings?.cantripCapacityAdjustments?.manual||0))),slots:saved?saved.map(id=>rows.some(s=>s.id===id)?id:''):remaining.map(s=>s.id)});
  return groups;
 }
 
@@ -33,8 +34,8 @@ export function chooseCantrip(c:Character,entry:Entry,ownerId?:string,index?:num
  if(group.profile&&hasClassLookup(entry)&&!spellOnClassList(entry,group.profile))return {error:`此戏法不在${group.name}的法表中。`};
  const row=c.selections.find(s=>s.entry.id===entry.id&&s.entry.kind==='spell'&&!c.spellSettings?.special?.[s.id]);
  const current=row?group.slots.indexOf(row.id):-1;
- if(current>=0&&index===undefined)return {id:row!.id};
- const limit=group.id==='manual'?Math.max(group.capacity,group.slots.length+1,(index??-1)+1):group.capacity;
+ if(current>=0&&current<group.capacity&&index===undefined)return {id:row!.id};
+ const limit=group.capacity;
  const target=index??Array.from({length:limit},(_,i)=>i).find(i=>!group.slots[i]);
  if(target===undefined||target<0||target>=limit)return {error:'戏法格已满；拖到已有戏法上可以替换，替换时机请按职业规则。'};
  const settings=c.spellSettings||=structuredClone(spellState(c));settings.cantrips||={};
@@ -55,9 +56,23 @@ export function clearCantrip(c:Character,ownerId:string,index:number){
 /** The overview and export use the exact same readiness as the spell page. */
 export function spellIsReady(c:Character,row:Selection):boolean{
  if(row.entry.kind!=='spell'||!selectionAllowed(c,row.entry))return false;
- if(c.spellSettings?.special?.[row.id])return sourceSpellEnabled(c,row.id);
- if(Number(row.entry.raw.level)===0)return cantripGroups(c).some(g=>g.slots.includes(row.id));
- return !spellUsesPreparation(c,row.entry,row.id)||spellState(c).prepared.includes(row.id);
+ const special=c.spellSettings?.special?.[row.id];
+ if(special){
+  const owner=(id:string)=>{const s=c.spellSettings!.special![id];return s.sourceGrant?.ownerId||s.manualSource?.ownerId||'manual';};
+  return sourceSpellEnabled(c,row.id)&&c.selections.filter(s=>c.spellSettings?.special?.[s.id]&&owner(s.id)===owner(row.id)).slice(0,sourceCapacity(c,owner(row.id)).total).some(s=>s.id===row.id);
+ }
+ if(spellUsesPreparation(c,row.entry,row.id)){const state=spellState(c);return state.prepared.slice(0,state.capacity).includes(row.id);}
+ if(Number(row.entry.raw.level)===0&&cantripGroups(c).length)return cantripGroups(c).some(g=>g.slots.slice(0,g.capacity).includes(row.id));
+ return knownActiveSpells(c).slice(0,knownSpellCapacity(c)).some(s=>s.id===row.id);
+}
+
+export function knownActiveSpells(c:Character){return c.selections.filter(s=>s.entry.kind==='spell'&&!c.spellSettings?.special?.[s.id]&&!spellUsesPreparation(c,s.entry,s.id)&&(Number(s.entry.raw.level)>0||!cantripGroups(c).length));}
+
+/** Only active known-spell selections consume this allowance; a book/library is independent. */
+export function chooseKnownSpell(c:Character,entry:Entry):{id?:string;error?:string}{
+ const known=knownActiveSpells(c),old=known.find(s=>s.entry.id===entry.id);if(old&&known.indexOf(old)<knownSpellCapacity(c))return {id:old.id};
+ if(knownActiveSpells(c).length>=knownSpellCapacity(c))return {error:'职业法术格已满，请调整上限或移除已有记录。'};
+ return learnActiveSpell(c,entry);
 }
 
 export function ordinaryPrepared(c:Character):string[]{

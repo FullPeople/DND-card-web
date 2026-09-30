@@ -15,7 +15,11 @@ const data: Record<string, unknown> = {
   'items-base.json': { baseitem: [{ name: '测试皮甲', ENG_name: 'Test Armor', source: 'XPHB', ac: 11, type: 'LA', entries: ['测试护甲。'] }] },
   'items.json': {}, 'optionalfeatures.json': {}, 'conditionsdiseases.json': {},
 };
-export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean}={}) {
+export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean;firstSetup?:boolean}={}) {
+  if(!options.firstSetup){
+    await page.context().addInitScript(()=>{try{localStorage.setItem('dnd-card:rules-setup:v1','done');}catch{}});
+    await page.evaluate(()=>{try{localStorage.setItem('dnd-card:rules-setup:v1','done');}catch{}}).catch(()=>{});
+  }
   // Unrelated room-flow tests start after the version notice has been accepted.
   // Dedicated announcement tests opt out and exercise the real mandatory dialog.
   if(!options.suiteAnnouncement){

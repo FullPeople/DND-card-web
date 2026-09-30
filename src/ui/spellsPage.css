@@ -40,8 +40,8 @@
 .special-spells-cell.has-source-spells{height:270px;max-height:300px}
 
 /* One prepared area: separate quotas, compact source grants, no third panel. */
-.paper .spell-stock-cell.unified-prepared{height:auto;min-height:220px;flex:1.2}
-.paper .spell-stock-cell.unified-prepared.only-prepared{flex:1}
+.paper .spell-stock-cell.unified-prepared{min-height:0;max-height:65%;flex:0 1 auto}
+.paper .spell-stock-cell.unified-prepared.only-prepared{max-height:100%}
 .paper .spell-library.spell-stock-cell{min-height:130px;flex:1}
 .prepared-spell-groups{display:flex;flex-direction:column;gap:7px}
 .prepared-spell-group{min-width:0}.prepared-spell-group>h4{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:11px;line-height:17px;margin:0;padding:1px 4px;border-bottom:1px solid #999;background:#5551}
@@ -62,8 +62,11 @@
 .spell-detail-shade{position:fixed;inset:0;z-index:2147482650;background:#0005;display:grid;place-items:center;padding:16px}
 .spell-detail-dialog{width:min(380px,calc(100vw - 32px));max-height:80dvh;overflow:auto;background:#eee;color:#333;border:3px solid #555;padding:14px;font-size:13px;box-shadow:0 8px 30px #0004}
 .spell-detail-dialog header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #999;padding-bottom:7px;margin-bottom:8px}.spell-detail-dialog p{margin:7px 0;line-height:1.5}.spell-detail-dialog .source-spell-actions{font-size:13px;margin-top:12px;gap:8px}.spell-detail-dialog button,.spell-detail-dialog select{font-size:12px;padding:5px 8px}.spell-detail-dialog .special-spell-uses{font-size:12px}.spell-detail-dialog .manual-spell-actions{display:flex;gap:6px;margin-top:10px}
-.sheet-reflow .paper:not(.sheet-export) .unified-prepared{min-height:220px;flex:none;height:auto;max-height:none}
+.sheet-reflow .paper:not(.sheet-export) .unified-prepared{min-height:0;flex:none;height:auto!important;max-height:none}
 .sheet-reflow .paper:not(.sheet-export) .unified-prepared .cell-content{max-height:none;overflow:visible}
 .sheet-reflow .paper:not(.sheet-export) .spell-grants-grid.spell-stock-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .sheet-reflow .spell-use-badge{font-size:11px;min-height:27px}
 @media print{.spell-detail-shade{display:none}}
+.prepared-spell-group>h4{flex-wrap:wrap}.spell-capacity-adjust{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:3px;width:auto!important;font-size:9px;font-weight:400;white-space:nowrap}.spell-capacity-adjust input{width:43px!important;min-width:0;flex:none!important;padding:1px 2px!important}
+.spell-library-level>summary{cursor:pointer;font-size:11px;line-height:18px;padding:2px 4px;background:#5551}.spell-library-level>summary small{font-weight:400;opacity:.65}
+.spell-overflow{font-size:10px;margin:3px 4px}.spell-overflow summary{cursor:pointer;color:#80601d}.spell-overflow ul{padding-left:12px}.spell-overflow li{display:flex;gap:8px;align-items:center}.spell-overflow button{font:inherit;padding:2px 4px}

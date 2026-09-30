@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-09-28';
+export const RELEASE_DATE='2026-09-30';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -124,20 +124,32 @@ const PREVIOUS_SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'三龙牌',items:['服务器牌桌的房主离开后，现在会自动交接给在线玩家。','短暂刷新和关闭重复窗口不会立即交接；真实多人房间待验证。','修复了自选特殊牌列表无法向下滚动的问题；实体手机待验证。']},
  {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_209_SECTIONS:ReleaseSection[]=[
  {title:'基础自动化',items:['增加了基础自动化，可以在角色卡工具栏中开启。','装备护甲和盾牌后，现在可以自动计算 AC。','装备武器后，现在可以生成对应的快捷攻击。','支持部分特性和种族的赠送法术、免费次数与法术位消耗。']},
  {title:'法术列表',items:['优化了预备法术和已知法术列表，戏法与赠送法术分组显示。','点击已知法术可以选中打勾，再次点击取消；预备区显示对应法术。','修复了同名赠送法术阻挡普通预备的问题。','恢复了法术格原有样式、专注和仪式效果。']},
  {title:'待验证',items:['实体手机操作待验证；复杂兼职、动态次数和完整休息规则尚未全部支持。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_209_SECTIONS:ReleaseSection[]=[...RELEASE_209_SECTIONS,
  {title:'枭熊联动',items:['基础自动化的真实多人同步待验证。']},
  {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'法术与容量',items:['空白角色不再显示空的预备法术框，框体随内容收缩。','已知法术可按戏法、环阶分别折叠；默认使用普通预备分类，额外分类随职业或特性出现。','编辑模式下可在分类标题右侧输入正负数调整容量，格子与上限保持一致；超额内容保留并单独提示。','补齐明确指定的专长赠送戏法；手动调整容量不会自动替你选择赠送法术。']},
+ {title:'角色与操作',items:['后添加的盾牌和军用武器熟练项现在能参与基础自动化；主动删除的背景赠品不再自动补回。','修复双列布局下添加、编辑按钮的显示；无法拖入时会说明原因。','单件武器可以选择属性调整值，刷新及 JSON 导入导出后保留。','首次打开会提示选择规则、资料显示方式和扩展，之后可随时从右上角“规则与扩展”调整。']},
+ {title:'旧职业同步',items:['可核对旧职业与当前资料的对应关系，预览变化后创建同步副本，原角色保留。','自定义职业可保留原样；同步不会自动补满已有资源。子职和未识别规则仍需自行核对。']},
+ {title:'公告与反馈',items:['问题反馈入口集中到公告内，附正确的问题地址、邮箱和反馈说明。','暂时移除语言选项，界面统一显示中文。']},
+ {title:'未完成与待验证',items:['自动选择或按条件筛选的专长赠送规则、完整英文翻译尚未完成；复杂兼职、动态次数和完整休息规则尚未全部支持。','实体手机操作与玩家具体旧卡待验证。']},
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'枭熊联动',items:['新版同步本批角色卡修复；旧版仅同步阅读器，继续支持 XLSX。','真实宿主、权限变化和多人同步待验证，独立网站预览不能代替房间联动验收。']},
+ {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']},
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-09-28',sections:mode==='suite'?SUITE_RELEASE_209_SECTIONS:RELEASE_209_SECTIONS},
  {title:'2026-09-27-二',sections:mode==='suite'?PREVIOUS_SUITE_RELEASE_SECTIONS:PREVIOUS_RELEASE_SECTIONS},
  {title:'2026-09-27-一',sections:mode==='suite'?SUITE_ARCHIVED_RELEASE_SECTIONS:ARCHIVED_RELEASE_SECTIONS},
 ];

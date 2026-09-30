@@ -23,7 +23,7 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
   c.quickbar = c.quickbar?.filter(key => !removed.has(key));
   if(c.spellSettings){c.spellSettings.prepared=c.spellSettings.prepared.map(key=>removed.has(key)?'':key);for(const [owner,ids] of Object.entries(c.spellSettings.cantrips||{})){if(removed.has(owner))delete c.spellSettings.cantrips![owner];else c.spellSettings.cantrips![owner]=ids.map(id=>removed.has(id)?'':id);}}
   for(const key of removed)if(c.spellSettings?.special)delete c.spellSettings.special[key];
-  for(const key of removed){if(c.spellSettings?.sourceCantripCapacities)delete c.spellSettings.sourceCantripCapacities[key];if(c.spellSettings?.cantripCapacityAdjustments)delete c.spellSettings.cantripCapacityAdjustments[key];}
+  for(const key of removed){if(c.spellSettings?.sourceCantripCapacities)delete c.spellSettings.sourceCantripCapacities[key];if(c.spellSettings?.sourceCapacityAdjustments)delete c.spellSettings.sourceCapacityAdjustments[key];if(c.spellSettings?.cantripCapacityAdjustments)delete c.spellSettings.cantripCapacityAdjustments[key];}
   for(const key of spellCounters)if(!Object.keys(c.spellSettings?.special||{}).some(id=>specialSpellResource(id,c)===key))delete c.runtime.resources[key];
   if(c.inventory)c.inventory.order=c.inventory.order.filter(key=>!removed.has(key));
   if(c.backgroundChoices)for(const key of removed)delete c.backgroundChoices[key];
@@ -32,9 +32,9 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
 
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
-export function syncFeatures(c: Character, catalog: Entry[]): boolean {
+export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean}): boolean {
   let changed = false;
-  const known = [...c.selections.map(s => s.entry), ...catalog];
+  const known = review?.refresh ? [...catalog, ...c.selections.map(s => s.entry)] : [...c.selections.map(s => s.entry), ...catalog];
   const byName = new Map<string, Entry[]>();
   for (const entry of known) for (const name of new Set([entry.name.toLowerCase(), entry.english.toLowerCase()])) { const group = byName.get(name) || []; group.push(entry); byName.set(name, group); }
   function resolve(ref: string, kind: Entry['kind']) {
@@ -47,7 +47,7 @@ export function syncFeatures(c: Character, catalog: Entry[]): boolean {
     const entry = (byName.get(base.toLowerCase()) || []).find(e => e.kind === kind && !requirementMismatch(e, { refs: [`${base}|${source || ''}`] }));
     return entry ? { ...entry, id: `${entry.id}#grant:${name}`, name, raw: { ...entry.raw, _grantReference: ref } } : undefined;
   }
-  const roots = c.selections.filter(s => ['class', 'subclass', 'race', 'background'].includes(s.entry.kind));
+  const roots = c.selections.filter(s => ['class', 'subclass', 'race', 'background'].includes(s.entry.kind)&&(!review||review.owners.has(s.id)));
   for (const owner of roots) {
     const raw = owner.entry.raw, grants: Grant[] = [];
     const parent = c.selections.find(s => belongsToClass(owner, s));
@@ -93,7 +93,7 @@ export function syncFeatures(c: Character, catalog: Entry[]): boolean {
     for (const grant of grants) {
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);
-      if(attached){if(attached.entry.raw._equipmentRef&&!grant.entry.raw._equipmentRef){attached.entry=structuredClone(grant.entry);changed=true;}continue;}
+      if(attached){if(review?.refresh&&JSON.stringify(attached.entry)!==JSON.stringify(grant.entry)||attached.entry.raw._equipmentRef&&!grant.entry.raw._equipmentRef){attached.entry=structuredClone(grant.entry);changed=true;}continue;}
       const existing = c.selections.find(s => s.entry.id === grant.entry!.id && !s.grantKey && (!s.parentId || s.parentId === owner.id) && (!s.requirementId || s.requirementId.startsWith(`${owner.id}:`)));
       if (existing) { existing.parentId = owner.id; existing.grantKey = grant.key; changed = true; continue; }
       if (c.selections.length >= 3000) break;
@@ -101,7 +101,7 @@ export function syncFeatures(c: Character, catalog: Entry[]): boolean {
       c.selections.push({ id: legacyId && !c.selections.some(s => s.id === legacyId) ? legacyId : uid(), entry: structuredClone(grant.entry), level: 1, quantity: grant.quantity||1, equipped: false, parentId: owner.id, grantKey: grant.key }); changed = true;
     }
   }
-  for(const row of c.selections.filter(s=>s.entry.kind==='feature')){
+  for(const row of c.selections.filter(s=>s.entry.kind==='feature'&&(!review||!!s.parentId&&review.owners.has(s.parentId)))){
     const owner=featureOwner(c,row);
     if(owner&&row.parentId!==owner.id){row.parentId=owner.id;changed=true;}
   }

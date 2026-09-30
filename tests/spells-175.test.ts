@@ -51,6 +51,6 @@ describe('spell page state and source-qualified subclass ownership',()=>{
   c.spellSettings={...spellState(c),capacity:2};delete c.spellSettings.capacityAdjustment;expect(togglePreparedSpell(c,a.id,1)).toBe(true);expect(c.spellSettings.prepared).toEqual(['',a.id]);expect(togglePreparedSpell(c,b.id)).toBe(true);
   const third=add(c,entry('spell','丙',{level:3}));expect(togglePreparedSpell(c,third.id)).toBe(false);expect(togglePreparedSpell(c,cantrip.id)).toBe(false);
   expect(togglePreparedSpell(c,a.id)).toBe(true);expect(c.selections).toHaveLength(4);expect(validateCharacter(exportCharacter(c)).spellSettings?.prepared).toEqual([b.id,'']);
-  c.spellSettings.capacity=0;expect(togglePreparedSpell(c,third.id)).toBe(true);expect(c.spellSettings.prepared).toEqual([b.id,third.id]);
+  c.spellSettings.capacity=0;expect(togglePreparedSpell(c,third.id)).toBe(false);expect(c.spellSettings.prepared).toEqual([b.id,'']);
  });
 });

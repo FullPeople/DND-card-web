@@ -54,7 +54,7 @@ export const hasKnownLibrary=(p:CasterProfile):boolean=>p.pool==='book'||p.mode=
 
 export function spellUsesPreparation(c:Character,entry:Entry,selectionId?:string):boolean{
  if(selectionId&&c.spellSettings?.special?.[selectionId])return false;
- if(!(Number(entry.raw.level)>0))return false;
+ if(Number(entry.raw.level)===0&&(casterProfiles(c).length>0||c.spellSettings?.cantrips?.manual?.some(Boolean)))return false;
  if(c.spellSettings?.modeOverride)return c.spellSettings.mode==='prepared';
  const profiles=casterProfiles(c),matching=profiles.filter(p=>spellOnClassList(entry,p));
  return matching.length?matching.some(p=>p.mode==='prepared'):(inferredSpellMode(c)??c.spellSettings?.mode??'prepared')==='prepared';

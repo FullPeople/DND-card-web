@@ -1,3 +1,4 @@
+import {spellState} from '../src/core/characterDetails';
 import { describe, expect, it } from 'vitest';
 import { newCharacter, uid, type Entry, type Character } from '../src/core/model';
 import { syncFeatures, removeSelection } from '../src/core/sheet';
@@ -147,7 +148,7 @@ describe('safe import and extension contracts', () => {
   });
   it('round trips native characters and preserves actual Owlbear schema 0.3 shapes', () => {
     const c = newCharacter(); c.name = '测试冒险者'; c.abilities.dex = 14; c.baseHp = 22; c.runtime.hp = 17; c.runtime.tempHp = 3;
-    add(c, entry('class', { hd: { faces: 8 } }), undefined, 3); add(c, entry('feat')); add(c, entry('spell', { level: 0 }));
+    add(c, entry('class', { hd: { faces: 8 } }), undefined, 3); add(c, entry('feat')); add(c, entry('spell', { level: 0 }));c.spellSettings={...spellState(c),capacityAdjustment:1,prepared:[c.selections.at(-1)!.id]};
     const native = validateCharacter(parseFile(JSON.stringify(exportCharacter(c)))); expect(native).toEqual(c);
     const external = exportOwlbear(c, evaluate(c)); expect(external.core_stats.hp).toEqual({ current: 17, max: 22, temp: 3 });
     expect(Array.isArray(external.skills)).toBe(true); expect(external.features.feats).toHaveLength(1); expect(external.spellcasting.cantrips_known).toHaveLength(1);

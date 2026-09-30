@@ -92,7 +92,7 @@ test('explicit class cantrip adjustment persists and lowering the limit retains 
  await expect(input).toHaveValue('0');await input.fill('1');await input.press('Enter');await page.locator('.spell-library').getByRole('button',{name:'小雾团',exact:true}).click();
  await expect(group.locator('[data-spell-id]')).toHaveCount(3);await expect(group.locator('h4')).toContainText('3 / 3');
  await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(input).toHaveValue('1');await expect(group.locator('[data-spell-id]')).toHaveCount(3);
- await input.fill('-1');await input.press('Enter');await expect(group.locator('h4')).toContainText('3 / 1');await expect(group.getByRole('status')).toContainText('已保留原记录');await expect(group.locator('[data-spell-id]')).toHaveCount(3);await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
+ await input.fill('-1');await input.press('Enter');await expect(group.locator('h4')).toContainText('3 / 1');await expect(group.locator('.spell-overflow summary')).toContainText('2 项已保留原记录');await expect(group.locator('[data-spell-id]')).toHaveCount(1);await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
 });
 test('a declared feat grants its cantrip after a real Wiki drop even when class cantrips are full',async({page})=>{
  await load(page,card(),async()=>{await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:[{name:'明确赠送验收专长',ENG_name:'Declared Gift',source:'XPHB',additionalSpells:[{known:{'_':['Mist|XPHB#c']}}],entries:['原创资料，明确赠送引用仅用于软件验收。']}]},headers:{'access-control-allow-origin':'*',etag:'declared-gift'}}));});
@@ -107,9 +107,9 @@ test('a declared feat grants its cantrip after a real Wiki drop even when class 
 });
 test('full class cantrips accept an explicitly recorded feat gift separately across reload, deletion and duplicate drops',async({page})=>{
  const c=card();c.selections.push(row(e('gift-feat','选学专长','feat',{})));await load(page,c);
- await page.getByLabel('赠送戏法来源',{exact:true}).selectOption('gift-feat',{timeout:5000});
- await expect(page.getByLabel('来源赠送戏法数量',{exact:true})).toHaveValue('0');
- await page.getByLabel('来源赠送戏法数量',{exact:true}).fill('1');await page.getByLabel('来源赠送戏法数量',{exact:true}).press('Enter');
+ await page.getByLabel('赠送法术来源',{exact:true}).selectOption('gift-feat',{timeout:5000});
+ await expect(page.getByLabel('来源法术上限调整',{exact:true})).toHaveValue('0');
+ await page.getByLabel('来源法术上限调整',{exact:true}).fill('1');await page.getByLabel('来源法术上限调整',{exact:true}).press('Enter');
  const group=page.locator('[data-source-cantrip-group="gift-feat"]'),ordinary=page.locator('[data-cantrip-group="Source Mage"]');
  const library=page.locator('.spell-library'),mist=library.getByRole('button',{name:'小雾团',exact:true});
  await drag(page,mist,group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
@@ -120,7 +120,7 @@ test('full class cantrips accept an explicitly recorded feat gift separately acr
  await group.getByRole('button',{name:'小雾团',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'从角色卡移除',exact:true}).click();
  await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
  await drag(page,library.getByRole('button',{name:'小雾团',exact:true}),group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
- await drag(page,library.getByRole('button',{name:'小火花',exact:true}),group);await expect(page.locator('.suite-toast')).toContainText('赠送戏法数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
+ await drag(page,library.getByRole('button',{name:'小火花',exact:true}),group);await expect(page.locator('.suite-toast')).toContainText('赠送法术数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await expect(page.locator('.spell-tile-flight,.entry-drag-ghost,.drag-lifted,.drag-landing-hidden')).toHaveCount(0);await page.screenshot({path:test.info().outputPath('feat-cantrip-separate.png')});
  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await group.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('feat-cantrip-separate-mobile.png'),fullPage:true});
 });

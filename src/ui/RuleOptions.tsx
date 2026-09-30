@@ -1,0 +1,5 @@
+import type {Character,Edition} from '../core/model';
+
+export function RuleOptions({c,edit,readOnly=false,title='当前角色的规则'}:{c:Character;edit:(action:(draft:Character)=>void)=>void;readOnly?:boolean;title?:string}){
+ return <section className="settings-section"><h3>{title}</h3><div className="setting-row"><span>基础版本<small>切换会保留所有内容，并标记不兼容条目。</small></span><div className="segmented" role="radiogroup" aria-label="角色规则版本">{(['2014','2024'] as Edition[]).map(v=><button disabled={readOnly} key={v} role="radio" aria-checked={c.edition===v} onClick={()=>edit(draft=>{draft.edition=v;})}>{v}</button>)}</div></div>{([['feats','专长规则','允许选择专长'],['multiclass','兼职规则','允许增加职业；兼职前提需与 DM 核对'],['legacy','兼容旧版内容','允许 2024 角色使用 2014 条目，具体替换关系由 DM 裁定']] as const).map(([key,label,desc])=><label className="setting-row" key={key}><span>{label}<small>{desc}</small></span><input disabled={readOnly} type="checkbox" checked={c.profile.optional[key]} onChange={e=>edit(draft=>{draft.profile.optional[key]=e.target.checked;})}/></label>)}</section>;
+}

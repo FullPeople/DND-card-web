@@ -13,7 +13,7 @@ import {evaluate} from '../src/core/engine';
 
 function entry(id:string,kind:Entry['kind'],raw:Entry['raw']={},source='XPHB'):Entry{return {id,kind,name:id,english:id,source,edition:source==='XPHB'?'2024':'2014',packId:'fixture',revision:'1',entries:['原创软件验收条目。'],raw};}
 const spells=[entry('测试光', 'spell',{level:0}),entry('测试盾','spell',{level:1}),entry('测试门','spell',{level:2})];
-function setup(){const c=newCharacter();c.automation=newAutomationState();c.spellSettings={...spellState(c),mode:'prepared',modeOverride:true,capacity:5};return c;}
+function setup(){const c=newCharacter();c.automation=newAutomationState();c.spellSettings={...spellState(c),mode:'prepared',modeOverride:true,capacity:5,capacityAdjustment:5};return c;}
 function source(c:Character,raw:Entry['raw'],kind:Entry['kind']='race',id='来源'):Selection{const row={id,entry:entry(id,kind,raw),quantity:1,level:1,equipped:false};c.selections.push(row);return row;}
 const grant=(c:Character)=>c.selections.find(s=>s.grantKey?.startsWith('source-spell:'))!;
 const resource=(c:Character)=>c.runtime.resources[specialSpellResource(grant(c).id)];

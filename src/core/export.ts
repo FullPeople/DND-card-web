@@ -20,7 +20,7 @@ export function exportOwlbear(c: Character, d: Derived) {
   const features = (kinds: string[]) => active.filter(s => kinds.includes(s.entry.kind)).map(s => ({ name: s.entry.name, source: s.entry.source, description: plainText(s.entry.entries), level: s.entry.raw.level || null }));
   const spells = active.filter(s => s.entry.kind === 'spell'&&sourceSpellEnabled(c,s.id)).map(s => ({ selectionId:s.id,name: s.entry.name, level: s.entry.raw.level || 0, source: s.entry.source, description: plainText(s.entry.entries), meta: { source: s.entry.source } }));
   const settings=spellState(c),spellStats=spellValues(c,d),ability=settings.ability;
-  const preparedIds=new Set(settings.prepared),readyIds=new Set(c.selections.filter(s=>spellIsReady(c,s)).map(s=>s.id));
+  const preparedIds=new Set(settings.prepared.slice(0,settings.capacity)),readyIds=new Set(c.selections.filter(s=>spellIsReady(c,s)).map(s=>s.id));
   return { schema_version: '0.3', meta: { template_name: 'DND Card Web', template_version: '0.1.0', layout_version: 'web-1', ruleset: c.edition, source_file: `${c.name}.json`, parsed_at: c.updatedAt },
     identity: { size: c.size || null, character_name: c.name, display_name: c.name, player: c.player, race: { name: entryName('race'), subrace: null }, background: entryName('background'), alignment: c.identity.alignment || null, gender: c.identity.gender || null, age: c.identity.age || null, languages: [], tool_proficiencies: [] },
     classes: active.filter(s => s.entry.kind === 'class').map((s, i) => ({ role: i === 0 ? '主职' : `兼职${i}`, name: s.entry.name, subclass: active.find(sc => belongsToClass(sc,s))?.entry.name || null, level: s.level })), total_level: d.level,

@@ -14,7 +14,7 @@ import {ContentBoundary,Entries} from './Entries';
 import {EntryFacts} from './EntryFacts';
 import {SourceName} from './SourceName';
 import {useUiLanguage} from './UiLanguage';
-import {LanguageSelector,FeedbackSection} from './UiControls';
+
 import {uiEntryName,type UiTextKey} from './uiText';
 import './playerViewer.css';
 
@@ -45,11 +45,11 @@ export default function PlayerViewer(){
  // Expand/collapse is local presentation state; the reader never persists or
  // rewrites the source character, inventory, resource values or prepared spells.
  const edit=(action:(draft:Character)=>void)=>setCard(current=>{if(!current)return current;const draft=structuredClone(current);action(draft);return {...current,featureLayout:draft.featureLayout};});
- if(!card||!derived)return <main className="player-viewer-loading"><LanguageSelector/><h1>{t('card')}</h1>{error?<><p role="alert">{error instanceof ViewerLoadError?t(error.key,error.values):error.message}</p><button onClick={()=>setReload(n=>n+1)}>{t('retry')}</button></>:<p role="status">{t('readerLoading')}</p>}<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('goToSite')}</a></main>;
+ if(!card||!derived)return <main className="player-viewer-loading"><h1>{t('card')}</h1>{error?<><p role="alert">{error instanceof ViewerLoadError?t(error.key,error.values):error.message}</p><button onClick={()=>setReload(n=>n+1)}>{t('retry')}</button></>:<p role="status">{t('readerLoading')}</p>}<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('goToSite')}</a></main>;
  const props={c:card,d:derived,edit,browse:noop,inspect:setDetail,onLink:link,add:noop,entries};
  return <KeywordPreview resolve={resolve} open={link}><SheetEditContext.Provider value={false}><main ref={root} className="player-viewer">
-  <header className="player-viewer-toolbar"><strong>{card.name}</strong><span>{card.edition} · {t('readOnly')}</span><LanguageSelector/><button onClick={()=>setReload(n=>n+1)}>{t('refreshData')}</button><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('createOnSite')}</a></header>
-  <section className="sheet-pane"><FeedbackSection/><PaperFrame character={card} page={page} changePage={setPage}>
+  <header className="player-viewer-toolbar"><strong>{card.name}</strong><span>{card.edition} · {t('readOnly')}</span><button onClick={()=>setReload(n=>n+1)}>{t('refreshData')}</button><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('createOnSite')}</a></header>
+  <section className="sheet-pane"><PaperFrame character={card} page={page} changePage={setPage}>
    {page==='主要'?<Overview {...props} catalog={entries} statusRibbon={<div className="edition-divider"><span/><strong>DND 五版角色卡</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={card} rows={card.selections.filter(s=>s.entry.kind==='condition')} edit={noop} browse={noop} onLink={link}/><span/></div>} addEntry={noop} renderSelection={()=>null} openResources={noop} openQuickbar={noop} pinDrop={noop}/>:<div className="sheet-details"><DetailHeader {...props} page={page}/>{page==='特性'?<FeaturesPage {...props}/>:page==='背景'?<BackgroundPage {...props}/>:page==='法术'?<SpellsPage {...props}/>:<InventoryPage {...props}/>}</div>}
   </PaperFrame></section>
   {detail&&<div className="player-entry-shade" onPointerDown={event=>{if(event.target===event.currentTarget)setDetail(undefined);}}><section role="dialog" aria-label={t('entryDetails')}><header><div><strong>{uiEntryName(detail,language)}</strong><small><SourceName id={detail.source}/> · {detail.edition}</small></div><button aria-label={t('closeEntry')} onClick={()=>setDetail(undefined)}>×</button></header><ContentBoundary key={detail.id}><EntryFacts entry={detail} onLink={link}/><Entries value={detail.entries} onLink={link}/></ContentBoundary></section></div>}

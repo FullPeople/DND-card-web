@@ -1,3 +1,7 @@
+# 2026-09-30 · 210 发布候选与隔离边界
+
+本轮用户已授权部署网站和枭熊插件，并要求更新公告。当前候选与验收见 RELEASE-210-CANDIDATE.md、STATUS.md；实际上线以 RELEASE-210-RESULT.md 为准。使用 U:/code/DND-card-cloud-feedback-20260930-7f00bead 与 U:/code/DND-card-suite-release210。U:/code/DND-card-automation-209 的手机 A4 脏树保持原样；F:/CodexWork/2026-09-27/feedback/suite 也有其他骰子开发，不能整包发布。这些新边界覆盖下方历史路径建议。
+
 # 2026-09-28 · 209 已发布：基础自动化与法术两栏
 
 国内 standalone-1.0.209 / 公告 0.1.14、新版 1.0.209-dev、旧版 1.3.13 阅读器和 GitHub Pages 已上线。主动开启基础自动化；保留手动旧卡。法术已知栏原地勾选，预备区副本，原格子样式保留；最新日期公告展开，完整历史折叠。

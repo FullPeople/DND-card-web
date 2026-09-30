@@ -36,8 +36,8 @@ describe('source-declared spell preparation',()=>{
  it('does not make learned-only multiclass spells use the daily preparation pool',()=>{
   const c=newCharacter();caster(c,'Bard',{preparedSpellsChange:'level',preparedSpellsProgression:[4,5,6]});caster(c,'Cleric',{preparedSpellsChange:'restLong',preparedSpellsProgression:[4,5,6]});expect(spellUsesPreparation(c,spell('Song',1,'Bard'))).toBe(false);expect(spellUsesPreparation(c,spell('Prayer',1,'Cleric'))).toBe(true);
  });
- it('accepts any visible empty preparation slot when no explicit capacity is set',()=>{
-  const c=newCharacter(),e=spell('Flexible slot',1,'Cleric');add(c,e);const id=prepareSpellEntry(c,e,4)!;
+ it('requires an allowance before preparing into a slot on a blank manual sheet',()=>{
+  const c=newCharacter(),e=spell('Flexible slot',1,'Cleric');add(c,e);expect(prepareSpellEntry(c,e,4)).toBeUndefined();c.spellSettings={...spellState(c),capacityAdjustment:5};const id=prepareSpellEntry(c,e,4)!;
   expect(spellState(c).prepared).toEqual(['','','','',id]);
  });
  it('uses legacy expansion class lookups with the same revised PHB class without conflating identities',()=>{

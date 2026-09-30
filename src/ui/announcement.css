@@ -33,3 +33,5 @@
 .announcement-owner>summary{color:#ae2727;font-weight:700;cursor:pointer}
 .announcement-history{margin:18px 0;padding-top:12px;border-top:1px solid #d8ddcd}.announcement-history>summary{font-size:13px;font-weight:600;color:#4e5a3e;cursor:pointer}
 .spell-learners{margin-top:18px;padding-top:12px;border-top:1px solid #aaa}
+
+.announcement-feedback>a{display:inline-block;margin-right:16px;overflow-wrap:anywhere}
