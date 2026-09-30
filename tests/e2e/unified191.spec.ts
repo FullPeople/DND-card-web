@@ -1,5 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,expandSourceBook} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 const card=newCharacter(),profile=card.profile;
 async function openRoom(page:Page,url:string,role:string,auto:boolean){
@@ -25,6 +25,6 @@ test('Suite compact chrome and Wiki columns keep room source authority',async({p
 test('existing room source choices stay disabled and DM source controls remain enabled',async({page,baseURL},info)=>{
  test.skip(info.project.name!=='integrated');await openRoom(page,baseURL!,'GM',false);
  await page.getByRole('button',{name:'装备',exact:true}).click();await expect(page.locator('.catalog-row').filter({hasText:'共享扩展物品'})).toHaveCount(0);
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();const book=page.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XGE',exact:true})});await expect(book.getByRole('checkbox')).not.toBeChecked();await expect(book.getByRole('checkbox')).toBeEnabled();
+ await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'XGE');const book=page.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XGE',exact:true})});await expect(book.getByRole('checkbox')).not.toBeChecked();await expect(book.getByRole('checkbox')).toBeEnabled();
  await page.screenshot({path:info.outputPath('suite-dm.png')});
 });

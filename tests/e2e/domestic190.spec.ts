@@ -1,11 +1,11 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource,suppressAnnouncement} from './fixtures';
+import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 async function ready(page:Page,url:string){
  await mockSource(page);await page.route('https://5e.kiwee.top/data/items.json',r=>r.fulfill({json:{item:[{name:'全站测试物品',ENG_name:'Shared Test Item',source:'XGE',type:'G',entries:['此条目用于验证资料来源共享。']}]}}));await suppressAnnouncement(page);
  await page.goto(url);await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
 }
 const xge=(page:Page)=>page.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XGE',exact:true})});
-async function rules(page:Page){await page.getByRole('button',{name:'规则与扩展',exact:true}).click();}
+async function rules(page:Page){await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'XGE');}
 async function close(page:Page){await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();}
 async function newCard(page:Page,edition='2014'){
  await page.getByRole('button',{name:/角色簿/}).click();await page.getByRole('button',{name:new RegExp(edition+' 角色')}).click();

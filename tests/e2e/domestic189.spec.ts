@@ -1,5 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource,suppressAnnouncement} from './fixtures';
+import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 const items=Array.from({length:220},(_,i)=>({name:`旅行用品 ${String(i+1).padStart(3,'0')}`,ENG_name:`Travel Gear ${i+1}`,source:'XGE',type:'G',weight:1,value:100,entries:Array.from({length:80},(_,n)=>`阅读片段 ${n+1}：旅人可以在这里记录用途、来源与使用方式。这是为界面验收编写的测试条目。`)}));
 async function ready(page:Page,baseURL:string){
  await mockSource(page);await page.route('https://5e.kiwee.top/data/items.json',route=>route.fulfill({json:{item:items},headers:{'access-control-allow-origin':'*'}}));await suppressAnnouncement(page);
@@ -57,16 +57,16 @@ test('column and row divider sizes are independently draggable, keyboard accessi
  expect(await page.evaluate(()=>localStorage.getItem('dnd-card:wiki-split-ratio'))).toBe(height);
 });
 test('fresh site enables extensions; manual source choices survive refresh and new cards',async({page,baseURL})=>{
- await ready(page,baseURL!);await page.getByRole('button',{name:'规则与扩展',exact:true}).click();
+ await ready(page,baseURL!);await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'XGE');
  const book=page.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XGE',exact:true})});
  await expect(book.getByRole('checkbox')).toBeChecked();await book.getByRole('checkbox').uncheck();
  await page.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.locator('.catalog-row').filter({hasText:'旅行用品'})).toHaveCount(0);
  await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();
  await page.getByRole('button',{name:'更新资料',exact:true}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expect(book.getByRole('checkbox')).not.toBeChecked();
+ await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'XGE');await expect(book.getByRole('checkbox')).not.toBeChecked();
  await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('button',{name:/角色簿/}).click();
  await page.getByRole('button',{name:/2014 角色/}).click();
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expect(book.getByRole('checkbox')).not.toBeChecked();
+ await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'XGE');await expect(book.getByRole('checkbox')).not.toBeChecked();
  await page.getByRole('button',{name:'全部禁用',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();
  await page.getByRole('button',{name:'更新资料',exact:true}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await expect(page.locator('.catalog-row')).toHaveCount(0);

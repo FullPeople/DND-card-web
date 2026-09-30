@@ -54,3 +54,10 @@ export async function fillFromDetail(page: Page) {
     throw new Error(`No visible drop region for ${kind}`);
   }
 }
+
+// Source books now live in user-expandable groups; exercise the visible control.
+export async function expandSourceBook(page:Page,source:string){
+ const book=page.locator('.source-book').filter({has:page.locator(`button[aria-label="设置来源 ${source}"]`)});
+ if(!await book.isVisible())await page.locator('.source-group').filter({has:book}).locator(':scope > summary').click();
+ await book.waitFor({state:'visible'});
+}
