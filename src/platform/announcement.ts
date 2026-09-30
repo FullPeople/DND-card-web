@@ -6,7 +6,7 @@ export const ANNOUNCEMENT_KEY = 'dnd-card:announcement-ack';
 export const announcementPending = (stored: string, version = APP_VERSION) => stored !== version;
 
 export type AnnouncementMode='standalone'|'suite';
-export const announcementVersionFor=(mode:AnnouncementMode)=>mode==='suite'?'1.0.212-dev':APP_VERSION;
+export const announcementVersionFor=(mode:AnnouncementMode)=>mode==='suite'?'1.0.213-dev':APP_VERSION;
 const keyFor=(mode:AnnouncementMode)=>mode==='suite'?`${ANNOUNCEMENT_KEY}:suite`:ANNOUNCEMENT_KEY;
 export function readAnnouncementVersion(mode:AnnouncementMode='standalone'): string {
   try { return localStorage.getItem(keyFor(mode)) || ''; } catch { return ''; }
