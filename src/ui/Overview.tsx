@@ -62,7 +62,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   function contentCell(label: string, rows: Selection[], kinds: Kind[], className: string) {
     return <FeaturePanel c={c} rows={rows} edit={edit} browse={() => browse(kinds[0])} onLink={onLink} label={label} className={className} kinds={kinds} grouped={false} receive={addEntry}/>;
   }
-  function setProficiency(key: string, value: boolean) { edit(draft => { (draft.proficiencies ||= {})[key] = value; if (!value && draft.expertise) draft.expertise[key] = false; }); }
+  function setProficiency(key: string, value: boolean) { edit(draft => { (draft.proficiencies ||= {})[key] = value; if (!value && draft.expertise && Object.hasOwn(SKILLS,key)) draft.expertise[key] = false; }); }
   function abilityCell(a: Ability) {
     const skills = Object.entries(SKILLS).filter(([, s]) => s.ability === a);
     return <SheetCell label={ABILITY_LABELS[a]} className={`ability-box ability-${a}`} hint={d.trace[a].join('；')}>

@@ -16,10 +16,12 @@ export const classRuleSnapshot=(e:Entry)=>({effects:e.effects,choices:e.choices,
 export const sameClassRules=(a:Entry,b:Entry)=>stable(classRuleSnapshot(a))===stable(classRuleSnapshot(b));
 export type ClassReview={row:Selection;status:'current'|'updated'|'unlinked'|'edition'|'unavailable'|'custom';suggested?:Entry;message:string};
 
+const classCatalogCache=new WeakMap<Entry[],Map<string,Entry[]>>();
+function editionClasses(catalog:Entry[],edition:Character['edition']){let cache=classCatalogCache.get(catalog);if(!cache){cache=new Map();classCatalogCache.set(catalog,cache);}let rows=cache.get(edition);if(!rows){rows=catalog.filter(e=>e.kind==='class'&&editionAllows(e,edition)&&!e.raw._custom);cache.set(edition,rows);}return rows;}
 /** Suggestions require source identity or a unique English identity. Chinese
  * labels and the old name-only casting hydration are never migration authority. */
 export function reviewClasses(c:Character,catalog:Entry[]):ClassReview[]{
- const classes=catalog.filter(e=>e.kind==='class'&&editionAllows(e,c.edition)&&!e.raw._custom);
+ const classes=editionClasses(catalog,c.edition);
  return c.selections.filter(s=>s.entry.kind==='class').map(row=>{
   const e=row.entry;
   if(e.raw._custom)return {row,status:'custom',message:'自定义职业，可保留原样，也可手动选择目标资料。'};
@@ -35,18 +37,18 @@ export function reviewClasses(c:Character,catalog:Entry[]):ClassReview[]{
   return {row,status,suggested,message:message+(suggested?' 已找到可供确认的目标。':' 请手动选择，或保留原样。')};
  });
 }
-/** Missing downloads are not evidence of an incompatible class. An imported
- * name can suppress an alarm, but never authorizes automatic migration. */
+/** Missing downloads are not evidence of an incompatible class. A matching
+ * imported name is a candidate, not proof that its old snapshot was migrated. */
 export function classCompatibilityIssues(c:Character,catalog:Entry[]):ClassReview[]{
  return reviewClasses(c,catalog).filter(review=>{
   const e=review.row.entry;
   if(review.status==='current')return false;
+  const kept=review.row.catalogReview;
+  if(['custom','unlinked'].includes(review.status)&&kept?.edition===c.edition&&kept.entryId===e.id&&kept.source===e.source&&kept.kind===e.kind)return false;
   if(review.status==='edition'&&editionAllows(e,c.edition,c.profile.optional.legacy))return false;
   if(review.status==='unavailable')return catalog.some(target=>target.kind==='class'&&target.source===e.source);
-  if(review.status==='unlinked'){
-   const names=[key(e.name),key(e.english)];
-   return !catalog.some(target=>target.kind==='class'&&!target.raw._custom&&editionAllows(target,c.edition)&&[key(target.name),key(target.english)].some(name=>names.includes(name)));
-  }
+  // A matching display name is only a candidate, never proof of completed migration.
+  if(review.status==='unlinked')return true;
   return true;
  });
 }

@@ -1,3 +1,4 @@
+import {legacyTraining} from './legacyTraining';
 import {validateActionState} from './automation/actions';
 import { ABILITIES, KIND_LABELS, SKILLS, SHEET_BONUS_KEYS, SIZE_LABELS, skillKey, newCharacter, uid, type Character, type Effect, type Entry, type Raw, type RulePack } from './model';
 import { evaluate } from './engine';
@@ -17,8 +18,19 @@ export function storedImage(value: unknown): value is NonNullable<Character['por
   const image=value as Record<string,unknown>;
   return typeof image.data==='string'&&image.data.length<=650000&&/^data:image\/(webp|png|jpeg);base64,[a-z\d+/=]+$/i.test(image.data)&&['x','y','zoom'].every(k=>Number.isFinite(image[k]))&&Math.abs(image.x as number)<=300&&Math.abs(image.y as number)<=300&&(image.zoom as number)>=1&&(image.zoom as number)<=5&&['frameWidth','frameHeight'].every(k=>image[k]===undefined||Number.isFinite(image[k])&&(image[k] as number)>0&&(image[k] as number)<=2000);
 }
+/** Older proficiency toggles wrote false saving-throw flags into the skill-only
+ * expertise map. Normalize only these no-op keys, without touching the input. */
+export function normalizeEmptySaveExpertise(value:unknown):unknown{
+ const wrapped=plain(value)&&plain(value.character)?value:undefined,source=wrapped?wrapped.character:value;
+ if(!plain(source)||!plain(source.expertise))return value;
+ const expertise={...source.expertise};let fixed=false;
+ for(const ability of ABILITIES){const key='save:'+ability;if(expertise[key]===false){delete expertise[key];fixed=true;}}
+ if(!fixed)return value;
+ const character={...source,expertise};return wrapped?{...wrapped,character}:character;
+}
 /** Open a stored character without letting one unreadable image lock the whole
- * card. Only image fields are dropped, and every other rule still applies. */
+ * card. Known no-op legacy save expertise flags are normalized; unknown or
+ * active invalid records still fail validation. The source object is untouched. */
 export function readCharacter(value: unknown): { character: Character; repaired: string[] } {
   try { return { character: validateCharacter(value), repaired: [] }; }
   catch (error) {
@@ -27,6 +39,7 @@ export function readCharacter(value: unknown): { character: Character; repaired:
     if(!plain(source))throw error;
     const trimmed: Raw={...source},repaired: string[]=[];
     for(const key of ['portrait','illustration'] as const)if(trimmed[key]!==undefined&&!storedImage(trimmed[key])){delete trimmed[key];repaired.push(key==='portrait'?'头像':'立绘');}
+    const normalized=normalizeEmptySaveExpertise(trimmed);if(normalized!==trimmed){trimmed.expertise=(normalized as Raw).expertise;repaired.push('旧版豁免的空专精标记');}
     if(!repaired.length)throw error;
     return { character: validateCharacter(wrapped?{...wrapped,character:trimmed}:trimmed), repaired };
   }
@@ -78,6 +91,7 @@ export function validateCharacter(value: unknown): Character {
   for (const s of c.selections) {
     assert(plain(s) && typeof s.id === 'string' && !selectionIds.has(s.id) && validEntry(s.entry), '角色中有无效或重复的条目身份。');
     selectionIds.add(s.id);
+    if(s.catalogReview!==undefined)assert(plain(s.catalogReview)&&['2014','2024'].includes(s.catalogReview.edition)&&typeof s.catalogReview.entryId==='string'&&typeof s.catalogReview.source==='string'&&Object.hasOwn(KIND_LABELS,s.catalogReview.kind),'旧卡核对记录无效。');
     assert(Number.isInteger(s.level) && s.level >= 1 && s.level <= 20 && Number.isInteger(s.quantity) && s.quantity >= 1 && s.quantity <= 100000, '角色条目数量或等级不合法。');
     assert(typeof s.equipped === 'boolean' && (s.requirementId === undefined || typeof s.requirementId === 'string'), '条目选择数据不合法。');
     assert(s.weaponAbility===undefined||s.entry.kind==='item'&&ABILITIES.includes(s.weaponAbility),'武器计算属性无效。');
@@ -167,12 +181,13 @@ export function validatePack(value: unknown, installed: RulePack[]): RulePack {
 }
 export function importOwlbear(value: unknown): Character {
   assert(plain(value) && value.schema_version === '0.3' && plain(value.identity) && plain(value.abilities), '需要枭熊 schema_version 0.3 的角色 JSON。');
-  if(value.dnd_card_web!==undefined)return validateCharacter(value.dnd_card_web);
+  if(value.dnd_card_web!==undefined)return validateCharacter(normalizeEmptySaveExpertise(value.dnd_card_web));
   const c = newCharacter(value.meta?.ruleset === '2014' ? '2014' : '2024');
   c.name = String(value.identity.character_name || value.identity.display_name || '导入的冒险者'); c.player = String(value.identity.player || '');
   for (const a of ABILITIES) { const n = Number(value.abilities[a]?.total); assert(Number.isInteger(n) && n >= 1 && n <= 100, `枭熊 ${a} 属性无效。`); c.abilities[a] = n; }
   c.profile.enabledSources.push('IMPORTED'); c.notes = `${String(value.background?.story || '')}\n从枭熊角色卡导入。数值按原卡总值保留；条目来源与内部选择需要重新核对。`;
   c.externalSnapshot = structuredClone(value);
+  const training=legacyTraining(value);if(Object.keys(training).length)c.training=training;
   const add = (kind: Entry['kind'], name: string, level = 1, description = '', raw: Raw = {}, quantity = 1, equipped = false) => c.selections.push({ id: uid(), entry: { id: `imported:${kind}:${name}`, kind, name, english: name, source: 'IMPORTED', edition: 'both', packId: 'imported', revision: '0.3', entries: [description].filter(Boolean), raw }, level, quantity, equipped });
   if (value.identity.race?.name) add('race', String(value.identity.race.name));
   for (const cls of value.classes || []) if (cls.name && cls.level) { const level = Number(cls.level); assert(Number.isInteger(level) && level >= 1 && level <= 20, '导入职业等级无效'); add('class', String(cls.name), level, '', value.classes.length===1&&Number(value.core_stats?.hit_dice?.die_size)>0?{hd:{faces:Number(value.core_stats.hit_dice.die_size)}}:{});const parent=c.selections.at(-1)!;if(cls.subclass){add('subclass',String(cls.subclass),1,'',{className:cls.name,classSource:'IMPORTED'});c.selections.at(-1)!.parentId=parent.id;} }
@@ -198,7 +213,7 @@ export function importOwlbear(value: unknown): Character {
   c.adjustments = [];
   const adjust = (target: string, v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) c.adjustments!.push({ id: uid(), target, value: v, reason: '保留枭熊原卡总值；更换规则条目后请重新核对此修正。' }); };
   for (const [key, target] of [['ac', 'ac'], ['initiative', 'initiative'], ['speed', 'speed'], ['passive_perception', 'passive']]) adjust(target, value.core_stats?.[key]);
-  for (const a of ABILITIES) adjust(`save:${a}`, value.abilities[a]?.save?.bonus);
+  for (const a of ABILITIES) {adjust(`save:${a}`, value.abilities[a]?.save?.bonus);if(typeof value.abilities[a]?.save?.proficient==='boolean')(c.proficiencies||={})['save:'+a]=value.abilities[a].save.proficient;}
   assert(value.skills === undefined || Array.isArray(value.skills), '枭熊 skills 应为数组。');
   for (const skill of value.skills || []) {
     const key = skill.name === '特技' ? 'acrobatics' : skillKey(String(skill.name));

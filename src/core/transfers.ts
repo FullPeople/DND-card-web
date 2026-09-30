@@ -1,5 +1,5 @@
 import {type Character,uid} from './model';
-import {importOwlbear,parseFile,validateCharacter} from './validation';
+import {importOwlbear,parseFile,validateCharacter,normalizeEmptySaveExpertise} from './validation';
 
 /** Validate the entire selection before any workspace or room mutation. */
 export function readCharacterTransfer(texts:string[]):Character[]{
@@ -9,7 +9,7 @@ export function readCharacterTransfer(texts:string[]):Character[]{
     const values=value?.format==='dnd-card-web-collection'?(value.version===1&&Array.isArray(value.characters)?value.characters:(()=>{throw Error('角色集合格式或版本无效');})()):[value];
     for(const row of values){
       if(cards.length>=200)throw Error('一次最多导入 200 张角色卡');
-      const card=structuredClone(row?.schema_version?importOwlbear(row):validateCharacter(row));
+      const card=structuredClone(row?.schema_version?importOwlbear(row):validateCharacter(normalizeEmptySaveExpertise(row)));
       card.id=uid();card.revision=1;card.updatedAt=new Date().toISOString();
       cards.push(card);
     }

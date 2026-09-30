@@ -39,7 +39,7 @@ test('room card tabs use permitted class summaries before selecting the card',as
  const known={...old,entry:{...old.entry,id:'imported-known',source:'IMPORTED',packId:'imported',edition:'both'}};
  const cards=[{...target,id:'one',classSummary:[]},{...target,id:'bad',itemId:'card:bad',name:'不兼容职业卡',classSummary:[old]},{...target,id:'good',itemId:'card:good',name:'可识别职业卡',classSummary:[known]}];
  await send('ready');await send('catalog',{sequence:1,role:'PLAYER',cards,monsters:[],enabled:{},visibility:{wiki:true,monsters:true},shared:{key:'room:fixture',scope:'room',revision:1,rules:{edition:'2024',profile:c.profile,packs:[],customEntries:[]}}});await send('selection',{sequence:2,state:target,document:{dnd_card_web:c,_suiteRevision:1}});
- await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();const tabs=page.getByRole('tablist',{name:'房间角色卡'});await expect(tabs.getByRole('tab',{name:/不兼容职业卡/}).locator('.class-warning-icon')).toBeVisible();await expect(tabs.getByRole('tab',{name:'可识别职业卡',exact:true}).locator('.class-warning-icon')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();const tabs=page.getByRole('tablist',{name:'房间角色卡'});await expect(tabs.getByRole('tab',{name:/不兼容职业卡/}).locator('.class-warning-icon')).toBeVisible();await expect(tabs.getByRole('tab',{name:/可识别职业卡/}).locator('.class-warning-icon')).toBeVisible();
  await page.screenshot({path:test.info().outputPath('room-class-warnings.png')});
 });
 

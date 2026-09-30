@@ -8,13 +8,10 @@ async function saved(page:Page){await expect(page.locator('.save-status')).toCon
 test('five collapsible source groups toggle as a whole, retain defaults and show narrow layouts',async({page})=>{
  await setup(page,true);const d=await rules(page);await d.getByRole('radio',{name:'2014',exact:true}).click();await expect(d.locator('.source-group > summary strong')).toHaveText(['三宝书','核心规则','模组内容','第三方','威世智每月更新']);const monthly=d.locator('.source-group').filter({has:page.getByRole('checkbox',{name:'启用威世智每月更新',exact:true})});await expect(monthly.locator('[aria-label="设置来源 AU"]')).toHaveCount(1);await expect(monthly.locator('[aria-label="设置来源 AUD"]')).toHaveCount(1);await expect(monthly.locator('[aria-label="设置来源 UATHEMYSTICCLASS"]')).toHaveCount(0);const group=d.locator('.source-group').filter({has:page.getByRole('checkbox',{name:'启用核心规则',exact:true})});await expect(group.getByRole('checkbox',{name:'启用核心规则',exact:true})).toBeChecked();
  await group.getByRole('checkbox',{name:'启用核心规则',exact:true}).uncheck();await group.locator(':scope > summary').click();await expect(group.locator('.source-book input:checked')).toHaveCount(0);await group.getByRole('checkbox',{name:'启用核心规则',exact:true}).check();await expect(group.locator('.source-book input:not(:checked)')).toHaveCount(0);
- const notice=d.locator('.source-conflict-notice'),heading=notice.locator('.source-conflict-heading'),scroller=d.locator('.source-groups'),summary=group.locator(':scope > summary');
- await expect(notice).toContainText('此项是用来解决相同的旧内容的，例如奇械师');
+ const scroller=d.locator('.source-groups'),summary=group.locator(':scope > summary');
+ await expect(d.locator('.source-conflict-notice')).toHaveCount(0);
  for(const viewport of [{width:1512,height:982,label:'wide'},{width:390,height:844,label:'narrow'}]){
-  await page.setViewportSize(viewport);await notice.scrollIntoViewIfNeeded();
-  const title=await heading.locator('strong').boundingBox(),actions=await heading.locator('.dialog-actions').boundingBox(),header=await heading.boundingBox();
-  expect(Math.abs(title!.y+title!.height/2-actions!.y-actions!.height/2)).toBeLessThan(2);
-  expect(Math.abs(actions!.x+actions!.width-header!.x-header!.width)).toBeLessThan(2);
+  await page.setViewportSize(viewport);await scroller.scrollIntoViewIfNeeded();
   expect(await d.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(false);
   await page.screenshot({path:test.info().outputPath(`sources-${viewport.label}.png`)});
   await scroller.scrollIntoViewIfNeeded();
@@ -25,15 +22,19 @@ test('five collapsible source groups toggle as a whole, retain defaults and show
   await page.screenshot({path:test.info().outputPath(`sources-sticky-${viewport.label}.png`)});
  }
  await group.getByRole('checkbox',{name:'启用核心规则',exact:true}).uncheck();await expect(group.locator('.source-book input:checked')).toHaveCount(0);
- await group.getByRole('checkbox',{name:'启用核心规则',exact:true}).check();await notice.getByRole('button',{name:'手动比较',exact:true}).click();await expect(page.getByRole('dialog',{name:'手动比较同名资料',exact:true})).toBeVisible();
+ await group.getByRole('checkbox',{name:'启用核心规则',exact:true}).check();await expect(d.getByRole('button',{name:'手动比较',exact:true})).toHaveCount(0);
 });
-test('latest date, manual comparison and all versions persist without merging editions',async({page})=>{
- await setup(page);let d=await rules(page);await d.getByRole('radio',{name:'2014',exact:true}).click();await expect(d.locator('.source-conflict-notice')).toContainText('2014 · 1 组');await expect(d.getByRole('button',{name:'按最新时间算（默认）'})).toHaveAttribute('aria-pressed','true');await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
- await expect(page.locator('.catalog-row')).toHaveCount(1);await expect(page.locator('.catalog-row')).toContainText('TCE');
- d=await rules(page);await d.getByRole('button',{name:'手动比较',exact:true}).click();const compare=page.getByRole('dialog',{name:'手动比较同名资料',exact:true});const old=compare.locator('article').filter({hasText:'2019-11-19'}),next=compare.locator('article').filter({hasText:'2020-11-17'});await old.getByRole('checkbox').check();await next.getByRole('checkbox').uncheck();await old.locator('summary').click();await expect(old).toContainText('较早资料正文。');await page.screenshot({path:test.info().outputPath('source-compare.png')});await compare.getByRole('button',{name:'保存手动选择'}).click();await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(1);await expect(page.locator('.catalog-row')).toContainText('ERLW');await saved(page);
- await expect.poll(()=>page.evaluate(async()=>{const r=indexedDB.open('dnd-card-standalone');const db=await new Promise<IDBDatabase>(ok=>r.onsuccess=()=>ok(r.result));return new Promise<string>(ok=>{const q=db.transaction('documents').objectStore('documents').get('workspace');q.onsuccess=()=>{db.close();ok(q.result?.siteSources?.sourceConflicts?.mode);};});})).toBe('manual');
- await page.reload();await expect(page.locator('.catalog-row')).toHaveCount(1);await expect(page.locator('.catalog-row')).toContainText('ERLW');d=await rules(page);await d.getByRole('button',{name:'全部显示',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(2);
- d=await rules(page);await d.getByRole('radio',{name:'2024',exact:true}).click();await expect(d.locator('.source-conflict-notice')).toHaveCount(0);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(1);await expect(page.locator('.catalog-row')).toContainText('新版工匠');
+test('shows all expansion names even with saved latest or manual choices and still separates editions',async({page})=>{
+ await setup(page);let d=await rules(page);await d.getByRole('radio',{name:'2014',exact:true}).click();await expect(d.locator('.source-conflict-notice')).toHaveCount(0);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ await expect(page.locator('.catalog-row')).toHaveCount(2);await saved(page);
+ for(const mode of ['latest','manual'] as const){
+  await page.evaluate(async(mode)=>{
+   const db=await new Promise<IDBDatabase>((ok,fail)=>{const q=indexedDB.open('dnd-card-standalone');q.onsuccess=()=>ok(q.result);q.onerror=()=>fail(q.error);});
+   await new Promise<void>((ok,fail)=>{const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),q=store.get('workspace');q.onsuccess=()=>{const w=q.result;w.siteSources.sourceConflicts={mode,selected:{legacy:[]}};store.put(w,'workspace');};tx.oncomplete=()=>ok();tx.onerror=()=>fail(tx.error);});db.close();
+  },mode);
+  await page.reload();await expect(page.locator('.catalog-row')).toHaveCount(2);await expect(page.locator('.catalog-row').filter({hasText:'TCE'})).toHaveCount(1);await expect(page.locator('.catalog-row').filter({hasText:'ERLW'})).toHaveCount(1);
+ }
+ d=await rules(page);await expect(d.getByRole('button',{name:'手动比较',exact:true})).toHaveCount(0);await d.getByRole('radio',{name:'2024',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(1);await expect(page.locator('.catalog-row')).toContainText('新版工匠');
 });
 test('class tab warning follows incompatible cards while cache and prose changes do not warn',async({page})=>{
  await setup(page);const compatible=newCharacter('2014');compatible.name='正确职业测试';const e={id:['kiwee','class','tce','test artisan','','','','','',''].map(encodeURIComponent).join(':'),kind:'class' as const,name:'测试工匠',english:'Test Artisan',source:'TCE',edition:'2014' as const,packId:'kiwee',revision:'old-cache',entries:['旧译文'],raw:{...classes.class[0],_category:'class'}};e.entries=['旧译文'];compatible.selections=[{id:'class',entry:e,level:1,quantity:1,equipped:false}];const wrong=structuredClone(compatible);wrong.id='wrong-edition';wrong.name='旧版职业测试';wrong.edition='2024';
