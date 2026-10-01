@@ -1,0 +1,3 @@
+import {defineConfig} from '@playwright/test';
+const port=process.env.DND_WIKI_TEST_PORT||'5292';
+export default defineConfig({testDir:'./tests/e2e',testMatch:'wikiRecovery229.spec.ts',outputDir:'.local-evidence/wiki-recovery',timeout:60000,expect:{timeout:15000},workers:1,reporter:'list',use:{baseURL:`http://127.0.0.1:${port}`,serviceWorkers:'block',channel:process.env.CI?undefined:'msedge',viewport:{width:1512,height:982},trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:`node node_modules/vite/bin/vite.js preview --mode standalone --host 127.0.0.1 --port ${port}`,url:`http://127.0.0.1:${port}`,reuseExistingServer:!process.env.CI}});
