@@ -12,7 +12,7 @@
 | 3. 数据与误操作恢复 | 保留余额、类型、来源、自动资源规则与休息恢复。设置取消、拖拽取消和布局放弃不落地。休息弹层位于原生 dialog 顶层，Esc 只关休息，返回焦点；未保存图标布局与确认休息余额可正确合并。 | 旧上限、契约独立池、共享池、2/4/6/9 环、旧 ACK、并发上限、撤销重做、保存刷新；空资源卡及未保存图标草稿的取消 / Esc / 确认。 | 原有自动资源受规则管理，不能把它当作任意自定义数值。 |
 | 4. 自动化选择 | 完成与待选气泡使用明确的选择/调整/折叠入口，修复完成气泡被资料点击接管。展开工具显示来源、切换与进度；Esc 先取消拖拽，再退出；返回恢复焦点。候选索引与叶子组件隔离减少拖动重算，非施法选择使用小范围事务。 | 5 条原创新增选择场景 × 两引擎 = 10 通过；包含重复原格、跨格交换、替换、取消、快速切换、慢资料、保存刷新与窄屏返回 A4。2,000 条原创 Wiki、12 次悬停记录 0 次角色深拷贝、无记录长任务。 | 5 浏览器 / 18 单元真实职业资料场景在子任务中因缺快照跳过；没有补齐全部职业自动化或宣称所有设备性能。 |
 | 5. 图片参考的三列布局 | **阻塞，未实施。** 当前 Library 支持流程的 `prepare_materialize` 返回完整元数据，下载助手持续报失败，目标文件实际不存在。已按父任务要求停止重试。 | 本 executor 已检查文件不存在；没有查看用户原图，也没有公开上传它。只对原创验收截图做视觉检查。 | 必须在可访问原图的 executor 物化并查看后再实施约 44% A4 / 24% Wiki / 32% 详情、独立滚动和窄屏降级；不以文字猜测替代。 |
-| 6. 发布链清理 | 删除 Pages 配置/上传/发布 job、Windows 启动脚本与桌面 ZIP 生成入口，更新现行说明。保留国内 `/card` 网页版、`build:standalone`、domestic 构建、离线缓存及历史资源覆盖保留机制。 | 双入口构建通过；YAML 校验保留原 6 组浏览器命令，新增双浏览器 follow-up 第 7 组，主分支/PR/manual 触发不变；无部署 job。 | 未删除线上站点、历史 release 资源或更改账户。远端 CI 本分支不自动触发，本轮未执行完整 CI。 |
+| 6. 发布链清理 | 删除 Pages 配置/上传/发布 job、Windows 启动脚本与桌面 ZIP 生成入口，更新现行说明。保留国内 `/card` 网页版、`build:standalone`、domestic 构建、离线缓存及历史资源覆盖保留机制。 | 双入口构建通过；YAML 校验保留原 6 组浏览器命令，新增双浏览器 follow-up 第 7 组，主分支/PR/manual 触发不变；无部署 job。 | 未删除线上站点、历史 release 资源或更改账户。远端 CI 本分支不因 push 自动触发；随后获明确授权单次 workflow_dispatch，完整 7 组均通过，见下方远端验收。 |
 | 7. 首屏编辑下载失败 | 实际注入 cardRuntime 首次下载失败，旧 230 永久禁用编辑且无恢复入口。新增错误详情、导出备份与“保存后重新加载编辑功能”；等待保存队列，保存失败阻止重载，成功后继续编辑。 | 同一故障在隔离旧 230 基线失败复现；修复后两引擎读取原卡、导航、重连、恢复编辑、保存刷新，笔记与 2/5 资源逐字段保留。 | 重载会重新下载失败模块；全新浏览器在完全离线且未缓存编辑模块时仍需联网。 |
 | 7. P2：读取备份后重试 | 独立读审指出当前恢复入口只等队列、未保存已接受备份。实测确认重载回到先前磁盘版本，补未保存状态及离页保护；重试沿原队列原子保存完整已接受工作区，成功才重载。普通重试不轮换有效备份；失败、只读和快速连点受保护。 | 新六条 × 两引擎 = 12 通过：不同姓名/笔记/修订/敏捷/临时生命/4/9资源恢复持久化、另一角色与独立草稿逐字段保留、取消离页、事务失败后重试、普通重试、连点和真实本地编辑锁。详见 [P2 清单](BACKUP-EDITING-RECOVERY-231.md)。 | 已读取完整备份的原语义保留，没有改成选择性合并；真实 Suite 房间备份与多人权限未由此单机测试替代。 |
 | 7. Wiki / 慢加载 / 离线恢复 | 保留 230 启动拆分与 Wiki 队列恢复机制，补双引擎验收。额外关闭真实本地 Web 服务器验证已用编辑/Wiki/法术页缓存回开和继续保存。 | 含 P2 的最终启动/Wiki/编辑组 50 通过、2 工具边界跳过：Chromium 26/0、Firefox 24/2。覆盖主体延迟、页面延迟/失败、拼音按需、暂时/持续/中途断线、缺失文档、缓存复用、默认 A4、保存偏好。实际服务器断线两引擎均通过。 | Firefox 两项 Playwright ServiceWorker 请求路由/离线控制不支持；另有真实服务器停机覆盖。公网线路、生产 Wiki 全库下载与真实登录房间未验证。 |
@@ -35,7 +35,8 @@
 | YAML / `git diff --check` | 通过 |
 | lint | 项目没有独立 lint script，未虚报执行 |
 | WebKit | 浏览器下载成功，但缺 GTK4、graphene、harfbuzz-icu、manette、hyphen、GLES2 系统依赖，未进入产品交互。安装依赖受本机管理员条件限制，未改变安全设置 |
-| 远端完整 CI / 国内部署 / 真实房间 / 实体触屏 | 未执行；应在父任务审查和协调后的阶段验收 |
+| 远端完整 CI | 后续单次 dispatch 的 [run36934766948](https://github.com/FullPeople/DND-card-web/actions/runs/36934766948) 锁定262a701：verify与7组全部success，单元486/23、浏览器执行398/20、0失败；[完整记录](CI-FOLLOWUP-230-RESULT.md) |
+| 国内部署 / 真实房间 / 实体触屏 | 未执行；应在父任务审查和协调后的阶段验收 |
 
 可重跑：先构建，再运行两份已提交 follow-up Playwright 配置。浏览器目录本机为 `/workspace/playwright-browsers`；Firefox 在受限沙盒报告找不到 profile，获自动审查批准的本机测试执行中成功启动。不是自动批准拒绝，也没有停用浏览器安全。WebKit 单独列未测，不能计为通过。
 
@@ -87,9 +88,11 @@
 | 7 | `4da0b4cd6f37d1c2ad6181baeee2864d25df50ac` | 首轮完整交接与原 259 配对失败证据 / 可重跑脚本 |
 | 8 | `488ea1bee7e46b763f80d2bb331420ad5ea583c0` | P2：编辑重试前保存已读取备份、取消 / 失败 / 只读 / 连点保护与双引擎回归 |
 
+后续已对文档 HEAD `262a7017806f0ef555cd36805554e06adda146a8` 单次启动完整远端 CI，8 job 全部成功。7 浏览器组的15个命令共398次通过/20条件跳过/0失败；这些含配置间重复执行，不与下方本地计数或SDK配对相加，详见 [远端验收](CI-FOLLOWUP-230-RESULT.md)。后续仅保存CI文档和摘要，产品源码仍为第8批。
+
 最终相关 Web 浏览器共 92 通过 / 2 工具条件跳过 / 0 最终失败：本次启动50与前批其他相关组件42，不把重复运行次数累加为独立覆盖。最终源码 SHA 为第 8 批 `488ea1bee7e46b763f80d2bb331420ad5ea583c0`，已核对远端；其后的交接提交只保存报告或联调材料。Suite 配对结果独立记录，不与 Web 通过数混算。
 
-分项文档：[资源](RESOURCE-FOLLOWUP-231-RESULT.md)、[职业选择](AUTOMATION-230-FOLLOWUP.md)、[骰子 Web](DICE-FOLLOWUP230-WEB.md)、[实际 SDK 配对](DICE-FOLLOWUP230-PAIRED.md)、[发布清理](PUBLISH-CLEANUP-230-FOLLOWUP.md)、[备份恢复 P2](BACKUP-EDITING-RECOVERY-231.md)。永久视觉证据均来自原创验收角色，未保存用户原图或上游规则正文：[资源宽屏](evidence/resources231/gray-preview-wide.png)、[资源窄屏](evidence/resources231/gray-preview-narrow.png)、[空卡休息](evidence/resources231/empty-resource-rest-dashboard.png)、[选择窄屏](evidence/automation230/slow-narrow.png)、[备份保存失败保护](evidence/backup-retry231/save-aborted.png)。
+分项文档：[资源](RESOURCE-FOLLOWUP-231-RESULT.md)、[职业选择](AUTOMATION-230-FOLLOWUP.md)、[骰子 Web](DICE-FOLLOWUP230-WEB.md)、[实际 SDK 配对](DICE-FOLLOWUP230-PAIRED.md)、[发布清理](PUBLISH-CLEANUP-230-FOLLOWUP.md)、[备份恢复 P2](BACKUP-EDITING-RECOVERY-231.md)、[完整远端CI](CI-FOLLOWUP-230-RESULT.md)。永久视觉证据均来自原创验收角色，未保存用户原图或上游规则正文：[资源宽屏](evidence/resources231/gray-preview-wide.png)、[资源窄屏](evidence/resources231/gray-preview-narrow.png)、[空卡休息](evidence/resources231/empty-resource-rest-dashboard.png)、[选择窄屏](evidence/automation230/slow-narrow.png)、[备份保存失败保护](evidence/backup-retry231/save-aborted.png)。
 
 ## 后续工作与体验建议
 

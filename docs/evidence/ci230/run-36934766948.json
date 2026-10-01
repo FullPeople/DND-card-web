@@ -1,0 +1,858 @@
+{
+  "scope": "actual remote GitHub Actions, not local CI simulation",
+  "run": {
+    "conclusion": "success",
+    "created_at": "2026-10-01T22:23:32Z",
+    "event": "workflow_dispatch",
+    "head_branch": "codex/web230-followup-20261001",
+    "head_sha": "262a7017806f0ef555cd36805554e06adda146a8",
+    "html_url": "https://github.com/FullPeople/DND-card-web/actions/runs/36934766948",
+    "id": 36934766948,
+    "name": "Verify web",
+    "path": ".github/workflows/web.yml",
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-10-01T22:31:25Z"
+  },
+  "environment": {
+    "os": "Ubuntu 24.04.5 LTS",
+    "node": "22.23.3",
+    "npm": "10.9.9",
+    "chromium_install": "Chrome for Testing / Headless Shell 153.0.8010.12 (Playwright v1243)",
+    "firefox_install": "155.0 (Playwright v1543)"
+  },
+  "source": {
+    "web_product_sha": "488ea1bee7e46b763f80d2bb331420ad5ea583c0",
+    "tested_head_sha": "262a7017806f0ef555cd36805554e06adda146a8",
+    "main_unchanged_sha": "4e398a39a5cb37e5e632ae377fdf2488cdc3924c",
+    "suite_paired_code_sha": "3fc7c710019bd7ac705915d5b91e633aeeb4215f",
+    "suite_pairing_in_this_workflow": false
+  },
+  "verify": {
+    "job_id": 110612328838,
+    "unit": {
+      "files_passed": 74,
+      "files_skipped": 1,
+      "passed": 486,
+      "skipped": 23,
+      "failed": 0
+    },
+    "npm_ci": "success",
+    "npm_run_check": "success",
+    "npm_run_build_standalone": "success"
+  },
+  "browser_groups": [
+    {
+      "group": "screen-release",
+      "job_id": 110612477002,
+      "conclusion": "success",
+      "commands": [
+        {
+          "command": "npx playwright test --config playwright.screen.config.ts",
+          "executions": 9,
+          "passed": 9,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "command": "npm run test:release",
+          "executions": 59,
+          "passed": 59,
+          "skipped": 0,
+          "failed": 0
+        }
+      ],
+      "totals": {
+        "executions": 68,
+        "passed": 68,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "group": "feedback-touch",
+      "job_id": 110612476885,
+      "conclusion": "success",
+      "commands": [
+        {
+          "command": "npx playwright test --config playwright.feedback198.config.ts",
+          "executions": 17,
+          "passed": 17,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "command": "npx playwright test --config playwright.compat207.config.ts",
+          "executions": 8,
+          "passed": 8,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "command": "npx playwright test --config playwright.touch.config.ts",
+          "executions": 12,
+          "passed": 6,
+          "skipped": 6,
+          "failed": 0
+        }
+      ],
+      "totals": {
+        "executions": 37,
+        "passed": 31,
+        "skipped": 6,
+        "failed": 0
+      }
+    },
+    {
+      "group": "startup-integration",
+      "job_id": 110612476881,
+      "conclusion": "success",
+      "commands": [
+        {
+          "command": "npx playwright test --config playwright.wiki-recovery.config.ts",
+          "executions": 7,
+          "passed": 7,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "command": "npx playwright test --config playwright.integration230.config.ts",
+          "executions": 56,
+          "passed": 51,
+          "skipped": 5,
+          "failed": 0
+        }
+      ],
+      "totals": {
+        "executions": 63,
+        "passed": 58,
+        "skipped": 5,
+        "failed": 0
+      }
+    },
+    {
+      "group": "resources-sources",
+      "job_id": 110612476976,
+      "conclusion": "success",
+      "commands": [
+        {
+          "command": "npx playwright test --config playwright.feedback217.config.ts",
+          "executions": 53,
+          "passed": 53,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "command": "npx playwright test --config playwright.source-feedback.config.ts",
+          "executions": 21,
+          "passed": 21,
+          "skipped": 0,
+          "failed": 0
+        }
+      ],
+      "totals": {
+        "executions": 74,
+        "passed": 74,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "group": "choices-standalone",
+      "job_id": 110612476806,
+      "conclusion": "success",
+      "commands": [
+        {
+          "command": "npx playwright test --config playwright.choices.config.ts",
+          "executions": 18,
+          "passed": 13,
+          "skipped": 5,
+          "failed": 0
+        },
+        {
+          "command": "npm run test:standalone",
+          "executions": 18,
+          "passed": 18,
+          "skipped": 0,
+          "failed": 0
+        }
+      ],
+      "totals": {
+        "executions": 36,
+        "passed": 31,
+        "skipped": 5,
+        "failed": 0
+      }
+    },
+    {
+      "group": "automation-unified",
+      "job_id": 110612476749,
+      "conclusion": "success",
+      "commands": [
+        {
+          "command": "DND_AUTOMATION_TEST_MODE=standalone npx playwright test --config playwright.automation209.config.ts",
+          "executions": 26,
+          "passed": 26,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "command": "npx playwright test --config playwright.unified191.config.ts",
+          "executions": 20,
+          "passed": 18,
+          "skipped": 2,
+          "failed": 0
+        }
+      ],
+      "totals": {
+        "executions": 46,
+        "passed": 44,
+        "skipped": 2,
+        "failed": 0
+      }
+    },
+    {
+      "group": "followup-230",
+      "job_id": 110612477028,
+      "conclusion": "success",
+      "commands": [
+        {
+          "command": "npx playwright test --config playwright.followup231.config.ts",
+          "executions": 52,
+          "passed": 50,
+          "skipped": 2,
+          "failed": 0
+        },
+        {
+          "command": "npx playwright test --config playwright.followup-ui231.config.ts",
+          "executions": 42,
+          "passed": 42,
+          "skipped": 0,
+          "failed": 0
+        }
+      ],
+      "totals": {
+        "executions": 94,
+        "passed": 92,
+        "skipped": 2,
+        "failed": 0
+      }
+    }
+  ],
+  "browser_totals": {
+    "executions": 418,
+    "passed": 398,
+    "skipped": 20,
+    "failed": 0
+  },
+  "count_semantics": "execution counts across 15 commands; includes repeated tests across configurations, not 398 unique cases; do not add previous local reruns",
+  "skip_categories": [
+    {
+      "executions": 10,
+      "reason": "5 unpublished rule-snapshot cases repeated in choices and integration groups"
+    },
+    {
+      "executions": 6,
+      "reason": "phone/desktop mode not applicable; corresponding supported-mode cases execute"
+    },
+    {
+      "executions": 2,
+      "reason": "Suite integrated-room scenarios not applicable to standalone project; integrated counterparts execute"
+    },
+    {
+      "executions": 2,
+      "reason": "Playwright ServiceWorker control/routing unsupported in Firefox; real local-server shutdown recovery executes in both engines"
+    }
+  ],
+  "jobs": {
+    "jobs": [
+      {
+        "completed_at": "2026-10-01T22:24:00Z",
+        "conclusion": "success",
+        "id": 110612328838,
+        "name": "verify",
+        "started_at": "2026-10-01T22:23:36Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run check",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run build:standalone",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "completed_at": "2026-10-01T22:28:12Z",
+        "conclusion": "success",
+        "id": 110612476749,
+        "name": "browsers (automation-unified, DND_AUTOMATION_TEST_MODE=standalone npx playwright test --config pl...",
+        "started_at": "2026-10-01T22:24:05Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run npx playwright install --with-deps firefox",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run all checks in group",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "completed_at": "2026-10-01T22:27:07Z",
+        "conclusion": "success",
+        "id": 110612476806,
+        "name": "browsers (choices-standalone, npx playwright test --config playwright.choices.config.ts\nnpm run t...",
+        "started_at": "2026-10-01T22:24:02Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run npx playwright install --with-deps firefox",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run all checks in group",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "completed_at": "2026-10-01T22:28:05Z",
+        "conclusion": "success",
+        "id": 110612476881,
+        "name": "browsers (startup-integration, npx playwright test --config playwright.wiki-recovery.config.ts\nnp...",
+        "started_at": "2026-10-01T22:24:02Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run npx playwright install --with-deps firefox",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run all checks in group",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "completed_at": "2026-10-01T22:26:30Z",
+        "conclusion": "success",
+        "id": 110612476885,
+        "name": "browsers (feedback-touch, npx playwright test --config playwright.feedback198.config.ts\nnpx playw...",
+        "started_at": "2026-10-01T22:24:03Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run npx playwright install --with-deps firefox",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run all checks in group",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "completed_at": "2026-10-01T22:28:51Z",
+        "conclusion": "success",
+        "id": 110612476976,
+        "name": "browsers (resources-sources, npx playwright test --config playwright.feedback217.config.ts\nnpx pl...",
+        "started_at": "2026-10-01T22:24:02Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run npx playwright install --with-deps firefox",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run all checks in group",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "completed_at": "2026-10-01T22:28:42Z",
+        "conclusion": "success",
+        "id": 110612477002,
+        "name": "browsers (screen-release, npx playwright test --config playwright.screen.config.ts\nnpm run test:r...",
+        "started_at": "2026-10-01T22:24:03Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run npx playwright install --with-deps firefox",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run all checks in group",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "completed_at": "2026-10-01T22:31:24Z",
+        "conclusion": "success",
+        "id": 110612477028,
+        "name": "browsers (followup-230, npx playwright test --config playwright.followup231.config.ts\nnpx playwri...",
+        "started_at": "2026-10-01T22:24:02Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npx playwright install --with-deps firefox",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run all checks in group",
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "status": "completed"
+          }
+        ]
+      }
+    ],
+    "total_count": 8
+  },
+  "artifacts": {
+    "artifacts": [
+      {
+        "created_at": "2026-10-01T22:23:58Z",
+        "expired": false,
+        "expires_at": "2026-10-02T22:23:56Z",
+        "id": 11198000296,
+        "name": "verified-web-builds",
+        "size_in_bytes": 4335342
+      }
+    ],
+    "total_count": 1
+  },
+  "workflow_safety": {
+    "dispatch_count": 1,
+    "workflow_permissions": {
+      "contents": "read"
+    },
+    "job_keys": [
+      "verify",
+      "browsers"
+    ],
+    "production_deployment_job": false,
+    "credentials_read_or_copied": false,
+    "new_credentials": false,
+    "new_pr": false,
+    "main_modified": false,
+    "suite_source_modified": false,
+    "player_data_modified": false
+  },
+  "remaining": [
+    "user reference image unavailable: three-column redesign not implemented",
+    "WebKit system libraries unavailable in current normal user executor; not tested",
+    "real logged-in Suite room, player permissions, physical dice and physical touch devices not tested",
+    "Suite manifest and paired Web announcement versions to be unified during formal release"
+  ]
+}

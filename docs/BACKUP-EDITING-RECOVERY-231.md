@@ -34,7 +34,7 @@
 
 第一轮 Chromium 六条均通过；最终六条 × Chromium / Firefox = **12 通过，0 失败，0 跳过**。完整启动 / Wiki / 原编辑恢复 / 本次备份恢复组 **50 通过，2 Firefox 工具边界跳过，0 失败**（Chromium 26/0，Firefox 24/2）。不混算重复执行次数，复验不使用真实玩家卡。
 
-`npx tsc -b --pretty false`、`npm run build`、`npm run build:standalone`、`git diff --check` 均通过；完整单元仍为 **486 通过 / 23 外部条件跳过 / 0 失败**（74 文件通过 / 1 条件跳过）。项目无独立 lint script，本轮没有虚报 lint 或远端 CI。
+`npx tsc -b --pretty false`、`npm run build`、`npm run build:standalone`、`git diff --check` 均通过；完整单元仍为 **486 通过 / 23 外部条件跳过 / 0 失败**（74 文件通过 / 1 条件跳过）。项目无独立 lint script，未虚报 lint。后续对同一产品源码的文档HEAD262a701启动一次完整远端CI，run36934766948的verify与7组全部成功；[远端验收](CI-FOLLOWUP-230-RESULT.md)补齐本页初轮尚未执行的CI。
 
 在本 executor 实际查看并保存了两张原创夹具截图：[已读取但未保存](evidence/backup-retry231/accepted-unsaved.png)、[原子保存失败后留在恢复版本](evidence/backup-retry231/save-aborted.png)。没有原玩家资料或用户布局参考图。
 
