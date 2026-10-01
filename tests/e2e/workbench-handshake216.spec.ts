@@ -28,7 +28,7 @@ test('real relay recovers its initial catalog while heartbeat traffic continues,
  await f.heartbeat(2000);await expect.poll(()=>f.posts.filter(m=>m.type==='hello').length).toBeGreaterThan(initial);
  await f.ready();await expect.poll(()=>page.evaluate(()=>(window as any).getWorkbench().cards[0]?.id)).toBe('synthetic-handshake');
  const complete=f.posts.filter(m=>m.type==='hello').length;await f.heartbeat(12000);
- expect(f.posts.filter(m=>m.type==='hello')).toHaveLength(complete);expect(f.posts.every(m=>m.type==='hello')).toBe(true);
+ expect(f.posts.filter(m=>m.type==='hello')).toHaveLength(complete);expect(f.posts.every(m=>m.type==='hello'||m.type==='ping')).toBe(true);expect(f.posts.some(m=>m.type==='ping')).toBe(true);
 });
 
 test('ambiguous write transport failure recovers the handshake and queries the same receipt without replay',async({page,baseURL})=>{

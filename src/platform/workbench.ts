@@ -20,7 +20,7 @@ export type CardChoice={resourceWidgets?:Record<string,ResourceWidgetLayout>;res
 export type SharedRules={edition:Edition;sourceMode:'full'|'short'|'both';profile:RuleProfile;packs:RulePack[];customEntries:Entry[]};
 export type SharedDocument={key:string;scope:'room'|'scene';revision:number;rules:SharedRules};
 type State={access?:CacheAccess;inventory?:InventoryState;shared?:SharedDocument;settings?:Record<string,any>;visibility?:{wiki:boolean;monsters:boolean};console?:{timeStop:boolean;portalEffects:boolean;players:{id:string;name:string}[]};cards:CardChoice[];monsters:CardChoice[];role?:string;enabled:Record<string,boolean>;online:boolean;target?:Target;document?:any;loading?:boolean;message:string;rolls:any[];compose?:{id:string;expression:string;label?:string}};
-let state:State={cards:[],monsters:[],enabled:{},online:false,message:'正在连接枭熊…',rolls:[]},host:Window|null=null,roomWindow:Window|null=null,last=0,lastDirect=0;
+let state:State={cards:[],monsters:[],enabled:{},online:false,message:'正在连接枭熊…',rolls:[]},host:Window|null=null,knownHost:Window|null=null,roomWindow:Window|null=null,last=0,lastDirect=0,lastRelayPing=0;
 const listeners=new Set<()=>void>(),pending=new Map<string,{resolve:(value?:any)=>void;reject:(e:Error)=>void;timer:ReturnType<typeof setTimeout>;started:number;type:string}>();
 let authoritativeInventory:InventoryState|undefined;
 let revisions=new WorkbenchRevisions();
@@ -73,10 +73,10 @@ export async function requestInventory(operation:Record<string,unknown>){
 }
 
 let relayState:RelayState|undefined;
-let relay:Relay|undefined,selectionSequence=0,catalogSequence=0,hostStarted=0;
+let relay:Relay|undefined,selectionSequence=0,catalogSequence=0,hostStarted=0,followRevision=0;
 let handshakeReady=false,handshakeCatalog=false,lastHello:number|undefined,helloAttempts=0;
 function resetGroup(disconnected=false){if(hostStarted)window.dispatchEvent(new CustomEvent('workbench-group-roll-reset',{detail:{hostStarted,disconnected}}));}
-function resetHandshake(restartRetries=true){resetGroup(true);snapshotCache.suspend();handshakeReady=false;handshakeCatalog=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
+function resetHandshake(restartRetries=true,disconnected=true){if(disconnected){resetGroup(true);snapshotCache.suspend();}handshakeReady=false;handshakeCatalog=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
 const monsterRuntimeSequence=new Map<string,number>();
 const runtimeFrom=(value:any)=>({stats:value.stats,resources:value.resources,conditions:value.conditions,documentRevision:value.documentRevision});
 function acceptSnapshot(m:any){
@@ -129,7 +129,7 @@ function requestHello(){
 }
 if(inWorkbench){
  startWorkbenchSound();
- function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;monsterRuntimeSequence.clear();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;clientSelection=0;update({access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
+ function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;followRevision=0;monsterRuntimeSequence.clear();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;clientSelection=0;update({access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
   if(!state.online)update({online:true,message:''});
   const accessAccepted=!m.access||acceptAccess(m.access);
   if(m.type==='access'||!accessAccepted&&m.type!=='ack')return;
@@ -141,7 +141,10 @@ if(inWorkbench){
   if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){handshakeCatalog=true;catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:(m.monsters||[]).map((card:CardChoice)=>{const previous=state.monsters.find(c=>c.itemId===card.itemId);if(previous&&(monsterRuntimeSequence.get(card.itemId)||0)>(m.sequence||0))return {...card,...runtimeFrom(previous)};monsterRuntimeSequence.set(card.itemId,m.sequence||0);return card;}),role:m.role,enabled:m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
   if(m.type==='catalog'&&state.target){const card=state.target.cardId?state.cards.find(c=>c.id===state.target!.cardId):state.monsters.find(c=>c.itemId===state.target!.itemId);if(card&&card.write!==state.target.write)update({target:{...state.target,write:card.write,locked:card.locked}});}
   if(m.type==='showWiki')window.dispatchEvent(new CustomEvent('workbench-open-entry',{detail:m.entry}));
-  if(m.type==='navigate'&&(!clientSelection||(!m.clientInstance||m.clientInstance===clientInstance)&&(m.clientSelection===undefined||m.clientSelection>=clientSelection))){wantedSelection=undefined;if(m.itemId)previewSelection(m.itemId);window.dispatchEvent(new Event('workbench-show-sheet'));}
+  if(['navigate','followSelection','followEnd','selection'].includes(m.type)&&Number.isSafeInteger(m.followRevision)){if(m.followRevision<followRevision)return;followRevision=m.followRevision;}
+  if(m.type==='followSelection')window.dispatchEvent(new CustomEvent('workbench-follow-selection',{detail:{active:true}}));
+  if(m.type==='followEnd'){wantedSelection=undefined;window.dispatchEvent(new CustomEvent('workbench-follow-selection',{detail:{active:false,itemId:m.itemId,restore:m.restore!==false}}));}
+  if(m.type==='navigate'&&(!clientSelection||(!m.clientInstance||m.clientInstance===clientInstance)&&(m.clientSelection===undefined||m.clientSelection>=clientSelection))){wantedSelection=undefined;if(m.followSelection)window.dispatchEvent(new CustomEvent('workbench-follow-selection',{detail:{active:true}}));if(m.itemId)previewSelection(m.itemId);window.dispatchEvent(new Event('workbench-show-sheet'));}
   if(m.type==='panelEvent')window.dispatchEvent(new CustomEvent('workbench-panel-event',{detail:m}));
   if(m.type==='diceEvent'&&m.event==='com.obr-suite/sfx')playWorkbenchSound(m.data?.data?.name);
   if(m.type==='diceEvent')window.dispatchEvent(new CustomEvent('workbench-dice-event',{detail:{event:m.event,data:m.data}}));
@@ -177,12 +180,14 @@ if(inWorkbench){
   if(handshakeReady&&handshakeCatalog){lastHello=undefined;helloAttempts=0;}
  }finally{updateDepth--;if(!updateDepth&&updatePending){updatePending=false;publishUpdate();}}}
  if(params.get('relay')){relay=new Relay(new URL('../relay',location.href.split('#')[0]).href,session!,'client',params.get('relay')!,accept,undefined,undefined,undefined,status=>{relayState=status;if(!host){resetHandshake(handshakeReady&&handshakeCatalog);if(!state.online)update({message:status.message});}});requestHello();}
- window.addEventListener('message',e=>{if(e.origin!==origin||e.data?.protocol!==protocol||e.data.session!==session||!e.source)return;if(host&&host!==e.source&&!host.closed&&!(e.data.type==='ready'&&e.data.hostStarted>hostStarted))return;if(!host&&e.data.type!=='ready')return;host=e.source as Window;lastDirect=Date.now();try{roomWindow=host.top;if(roomWindow)window.opener=roomWindow;}catch{}accept(e.data);});
- const connect=()=>{const now=Date.now();let lostDirect=false;
-  if(host&&(host.closed||now-lastDirect>5000)){host=null;lostDirect=true;resetHandshake();}
+ window.addEventListener('message',e=>{if(e.origin!==origin||e.data?.protocol!==protocol||e.data.session!==session||!e.source||e.data.hostStarted&&e.data.hostStarted<hostStarted)return;if(host&&host!==e.source&&!host.closed&&!(e.data.type==='ready'&&e.data.hostStarted>hostStarted))return;if(!host&&e.data.type!=='ready'&&!(e.source===knownHost&&e.data.type==='pong'&&e.data.hostStarted===hostStarted))return;host=e.source as Window;knownHost=host;lastDirect=Date.now();try{roomWindow=host.top;if(roomWindow)window.opener=roomWindow;}catch{}accept(e.data);});
+ const connect=()=>{const now=Date.now();
+  // A short busy/throttled interval must not erase the group or warm cache.
+  if(host&&(host.closed||now-lastDirect>15000)){host=null;resetHandshake(true,false);}
   if(last&&now-last>45000&&state.online){resetHandshake();update({online:false,message:relayState?.message||'正在重新连接枭熊…'});}
-  if(!handshakeReady||!handshakeCatalog||!host&&(lostDirect||now-last>10000))requestHello();
+  if(!handshakeReady||!handshakeCatalog)requestHello();
   if(host&&now-lastDirect>2500)send('ping');
+  else if(!host&&relay&&handshakeReady&&handshakeCatalog&&now-lastRelayPing>=10000){lastRelayPing=now;send('ping');}
  };
  connect();setInterval(connect,1000);window.addEventListener('focus',connect);window.addEventListener('pageshow',connect);
 }

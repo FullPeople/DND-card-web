@@ -1,6 +1,6 @@
 import {ownedTrainingReference} from './entryMenuEntries';
 import {overviewConditionEntry} from './OverviewVisuals';
-import {useGroupRoll} from '../platform/groupRoll';
+import {useGroupRoll,getGroupRoll} from '../platform/groupRoll';
 import {CardMigration} from './CardMigration';
 import {cardMigrationIssues} from '../core/cardMigration';
 import {ClearableSearch} from './ClearableSearch';
@@ -134,10 +134,10 @@ export default function App() {
   useEffect(()=>{const navigate=(e:Event)=>{const page=(e as CustomEvent).detail;if(['console','sheet','dice','music','settings','features'].includes(page))setWorkbenchPage(page);};window.addEventListener('workbench-panel-navigate',navigate);return()=>window.removeEventListener('workbench-panel-navigate',navigate);},[]);
   const [tableOpen,setTableOpen]=useState(false);
   useEffect(()=>{if(wb.enabled.threeDragonAnte===false)setTableOpen(false);if(wb.enabled.musicBoard===false&&workbenchPage==='music'||wb.enabled.dice===false&&workbenchPage==='dice')setWorkbenchPage('console');},[wb.enabled,workbenchPage]);
-  const firstWorkbenchRole=useRef(false),previousTarget=useRef('');
+  const firstWorkbenchRole=useRef(false),previousTarget=useRef(''),restoredMapTarget=useRef<string|undefined>(undefined);
   const wikiVisible=!inWorkbench||!!wb.visibility?.wiki,monstersVisible=!inWorkbench||!!wb.visibility?.monsters;
   useEffect(()=>{if(!inWorkbench||!wb.role)return;if(!firstWorkbenchRole.current){firstWorkbenchRole.current=true;setWorkbenchPage('console');}},[wb.role]);
-  useEffect(()=>{const key=wb.target?.key||'';if(!groupRoll&&previousTarget.current&&key&&key!==previousTarget.current)setWorkbenchPage('sheet');previousTarget.current=key;},[wb.target?.key]);
+  useEffect(()=>{const key=wb.target?.key||'',id=wb.target?.cardId?`card:${wb.target.cardId}`:wb.target?.itemId;if(!groupRoll&&previousTarget.current&&key&&key!==previousTarget.current){if(restoredMapTarget.current!==id)setWorkbenchPage('sheet');restoredMapTarget.current=undefined;}previousTarget.current=key;},[wb.target?.key]);
   useEffect(()=>{const show=()=>{if(!groupRoll){setWorkbenchPage('sheet');setTab('sheet');}};window.addEventListener('workbench-show-sheet',show);return()=>window.removeEventListener('workbench-show-sheet',show);},[groupRoll]);
   useEffect(()=>{if(wb.compose&&!groupRoll)setWorkbenchPage('dice');},[wb.compose?.id]);
   useEffect(()=>{if(inWorkbench)document.body.classList.add('suite-workbench');return()=>document.body.classList.remove('suite-workbench');},[]);
@@ -257,12 +257,24 @@ export default function App() {
   useEntryMenuActions({character:c,editing,scope:inWorkbench?JSON.stringify([wb.online,wb.role,wb.access?.room,wb.access?.scope,wb.access?.epoch]):undefined,readableEntry:readableMenuEntry,writable:!readOnly&&(!inWorkbench||!!wb.target?.write),add:entry=>add(entry),inspect,remove:id=>edit(draft=>removeSelection(draft,id)),canRemoveCustom:entry=>canAuthor&&!readOnly&&!rulesBusy&&customEntries.some(row=>row.id===entry.id),removeCustom:entry=>{void changeCustom(entry,true).catch(error=>setNotice(String(error)));}});
   const [tab, setTab] = useState('sheet');
   const groupReturn=useRef<{page:string;tab:string;sheet:SheetPage;scrolls:{selector:string;top:number;left:number}[]}|undefined>(undefined);
+  const mapFollowing=useRef(false);
+  const captureSelectionReturn=()=>{if(!groupReturn.current)groupReturn.current={page:workbenchPage,tab,sheet:sheetPage,scrolls:['.sheet-viewport','.sheet-pane','.entry-detail'].flatMap(selector=>{const el=document.querySelector(selector);return el?[{selector,top:el.scrollTop,left:el.scrollLeft}]:[]})};};
+  const restoreSelectionReturn=()=>{
+    const restore=groupReturn.current;if(!restore)return;groupReturn.current=undefined;setWorkbenchPage(restore.page);setTab(restore.tab);setSheetPage(restore.sheet);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{if(groupReturn.current)return;for(const position of restore.scrolls){const el=document.querySelector(position.selector);if(el){el.scrollTop=position.top;el.scrollLeft=position.left;}}}));
+  };
+  useEffect(()=>{
+    const follow=(event:Event)=>{const detail=(event as CustomEvent).detail;
+      if(detail.active){captureSelectionReturn();mapFollowing.current=true;restoredMapTarget.current=undefined;}
+      else{mapFollowing.current=false;if(detail.restore===false){groupReturn.current=undefined;return;}if(!getGroupRoll()||getGroupRoll()?.phase==='select'){restoredMapTarget.current=detail.itemId;restoreSelectionReturn();}}
+    };
+    window.addEventListener('workbench-follow-selection',follow);return()=>window.removeEventListener('workbench-follow-selection',follow);
+  },[workbenchPage,tab,sheetPage]);
   useLayoutEffect(()=>{
     if(inWorkbench&&wb.role==='GM'&&groupRoll){
-      if(!groupReturn.current){groupReturn.current={page:workbenchPage,tab,sheet:sheetPage,scrolls:['.sheet-viewport','.sheet-pane','.entry-detail'].flatMap(selector=>{const el=document.querySelector(selector);return el?[{selector,top:el.scrollTop,left:el.scrollLeft}]:[]})};setWorkbenchPage('console');setTab('sheet');}
-    }else if(groupReturn.current){
-      const restore=groupReturn.current;groupReturn.current=undefined;setWorkbenchPage(restore.page);setTab(restore.tab);setSheetPage(restore.sheet);
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{if(groupReturn.current)return;for(const position of restore.scrolls){const el=document.querySelector(position.selector);if(el){el.scrollTop=position.top;el.scrollLeft=position.left;}}}));
+      captureSelectionReturn();setWorkbenchPage('console');setTab('sheet');
+    }else if(groupReturn.current&&!mapFollowing.current){
+      restoreSelectionReturn();
     }
   },[groupRoll?.id,wb.role]);
 
