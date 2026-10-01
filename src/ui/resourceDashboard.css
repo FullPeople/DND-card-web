@@ -56,5 +56,5 @@
 .resource-diy-quickbar .resource-widget[data-overlapping=true][data-selected=true]{z-index:8;outline-style:dashed}
 .resource-workspace[data-layout-editing=true] .resource-widget-canvas{background-image:linear-gradient(to right,#52788012 1px,transparent 1px),linear-gradient(to bottom,#52788012 1px,transparent 1px);background-size:calc(100% / 12) calc(100% / 6)}
 .sheet-export .resource-workspace-toolbar button{visibility:hidden}
-.sheet-reflow .paper:not(.sheet-export) .resource-diy-quickbar{display:block!important;height:210px}
+
 @media(max-width:480px){.dialog:has(.resource-dashboard) .dialog-body{padding:10px}.dashboard-stage{top:-10px}.dashboard-swatches{gap:3px}.dashboard-swatches button{width:15px;height:15px}.dashboard-palette>strong{max-width:80px}.dashboard-icons{gap:3px}.dashboard-icons small{max-width:120px;line-height:1.2}.dashboard-preview{max-width:calc(100% - 4px)}}

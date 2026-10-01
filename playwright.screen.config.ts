@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:['screenLayout.spec.ts'],timeout:60000,expect:{timeout:10000},workers:1,reporter:'list',outputDir:'test-results-screen',use:{baseURL:'http://127.0.0.1:5335',channel:process.env.CI?undefined:'msedge',viewport:{width:1512,height:982},screenshot:'only-on-failure',trace:'retain-on-failure'},webServer:{command:'node node_modules/vite/bin/vite.js --mode automation-standalone --host 127.0.0.1 --port 5335',url:'http://127.0.0.1:5335',reuseExistingServer:!process.env.CI}});

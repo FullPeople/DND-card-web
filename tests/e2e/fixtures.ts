@@ -15,7 +15,9 @@ const data: Record<string, unknown> = {
   'items-base.json': { baseitem: [{ name: '测试皮甲', ENG_name: 'Test Armor', source: 'XPHB', ac: 11, type: 'LA', entries: ['测试护甲。'] }] },
   'items.json': {}, 'optionalfeatures.json': {}, 'conditionsdiseases.json': {},
 };
-export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean;firstSetup?:boolean}={}) {
+export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean;firstSetup?:boolean;displayMode?:'a4'|'screen'}={}) {
+  // Existing flows retain their A4 contract; responsive flows opt into screen mode.
+  await page.context().addInitScript(mode=>{if(!localStorage.getItem('dnd-card-sheet-display'))localStorage.setItem('dnd-card-sheet-display',mode);},options.displayMode||'a4');
   if(!options.firstSetup){
     await page.context().addInitScript(()=>{try{localStorage.setItem('dnd-card:rules-setup:v1','done');}catch{}});
     await page.evaluate(()=>{try{localStorage.setItem('dnd-card:rules-setup:v1','done');}catch{}}).catch(()=>{});

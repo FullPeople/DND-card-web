@@ -1,4 +1,5 @@
 import {useEntryMenu} from './EntrySharing';
+import {useSheetRenderMode} from './sheetDisplay';
 import {sheetChoices,builtinChoices,builtinOptionsVisible,setBuiltinOptionsVisible} from '../core/automation/choices';
 import {ChoiceOutline} from './ChoiceOutline';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
@@ -26,6 +27,7 @@ type Props = { catalog?:Entry[]; owners?:Selection[]; detailed?:boolean; inline?
 
 export function FeaturePanel({ catalog=[], owners=[], detailed = false, inline = false, c, rows, receive, edit, browse, onLink, children, label = '特性', className = 'class-features', kinds = ['feature', 'rule'], grouped = true }: Props) {
   const {format}=useSources(); const editing=useContext(SheetEditContext);
+  const screen=useSheetRenderMode()==='screen';
   const menu=useEntryMenu();
   const choices=sheetChoices(c,catalog),workspace=useChoiceWorkspace(),setChoiceId=workspace.open;
   const choicesFor=(id:string)=>choices.filter(r=>r.ownerId===id);
@@ -123,7 +125,7 @@ export function FeaturePanel({ catalog=[], owners=[], detailed = false, inline =
         {choicesFor(f.id).some(r=>!r.complete)&&<ChoiceOutline/>}{expanded.has(f.id) ? <strong><em>{f.name.replace(/[。.]$/, '')}。</em></strong> : f.name}{choicesFor(f.id).filter(r=>!r.complete).map(r=>` ${r.selected.length}/${r.count}`)}
       </Reference>{inline && conditionVisual(f.entry) === 'exhaustion' && <NumberInput className="exhaustion-level" aria-label="力竭层数" type="number" min="1" max="6" value={c.selections.find(s => s.id === f.id)?.level || 1} onChange={event => edit(draft => { const row = draft.selections.find(s => s.id === f.id); if (row) row.level = Math.max(1, Math.min(6, Math.trunc(Number(event.target.value) || 1))); })}/>} {expanded.has(f.id) && <div className="feature-prose rules-prose"><ContentBoundary key={f.id}><Entries value={f.body} onLink={onLink}/>{f.restricted && <p className="inline-warning">来源未启用</p>}</ContentBoundary></div>}
     </article>)}</div></section>)}
-    </div>{children}{!inline && <button className="feature-browse" onClick={browse}>＋ 查阅{label}</button>}</>;
+    </div>{children}{!inline && !screen && <button className="feature-browse" onClick={browse}>＋ 查阅{label}</button>}</>;
   if (inline) return <DropZone className="status-strip" kinds={kinds} onReceive={receive} wholePaper>{contents}</DropZone>;
-  return <SheetCell label={label} className={`${className} traits-box feature-panel`} dropKinds={kinds} onReceive={receive} wholePaper={kinds.length === 1 && kinds[0] === 'condition'} onHeadingClick={() => saveLayout(ordered.map(f => f.id), allOpen ? [] : ordered.map(f => f.id))} headingExpanded={allOpen} headingActionLabel={`${allOpen ? '折叠' : '展开'}全部${label}`}>{contents}</SheetCell>;
+  return <SheetCell label={label} trailing={screen?<button className="feature-browse-heading" aria-label={`查阅${label}`} title={`查阅${label}`} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();browse();}}>＋</button>:undefined} className={`${className} traits-box feature-panel`} dropKinds={kinds} onReceive={receive} wholePaper={kinds.length === 1 && kinds[0] === 'condition'} onHeadingClick={() => saveLayout(ordered.map(f => f.id), allOpen ? [] : ordered.map(f => f.id))} headingExpanded={allOpen} headingActionLabel={`${allOpen ? '折叠' : '展开'}全部${label}`}>{contents}</SheetCell>;
 }

@@ -13,7 +13,6 @@
 @keyframes slot-unfold{from{transform:scale(.88);clip-path:inset(0 5% 12% 0)}to{transform:scale(1);clip-path:inset(0)}}
 .console-roster .resource179-row .resource-title>strong,.spell-slot-popover .resource179-row .resource-title>strong{font-size:15px;line-height:19px}.console-roster .resource179-row .resource-title{min-height:19px}
 .spell-stock-cell.prepared-cell{height:124px;min-height:124px;flex:none}
-.sheet-reflow .spell-stock-cell.prepared-cell{height:190px;min-height:190px}
 .header-法术 .cell-content:has(.adjusted-value){padding:0}.header-法术 .adjusted-value{min-height:42px}
 .spell-stock-cell .spell-stock-tile.stock-item.spell-ritual{background-image:linear-gradient(90deg,#5f9ec42b,transparent 85%)}
 .spell-stock-meta{display:flex;align-items:center;justify-content:flex-end;gap:3px;min-width:0}

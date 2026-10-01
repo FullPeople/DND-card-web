@@ -2,6 +2,8 @@ import {useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {type Character,type Entry} from '../core/model';
 import {evaluate} from '../core/engine';
 import {readCharacter,importOwlbear,parseFile} from '../core/validation';
+import {SheetDisplayButton} from './SheetDisplayButton';
+import {useSheetRenderMode} from './sheetDisplay';
 import {PaperFrame,type SheetPage} from './PaperFrame';
 import {SheetEditContext} from './SheetEdit';
 import {Overview} from './Overview';
@@ -27,6 +29,7 @@ export function readViewerCharacter(value:unknown):Character{
 const noop=()=>{};
 class ViewerLoadError extends Error{constructor(readonly key:UiTextKey,readonly values:Record<string,string|number>={}){super(key);}}
 export default function PlayerViewer(){
+ const renderMode=useSheetRenderMode();
  const {language,t}=useUiLanguage();
  const [card,setCard]=useState<Character>(),[error,setError]=useState<Error>(),[page,setPage]=useState<SheetPage>('主要'),[detail,setDetail]=useState<Entry>(),[reload,setReload]=useState(0);
  const root=useRef<HTMLDivElement>(null);
@@ -37,7 +40,7 @@ export default function PlayerViewer(){
   if(Number(response.headers.get('content-length')||0)>20_000_000)throw new ViewerLoadError('readerLarge');
   const next=readViewerCharacter(parseFile(await response.text()));if(!abort.signal.aborted)setCard(next);
  })().catch(e=>{if(!abort.signal.aborted)setError(e instanceof Error?e:new Error(String(e)));});return()=>abort.abort();},[reload]);
- useLayoutEffect(()=>{for(const input of root.current?.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>('.paper input,.paper textarea,.paper select')||[])input.disabled=true;},[card,page]);
+ useLayoutEffect(()=>{for(const input of root.current?.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>('.paper input,.paper textarea,.paper select')||[])input.disabled=true;},[card,page,renderMode]);
  const derived=useMemo(()=>card?evaluate(card):undefined,[card]);
  const entries=useMemo(()=>card?.selections.map(s=>s.entry)||[],[card]);
  const resolve=(reference:string,kind?:string)=>{if(reference.startsWith('entry:'))return entries.find(e=>e.id===reference.slice(6))||card?.selections.find(s=>s.id===reference.slice(6))?.entry;const [name,source]=reference.split('|');return entries.find(e=>(!kind||kind===e.kind)&&(!source||e.source.toLowerCase()===source.toLowerCase())&&[e.name,e.english].some(value=>value.toLowerCase()===name.toLowerCase()));};
@@ -49,7 +52,7 @@ export default function PlayerViewer(){
  const props={c:card,d:derived,edit,browse:noop,inspect:setDetail,onLink:link,add:noop,entries};
  return <KeywordPreview resolve={resolve} open={link}><SheetEditContext.Provider value={false}><main ref={root} className="player-viewer">
   <header className="player-viewer-toolbar"><strong>{card.name}</strong><span>{card.edition} · {t('readOnly')}</span><button onClick={()=>setReload(n=>n+1)}>{t('refreshData')}</button><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('createOnSite')}</a></header>
-  <section className="sheet-pane"><PaperFrame character={card} page={page} changePage={setPage}>
+  <section className="sheet-pane"><div className="pane-toolbar"><SheetDisplayButton/></div><PaperFrame character={card} page={page} changePage={setPage}>
    {page==='主要'?<Overview {...props} catalog={entries} statusRibbon={<div className="edition-divider"><span/><strong>DND 五版角色卡</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={card} rows={card.selections.filter(s=>s.entry.kind==='condition')} edit={noop} browse={noop} onLink={link}/><span/></div>} addEntry={noop} renderSelection={()=>null} openResources={noop} openQuickbar={noop} pinDrop={noop}/>:<div className="sheet-details"><DetailHeader {...props} page={page}/>{page==='特性'?<FeaturesPage {...props}/>:page==='背景'?<BackgroundPage {...props}/>:page==='法术'?<SpellsPage {...props}/>:<InventoryPage {...props}/>}</div>}
   </PaperFrame></section>
   {detail&&<div className="player-entry-shade" onPointerDown={event=>{if(event.target===event.currentTarget)setDetail(undefined);}}><section role="dialog" aria-label={t('entryDetails')}><header><div><strong>{uiEntryName(detail,language)}</strong><small><SourceName id={detail.source}/> · {detail.edition}</small></div><button aria-label={t('closeEntry')} onClick={()=>setDetail(undefined)}>×</button></header><ContentBoundary key={detail.id}><EntryFacts entry={detail} onLink={link}/><Entries value={detail.entries} onLink={link}/></ContentBoundary></section></div>}
