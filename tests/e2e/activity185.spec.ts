@@ -13,6 +13,9 @@ test('prepared cantrips remain on the main sheet; manual spell adjustments are i
  await page.getByRole('switch',{name:'编辑模式'}).click();await expect(page.locator('.header-法术 .stat-adjustment')).toHaveCount(0);await expect(page.locator('.header-法术 .page-value').first()).toHaveText('+7');await page.screenshot({path:'test-results/activity185-spell-normal.png'});
 });
 test('bubble, spell and item menus share only the selected entry; received notifications navigate Wiki',async({page:host})=>{
+ // This flow tests the user's explicit responsive preference. Install it before
+ // window.open starts the app; the default first visit deliberately uses A4.
+ await host.context().addInitScript(()=>localStorage.setItem('dnd-card-sheet-display','screen'));
  const c=character(),protocol='full-suite-workbench/v1',session='activity185';await host.route('**/activity-host185',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><title>Activity test host</title>'}));await host.goto('/activity-host185');
  await host.evaluate(({protocol,session})=>{(window as any).requests=[];window.addEventListener('message',e=>{const m=e.data;if(m?.protocol!==protocol||m.session!==session)return;const send=(v:any)=>(e.source as Window).postMessage({protocol,session,hostStarted:185,...v},location.origin);if(m.type==='hello'||m.type==='ping')send({type:m.type==='hello'?'ready':'pong'});if(m.type==='showEntry'){(window as any).requests.push(m);send({type:'ack',requestId:m.requestId,ok:true});}});},{protocol,session});
  const waiting=host.context().waitForEvent('page');await host.evaluate(session=>{(window as any).viewer=window.open('/#suite='+session+'&bridge='+encodeURIComponent(location.origin),'activity185');},session);const page=await waiting;await mockSource(page,{displayMode:'screen'});await expect(page.locator('.app-shell')).toBeVisible();
