@@ -37,3 +37,7 @@ test-results-feedback198/
 dist-automation/
 test-results-automation209/
 local-rules/
+
+.cache-release/
+evidence/
+test-results-choices/

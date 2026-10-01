@@ -1,6 +1,9 @@
 import {selectionAllowed,uid,type Character,type Entry,type Selection} from './model';
 import {spellState} from './characterDetails';
 import {availableClassSpells,spellUsesPreparation} from './spellcastingRules';
+import {preparationBase} from './preparation';
+import {assignClassSpell} from './spellWorkspace';
+import {casterProfiles,spellOnClassList} from './spellcastingRules';
 
 export function spellLibrary(c:Character,entries:Entry[]=[]):Selection[]{
  const selected=c.selections.filter(s=>s.entry.kind==='spell'),known=new Set(selected.filter(s=>!c.spellSettings?.special?.[s.id]?.sourceGrant).map(s=>s.entry.id));
@@ -8,13 +11,16 @@ export function spellLibrary(c:Character,entries:Entry[]=[]):Selection[]{
 }
 
 /** Copy just the selected full-list spell into durable state; do not persist the whole class list. */
-export function prepareSpellEntry(c:Character,entry:Entry,preferredSlot?:number):string|undefined{
+export function prepareSpellEntry(c:Character,entry:Entry,preferredSlot?:number,ownerId?:string):string|undefined{
+ const matching=casterProfiles(c).filter(p=>p.mode==='prepared'&&spellOnClassList(entry,p));
+ if(ownerId&&!matching.some(p=>p.owner.id===ownerId))return undefined;
+ const assign=(id:string)=>{const owner=ownerId||(matching.length===1?matching[0].owner.id:undefined);if(owner)assignClassSpell(c,id,owner);return id;};
  const existing=c.selections.find(s=>s.entry.kind==='spell'&&s.entry.id===entry.id&&!c.spellSettings?.special?.[s.id]);
- if(existing){const effective=spellState(c);return setPreparedSpell(c,existing.id,true,preferredSlot)||effective.prepared.slice(0,effective.capacity).includes(existing.id)?existing.id:undefined;}
+ if(existing){const effective=spellState(c);return setPreparedSpell(c,existing.id,true,preferredSlot)||effective.prepared.slice(0,effective.capacity).includes(existing.id)?assign(existing.id):undefined;}
  if(!selectionAllowed(c,entry)||!spellUsesPreparation(c,entry))return undefined;
  const row:Selection={id:uid(),entry:structuredClone(entry),quantity:1,level:1,equipped:false};
  c.selections.push(row);
- if(setPreparedSpell(c,row.id,true,preferredSlot))return row.id;
+ if(setPreparedSpell(c,row.id,true,preferredSlot))return assign(row.id);
  c.selections.pop();return undefined;
 }
 

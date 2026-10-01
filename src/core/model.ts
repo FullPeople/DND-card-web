@@ -24,8 +24,9 @@ export interface Entry {
 }
 export interface Selection { catalogReview?:{edition:Edition;entryId:string;source:string;kind:Kind}; id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; weaponAbility?:Ability; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
 export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check';castLevel?:number}}
-export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
+export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; classSpells?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
+export interface RuntimeResource {current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string}}
 export interface Character {
   automation?:import('./automation/state').AutomationState;
   locked?:boolean;
@@ -55,10 +56,10 @@ export interface Character {
   sheetBonuses?: Partial<Record<SheetBonus, number>>;
   skillBonuses?: Record<string, number>;
   dismissedFeatures?: string[];
-  featureLayout?: { detailsExpanded?:string[]; order: string[]; expanded: string[] };
+  featureLayout?: { detailsExpanded?:string[]; optionsVisible?:Record<string,boolean>; order: string[]; expanded: string[] };
   adjustments?: { id: string; target: string; value: number; reason: string }[];
   externalSnapshot?: Raw;
-  runtime: { automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string, { current: number; max: number; name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean }> };
+  runtime: { rests?:import('./automation/rest').RestState; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
 }
 export interface RulePack { schemaVersion: 1; id: string; name: string; version: string; author?: string; editions: Edition[]; requires: { id: string; version: string }[]; conflicts: string[]; entries: Entry[] }
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }
@@ -104,3 +105,4 @@ export function skillKey(name: string): string {
   const compact = name.toLowerCase().replace(/[\s_-]/g, '');
   return Object.keys(SKILLS).find(k => k.toLowerCase() === compact || SKILLS[k].name === name) ?? name;
 }
+

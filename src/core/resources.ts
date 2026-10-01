@@ -1,4 +1,5 @@
 import type {Character} from './model';
+import {syncFeatureResources} from './automation/featureResources';
 import {spellState} from './characterDetails';
 import {parentClass} from './featureOwnership';
 export function isHitDieResource(id:string){return /^hit-die:\d+$/.test(id);}
@@ -30,6 +31,8 @@ export function syncAutoResources(c:Character,before?:Character){
  if(pact){const level=Math.min(5,Math.ceil(pact/2)),max=pact===1?1:pact<11?2:pact<17?3:4;ensure(`pact-slot:${level}`,`${level}环契约位`,max);}
  if(automaticSlots&&c.spellSettings)for(const level of Object.keys(c.spellSettings.slots))if(!needed.has(`spell-slot:${level}`))delete c.spellSettings.slots[level];
  for(const [id,r] of Object.entries(resources))if(r.automatic&&!needed.has(id))delete resources[id];
- return previous!==JSON.stringify([resources,c.spellSettings?.slots]);
+ const featuresChanged=syncFeatureResources(c);
+ return featuresChanged||previous!==JSON.stringify([resources,c.spellSettings?.slots]);
 }
-export function setResource(c:Character,id:string,current:number){const r=c.runtime.resources[id];if(!r)return;r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};}
+export function setResource(c:Character,id:string,current:number){const r=c.runtime.resources[id];if(!r)return;r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));if(r.featureGrant)r.featureGrant.spent=Math.max(0,r.max-r.current);if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};}
+

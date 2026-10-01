@@ -1,4 +1,6 @@
 
+import {TraceValue} from './ValueTrace';
+import {sheetChoices,selectionActive} from '../core/automation/choices';
 import {classMatches} from '../core/model';
 import {proficiencyText} from '../core/proficiencyText';
 import {spellIsReady} from '../core/spellWorkspace';
@@ -60,7 +62,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
     </SheetCell>;
   }
   function contentCell(label: string, rows: Selection[], kinds: Kind[], className: string) {
-    return <FeaturePanel c={c} rows={rows} edit={edit} browse={() => browse(kinds[0])} onLink={onLink} label={label} className={className} kinds={kinds} grouped={false} receive={addEntry}/>;
+    return <FeaturePanel catalog={catalog} c={c} rows={rows} edit={edit} browse={() => browse(kinds[0])} onLink={onLink} label={label} className={className} kinds={kinds} grouped={false} receive={addEntry}/>;
   }
   function setProficiency(key: string, value: boolean) { edit(draft => { (draft.proficiencies ||= {})[key] = value; if (!value && draft.expertise && Object.hasOwn(SKILLS,key)) draft.expertise[key] = false; }); }
   function abilityCell(a: Ability) {
@@ -68,21 +70,22 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
     return <SheetCell label={ABILITY_LABELS[a]} className={`ability-box ability-${a}`} hint={d.trace[a].join('；')}>
       <div className="ability-values"><span className="ability-code">{a.toUpperCase()}</span><label><NumberInput aria-label={`${ABILITY_LABELS[a]}基础值`} type="number" readOnly={!editing} min="1" max="30" value={c.abilities[a]} onChange={e => edit(draft => { draft.abilities[a] = clamp(e.target.value, 1, 30); }, a)}/><span>基础属性</span></label><div><button className="ability-modifier rollable-stat" disabled={!inWorkbench} onClick={()=>composeRoll(`1d20${signed(d.modifiers[a])}`,`${ABILITY_LABELS[a]}检定`)}>{signed(d.modifiers[a])}</button><small>调整值</small></div></div>
       {d.abilities[a] !== c.abilities[a] && <div className="ability-total">总值 {d.abilities[a]}</div>}
-      <div className={`ability-save ${!editing&&inWorkbench?'roll-row':''}`} role={!editing&&inWorkbench?'button':undefined} tabIndex={!editing&&inWorkbench?0:undefined} onClick={()=>{if(!editing&&inWorkbench)composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}} onKeyDown={e=>{if(!editing&&inWorkbench&&['Enter',' '].includes(e.key)){e.preventDefault();composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}}}>{editing ? <input type="checkbox" aria-label={`${ABILITY_LABELS[a]}豁免熟练`} checked={d.saves[a].proficient} onChange={e => setProficiency(`save:${a}`, e.target.checked)}/> : <span className={`proficiency-mark ${d.saves[a].proficient ? 'trained' : ''}`} aria-label={`${ABILITY_LABELS[a]}豁免${d.saves[a].proficient ? '熟练' : '无熟练'}`}/>}<b>{signed(d.saves[a].value)}</b><span>豁免</span></div>
+      <div className={`ability-save ${!editing&&inWorkbench?'roll-row':''}`} role={!editing&&inWorkbench?'button':undefined} tabIndex={!editing&&inWorkbench?0:undefined} onClick={()=>{if(!editing&&inWorkbench)composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}} onKeyDown={e=>{if(!editing&&inWorkbench&&['Enter',' '].includes(e.key)){e.preventDefault();composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}}}>{editing ? <input type="checkbox" aria-label={`${ABILITY_LABELS[a]}豁免熟练`} checked={d.saves[a].proficient} onChange={e => setProficiency(`save:${a}`, e.target.checked)}/> : <span className={`proficiency-mark ${d.saves[a].proficient ? 'trained' : ''}`} aria-label={`${ABILITY_LABELS[a]}豁免${d.saves[a].proficient ? '熟练' : '无熟练'}`}/>}{editing?<TraceValue target={`save:${a}`} label={`${ABILITY_LABELS[a]}豁免`} value={d.saves[a].value}><b>{signed(d.saves[a].value)}</b></TraceValue>:<b>{signed(d.saves[a].value)}</b>}<span>豁免</span></div>
       <div className="ability-skills">{skills.map(([key, skill]) => <div className={`ability-skill ${editing ? 'skill-editing' : inWorkbench?'roll-row':''}`} role={!editing&&inWorkbench?'button':undefined} tabIndex={!editing&&inWorkbench?0:undefined} onClick={()=>{if(!editing&&inWorkbench)composeRoll(`1d20${signed(d.skills[key].value)}`,skill.name);}} onKeyDown={e=>{if(!editing&&inWorkbench&&['Enter',' '].includes(e.key)){e.preventDefault();composeRoll(`1d20${signed(d.skills[key].value)}`,skill.name);}}} key={key} title={d.skills[key].sources.join('；')}>
         {editing ? <><input aria-label={`${skill.name}熟练`} type="checkbox" checked={d.skills[key].proficient} onChange={e => setProficiency(key, e.target.checked)}/><input className="expertise-check" aria-label={`${skill.name}专精`} type="checkbox" checked={d.skills[key].expertise} onChange={e => edit(draft => { (draft.expertise ||= {})[key] = e.target.checked; if (e.target.checked) (draft.proficiencies ||= {})[key] = true; })}/></> : <span className={`proficiency-mark ${d.skills[key].expertise ? 'expert' : d.skills[key].proficient ? 'trained' : ''}`} aria-label={`${skill.name}${d.skills[key].expertise ? '专精' : d.skills[key].proficient ? '熟练' : '无熟练'}`}/>}
-        <b>{signed(d.skills[key].value)}</b><span>{skill.name}</span>{editing&&<NumberInput className="skill-extra-adjustment" aria-label={`${skill.name}额外调整值`} title="额外加减值，叠加于技能检定；保留至手动修改" min="-9999" max="9999" step="1" value={c.skillBonuses?.[key]||0} onChange={e=>edit(draft=>{const value=Math.trunc(clamp(e.target.value,-9999,9999));if(value)(draft.skillBonuses||={})[key]=value;else if(draft.skillBonuses)delete draft.skillBonuses[key];},`skill-bonus:${key}`)}/>}</div>)}</div>
+                {editing?<TraceValue target={`skill:${key}`} label={skill.name} value={d.skills[key].value}><b>{signed(d.skills[key].value)}</b></TraceValue>:<b>{signed(d.skills[key].value)}</b>}<span>{skill.name}</span>{editing&&<NumberInput className="skill-extra-adjustment" aria-label={`${skill.name}额外调整值`} title="额外加减值，叠加于技能检定；保留至手动修改" min="-9999" max="9999" step="1" value={c.skillBonuses?.[key]||0} onChange={e=>edit(draft=>{const value=Math.trunc(clamp(e.target.value,-9999,9999));if(value)(draft.skillBonuses||={})[key]=value;else if(draft.skillBonuses)delete draft.skillBonuses[key];},`skill-bonus:${key}`)}/>}</div>)}</div>
       {a === 'dex' && (editing || c.jackOfAllTrades) && <label className="jack-of-all-trades"><input type="checkbox" aria-label="万事通" disabled={!editing} checked={!!c.jackOfAllTrades} onChange={e => edit(draft => { draft.jackOfAllTrades = e.target.checked; })}/><span>万事通</span></label>}
     </SheetCell>;
   }
   const training: { key: string; label: string; values: string[] }[] = [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
-    const values = c.selections.filter(s => selectionAllowed(c, s.entry)).flatMap(s => {
+    const values = c.selections.filter(s => selectionActive(c,s)&&(!s.grantKey?.startsWith('choice:')||c.automation?.enabled)).flatMap(s => {
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
       return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
     });
+    values.push(...sheetChoices(c,catalog).filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.map(v=>r.options.find(o=>o.value===v)?.label||v)));
     return { key, label, values: [...new Set<string>(values.map(v => {const entry=(trainingNames.get(v.toLowerCase())||[]).find(e=>e.source===(c.edition==='2024'?'XPHB':'PHB'))||(trainingNames.get(v.toLowerCase())||[])[0];return names[v] || (entry?`{@${key==='languages'?'language':'item'} ${entry.name}|${entry.source}}`:proficiencyText(v,c.edition==='2024'?'XPHB':'PHB',key));}))] };
   });
   return <div className="overview-sheet">

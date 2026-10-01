@@ -49,17 +49,17 @@ async function seekAttack(page:Page,id:string){
 }
 async function expectAttack(page:Page,id:string,...parts:string[]){const row=await seekAttack(page,id);for(const part of parts)await expect(row).toContainText(part);return row;}
 
-test('manual card copies into automation; armor replaces, shield adds, undo and reload preserve intent and resources',async({page})=>{
+test('imported manual card automatically enables automation; armor replaces, shield adds, undo and reload preserve intent and resources',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await ready(page);await importManual(page);
- await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByTestId('automation-ac')).toHaveText('13');await page.getByRole('button',{name:'复制并开启自动计算'}).click();
- await expect(page.getByRole('tab',{name:'自动化迁移验收（导入）（副本）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'自动化设置'}).click();
+ await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByTestId('automation-ac')).toHaveText('13');await expect(page.getByRole('checkbox',{name:'启用自动计算',exact:true})).toBeChecked();await page.keyboard.press('Escape');
+ await expect(page.getByRole('tab',{name:'自动化迁移验收（导入）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'自动化设置'}).click();
  await page.getByRole('checkbox',{name:'装备 验收轻甲',exact:true}).check();await expect(page.getByTestId('automation-ac')).toHaveText('14');
  await page.getByRole('checkbox',{name:'装备 验收盾牌',exact:true}).check();await expect(page.getByTestId('automation-ac')).toHaveText('16');
  await page.getByRole('checkbox',{name:'装备 验收重甲',exact:true}).check();await expect(page.getByTestId('automation-ac')).toHaveText('18');await expect(page.getByRole('checkbox',{name:'装备 验收轻甲',exact:true})).not.toBeChecked();
  await page.screenshot({path:test.info().outputPath('armor-shield-trace.png')});await page.keyboard.press('Escape');await page.getByRole('button',{name:'撤销',exact:true}).click();await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByTestId('automation-ac')).toHaveText('16');await page.keyboard.press('Escape');await page.getByRole('button',{name:'重做',exact:true}).click();
  await expect.poll(async()=>{const w=await readWorkspace(page);return w.characters.find((c:any)=>c.id===w.activeId)?.selections.find((s:any)=>s.entry.name==='验收重甲')?.equipped;}).toBe(true);
  await page.reload();await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByTestId('automation-ac')).toHaveText('18');
- const w=await readWorkspace(page),original=w.characters.find((c:any)=>c.name==='自动化迁移验收（导入）'),copy=w.characters.find((c:any)=>c.id===w.activeId);expect(original.automation).toBeUndefined();expect(original.selections.every((r:any)=>!r.equipped)).toBe(true);expect(copy.runtime.resources.fixture.current).toBe(1);expect(copy.abilities.dex).toBe(16);
+ const w=await readWorkspace(page),original=w.characters.find((c:any)=>c.name==='自动化迁移验收（导入）'),copy=w.characters.find((c:any)=>c.id===w.activeId);expect(original.automation?.enabled).toBe(true);expect(original.id).toBe(copy.id);expect(copy.runtime.resources.fixture.current).toBe(1);expect(copy.abilities.dex).toBe(16);
  await page.getByRole('checkbox',{name:'启用自动计算',exact:true}).uncheck();await expect(page.getByTestId('automation-ac')).toHaveText('13');await page.getByRole('checkbox',{name:'启用自动计算',exact:true}).check();await expect(page.getByTestId('automation-ac')).toHaveText('18');expect(errors).toEqual([]);
 });
 test('narrow screen keeps settings readable and uses isolated storage',async({page})=>{
@@ -67,7 +67,7 @@ test('narrow screen keeps settings readable and uses isolated storage',async({pa
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);const names=await page.evaluate(async()=>(await indexedDB.databases()).map(d=>d.name));expect(names).toContain(process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-209');expect(names).not.toContain('dnd-card-workspace');await page.screenshot({path:test.info().outputPath('automation-mobile.png')});
 });
 test('failed equipment save preserves the previous database and the current draft, then a later save commits both actions once',async({page})=>{
- await ready(page);await importManual(page);await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('button',{name:'复制并开启自动计算'}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await ready(page);await importManual(page);await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('checkbox',{name:'启用自动计算',exact:true})).toBeChecked();await page.keyboard.press('Escape');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const before=await readWorkspace(page);
  await page.evaluate(()=>{const original=IDBObjectStore.prototype.put;(window as any).rejectAutomationSave=true;IDBObjectStore.prototype.put=function(...args:any[]){if((window as any).rejectAutomationSave&&this.name==='documents'&&args[1]==='workspace')throw new DOMException('injected full storage','QuotaExceededError');return original.apply(this,args as any);};});
  await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'装备 验收重甲',exact:true}).check();await expect(page.locator('.save-status')).toContainText('保存失败');await expect(page.getByTestId('automation-ac')).toHaveText('16');expect(await readWorkspace(page)).toEqual(before);
@@ -167,4 +167,11 @@ test('a failed spell-action save retains the prior counter and receipt on disk, 
  await page.evaluate(()=>{(window as any).rejectSpellSave=false;});dialog=await spellDialog(page,'共享乙');await dialog.getByRole('button',{name:'使用',exact:true}).click();await page.keyboard.press('Escape');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const w=await readWorkspace(page),saved=w.characters.find((c:any)=>c.id===w.activeId);expect(saved.runtime.automationActions.sequence).toBe(2);const pools=Object.entries(saved.runtime.resources).filter(([id])=>id.startsWith('source-spell-pool:'));expect(pools).toHaveLength(1);expect((pools[0][1] as any).current).toBe(0);expect(saved.runtime.resources['spell-slot:1'].current).toBe(2);
  await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(first).toContainText('共用 0/2');await expect(second).toContainText('共用 0/2');
+});
+
+test('old stored cards enable without a click and later explicit opt-out survives reload without restoring resources',async({page})=>{
+ await ready(page);const old=manual();old.inventory={view:'grid',order:[],attunementLimit:3,coins:{gp:7,cp:0,sp:0,ep:0,pp:0}};
+ await page.evaluate(async({card,dbName})=>{const req=indexedDB.open(dbName),db=await new Promise<IDBDatabase>((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});try{await new Promise<void>((resolve,reject)=>{const tx=db.transaction('documents','readwrite');tx.objectStore('documents').put({schemaVersion:1,characters:[card],activeId:card.id,packs:[]},'workspace');tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}finally{db.close();}},{card:old,dbName:process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-209'});
+ await page.reload();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('checkbox',{name:'启用自动计算',exact:true})).toBeChecked();await expect.poll(async()=>{const w=await readWorkspace(page);return w.characters[0].automation?.enabled;}).toBe(true);let w=await readWorkspace(page);expect(w.characters[0].runtime.resources.fixture.current).toBe(1);expect(w.characters[0].inventory.coins.gp).toBe(7);expect(w.characters[0].selections).toHaveLength(3);
+ await page.getByRole('checkbox',{name:'启用自动计算',exact:true}).uncheck();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('checkbox',{name:'启用自动计算',exact:true})).not.toBeChecked();w=await readWorkspace(page);expect(w.characters[0].runtime.resources.fixture.current).toBe(1);expect(w.characters[0].inventory.coins.gp).toBe(7);
 });

@@ -21,7 +21,7 @@ function wikiIsVisible(){
   return style.visibility!=='hidden'&&bounds.width>0&&bounds.height>0&&bounds.right>0&&bounds.left<innerWidth&&bounds.bottom>0&&bounds.top<innerHeight;
 }
 
-type Preview = { id: string; anchor: HTMLElement; reference: string; entry?: Entry; sourceLabel?: string; point: Point; fixed?: Point; excluded?:boolean };
+type Preview = { id: string; anchor: HTMLElement; reference: string; entry?: Entry; sourceLabel?: string; point: Point; fixed?: Point; excluded?:boolean; layer:number };
 function Pane({ value, pinned, index, keep, leave, open }: { value: Preview; pinned: boolean; index: number; keep: () => void; leave: () => void; open: (reference: string, kind?: string) => void }) {
   const {format}=useSources();
   const ref = useRef<HTMLElement>(null);
@@ -36,7 +36,7 @@ function Pane({ value, pinned, index, keep, leave, open }: { value: Preview; pin
     };
     place(); window.addEventListener('resize', place); return () => window.removeEventListener('resize', place);
   }, [value]);
-  return <aside ref={ref} className={`keyword-preview ${pinned ? 'is-pinned' : ''} ${value.excluded?'entry-disabled':''}`} id={value.id} data-tooltip-id={value.id} role="tooltip" onDragStart={event => event.preventDefault()} style={{ ...position, zIndex: 101 + index }} onMouseEnter={keep} onMouseLeave={leave}>
+  return <aside ref={ref} className={`keyword-preview ${pinned ? 'is-pinned' : ''} ${value.excluded?'entry-disabled':''}`} id={value.id} data-tooltip-id={value.id} role="tooltip" onDragStart={event => event.preventDefault()} style={{ ...position, zIndex: value.layer + 1 + index }} onMouseEnter={keep} onMouseLeave={leave}>
     <header><strong>{entry?entryLabel(entry):value.reference.split('|')[0]}{entry?.english && entry.english !== entry.name && <small className="tooltip-english"> {entry.english}</small>}</strong>{entry && <EntryBadges entry={entry}/>}<small>{value.sourceLabel || (entry ? `${KIND_LABELS[entry.kind]} · ${format(entry.source)} · ${entryEdition(entry) === 'both' ? '通用' : entryEdition(entry)}` : '资料尚未收录')}{pinned && <span className="tooltip-pin"> · 已固定</span>}</small></header>
     <div className="keyword-content rules-prose">{entry ? <ContentBoundary key={entry.id}>{entry.kind==='monster'?<MonsterDocument entry={entry} onLink={open}/>:<>{!value.sourceLabel && <EntryFacts entry={entry} onLink={open}/>}<Entries compact={entry.kind==='feature'} value={entry.entries} onLink={open}/><SpellLearners entry={entry} onLink={open}/></>}</ContentBoundary> : null}</div>
   </aside>;
@@ -103,13 +103,17 @@ export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCom
     keep();
     if (state.current.preview?.anchor === anchor) return;
     const entry = resolve(reference, kind) || override;
-    if(anchor.closest('.paper,[data-wiki-preview]')&&sheetCallbacks.current.wikiVisible()){close();if(entry && sheetCallbacks.current.sheetPreview){sheetAnchor.current=anchor;sheetCallbacks.current.sheetPreview(entry);}return;}
+    if(!anchor.closest('[data-local-preview]')&&anchor.closest('.paper,[data-wiki-preview]')&&sheetCallbacks.current.wikiVisible()){close();if(entry && sheetCallbacks.current.sheetPreview){sheetAnchor.current=anchor;sheetCallbacks.current.sheetPreview(entry);}return;}
     if (anchor.closest('.feature-bubble') && (!entry || !plainText(entry.entries).replace('外部角色卡条目；请在规则资料中核对并替换为有来源的条目。','').trim())) { close(); return; }
     const described=anchor.closest<HTMLElement>('[data-described-entry]');if(entry && described?.dataset.describedEntry===entry.id){close();return;}
     const parentId = anchor.closest<HTMLElement>('[data-tooltip-id]')?.dataset.tooltipId;
     if (parentId && state.current.preview?.id === parentId) pin(state.current.preview);
     const b = anchor.getBoundingClientRect();
-    pending.current = { id: `keyword-preview-${++counter.current}`, anchor, reference, entry, sourceLabel, excluded:entry?isExcluded?.(entry):false, point: point || { x: b.left, y: b.bottom } };
+    // Portalled previews must clear the stack of their actual anchor, including
+    // modal backdrops and nested previews. Ordinary sheet/wiki layering stays 100.
+    let layer=100;
+    for(let node:HTMLElement|null=anchor;node;node=node.parentElement){const z=Number.parseInt(getComputedStyle(node).zIndex,10);if(Number.isFinite(z))layer=Math.max(layer,z);}
+    pending.current = { id: `keyword-preview-${++counter.current}`, anchor, reference, entry, sourceLabel, excluded:entry?isExcluded?.(entry):false, layer, point: point || { x: b.left, y: b.bottom } };
     state.current.preview = pending.current;
     setPreview(pending.current); pending.current = undefined;
   }

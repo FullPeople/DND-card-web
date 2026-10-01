@@ -30,6 +30,7 @@ jobs:
         env:
           DND_217_RESULTS: test-results/feedback217
       - run: npx playwright test --config playwright.source-feedback.config.ts
+      - run: npx playwright test --config playwright.choices.config.ts
       - run: npm run test:standalone
       - run: npx playwright test --config playwright.automation209.config.ts
         env:

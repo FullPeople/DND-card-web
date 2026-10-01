@@ -1,3 +1,5 @@
+import {RestPopup} from './RestPopup';
+import {automationEnabled} from '../core/automation/state';
 import {sourceSpellResourceEnabled} from '../core/automation/sourceSpellState';
 import {standalone} from '../platform/buildMode';
 import {quickbarEntries,removePin} from '../core/quickbar';
@@ -16,6 +18,7 @@ import {SheetEditContext} from './SheetEdit';
 import {entryLabel} from '../core/entryLabel';
 import {weaponAttacks} from '../core/weaponAttacks';
 export function Quickbar({c,d,edit,inspect,manage,manageQuickbar,dashboard,disabled=false}:{dashboard?:DashboardControls;disabled?:boolean;c:Character;d:Derived;edit:(f:(c:Character)=>void)=>void;inspect:(e:Entry)=>void;manage:()=>void;manageQuickbar:()=>void}){
+ const [rest,setRest]=useState<'short'|'long'>();useEffect(()=>setRest(undefined),[c.id]);
  const wb=useWorkbench();const editing=useContext(SheetEditContext),spell=spellValues(c,d);
  const root=useRef<HTMLDivElement>(null),cancel=useRef<(()=>void)|undefined>(undefined),[over,setOver]=useState('');useEffect(()=>()=>cancel.current?.(),[]);
  const layout=c.quickbarLayout||{order:[],hidden:[]},rank=(id:string)=>layout.order.includes(id)?layout.order.indexOf(id):9999;
@@ -28,7 +31,7 @@ export function Quickbar({c,d,edit,inspect,manage,manageQuickbar,dashboard,disab
  }
  const roll=(expression:string,label:string)=>{if((inWorkbench||standalone)&&!editing)composeRoll(expression,label);};
  const attacks=<AttackPages>{editing&&<button className="quickbar-manage-strip" onClick={manageQuickbar}>整理快捷栏</button>}<div className="quick-weapon"><span>法术攻击</span><button disabled={!inWorkbench&&!standalone} className="rollable-stat" onClick={()=>roll(`1d20${signed(spell.attack)}`,'法术攻击')}>{signed(spell.attack)}</button><strong>DC {spell.dc}</strong></div>{visibleWeapons.map((w:any)=>{const bonus=String(w.attack_bonus??'').match(/[+-]?\s*\d+/)?.[0].replace(/\s/g,'');const damage=[w.damage,w.extra_damage].filter(Boolean).join('+').replace(/\s/g,'');return <div className={`quick-weapon ${over===w.key?'quick-drag-over':''}`} key={w.key} data-quick-id={w.key} data-quick-side="attacks"><span className="quick-drag-handle" data-editing={editing} onPointerDown={e=>drag(e,w.key,w.name,'attacks')}>{w.entry?`${entryLabel(w.entry)}${w.modeLabel?` · ${w.modeLabel}`:''}`:w.name}</span><button className="rollable-stat" disabled={(!inWorkbench&&!standalone)||bonus===undefined} onClick={()=>roll(`1d20${signed(Number(bonus))}`,`${w.name} 命中`)}>{bonus===undefined?'—':signed(Number(bonus))}</button><button className="rollable-stat" disabled={(!inWorkbench&&!standalone)||!damage} onClick={()=>roll(damage,`${w.name} 伤害`)}>{damage||'—'} {w.damage_type||''}</button></div>;})}{quickbarEntries(c).map(s=><Reference className={`quick-pin quick-drag-handle ${over===`pin:${s.id}`?'quick-drag-over':''}`} reference={`entry:${s.entry.id}`} entry={s.entry} data-editing={editing} data-quick-id={`pin:${s.id}`} data-entry-id={s.entry.id} data-quick-side="pins" onPointerDown={e=>drag(e,`pin:${s.id}`,entryLabel(s.entry),'pins')} key={s.id} onClick={()=>inspect(s.entry)}>{entryLabel(s.entry)}</Reference>)}</AttackPages>;
- return <div className="resource-diy-quickbar" ref={root}><ResourceWidgets c={c} rows={resources} editing={editing} enabled={!disabled&&(!inWorkbench||!!wb.target?.write)} gm={!inWorkbench||wb.role==='GM'} edit={edit} manage={manage} attacks={attacks} {...dashboard}/></div>;
+ return <>{rest&&<RestPopup c={c} kind={rest} edit={edit} close={()=>setRest(undefined)}/>} {automationEnabled(c)&&<div className="resource-rests"><button disabled={disabled||inWorkbench&&!wb.target?.write} onClick={()=>setRest('short')}>短休</button><button disabled={disabled||inWorkbench&&!wb.target?.write} onClick={()=>setRest('long')}>长休</button></div>}{c.runtime.rests?.last&&<div className="rest-result" role="status">{c.runtime.rests.last.kind==="short"?"短休":"长休"}：生命 {c.runtime.rests.last.hpBefore} → {c.runtime.rests.last.hpAfter}{c.runtime.rests.last.rolls.length>0&&` · ${c.runtime.rests.last.rolls.map(r=>`d${r.faces}(${r.value})`).join(" + ")}`}</div>}<div className="resource-diy-quickbar" ref={root}><ResourceWidgets c={c} rows={resources} editing={editing} enabled={!disabled&&(!inWorkbench||!!wb.target?.write)} gm={!inWorkbench||wb.role==='GM'} edit={edit} manage={manage} attacks={attacks} {...dashboard}/></div></>;
 }
 
 function AttackPages({children}:{children:ReactNode}){
@@ -37,3 +40,4 @@ function AttackPages({children}:{children:ReactNode}){
  const rows=Children.toArray(children),capacity=Math.max(1,Math.floor((height-21)/23)),pages=Math.max(1,Math.ceil(rows.length/capacity)),shown=Math.min(page,pages-1);
  return <div className="quickbar-attacks" ref={ref}><div className="quickbar-attacks-heading"><span>武器与攻击</span>{pages>1&&<span><button aria-label="上一页攻击" disabled={!shown} onClick={()=>setPage(shown-1)}>‹</button><small>{shown+1}/{pages}</small><button aria-label="下一页攻击" disabled={shown>=pages-1} onClick={()=>setPage(shown+1)}>›</button></span>}</div>{rows.slice(shown*capacity,(shown+1)*capacity)}</div>;
 }
+

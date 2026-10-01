@@ -1,3 +1,5 @@
+import {planFeatureResources} from './automation/featureResources';
+import {sheetChoices} from './automation/choices';
 import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
 import {automationEnabled} from './automation/state';
@@ -10,6 +12,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const issues: Derived['issues'] = [...inheritedIssues]; const requirements: Requirement[] = [];
   const compatibility=automationCompatibilityIssue(c);if(compatibility)issues.push(compatibility);
   const active = c.selections.filter(s => {
+    if(s.grantKey?.startsWith('choice:')&&!automationEnabled(c))return false;
     if (excluded.has(s.id)) return false;
     let owner = s; const seen = new Set<string>();
     while (owner.parentId && !seen.has(owner.id)) { seen.add(owner.id); const parent = c.selections.find(p => p.id === owner.parentId); if (!parent || !selectionAllowed(c, parent.entry)) return false; owner = parent; }
@@ -25,15 +28,16 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const walking=typeof raceSpeed==='number'?raceSpeed:raceSpeed?.walk;
   let speed = typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
   const sizes = new Set<string>();
+  const effectTrace:Record<string,string[]>={ac:[],hp:[],speed:[]};
   for (const selection of active) {
     const e = selection.entry; const origin = `${e.name} · ${e.source}`; const raw = e.raw;
+    if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(JSON.stringify(e.entries)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
     // Background ability choices are annotations. The sheet's base scores
     // already contain the player's allocation, so do not apply it a second time.
     if (e.kind === 'race') { (raw.size || []).forEach((s: string) => sizes.add(s)); }
     if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
-    // Fixed declarations only. Choice counts, progression checks and name-based rules
-    // are deliberately not interpreted; players edit their own selections.
-    const skillBlocks = e.kind === 'class' ? raw.startingProficiencies?.skills : raw.skillProficiencies;
+    // Choices are explicit saved answers; evaluation never creates an answer or grant.
+    const skillBlocks = e.kind === 'class' ? (selection.id===classes[0]?.id?raw.startingProficiencies?.skills:raw.multiclassing?.proficienciesGained?.skills) : raw.skillProficiencies;
     for (const block of Array.isArray(skillBlocks) ? skillBlocks : []) {
       for (const [key, value] of Object.entries(block || {})) if (value === true) grantSkill(key, origin);
     }
@@ -46,9 +50,9 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
         if(e.kind==='background')continue;
         const a = effect.target as Ability; abilities[a] = effect.op === 'set' ? effect.value : abilities[a] + effect.value;
         trace[a].push(`${origin} ${effect.op === 'set' ? '=' : '+'}${effect.value}`);
-      } else if (effect.target === 'speed') speed = effect.op === 'set' ? effect.value : speed + effect.value;
-      else if (effect.target === 'ac') { if (effect.op === 'set') acOverride = effect.value; else acBonus += effect.value; }
-      else if (effect.target === 'hp') { if (effect.op === 'set') hpOverride = effect.value; else hpBonus += effect.value; }
+      } else if (effect.target === 'speed') {speed = effect.op === 'set' ? effect.value : speed + effect.value;effectTrace.speed.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`);}
+      else if (effect.target === 'ac') { if (effect.op === 'set') acOverride = effect.value; else acBonus += effect.value;effectTrace.ac.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }
+      else if (effect.target === 'hp') { if (effect.op === 'set') hpOverride = effect.value; else hpBonus += effect.value;effectTrace.hp.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }
     }
   }
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
@@ -67,12 +71,13 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   ac += acBonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...(acBonus ? [`规则修正 +${acBonus}`] : [])];
-  if (acOverride !== undefined) trace.ac.push(`规则设定基础结果 ${acOverride}`);
-  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...(hpOverride !== undefined ? [`规则设定 ${hpOverride}`] : []), ...(hpBonus ? [`规则修正 +${hpBonus}`] : [])];
-  trace.proficiency = [`总等级 ${level || 1}`]; trace.speed = [active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'];
+  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac];
+  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
+  trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
   let initiative = modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value;
+  trace.initiative=[`敏捷调整值 ${modifiers.dex}`,...(c.jackOfAllTrades&&c.edition==='2014'?[`万事通 +${Math.floor(proficiency/2)}`]:[])];
+  trace.passive=[`基础 10 + 察觉 ${skills.perception.value}`];
   for (const adjustment of c.adjustments || []) {
     if (!adjustment.reason.trim()) continue;
     const { target, value } = adjustment;
@@ -87,13 +92,17 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     const note=`技能额外调整 ${value >= 0 ? '+' : ''}${value}`;
     skills[key].sources.push(note);(trace['skill:'+key] ||= []).push(note);
   }
-  if (!(c.adjustments || []).some(a => a.target === 'passive')) passive = 10 + skills.perception.value;
+  if (!(c.adjustments || []).some(a => a.target === 'passive')) {passive = 10 + skills.perception.value;trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}`;}
   ac += c.sheetBonuses?.ac || 0;
   initiative += c.sheetBonuses?.initiative || 0;
   speed += c.sheetBonuses?.speed || 0;
   passive += c.sheetBonuses?.passive || 0;
   maxHp += c.sheetBonuses?.hp || 0;
   for (const [target, value] of Object.entries(c.sheetBonuses || {})) if (value) (trace[target] ??= []).push(`卡面调整 ${value >= 0 ? '+' : ''}${value}`);
+  issues.push(...planFeatureResources(c).issues);
+  for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
+  for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`)];
+  for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
   return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive,
     skills, saves, requirements, issues, trace,
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };

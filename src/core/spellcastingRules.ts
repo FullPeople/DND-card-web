@@ -1,5 +1,6 @@
 import {selectionAllowed,type Character,type Entry,type Selection} from './model';
-import {parentClass} from './featureOwnership';
+import {parentClass,featureOwner} from './featureOwnership';
+import {automationEnabled} from './automation/state';
 
 export type CasterProfile={owner:Selection;casting:Selection;mode:'known'|'prepared';pool:'learned'|'book'|'list';maxLevel:number};
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
@@ -31,7 +32,7 @@ export function inferredSpellMode(c:Character):'known'|'prepared'|undefined{
 
 /** Match the upstream class lookup by source and either language; never merge translated names. */
 export function spellOnClassList(entry:Entry,profile:CasterProfile):boolean{
- const raw=entry.raw,names=[profile.owner.entry.name,profile.owner.entry.english,profile.owner.entry.raw.name,profile.owner.entry.raw.ENG_name,profile.owner.entry.raw._castingSource?.name,profile.owner.entry.raw._castingSource?.english].map(key);
+ const raw=entry.raw,names=[profile.owner.entry.name,profile.owner.entry.english,profile.owner.entry.raw.name,profile.owner.entry.raw.ENG_name,profile.owner.entry.raw._castingSource?.name,profile.owner.entry.raw._castingSource?.english].map(key).filter(Boolean);
  const source=key(profile.owner.entry.raw._castingSource?.source||profile.owner.entry.source),lookup=raw._spellClasses;
  // Expansion books often predate the 2024 lookup. Their class list remains usable
  // with either PHB class, while the spell's own source-qualified identity stays intact.
@@ -48,7 +49,30 @@ export function availableClassSpells(c:Character,entries:Entry[]):Entry[]{
 }
 
 /** Capabilities come from the source's casting model, never its translated name. */
-export const cantripCapacity=(p:CasterProfile):number=>Math.max(0,Math.min(100,Number(p.casting.entry.raw.cantripProgression?.[p.owner.level-1]??p.owner.entry.raw.cantripProgression?.[p.owner.level-1])||0));
+export function cantripCapacity(p:CasterProfile,c?:Character):number{
+ let bonus=0;
+ if(c&&automationEnabled(c))for(const row of c.selections){
+  if(row.entry.kind!=='feature'||!selectionAllowed(c,row.entry))continue;
+  let owner=featureOwner(c,row);const owners=new Set<string>();
+  while(owner&&owner.entry.kind!=='class'){if(owners.has(owner.id)){owner=undefined;break;}owners.add(owner.id);owner=featureOwner(c,owner);}
+  if(owner?.id!==p.owner.id)continue;
+  let active=true,current=row;const seen=new Set<string>();
+  while(current.parentId){if(seen.has(current.id)){active=false;break;}seen.add(current.id);const parent=c.selections.find(s=>s.id===current.parentId);if(!parent||!selectionAllowed(c,parent.entry)){active=false;break;}current=parent;}
+  if(!active)continue;
+  const declared=row.entry.raw.cantripBonus;
+  if(Number.isSafeInteger(declared)&&declared>=0&&declared<=100){bonus+=declared;continue;}
+  // Narrow prose adapter: an explicit extra-cantrip count AND a source class
+  // filter in the same clause. Ignore unchosen option branches entirely.
+  const walk=(v:unknown):string[]=>typeof v==='string'?[v]:Array.isArray(v)?v.flatMap(walk):v&&typeof v==='object'?(v as any).type==='options'?[]:walk((v as any).entries):[];
+  for(const text of walk(row.entry.entries))for(const clause of text.split(/[。.!！]/)){
+   const filter=clause.match(/\{@filter [^|}]+\|spells\|class=([^|}]+)/);
+   if(!filter||![p.owner.entry.name,p.owner.entry.english,p.owner.entry.raw.name,p.owner.entry.raw.ENG_name].map(key).includes(key(filter[1])))continue;
+   const n=clause.match(/额外学会([一二三四五六七八九十\d]+)(?:道|个)戏法|学会([一二三四五六七八九十\d]+)个额外的.*戏法/);
+   if(n){const value=n[1]||n[2],amount=Number(value)||({'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10} as Record<string,number>)[value];if(amount>0&&amount<=100)bonus+=amount;}
+  }
+ }
+ return Math.max(0,Math.min(100,(Number(p.casting.entry.raw.cantripProgression?.[p.owner.level-1]??p.owner.entry.raw.cantripProgression?.[p.owner.level-1])||0)+bonus));
+}
 export const fullCantripList=(p:CasterProfile):boolean=>cantripCapacity(p)>0&&(p.pool==='book'||p.casting.entry.raw.casterProgression==='artificer'||p.casting.entry.raw.cantripChange==='restLong');
 export const hasKnownLibrary=(p:CasterProfile):boolean=>p.pool==='book'||p.mode==='prepared'&&cantripCapacity(p)>0;
 

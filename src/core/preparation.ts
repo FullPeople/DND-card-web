@@ -1,5 +1,5 @@
 import {evaluate} from './engine';
-import {casterProfiles} from './spellcastingRules';
+import {casterProfiles,type CasterProfile} from './spellcastingRules';
 import {ABILITIES,type Character} from './model';
 
 /** Upstream arithmetic only. No eval, JavaScript property access or executable data. */
@@ -16,11 +16,13 @@ export function preparationFormula(formula:string,variables:Record<string,number
 export function preparationBase(c:Character):number|undefined{
  const profiles=casterProfiles(c).filter(p=>p.mode==='prepared');if(!profiles.length)return;
  const d=evaluate(c);let total=0;
- for(const p of profiles){const raw=p.casting.entry.raw,level=p.owner.level,table=raw.preparedSpellsProgression?.[level-1];
-  if(typeof table==='number'){total+=Math.max(0,table);continue;}
-  const variables=Object.fromEntries([['level',level],['spellcasting_mod',d.modifiers[raw.spellcastingAbility as keyof typeof d.modifiers]||0],...ABILITIES.map(a=>[`${a}_mod`,d.modifiers[a]])]);
-  const value=typeof raw.preparedSpells==='string'?preparationFormula(raw.preparedSpells,variables):undefined;
-  if(value===undefined)return;total+=value;
- }
+ for(const p of profiles){const value=profilePreparation(c,p,d);if(value===undefined)return;total+=value;}
  return total;
+}
+/** The same per-class formula feeds both the preparation workspace and choices. */
+export function profilePreparation(c:Character,p:CasterProfile,d=evaluate(c)):number|undefined{
+ const raw=p.casting.entry.raw,level=p.owner.level,table=raw.preparedSpellsProgression?.[level-1];
+ if(typeof table==='number')return Math.max(0,table);
+ const variables=Object.fromEntries([['level',level],['spellcasting_mod',d.modifiers[raw.spellcastingAbility as keyof typeof d.modifiers]||0],...ABILITIES.map(a=>[`${a}_mod`,d.modifiers[a]])]);
+ return typeof raw.preparedSpells==='string'?preparationFormula(raw.preparedSpells,variables):undefined;
 }

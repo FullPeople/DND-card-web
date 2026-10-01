@@ -10,8 +10,8 @@ import {rulesSetupComplete,rememberRulesSetup} from '../platform/rulesSetup';
 import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
 import {syncSourceSpells} from '../core/automation/sourceSpells';
 import {AutomationPanel} from './AutomationPanel';
-import {automationDevelopment} from '../platform/buildMode';
-import {automationEnabled,newAutomationState} from '../core/automation/state';
+
+import {automationEnabled,initializeAutomation,newAutomationState} from '../core/automation/state';
 import {reconcileEquipping} from '../core/automation/equipment';
 import {CardOwnership} from './CardOwnership';
 import {Announcement} from './Announcement';
@@ -46,6 +46,7 @@ import {SupporterEffect} from './SupporterEffect';
 import {ResourceModuleEditor} from './ResourceModuleEditor';
 import {ResourceDashboard,type DashboardViewport} from './ResourceDashboard';
 import {ensureResourceWidget} from '../core/resourceWidgets';
+import {ValueTraceProvider} from './ValueTrace';
 import {applyInventory} from '../core/inventory';
 import {WorkbenchInventory} from './StockBoard';
 import {WorkbenchPanel,MusicWorkspace} from './WorkbenchPanel';
@@ -58,6 +59,9 @@ import {NumberInput} from './NumberInput';
 import {inWorkbench,useWorkbench,markWorkbenchView,workbenchCharacterId,patchWorkbenchStats,workbenchRequest,chooseWorkbench,workbenchDiagnostics,type SharedRules} from '../platform/workbench';
 import {WorkbenchBar,DicePage,WorkbenchMonster,DMConsole} from './Workbench';
 import {DetailHeader,FeaturesPage,BackgroundPage} from './CharacterPages';
+import {ChoiceWorkspaceContext} from './ChoiceWorkspaceContext';
+import {sheetChoices} from '../core/automation/choices';
+import {choiceCatalog} from './choiceCatalog';
 import {SpellsPage} from './SpellsPage';
 import {DmNotes} from './DmNotes';
 import {InventoryPage} from './InventoryPage';
@@ -196,10 +200,10 @@ export default function App() {
     const effective=inWorkbench&&wb.shared?{...storedCharacter,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources?withSiteSources(storedCharacter,workspace?.siteSources,activePacks):storedCharacter;
     // Reading an old card must not create competing network writes. Casting
     // metadata is a view until the owner performs an explicit edit.
-    if(inWorkbench&&effective.selections.some(s=>s.entry.packId==='imported'&&s.entry.kind==='class'&&!s.entry.raw._castingSource)){const view=structuredClone(effective);if(hydrateImportedCasting(view,allEntries))return view;}
-    return effective;
+    if(inWorkbench&&effective.selections.some(s=>s.entry.packId==='imported'&&s.entry.kind==='class'&&!s.entry.raw._castingSource)){const view=structuredClone(effective);const hydrated=hydrateImportedCasting(view,allEntries),initialized=initializeAutomation(view);if(hydrated||initialized){syncAutoResources(view);return view;}}
+    const autoView=structuredClone(effective);if(initializeAutomation(autoView)){syncAutoResources(autoView);return autoView;}return effective;
   },[storedCharacter,roomRules,roomProfile,workspace?.siteSources,activePacks,allEntries]);
-  function createLocalCharacter(edition:Edition='2024'){const next=newCharacter(edition);if(automationDevelopment)next.automation=newAutomationState();return localSources?(workspaceRef.current?.siteSources?withSiteSources(next,workspaceRef.current.siteSources,workspaceRef.current.packs):startAllSources(next,defaultSources)):next;}
+  function createLocalCharacter(edition:Edition='2024'){const next=newCharacter(edition);initializeAutomation(next);return localSources?(workspaceRef.current?.siteSources?withSiteSources(next,workspaceRef.current.siteSources,workspaceRef.current.packs):startAllSources(next,defaultSources)):next;}
   useEffect(()=>{
     const current=workspaceRef.current;
     if(!localSources||!current||!writable.current)return;
@@ -266,6 +270,16 @@ export default function App() {
     }
   },[groupRoll?.id,wb.role]);
 
+  const [choiceRoute,setChoiceRoute]=useState<{id:string;characterId:string}>();
+  const choiceSnapshot=useRef<ReturnType<typeof library.snapshot>|undefined>(undefined);
+  const activeChoice=useMemo(()=>c&&choiceRoute?.characterId===c.id?sheetChoices(c,allEntries).find(r=>r.id===choiceRoute.id):undefined,[c,allEntries,choiceRoute]);
+  const choiceScope=useMemo(()=>c&&activeChoice?choiceCatalog(c,activeChoice,allEntries):undefined,[c,activeChoice,allEntries]);
+  function closeChoice(){setChoiceRoute(undefined);if(choiceSnapshot.current){library.restore(choiceSnapshot.current);choiceSnapshot.current=undefined;}}
+  function openChoice(id:string){if(!c||!editing||readOnly||inWorkbench&&!wb.target?.write)return;const choice=sheetChoices(c,allEntries).find(r=>r.id===id);if(!choice)return;
+    choiceSnapshot.current??=library.snapshot();setChoiceRoute({id,characterId:c.id});setSheetPage('特性');exitSheetFullscreen();
+    const scope=choiceCatalog(c,choice,allEntries);if(scope.wiki){library.setKind(scope.tab);library.patch({query:'',detailId:undefined,focus:undefined,edition:c.edition,filters:scope.filters,sort:scope.tab==='spell'?'level':'source',descending:false},scope.tab);setFillPulse(n=>n+1);setTab('wiki');}else setTab('sheet');
+  }
+  useEffect(()=>{if(choiceRoute&&(!activeChoice||!editing||sheetPage!=='特性'))closeChoice();},[c?.id,choiceRoute?.id,!!activeChoice,editing,sheetPage]);
   useNarrowWikiDrag(tab,setTab,!tableOpen&&(!inWorkbench||workbenchPage==='console'||workbenchPage==='sheet'&&!!wb.target));
   const [exception, setException] = useState('');
   const [importError, setImportError] = useState('');
@@ -287,7 +301,7 @@ export default function App() {
   function acceptWorkspace(value: Workspace) {
     if (value.schemaVersion !== 1 || !Array.isArray(value.characters) || !value.characters.length || !Array.isArray(value.packs)) throw new Error('工作区结构不完整');
     const repaired: string[] = [];
-    value = {...value, characters: value.characters.map(character => { const read = readCharacter(character); if (read.repaired.length) repaired.push(`${character.name || '未命名'}（${read.repaired.join('、')}）`); return read.character; })};
+    value = {...value, characters: value.characters.map(character => { const read = readCharacter(character); if (read.repaired.length) repaired.push(`${character.name || '未命名'}（${read.repaired.join('、')}）`); if(!inWorkbench)initializeAutomation(read.character);return read.character; })};
     if(value.siteSources){const probe=newCharacter();probe.profile={...probe.profile,...value.siteSources};validateCharacter(probe);}
     if (new Set(value.characters.map(c => c.id)).size !== value.characters.length) throw new Error('角色身份重复');
     for (const pack of value.packs) validatePack({ ...pack, entries: pack.entries.map(e => ({ ...e, id: e.id.slice(pack.id.length + 1) })) }, value.packs);
@@ -302,7 +316,7 @@ export default function App() {
       writable.current = canWrite; setReadOnly(!canWrite);
       try {
         const value = await loadWorkspace(); if (!alive) return;
-        if (value) {acceptWorkspace(value);if(localSources&&!value.siteSources&&canWrite)persist(workspaceRef.current!);} else { const first = createLocalCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
+        if (value) {acceptWorkspace(value);if(localSources&&canWrite&&(!value.siteSources||!sameValue(value.characters,workspaceRef.current!.characters)))persist(workspaceRef.current!);} else { const first = createLocalCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
       } catch (e) { if (alive) setStartupError(String(e)); }
     };
     if (navigator.locks) navigator.locks.request('dnd-card-editor', { ifAvailable: true }, async lock => {
@@ -405,13 +419,14 @@ export default function App() {
   useLayoutEffect(()=>{if(inWorkbench&&wb.target?.kind==='character'&&storedCharacter?.id===workbenchCharacterId(wb.target)&&appliedDocument.current===wb.document)markWorkbenchView('committed',wb.target.key);},[storedCharacter,wb.target,wb.document]);
 
 
-  const columns = useMemo(() => columnsFor(kind, c?.edition==='2014'||!!c?.profile.optional.legacy||['2014','all'].includes(editionFilter)), [kind,c?.edition,c?.profile.optional.legacy,editionFilter]);
+  const columns = useMemo(() => columnsFor(choiceScope?.wiki&&choiceScope.tab===kind&&choiceScope.entries.length>0&&choiceScope.entries.every(e=>e.kind==='feature')?'feature':kind, c?.edition==='2014'||!!c?.profile.optional.legacy||['2014','all'].includes(editionFilter)), [kind,c?.edition,c?.profile.optional.legacy,editionFilter,choiceScope]);
   const facets = useMemo(() => facetsFor(kind), [kind]);
   const categoryEntries = useMemo(() => {
     if (!c) return [];
-    return libraryEntries.filter(e => matchesLibraryTab(e,kind) && (kind!=='class'||e.kind==='class') &&
+    const candidates=choiceScope?.wiki&&choiceScope.tab===kind?new Set(choiceScope.entries.map(e=>e.id)):undefined;
+    return libraryEntries.filter(e => (candidates?candidates.has(e.id):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
       (editionFilter === 'all' || editionAllows(e,(editionFilter === 'character' ? c.edition : editionFilter) as Edition,editionFilter === 'character' && c.profile.optional.legacy)));
-  }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter]);
+  }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope]);
   const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery]);
   useEffect(() => { setException(''); }, [detail?.id]);
   useEffect(() => { if (detailPane.current && detail) { const pending=previewCommit.current;detailPane.current.scrollTop=pending?.id===detail.id?pending.top:libraryState.positions[detail.id]||0;previewCommit.current=undefined; } }, [kind, detail?.id, !!library.hover,library.navigationKey]);
@@ -437,7 +452,7 @@ export default function App() {
     if (!key || record.key !== key || Date.now() - record.time > 900) record.past = [...record.past.slice(-59), character];
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
     const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
-    const draft = structuredClone(effective); hydrateImportedCasting(draft,allEntries); rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries); syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return; draft.updatedAt = new Date().toISOString(); draft.revision++;
+    const draft = structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries); syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return; draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
     if(inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
@@ -551,7 +566,7 @@ export default function App() {
   }
   async function importTexts(texts:string[]){
     const cards=readCharacterTransfer(texts),w=workspaceRef.current!;
-    const batch=cards.map(card=>{hydrateImportedCasting(card,allEntries);const effective=inWorkbench&&roomRules?{...card,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(card,w.siteSources,w.packs);return {card,review:reviewImport(card,effective,c?.edition||card.edition)};});
+    const batch=cards.map(card=>{initializeAutomation(card);hydrateImportedCasting(card,allEntries);const effective=inWorkbench&&roomRules?{...card,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(card,w.siteSources,w.packs);return {card,review:reviewImport(card,effective,c?.edition||card.edition)};});
     setPendingBatch(batch);setBatchUncertain(false);setImportError('');setModal('batchImport');
   }
   async function finishBatch(){
@@ -626,10 +641,12 @@ export default function App() {
     finally{pendingSaves.current--;}
   }
   async function finishImport(character:Character){
+    initializeAutomation(character);
     if(inWorkbench)await createRemoteCard(character);else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,character],activeId:character.id});setModal('export');}
     setPendingImport(undefined);setNotice(inWorkbench?'角色已导入枭熊角色簿。':'角色已作为新副本导入。');
   }
   async function createRemoteCard(card:Character,select=true){
+    initializeAutomation(card);
     if(!wb.online)throw Error('枭熊未连接，角色尚未导入。');
     if(remoteCreatePending.current)throw Error('正在创建角色，请等待当前操作完成。');
     remoteCreatePending.current=true;setCreatingCard(true);
@@ -659,7 +676,7 @@ export default function App() {
     workbenchUncertain.current.has(c.id)?'上一项修改尚未确认，请先核对枭熊数据。':undefined;
   const managerId=inWorkbench?wb.target?.cardId||'':c.id;
   const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!readOnly}));
-  return <KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
+  return <ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src="./exe_icon.png" alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
       <div className="header-tools">{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<button aria-pressed={tableOpen} onClick={()=>{setTableOpen(value=>!value);setTab('wiki');}}>{t('threeDragon')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{setWorkbenchPage('features');setTab('sheet');}}>{t('featuresToggle')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{setWorkbenchPage('settings');setTab('sheet');}}>{t('settings')}</button>}{(standalone||inWorkbench)&&<button onClick={()=>setAnnouncement(true)}>{t('announcements')}</button>}<button onClick={() => setModal('characters')}>{t('characters')} <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>{t('rules')}</button><button className="primary" onClick={() => setModal('export')}>{t('transfer')}</button></div>
     </header>
@@ -674,22 +691,22 @@ export default function App() {
           <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&wb.role==='GM'&&wb.cards.find(card=>card.id===wb.target?.cardId)&&<CardOwnership key={wb.target?.cardId} card={wb.cards.find(card=>card.id===wb.target?.cardId)!}/>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}{editing&&<button onClick={()=>setModal('personal')}>{t('entriesLevels')}</button>}{editing && <button className="adjust-shortcut" aria-label={t('adjustDetails')} onClick={() => setModal('adjust')}>{t('adjust')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><span className="paper-size">{t('fitWindow')}</span><button disabled={inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
         </div>
         {classNeedsReview&&!loading&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
-        <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
+        <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button></span></div>
           {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
 </> : <div className="sheet-details">
           <div className="edition-divider"><span/><strong>{t('cardTitle')}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
           <DetailHeader openSpellAbility={()=>setModal('spellAbility')} page={sheetPage} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>
-          {sheetPage==='特性'?<FeaturesPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='背景'?<BackgroundPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='法术'?<SpellsPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:inWorkbench?<WorkbenchInventory id={`card:${wb.target!.cardId}`} capacity={<CarryCapacity c={c} d={d} edit={edit}/>}/>:<InventoryPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>}
+          {sheetPage==='特性'?<FeaturesPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='背景'?<BackgroundPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='法术'?<SpellsPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:inWorkbench?<WorkbenchInventory id={`card:${wb.target!.cardId}`} capacity={<CarryCapacity c={c} d={d} edit={edit}/>}/>:<InventoryPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>}
         </div>}
           <footer className="paper-footer"><span>{t('cardFooter',{edition:c.edition,level:d.level||'—',revision:c.revision})}</span><span>{t('snapshotSaved')}</span></footer>
-        </PaperFrame></SheetEditContext.Provider><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} role="status"><span className="status-dot"/>{inWorkbench?(workbenchUncertain.current.has(c.id)?'待核对 · 本地修改已保留':workbenchDirty.current.has(c.id)?'正在同步至枭熊…':workbenchFailed.current.has(c.id)?'同步失败 · 已保留本地备份':wb.target?.projectionPending?'资料已保存 · 棋子显示待同步':wb.online?'与枭熊同步':'等待枭熊重连'):saving}{workbenchUncertain.current.has(c.id)&&wb.document&&<button onClick={()=>{window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:workbenchUncertain.current.get(c.id)?.requestId}}));workbenchUncertain.current.delete(c.id);workbenchDirty.current.delete(c.id);workbenchFailed.current.delete(c.id);workbenchDocuments.current.delete(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已采用枭熊当前数据；未确认的本地修改仍保留在恢复备份中。');}}>核对并采用枭熊数据</button>}{syncDiagnostic&&<CopyDiagnostic text={syncDiagnostic}/>}<span>{inWorkbench?'角色资料自动保存':'资料与角色保存在当前浏览器 · 请定期导出'}</span></div></>}
+        </PaperFrame></ValueTraceProvider></SheetEditContext.Provider><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} role="status"><span className="status-dot"/>{inWorkbench?(workbenchUncertain.current.has(c.id)?'待核对 · 本地修改已保留':workbenchDirty.current.has(c.id)?'正在同步至枭熊…':workbenchFailed.current.has(c.id)?'同步失败 · 已保留本地备份':wb.target?.projectionPending?'资料已保存 · 棋子显示待同步':wb.online?'与枭熊同步':'等待枭熊重连'):saving}{workbenchUncertain.current.has(c.id)&&wb.document&&<button onClick={()=>{window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:workbenchUncertain.current.get(c.id)?.requestId}}));workbenchUncertain.current.delete(c.id);workbenchDirty.current.delete(c.id);workbenchFailed.current.delete(c.id);workbenchDocuments.current.delete(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已采用枭熊当前数据；未确认的本地修改仍保留在恢复备份中。');}}>核对并采用枭熊数据</button>}{syncDiagnostic&&<CopyDiagnostic text={syncDiagnostic}/>}<span>{inWorkbench?'角色资料自动保存':'资料与角色保存在当前浏览器 · 请定期导出'}</span></div></>}
       </section>
 
       {tableOpen?<><WorkspaceSplitter/><section className={`wiki-pane table-pane ${tab==='wiki'?'mobile-active':''}`} aria-label="三龙牌"><WorkbenchPanel panel="table" close={()=>setTableOpen(false)}/></section></>:wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料"><WikiLayout><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
         <GlobalSearch query={query} change={setQuery} entries={libraryEntries} c={c} inspect={entry=>{inspect(entry);library.patch({query:"",filters:{},edition:entry.edition==="both"?"all":entry.edition},tabOf(readingTarget(entry).entry));}}/>
         <nav className="category-tabs" aria-label="资料分类">{Object.entries(LIBRARY_TABS).filter(([key])=>(key!=='custom'||canAuthor)&&(key!=='monster'||monstersVisible)&&(key!=='weaponMastery'||c.edition==='2024'||editionFilter==='2024'||editionFilter==='all')).map(([key, label]) => <button key={key} className={kind === key ? 'active' : ''} onClick={() => setKind(key as keyof typeof LIBRARY_TABS)}>{label}</button>)}</nav>
-        <div className="wiki-filters"><ClearableSearch className="category-search-control" label={`${LIBRARY_TABS[kind]}分类搜索`} clearLabel="清空分类搜索" placeholder={`搜索${LIBRARY_TABS[kind]}`} value={categoryQuery} change={query=>library.patch({query})}/><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames}/>
+        {choiceScope?.wiki&&<div className="wiki-choice-notice"><span>选择{activeChoice!.label} · 拖拽加入左侧空格</span><button onClick={()=>setTab('sheet')}>查看选择</button><button onClick={closeChoice}>退出选择</button></div>}<div className="wiki-filters"><ClearableSearch className="category-search-control" label={`${LIBRARY_TABS[kind]}分类搜索`} clearLabel="清空分类搜索" placeholder={`搜索${LIBRARY_TABS[kind]}`} value={categoryQuery} change={query=>library.patch({query})}/><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames}/>
         </div>
         <div className="catalog-status"><span>{loading ? `${progress.done}/${progress.total} 份资料` : `${libraryEntries.length.toLocaleString()} 条资料`}{progress.cached > 0 ? ` · ${progress.cached} 份缓存` : ''}</span><span>{filtered.length} 条符合筛选</span></div>
         {progress.failed.length > 0 && <details className="load-errors"><summary>{progress.failed.length} 份资料读取异常 · 可重试</summary>{progress.failed.map((e, i) => <p key={i}>{e}</p>)}<button disabled={loading} onClick={() => load(true)}>重试加载</button></details>}
@@ -734,5 +751,6 @@ export default function App() {
 
     </Dialog>}
 
-  </div></EntryDragProvider></KeywordPreview>;
+  </div></EntryDragProvider></KeywordPreview></ChoiceWorkspaceContext.Provider>;
 }
+

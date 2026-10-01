@@ -1,4 +1,8 @@
 import {specialSpellResource} from './spellResourceKeys';
+import {resolveEntryReference} from './entryReferences';
+import {equipmentBlocks,syncChoiceContent} from './automation/choices';
+import {automationEnabled} from './automation/state';
+import {rememberFeatureResources} from './automation/featureResources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import { requirementMismatch } from './engine';
 import { uid, type Character, type Entry, type Selection } from './model';
@@ -9,6 +13,7 @@ export function belongsToClass(child: Selection, parent: Selection) {
   return child.entry.kind === 'subclass' && classMatches(child.entry,parent.entry) && (!child.parentId || child.parentId === parent.id);
 }
 export function removeSelection(c: Character, id: string, dismiss = true) {
+  rememberFeatureResources(c);
   const row = c.selections.find(s => s.id === id);
   if(dismiss&&row?.grantKey?.startsWith('source-spell:'))return;
   if (dismiss && row?.parentId && row.grantKey) c.dismissedFeatures = [...new Set([...(c.dismissedFeatures || []), `${row.parentId}|${row.grantKey}`])];
@@ -22,18 +27,20 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
   c.selections = c.selections.filter(s => !removed.has(s.id));
   c.quickbar = c.quickbar?.filter(key => !removed.has(key));
   if(c.spellSettings){c.spellSettings.prepared=c.spellSettings.prepared.map(key=>removed.has(key)?'':key);for(const [owner,ids] of Object.entries(c.spellSettings.cantrips||{})){if(removed.has(owner))delete c.spellSettings.cantrips![owner];else c.spellSettings.cantrips![owner]=ids.map(id=>removed.has(id)?'':id);}}
+  if(c.spellSettings?.classSpells)for(const [owner,ids] of Object.entries(c.spellSettings.classSpells)){if(removed.has(owner))delete c.spellSettings.classSpells[owner];else c.spellSettings.classSpells[owner]=ids.map(id=>removed.has(id)?'':id);}
   for(const key of removed)if(c.spellSettings?.special)delete c.spellSettings.special[key];
   for(const key of removed){if(c.spellSettings?.sourceCantripCapacities)delete c.spellSettings.sourceCantripCapacities[key];if(c.spellSettings?.sourceCapacityAdjustments)delete c.spellSettings.sourceCapacityAdjustments[key];if(c.spellSettings?.cantripCapacityAdjustments)delete c.spellSettings.cantripCapacityAdjustments[key];}
   for(const key of spellCounters)if(!Object.keys(c.spellSettings?.special||{}).some(id=>specialSpellResource(id,c)===key))delete c.runtime.resources[key];
   if(c.inventory)c.inventory.order=c.inventory.order.filter(key=>!removed.has(key));
   if(c.backgroundChoices)for(const key of removed)delete c.backgroundChoices[key];
-  if (c.featureLayout) { c.featureLayout.order = c.featureLayout.order.filter(key => !removed.has(key)); c.featureLayout.expanded = c.featureLayout.expanded.filter(key => !removed.has(key)); c.featureLayout.detailsExpanded=c.featureLayout.detailsExpanded?.filter(key=>!removed.has(key)); }
+  if (c.featureLayout) { c.featureLayout.order = c.featureLayout.order.filter(key => !removed.has(key)); c.featureLayout.expanded = c.featureLayout.expanded.filter(key => !removed.has(key)); c.featureLayout.detailsExpanded=c.featureLayout.detailsExpanded?.filter(key=>!removed.has(key));for(const id of removed)if(c.featureLayout.optionsVisible)delete c.featureLayout.optionsVisible[id]; }
 }
 
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
 export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean}): boolean {
   let changed = false;
+  for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
   const known = review?.refresh ? [...catalog, ...c.selections.map(s => s.entry)] : [...c.selections.map(s => s.entry), ...catalog];
   const byName = new Map<string, Entry[]>();
   for (const entry of known) for (const name of new Set([entry.name.toLowerCase(), entry.english.toLowerCase()])) { const group = byName.get(name) || []; group.push(entry); byName.set(name, group); }
@@ -72,7 +79,7 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
     for (const block of Array.isArray(raw.feats) ? raw.feats : []) for (const [ref, granted] of Object.entries(block || {})) {
       if (granted === true) grants.push({ key: `feat:${ref}`, entry: resolve(ref, 'feat') });
     }
-    if(owner.entry.kind==='background')for(const [index,block] of (Array.isArray(raw.startingEquipment)?raw.startingEquipment:[]).entries()){
+    if(owner.entry.kind==='background'&&!automationEnabled(c))for(const [index,block] of equipmentBlocks(owner.entry).entries()){
       const chosen=c.backgroundChoices?.[owner.id]?.equipment?.[String(index)];
       const options=Object.keys(block).filter(k=>k!=='_');
       const selectedKey=chosen&&options.includes(chosen)?chosen:options.length===1?options[0]:undefined;
@@ -89,7 +96,7 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       if(money!==before){const inv=c.inventory||=structuredClone(inventoryState(c));(inv.grantedCoins||={})[coinKey]=money;inv.coins.gp=Math.max(0,inv.coins.gp+money-before);changed=true;}
     }
     const expected = new Set(grants.map(g => g.key));
-    for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !s.grantKey.startsWith('source-spell:') && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
+    for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !s.grantKey.startsWith('source-spell:') && !s.grantKey.startsWith('choice:') && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
     for (const grant of grants) {
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);
@@ -105,5 +112,5 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
     const owner=featureOwner(c,row);
     if(owner&&row.parentId!==owner.id){row.parentId=owner.id;changed=true;}
   }
-  return changed;
+  return syncChoiceContent(c,catalog)||changed;
 }

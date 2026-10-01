@@ -50,7 +50,7 @@ const words: Record<string, string> = { '$G':'宝石', '$A':'艺术品', A: '防
 export const translate = (v: unknown): string => { const s = String(v ?? ''); return words[s] || s; };
 export const timeText = (e: Entry) => (e.raw.time || []).map((t: any) => `${t.number || 1}${translate(t.unit)}`).join(' / ');
 export const rangeText = (e: Entry) => e.raw.range?.distance ? `${e.raw.range.distance.amount ?? ''}${translate(e.raw.range.distance.type)}` : translate(e.raw.range?.type);
-export function columnsFor(tab: LibraryTab, legacy = true): Column[] {
+export function columnsFor(tab: LibraryTab|'feature', legacy = true): Column[] {
   const name = { key: 'name', label: '名称', value: (e: Entry) => e.name }, source = { key: 'source', label: '来源', value: (e: Entry) => e.source };
   const middle: Record<string, Column[]> = {
     spell: [{ key: 'level', label: '环阶', value: e => e.raw.level ?? -1 }, { key: 'time', label: '时间', value: timeText }, { key: 'school', label: '学派', value: e => translate(e.raw.school) }, { key: 'ritual', label: '仪式', value: e => e.raw.meta?.ritual ? '是' : '—' }, { key: 'concentration', label: '专注', value: e => e.raw.duration?.some((d: any) => d.concentration) ? '是' : '—' }, { key: 'range', label: '范围', value: rangeText }],

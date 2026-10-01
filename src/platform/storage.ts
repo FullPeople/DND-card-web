@@ -4,7 +4,7 @@ import type { Character, Entry, Raw, RulePack } from '../core/model';
 import type {SiteSources} from '../core/siteSources';
 export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[]; siteSources?:SiteSources; legacySourceProfiles?:Record<string,SiteSources> }
 let connection: ReturnType<typeof openDB> | undefined;
-const db = () => connection ??= openDB(automationDevelopment?'dnd-card-automation-209':standalone?'dnd-card-standalone':'dnd-card-workspace', 1, { upgrade(db) { db.createObjectStore('documents'); db.createObjectStore('cache'); } });
+const db = () => connection ??= openDB(automationDevelopment?'dnd-card-automation-choices-20261001':standalone?'dnd-card-standalone':'dnd-card-workspace', 1, { upgrade(db) { db.createObjectStore('documents'); db.createObjectStore('cache'); } });
 export async function loadWorkspace(): Promise<Workspace | undefined> { return (await db()).get('documents', 'workspace'); }
 export async function saveWorkspace(workspace: Workspace): Promise<void> {
   const database = await db(); const tx = database.transaction('documents', 'readwrite');

@@ -2,6 +2,8 @@ import {SourceSpellChoiceControl,SourceSpellRestControl} from './SourceSpellCont
 import {planSourceSpells} from '../core/automation/sourceSpells';
 import {ABILITIES,ABILITY_LABELS,type Entry,type Ability} from '../core/model';
 import {automaticWeaponAbility,automaticWeaponAttacks,weaponType} from '../core/automation/weapons';
+import {planFeatureResources} from '../core/automation/featureResources';
+import {sheetChoices} from '../core/automation/choices';
 import type {Character,Derived} from '../core/model';
 import {automationEnabled,setAutomationEnabled,supportedAutomation} from '../core/automation/state';
 import {armorType,equipSelection} from '../core/automation/equipment';
@@ -10,8 +12,8 @@ import type {Edit} from './CharacterPages';
 export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:Entry[];c:Character;d:Derived;edit:Edit;copy?:()=>void;writable?:boolean}){
  const supported=!c.automation||supportedAutomation(c),enabled=automationEnabled(c),weapons=automaticWeaponAttacks(c,d),spells=planSourceSpells(c,entries);
  return <section className="automation-panel"><fieldset disabled={!writable} style={{border:0,padding:0,margin:0,minWidth:0}}>
-  <p>基础自动化支持护甲、盾牌、装备武器快捷攻击和来源赠送法术；未支持的部分会列出。</p>
-  {!c.automation?<><p>{copy?'这张卡保持手动填写。复制后可以试用自动计算，原卡和人工修正都会保留。':'这张卡保持手动填写。开启后按装备与来源计算，手写内容和人工修正保留，也可随时关闭。'}</p><button onClick={copy||(()=>edit(draft=>setAutomationEnabled(draft,true)))}>{copy?'复制并开启自动计算':'开启自动计算'}</button></>:supported?<label><input type="checkbox" aria-label="启用自动计算" checked={enabled} onChange={e=>edit(draft=>setAutomationEnabled(draft,e.target.checked))}/>启用自动计算</label>:<p role="alert">这张卡使用尚未支持的自动化协议或规则版本。原始记录已保留，暂不执行或转换。</p>}
+  <p>自动化支持装备、职业与特性选择、可适配的次数资源和休息恢复；未支持的规则会列出。</p>
+  {supported?<><p>新建、导入和旧角色默认开启自动化。手写内容、修正和已消耗资源保留；可在此手动关闭。</p><label><input type="checkbox" aria-label="启用自动计算" checked={enabled} onChange={e=>edit(draft=>setAutomationEnabled(draft,e.target.checked))}/>启用自动计算</label></>:<p role="alert">这张卡使用尚未支持的自动化协议或规则版本。原始记录已保留，暂不执行或转换。</p>}
   <h3>护甲与盾牌</h3><p>当前 AC：<strong data-testid="automation-ac">{d.ac}</strong>。卸下后恢复适用方案，手工绝对修正与卡面加减仍有效。</p>
   {enabled&&c.selections.filter(row=>armorType(row.entry)).map(row=><label key={row.id} style={{display:'block'}}><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>)}
   <ul>{d.trace.ac?.map((line,i)=><li key={i}>{line}</li>)}</ul>

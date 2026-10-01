@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-01-四';
+export const RELEASE_DATE='2026-10-01-五';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -184,20 +184,27 @@ const SUITE_RELEASE_219_SECTIONS:ReleaseSection[]=[
  {title:'先攻投掷',items:['修复从先攻栏发起投掷时，骰子无法正常出现的问题。','投掷提交失败时会显示原因，不再提前写入先攻数值。']},
  {title:'验证范围',items:['本次仅更新新版 Full Suite 的这两项修复，角色卡网站与旧版插件不变。','自动回归已覆盖先攻提交和历史窗口行为；真实房间中的玩家端动画与权限联动待验证。']},
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_222_SECTIONS:ReleaseSection[]=[
  {title:'资源仪表盘',items:['快捷栏增加“仪表盘”，在与卡面相同大小的画布中调整模块位置、大小和页数，双击设置对应资源。','提供 16 款资源模块，可以选择颜色和计数图标；默认添加按资源上限选择合适的样式，刷新后保留。','可以从模块库直接拖入画布，拖动时显示半透明落点预览；画布外松手或按 Esc 取消。','移动和缩放不会挤动其他模块。排版时允许临时重叠，冲突标红，移开后才能保存。','点击“保存布局”才保留修改；关闭窗口或“放弃修改”会丢弃本次未保存的排版。','共用的普通法术位合并显示，契约等独立资源池分别显示，已有次数不会重置。']},
  {title:'角色卡与整理',items:['核对旧卡遇到多个候选时，优先选择当前规则版本的三宝书条目，也可以自行改选或保留自定义。','快捷栏整理只列出已加入的内容，需要其他攻击时可从资料或卡面拖入。','收窄主要页左侧数值区及背景与专长区域，为其他内容留出空间。']},
  {title:'待验证与未完成',items:['实体手机操作仍待验证；复杂自动化、完整休息与完整英文翻译仍未完成。']},
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_222_SECTIONS:ReleaseSection[]=[...RELEASE_222_SECTIONS,
  {title:'总览与历史',items:['总览中的玩家、怪物和公共资源采用同一套模块外观；角色资源保留颜色、图标及资源池分组。','骰子历史只保留最近 100 条；点击左上角历史查看头顶结果时，Action 栏保持打开。','保留上一批先攻投骰修复。']},
  {title:'联动待验证',items:['真实房主与玩家同步、权限变化及实体触屏仍待验证；独立网页预览不能代替房间验收。','切卡的剩余卡顿及跨窗口骰子置顶仍未解决，本批不宣称已修复。']},
 ];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'自动化与职业选择',items:['新建、导入和旧角色默认开启自动化，无需再手动开启；之后主动关闭的设置会保留。','职业标题保留原粗体与分割线。点击待选按钮，在左侧整个特性区选择，可随时退出。','熟练项、法术与资料库特性使用 Wiki 筛选后拖拽加入，可以删除或拖拽替换；装备和自定义内容列出全部候选，保留悬停说明。','已选按钮变灰，可继续调整；全部完成后一起收起，已选特性正文保留。职业标题右键可以显示或隐藏自带选项。','补齐按职业资料选择起始戏法、法术书、已知和预备法术。']},
+ {title:'资源、休息与数值',items:['可适配的特性生成对应资源和恢复公式，移除特性时移除关联资源。保留消耗、外观及玩家手改上限。','短休和长休可以确认资源恢复；短休可选择消耗生命骰恢复生命。','编辑模式点击数据，平滑展开追溯，输入框保持原位置和尺寸，列出修饰符与最终结果。','起始装备按确认领取，刷新不会重复发放；重新领取会再次新增装备和金币。']},
+ {title:'待验证',items:['实体手机及真实多人房间待验证；复杂正文规则、完整休息边界和完整英文翻译仍未全部支持。']},
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,{title:'枭熊联动',items:['保留已上线的资源仪表盘、先攻与骰子修复。真实房主和玩家的自动化同步待验证。']}];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-01-四',sections:mode==='suite'?SUITE_RELEASE_222_SECTIONS:RELEASE_222_SECTIONS},
  ...(mode==='suite'?[{title:'2026-10-01-三',sections:SUITE_RELEASE_219_SECTIONS}]:[]),
  {title:'2026-10-01-二',sections:mode==='suite'?SUITE_RELEASE_217_SECTIONS:RELEASE_217_SECTIONS},
  {title:'2026-10-01',sections:mode==='suite'?SUITE_RELEASE_216_SECTIONS:RELEASE_216_SECTIONS},

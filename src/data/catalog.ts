@@ -1,5 +1,6 @@
 import type {SourceMeta} from '../core/sourceCatalog';
 import {catalogNormalizer,type CatalogOperation} from './catalogNormalizer';
+import {correctSourceData} from '../core/sourceCorrections';
 import {withRequestTimeout} from '../platform/requestTimeout';
 import {EQUIPMENT_TRAINING_ENTRIES} from './weaponTraining';
 import type { Entry, Kind, Raw } from '../core/model';
@@ -23,7 +24,8 @@ export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): En
       const item = sourceItem && !sourceItem.name && sourceItem.abbreviation ? { ...sourceItem, name: sourceItem.entries?.[0]?.name || sourceItem.abbreviation, ENG_name: sourceItem.entries?.[0]?.ENG_name || sourceItem.abbreviation } : sourceItem;
       if (!item || typeof item.name !== 'string' && key !== 'subrace') continue;
       const inherited = key === 'subrace' ? inheritSubrace(item, body.race || []) : item;
-      for (const raw of [inherited, ...expandVersions(inherited)]) {
+      for (const snapshot of [inherited, ...expandVersions(inherited)]) {
+      const raw=correctSourceData(snapshot);
       if(['subclass','classFeature','subclassFeature'].includes(key)){
         const parent=body.class?.find((c:Raw)=>c.source===raw.classSource&&[c.name,c.ENG_name].includes(raw.className));
         const parentEdition=parent?.edition==='one'?'2024':parent?.edition==='classic'?'2014':undefined;

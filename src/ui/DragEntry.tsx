@@ -14,9 +14,9 @@ type Zone = DropRules & { element: HTMLElement; onReceive?: (entry: Entry) => vo
 function compatible(character: Character, entry: Entry, zone: Omit<Zone, 'element'>) {
   return !dropRejection(character,entry,zone);
 }
-type Drag = { editing:boolean; entry?: Entry; character: Character; over?: string; hoverTab?: string; register: (id: string, zone: Zone) => () => void; start: (event: PointerEvent, entry: Entry) => void };
+type Drag = { editing:boolean; preservePage:boolean; entry?: Entry; character: Character; over?: string; hoverTab?: string; register: (id: string, zone: Zone) => () => void; start: (event: PointerEvent, entry: Entry) => void };
 export const DragContext = createContext<Drag | null>(null);
-export function EntryDragProvider({ character, receive, children, editing=false, disabledReason }: { editing?:boolean; disabledReason?:string; character: Character; receive: (entry: Entry, requirement?: Requirement) => void; children: ReactNode }) {
+export function EntryDragProvider({ character, receive, children, editing=false, preservePage=false, disabledReason }: { preservePage?:boolean; editing?:boolean; disabledReason?:string; character: Character; receive: (entry: Entry, requirement?: Requirement) => void; children: ReactNode }) {
   const {format}=useSources();
   const [entry, setEntry] = useState<Entry>(); const [over, setOver] = useState<string>(); const [hoverTab, setHoverTab] = useState<string>();
   const zones = useRef(new Map<string, Zone>()), latest = useRef({ character, receive,editing,disabledReason }), cancel = useRef<(() => void) | undefined>(undefined);
@@ -36,8 +36,8 @@ export function EntryDragProvider({ character, receive, children, editing=false,
     return undefined;
   }
   function start(event: PointerEvent, item: Entry) {
-    const preservePage=item.kind==='item'&&!!event.currentTarget.closest('.inline-reference,.training-row');
-    cancel.current = pointerDrag(event, { title: item.name, subtitle: `${format(item.source)}`, start: () => {setEntry(item);window.dispatchEvent(new CustomEvent('entry-drag-start',{detail:{entry:item,preservePage}}));}, cancel: clear,
+    const keepPage=preservePage||item.kind==='item'&&!!event.currentTarget.closest('.inline-reference,.training-row');
+    cancel.current = pointerDrag(event, { title: item.name, subtitle: `${format(item.source)}`, start: () => {setEntry(item);window.dispatchEvent(new CustomEvent('entry-drag-start',{detail:{entry:item,preservePage:keepPage}}));}, cancel: clear,
       move: (_point, hit) => {const old=hitCache.current;const match=old&&old.hit===hit&&old.item===item&&old.character===latest.current.character?old.result:find(hit,item);hitCache.current={hit,item,character:latest.current.character,result:match};setOver(match?.id); setHoverTab(hit?.closest<HTMLElement>('[data-sheet-tab]')?.dataset.sheetTab); },
       finish: (_point, hit) => {
         const target=find(hit,item),nearest=hit?.closest<HTMLElement>('[data-drop-zone]'),zone=nearest?.dataset.dropZone?zones.current.get(nearest.dataset.dropZone):undefined;
@@ -51,7 +51,7 @@ export function EntryDragProvider({ character, receive, children, editing=false,
       }
     });
   }
-  return <DragContext.Provider value={{ editing,entry, character, over, hoverTab, register, start }}>{children}</DragContext.Provider>;
+  return <DragContext.Provider value={{ editing,preservePage,entry, character, over, hoverTab, register, start }}>{children}</DragContext.Provider>;
 }
 export function EntryDraggable({ entry, children, dragEnabled = true, onContextMenu, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { entry: Entry; dragEnabled?: boolean }) {
   const drag = useContext(DragContext);
