@@ -1,14 +1,14 @@
 import {useEffect,useRef,useState,type PointerEvent as ReactPointerEvent,type RefObject} from 'react';
 import {createPortal} from 'react-dom';
-import {WIDGET_COLS,WIDGET_ROWS,type ResourceTemplate} from '../core/resourceWidgets';
+import {WIDGET_COLS,WIDGET_ROWS,type ResourceTemplate,type ResourceTemplateValues} from '../core/resourceWidgets';
 import {ResourceModuleFace} from './ResourceModuleFace';
 import {resourceTemplatePreview} from './ResourceTemplatePicker';
 import './resourceTemplateDrag.css';
 
 export type ResourceTemplatePlacement={x:number;y:number;page:number};
-type Options={host:RefObject<HTMLElement|null>;page:number;disabled:boolean;drop:(template:ResourceTemplate,placement:ResourceTemplatePlacement)=>void};
+type Options={host:RefObject<HTMLElement|null>;page:number;disabled:boolean;drop:(template:ResourceTemplate,placement:ResourceTemplatePlacement,values?:ResourceTemplateValues)=>void};
 type Bounds={left:number;top:number;width:number;height:number};
-type DragView={template:ResourceTemplate;bounds:Bounds;placement?:ResourceTemplatePlacement;overlap:boolean;portal:HTMLElement};
+type DragView={template:ResourceTemplate;values?:ResourceTemplateValues;bounds:Bounds;placement?:ResourceTemplatePlacement;overlap:boolean;portal:HTMLElement};
 
 /** Templates are only created after a completed drop. This gesture never writes a layout. */
 export function useResourceTemplateDrag(options:Options){
@@ -30,7 +30,7 @@ export function useResourceTemplateDrag(options:Options){
   timer=setTimeout(clear,600);clearClick.current=clear;
  }
 
- function begin(event:ReactPointerEvent<HTMLButtonElement>,template:ResourceTemplate){
+ function begin(event:ReactPointerEvent<HTMLButtonElement>,template:ResourceTemplate,values?:ResourceTemplateValues){
   if(latest.current.disabled||event.button!==0||!event.isPrimary)return;
   cancel.current();clearClick.current();
   const host=latest.current.host.current,source=event.currentTarget;
@@ -48,7 +48,7 @@ export function useResourceTemplateDrag(options:Options){
    if(rect.width<=0||rect.height<=0)return null;
    const width=rect.width*template.w/WIDGET_COLS,height=rect.height*template.h/WIDGET_ROWS;
    const inside=x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom;
-   if(!inside)return {template,portal,bounds:{left:x-width/2,top:y-height/2,width,height},overlap:false};
+   if(!inside)return {template,values,portal,bounds:{left:x-width/2,top:y-height/2,width,height},overlap:false};
    const col=Math.max(0,Math.min(WIDGET_COLS-template.w,Math.round((x-rect.left)/rect.width*WIDGET_COLS-template.w/2)));
    const row=Math.max(0,Math.min(WIDGET_ROWS-template.h,Math.round((y-rect.top)/rect.height*WIDGET_ROWS-template.h/2)));
    const left=rect.left+col/WIDGET_COLS*rect.width,top=rect.top+row/WIDGET_ROWS*rect.height;
@@ -56,7 +56,7 @@ export function useResourceTemplateDrag(options:Options){
     const box=widget.getBoundingClientRect();
     return box.width>0&&box.height>0&&left<box.right-.25&&left+width>box.left+.25&&top<box.bottom-.25&&top+height>box.top+.25;
    });
-   return {template,portal,bounds:{left,top,width,height},placement:{x:col,y:row,page:active.page},overlap};
+   return {template,values,portal,bounds:{left,top,width,height},placement:{x:col,y:row,page:active.page},overlap};
   }
   function move(event:PointerEvent){
    if(event.pointerId!==pointerId)return;
@@ -79,7 +79,7 @@ export function useResourceTemplateDrag(options:Options){
    try{if(source.hasPointerCapture(pointerId))source.releasePointerCapture(pointerId);}catch{/* Already released by the browser. */}
    cancel.current=()=>{};setView(null);
    if(moved){suppressDropClick();if(event){event.preventDefault();event.stopPropagation();}}
-   if(target?.placement&&!latest.current.disabled)latest.current.drop(template,target.placement);
+   if(target?.placement&&!latest.current.disabled)latest.current.drop(template,target.placement,values);
   }
   function up(event:PointerEvent){finish(event,true);}
   function abort(event:PointerEvent){finish(event);}
@@ -95,7 +95,7 @@ export function useResourceTemplateDrag(options:Options){
   cancel.current=()=>finish();
  }
 
- const example=view?resourceTemplatePreview(view.template):null;
+ const example=view?resourceTemplatePreview(view.template,view.values):null;
  const ghost=view&&example?createPortal(<>
   {view.placement&&<div className="resource-template-drop-preview" data-testid="resource-template-drop-preview" data-overlap={view.overlap} data-grid-x={view.placement.x} data-grid-y={view.placement.y} style={view.bounds} aria-hidden="true"><span>{view.overlap?'重叠 · 调整后可保存':'松开放置'}</span></div>}
   <div className="resource-template-ghost" data-testid="resource-template-ghost" data-over-canvas={!!view.placement} data-overlap={view.overlap} data-template-id={view.template.id} style={view.bounds} aria-hidden="true"><ResourceModuleFace module={example.module} style={view.template.style} layout={example.layout}/></div>

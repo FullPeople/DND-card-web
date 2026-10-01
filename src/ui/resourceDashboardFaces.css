@@ -1,6 +1,6 @@
 /* The approved dashboard art is isolated from the old widget layout selectors. */
 .resource-widget-face:has(>.resource-module-art),.resource-workspace .resource-widget-face:has(>.resource-module-art),.resource-workspace .widget-group .resource-widget-face:has(>.resource-module-art){padding:0!important;background:transparent!important;border:0!important;clip-path:none;overflow:visible;gap:0;min-width:0}
-.resource-module-art{--rm-tone:#527880;--rm-wash:color-mix(in srgb,var(--rm-tone) 9%,#f9faf7);position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:3px;width:100%;height:100%;box-sizing:border-box;min-height:0;min-width:0;padding:4px 6px;overflow:hidden;border:1px solid color-mix(in srgb,var(--rm-tone) 23%,#d5d8d1);border-radius:4px;background:var(--rm-wash);color:var(--rm-tone);container-type:size;text-align:left;font-size:10px;line-height:1.2;user-select:none;font-variant-numeric:tabular-nums}
+.resource-module-art{--rm-tone:#56585e;--rm-icon-tone:#527880;--rm-wash:#ededed;position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:3px;width:100%;height:100%;box-sizing:border-box;min-height:0;min-width:0;padding:4px 6px;overflow:hidden;border:1px solid #b9bbbe;border-radius:4px;background:var(--rm-wash);color:var(--rm-tone);container-type:size;text-align:left;font-size:10px;line-height:1.2;user-select:none;font-variant-numeric:tabular-nums}
 .resource-module-art *{box-sizing:border-box}
 .resource-module-art .rm-name{display:block;position:relative;flex:none;min-width:0;max-width:100%;font-size:clamp(9px,16cqh,11px);font-weight:650;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.1px;padding:0!important}
 .resource-module-art .rm-lock{position:absolute;right:3px;top:2px;font-size:8px;opacity:.6}
@@ -93,3 +93,16 @@
 .resource-module-art.rm-large-number .rm-pool-current{font-size:13px}
 .resource-module-art.rm-large-number .rm-pools.has-many-pools .rm-pool-current{font-size:10px}
 @media(prefers-reduced-motion:reduce){.resource-module-art *{transition:none!important}}
+
+/* Resource color belongs to the icon; values, gauges and card surfaces stay gray. */
+.resource-module-art .resource-dashboard-icon{color:var(--rm-icon-tone)}
+.resource-module-art .rm-icon-count{flex:none;text-align:center;font:700 10px/1.15 system-ui;white-space:nowrap}
+.resource-module-art .rm-pools-poolpips .rm-icon-count{order:3;font-size:10px}
+.resource-module-art.rm-number .rm-readout{position:relative;flex:1;min-height:0}
+.resource-module-art.rm-number .rm-readout strong{font:700 clamp(16px,30cqh,30px) system-ui;letter-spacing:0}
+.resource-module-art.rm-large-number.rm-number .rm-readout strong{font-size:clamp(12px,17cqw,24px)}
+
+.resource-module-art.rm-pips{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr);column-gap:6px;row-gap:2px}
+.resource-module-art.rm-pips>.rm-name{grid-column:1/-1}
+.resource-module-art.rm-pips>.rm-icons{grid-column:1;grid-row:2;height:100%;min-height:0;align-self:stretch}
+.resource-module-art.rm-pips>.rm-icon-count{grid-column:2;grid-row:2;align-self:center;font-size:10px}

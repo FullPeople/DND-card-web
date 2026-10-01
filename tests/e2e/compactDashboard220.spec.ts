@@ -7,9 +7,9 @@ for(const width of [1100,390])test.describe(`compact dashboard ${width}`,()=>{
   await page.goto('/tests/fixtures/compact-dashboard220/');
   const ring=page.locator('.compact-resource[data-resource-id="ring"]'),face=ring.locator('.resource-widget-face'),popover=ring.locator('.compact-resource-popover');
   await expect(page.locator('.resource-module-art')).toHaveCount(4);
-  await expect(ring.locator('.resource-module-art')).toHaveCSS('--rm-tone','#436978');
+  await expect(ring.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#436978');
   await expect(page.locator('[data-resource-id="pips"] .resource-module-art .rm-icon-unit')).toHaveCount(4);
-  await expect(page.locator('[data-resource-id="fraction"] .resource-module-art')).toHaveAttribute('data-module-style','fraction');
+  await expect(page.locator('[data-resource-id="fraction"] .resource-module-art')).toHaveAttribute('data-module-style','number');
   await expect(ring).toHaveAttribute('data-resource-current','3');
   await page.evaluate(()=>{(window as any).originalResourceRow=document.querySelector('[data-resource-id="ring"] .console-resource');});
   await face.click();await expect(popover).toBeVisible();
@@ -21,7 +21,7 @@ for(const width of [1100,390])test.describe(`compact dashboard ${width}`,()=>{
   await expect(page.locator('#pending')).toHaveText('0');
   const persisted=JSON.parse(await page.locator('#fixture-data').textContent()||'{}');expect(persisted.resources.find((r:any)=>r.id==='ring').current).toBe(2);
   await popover.getByRole('button',{name:'关闭资源操作',exact:true}).click();
-  await page.reload();await expect(ring).toHaveAttribute('data-resource-current','2');await expect(ring.locator('.resource-module-art')).toHaveCSS('--rm-tone','#436978');
+  await page.reload();await expect(ring).toHaveAttribute('data-resource-current','2');await expect(ring.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#436978');
   await face.click();await expect(popover).toBeVisible();await expect(popover.locator('.resource-numeric')).toHaveText('2 / 5');
   const bounds=await popover.boundingBox();expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width);
   expect(errors).toEqual([]);await page.screenshot({path:testInfo.outputPath(`compact-popover-${width}.png`),fullPage:true});
@@ -40,7 +40,7 @@ for(const width of [1100,390])test.describe(`compact dashboard ${width}`,()=>{
   expect(overflow.scroll).toBeLessThanOrEqual(overflow.width+1);expect(overflow.rect.left).toBeGreaterThanOrEqual(0);expect(overflow.rect.right).toBeLessThanOrEqual(width);
   for(const button of overflow.buttons){expect(button.left).toBeGreaterThanOrEqual(overflow.rect.left);expect(button.right).toBeLessThanOrEqual(overflow.rect.right);}
   await buttons.filter({hasText:'菱形'}).click();await editor.getByRole('button',{name:'保存',exact:true}).click();await expect(editor).toBeHidden();
-  await expect(pips.locator('.resource-module-art')).toHaveAttribute('data-module-style','diamond');await expect(pips.locator('.resource-module-art')).toHaveCSS('--rm-tone','#926041');
+  await expect(pips.locator('.resource-module-art')).toHaveAttribute('data-module-style','diamond');await expect(pips.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#926041');
   await page.reload();await expect(pips.locator('.resource-module-art')).toHaveAttribute('data-module-style','diamond');
   const state=JSON.parse(await page.locator('#fixture-data').textContent()||'{}');expect(state.layouts.pips.icon).toBe('flame');expect(state.resources.find((r:any)=>r.id==='pips').current).toBe(2);
   await pips.locator('.resource-widget-face').click();await pips.locator('.console-resource').hover();await pips.getByRole('button',{name:'设置图标行动',exact:true}).click();await expect(editor).toBeVisible();
@@ -57,7 +57,7 @@ for(const width of [1100,390])test(`actual overview groups shared, pact and cust
  const card=page.locator('[data-resource-target="hero"]'),modules=card.locator('.compact-resource');await expect(modules).toHaveCount(4);
  const shared=card.locator('[data-resource-id="spell-slot:1"]'),pact=card.locator('[data-resource-id="pact-slot:2"]'),group=card.locator('[data-resource-id="food"]');
  await expect(shared.locator('.rm-pool-label')).toHaveText(['I','II','III','IV','V','VI','VII','VIII','IX']);await expect(shared.locator('.resource-module-art')).toHaveAttribute('data-module-style','poolchips');
- await expect(pact.locator('.rm-pool-label')).toHaveText(['II']);await expect(pact.locator('.rm-pool-current')).toHaveText(['1']);await expect(group.locator('.rm-pool-label')).toHaveText(['食物','饮水']);await expect(group.locator('.resource-module-art')).toHaveCSS('--rm-tone','#527448');
+ await expect(pact.locator('.rm-pool-label')).toHaveText(['II']);await expect(pact.locator('.rm-pool-current')).toHaveText(['1']);await expect(group.locator('.rm-pool-label')).toHaveText(['食物','饮水']);await expect(group.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#527448');
  await expect(card.locator('[data-resource-id="focus"] .rm-icon-unit')).toHaveCount(3);
  const clipped=await modules.locator('.resource-widget-face').evaluateAll(faces=>faces.some(face=>{const rect=face.getBoundingClientRect();return [...face.querySelectorAll('.resource-subvalue')].some(el=>{const r=el.getBoundingClientRect();return r.top<rect.top-1||r.left<rect.left-1||r.right>rect.right+1||r.bottom>rect.bottom+1;});}));expect(clipped).toBe(false);
  await page.evaluate(()=>{(window as any).originalPoolRow=document.querySelector('[data-resource-id="spell-slot:1"] .console-resource');});
