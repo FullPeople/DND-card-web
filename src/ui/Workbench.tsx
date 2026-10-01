@@ -34,11 +34,22 @@ export function WorkbenchBar({classWarnings,online,target,message,page,change}:{
 }
 
 function DiceFrame({quick,expression='',label='',close}:{quick?:boolean;expression?:string;label?:string;close?:()=>void}){
- const ref=useRef<HTMLIFrameElement>(null),wb=useWorkbench(),latest=useRef(wb),lastRolls=useRef(new Set<string>());latest.current=wb;
- useEffect(()=>{const receive=(event:MessageEvent)=>{if(event.source!==ref.current?.contentWindow||event.origin!==location.origin||event.data?.channel!=='workbench-dice-frame/v1')return;const m=event.data;if(m.ready){for(const roll of [...latest.current.rolls].reverse())ref.current?.contentWindow?.postMessage({channel:m.channel,event:'com.obr-suite/dice-roll',data:{data:roll}},location.origin);return;}if(m.close){close?.();return;}if(typeof m.id!=='string'||typeof m.method!=='string')return;void workbenchRequest('diceRpc',{method:m.method,args:m.args}).then(result=>ref.current?.contentWindow?.postMessage({channel:m.channel,id:m.id,result},location.origin)).catch(error=>{ref.current?.contentWindow?.postMessage({channel:m.channel,id:m.id,error:String(error)},location.origin);window.dispatchEvent(new CustomEvent('workbench-error',{detail:String(error)}));});};
+ const ref=useRef<HTMLIFrameElement>(null),wb=useWorkbench(),latest=useRef(wb),lastRolls=useRef(new Map<string,string>());latest.current=wb;
+ const deliverRolls=(rolls:any[],reset=false)=>{
+  if(reset)lastRolls.current.clear();
+  const next=new Map<string,string>();
+  for(const roll of [...rolls].reverse()){
+   const signature=JSON.stringify(roll);next.set(roll.rollId,signature);
+   // Revealing a dark roll updates its existing identity. Treating rollId as
+   // a permanent delivery marker leaves the panel's history private forever.
+   if(lastRolls.current.get(roll.rollId)!==signature)ref.current?.contentWindow?.postMessage({channel:'workbench-dice-frame/v1',event:'com.obr-suite/dice-roll',data:{data:roll}},location.origin);
+  }
+  lastRolls.current=next;
+ };
+ useEffect(()=>{const receive=(event:MessageEvent)=>{if(event.source!==ref.current?.contentWindow||event.origin!==location.origin||event.data?.channel!=='workbench-dice-frame/v1')return;const m=event.data;if(m.ready){deliverRolls(latest.current.rolls,true);return;}if(m.close){close?.();return;}if(typeof m.id!=='string'||typeof m.method!=='string')return;void workbenchRequest('diceRpc',{method:m.method,args:m.args}).then(result=>ref.current?.contentWindow?.postMessage({channel:m.channel,id:m.id,result},location.origin)).catch(error=>{ref.current?.contentWindow?.postMessage({channel:m.channel,id:m.id,error:String(error)},location.origin);window.dispatchEvent(new CustomEvent('workbench-error',{detail:String(error)}));});};
   const emit=(event:Event)=>{const m=(event as CustomEvent).detail;if(['com.obr-suite/dice-roll','com.obr-suite/sfx'].includes(m.event))return;ref.current?.contentWindow?.postMessage({channel:'workbench-dice-frame/v1',...m},location.origin);};window.addEventListener('message',receive);window.addEventListener('workbench-dice-event',emit);return()=>{window.removeEventListener('message',receive);window.removeEventListener('workbench-dice-event',emit);};},[close]);
- useEffect(()=>{if(!wb.online)return;void workbenchRequest('diceRpc',{method:'init',args:[]}).then(data=>ref.current?.contentWindow?.postMessage({channel:'workbench-dice-frame/v1',event:'snapshot',data},location.origin)).catch(()=>{});},[wb.target?.key,wb.role]);
- useEffect(()=>{for(const roll of [...wb.rolls].reverse())if(!lastRolls.current.has(roll.rollId)){lastRolls.current.add(roll.rollId);ref.current?.contentWindow?.postMessage({channel:'workbench-dice-frame/v1',event:'com.obr-suite/dice-roll',data:{data:roll}},location.origin);}},[wb.rolls]);
+ useEffect(()=>{if(!wb.online)return;let current=true;void workbenchRequest('diceRpc',{method:'init',args:[]}).then(data=>{if(current)ref.current?.contentWindow?.postMessage({channel:'workbench-dice-frame/v1',event:'snapshot',data},location.origin);}).catch(()=>{});return()=>{current=false;};},[wb.online,wb.target?.key,wb.role]);
+ useEffect(()=>{deliverRolls(wb.rolls);},[wb.rolls]);
  const src=new URL('../workbench-dice/'+(quick?'quick.html':'index.html'),location.href.split('#')[0]);src.searchParams.set('v',import.meta.url.split('/').pop()||'');if(quick){src.searchParams.set('expr',expression);src.searchParams.set('label',label);}
  return <iframe ref={ref} className={quick?'original-quick-dice':'original-dice-panel'} title={quick?'投骰调整原面板':'原版投骰面板'} src={src.href}/>;
 }
