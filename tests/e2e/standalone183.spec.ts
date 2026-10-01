@@ -22,6 +22,11 @@ test('standalone has no room transport, survives offline reload and rolls withou
  await controls.getByRole('button',{name:'活力 3',exact:true}).click();await expect(resource.locator('[data-resource-name="活力"]')).toHaveAttribute('data-resource-current','3');await expect.poll(savedResource).toBe(3);await controls.getByRole('button',{name:'关闭资源操作',exact:true}).click();
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await expect.poll(()=>page.evaluate(async()=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open('dnd-card-standalone');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});return new Promise<string>(resolve=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{const w=req.result;db.close();resolve(w.characters.find((c:any)=>c.id===w.activeId).name);};});})).toBe('单机冒险者');
+ // Deferred tools are cached when used, independently of the first-card shell.
+ // Load this tool online before verifying that the same tool reopens offline.
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
+ await expect(page.getByText('完整 JSON 备份 · 网站与枭熊通用')).toBeVisible();
+ await page.getByRole('button',{name:'关闭弹窗'}).click();
  await context.setOffline(true);await page.reload();await expect.poll(()=>page.locator('.brand-logo').evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>0)).toBe(true);
  await expect(page.getByRole('textbox',{name:'角色姓名',exact:true})).toHaveValue('单机冒险者');
  await expect(page.locator('.quick-weapon').filter({hasText:'训练剑'})).toBeVisible();await expect(resource.locator('[data-resource-name="活力"]')).toHaveAttribute('data-resource-current','3');await expect.poll(savedResource).toBe(3);
