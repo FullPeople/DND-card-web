@@ -12,6 +12,6 @@ export function startupPreload():Plugin {
    if(chunk)visit(chunk.fileName);
    return [...files].map(file=>({href:'./'+file,rel:'modulepreload'})).concat([...styles].map(file=>({href:'./'+file,rel:'preload'})));
   };
-  return [{tag:'meta',attrs:{charset:'UTF-8'},injectTo:'head-prepend'},{tag:'script',injectTo:'head-prepend',children:`(function(){var links=new URLSearchParams(location.search).get('legacyViewer')==='1'?${JSON.stringify(graph('PlayerViewer'))}:${JSON.stringify(graph('App'))};links.forEach(function(spec){var link=document.createElement('link');link.rel=spec.rel;link.href=spec.href;if(spec.rel==='preload')link.as='style';else link.crossOrigin='';document.head.appendChild(link);});})();`}];
+  return [{tag:'meta',attrs:{charset:'UTF-8'},injectTo:'head-prepend'},{tag:'script',injectTo:'head-prepend',children:`(function(){var links=new URLSearchParams(location.search).get('legacyViewer')==='1'?${JSON.stringify(graph('PlayerViewer'))}:${JSON.stringify(graph('App'))};links.forEach(function(spec){var link=document.createElement('link');link.rel=spec.rel;link.href=spec.href;link.crossOrigin='';if(spec.rel==='preload')link.as='style';document.head.appendChild(link);});})();`}];
  }}};
 }

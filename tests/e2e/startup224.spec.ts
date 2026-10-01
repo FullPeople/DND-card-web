@@ -1,6 +1,18 @@
 import {test,expect} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 
+test('preloaded styles are reused by the application without duplicate downloads',async({page})=>{
+ await mockSource(page);await suppressAnnouncement(page);
+ const requests=new Map<string,number>(),warnings:string[]=[];
+ page.on('request',request=>{if(/\/assets\/.*\.css(?:\?|$)/.test(request.url()))requests.set(request.url(),(requests.get(request.url())??0)+1);});
+ page.on('console',message=>{if(message.text().includes('credentials mode does not match'))warnings.push(message.text());});
+ await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
+ const styles=await page.locator('link[rel="preload"][as="style"]').evaluateAll(nodes=>nodes.map(node=>(node as HTMLLinkElement).href));
+ expect(styles.length).toBeGreaterThan(0);
+ for(const href of styles)expect(requests.get(href),href).toBe(1);
+ expect(warnings).toEqual([]);
+});
+
 test('application preload starts before a delayed entry and slow loading remains recoverable',async({page})=>{
  await mockSource(page);await suppressAnnouncement(page);await page.clock.install();
  let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
