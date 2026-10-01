@@ -41,3 +41,8 @@ local-rules/
 .cache-release/
 evidence/
 test-results-choices/
+
+.local-evidence/
+test-results-screen/
+
+__pycache__/

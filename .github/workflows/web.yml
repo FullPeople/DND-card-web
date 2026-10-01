@@ -21,6 +21,7 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.screen.config.ts
       - run: npm run test:release
       - run: npx playwright test --config playwright.feedback198.config.ts
       - run: npx playwright test --config playwright.compat207.config.ts

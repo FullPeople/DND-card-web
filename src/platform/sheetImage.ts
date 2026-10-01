@@ -1,9 +1,10 @@
 import { downloadBlob } from './storage';
+import {beginSheetCapture} from '../ui/sheetDisplay';
 export type SheetCaptureOptions={hidePortraits?:boolean;hideNotes?:boolean;hideConditions?:boolean;hideResources?:boolean;collapseFeatures?:boolean};
 export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob> {
  const paper=document.querySelector<HTMLElement>('.paper');if(!paper)throw new Error('角色卡尚未显示');
- const viewport=paper.closest<HTMLElement>('.sheet-viewport'),reflow=viewport?.classList.contains('sheet-reflow'),previousStyle=paper.getAttribute('style');
- if(reflow){viewport!.classList.remove('sheet-reflow');paper.style.width='680px';paper.style.height=`${680*297/210}px`;}
+ const release=beginSheetCapture();
+ await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
  paper.classList.add('sheet-export');
  const restored:{node:HTMLElement;style:string|null}[]=[];
  const conceal=(selector:string,collapse=false)=>paper.querySelectorAll<HTMLElement>(selector).forEach(node=>{restored.push({node,style:node.getAttribute('style')});node.style.setProperty(collapse?'display':'visibility',collapse?'none':'hidden','important');});
@@ -41,7 +42,7 @@ export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob
  const canvas=document.createElement('canvas');canvas.width=2480;canvas.height=3508;
  const context=canvas.getContext('2d');if(!context)throw new Error('无法创建 PNG 画布');context.drawImage(image,0,0,canvas.width,canvas.height);
  return await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG 生成失败')),'image/png'));
- }finally{for(const {node,style} of restored){if(style===null)node.removeAttribute('style');else node.setAttribute('style',style);}paper.classList.remove('sheet-export');if(reflow){if(previousStyle===null)paper.removeAttribute('style');else paper.setAttribute('style',previousStyle);viewport!.classList.add('sheet-reflow');}}
+ }finally{for(const {node,style} of restored){if(style===null)node.removeAttribute('style');else node.setAttribute('style',style);}paper.classList.remove('sheet-export');release();await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));}
 }
 export function saveSheetPng(blob:Blob,name:string){downloadBlob(name,blob);}
 export function printSheetPng(url:string){

@@ -1,0 +1,286 @@
+/* Screen composition approved in design/layout-lab. A4 styles stay independent. */
+.sheet-pane{container-type:inline-size;container-name:sheetpane}
+.pane-toolbar .toolbar-actions button.sheet-display-toggle{font-size:12px;line-height:20px;min-height:24px;padding:2px 6px;white-space:nowrap;color:inherit}
+.sheet-viewport.screen-mode{display:block;overflow-y:auto;overflow-x:hidden;margin:5px 7px 3px;padding:0;container-type:inline-size;container-name:screen;touch-action:pan-y pinch-zoom;overscroll-behavior-y:contain;scrollbar-width:thin}
+.sheet-viewport.screen-mode .paper-stack{width:100%!important;height:auto!important;transform:none!important;display:flex;flex-direction:column;min-width:0}
+.sheet-viewport.screen-mode .paper:not(.sheet-export){position:relative;inset:auto;width:100%!important;height:auto!important;min-height:0;transform:none!important;flex:none;display:flex;flex-direction:column;gap:4px;padding:6px 7px;font-size:14px;overflow:hidden;box-shadow:none}
+.sheet-viewport.screen-mode .paper:not(.sheet-export)>.paper-heading{flex:none;font-size:12px;letter-spacing:.6px;min-height:20px;margin:0;padding:0;border:0;line-height:16px}
+.sheet-viewport.screen-mode .paper-footer{flex:none;font-size:13px;line-height:18px;gap:8px;flex-wrap:wrap}
+.sheet-viewport.screen-mode .paper-heading .card-lock{height:20px;min-height:20px;padding:0 2px}
+.sheet-viewport.screen-mode .paper:has(.screen-overview)>.paper-heading{position:absolute;top:6px;left:7px;right:7px;pointer-events:none}
+.sheet-viewport.screen-mode .paper:has(.screen-overview)>.paper-heading>*{background:var(--paper-paper,#ededeb);pointer-events:auto}
+.sheet-viewport.screen-mode .paper:has(.screen-overview)>.paper-heading>span{padding-right:4px}
+.sheet-viewport.screen-mode .sheet-pages{order:-1;position:sticky!important;left:0!important;top:0!important;width:100%;height:35px;min-height:35px;flex-direction:row;padding:2px 0 0;gap:3px;align-items:stretch;background:var(--paper-paper,#ededeb);z-index:40}
+.sheet-viewport.screen-mode .sheet-pages button,.sheet-viewport.screen-mode .sheet-pages button[aria-selected=true]{flex:1;width:auto;height:auto;min-height:32px;margin:0;padding:2px;border:1px solid #a4a69e;border-bottom:0;writing-mode:horizontal-tb;border-radius:3px 3px 0 0;font-size:14px;line-height:22px;box-shadow:none;color:var(--paper-ink,#343532)}
+.sheet-viewport.screen-mode .sheet-pages button[aria-selected=true]{background:var(--paper-paper,#ededeb);box-shadow:inset 0 3px #595959}
+.sheet-viewport.screen-mode .page-number{display:none}
+.sheet-viewport.screen-mode .sheet-cell{height:auto;min-height:0;flex:none}
+.sheet-viewport.screen-mode .paper.has-card-art .sheet-cell .cell-face{position:relative;inset:auto;min-height:0;flex:none;width:100%;height:auto}
+.sheet-viewport.screen-mode .paper.has-card-art .portrait-cell .cell-face{height:100%;flex:1}
+.sheet-viewport.screen-mode .cell-heading{min-height:23px;padding:1px 5px}
+.sheet-viewport.screen-mode .cell-heading h3{font-size:14px;line-height:20px;letter-spacing:0;overflow-wrap:anywhere}
+.sheet-viewport.screen-mode .cell-content{flex:none;overflow:visible;padding:4px 6px;font-size:14px;line-height:1.45}
+.sheet-viewport.screen-mode .cell-drop-surface{height:auto;flex:none}
+.sheet-viewport.screen-mode .cell-fill{font-size:13px!important;line-height:20px;padding:2px 0!important}
+.sheet-viewport.screen-mode .paper input,.sheet-viewport.screen-mode .paper textarea,.sheet-viewport.screen-mode .paper select{font-size:14px}
+.sheet-viewport.screen-mode .screen-overview{display:block;flex:none;min-height:0}
+.screen-status{margin-bottom:3px}
+.sheet-viewport.screen-mode .edition-divider{min-height:26px;gap:7px}
+.sheet-viewport.screen-mode .edition-divider strong{font-size:16px;letter-spacing:0}
+.screen-layout{display:grid;grid-template-columns:minmax(350px,min(45%,440px)) minmax(0,1fr);gap:9px;align-items:start}
+.screen-summary,.screen-actions{display:flex;flex-direction:column;min-width:0;gap:4px}
+.sheet-viewport.screen-mode .paper .overview-identity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;gap:4px;align-items:start}
+.sheet-viewport.screen-mode .overview-identity>.sheet-cell{grid-area:auto}
+.sheet-viewport.screen-mode .overview-identity>.identity-name{grid-column:1/-1}
+.sheet-viewport.screen-mode .identity-name .cell-surface,.sheet-viewport.screen-mode .overview-identity .identity-field .cell-drop-surface{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:stretch}
+.sheet-viewport.screen-mode .identity-name .cell-surface{grid-template-columns:53px minmax(0,1fr)}
+.sheet-viewport.screen-mode .overview-identity .cell-heading{padding:1px 2px;min-height:27px}
+.sheet-viewport.screen-mode .overview-identity .cell-heading h3{font-size:13px;line-height:18px;text-align:center}
+.sheet-viewport.screen-mode .overview-identity .cell-content{display:flex;align-items:center;justify-content:center;padding:0 3px;gap:3px;min-height:27px}
+.sheet-viewport.screen-mode .paper .identity-name input[aria-label="角色姓名"]{font-size:16px;line-height:26px;min-height:26px}
+.sheet-viewport.screen-mode .screen-name-input{flex:1;width:100%;min-width:0;min-height:26px;resize:none;overflow:hidden;font-size:16px;line-height:24px;font-weight:600;padding:0;border:0;background:transparent}
+.sheet-viewport.screen-mode .paper .identity-name input[aria-label="玩家姓名"]{font-size:13px;width:65px}
+.sheet-viewport.screen-mode .identity-token{flex-wrap:wrap;min-height:26px;padding:1px;gap:2px;touch-action:pan-y}
+.sheet-viewport.screen-mode .identity-token .identity-title{font-size:14px;line-height:22px;white-space:normal;overflow:visible;overflow-wrap:anywhere}
+.sheet-viewport.screen-mode .identity-token .identity-level{font-size:13px}
+.sheet-viewport.screen-mode .identity-token .identity-level input{font-size:14px!important;width:2ch!important;height:22px!important;line-height:20px!important}
+.sheet-viewport.screen-mode .overview-identity .identity-class .identity-record{padding-right:20px}
+.sheet-viewport.screen-mode .subclass-fill{position:absolute;right:0;top:calc(50% - 10px);transform:none}
+.sheet-viewport.screen-mode .overview-identity .identity-record{flex:1}
+.screen-vitals{display:grid;grid-template-columns:62px minmax(0,1fr) 70px;gap:5px;align-items:start}
+.sheet-viewport.screen-mode .overview-ratings,.sheet-viewport.screen-mode .overview-health{display:grid;grid-template-columns:1fr;grid-template-rows:auto;gap:4px}
+.sheet-viewport.screen-mode .overview-ratings .cell-surface{display:flex;flex-direction:row}
+.sheet-viewport.screen-mode .overview-ratings .cell-heading{width:22px;min-height:34px;padding:0 1px;writing-mode:horizontal-tb}
+.sheet-viewport.screen-mode .overview-ratings .cell-heading h3{font-size:13px;line-height:17px;text-align:center}
+.sheet-viewport.screen-mode .overview-ratings .cell-content{display:flex;align-items:center;justify-content:center;flex:1;padding:1px;min-height:34px}
+.sheet-viewport.screen-mode .overview-ratings strong,.sheet-viewport.screen-mode .armor-cell .adjusted-value strong{font-size:23px;line-height:28px}
+.sheet-viewport.screen-mode .overview-ratings small{display:none}
+.sheet-viewport.screen-mode .overview-ratings .armor-cell .cell-surface{flex-direction:column}
+.sheet-viewport.screen-mode .overview-ratings .armor-cell .cell-heading{width:auto;min-height:22px;padding:0 1px}
+.sheet-viewport.screen-mode .overview-ratings .armor-cell .cell-content{min-height:29px}
+.sheet-viewport.screen-mode .life-fields{min-height:37px;display:flex;gap:3px;justify-content:space-around;align-items:center;padding:0}
+.sheet-viewport.screen-mode .life-fields>label,.sheet-viewport.screen-mode .hp-maximum{font-size:13px;line-height:16px;min-width:0}
+.sheet-viewport.screen-mode .life-fields input,.sheet-viewport.screen-mode .life-fields .adjusted-value strong{font-size:23px!important;line-height:27px;padding:0;width:3ch}
+.sheet-viewport.screen-mode .life-fields>label:last-child input{font-size:18px!important}
+.sheet-viewport.screen-mode .dice-cell .cell-surface{flex-direction:row}
+.sheet-viewport.screen-mode .dice-cell .cell-heading{padding-inline:3px;min-height:26px}
+.sheet-viewport.screen-mode .dice-cell .cell-heading h3{font-size:13px;white-space:nowrap}
+.sheet-viewport.screen-mode .dice-cell .cell-content{flex:1;min-height:26px;padding:1px 3px}
+.sheet-viewport.screen-mode .screen-vitals .portrait-cell{height:98px;grid-area:auto}
+.sheet-viewport.screen-mode .portrait-view{min-height:0;height:100%}
+.sheet-viewport.screen-mode .screen-vitals .portrait-cell .cell-content{flex:1;padding:0;overflow:hidden}
+.sheet-viewport.screen-mode .adjusted-value{height:auto;min-height:26px;display:flex;align-items:center;justify-content:center;gap:2px}
+.sheet-viewport.screen-mode .adjusted-value .trace-value{flex:1;display:flex;justify-content:center;align-items:center;min-width:0}
+.sheet-viewport.screen-mode .adjusted-value strong{font-size:20px;line-height:26px;white-space:nowrap}
+.sheet-viewport.screen-mode .stat-adjustment{flex:0 0 23px!important;width:23px!important;margin:0!important;border-left:1px solid #b7bcb0;padding:0 1px;min-height:22px}
+.sheet-viewport.screen-mode .stat-adjustment>span:first-child{display:none}
+.sheet-viewport.screen-mode .stat-adjustment input,.sheet-viewport.screen-mode .adjustment-number{width:21px!important;font-size:13px!important;line-height:20px;padding:0;min-height:20px;text-align:center}
+.sheet-viewport.screen-mode .adjustment-reserved{visibility:hidden}
+.screen-abilities{--ability-columns:3;position:relative;width:100%;min-height:300px}
+.screen-ability-item{position:absolute;width:calc((100% - (var(--ability-columns) - 1) * 4px) / var(--ability-columns));min-width:0}
+.screen-ability-item>.sheet-cell{width:100%}
+.sheet-viewport.screen-mode .screen-abilities .ability-box .cell-surface{display:grid;grid-template-columns:29px minmax(0,1fr);height:auto}
+.sheet-viewport.screen-mode .screen-abilities .ability-box .cell-heading{grid-column:1;grid-row:1;min-height:29px;padding:0 1px}
+.sheet-viewport.screen-mode .screen-abilities .ability-box .cell-heading h3{font-size:13px;line-height:20px}
+.sheet-viewport.screen-mode .screen-abilities .ability-box .cell-content{display:contents}
+.sheet-viewport.screen-mode .overview-sheet .ability-values{grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:space-between;gap:1px;height:29px;min-height:29px;border:0;margin:0;padding:0 2px}
+.sheet-viewport.screen-mode .ability-code,.sheet-viewport.screen-mode .ability-values label>span,.sheet-viewport.screen-mode .ability-values small{display:none!important}
+.sheet-viewport.screen-mode .paper .overview-sheet .ability-values input{font-size:23px;line-height:27px;width:2ch;height:27px;min-width:0;font-weight:700;padding:0}
+.sheet-viewport.screen-mode .overview-sheet .ability-values>div{flex:none}
+.sheet-viewport.screen-mode .overview-sheet .ability-modifier{font-size:20px;line-height:27px;min-width:0;height:27px;padding:0}
+.sheet-viewport.screen-mode .ability-save,.sheet-viewport.screen-mode .ability-skills,.sheet-viewport.screen-mode .ability-total,.sheet-viewport.screen-mode .jack-of-all-trades{grid-column:1/-1}
+.sheet-viewport.screen-mode .ability-save,.sheet-viewport.screen-mode .ability-skill{font-size:14px;line-height:21px;min-height:21px;grid-template-columns:11px 10px 30px minmax(0,1fr);gap:1px;padding:0 2px}
+.sheet-viewport.screen-mode .ability-save{grid-template-columns:11px 30px minmax(0,1fr);padding:0 2px;margin:0 2px 1px;min-height:21px;line-height:20px;border-bottom:1px solid #b7bcb0}
+.sheet-viewport.screen-mode .ability-skills{padding:0 0 1px}
+.sheet-viewport.screen-mode .ability-skill:not(.skill-editing)>:nth-child(2){grid-column:3}
+.sheet-viewport.screen-mode .ability-skill:not(.skill-editing)>:nth-child(3){grid-column:4}
+.sheet-viewport.screen-mode .ability-save b,.sheet-viewport.screen-mode .ability-skill b{font-size:14px;white-space:nowrap;text-align:right;font-weight:700}
+.sheet-viewport.screen-mode .ability-save .trace-value,.sheet-viewport.screen-mode .ability-skill .trace-value{display:block;text-align:right}
+.sheet-viewport.screen-mode .ability-save>span:last-child,.sheet-viewport.screen-mode .ability-skill>span:last-child{font-size:14px;white-space:nowrap;line-height:21px}
+.sheet-viewport.screen-mode .proficiency-mark,.sheet-viewport.screen-mode .paper .ability-skill input[type=checkbox],.sheet-viewport.screen-mode .paper .ability-save input[type=checkbox]{width:10px;height:10px;min-width:10px;max-width:10px;margin:0}
+.sheet-viewport.screen-mode .ability-total{font-size:13px;line-height:20px}
+.sheet-viewport.screen-mode .jack-of-all-trades{height:21px;min-height:21px;font-size:13px;line-height:21px;margin:0;padding:0 2px;display:flex;align-items:center;gap:3px}
+.sheet-viewport.screen-mode .jack-reserved{visibility:hidden}
+.sheet-viewport.screen-mode .screen-ability-item:not(:has(.ability-box)) .cell-surface,.sheet-viewport.screen-mode .screen-ability-item .size-cell .cell-drop-surface{display:flex;flex-direction:row;align-items:stretch}
+.sheet-viewport.screen-mode .screen-ability-item:not(:has(.ability-box)) .cell-heading{max-width:60%;min-width:0;padding:1px 2px;min-height:29px;flex:none}
+.sheet-viewport.screen-mode .screen-ability-item:not(:has(.ability-box)) .cell-heading h3{font-size:13px;line-height:17px;text-align:center}
+.sheet-viewport.screen-mode .screen-ability-item:not(:has(.ability-box)) .cell-content{flex:1;display:flex;align-items:center;justify-content:center;min-height:29px;padding:1px 2px}
+.sheet-viewport.screen-mode .size-cell select,.sheet-viewport.screen-mode .size-value{font-size:14px;line-height:22px;width:100%;min-width:0;padding:0}
+.sheet-viewport.screen-mode .screen-abilities .death-saves-cell .cell-heading{width:30px;max-width:30px;padding:1px}
+.sheet-viewport.screen-mode .screen-abilities .death-saves-cell .cell-content{min-height:44px;padding:1px}
+.sheet-viewport.screen-mode .death-saves{font-size:13px;line-height:21px;display:flex;flex-direction:column;gap:0;margin:0}
+.sheet-viewport.screen-mode .death-saves>div{display:flex;align-items:center;justify-content:center;gap:2px}
+.sheet-viewport.screen-mode .death-saves input{width:11px!important;min-width:11px;height:11px!important;margin:0}
+.sheet-viewport.screen-mode .training-cell dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 6px;margin:0}
+.sheet-viewport.screen-mode .training-row{display:grid;grid-template-columns:27px minmax(0,1fr);gap:3px;padding:1px 0;align-items:start}
+.sheet-viewport.screen-mode .training-row dt{font-size:13px;line-height:23px}
+.sheet-viewport.screen-mode .training-row dd{margin:0;min-width:0}
+.sheet-viewport.screen-mode .training-chips .feature-caption{font-size:13px;line-height:21px;padding:0 2px}
+.sheet-viewport.screen-mode .training-input{font-size:14px;line-height:23px;min-height:25px}
+.sheet-viewport.screen-mode .quickbar-split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:8px;height:auto;min-height:0}
+.sheet-viewport.screen-mode .quickbar-attacks,.sheet-viewport.screen-mode .quickbar-resources{width:100%;min-width:0;overflow:visible;padding:0}
+.sheet-viewport.screen-mode .quickbar-copy-zone{height:auto;min-height:0}
+.sheet-viewport.screen-mode .quick-weapon{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;gap:4px;align-items:center;min-height:28px;font-size:14px;line-height:22px;padding:0}
+.sheet-viewport.screen-mode .quick-weapon button,.sheet-viewport.screen-mode .quick-weapon span,.sheet-viewport.screen-mode .quick-weapon strong{font-size:14px;line-height:22px;padding:1px 0;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.sheet-viewport.screen-mode .quick-pin{font-size:14px;line-height:22px;padding:1px 4px;white-space:normal;touch-action:pan-y}
+.sheet-viewport.screen-mode .quickbar-manage-strip{font-size:13px;line-height:20px;min-height:21px;height:21px;padding:0 2px}
+.sheet-viewport.screen-mode .quickbar-manage-strip:disabled{opacity:1;border:0;background:none;cursor:default;color:#65685e;text-align:left}
+.sheet-viewport.screen-mode .quickbar-resources .resource179-row{display:flex;flex-wrap:wrap;align-items:center;width:100%;gap:3px;padding:2px 3px!important}
+.sheet-viewport.screen-mode .quickbar-resources .resource179-row .resource-title{flex:1;min-width:0;min-height:20px}
+.sheet-viewport.screen-mode .quickbar-resources .console-resource-controls{flex:none}
+.sheet-viewport.screen-mode .quickbar-resources .console-resource-controls .resource-pips button{width:20px;min-width:20px;height:21px;min-height:21px}
+.sheet-viewport.screen-mode .quickbar-resources>.quick-resource{width:100%}
+.sheet-viewport.screen-mode .quickbar-resources .resource179-row .resource-title>strong{font-size:13px;line-height:20px}
+.sheet-viewport.screen-mode .quickbar-resources .console-resource-controls>button{min-height:23px;height:23px;font-size:14px;min-width:23px}
+.sheet-viewport.screen-mode .resource-numeric,.sheet-viewport.screen-mode .resource-manual input{font-size:14px}
+.sheet-viewport.screen-mode .resource-rests{min-height:23px}
+.sheet-viewport.screen-mode .resource-rests button{font-size:13px;line-height:21px;padding:0 5px}
+.sheet-viewport.screen-mode .screen-actions .feature-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.sheet-viewport.screen-mode .feature-group{margin:0;min-width:0}
+.sheet-viewport.screen-mode .feature-group h4{font-size:13px;line-height:20px;margin:0 0 3px;padding:0}
+.sheet-viewport.screen-mode .feature-flow{gap:3px}
+.sheet-viewport.screen-mode .feature-caption{font-size:14px;line-height:21px;padding:0 5px;touch-action:pan-y}
+.sheet-viewport.screen-mode .screen-actions .class-features .feature-caption{padding-inline:3px}
+.sheet-viewport.screen-mode .feature-browse,.sheet-viewport.screen-mode .feature-pending{font-size:13px;line-height:20px}
+.sheet-viewport.screen-mode .feature-panel .cell-heading{padding-inline:28px}
+.sheet-viewport.screen-mode .feature-browse-heading{position:absolute;right:2px;top:0;min-width:23px;height:23px;min-height:23px;padding:0 2px;background:transparent;border:0;color:white;font-size:17px;line-height:23px}
+.player-viewer .feature-browse-heading{display:none!important}
+.sheet-viewport.screen-mode .feature-group+.feature-group{margin:0;padding:0;border:0}
+.sheet-viewport.screen-mode .feature-prose,.sheet-viewport.screen-mode .feature-bubble.is-expanded,.sheet-viewport.screen-mode .feature-page-body{font-size:15px;line-height:1.55;max-height:none;overflow:visible}
+.sheet-viewport.screen-mode .overview-spells .feature-groups{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}
+.sheet-viewport.screen-mode .overview-spells .feature-bubble{min-height:28px}
+.sheet-viewport.screen-mode .detail-page-header{display:flex;flex-wrap:wrap;flex:none;height:auto;min-height:0;gap:7px;align-items:start}
+.sheet-viewport.screen-mode .sheet-details{height:auto;min-height:0;flex:none}
+.sheet-viewport.screen-mode .page-caption{flex:none;min-width:0}
+.sheet-viewport.screen-mode .detail-page-header .page-caption{width:auto;max-width:100%;align-self:flex-start}
+.sheet-viewport.screen-mode .page-caption h2{font-size:19px;line-height:26px}
+.sheet-viewport.screen-mode .page-caption small{font-size:13px;white-space:normal;max-height:none}
+.sheet-viewport.screen-mode .page-header-fields{display:grid;flex:1;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto;gap:5px;min-width:0;min-height:0}
+.sheet-viewport.screen-mode .page-header-fields>.portrait-cell{height:72px;max-width:78px}
+.sheet-viewport.screen-mode .page-header-fields>.portrait-cell .cell-content{flex:1;padding:0;overflow:hidden}
+.sheet-viewport.screen-mode .page-header-fields .page-value{font-size:22px;line-height:28px}
+.sheet-viewport.screen-mode .features-page-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-items:start;gap:7px;min-height:0;flex:none}
+.sheet-viewport.screen-mode .features-page-grid>.sheet-cell{grid-area:auto}
+.sheet-viewport.screen-mode .biography-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-items:start;gap:7px;min-height:0;flex:none}
+.sheet-viewport.screen-mode .biography-grid>*{grid-area:auto}
+.sheet-viewport.screen-mode .biography-field{font-size:15px;line-height:24px;min-height:26px;height:auto}
+.sheet-viewport.screen-mode .biography-field>span{font-size:13px}
+.sheet-viewport.screen-mode .biography-text{font-size:15px;line-height:1.55;min-height:24px;overflow:visible}
+.sheet-viewport.screen-mode .biography-multi{height:auto;min-height:26px}
+.sheet-viewport.screen-mode .biography-multi textarea{min-height:36px;font-size:15px;line-height:1.55;resize:vertical}
+.sheet-viewport.screen-mode .bio-portrait>.portrait-cell{height:220px}
+.sheet-viewport.screen-mode .bio-portrait .cell-content{flex:1;padding:0}
+.sheet-viewport.screen-mode .spells-page-grid,.sheet-viewport.screen-mode .spell-workspace-grid{height:auto;min-height:0;flex:none;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-items:start;gap:7px}
+.sheet-viewport.screen-mode .spells-page-grid>.sheet-cell,.sheet-viewport.screen-mode .spell-workspace-grid>.sheet-cell{height:auto;min-height:0}
+.sheet-viewport.screen-mode .paper .spell-stock-cell .spell-stock-grid{grid-template-columns:repeat(auto-fill,minmax(min(125px,100%),1fr));gap:4px}
+.sheet-viewport.screen-mode .paper .spell-stock-cell .spell-stock-tile.stock-item{min-height:34px;height:auto;font-size:14px;padding:3px 5px}
+.sheet-viewport.screen-mode .paper .spell-stock-tile.stock-item .stock-name{font-size:14px;line-height:21px;white-space:normal;overflow-wrap:anywhere;text-overflow:clip}
+.sheet-viewport.screen-mode .paper .spell-stock-cell.unified-prepared,.sheet-viewport.screen-mode .paper .spell-library.spell-stock-cell{flex:none;min-height:0;height:auto}
+.sheet-viewport.screen-mode .spell-settings{font-size:14px;height:auto;flex-wrap:wrap}
+.sheet-viewport.screen-mode .inventory-page{height:auto;min-height:0;flex:none}
+.sheet-viewport.screen-mode .stock-board{height:auto;min-height:0}
+.sheet-viewport.screen-mode .stock-board .stock-drop-zone{flex:none;overflow:visible}
+.sheet-viewport.screen-mode .stock-item{font-size:14px;min-height:50px}
+.sheet-viewport.screen-mode .stock-name{font-size:14px;line-height:21px}
+.sheet-viewport.screen-mode .stock-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.sheet-viewport.screen-mode .paper .stock-grid .stock-item{height:auto;min-height:50px;grid-template-rows:auto auto}
+.sheet-viewport.screen-mode .paper .stock-grid .stock-item .stock-name{white-space:normal;overflow-wrap:anywhere;line-height:21px;font-size:14px;text-overflow:clip}
+.sheet-viewport.screen-mode .workbench-monster{flex:none;height:auto;min-height:0;font-size:15px}
+.sheet-viewport.screen-mode .monster-paper-content .cell-content{font-size:15px;line-height:1.55}
+@container screen (min-width:760px){
+ .screen-layout{align-items:stretch}
+ .sheet-viewport.screen-mode .screen-actions>.class-features,.sheet-viewport.screen-mode .screen-actions>.overview-spells{flex:1 0 auto}
+ .sheet-viewport.screen-mode .paper.has-card-art .screen-actions>.class-features>.cell-face,.sheet-viewport.screen-mode .paper.has-card-art .screen-actions>.overview-spells>.cell-face{flex:1}
+ .sheet-viewport.screen-mode .screen-actions>.class-features .cell-content,.sheet-viewport.screen-mode .screen-actions>.overview-spells .cell-content{flex:1}
+}
+@container screen (max-width:759px){
+ .sheet-viewport.screen-mode .paper:has(.screen-overview)>.paper-heading{position:relative;top:auto;left:auto;right:auto}
+ .sheet-viewport.screen-mode .paper.visual-editing:has(.screen-overview)>.paper-heading{justify-content:flex-end}
+ .sheet-viewport.screen-mode .paper.visual-editing:has(.screen-overview)>.paper-heading>span:first-child{display:none}
+ .sheet-viewport.screen-mode .paper:not(.sheet-export){padding:5px 4px;gap:5px}
+ .screen-layout{display:flex;flex-direction:column;gap:5px}
+ .screen-summary,.screen-actions{display:contents}
+ .screen-layout .overview-identity{order:0;width:100%}
+ .screen-vitals{order:1;width:100%;grid-template-columns:72px minmax(0,1fr) 50px;gap:4px}
+ .screen-layout .quickbar-cell{order:2;width:100%}
+ .screen-abilities{order:3;width:100%}
+ .screen-layout .training-cell{order:4;width:100%}
+ .screen-layout .class-features{order:5;width:100%}
+ .screen-layout .overview-spells{order:6;width:100%}
+ .screen-layout .heritage-features{order:7;width:100%}
+ .sheet-viewport.screen-mode .screen-vitals .portrait-cell{height:76px}
+ .sheet-viewport.screen-mode .overview-ratings .cell-heading{width:30px}
+ .sheet-viewport.screen-mode .overview-ratings .cell-content{min-height:33px}
+ .sheet-viewport.screen-mode .paper .identity-name input[aria-label="玩家姓名"]{display:none}
+ .sheet-viewport.screen-mode .screen-actions .class-features .feature-groups{grid-template-columns:1fr}
+ .sheet-viewport.screen-mode .detail-page-header{flex-direction:column;gap:5px}
+ .sheet-viewport.screen-mode .page-header-fields{width:100%;flex:none}
+ .sheet-viewport.screen-mode .features-page-grid,.sheet-viewport.screen-mode .biography-grid,.sheet-viewport.screen-mode .spells-page-grid,.sheet-viewport.screen-mode .spell-workspace-grid{grid-template-columns:1fr}
+ .sheet-viewport.screen-mode .bio-portrait>.portrait-cell{height:150px;max-width:180px}
+ .sheet-viewport.screen-mode .biography-multi textarea{min-height:28px}
+}
+@container screen (max-width:479px){
+ .sheet-viewport.screen-mode .quickbar-split{display:flex;flex-direction:column;gap:4px}
+ .sheet-viewport.screen-mode .paper .quickbar-resources{display:flex;flex-flow:row wrap;gap:3px}
+ .sheet-viewport.screen-mode .quickbar-resources>.quick-resource{flex:0 1 calc((100% - 3px)/2);width:calc((100% - 3px)/2)}
+ .sheet-viewport.screen-mode .quickbar-resources>.quickbar-manage-strip,.sheet-viewport.screen-mode .quickbar-resources>.resource-rests{flex-basis:100%}
+ .sheet-viewport.screen-mode .training-cell dl{grid-template-columns:1fr}
+ .sheet-viewport.screen-mode .page-header-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sheet-viewport.screen-mode .page-header-fields>.portrait-cell{height:65px}
+ .sheet-viewport.screen-mode .cell-heading h3{font-size:14px}
+ .sheet-viewport.screen-mode .quick-weapon{grid-template-columns:minmax(0,1fr) max-content max-content}
+}
+@container screen (max-width:373px){.screen-abilities{--ability-columns:2}}
+@container screen (max-width:359px){
+ .screen-vitals{grid-template-columns:68px minmax(0,1fr) 43px;gap:3px}
+ .sheet-viewport.screen-mode .life-fields input,.sheet-viewport.screen-mode .life-fields .adjusted-value strong{font-size:20px!important;width:2.5ch}
+ .sheet-viewport.screen-mode .page-header-fields{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){.toolbar-actions .sheet-display-toggle{font-size:12px;padding:2px 4px;display:block}}
+@container sheetpane (max-width:599px){
+ .sheet-pane .pane-toolbar{height:56px;min-height:56px;flex-direction:column;align-items:stretch;gap:2px;padding:2px 5px}
+ .sheet-pane .pane-toolbar>div:first-child{width:100%;min-width:0;max-width:100%;height:24px;flex:none}
+ .sheet-pane .pane-toolbar>.toolbar-actions{display:flex;flex-flow:row nowrap;justify-content:flex-start;gap:3px;flex:none;width:100%;max-width:100%;height:26px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;white-space:nowrap}
+ .sheet-pane .toolbar-actions>button{flex:none}
+}
+
+/* Preserve saved dashboard layout in its editor; the sheet uses readable resource rows. */
+.sheet-viewport.screen-mode .resource-diy-quickbar,.sheet-viewport.screen-mode .resource-diy-quickbar .resource-workspace{height:auto;min-height:0}
+.sheet-viewport.screen-mode .resource-widget-canvas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;flex:none;height:auto;min-height:0}
+.sheet-viewport.screen-mode .resource-widget{position:relative;inset:auto!important;width:auto!important;height:auto!important;min-height:44px;padding:0;grid-column:auto}
+.sheet-viewport.screen-mode .resource-attacks-widget{grid-column:1 / span 2;grid-row:1 / span var(--screen-resource-count)}
+.sheet-viewport.screen-mode .resource-attacks-content{height:100%;overflow:visible}
+.sheet-viewport.screen-mode .resource-diy-quickbar .quickbar-attacks{height:auto;overflow:visible!important;padding:2px 3px}
+.sheet-viewport.screen-mode .quickbar-attacks-heading{display:none}
+.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon{height:auto;min-height:26px;grid-template-columns:minmax(0,1fr) auto auto}
+.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon>:last-child{grid-column:auto}
+.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon button{font-size:13px!important;max-width:none}
+.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon>span{font-size:13px}
+.sheet-viewport.screen-mode .resource-diy-quickbar .quickbar-manage-strip{height:23px;font-size:13px}
+.sheet-viewport.screen-mode .resource-workspace-toolbar{height:25px;line-height:23px;font-size:13px}
+.sheet-viewport.screen-mode .resource-workspace-toolbar button,.sheet-viewport.screen-mode .resource-page-nav output{font-size:13px;min-height:23px}
+.sheet-viewport.screen-mode .resource-module-art{min-height:44px}
+.sheet-viewport.screen-mode .resource-module-art .rm-name{font-size:13px;white-space:normal;line-height:16px;overflow-wrap:anywhere}
+.sheet-viewport.screen-mode .resource-module-art :is(.rm-readout small,.rm-inline-value small,.rm-counter-max,.rm-pool-label,.rm-pool-max){font-size:12px}
+.sheet-viewport.screen-mode .resource-module-art :is(.rm-inline-value,.rm-pool-current){font-size:16px}
+.sheet-viewport.screen-mode .resource-module-art:is(.rm-ring,.rm-orbit,.rm-square,.rm-half,.rm-diamond,.rm-reservoir){min-height:44px;display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:3px;align-items:center;padding:3px}
+.sheet-viewport.screen-mode .resource-module-art:is(.rm-pool,.rm-poolchips,.rm-poolbars,.rm-poolpips){min-height:50px}
+.sheet-viewport.screen-mode .paper .ability-skill.skill-editing:has(.skill-extra-adjustment){grid-template-columns:10px 10px 20px minmax(0,1fr) 20px;gap:1px}
+.sheet-viewport.screen-mode .paper .ability-skill.skill-editing>span{font-size:13px;line-height:21px}
+.sheet-viewport.screen-mode .paper .ability-skill input.skill-extra-adjustment{width:20px;max-width:20px;height:20px;font-size:12px;line-height:18px;padding:0}
+@container screen (max-width:479px){
+ .sheet-viewport.screen-mode .resource-widget-canvas{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sheet-viewport.screen-mode .resource-widget{grid-column:auto}
+ .sheet-viewport.screen-mode .resource-attacks-widget{grid-column:1/-1;grid-row:auto}
+}
+
+.sheet-viewport.screen-mode .resource-widget:has(.rm-pools.has-many-pools){grid-column:span 2}
+.sheet-viewport.screen-mode .resource-module-art .rm-shape{width:36px;height:36px;max-height:36px}
+.sheet-viewport.screen-mode .resource-module-art .rm-readout strong{font-size:16px}
+.sheet-viewport.screen-mode .resource-module-art:is(.rm-ring,.rm-orbit,.rm-square,.rm-half,.rm-diamond,.rm-reservoir)>.rm-name{text-align:left}
+
+.sheet-viewport.screen-mode .resource-module-art.rm-group{container-type:inline-size;height:auto}
+.sheet-viewport.screen-mode .resource-module-art .rm-pools{flex:none;min-height:22px}
+.sheet-viewport.screen-mode .resource-module-art .rm-pools.has-many-pools{grid-auto-rows:minmax(24px,auto);min-height:calc(var(--rm-pool-rows) * 25px)}
+
+.sheet-viewport.screen-mode .screen-attack-manage:disabled{opacity:1;background:transparent;border-color:transparent;color:#65685e}

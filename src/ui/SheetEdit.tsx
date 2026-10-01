@@ -1,13 +1,14 @@
 import {TraceValue} from './ValueTrace';
+import {useSheetRenderMode} from './sheetDisplay';
 import {NumberInput} from './NumberInput';
 import { createContext, useContext } from 'react';
 import { signed, type Character, type SheetBonus } from '../core/model';
 
 export const SheetEditContext = createContext(false);
 export function AdjustedValue({ c, value, target, label, sign, unit, edit }: { c: Character; value: number; target: SheetBonus; label: string; sign?: boolean; unit?: string; edit: (action: (draft: Character) => void, key?: string) => void }) {
-  const editing = useContext(SheetEditContext), bonus = c.sheetBonuses?.[target] || 0;
+  const editing = useContext(SheetEditContext), bonus = c.sheetBonuses?.[target] || 0,screen=useSheetRenderMode()==='screen';
   return <div className={`adjusted-value ${editing || bonus ? 'has-adjustment' : ''}`}>
     <TraceValue target={target} label={label} value={value}><strong data-stat={target}>{sign ? signed(value) : value}{unit && <small>{unit}</small>}</strong></TraceValue>
-    {(editing || bonus !== 0) && <label className="stat-adjustment"><span>调整</span>{editing ? <NumberInput aria-label={`${label}调整值`} type="number" min="-9999" max="9999" value={bonus} onChange={e => { const amount = Math.max(-9999, Math.min(9999, Number(e.target.value) || 0)); edit(draft => { (draft.sheetBonuses ||= {})[target] = amount; }, `bonus:${target}`); }}/> : <span className="adjustment-number">{signed(bonus)}</span>}</label>}
+    {(screen || editing || bonus !== 0) && <label className={`stat-adjustment ${screen&&!editing&&!bonus?'adjustment-reserved':''}`}><span>调整</span>{editing ? <NumberInput aria-label={`${label}调整值`} type="number" min="-9999" max="9999" value={bonus} onChange={e => { const amount = Math.max(-9999, Math.min(9999, Number(e.target.value) || 0)); edit(draft => { (draft.sheetBonuses ||= {})[target] = amount; }, `bonus:${target}`); }}/> : <span className="adjustment-number">{signed(bonus)}</span>}</label>}
   </div>;
 }
