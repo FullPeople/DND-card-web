@@ -1,0 +1,27 @@
+import {mkdirSync} from 'node:fs';
+import {expect,type Page} from '@playwright/test';
+import {mockSource,suppressAnnouncement} from './fixtures';
+import {newCharacter,type Entry} from '../../src/core/model';
+import {newAutomationState} from '../../src/core/automation/state';
+import {exportCharacter} from '../../src/core/export';
+mkdirSync('evidence',{recursive:true});
+export const raw={class:[{name:'测试职业',ENG_name:'Fixture Class',source:'XPHB',hd:{faces:10},startingProficiencies:{skills:[{choose:{from:['athletics','perception','history'],count:2}}]},startingEquipment:{defaultData:[{A:[{item:'测试剑|XPHB'},{value:400}],B:[{value:15000}]}]},classFeatures:['测试圣职|测试职业|XPHB|1|XPHB','测试回气|测试职业|XPHB|1|XPHB']}],classFeature:[{name:'测试圣职',source:'XPHB',className:'测试职业',classSource:'XPHB',level:1,entries:[{type:'options',count:1,entries:[{type:'entries',name:'保护者',entries:['原创选项：防护。'],effects:[{op:'add',target:'ac',value:2}]},{type:'entries',name:'奇术使',entries:['原创选项：魔法。']}]}]},{name:'测试回气',source:'XPHB',className:'测试职业',classSource:'XPHB',level:1,resources:[{name:'回气',max:'@class.level + 1',formula:'1d10 + @class.level',recovery:{short:1,long:'all'}}],entries:['原创资源验收条目。']}],item:[{name:'测试剑',source:'XPHB',entries:['原创测试装备。']}]};
+export async function ready(page:Page,data:Record<string,any[]>=raw,options:{skillsGate?:Promise<void>;savedSkills?:string[]}={}){
+ await mockSource(page);await suppressAnnouncement(page);
+ {await page.route('**/data/class/index.json',r=>r.fulfill({json:{real:'class-real.json'},headers:{'access-control-allow-origin':'*'}}));await page.route('**/data/class/class-real.json',r=>r.fulfill({json:data,headers:{'access-control-allow-origin':'*'}}));}
+ if(data.spell){await page.route('**/data/spells/index.json',r=>r.fulfill({json:{XPHB:'spells-choices.json'},headers:{'access-control-allow-origin':'*'}}));await page.route('**/data/spells/spells-choices.json',r=>r.fulfill({json:{spell:data.spell},headers:{'access-control-allow-origin':'*'}}));}
+ await page.route('**/data/skills.json',async r=>{await options.skillsGate;await r.fulfill({json:{skill:['XPHB','PHB'].flatMap(source=>[{name:'运动',ENG_name:'Athletics',source,entries:['原创运动技能概念。']},{name:'察觉',ENG_name:'Perception',source,entries:['原创察觉技能概念。']},{name:'历史',ENG_name:'History',source,entries:['原创历史技能概念。']}])},headers:{'access-control-allow-origin':'*'}});});
+ await page.goto('/',{waitUntil:'domcontentloaded'});await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ const entries:Entry[]=Object.entries(data).flatMap(([kind,values])=>Array.isArray(values)?values.map(r=>({id:`fixture:${kind}:${r.source}:${r.level||0}:${r.ENG_name||r.name}`,kind:kind==='classFeature'||kind==='subclassFeature'?'feature':kind as Entry['kind'],name:r.name,english:r.ENG_name||r.name,source:r.source,edition:r.source==='PHB'?'2014':'2024',packId:'fixture',revision:'1',choices:r.choices,entries:r.entries||[],raw:{...r,_category:kind}})):[]),c=newCharacter();c.name='选择与资源验收';c.automation=newAutomationState();const owner=entries.find(e=>e.kind==='class'&&e.source==='XPHB')!;c.selections=[{id:'class-owner',entry:owner,level:1,quantity:1,equipped:false}];
+ for(const [i,value] of (owner.raw.classFeatures||[]).entries()){const ref=typeof value==='string'?value:value.classFeature,[name,cls,source,level,featureSource]=ref.split('|');if(Number(level)!==1)continue;const entry=entries.find(e=>e.kind==='feature'&&e.name===name&&e.raw.className===cls&&e.raw.classSource===source&&e.raw.level===1&&e.source===(featureSource||source));if(entry)c.selections.push({id:'feature-'+i,entry,level:1,quantity:1,equipped:false,parentId:'class-owner',grantKey:`ref:${ref}`});}
+ if(options.savedSkills)c.answers['class-owner:skills:0']=options.savedSkills;
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'choices.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:/^选择与资源验收（导入）(?:\s*旧卡资料需要核对)?$/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+}
+
+export const workspace=(page:Page,label:string)=>page.getByRole('region',{name:`选择${label}`,exact:true});
+export async function dragWiki(page:Page,name:string,index:number){
+ const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();
+ await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();await page.mouse.move(from!.x+30,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+40,from!.y+from!.height/2,{steps:3});
+ const slot=page.locator('.choice-slot').nth(index);await expect(slot).toBeVisible();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:16});await page.mouse.up();
+ await expect(slot).toContainText(name);await expect(page.locator('.choice-slot.drop-ready')).toHaveCount(0);await expect(page.locator('.pointer-ghost')).toHaveCount(0);
+}

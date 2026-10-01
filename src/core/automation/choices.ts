@@ -121,7 +121,11 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  if(!choice||choice.restricted||choice.channel==='equipment'||!Number.isInteger(index)||index<0||index>=Math.max(choice.count,choice.slots?.length||0))throw Error('此选择位置当前不可用。');
  const option=value===undefined?undefined:choice.options.find(o=>o.value===value);
  if(value!==undefined&&(!option||option.unavailable))throw Error(option?.unavailable||'此条目不属于可选内容。');
- const draft=structuredClone(c);
+ if(((choice.slots||choice.selected)[index]||undefined)===value)return;
+ // Ordinary option edits only touch answers and option visibility. Keep atomic
+ // validation without copying every source snapshot and inventory item again.
+ // Spell allocation can modify selections, so it retains the full transaction.
+ const draft=choice.channel==='spells'?structuredClone(c):{...c,answers:{...c.answers},featureLayout:c.featureLayout?{...c.featureLayout,optionsVisible:c.featureLayout.optionsVisible?{...c.featureLayout.optionsVisible}:undefined}:undefined};
  if(choice.channel==='spells')setClassSpellSlot(draft,choice,index,option?.entry);
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;}
  finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
