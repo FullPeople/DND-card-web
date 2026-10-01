@@ -3,6 +3,9 @@ export async function registerOffline(onUpdate: (activate: () => void) => void):
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
   try {
     const registration = await navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+    // Embedded or controlled browsers can suppress registration. Do not leave
+    // an asynchronous download observer behind without an available worker.
+    if(!registration)return;
     let rememberedWorker:ServiceWorker|undefined;
     const rememberedUrls=new Set<string>();
     const rememberUsed = (entries:PerformanceEntry[]=performance.getEntriesByType('resource')) => {

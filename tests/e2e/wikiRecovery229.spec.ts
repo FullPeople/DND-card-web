@@ -69,7 +69,12 @@ test('a mid-download outage stops the parallel file readers and preserves the ex
  };
  await page.route('https://5e.kiwee.top/data/**',broken);
  await page.getByRole('button',{name:'更新资料',exact:true}).click();await expect(page.locator('.load-paused')).toBeVisible();
- const count=failedRequests.length;expect(count).toBeLessThanOrEqual(12);
+ // Four readers can be in flight. The first exhausted file can release its
+ // reader before the second exhaustion pauses the origin, starting one more
+ // file; each file still has at most three attempts and the queue must stop.
+ const count=failedRequests.length;expect(count).toBeLessThanOrEqual(15);
+ expect(new Set(failedRequests).size).toBeLessThanOrEqual(5);
+ for(const url of new Set(failedRequests))expect(failedRequests.filter(value=>value===url).length).toBeLessThanOrEqual(3);
  await page.waitForTimeout(700);expect(failedRequests.length).toBe(count);
  await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
  await expect(page.locator('.load-errors')).toContainText('旧缓存');
