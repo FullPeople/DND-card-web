@@ -31,3 +31,17 @@ test('pinyin dictionary is loaded on demand and results refresh after it arrives
  release();await expect(page.locator('.global-result').filter({hasText:'测试法师'}).first()).toBeVisible();
  await expect(page.getByText('正在加载拼音搜索…',{exact:true})).toHaveCount(0);
 });
+
+
+test('category pinyin updates in the existing status row without displacing the Wiki columns',async({page})=>{
+ await mockSource(page);await suppressAnnouncement(page);
+ let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
+ await page.route('**/assets/search-*.js',async route=>{await gate;await route.continue();});
+ await page.goto('/');await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
+ const before=await page.locator('.catalog-shell').boundingBox();
+ await page.getByRole('searchbox',{name:'职业分类搜索',exact:true}).fill('ceshifashi');
+ await expect(page.locator('.catalog-status')).toContainText('正在加载拼音搜索');
+ const during=await page.locator('.catalog-shell').boundingBox();expect(Math.abs(during!.width-before!.width)).toBeLessThan(2);expect(Math.abs(during!.x-before!.x)).toBeLessThan(2);
+ release();await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
+ await expect(page.locator('.catalog-status')).not.toContainText('正在加载拼音搜索');
+});
