@@ -5,14 +5,16 @@
 <section id="startup" class="startup-panel" role="status"><h1 id="startup-title">正在启动角色卡…</h1><p id="startup-message">正在加载程序，请稍候。</p><div id="startup-help" hidden><button id="startup-retry" type="button">重新加载</button><details><summary>错误详情（可复制给开发者）</summary><pre id="startup-detail"></pre></details></div><noscript>浏览器未启用 JavaScript。请允许此网站运行 JavaScript 后重新打开。</noscript></section>
 <script>
 (function(){
- var ready=false,timer;
+ var ready=false,failed=false,timer,started=Date.now(),stage='正在下载程序文件';
  var panel=document.getElementById('startup'),title=document.getElementById('startup-title'),message=document.getElementById('startup-message'),detail=document.getElementById('startup-detail');
- function show(text,error){if(ready)return;clearTimeout(timer);title.textContent=text;message.textContent='请检查网络或浏览器扩展是否拦截了本站，再点击重新加载。旧版浏览器也可以尝试升级后打开。';document.getElementById('startup-help').hidden=false;detail.textContent=String(error||'未收到程序启动完成信号')+'\n'+navigator.userAgent;}
+ function show(text,error){if(ready)return;failed=true;clearInterval(timer);title.textContent=text;message.textContent='程序文件未能正常加载。可以点击重新加载；已保存的角色不会被删除。';document.getElementById('startup-help').hidden=false;detail.textContent=String(error)+'\n阶段：'+stage+'\n'+navigator.userAgent;}
+ function progress(){if(ready||failed)return;var seconds=Math.floor((Date.now()-started)/1000);message.textContent=stage+' · 已等待 '+seconds+' 秒。';if(seconds>=20){title.textContent='程序仍在加载';message.textContent+=' 网络较慢时可以继续等待，也可以重新加载。';document.getElementById('startup-help').hidden=false;detail.textContent='加载尚未完成；暂未收到文件加载错误。\n阶段：'+stage+'\n已等待：'+seconds+' 秒\n'+navigator.userAgent;}}
+ window.addEventListener('dnd-card-stage',function(event){stage=String(event.detail||stage);progress();});
  document.getElementById('startup-retry').onclick=function(){location.reload();};
- window.addEventListener('dnd-card-ready',function(){ready=true;clearTimeout(timer);panel.hidden=true;});
+ window.addEventListener('dnd-card-ready',function(){ready=true;clearInterval(timer);panel.hidden=true;});
  window.addEventListener('error',function(event){var target=event.target;if(target&&target!==window&&(target.tagName==='SCRIPT'||target.tagName==='LINK'))show('程序文件加载失败',target.src||target.href);else if(event.message)show('程序启动失败',event.message);},true);
  window.addEventListener('unhandledrejection',function(event){show('程序启动失败',event.reason&&event.reason.message||event.reason);});
- timer=setTimeout(function(){show('程序加载时间较长');},20000);
+ timer=setInterval(progress,1000);progress();
  if(!('noModule' in document.createElement('script'))){show('浏览器版本过旧','此浏览器不支持运行角色卡所需的 JavaScript 模块。');}
 })();
 </script>

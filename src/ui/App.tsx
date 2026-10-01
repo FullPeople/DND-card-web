@@ -1,7 +1,7 @@
 import {ownedTrainingReference} from './entryMenuEntries';
 import {overviewConditionEntry} from './OverviewVisuals';
 import {useGroupRoll} from '../platform/groupRoll';
-import {CardMigration} from './CardMigration';
+const CardMigration=lazy(()=>import('./CardMigration').then(module=>({default:module.CardMigration})));
 import {cardMigrationIssues} from '../core/cardMigration';
 import {ClearableSearch} from './ClearableSearch';
 import {classCompatibilityIssues,migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigration';
@@ -9,7 +9,7 @@ import {RuleOptions} from './RuleOptions';
 import {rulesSetupComplete,rememberRulesSetup} from '../platform/rulesSetup';
 import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
 import {syncSourceSpells} from '../core/automation/sourceSpells';
-import {AutomationPanel} from './AutomationPanel';
+const AutomationPanel=lazy(()=>import('./AutomationPanel').then(module=>({default:module.AutomationPanel})));
 
 import {automationEnabled,initializeAutomation,newAutomationState} from '../core/automation/state';
 import {reconcileEquipping} from '../core/automation/equipment';
@@ -20,31 +20,32 @@ import {useUiLanguage} from './UiLanguage';
 import {uiEntryLabel} from './uiText';
 import {useEntryMenuActions} from './EntrySharing';
 import {CharacterManager,localCharacterRow,type CharacterRow} from './CharacterManager';
-import {TransferPanel} from './TransferPanel';
-import {CharacterReview} from './CharacterReview';
+const TransferPanel=lazy(()=>import('./TransferPanel').then(module=>({default:module.TransferPanel})));
+const CharacterReview=lazy(()=>import('./CharacterReview').then(module=>({default:module.CharacterReview})));
 import {readCharacterTransfer,deleteLocalCharacters} from '../core/transfers';
-import {matchesEntrySearch} from '../core/search';
+import {useEntrySearch} from './useEntrySearch';
 import {announcementVersionFor,announcementPending,readAnnouncementVersion} from '../platform/announcement';
-import {SpellAbilityEditor} from './SpellAbilityEditor';
+const SpellAbilityEditor=lazy(()=>import('./SpellAbilityEditor').then(module=>({default:module.SpellAbilityEditor})));
 import {ownsSubclassFeature} from '../core/entryReferences';
 import {reviewImport} from '../core/importReview';
 import {hydrateImportedCasting} from '../core/castingSnapshot';
-import {PersonalEntries} from './PersonalEntries';
-import {HitPointEditor} from './HitPointEditor';
+const PersonalEntries=lazy(()=>import('./PersonalEntries').then(module=>({default:module.PersonalEntries})));
+const HitPointEditor=lazy(()=>import('./HitPointEditor').then(module=>({default:module.HitPointEditor})));
 import {includeNewProfileSources,startAllSources} from '../core/sourceDefaults';
 import {ensureSiteSources,sourceSettings,withSiteSources} from '../core/siteSources';
 import {WikiLayout,WikiEmptyPrompt} from './WikiLayout';
 import {standalone} from '../platform/buildMode';
 import {LocalDice} from '../standalone/LocalDice';
 import {pinEntry} from '../core/quickbar';
-import {QuickbarManager} from './QuickbarManager';
+const QuickbarManager=lazy(()=>import('./QuickbarManager').then(module=>({default:module.QuickbarManager})));
 import {recordAction,travelHistory,useActionHistory} from '../platform/actionHistory';
 import {applyPatch,sameValue} from '../core/merge';
 import {CarryCapacity} from './InventoryMarks';
 import {useLayoutEffect} from 'react';
 import {SupporterEffect} from './SupporterEffect';
-import {ResourceModuleEditor} from './ResourceModuleEditor';
-import {ResourceDashboard,type DashboardViewport} from './ResourceDashboard';
+const ResourceModuleEditor=lazy(()=>import('./ResourceModuleEditor').then(module=>({default:module.ResourceModuleEditor})));
+import type {DashboardViewport} from './ResourceDashboard';
+const ResourceDashboard=lazy(()=>import('./ResourceDashboard').then(module=>({default:module.ResourceDashboard})));
 import {ensureResourceWidget} from '../core/resourceWidgets';
 import {ValueTraceProvider} from './ValueTrace';
 import {applyInventory} from '../core/inventory';
@@ -71,7 +72,7 @@ import { captureSheet, type SheetCaptureOptions } from '../platform/sheetImage';
 import { ClassNavigation } from './ClassNavigation';
 import { CatalogList } from './CatalogList';
 import { MonsterDocument, MonsterPortrait } from './MonsterDocument';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, subclassOwner, entryEdition, editionAllows, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
@@ -427,7 +428,8 @@ export default function App() {
     return libraryEntries.filter(e => (candidates?candidates.has(e.id):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
       (editionFilter === 'all' || editionAllows(e,(editionFilter === 'character' ? c.edition : editionFilter) as Edition,editionFilter === 'character' && c.profile.optional.legacy)));
   }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope]);
-  const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery]);
+  const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery);
+  const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery,matchesEntrySearch]);
   useEffect(() => { setException(''); }, [detail?.id]);
   useEffect(() => { if (detailPane.current && detail) { const pending=previewCommit.current;detailPane.current.scrollTop=pending?.id===detail.id?pending.top:libraryState.positions[detail.id]||0;previewCommit.current=undefined; } }, [kind, detail?.id, !!library.hover,library.navigationKey]);
 
@@ -710,7 +712,7 @@ export default function App() {
         </div>
         <div className="catalog-status"><span>{loading ? `${progress.done}/${progress.total} 份资料` : `${libraryEntries.length.toLocaleString()} 条资料`}{progress.cached > 0 ? ` · ${progress.cached} 份缓存` : ''}</span><span>{filtered.length} 条符合筛选</span></div>
         {progress.failed.length > 0 && <details className="load-errors"><summary>{progress.failed.length} 份资料读取异常 · 可重试</summary>{progress.failed.map((e, i) => <p key={i}>{e}</p>)}<button disabled={loading} onClick={() => load(true)}>重试加载</button></details>}
-        <div className={`library-body ${detail ? 'has-detail' : ''}`}><CatalogList entries={filtered} columns={columns} kind={kind} character={c} selected={detail} inspect={inspect} sort={sort} descending={descending} onSort={key=>library.patch({sort:key,descending:sort===key?!descending:false})} resetKey={JSON.stringify([kind,filters,editionFilter,sort,descending,categoryQuery])} loading={loading} onSettings={()=>setModal('rules')} pulse={fillPulse}/>
+        <div className={`library-body ${detail ? 'has-detail' : ''}`}>{searchStatus&&<p role="status">{searchStatus}</p>}<CatalogList entries={filtered} columns={columns} kind={kind} character={c} selected={detail} inspect={inspect} sort={sort} descending={descending} onSort={key=>library.patch({sort:key,descending:sort===key?!descending:false})} resetKey={JSON.stringify([kind,filters,editionFilter,sort,descending,categoryQuery])} loading={loading} onSettings={()=>setModal('rules')} pulse={fillPulse}/>
         <WikiSplitter/>{kind==='custom'&&canAuthor&&<><CustomEntryEditor newEntry={()=>setDetail(undefined)} entry={detail?.raw._workbenchCustom?detail:undefined} busy={rulesBusy} save={entry=>changeCustom(entry)} remove={entry=>changeCustom(entry,true)}/></>}
         {detail && <article key={`${detail.kind}:${detail.id}`} className={`entry-detail ${explicitlyExcluded(c,detail)?'entry-disabled':''} ${library.hover?'is-sheet-preview':readingFlash?'sheet-preview-committed':''} ${library.focus?'has-reading-focus':''}`} data-described-entry={detail.id} data-entry-kind={detail.kind} ref={detailPane} onScroll={e => { if(!library.hover)library.savePosition(detail.id, e.currentTarget.scrollTop); }}><div className="detail-frozen"><div className="detail-navigation"><button disabled={!library.canGoBack} onClick={library.back}>← 上一条</button><button aria-label="收起正文" onClick={() => { setDetail(undefined); }}>×</button></div><div className="detail-heading">{detail.kind==='monster'&&<MonsterPortrait entry={detail}/>}<EntryBadges entry={detail}/><span className="eyebrow">{KIND_LABELS[detail.kind]} · {entryEdition(detail) === 'both' ? '通用资料' : entryEdition(detail)}</span><h1><EntryDraggable className="detail-title" entry={detail} >{uiEntryLabel(detail,language)}{detail.english !== detail.name && <small className="english-name"> {language==='en'?detail.name:detail.english}</small>}</EntryDraggable></h1><small>{detail.raw._authoredBy ? `${detail.raw._authoredBy} · ` : ''}<SourceName id={detail.source}/>{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div><ClassNavigation subclassesOpen={!!libraryState.subclassesOpen} onToggleSubclasses={()=>library.patch({subclassesOpen:!libraryState.subclassesOpen})} entry={detail} entries={libraryEntries} character={c} navigate={(entry,focus)=>library.navigate(entry,focus)}/></div>
           {detail.kind==='monster'?<ContentBoundary key={detail.id}><MonsterDocument entry={detail} onLink={link}/></ContentBoundary>:<><ContentBoundary key={`facts:${detail.id}`}><EntryFacts entry={detail} onLink={link}/></ContentBoundary>
@@ -726,6 +728,7 @@ export default function App() {
     </main>
     {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&announcement&&<Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/>}{notice&&<Toast message={notice} action={!editing&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
     {modal && <Dialog title={modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}setModal(''); setImportError('');} }}>
+      <Suspense fallback={<p role="status">正在加载面板…</p>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}
       {modal === 'adjust' && <><p className="muted">特殊规则尚未自动适配时，可填写最终数值与原因。修正会覆盖计算值，持续保留到手动撤回，并列入审卡。</p><div className="adjust-form"><label>数值<select aria-label="人工修正目标" value={adjustTarget} onChange={e => setAdjustTarget(e.target.value)}>{[['ac', '护甲等级'], ['hp', '生命值上限'], ['speed', '速度'], ['initiative', '先攻'], ['passive', '被动察觉'], ...Object.entries(SKILLS).map(([key, s]) => [`skill:${key}`, `${s.name}检定`]), ...ABILITIES.map(a => [`save:${a}`, `${ABILITY_LABELS[a]}豁免`])].map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label><label>最终值<NumberInput aria-label="人工修正数值" type="number" min="-9999" max="9999" value={adjustValue} onChange={e => setAdjustValue(clamp(e.target.value, -9999, 9999))}/></label><label className="full-width">原因<input aria-label="人工修正原因" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="例如：DM 允许的护甲修正，或尚未适配的专长"/></label><button disabled={!adjustReason.trim()} onClick={() => { edit(draft => { draft.adjustments = [...(draft.adjustments || []).filter(a => a.target !== adjustTarget), { id: uid(), target: adjustTarget, value: adjustValue, reason: adjustReason.trim() }]; }); setAdjustReason(''); }}>记录修正</button></div>{(c.adjustments || []).map(a => <div className="pack-row" key={a.id}><span><strong>{a.target} → {a.value}</strong><small>{a.reason}</small></span><button onClick={() => edit(draft => { draft.adjustments = draft.adjustments?.filter(x => x.id !== a.id); })}>撤回</button></div>)}<details className="calculation-trace"><summary>展开计算依据</summary>{Object.entries(d.trace).map(([key, items]) => <p key={key}><strong>{choiceLabel(key)}</strong>：{items.join('；')}</p>)}</details></>}
       {modal==='classSync'&&<CardMigration key={c.id} c={c} entries={allEntries} loading={loading} readOnly={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} save={saveClassCopy} busy={classSyncBusy} setBusy={setClassSyncBusy}/>}
@@ -749,6 +752,7 @@ export default function App() {
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
       </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} capture={capturePages} disabled={readOnly||inWorkbench&&!wb.online} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>单文件导入与本机恢复</h3><div className="dialog-actions"><button onClick={()=>importFile('character')}>导入角色 JSON</button></div><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup);history.current.clear();setNotice('已读取上一次保存；确认后继续编辑即可保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
 
+      </Suspense>
     </Dialog>}
 
   </div></EntryDragProvider></KeywordPreview></ChoiceWorkspaceContext.Provider>;

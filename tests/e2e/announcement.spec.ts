@@ -23,7 +23,7 @@ test('首次打开单机站弹出公告，版本、问题清单与默认展开�
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
  await expect(dialog(page).locator('.announcement-current>h3')).toHaveText(RELEASE_DATE);
  await expect(dialog(page).locator('.announcement-current li')).toHaveCount(RELEASE_NOTES.length);
- const histories=dialog(page).locator('.announcement-history');await expect(histories.locator('summary')).toHaveText(['2026-10-01-四','2026-10-01-二','2026-10-01','2026-09-30-二','2026-09-30-一','2026-09-28','2026-09-27-二','2026-09-27-一']);for(const item of await histories.all())expect(await item.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);const history=histories.first();
+ const histories=dialog(page).locator('.announcement-history');await expect(histories.locator('summary')).toHaveText(['2026-10-01-五','2026-10-01-四','2026-10-01-二','2026-10-01','2026-09-30-二','2026-09-30-一','2026-09-28','2026-09-27-二','2026-09-27-一']);for(const item of await histories.all())expect(await item.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);const history=histories.first();
  await expect(history.locator('li').first()).toBeHidden();await history.locator('summary').click();await expect(history.locator('li').first()).toBeVisible();await history.locator('summary').click();
  await expect(dialog(page).locator('.announcement-issues')).toContainText('导出指定角色或多卡备份');
  await expect(dialog(page).locator('.announcement-issues')).not.toContainText('枭熊');await expect(dialog(page).locator('.announcement-issues')).not.toContainText('三龙');

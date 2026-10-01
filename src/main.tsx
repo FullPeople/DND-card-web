@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { SourceProvider } from './ui/SourceName';
 import {lazy,Suspense} from 'react';
 import {StartupBoundary,StartupReady} from './ui/StartupBoundary';
+window.dispatchEvent(new CustomEvent('dnd-card-stage',{detail:'正在加载角色卡界面'}));
 const viewer=new URLSearchParams(location.search).get('legacyViewer')==='1';
 // Keep dynamic imports in separate lazy callbacks so the production bundler
 // attaches each entry's own CSS dependencies (including the standalone reader).

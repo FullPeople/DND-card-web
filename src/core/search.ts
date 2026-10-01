@@ -1,9 +1,9 @@
 import { pinyin } from 'pinyin-pro';
 import type { Entry } from './model';
+import {normalizeSearch as normalize} from './searchText';
 
 type SearchIndex = { text:string; full:string; initials:string };
 const cache=new WeakMap<Entry,SearchIndex>();
-const normalize=(text:string)=>text.normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/ü/g,'v');
 /** Search names and provenance only. Index once per immutable entry, on demand. */
 export function matchesEntrySearch(entry:Entry,query:string,sourceName=''):boolean {
  const terms=normalize(query).trim().split(/\s+/).filter(Boolean);if(!terms.length)return true;
