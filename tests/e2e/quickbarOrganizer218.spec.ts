@@ -1,10 +1,13 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter,type Character,type Entry} from '../../src/core/model';
+import {setAutomationEnabled} from '../../src/core/automation/state';
 
 // Original software fixtures only. Organizing shortcuts must not alter their source entities.
 function fixture(){
  const c=newCharacter();c.name='快捷栏整理验收';
+ // This fixture exercises the retained manual shortcut path and an explicit opt-out.
+ setAutomationEnabled(c,false);
  const entry=(id:string,kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id,kind,name,english:name,source:'CUSTOM',edition:'both',packId:'organizer-fixture',revision:'1',entries:['原创测试条目。'],raw:{_custom:true,...raw}});
  const sword=entry('organizer-sword','item','旅行短剑',{dmg1:'1d6+2',attackBonus:4});
  const spell=entry('organizer-spell','spell','微光印记',{level:0});
