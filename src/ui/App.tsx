@@ -1,3 +1,4 @@
+import {ownedTrainingReference} from './entryMenuEntries';
 import {overviewConditionEntry} from './OverviewVisuals';
 import {useGroupRoll} from '../platform/groupRoll';
 import {CardMigration} from './CardMigration';
@@ -248,7 +249,7 @@ export default function App() {
     // Roster conditions are already authorized directory data and may not be a
     // selection on the open sheet. Rebuild them from the current roster only.
     return selectedEntries.find(same)||allEntries.find(same)
-      ||(!inWorkbench||wb.target&&!!wb.document&&c?.id===workbenchCharacterId(wb.target)?c?.quickbarCopies?.map(row=>row.entry).find(same):undefined)
+      ||(!inWorkbench||wb.target&&!!wb.document&&c?.id===workbenchCharacterId(wb.target)?c&&(c.quickbarCopies?.map(row=>row.entry).find(same)||ownedTrainingReference(c,entry)):undefined)
       ||(inWorkbench?Object.values(wb.inventory?.containers||{}).flatMap(container=>container.items).map(row=>row.entry).find((row):row is Entry=>!!row&&same(row)):undefined)
       ||(inWorkbench?[...wb.cards,...wb.monsters].flatMap(row=>row.conditions||[]).map(overviewConditionEntry).find(same):undefined);
   };

@@ -94,3 +94,13 @@ test('entry menus invalidate revoked or changed scopes and share only the curren
  for(const action of ['scope','readonly','editing','character']){await page.getByRole('button',{name:'Public anchor',exact:true}).click({button:'right'});await expect(page.getByRole('menu')).toBeVisible();await page.evaluate(action=>(window as any).harness[action](),action);await expect(page.getByRole('menu')).toHaveCount(0);}
  await page.getByRole('button',{name:'Public anchor',exact:true}).click({button:'right'});await page.getByRole('menu').getByRole('menuitem',{name:'移除自定义条目',exact:true}).click();expect(await page.evaluate(()=>(window as any).actions.at(-1))).toMatchObject({kind:'removeCustom',entry:{id:'Public',entries:['public body']}});
 });
+
+
+test('current owned unresolved training is removable but its menu vanishes with card access',async({page:host})=>{
+ const page=await pair(host),a=snapshot('a',2);a.document.dnd_card_web.training={weapons:'未入库训练217'};
+ await send(host,'selection',{sequence:5,...a,access:auth()});await expect(page.locator('.training-row').filter({hasText:'武器'})).toContainText('未入库训练217');
+ if(await page.getByRole('switch',{name:'编辑模式'}).getAttribute('aria-checked')!=='true')await page.getByRole('switch',{name:'编辑模式'}).click();
+ await page.getByRole('button',{name:'未入库训练217',exact:true}).click({button:'right'});await expect(page.getByRole('menuitem',{name:'移除',exact:true})).toBeEnabled();
+ await send(host,'access',{access:auth(2,['b'])});await expect(page.getByRole('menu',{name:'词条操作'})).toHaveCount(0);await expect(page.getByRole('button',{name:'未入库训练217',exact:true})).toHaveCount(0);
+ expect(await host.evaluate(()=>(window as any).requests.filter((m:any)=>['showEntry','save'].includes(m.type)))).toEqual([]);
+});

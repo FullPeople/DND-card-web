@@ -39,7 +39,9 @@ jobs:
         if: failure()
         with:
           name: browser-failure
-          path: test-results/
+          path: |
+            test-results/
+            test-results-*/
           retention-days: 7
       - uses: actions/configure-pages@v5
         if: github.ref == 'refs/heads/main'
