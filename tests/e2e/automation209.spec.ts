@@ -15,6 +15,34 @@ async function readWorkspace(page:Page){return page.evaluate(async(dbName)=>{
 async function ready(page:Page){await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');}
 async function importManual(page:Page){await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'manual.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(manual())))});await page.keyboard.press('Escape');await expect(page.getByRole('tab',{name:'自动化迁移验收（导入）',exact:true})).toHaveAttribute('aria-selected','true');}
 
+// The compact attack block paginates independently of resource modules.
+async function attackPages(page:Page){
+ const panel=page.locator('.paper .quickbar-attacks');await expect(panel).toBeVisible();
+ const previous=panel.getByRole('button',{name:'上一页攻击',exact:true}),next=panel.getByRole('button',{name:'下一页攻击',exact:true}),counter=panel.locator('.quickbar-attacks-heading small');
+ while(await previous.count()&&await previous.isEnabled())await previous.click();
+ const pages=await counter.count()?Number((await counter.innerText()).split('/')[1]):1;expect(pages).toBeGreaterThan(0);
+ return {panel,next,counter,pages};
+}
+async function attackIds(page:Page){
+ const {panel,next,counter,pages}=await attackPages(page),ids:string[]=[];
+ for(let index=0;index<pages;index++){
+  if(pages>1)await expect(counter).toHaveText(`${index+1}/${pages}`);
+  ids.push(...await panel.locator('[data-quick-id]').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-quick-id')!)));
+  if(index<pages-1){await expect(next).toBeEnabled();await next.click();}
+ }
+ expect(new Set(ids).size).toBe(ids.length);if(pages>1)await expect(next).toBeDisabled();return ids;
+}
+async function seekAttack(page:Page,id:string){
+ const {panel,next,counter,pages}=await attackPages(page),row=panel.locator(`[data-quick-id="${id}"]`);
+ for(let index=0;index<pages;index++){
+  if(pages>1)await expect(counter).toHaveText(`${index+1}/${pages}`);
+  if(await row.count()){await expect(row).toBeVisible();return row;}
+  if(index<pages-1){await expect(next).toBeEnabled();await next.click();}
+ }
+ throw Error(`Attack ${id} missing from all ${pages} pages`);
+}
+async function expectAttack(page:Page,id:string,...parts:string[]){const row=await seekAttack(page,id);for(const part of parts)await expect(row).toContainText(part);return row;}
+
 test('manual card copies into automation; armor replaces, shield adds, undo and reload preserve intent and resources',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await ready(page);await importManual(page);
  await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByTestId('automation-ac')).toHaveText('13');await page.getByRole('button',{name:'复制并开启自动计算'}).click();
@@ -48,15 +76,16 @@ test('equipped weapon has separate clickable thrown and two-handed formulas, sur
  c.selections.push({id:'weapon-fixture',entry:{...c.selections[0].entry,id:'fixture:weapon',name:'验收长兵器',english:'Fixture Spear',raw:{type:'M',weaponCategory:'simple',dmg1:'1d6',dmg2:'1d8',dmgType:'P',property:['T','V']}},quantity:4,level:1,equipped:false});
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'weapon.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await page.keyboard.press('Escape');
  await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'装备 验收长兵器'}).check();await page.keyboard.press('Escape');
- const thrown=page.locator('[data-quick-id="auto-weapon:weapon-fixture:thrown"]'),twohanded=page.locator('[data-quick-id="auto-weapon:weapon-fixture:two-handed"]');
- await expect(thrown).toContainText('投掷');await expect(thrown).toContainText('1d6+4');await expect(twohanded).toContainText('1d8+4');await expect(page.locator('[data-quick-id="custom:manual"]')).toContainText('2d8+7');
+ const thrown='auto-weapon:weapon-fixture:thrown',twohanded='auto-weapon:weapon-fixture:two-handed';
+ expect(await attackIds(page)).toEqual(['custom:manual','auto-weapon:weapon-fixture:main',thrown,twohanded]);
+ await expectAttack(page,thrown,'投掷','1d6+4');await expectAttack(page,twohanded,'1d8+4');await expectAttack(page,'custom:manual','2d8+7');
  const edit=page.getByRole('switch',{name:'编辑模式',exact:true});if(await edit.getAttribute('aria-checked')==='true')await edit.click();
  const dice=page.getByRole('dialog',{name:'本地投骰'});
- await thrown.getByRole('button',{name:'+6',exact:true}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d20+6');await dice.getByRole('button',{name:'投骰',exact:true}).click();await expect(dice.getByRole('status',{name:'投骰结果',exact:true})).toContainText('1d20:');const total=Number((await dice.getByRole('status',{name:'投骰结果',exact:true}).innerText()).split(' ')[0]);expect(total).toBeGreaterThanOrEqual(7);expect(total).toBeLessThanOrEqual(26);await dice.getByRole('button',{name:'关闭',exact:true}).click();
- await thrown.getByRole('button',{name:/1d6\+4/}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d6+4');await dice.getByRole('button',{name:'关闭',exact:true}).click();
- await twohanded.getByRole('button',{name:/1d8\+4/}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d8+4');await dice.getByRole('button',{name:'关闭',exact:true}).click();
- await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await expect(thrown).toBeVisible();
- await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'装备 验收长兵器'}).uncheck();await page.keyboard.press('Escape');await expect(thrown).toHaveCount(0);await expect(page.locator('[data-quick-id="custom:manual"]')).toBeVisible();
+ await (await seekAttack(page,thrown)).getByRole('button',{name:'+6',exact:true}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d20+6');await dice.getByRole('button',{name:'投骰',exact:true}).click();await expect(dice.getByRole('status',{name:'投骰结果',exact:true})).toContainText('1d20:');const total=Number((await dice.getByRole('status',{name:'投骰结果',exact:true}).innerText()).split(' ')[0]);expect(total).toBeGreaterThanOrEqual(7);expect(total).toBeLessThanOrEqual(26);await dice.getByRole('button',{name:'关闭',exact:true}).click();
+ await (await seekAttack(page,thrown)).getByRole('button',{name:/1d6\+4/}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d6+4');await dice.getByRole('button',{name:'关闭',exact:true}).click();
+ await (await seekAttack(page,twohanded)).getByRole('button',{name:/1d8\+4/}).click();await expect(dice.getByRole('textbox',{name:'骰子表达式'})).toHaveValue('1d8+4');await dice.getByRole('button',{name:'关闭',exact:true}).click();
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await expect(await seekAttack(page,thrown)).toBeVisible();
+ await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'装备 验收长兵器'}).uncheck();await page.keyboard.press('Escape');expect(await attackIds(page)).toEqual(['custom:manual']);await expect(await seekAttack(page,'custom:manual')).toBeVisible();
 });
 
 test('weapon instances independently choose calculation attributes and retain choices through reload and native file import',async({page})=>{
@@ -68,19 +97,19 @@ test('weapon instances independently choose calculation attributes and retain ch
  const first=page.locator('[data-weapon-selection="ability-first"]'),second=page.locator('[data-weapon-selection="ability-second"]');
  await expect(first.getByRole('combobox')).toHaveValue('');await expect(first.getByRole('combobox').locator('option:checked')).toContainText('自动（力量）');
  await first.getByRole('combobox').selectOption('wis');await expect(second.getByRole('combobox')).toHaveValue('');await expect(page.locator('.automation-panel')).toContainText('感知 +3（手动选择');await page.keyboard.press('Escape');
- const a=page.locator('[data-quick-id="auto-weapon:ability-first:main"]'),b=page.locator('[data-quick-id="auto-weapon:ability-second:main"]');await expect(a).toContainText('+8');await expect(a).toContainText('1d6+7');await expect(b).toContainText('+9');await expect(b).toContainText('1d6+8');
+ const a='auto-weapon:ability-first:main',b='auto-weapon:ability-second:main';expect(await attackIds(page)).toEqual(['custom:manual-override',...['ability-first','ability-second'].flatMap(id=>['main','thrown','two-handed'].map(mode=>`auto-weapon:${id}:${mode}`))]);await expectAttack(page,a,'+8','1d6+7');await expectAttack(page,b,'+9','1d6+8');
  const editing=page.getByRole('switch',{name:'编辑模式',exact:true});if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await page.getByLabel('感知基础值',{exact:true}).fill('20');await page.getByLabel('感知基础值',{exact:true}).press('Enter');
- await expect(a).toContainText('+10');await expect(a).toContainText('1d6+9');await expect(b).toContainText('1d6+8');
- await expect(page.locator('[data-quick-id="custom:manual-override"]')).toContainText('2d8+7');await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await expectAttack(page,a,'+10','1d6+9');await expectAttack(page,b,'1d6+8');
+ await expectAttack(page,'custom:manual-override','2d8+7');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const saved=await readWorkspace(page),current=saved.characters.find((x:any)=>x.id===saved.activeId);expect(current.selections.find((s:any)=>s.id==='ability-first').weaponAbility).toBe('wis');expect(current.selections.find((s:any)=>s.id==='ability-second').weaponAbility).toBeUndefined();expect(current.runtime.resources.fixture.current).toBe(1);
- await page.reload();await expect(a).toContainText('1d6+9');await page.getByRole('button',{name:'自动化设置'}).click();await expect(first.getByRole('combobox')).toHaveValue('wis');await expect(second.getByRole('combobox')).toHaveValue('');await page.locator('.automation-panel details').first().locator('summary').click();await expect(page.locator('.automation-panel details').first()).toContainText('感知 +5（手动选择');await page.screenshot({path:test.info().outputPath('weapon-ability-choice.png')});
+ await page.reload();await expectAttack(page,a,'1d6+9');await page.getByRole('button',{name:'自动化设置'}).click();await expect(first.getByRole('combobox')).toHaveValue('wis');await expect(second.getByRole('combobox')).toHaveValue('');await page.locator('.automation-panel details').first().locator('summary').click();await expect(page.locator('.automation-panel details').first()).toContainText('感知 +5（手动选择');await page.screenshot({path:test.info().outputPath('weapon-ability-choice.png')});
  await page.setViewportSize({width:390,height:844});await first.scrollIntoViewIfNeeded();expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await page.screenshot({path:test.info().outputPath('weapon-ability-choice-mobile.png')});await page.setViewportSize({width:1512,height:982});await page.keyboard.press('Escape');
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByRole('button',{name:'生成并复制 JSON',exact:true}).click();const text=await page.getByRole('textbox',{name:'角色 JSON 文本',exact:true}).inputValue();const exported=JSON.parse(text);expect(exported.character.selections.find((s:any)=>s.id==='ability-first').weaponAbility).toBe('wis');expect(exported.character.selections.find((s:any)=>s.id==='ability-second').weaponAbility).toBeUndefined();
  await page.getByTestId('character-file').setInputFiles({name:'roundtrip-weapon.json',mimeType:'application/json',buffer:Buffer.from(text)});
  await expect(page.getByRole('tab',{name:'武器属性覆盖验收（导入）（导入）',exact:true})).toHaveAttribute('aria-selected','true');
  await expect.poll(async()=>{const w=await readWorkspace(page),card=w.characters.find((x:any)=>x.id===w.activeId);return {name:card?.name,ability:card?.selections.find((s:any)=>s.id==='ability-first')?.weaponAbility};}).toEqual({name:'武器属性覆盖验收（导入）（导入）',ability:'wis'});
- await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(a).toContainText('1d6+9');await expect(b).toContainText('1d6+8');
- await page.getByRole('button',{name:'自动化设置'}).click();await first.getByRole('combobox').selectOption('');await expect(first.getByRole('combobox').locator('option:checked')).toContainText('自动（力量）');await page.keyboard.press('Escape');await expect(a).toContainText('1d6+8');await expect(b).toContainText('1d6+8');
+ await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();await expectAttack(page,a,'1d6+9');await expectAttack(page,b,'1d6+8');
+ await page.getByRole('button',{name:'自动化设置'}).click();await first.getByRole('combobox').selectOption('');await expect(first.getByRole('combobox').locator('option:checked')).toContainText('自动（力量）');await page.keyboard.press('Escape');await expectAttack(page,a,'1d6+8');await expectAttack(page,b,'1d6+8');
 });
 test('source spells stay fixed, use their own casting ability and keep spent charges after reload and disable',async({page})=>{
  await ready(page);const c=manual();c.name='来源法术验收';c.automation=newAutomationState();c.abilities.cha=18;c.abilities.wis=14;
