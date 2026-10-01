@@ -19,9 +19,9 @@ test('DM assignment dialog and live player permission updates do not rewrite rem
  await page.evaluate(()=>(window as any).catalog('PLAYER',false));await expect(page.getByRole('switch',{name:'编辑模式'})).toBeDisabled();
  await page.evaluate(()=>(window as any).catalog('PLAYER',true,['player']));await page.getByRole('switch',{name:'编辑模式'}).click();await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','true');await expect(page.getByRole('button',{name:'分配玩家',exact:true})).toHaveCount(0);
  expect(await page.evaluate(()=>(window as any).workspaceWrites)).toBe(0);
- await page.getByRole('button',{name:'自动化设置',exact:true}).click();const automation=page.getByRole('dialog',{name:'基础自动化'});await automation.getByRole('button',{name:'开启自动计算',exact:true}).click();await expect(automation.getByRole('checkbox',{name:'启用自动计算'})).toBeChecked();
+ await page.getByRole('button',{name:'自动化设置',exact:true}).click();const automation=page.getByRole('dialog',{name:'基础自动化'});await expect(automation.getByRole('checkbox',{name:'启用自动计算'})).toBeChecked();expect(await page.evaluate(()=>(window as any).sent.filter((m:any)=>m.type==='save').length)).toBe(0);await automation.getByRole('checkbox',{name:'启用自动计算'}).uncheck();
  await expect.poll(()=>page.evaluate(()=>(window as any).sent.filter((m:any)=>m.type==='save').length)).toBe(1);
- const saves=await page.evaluate(()=>(window as any).sent);expect(saves.some((m:any)=>m.type==='createCard')).toBe(false);expect(saves.find((m:any)=>m.type==='save').delta.native).toContainEqual(expect.objectContaining({path:['automation'],after:expect.objectContaining({enabled:true})}));
+ const saves=await page.evaluate(()=>(window as any).sent);expect(saves.some((m:any)=>m.type==='createCard')).toBe(false);expect(saves.find((m:any)=>m.type==='save').delta.native).toContainEqual(expect.objectContaining({path:['automation'],after:expect.objectContaining({enabled:false,defaultsVersion:1})}));
  await page.evaluate(()=>(window as any).catalog('PLAYER',false));await expect(automation.getByRole('checkbox',{name:'启用自动计算'})).toBeDisabled();await automation.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.getByRole('tab',{name:'分配测试卡',exact:true})).toHaveAttribute('aria-selected','true');
 });
 
