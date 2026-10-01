@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-01-六';
+export const RELEASE_DATE='2026-10-02';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -199,13 +199,23 @@ const RELEASE_223_SECTIONS:ReleaseSection[]=[
  {title:'待验证',items:['实体手机及真实多人房间待验证；复杂正文规则、完整休息边界和完整英文翻译仍未全部支持。']},
 ];
 const SUITE_RELEASE_223_SECTIONS:ReleaseSection[]=[...RELEASE_223_SECTIONS,{title:'枭熊联动',items:['保留已上线的资源仪表盘、先攻与骰子修复。真实房主和玩家的自动化同步待验证。']}];
-export const RELEASE_SECTIONS:ReleaseSection[]=[{title:'启动与加载',items:['减少首次打开时需要下载的程序内容，并提前并行加载角色卡。拼音词库和部分设置面板在使用时加载。','加载较慢时显示当前阶段和等待时间；实际加载失败仍提供错误详情与重新加载按钮。','程序已缓存时，网页请求长时间没有返回会先打开缓存页面。已保存的角色与自动化设置保留。']},{title:'验证范围',items:['已验证弱网等待、拼音搜索和重试恢复；不同玩家的实际网络与设备仍需继续观察。']}];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS];
+const RELEASE_227_SECTIONS:ReleaseSection[]=[{title:'启动与加载',items:['减少首次打开时需要下载的程序内容，并提前并行加载角色卡。拼音词库和部分设置面板在使用时加载。','加载较慢时显示当前阶段和等待时间；实际加载失败仍提供错误详情与重新加载按钮。','程序已缓存时，网页请求长时间没有返回会先打开缓存页面。已保存的角色与自动化设置保留。']},{title:'验证范围',items:['已验证弱网等待、拼音搜索和重试恢复；不同玩家的实际网络与设备仍需继续观察。']}];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色卡启动与显示',items:['先打开已保存的角色卡，再读取 Wiki 和其他工具；资料暂未读完时，仍可查看、编辑和保存角色。','没有保存显示偏好时默认 A4；你主动选择的显示方式仍会保留。','保留资源仪表盘、基础自动化、角色数据及已消耗次数。']},
+ {title:'Wiki 连接与离线使用',items:['短暂网络故障会自动重试；持续断线时暂停继续下载，已有资料和角色卡仍可使用。','恢复连接后，可以补读失败和未读资料，无需重新下载已经成功的缓存。','使用过的页面工具会保留供离线重开；实际读取失败和未读资料仍显示提醒。']},
+ {title:'待验证与未完成',items:['不同玩家的网络、原设备和实体手机效果待验证。','自动选择或筛选式专长赠送规则、完整英文翻译仍未完成；手动调整容量不等于自动规则已完成。']},
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'地图选择与窗口跟随',items:['修复中继连接空闲后仍显示在线、却收不到选中变化的问题，并减少重复读取整个房间。','选中角色或怪物时跟随到对应卡；多选时先显示群体区域，取消选择后恢复原来的页面。','旧选择的迟到消息不会抢回当前页面，群体数据尚未读完时不会漏掉目标执行操作。']},
+ {title:'骰子加载',items:['合并已验证的骰子加载与缓存恢复修复，避免重复下载物理引擎。','骰子加载失败后可以重新尝试；持续损坏仍会报告原因。已验证本机真实投骰与完整动画。']},
+ {title:'枭熊联动待验证',items:['真实房主与玩家的联动、权限变化和原设备效果仍待验证；本机模拟不能替代真实房间验收。','更新后请先关闭附加窗口，刷新枭熊房间，再重新打开附加窗口。']},
+];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-01-六',sections:RELEASE_227_SECTIONS},
  {title:'2026-10-01-五',sections:mode==='suite'?SUITE_RELEASE_223_SECTIONS:RELEASE_223_SECTIONS},
  {title:'2026-10-01-四',sections:mode==='suite'?SUITE_RELEASE_222_SECTIONS:RELEASE_222_SECTIONS},
  ...(mode==='suite'?[{title:'2026-10-01-三',sections:SUITE_RELEASE_219_SECTIONS}]:[]),
