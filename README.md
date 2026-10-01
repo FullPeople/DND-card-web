@@ -38,6 +38,10 @@ Full Suite 集成版用于枭熊房间；源码中的常规构建仍保留同步
 
 ## 开发与自行部署
 
+仓库另提供独立的 [Go / SQLite 后端](backend/README.md)，支持角色快照、操作日志和实时同步。网页的本机独立模式保持不变；「角色簿 → 服务器角色…」可用管理员令牌登录、打开服务器角色或明确上传当前本机角色，托管角色以服务器快照为准，修改按 Operation 协议发送。协议见 [接入指南](docs/frontend/FRONTEND_IMPLEMENTATION_GUIDE.md)。
+
+本地联调：`cd backend && DND_CORS_ORIGIN=http://127.0.0.1:5178 go run ./cmd/server`，另开终端 `npm run dev`；Vite 把同源 `/api` 代理到 `DND_BACKEND_URL`（默认 `http://127.0.0.1:8080`），登录框服务器地址保持 `/api/v1`。首次令牌在 `backend/data/bootstrap-credentials.json`。生产部署需由反向代理在同一站点提供 `/api/v1`。
+
 需要 Node.js 22.12 或更新的兼容版本。Windows 测试默认使用 Edge；CI 使用 Playwright Chromium。
 
 ```sh

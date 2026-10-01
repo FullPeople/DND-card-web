@@ -1,3 +1,4 @@
+import {escapePointer} from './sync/operations';
 import type {Character} from './model';
 import {spellState} from './characterDetails';
 import {parentClass} from './featureOwnership';
@@ -33,3 +34,5 @@ export function syncAutoResources(c:Character,before?:Character){
  return previous!==JSON.stringify([resources,c.spellSettings?.slots]);
 }
 export function setResource(c:Character,id:string,current:number){const r=c.runtime.resources[id];if(!r)return;r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};}
+/** Canonical increment paths for an explicit spend/regain of one resource. */
+export function resourceIncrement(id:string){const paths=[`/runtime/resources/${escapePointer(id)}/current`];if(id.startsWith('spell-slot:'))paths.push(`/spellSettings/slots/${escapePointer(id.split(':')[1])}/used`);return {inc:paths};}

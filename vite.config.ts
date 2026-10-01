@@ -21,4 +21,6 @@ self.addEventListener('fetch', event => {
 });` });
   } };
 }
-export default defineConfig(({mode})=>({ plugins: [...(['standalone','automation-standalone'].includes(mode)?[standalonePlugin()]:[]),react(), offlineShell(),...(mode==='automation-standalone'?[{name:'automation-development',transformIndexHtml:(html:string)=>html.replace('DND 角色卡 · 单机版','DND 角色卡 · 自动化开发版')}]:[])], base: './', build:{target:['chrome109','edge109','firefox102','safari15.4'],outDir:mode==='automation-standalone'?'dist-automation':mode==='standalone'?'dist-standalone':'dist'},server: { port: mode==='automation-standalone'?5190:5178, strictPort: true,host:'127.0.0.1' } }));
+export default defineConfig(({mode})=>({ plugins: [...(['standalone','automation-standalone'].includes(mode)?[standalonePlugin()]:[]),react(), offlineShell(),...(mode==='automation-standalone'?[{name:'automation-development',transformIndexHtml:(html:string)=>html.replace('DND 角色卡 · 单机版','DND 角色卡 · 自动化开发版')}]:[])], base: './', build:{target:['chrome109','edge109','firefox102','safari15.4'],outDir:mode==='automation-standalone'?'dist-automation':mode==='standalone'?'dist-standalone':'dist'},server: { port: mode==='automation-standalone'?5190:5178, strictPort: true,host:'127.0.0.1',
+  // Same-origin /api/v1 for the optional Go backend (cookie session + WebSocket). Set DND_CORS_ORIGIN to this dev origin.
+  proxy:{'/api':{target:process.env.DND_BACKEND_URL||'http://127.0.0.1:8080',ws:true}} } }));

@@ -8,7 +8,7 @@ import {SheetEditContext} from './SheetEdit';
 import {Portrait} from './Portrait';
 import {FeaturePanel} from './FeaturePanel';
 import {IdentityToken} from './IdentityToken';
-export type Edit=(action:(c:Character)=>void,key?:string)=>void;
+export type Edit=(action:(c:Character)=>void,key?:string,intent?:import('../core/sync/diff').EditIntent)=>void;
 export type PageProps={c:Character;d:Derived;edit:Edit;browse:(kind:Kind)=>void;inspect:(e:Entry)=>void;onLink:(ref:string,kind?:string)=>void;add:(e:Entry)=>void;entries?:Entry[]};
 export const number=(v:string,max=9999)=>Math.max(0,Math.min(max,Math.trunc(Number(v)||0)));
 function Identity({kind,label,c,edit,inspect,browse}:{kind:Kind;label:string}&Pick<PageProps,'c'|'edit'|'inspect'|'browse'>){return <SheetCell label={label} className={`identity-field detail-identity identity-${kind}`} dropKinds={kind==='class'?['class','subclass']:[kind]}>{c.selections.filter(s=>s.entry.kind===kind||(kind==='class'&&s.entry.kind==='subclass')).map(s=><IdentityToken key={s.id} row={s} c={c} edit={edit} inspect={inspect}/>)}{!c.selections.some(s=>s.entry.kind===kind)&&<button className="cell-fill" onClick={()=>browse(kind)}>点击并拖拽填写</button>}</SheetCell>;}

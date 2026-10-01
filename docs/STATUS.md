@@ -1,3 +1,47 @@
+# 2026-10-01 · 服务器同步前端审阅修复（只改前端），未提交/发布
+
+后端（`backend/`）、HTTP/WS 协议、Operation、错误码、Schema 零修改。修复：①旧工作区泄漏：`saveWorkspace` 内经新增 `src/platform/localWorkspace.ts` 的 `localOnlyWorkspace` 统一剔除 `server:*` 行并把 activeId 换成本机角色，备份同样处理，`saveRecovery` 拒收托管卡；`saveClassCopy` 对服务器角色改为 POST /characters 创建新的服务器角色并打开（原卡不变，未知结果提示先刷新列表核对），删除本机卡时只在本机行内计算。②resync 自冲突：新增纯函数 `rebaseNeverSentOutbox`，按 outbox 原顺序在 working（快照+前序活动意图）上比对，已发送/未知 body 冻结，依赖已阻塞前序意图的离线修改标为依赖阻塞不越过；阻塞原因改为客户端 `hold`（stale/unreplayable/dependency），不再伪造 `revision_conflict`/`invalid_operation`；`resolve('mine')` 以前序活动意图为基础并把新 ID 写回后续未发送意图的依赖链；`propose` 的 before 改为写入事务内的投影（修复浏览器验收发现的“前一意图未落盘时连续编辑”自冲突）。③logout fail-closed：先独立写 `dnd-card:server-signed-out:<origin>` 标记，再删账户缓存、DELETE /session；restore 见标记不调 /me、不读缓存账户；login 成功才清除；结果未确认或缓存未删除时界面提示，标记也写不进且无法确认时抛错。④无 Web Locks 及取得锁后都调用新 `resumeSending()`（重读→sending 转 unknown→pump）。⑤clientId 每标签页存 sessionStorage，刷新稳定。另修浏览器验收发现的：旧编辑锁转移到本标签重读工作区时不再把当前服务器角色切回本机卡。改动：`src/platform/{localWorkspace.ts(新),storage.ts}`、`src/platform/server/{characterSync,serverSession,syncStore}.ts`、`src/ui/{App,ServerSync}.tsx`，前端指南同步更新。
+
+验证：定向 `tsc -p`（改动/新增文件）通过；`npm run build`（含 `tsc -b` 全项目）、`npm run build:standalone`、`vite build --mode automation-standalone` 均通过。`npx vitest run` 全量 412 通过 / 5 既有可选资料跳过。同步定向 core18/ws1/backend15/新增 `tests/server-sync-review.test.ts` 21 共 55 通过（真实 Go 后端 + 临时 SQLite，DND_RETENTION=3）：工作区边界、resync A/A2/B/C/D、未知队首 resync 后明确提交、logout A–D 与屏障写失败、无锁发送、Web Locks 接管不重复 inc 且保留原 clientId。对 5 处修复分别回退注入变异，相应用例均失败。新增真实浏览器 `playwright.server-sync.config.ts` + `tests/e2e/serverSync.spec.ts`（本机 Chrome；Go 后端经 Vite 代理、HttpOnly cookie、真实 IndexedDB/Web Locks/BroadcastChannel）5 项：登录/列表/打开/刷新恢复且旧 workspace 与 backup 无 `server:*`、服务器角色资料同步副本成为新服务器角色；同上下文双标签只由发送者提交、另一页经广播重读、发送者关闭后接管并以原 operationId/body 重发、服务器只减一次、clientId 两页不同且刷新不变；离线 25→20→15 刷新后按序提交无自冲突；保留窗口外仅未知队首需核对、明确提交后其余按序到 rev9；DELETE /session 失败后刷新不发 /me、不恢复（cookie 实际仍有效），重新登录后恢复。整套连续 2 轮 10/10 通过，保留窗口用例另 10 轮及“快速连续编辑”8 轮全部通过。回归：standalone 浏览器组（Chrome）18/18 通过，含本机角色资料同步副本与保存失败重试；主配置抽取 11 个文件 32 通过 / 16 失败，同 16 项在未含任何未提交改动的 HEAD 干净 worktree 上同样失败（旧选择器/布局断言，非本轮引入）。
+
+限制：浏览器验证用 Chrome（未装 Edge）；未跑主配置全量与 production-offline 组。非编辑锁标签页仍受旧“另一标签页正在编辑”只读锁限制，不能编辑服务器角色（双标签验收在发送者页编辑）。复制标签页时浏览器会复制 sessionStorage，副本沿用同一 clientId。退出只阻止本浏览器以后的自动恢复，其他已打开标签在刷新前仍保持内存会话。未知结果若实际已提交，resync 投影可能重复计入其 inc，同路径后续 set 会保守地转人工确认。依赖阻塞的意图在前序处理后仍需逐条确认。「复制当前角色」对服务器角色仍创建本机副本（新本机 ID）。未提交、push 或部署。以下为上一轮记录。
+
+# 2026-10-01 · React 前端接入 Go 后端（服务器托管角色），未提交/发布
+
+新增同步层，后端协议/字段/错误码未改：`src/core/sync/`（协议类型、与服务端一致的纯 Operation reducer、编辑→Operation 生成：值输入为 set，仅显式 `-5` 类输入和资源 ± 按钮为 inc；五个注册数组按 ID upsert/delete/order.move，resources 按键，其余数组整体 set，元数据不上传）；`src/platform/server/`（characterApi、wsClient、syncStore、characterSync、serverSession）。独立 IndexedDB `dnd-card-server-sync` 按 serverOrigin+accountId+服务器角色 UUID 存 confirmed 快照与完整 outbox（同一事务），旧 `dnd-card-*` 工作区/备份/恢复/资料缓存不变。意图先落盘再显示；每卡单飞，已发 body 与 operationId 冻结，未知结果/429/5xx 原 ID 退避重试；HTTP 与 WS 竞速时每个 revision 只应用一次，按 operationId 收束；gap 单飞补 delta，resync_required 重读快照，从未发送的离线意图与新快照比对后转用户确认，已发未知请求再遇 resync_required 转人工核对；冲突/拒绝阻塞后续发送，界面显示路径、服务器值（区分不存在）、我的修改（inc 显示扣除/增加），提供保留服务器/重新编辑/明确提交（重读最新 revision、新 ID）。403 停止发送并保留草稿；退出关闭 WS；令牌只用于换 HttpOnly cookie，不保存。多标签页用 Web Locks 选发送者、BroadcastChannel 通知重读，IDB 读改写事务避免覆盖队列。
+
+React 改动保持五页外观：「角色簿 → 服务器角色…」登录/列表/打开/明确上传当前本机角色/拥有者授权与撤权；托管卡在工作区内存中以 `server:<uuid>` 出现，不写入本机工作区；工具栏「服务器 · 状态」打开冲突处理。App `edit()` 对托管卡以“同一编辑流水线的无操作 hydration”为基线生成 Operation，派生/hydration 不上传；撤销/重做为新 Operation；导出使用原 document.id。HP/临时 HP 输入通过 NumberInput `data-relative` 区分 set/inc，ResourceRow/ResourceWidgets 传递资源增减意图。Vite dev 新增 `/api` 同源代理（`DND_BACKEND_URL`）。Suite/workbench、merge.ts、document-delta、旧存储、原生导入导出与 Owlbear 原型未删改。
+
+验证（按用户要求仅类型检查与测试，不做浏览器验证和完整构建）：仅对本次修改/新增文件运行 `tsc -p` 定向检查（含其传递依赖与 App.tsx）通过；`npx vitest run` 全量 391 通过 / 5 既有可选真实资料跳过。新增 `tests/server-sync-core.test.ts`（18，协议样例 reducer、diff、收束/基线/离线比对）、`tests/server-sync-ws.test.ts`（1，退避+jitter/从 confirmed 重订阅/非法消息丢弃）、`tests/server-sync-backend.test.ts`（15）：每次构建并启动真实 Go 后端 + 临时 SQLite（DND_RETENTION=3），两账户/viewer 独立身份覆盖创建读取与身份分离、不同路径自动 rebase、同 path 冲突及两种决定、并发 inc 累计、相同 operationId 不重复及异体复用 409、不同 selection ID 并改、order.move、删除引用清理、WS 先到/HTTP 先到、响应丢失原 ID 重试、gap 补齐、断线重连回放先于 subscribed、离线编辑“刷新”恢复、保留窗口 resync（未知请求转核对、陈旧离线意图转确认）、viewer 拒绝与撤权停止接收、存储写失败拒绝意图、两标签共享 outbox 不重复、备份往返（2014/空槽/资源余量/图片/来源）。该文件连续 5 次全部通过；对引擎注入“重复应用 revision”“重试换 ID”两处变异后 6 项失败，证明用例有效。
+
+限制：未运行 Playwright/真实浏览器、完整 `npm run build`/全项目类型检查；IndexedDB、Web Locks、BroadcastChannel 与 React 接线只经类型检查，未在浏览器中实测（测试用同契约的内存 store）。多客户端测试在 Node 中以 Bearer 头连接 WS，浏览器 cookie 会话路径未实测。hydration 生成的随机 ID 条目在两个客户端同时编辑时仍可能各自上传；超过 128 项的单次编辑拆为多批（非原子）；未知结果被重放到新快照时乐观视图可能短暂重复显示；角色列表无名称时需打开后才显示。FVTT/Owlbear 连接器仍未实现，未新增 binding 请求。未提交、push 或部署。以下为后端阶段的历史记录。
+
+# 2026-10-01 · Go 后端 Windows SQLite / 撤权队列修复，未提交/发布
+
+Windows 原生 Go1.25.3 最小诊断确认旧 DSN 为错误的 `file://C:/...`，Open 稳定返回 `SQL logic error: out of memory (1)`；普通绝对路径和规范 `file:///C:/...` 同机成功。生产 DSN 改为原生绝对路径加编码 pragma query，Unix 合法 `?` 文件名用 url.URL 转义 URI。WAL/外键/busy_timeout/NORMAL 校验、migration trigger/checksum/rollback 均保留；Windows/WSL 的 ASCII、空格、中文与合法特殊字符已真实 Open/reopen，用 database_list/os.SameFile 核对预期磁盘文件。
+
+撤权立即稳定压缩受控队列，释放 A 旧 token 的容量与字节，B/C 和连接响应保留 FIFO；取出/撤权删除/close 在同一 sendMu 下各只扣一次。写入 barrier 改为目标 characterId 的 in-flight completion（包含已替换/unsubscribe 的旧 token），不等待无关角色 write；DELETE 返回后旧 token 不能再开始发送。该卡 Service gate 最坏仍等待已开始帧的单次10秒写超时剩余时间，真实 SQLite/阻塞 WS writer 测试证明其他卡 Submit/Synchronize/Create 继续推进。既有 per-character sequencing 实现、Adapter 语义、Schema、Operation/HTTP/WS 格式及 revision/rebase/幂等未改。
+
+本轮5个Go文件 gofmt、WSL `GOPROXY=off go test ./... -count=1`、`go test -race ./... -count=1`、`go vet ./...` 全通过。Windows 原生 migration 定向、新 DSN/path 全包测试和全量 `go test ./... -count=1` 通过；默认 Windows 缓存缺依赖及 UNC 缓存文件锁失败单独记录，最终复用复制到 Windows 临时目录的既有缓存离线成功，没有安装/下载依赖。详见 [后端验证](backend/VALIDATION.md)。本轮未另跑 Windows race/vet、交叉编译、exe 独立进程 smoke 或容量测试。
+
+保留此前所有未提交内容；仅改5个后端Go文件与 backend/README、docs/backend/DATABASE、docs/backend/VALIDATION、本 STATUS。git diff --check 及本轮未跟踪文件 whitespace 检查通过，`git diff --name-only -- src prototype package.json package-lock.json` 输出为空；未提交、push 或部署。以下是上一阶段的历史记录。
+
+# 2026-10-01 · Go 后端审阅修复完成，未提交/发布
+
+修复Service全局锁为可回收characterId gate，同一卡commit后publish与subscribe/replay注册仍严格排序，Create及不同角色独立推进；SQLite继续单连接和原CAS事务。Adapter.BaseRevision来自Binding.LastRevision，外部Event.Revision仅作平台版本；connector检查点持久化边界已说明。viewer/editor切换保留WS，删除权限只撤销目标角色并失效其排队消息，其他订阅继续使用原连接。
+
+migration通过驱动SQLite parser执行完整script，真实trigger/字符串分号/checksum/失败rollback用例通过；新增回执清理索引及配置，默认至少90天且最近10000revision，revision窗口至少为log的10倍，只有过期、超出版本窗口且无log的回执才分批清理。超窗原请求返回resync_required而不重复执行，需人工核对。
+
+本轮gofmt、`go test ./... -count=1`、`go test -race ./... -count=1`、`go vet ./...`及diff检查通过，包含真实SQLite/HTTP/WS。初次沙箱端口拒绝经授权重跑解决；具体证据见 [后端验证](backend/VALIDATION.md)。保留既有未提交内容，src/prototype/package.json/package-lock.json及Schema/HTTP/WS消息结构未改动；未提交、推送或部署。本轮未重跑Windows/独立进程smoke/容量测试，不声称完整FVTT/Owlbear connector。下文为先前阶段记录。
+
+# 2026-10-01 · 独立 Go 后端本地交付，前端未接入
+
+新增 backend 模块：Gin/GORM/纯 Go SQLite WAL、版本化 SQL migrations、Character v1完整快照、revision、六种Operation、路径冲突/自动rebase、operationId回执（保留策略以上方最新修复为准）、有限delta日志、权限和commit后WebSocket广播。现有selections稳定ID与运行资源保持兼容；未修改src/prototype或前端依赖，未提交、推送或发布。
+
+真实SQLite/HTTP/WS测试、race、vet、Windows无CGO交叉编译和独立进程smoke已通过。具体证据、环境失败及边界见 [后端验证](backend/VALIDATION.md)；运行方式见 [backend/README](../backend/README.md)。当前不声称已验证1000连接容量、Windows原生运行、完整FVTT/OBR连接器或前端UI接入。
+
+交接：[源码审计](backend/AUDIT.md)、[前端指南](frontend/FRONTEND_IMPLEMENTATION_GUIDE.md)、[Claude实施Prompt](frontend/CLAUDE_FRONTEND_PROMPT.md)、[OpenAPI](../openapi.yaml)。线上217状态仍以下文既有发布回执为准。
+
 # 2026-10-01 · 217 已发布，卡顿排查按用户要求暂缓
 
 国内网站standalone-1.0.217 / 公告0.1.19、新版Suite1.0.217-dev及GitHub备用站均上线，公告已更新。运行源码Web `023feb6256dd5a1d85d92e9fe338b45fe8f280f0`、Suite `79e0c46f3d86078946426ccdad4e2a03ced2c34f`；完整验证、216备份和未完成边界见 [217发布回执](RELEASE-217-RESULT.md)。

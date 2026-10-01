@@ -22,7 +22,7 @@ import { DropZone } from './DragEntry';
 import { trainingCategory } from './trainingData';
 import { belongsToClass } from '../core/sheet';
 
-type Edit = (action: (draft: Character) => void, key?: string) => void;
+type Edit = (action: (draft: Character) => void, key?: string, intent?: import('../core/sync/diff').EditIntent) => void;
 type Props = {
   catalog?:Entry[]; statusRibbon: ReactNode;
   addEntry: (entry: Entry, section?: Selection['section']) => void; c: Character; d: Derived; edit: Edit; browse: (kind: Kind | 'size',parent?:Entry) => void; inspect: (e: Entry) => void;
@@ -96,7 +96,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
         <SheetCell label="护甲等级" className="armor-cell" hint={d.trace.ac.join('；')}><AdjustedValue c={c} value={d.ac} target="ac" label="护甲等级" edit={edit}/><small>AC</small></SheetCell>
       </div>
       <div className="overview-health">
-        <SheetCell label="生命值" settingsIcon onHeadingClick={editing?openHp:undefined} headingActionLabel="设置生命值取值方式" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput arithmetic aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput arithmetic aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
+        <SheetCell label="生命值" settingsIcon onHeadingClick={editing?openHp:undefined} headingActionLabel="设置生命值取值方式" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput arithmetic aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp', e.currentTarget.dataset.relative==='true'?{inc:['/runtime/hp']}:undefined)}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput arithmetic aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp', e.currentTarget.dataset.relative==='true'?{inc:['/runtime/tempHp']}:undefined)}/></label></div></SheetCell>
         <SheetCell label="生命骰" className="dice-cell"><HitDiceResources c={c} edit={edit}/></SheetCell>
       </div>
       <Portrait c={c} edit={edit}/>

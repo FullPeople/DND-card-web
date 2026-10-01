@@ -1,14 +1,15 @@
 import {useEffect,useRef,useState,type CSSProperties,type PointerEvent as ReactPointerEvent,type KeyboardEvent} from 'react';
 import {createPortal} from 'react-dom';
 import type {Character} from '../core/model';
-import {setResource} from '../core/resources';
+import {resourceIncrement,setResource} from '../core/resources';
+import type {EditIntent} from '../core/sync/diff';
 import {moveWidget,resourceWidgetLayout,WIDGET_STYLES,widgetStyleNames,type ResourceWidgetLayout,type WidgetStyle} from '../core/resourceWidgets';
 import {ResourceRow} from './ResourceRow';
 import './resourceWidgets.css';
 type Value=Character['runtime']['resources'][string];
 const handles=['nw','n','ne','e','se','s','sw','w'] as const;
 const handleNames={nw:'左上',n:'上',ne:'右上',e:'右',se:'右下',s:'下',sw:'左下',w:'左'};
-export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage}:{c:Character;rows:[string,Value][];editing:boolean;enabled:boolean;gm:boolean;edit:(f:(c:Character)=>void)=>void;manage:()=>void}){
+export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage}:{c:Character;rows:[string,Value][];editing:boolean;enabled:boolean;gm:boolean;edit:(f:(c:Character)=>void,key?:string,intent?:EditIntent)=>void;manage:()=>void}){
  const ids=rows.map(([id])=>id),saved=c.quickbarLayout?.widgets||{};
  const [preview,setPreview]=useState<Record<string,ResourceWidgetLayout>>(),[page,setPage]=useState(0),[selected,setSelected]=useState(''),[open,setOpen]=useState('');
  const canvas=useRef<HTMLDivElement>(null),panel=useRef<HTMLDivElement>(null),trigger=useRef<HTMLElement|null>(null),cancel=useRef<(()=>void)|undefined>(undefined);
@@ -45,6 +46,6 @@ export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage}:{c:Chara
    </div>;})}
   </div>
   {writable&&<div className="resource-layout-tools">{selection?<><label>样式<select aria-label="选中资源样式" value={selection.style} onChange={e=>change(selected,{style:e.target.value as WidgetStyle})}>{WIDGET_STYLES.map(style=><option key={style} value={style}>{widgetStyleNames[style]}</option>)}</select></label><button disabled={selection.page===0} aria-label="将选中资源移至前页" onClick={()=>change(selected,{page:selection.page-1})}>←页</button><button aria-label="将选中资源移至后页" onClick={()=>change(selected,{page:selection.page+1})}>页→</button></>:<span>选模块 · 拖动 ⠿ · 八点缩放</span>}<button onClick={()=>{edit(d=>{if(d.quickbarLayout)delete d.quickbarLayout.widgets;});setPage(0);setSelected('');}}>重排</button></div>}
-  {active&&createPortal(<div ref={panel} role="dialog" aria-label={`${active[1].name||active[0]}资源操作`} className="resource-widget-popover" style={{left:Math.max(8,Math.min(trigger.current?.getBoundingClientRect().left||8,window.innerWidth-304)),top:Math.max(8,Math.min((trigger.current?.getBoundingClientRect().bottom||8)+4,window.innerHeight-190))}}><button className="resource-widget-close" aria-label="关闭资源操作" onClick={()=>{setOpen('');trigger.current?.focus();}}>×</button><ResourceRow key={active[0]} resource={{...active[1],id:active[0]}} enabled={enabled} gm={gm} change={async n=>edit(d=>setResource(d,active[0],n))} configure={()=>{window.dispatchEvent(new CustomEvent('edit-character-resource',{detail:active[0]}));setOpen('');}} lock={()=>edit(d=>{const r=d.runtime.resources[active[0]];if(r)r.locked=!r.locked;})}/></div>,document.querySelector('dialog[open]')||document.body)}
+  {active&&createPortal(<div ref={panel} role="dialog" aria-label={`${active[1].name||active[0]}资源操作`} className="resource-widget-popover" style={{left:Math.max(8,Math.min(trigger.current?.getBoundingClientRect().left||8,window.innerWidth-304)),top:Math.max(8,Math.min((trigger.current?.getBoundingClientRect().bottom||8)+4,window.innerHeight-190))}}><button className="resource-widget-close" aria-label="关闭资源操作" onClick={()=>{setOpen('');trigger.current?.focus();}}>×</button><ResourceRow key={active[0]} resource={{...active[1],id:active[0]}} enabled={enabled} gm={gm} change={async(n,relative)=>edit(d=>setResource(d,active[0],n),undefined,relative?resourceIncrement(active[0]):undefined)} configure={()=>{window.dispatchEvent(new CustomEvent('edit-character-resource',{detail:active[0]}));setOpen('');}} lock={()=>edit(d=>{const r=d.runtime.resources[active[0]];if(r)r.locked=!r.locked;})}/></div>,document.querySelector('dialog[open]')||document.body)}
  </section>;
 }

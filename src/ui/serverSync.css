@@ -1,0 +1,10 @@
+.server-sync-status{white-space:nowrap}
+.server-sync-status.blocked,.server-sync-status[data-phase=forbidden],.server-sync-status[data-phase=unauthorized]{outline:2px solid #8a2b2b}
+.server-panel label{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.server-character-list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}
+.server-character-list li{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.server-character-list span{display:flex;flex-direction:column}
+.server-permissions ul{padding-left:16px}
+.server-sync-conflicts table{width:100%;border-collapse:collapse;margin:6px 0}
+.server-sync-conflicts td,.server-sync-conflicts th{border-bottom:1px solid currentColor;padding:3px 6px;text-align:left;vertical-align:top;word-break:break-all}
+.server-sync-code{font-family:monospace;font-size:.85em}
