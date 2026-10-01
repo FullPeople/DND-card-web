@@ -22,7 +22,15 @@ async function load(page:Page,c=card(),prepare?:()=>Promise<void>){
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
  const editing=page.getByRole('switch',{name:'编辑模式',exact:true});if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await page.getByRole('tab',{name:'法术',exact:true}).click();
 }
-async function drag(page:Page,from:Locator,to:Locator){await from.scrollIntoViewIfNeeded();await to.scrollIntoViewIfNeeded();const a=await from.boundingBox(),b=await to.boundingBox();if(!a||!b)throw Error('drag target missing');await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(a.x+a.width/2+12,a.y+a.height/2,{steps:3});await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:15});await page.mouse.up();}
+async function drag(page:Page,from:Locator,to:Locator){
+ // hover waits for a stable, visible source after deferred rendering/scaling.
+ await from.hover();const a=await from.boundingBox();if(!a)throw Error('drag source missing');
+ await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(a.x+a.width/2+12,a.y+a.height/2,{steps:3});
+ // A4 can put the destination outside the source viewport. Start the gesture
+ // on the visible source before scrolling the destination into reach.
+ await to.scrollIntoViewIfNeeded();const b=await to.boundingBox();if(!b)throw Error('drag target missing');
+ await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:15});await page.mouse.up();
+}
 
 // Observe actual rendered motion over successive browser frames, including its destination.
 async function recordMotion(page:Page){await page.evaluate(()=>{
@@ -52,6 +60,9 @@ test('original spell height, cut frame, ritual wash and rotating concentration s
 
 test('known spells press in place and toggle a prepared copy, including cantrips, without flight or reflow',async({page})=>{
  await load(page);const known=page.locator('.spell-library [data-spell-id="Ward"]'),prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]'),gift=page.locator('.source-spell-row');
+ // The page is loaded on demand. Snapshot the mounted library, not the empty
+ // interval between selecting its tab and completing the deferred module.
+ await expect(known).toBeVisible();
  const positions=()=>page.locator('.spell-library .spell-stock-tile').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return {id:(el as HTMLElement).dataset.spellId,x:r.x,y:r.y,w:r.width,h:r.height};}));
  const before=await positions();await recordMotion(page);await known.click();await expect(prepared).toBeVisible();await expect(known).toHaveAttribute('aria-pressed','true');await expect(known).toHaveCSS('box-shadow',/inset/);await expect(known.locator('.spell-ready-mark')).toContainText('已预备');expect(await positions()).toEqual(before);
  await known.click();await expect(prepared).toHaveCount(0);await expect(known).toHaveAttribute('aria-pressed','false');await expect(known.locator('.spell-ready-mark')).toHaveCount(0);await expect(gift).toContainText('免费 1/1');expect(await positions()).toEqual(before);
