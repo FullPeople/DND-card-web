@@ -2,9 +2,9 @@
 
 左边是角色卡，右边是规则资料。卡片在需要填写的位置给出提示，玩家查阅并拖入条目，逐步完成角色。
 
-**[打开单机角色卡与 Wiki（国内地址）](https://obr.dnd.center/card/)** · [GitHub Pages 备用地址](https://fullpeople.github.io/DND-card-web/) · [验收记录](docs/ACCEPTANCE.md) · [规则覆盖范围](docs/RULE-COVERAGE.md)
+**[打开单机角色卡与 Wiki（国内地址）](https://obr.dnd.center/card/)** · [验收记录](docs/ACCEPTANCE.md) · [规则覆盖范围](docs/RULE-COVERAGE.md)
 
-网页端先行，之后由 C++ 桌面客户端复用界面、数据和规则。首版是引导手动选择的完整网页工作区；特殊规则的自动适配范围单独记录，不声称模拟所有 D&D 规则。
+本项目维护浏览器中的角色卡与资料工作区。特殊规则的自动适配范围单独记录，不声称模拟所有 D&D 规则。
 
 - 沿用原 Godot 角色卡布局和 StyleBox 视觉设计。
 - 固定 A4 纸张，区域内滚动；主要 / 特性 / 背景 / 法术 / 背包五页切换。
@@ -21,7 +21,7 @@
 
 ## 两种构建
 
-GitHub Pages 发布独立单机版：不加载枭熊连接和联机同步模块，角色直接保存在本机。下载 Windows 免安装启动包和离线使用方法见 [单机版说明](docs/STANDALONE.md)。
+国内 `/card/` 使用独立单机网页版构建，不加载枭熊连接和联机同步模块，角色直接保存在当前浏览器。使用和离线缓存方法见 [单机网页版说明](docs/STANDALONE.md)。
 
 Full Suite 集成版用于枭熊房间；源码中的常规构建仍保留同步、总览、资源等功能。单机与集成版分别构建，不通过 URL 参数切换。
 
@@ -48,9 +48,9 @@ npm run test:e2e
 npm run build
 ```
 
-构建结果在 `dist/`，部署到 HTTPS 静态服务器即可；不能直接用 `file://` 打开源文件作为应用。GitHub Actions 完成规则测试、构建及浏览器验收后发布到 Pages。静态构建约 445 KB JavaScript（gzip 约 146 KB），不打包上游规则资料。
+集成版构建结果在 `dist/`；国内单机网页版运行 `npm run build:standalone`，结果在 `dist-standalone/`，`npm run build:domestic` 保留为同一构建的兼容命令。部署到 HTTPS 静态服务器，不直接用 `file://` 打开源文件作为应用。GitHub Actions 执行规则测试、两种构建及浏览器验收；国内发布独立核对验收结果和产物，流程见 [国内托管说明](docs/DOMESTIC-HOSTING.md)。构建不打包上游规则资料。
 
-数据只存在当前浏览器的本站存储中，清除站点数据会删除角色和缓存。自动备份保留上一次保存；跨设备迁移请使用 JSON 导出。Excel 适配与 C++ 宿主尚属后续阶段。
+数据只存在当前浏览器的本站存储中，清除站点数据会删除角色和缓存。自动备份保留上一次保存；跨设备迁移请使用 JSON 导出。
 
 自 v0.1.4 起，原创代码、文档和美术采用 [项目非商用共享许可](LICENSE)：商用须另获授权；分发或对外提供服务须免费公开完整衍生源码并沿用本许可。它不是标准开源许可；[许可说明](docs/LICENSING.md) 列出了适用范围和旧 MIT 版本边界。第三方规则正文、译文及图像不因该代码许可证而获得再授权；资料由使用者配置的数据源提供，不随源码仓库分发。角色数据保存在本机，不会自动上传。运行时依赖的原始许可保留在 [第三方许可](public/third-party-licenses.txt)。
 

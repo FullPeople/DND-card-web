@@ -33,10 +33,6 @@ def main():
             shutil.copy2(web/'LICENSE',folder/'LICENSE.txt')
             shutil.copy2(out/'source.zip',folder/'source.zip')
             write(folder/'release.json',{'version':'standalone-1.0.225','announcementVersion':'0.1.21','sourceCommit':wc})
-            (folder/'downloads').mkdir()
-            with zipfile.ZipFile(folder/'downloads/DND-Card-Standalone-225.zip','w',zipfile.ZIP_DEFLATED) as z:
-                for f in sorted(folder.rglob('*')):
-                    if f.is_file() and 'downloads' not in f.relative_to(folder).parts:z.write(f,f.relative_to(folder).as_posix())
         else:
             for sub in (['workbench','card-viewer'] if name=='suite-dev' else ['card-viewer']):
                 shutil.copytree(web/'dist',folder/sub)
