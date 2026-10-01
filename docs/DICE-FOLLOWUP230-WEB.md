@@ -1,6 +1,6 @@
 # 230 后续骰子 Web 桥接检查
 
-本记录针对 `codex/web230-followup-20261001` 的 Web 改动，不是上线回执。没有修改 Suite 仓库、线上版本、真实房间或玩家数据；提交和推送由主任务分阶段执行。后续锁定 Suite 最终 `259672c6…` 的生产组件 / 实际 SDK 配对结果见 [配对复验](DICE-FOLLOWUP230-PAIRED.md)，其中旧群体数字回显仍失败；该新记录优先于本页初轮 Suite 未测边界。
+本记录针对 `codex/web230-followup-20261001` 的 Web 改动，不是上线回执。没有修改 Suite 仓库、线上版本、真实房间或玩家数据；提交和推送由主任务分阶段执行。最终锁定 Web `488ea1be…` 与 Suite `3fc7c710…` 的生产组件 / 实际 SDK 配对结果见 [配对复验](DICE-FOLLOWUP230-PAIRED.md)，原固定 15 项全部通过，259 的旧群体回显失败作为历史对照保留；该新记录优先于本页初轮 Suite 未测边界。
 
 ## 需求、改动与证据
 
@@ -14,7 +14,7 @@
 
 代码：`src/ui/Workbench.tsx`、`src/ui/GroupRollArea.css`；新增浏览器用例：`tests/e2e/diceFrame230.spec.ts` 与 `tests/e2e/harness/dice-frame230.tsx`。既有 `tests/e2e/groupRoll217.spec.ts` 原样执行。
 
-## 已有协议与 Suite 协调项
+## 初轮协议核对与历史 Suite 协调项
 
 只读核对仓库为 [FullPeople/obr-suite](https://github.com/FullPeople/obr-suite)，配套分支 `codex/release230-suite` 当次完整 SHA `c90ed018bb869068526ef9bfc24da2a3d9022712`。
 
@@ -35,9 +35,9 @@ iframe 消息：
 
 Web 将 `method` 和 `args` 传入已有 `diceRpc`。Suite `src/modules/dice/panel-page.ts`、`history-page.ts` 拥有历史按钮；`src/workbench/dice.ts`、`token-results.ts` 与 3D overlay 拥有头顶结果及取消显示。Web 仓库没有 `workbench-dice` 资产目录，这些面板由 Suite 构建提供。本地 `LocalDice.tsx` 只有投骰弹窗，没有历史列表。
 
-已向主任务报告 Suite 竞态候选：`history-page.ts` 的 Action 历史路径先等待发送回执，再修改 `activeReplayCid`；延迟回执期间连续点击同项可能连续发送 `open`。`panel-page.ts` 则先记录意图。此记录为源码核对和协调项，未宣称已经在真实 Suite 宿主复现或修复。半透明残留、群体历史完全取消和跨历史入口互斥仍需 Suite 任务实测并修复。
+初轮向主任务报告 Suite 竞态候选：`history-page.ts` 的 Action 历史路径先等待发送回执，再修改 `activeReplayCid`；延迟回执期间连续点击同项可能连续发送 `open`。`panel-page.ts` 则先记录意图。此段保留初轮源码核对过程；后续实际SDK配对复现了连点及旧群体回显，父任务已在Suite修复，最终3fc原15项全部通过，详见上方配对复验。真实登录房间、物理投掷和真人多人权限仍未测。
 
-## 本任务测试结果
+## 初轮 Web 子任务测试结果（最终复验见配对报告与总清单）
 
 | 检查 | 结果 |
 | --- | --- |
