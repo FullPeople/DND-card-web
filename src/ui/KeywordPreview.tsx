@@ -41,11 +41,16 @@ function Pane({ value, pinned, index, keep, leave, open }: { value: Preview; pin
     <div className="keyword-content rules-prose">{entry ? <ContentBoundary key={entry.id}>{entry.kind==='monster'?<MonsterDocument entry={entry} onLink={open}/>:<>{!value.sourceLabel && <EntryFacts entry={entry} onLink={open}/>}<Entries compact={entry.kind==='feature'} value={entry.entries} onLink={open}/><SpellLearners entry={entry} onLink={open}/></>}</ContentBoundary> : null}</div>
   </aside>;
 }
-export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCommit, isExcluded, wikiVisible=wikiIsVisible }: { isExcluded?:(entry:Entry)=>boolean; wikiVisible?:()=>boolean; sheetPreview?:(entry?:Entry)=>void; sheetCommit?:(entry:Entry)=>void; children: ReactNode; resolve: (reference: string, kind?: string) => Entry | undefined; open: (reference: string, kind?: string) => void }) {
+export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCommit, isExcluded, readableEntry, wikiVisible=wikiIsVisible }: { readableEntry?:(entry:Entry)=>Entry|undefined; isExcluded?:(entry:Entry)=>boolean; wikiVisible?:()=>boolean; sheetPreview?:(entry?:Entry)=>void; sheetCommit?:(entry:Entry)=>void; children: ReactNode; resolve: (reference: string, kind?: string) => Entry | undefined; open: (reference: string, kind?: string) => void }) {
   const sheetAnchor=useRef<HTMLElement | undefined>(undefined);
   const sheetCallbacks=useRef({sheetPreview,sheetCommit,resolve,wikiVisible});sheetCallbacks.current={sheetPreview,sheetCommit,resolve,wikiVisible};
   const [preview, setPreview] = useState<Preview>(); const [pinned, setPinned] = useState<Preview[]>([]);
-  const state = useRef({ preview, pinned }); state.current = { preview, pinned };
+  // Fixed tooltips own snapshots too. Resolve them against the current access
+  // set before rendering, so removing a card cannot leave its old body visible.
+  const readable=(value:Preview|undefined)=>{if(!value?.entry||!readableEntry)return value;const entry=readableEntry(value.entry);return entry?entry===value.entry?value:{...value,entry}:undefined;};
+  const visiblePreview=readable(preview),visiblePinned=pinned.flatMap(value=>{const next=readable(value);return next?[next]:[];});
+  const state = useRef({ preview:visiblePreview, pinned:visiblePinned }); state.current = { preview:visiblePreview, pinned:visiblePinned };
+  useEffect(()=>{if(visiblePreview!==preview)setPreview(visiblePreview);if(visiblePinned.length!==pinned.length||visiblePinned.some((value,i)=>value!==pinned[i]))setPinned(visiblePinned);},[readableEntry,preview,pinned]);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), pending = useRef<Preview | undefined>(undefined), counter = useRef(0), suppressUntil = useRef(0), backdropPressed = useRef(false);
   const moveFrame = useRef(0);
   const dismissedAnchors = useRef(new Set<HTMLElement>());
@@ -118,8 +123,8 @@ export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCom
       pane.style.top = `${Math.max(8, Math.min(innerHeight - h - 8, point.y + h + 18 < innerHeight ? point.y + 18 : point.y - h - 14))}px`;
     });
   }
-  return <ReferenceContext.Provider value={{ show, move, leave, close, resolve:(reference,kind)=>sheetCallbacks.current.resolve(reference,kind), commit:(anchor,reference,kind,entry)=>{if(!anchor.closest('.paper,[data-wiki-preview]')||!sheetCallbacks.current.sheetCommit)return false;const found=sheetCallbacks.current.resolve(reference,kind)||entry;if(!found)return false;sheetCallbacks.current.sheetCommit(found);return true;}, active: preview?.anchor, activeId: preview?.id }}>
+  return <ReferenceContext.Provider value={{ show, move, leave, close, resolve:(reference,kind)=>sheetCallbacks.current.resolve(reference,kind), commit:(anchor,reference,kind,entry)=>{if(!anchor.closest('.paper,[data-wiki-preview]')||!sheetCallbacks.current.sheetCommit)return false;const found=sheetCallbacks.current.resolve(reference,kind)||entry;if(!found)return false;sheetCallbacks.current.sheetCommit(found);return true;}, active: visiblePreview?.anchor, activeId: visiblePreview?.id }}>
     {children}
-    {createPortal(<>{pinned.length > 0 && <div className="tooltip-backdrop" data-testid="tooltip-backdrop" onPointerDown={e => { backdropPressed.current = true; e.preventDefault(); e.stopPropagation(); }} onPointerUp={e => { e.preventDefault(); e.stopPropagation(); if (e.button !== 0 && backdropPressed.current) { backdropPressed.current = false; suppressUntil.current = Date.now() + 800; clear(); } }} onClick={e => { e.preventDefault(); e.stopPropagation(); clear(); }} onContextMenu={e => e.preventDefault()} onWheel={e => e.stopPropagation()}/>}{pinned.map((value, index) => <Pane key={value.id} value={value} pinned index={index} keep={keep} leave={leave} open={open}/>)}{preview && <Pane key={preview.id} value={preview} pinned={false} index={pinned.length} keep={keep} leave={leave} open={open}/>}</>, document.body)}
+    {createPortal(<>{visiblePinned.length > 0 && <div className="tooltip-backdrop" data-testid="tooltip-backdrop" onPointerDown={e => { backdropPressed.current = true; e.preventDefault(); e.stopPropagation(); }} onPointerUp={e => { e.preventDefault(); e.stopPropagation(); if (e.button !== 0 && backdropPressed.current) { backdropPressed.current = false; suppressUntil.current = Date.now() + 800; clear(); } }} onClick={e => { e.preventDefault(); e.stopPropagation(); clear(); }} onContextMenu={e => e.preventDefault()} onWheel={e => e.stopPropagation()}/>}{visiblePinned.map((value, index) => <Pane key={value.id} value={value} pinned index={index} keep={keep} leave={leave} open={open}/>)}{visiblePreview && <Pane key={visiblePreview.id} value={visiblePreview} pinned={false} index={visiblePinned.length} keep={keep} leave={leave} open={open}/>}</>, document.body)}
   </ReferenceContext.Provider>;
 }

@@ -43,7 +43,7 @@ export interface Character {
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];
-  quickbarLayout?: {order:string[];hidden:string[]};
+  quickbarLayout?: {order:string[];hidden:string[];widgets?:Record<string,import('./resourceWidgets').ResourceWidgetLayout>};
   quickbar?: string[];
   quickbarCopies?: {id:string;entry:Entry}[];
   quickbarActions?: {id:string;name:string;attack:string;damage:string}[];
@@ -53,6 +53,7 @@ export interface Character {
   training?: Record<string, string>;
   size?: Size;
   sheetBonuses?: Partial<Record<SheetBonus, number>>;
+  skillBonuses?: Record<string, number>;
   dismissedFeatures?: string[];
   featureLayout?: { detailsExpanded?:string[]; order: string[]; expanded: string[] };
   adjustments?: { id: string; target: string; value: number; reason: string }[];

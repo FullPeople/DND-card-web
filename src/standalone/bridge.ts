@@ -13,3 +13,6 @@ export const patchWorkbenchStats=()=>({});
 export async function workbenchRequest(){throw Error('此版本只使用本机角色数据');}
 export const requestInventory=workbenchRequest;
 export function composeRoll(expression:string,label=''){window.dispatchEvent(new CustomEvent('local-dice',{detail:{expression,label}}));}
+
+// Integrated workbench profiling has no standalone transport.
+export function markWorkbenchView(_stage:'prepare'|'prepared'|'committed',_key:string,_reused?:boolean){}

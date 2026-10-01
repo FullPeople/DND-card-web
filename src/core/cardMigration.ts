@@ -1,4 +1,4 @@
-import {editionAllows,selectionAllowed,classMatches,KIND_LABELS,SKILLS,type Character,type Entry,type Selection,type Kind} from './model';
+import {editionAllows,selectionAllowed,classMatches,KIND_LABELS,SKILLS,ABILITY_LABELS,type Ability,type Character,type Entry,type Selection,type Kind} from './model';
 import {syncFeatures,removeSelection} from './sheet';
 import {featureOwner} from './featureOwnership';
 import {legacyTraining} from './legacyTraining';
@@ -19,9 +19,10 @@ const bubbles:Kind[]=['feature','feat','rule'];
 export const unlinkedEntry=(e:Entry)=>e.packId==='imported'||e.source==='IMPORTED'||e.source==='CUSTOM'||!!e.raw._custom;
 export const reviewedLegacy=(row:Selection,edition:Character['edition'])=>row.catalogReview?.edition===edition&&row.catalogReview.entryId===row.entry.id&&row.catalogReview.source===row.entry.source&&row.catalogReview.kind===row.entry.kind;
 export function cardMigrationIssues(c:Character,entries:Entry[]):Selection[]{
- const rows=c.selections.filter(s=>unlinkedEntry(s.entry)&&!reviewedLegacy(s,c.edition));
- for(const issue of classCompatibilityIssues(c,entries))if(!rows.some(s=>s.id===issue.row.id))rows.push(issue.row);
- return rows;
+ // The old-card indicator is about class compatibility only. Custom gear,
+ // ancestry, spells and personal bubbles remain valid player choices; they
+ // can still be reviewed explicitly in the full migration wizard.
+ return classCompatibilityIssues(c,entries).map(issue=>issue.row);
 }
 type CatalogIndex={rows:Entry[];names:Map<string,Entry[]>;ids:Map<string,Entry[]>};
 const indexes=new WeakMap<Entry[],CatalogIndex>();
@@ -134,7 +135,7 @@ export function migrationDraft(original:Character,entries:Entry[],choices:Migrat
  const spellRows=card.selections.filter(s=>s.entry.kind==='spell'&&!consumed.has(s.id)),training=trainingRows(original,entries);
  if(through>=5){
   for(const row of spellRows){const id=choices.spells[row.id];if(id)replace(row,target(card,entries,id,['spell']),changed);}
-  for(const group of ['armor','weapons','tools','languages']){const rows=training.filter(t=>t.group===group);if(!rows.length)continue;(card.training||={})[group]=rows.map(t=>{const id=choices.training[t.id];if(!id)return t.text;if(!t.candidates.some(e=>e.id===id))throw Error('熟练项目标已变化，请重新核对。');const e=target(card,entries,id,['item','rule','feature']);return '{@'+(e.raw._category==='language'?'language':e.raw._category==='itemProperty'?'itemProperty':e.raw._category==='itemMastery'?'itemMastery':'item')+' '+e.name+'|'+e.source+'}';}).join('、');}
+  for(const group of ['armor','weapons','tools','languages']){const rows=training.filter(t=>t.group===group);if(!rows.length)continue;(card.training||={})[group]=rows.map(t=>{const id=choices.training[t.id];if(!id)return t.text;const e=target(card,entries,id,['item','rule','feature']);if(trainingCategory(e)!==t.group)throw Error('熟练项目标类别不同，请重新核对。');return '{@'+(e.raw._category==='language'?'language':e.raw._category==='itemProperty'?'itemProperty':e.raw._category==='itemMastery'?'itemMastery':'item')+' '+e.name+'|'+e.source+'}';}).join('、');}
  }
  return {card,grants,extraRows,leftovers,spellRows,training,warnings,changed};
 }
@@ -157,4 +158,4 @@ export function planCardMigration(original:Character,entries:Entry[],choices:Mig
  return {card,originalId:original.id,originalRevision:original.revision,originalFingerprint:stable(original),changed,added,removed,refreshed,resources,stats,warnings};
 }
 /** Skills/saves have canonical IDs and are retained, never inferred/reset by a new class. */
-export function retainedProficiencies(c:Character):string[]{return Object.entries(c.proficiencies||{}).filter(([,v])=>v).map(([key])=>SKILLS[key]?.name||key.replace('save:','')+'豁免').concat(Object.keys(c.expertise||{}).filter(k=>c.expertise![k]).map(k=>(SKILLS[k]?.name||k)+'专精'));}
+export function retainedProficiencies(c:Character):string[]{return Object.entries(c.proficiencies||{}).filter(([,v])=>v).map(([key])=>SKILLS[key]?.name||(ABILITY_LABELS[key.replace('save:','') as Ability]||key.replace('save:',''))+'豁免').concat(Object.keys(c.expertise||{}).filter(k=>c.expertise![k]).map(k=>(SKILLS[k]?.name||k)+'专精'));}

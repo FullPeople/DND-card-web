@@ -26,6 +26,9 @@ jobs:
       - run: npx playwright test --config playwright.compat207.config.ts
       - run: npx playwright test --config playwright.touch.config.ts
       - run: npm run build:standalone
+      - run: npx playwright test --config playwright.feedback217.config.ts
+        env:
+          DND_217_RESULTS: test-results/feedback217
       - run: npx playwright test --config playwright.source-feedback.config.ts
       - run: npm run test:standalone
       - run: npx playwright test --config playwright.automation209.config.ts

@@ -5,8 +5,8 @@ import {sourceSpellEnabled,rememberSourceSpellUses} from './sourceSpellState';
 import {automationEnabled} from './state';
 
 export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string}
-export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string}
-export interface SpellActionReceipt {id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number}
+export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long'}
+export interface SpellActionReceipt {id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number;recovered?:{resourceId:string;before:number;after:number}[]}
 export interface ActionState {version:number;sequence:number;last?:SpellActionReceipt}
 export type SpellActionResult={status:'applied'|'duplicate';receipt:SpellActionReceipt;message:string}|{status:'rejected';message:string};
 
@@ -31,6 +31,25 @@ export function spellPayments(c:Character,id:string):{options:SpellPayment[];rea
  return {options,...(!options.length?{reason:grant.usage==='check'?'此来源的施法消耗未声明，请按原文人工处理。':'没有符合环阶的可用施法方式。'}:{})};
 }
 
+export interface SourceSpellRestPlan {resources:{resourceId:string;before:number;after:number}[];reason?:string}
+/** Rest is explicit; disabled sources, manual pools, slots and unrelated counters are excluded. */
+export function sourceSpellRestPlan(c:Character,kind:'short'|'long'):SourceSpellRestPlan{
+ if(!automationEnabled(c))return {resources:[],reason:'请先开启此角色卡的自动计算。'};
+ if(!['short','long'].includes(kind))return {resources:[],reason:'休息类型无效。'};
+ const resources:SourceSpellRestPlan['resources']=[],seen=new Set<string>();
+ for(const [id,config] of Object.entries(c.spellSettings?.special||{})){
+  if(!config.sourceGrant||config.mode!=='uses'||!sourceSpellEnabled(c,id)||!(config.recovery==='short'||kind==='long'&&config.recovery==='long'))continue;
+  const resourceId=specialSpellResource(id,c);if(seen.has(resourceId))continue;seen.add(resourceId);
+  const r=c.runtime.resources[resourceId];
+  if(!r||r.unlimited||!Number.isSafeInteger(r.max)||r.max<1||!Number.isSafeInteger(r.current)||r.current<0||r.current>r.max)return {resources:[],reason:'来源次数记录无效，整批未恢复。'};
+  if(r.current<r.max)resources.push({resourceId,before:r.current,after:r.max});
+ }
+ return {resources};
+}
+export function sourceSpellRestRequest(c:Character,kind:'short'|'long',id:string):SpellActionRequest{
+ return {...spellActionRequest(c,'',`rest:${kind}`,id,'restore'),rest:kind};
+}
+
 /** Request identity is supplied by the application, keeping the core independent of randomness. */
 export function spellActionRequest(c:Character,selectionId:string,paymentId:string,id:string,mode:'cast'|'restore'='cast'):SpellActionRequest{
  return {id,selectionId,paymentId,mode,revision:c.revision,sequence:c.runtime.automationActions?.sequence??0};
@@ -45,7 +64,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest):Spell
  if(typeof request.id!=='string'||!request.id.trim()||request.id.length>128||!Number.isSafeInteger(request.sequence)||request.sequence<0||!Number.isSafeInteger(request.revision)||!['cast','restore'].includes(request.mode))return reject('施法操作格式无效。');
  const state=c.runtime.automationActions;
  if(state&&state.version!==1)return reject('此卡的动作记录版本尚未支持。');
- const fingerprint=JSON.stringify([request.revision,request.selectionId,request.mode,request.paymentId]);
+ const fingerprint=JSON.stringify([request.revision,request.selectionId,request.mode,request.paymentId,...(request.rest!==undefined?[request.rest]:[])]);
  if(state?.last?.id===request.id){
   if(state.last.sequence===request.sequence&&state.last.fingerprint===fingerprint)return {status:'duplicate',receipt:state.last,message:'该操作已经记录，未重复扣费。'};
   return reject('操作编号已被用于其他请求，请重新操作。');
@@ -53,6 +72,14 @@ export function performSpellAction(c:Character,request:SpellActionRequest):Spell
  const sequence=state?.sequence??0;
  if(request.sequence!==sequence||request.revision!==c.revision)return reject('角色已发生变化，请按当前次数重新操作。');
  if(sequence>=Number.MAX_SAFE_INTEGER)return reject('动作序号已达到上限，需要迁移记录。');
+ if(request.rest!==undefined){
+  if(!['short','long'].includes(request.rest)||request.mode!=='restore'||request.selectionId!==''||request.paymentId!==`rest:${request.rest}`)return reject('休息操作格式无效。');
+  const plan=sourceSpellRestPlan(c,request.rest);if(plan.reason)return reject(plan.reason);if(!plan.resources.length)return reject('没有需要恢复的启用来源次数。');
+  const receipt:SpellActionReceipt={id:request.id,sequence,fingerprint,selectionId:'',mode:'restore',level:0,recovered:plan.resources};
+  for(const row of plan.resources)setResource(c,row.resourceId,row.after);
+  c.runtime.automationActions={version:1,sequence:sequence+1,last:receipt};rememberSourceSpellUses(c);
+  return {status:'applied',receipt,message:`已按${request.rest==='short'?'短':'长'}休恢复 ${plan.resources.length} 项来源次数。`};
+ }
  const config=c.spellSettings?.special?.[request.selectionId];
  if(!config?.sourceGrant||!sourceSpellEnabled(c,request.selectionId))return reject('此来源法术当前不可用。');
  let payment:SpellPayment|undefined;
@@ -82,5 +109,5 @@ export function validateActionState(value:unknown):void{
  if(!object(value)||!Number.isSafeInteger(value.version)||value.version<1)throw Error('自动化动作记录无效。');
  if(value.version!==1)return; // Preserve unfamiliar ledgers, never execute them.
  if(!Number.isSafeInteger(value.sequence)||value.sequence<0)throw Error('自动化动作序号无效。');
- if(value.last!==undefined){const r=value.last;if(!object(r)||typeof r.id!=='string'||!r.id.trim()||r.id.length>128||!Number.isSafeInteger(r.sequence)||r.sequence!==value.sequence-1||typeof r.fingerprint!=='string'||r.fingerprint.length>40000||typeof r.selectionId!=='string'||!['cast','restore'].includes(r.mode)||!Number.isInteger(r.level)||r.level<0||r.level>9||r.resourceId!==undefined&&(typeof r.resourceId!=='string'||!Number.isSafeInteger(r.before)||r.before<0||!Number.isSafeInteger(r.after)||r.after<0))throw Error('自动化动作回执无效。');}
+ if(value.last!==undefined){const r=value.last;if(!object(r)||typeof r.id!=='string'||!r.id.trim()||r.id.length>128||!Number.isSafeInteger(r.sequence)||r.sequence!==value.sequence-1||typeof r.fingerprint!=='string'||r.fingerprint.length>40000||typeof r.selectionId!=='string'||!['cast','restore'].includes(r.mode)||!Number.isInteger(r.level)||r.level<0||r.level>9||r.resourceId!==undefined&&(typeof r.resourceId!=='string'||!Number.isSafeInteger(r.before)||r.before<0||!Number.isSafeInteger(r.after)||r.after<0))throw Error('自动化动作回执无效。');if(r.recovered!==undefined&&(!Array.isArray(r.recovered)||r.recovered.length>3000||r.recovered.some((x:any)=>!object(x)||typeof x.resourceId!=='string'||!Number.isSafeInteger(x.before)||x.before<0||!Number.isSafeInteger(x.after)||x.after<x.before)))throw Error('批量恢复回执无效。');}
 }

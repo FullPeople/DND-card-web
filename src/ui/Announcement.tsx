@@ -4,6 +4,8 @@ import {announcementVersionFor,announcementPending,forgetAnnouncementVersion,rea
 import './announcement.css';
 import {useUiLanguage} from './UiLanguage';
 import {FeedbackSection} from './UiControls';
+import {AuthorSupport} from './AuthorSupport';
+import {SupporterMarquee} from './SupporterMarquee';
 
 const QUESTIONS=[['faqEditionQ','faqEditionA'],['faqSourcesQ','faqSourcesA'],['faqSourceControlQ','faqSourceControlA'],['faqAutomationQ','faqAutomationA']] as const;
 
@@ -33,10 +35,10 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
     {title:t('releasePending'),items:[t('releasePending1')]},
     ...(mode==='suite'?[{title:t('releaseSuite'),items:[t('releaseSuite1')]},{title:t('releaseInvestigating'),items:[t('releaseInvestigating1')]}]:[]),
   ];
-  return <dialog className="announcement" ref={ref} aria-labelledby="announcement-title" onCancel={event=>event.preventDefault()}>
+  return <><SupporterMarquee fullScreen/><dialog className="announcement" ref={ref} aria-labelledby="announcement-title" onCancel={event=>event.preventDefault()}>
     <header className="announcement-head"><div className="announcement-heading-row"><h2 id="announcement-title">{t(mode==='suite'?'welcomeSuite':'welcomeSite')}</h2></div><p className="announcement-version">{t('version',{version})}</p></header>
     <div className="announcement-body">
-      <FeedbackSection/>
+      <FeedbackSection/><AuthorSupport/>
       {mode==='suite'&&<details className="announcement-owner" onToggle={reveal}><summary>{t('ownerTitle')}</summary><p>{t('ownerIntro')}</p><ol><li>{t('ownerStep1')}<img src="./owner-step1.png" alt={t('ownerImage1')}/><img src="./owner-step2.png" alt={t('ownerImage2')}/></li><li>{t('ownerStep2')}<img src="./owner-step3.png" alt={t('ownerImage3')}/></li></ol><p>{t('ownerFinish')}</p></details>}
       {mode==='suite'&&<p>{t('assignCard')}<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('independentSite')}</a></p>}
       <div className="announcement-issues">{releaseHistoryFor(mode).map((release,index)=>index===0?<section className="announcement-current" key={release.title}><h3>{release.title}{language==='en'&&release.title!=='2026-09-28'&&` · ${t('chineseOriginal')}`}</h3>{sections(language==='en'&&release.title==='2026-09-28'?englishCurrent:release.sections)}</section>:<details className="announcement-history" key={release.title}><summary>{release.title}{language==='en'&&` · ${t('chineseOriginal')}`}</summary>{sections(release.sections)}</details>)}</div>
@@ -48,5 +50,5 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
       <label><input type="checkbox" checked={remember} onChange={event=>setRemember(event.target.checked)}/>{t('rememberVersion')}</label>
       <button ref={confirmRef} className="primary" onClick={confirm}>{t('gotIt')}</button>
     </footer>
-  </dialog>;
+  </dialog></>;
 }

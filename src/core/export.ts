@@ -10,7 +10,8 @@ export const exportCharacter = (c: Character) => ({ format: 'dnd-card-web', vers
 // File exchange retains native identities; the live legacy projection stays small.
 export function exportLinkedOwlbear(c:Character,d:Derived){
   const native=structuredClone(c);if(native.externalSnapshot&&typeof native.externalSnapshot==='object')delete native.externalSnapshot.dnd_card_web;
-  return {...exportOwlbear(c,d),dnd_card_web:native};
+  const legacy=exportOwlbear(c,d);delete legacy.web_resource_widgets;
+  return {...legacy,dnd_card_web:native};
 }
 export const exportCharacters = (characters:Character[]) => ({format:'dnd-card-web-collection',version:1,exportedAt:new Date().toISOString(),characters});
 export const exportRulePack = (pack: RulePack) => ({ ...pack, entries: pack.entries.map(e => ({ id: e.id.slice(pack.id.length + 1), kind: e.kind, name: e.name, english: e.english, entries: e.entries, raw: e.raw, effects: e.effects || [], choices: e.choices || [] })) });
@@ -34,6 +35,7 @@ export function exportOwlbear(c: Character, d: Derived) {
     spellcasting: { spellcasting_ability: ability || null, save_dc: spellStats.dc, attack_bonus: spellStats.attack, spell_slots: Object.fromEntries(Object.entries(settings.slots).map(([level,slot])=>[level,{max:slot.max,current:slot.max-slot.used}])), cantrips_known: spells.filter(s => s.level === 0 && readyIds.has(s.selectionId)), prepared: spells.filter(s => s.level > 0 && settings.mode==='prepared'&&preparedIds.has(s.selectionId)), always_known: spells.filter(s=>s.level>0&&(settings.mode==='known'||!preparedIds.has(s.selectionId))) },
     background: { background_name: entryName('background'), appearance: c.identity.description, story: c.biography?.story??c.notes, description: plainText(active.find(s => s.entry.kind === 'background')?.entry.entries) },
     web_resources: c.runtime.resources,
+    ...(c.quickbarLayout?.widgets?{web_resource_widgets:Object.fromEntries(Object.entries(c.quickbarLayout.widgets).filter(([id])=>Object.hasOwn(c.runtime.resources,id)))}:{}),
     export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };
 }
 export function plainText(value: unknown): string {

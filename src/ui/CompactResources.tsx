@@ -1,0 +1,16 @@
+import {ResourceDisplayContext} from './resourceDisplay';
+import {useRef,useState,type CSSProperties,type ReactNode} from 'react';
+import type {ResourceValue} from './resourcePresets';
+import {WIDGET_STYLES,type WidgetStyle} from '../core/resourceWidgets';
+import './resourceWidgets.css';
+import './compactResources.css';
+/** The original ResourceRow remains mounted: closing a detail never discards pending ACK state. */
+export function CompactResource({resource:r,style='bar',children}:{resource:ResourceValue;style?:WidgetStyle;children:ReactNode}){
+ const panel=useRef<HTMLDivElement>(null),button=useRef<HTMLButtonElement>(null),[opened,setOpened]=useState(false),[shown,setShown]=useState(r.current);const shape=WIDGET_STYLES.includes(style)?style:'bar';
+ function show(){const node=panel.current,anchor=button.current;if(!node||!anchor)return;if(node.matches(':popover-open')){node.hidePopover();return;}node.showPopover();const rect=anchor.getBoundingClientRect(),width=Math.min(310,innerWidth-24);node.style.width=`${width}px`;node.style.left=`${Math.max(12,Math.min(rect.left,innerWidth-width-12))}px`;node.style.top=`${Math.max(8,Math.min(rect.bottom+5,innerHeight-node.offsetHeight-8))}px`;}
+ return <div className={`compact-resource widget-${shape}`} data-resource-id={r.id} data-resource-name={r.name} data-resource-current={shown} style={{'--resource-ratio':r.unlimited?1:r.max?Math.max(0,Math.min(1,shown/r.max)):0} as CSSProperties}><button ref={button} className="resource-widget-face" aria-label={`${r.name}：${shown} / ${r.unlimited?'不限':r.max}，打开资源操作`} title={`${r.name} · ${shown} / ${r.unlimited?'∞':r.max}`} aria-expanded={opened} onClick={show}><span className="resource-widget-symbol" aria-hidden="true">✦</span><span className="resource-widget-name">{r.name}</span><strong className="resource-widget-value">{shown}<small> / {r.unlimited?'∞':r.max}</small></strong><span className="resource-widget-meter" aria-hidden="true"/>{r.locked&&<span className="resource-widget-lock" aria-label="已锁定">▣</span>}</button><div ref={panel} popover="auto" className="compact-resource-popover" role="dialog" aria-label={`${r.name}资源操作`} onToggle={e=>setOpened((e.nativeEvent as ToggleEvent).newState==='open')}><button type="button" className="compact-resource-close" aria-label="关闭资源操作" onClick={()=>{panel.current?.hidePopover();button.current?.focus();}}>×</button><ResourceDisplayContext.Provider value={setShown}>{children}</ResourceDisplayContext.Provider></div></div>;
+}
+export function CompactResourceGrid({rows,render,label}:{rows:ResourceValue[];render:(r:ResourceValue)=>ReactNode;label:string}){
+ const [page,setPage]=useState(0),pages=Math.max(1,Math.ceil(rows.length/9)),current=Math.min(page,pages-1);
+ return <section className="compact-resources" aria-label={label}><div className="compact-resource-pages"><span>{rows.length} 项资源</span>{pages>1&&<nav aria-label={`${label}分页`}><button aria-label="上一页资源" disabled={!current} onClick={()=>setPage(current-1)}>‹</button><output>{current+1} / {pages}</output><button aria-label="下一页资源" disabled={current>=pages-1} onClick={()=>setPage(current+1)}>›</button></nav>}</div><div className="compact-resource-grid">{rows.map((r,index)=><div key={r.id} hidden={Math.floor(index/9)!==current}>{render(r)}</div>)}</div></section>;
+}

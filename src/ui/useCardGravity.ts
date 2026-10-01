@@ -1,21 +1,27 @@
-import { useLayoutEffect, useState, type RefObject } from 'react';
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 
 /** Conservative rotated bounds keep real DOM hit areas inside the pile. */
 export function useCardGravity(ref: RefObject<HTMLDivElement | null>, enabled: boolean, page: string, identity: string, layoutKey='', inset=12) {
   const [structure,setStructure]=useState(0);
+  const hasMoved=useRef(false);
   const getCells=(root:HTMLElement)=>[...root.querySelectorAll<HTMLElement>('.sheet-cell,[data-physical-frame]')].filter(node=>{const parent=node.parentElement?.closest('.sheet-cell,[data-physical-frame]');return !parent||!root.contains(parent);});
-  useLayoutEffect(()=>{const root=ref.current;if(!root)return;let cells=getCells(root);const observer=new MutationObserver(()=>{const next=getCells(root);if(next.length!==cells.length||next.some((node,i)=>node!==cells[i])){cells=next;setStructure(n=>n+1);}});observer.observe(root,{childList:true,subtree:true});return()=>observer.disconnect();},[ref]);
+  useLayoutEffect(()=>{const root=ref.current;if(!root||!enabled)return;let cells=getCells(root);const observer=new MutationObserver(()=>{const next=getCells(root);if(next.length!==cells.length||next.some((node,i)=>node!==cells[i])){cells=next;setStructure(n=>n+1);}});observer.observe(root,{childList:true,subtree:true});return()=>observer.disconnect();},[ref,enabled]);
   useLayoutEffect(() => {
     const paper = ref.current; if (!paper) return;
+    // Normal sheets have no falling layout to restore. Avoid rewriting every
+    // cell and scheduling a second render merely because the card changed.
+    if(!enabled&&!hasMoved.current)return;
     const cells = getCells(paper);
     let frame = 0;
     if (!enabled) {
+      hasMoved.current=false;
       for (const cell of cells) {
         cell.style.transition = 'translate 700ms cubic-bezier(.2,.7,.2,1), transform 700ms cubic-bezier(.2,.7,.2,1), rotate 900ms cubic-bezier(.3,.8,.3,1)';
         cell.style.translate = '0px 0px'; cell.style.setProperty('--fall-tilt', '0deg'); delete cell.dataset.fallen;
       }
       return;
     }
+    hasMoved.current=true;
     const scale = paper.getBoundingClientRect().width / paper.offsetWidth;
     for (const cell of cells) {
       cell.style.transition = 'rotate 900ms cubic-bezier(.3,.8,.3,1)';

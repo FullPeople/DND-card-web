@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-01';
+export const RELEASE_DATE='2026-10-01-二';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -154,23 +154,37 @@ const SUITE_RELEASE_213_SECTIONS:ReleaseSection[]=[...RELEASE_213_SECTIONS,
  {title:'枭熊联动待验证',items:['真实宿主、权限变化和多人同步仍待验证，独立预览不能证明完整枭熊联动正常。']},
  {title:'仍在排查',items:['卡上已移除但棋子状态残留、保存结果未确认的问题仍在排查。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_216_SECTIONS:ReleaseSection[]=[
  {title:'旧卡同步',items:['旧版导入或自定义资料会在角色名字旁显示黄色提示，卡面上方可以进入同步。','按步骤核对背景、职业、种族、子职、背包、来源特性、自定义气泡、法术与熟练；无法唯一匹配的内容由你选择。','确认变化后创建同步副本，原卡保留；已有资源不会自动补满，主动保留的自定义内容不再重复提醒。','兼容旧版产生的空豁免专精标记，修复部分角色无法打开的问题；读取失败时会显示具体原因。']},
  {title:'Wiki 与资料来源',items:['移除同名冲突筛选，同名扩展资料默认全部显示；仍遵循所选规则版本及资料开关。','修复搜索框清除按钮，点击输入框会全选已有文字。','资料分类展开、折叠后会调整滚动位置，便于继续浏览。']},
  {title:'本地投骰',items:['独立网站的骰子与结果显示在已有弹窗之上，关闭后返回原来的操作位置。']},
  {title:'未完成与待验证',items:['自动选择或筛选式专长赠送规则、完整英文翻译尚未完成。','玩家具体旧卡与实体手机操作待验证；未识别的资料保留给玩家核对。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_216_SECTIONS:ReleaseSection[]=[...RELEASE_216_SECTIONS,
  {title:'角色切换与跟随',items:['减少切换角色时重复核对全房间的开销，普通数据冲突不再让其他操作一并等待重连。','修复角色绑定晚到、同一棋子换绑及怪物资料更新后跟随不及时的情况。','房主与玩家多轮切卡、双向修改已通过实测；冷启动仍待复验，残余卡顿和同步延迟继续排查。']},
  {title:'首次连接恢复',items:['打开后已有连接却迟迟没有角色列表时，现在会自动重试连接；不会重复提交你的修改。','更多房间的首次加载与重连仍需继续验证。']},
  {title:'投骰',items:['骰子已准备好时，重新打开骰盘不再闪出加载进度；首次加载和故障仍显示实际状态。','保留已上线的常驻骰子服务和五种材质预览；旧插件本批不更新。','枭熊宿主内跨窗口的骰子置顶问题仍未解决。']},
  {title:'枭熊联动待验证',items:['独立预览不能证明完整枭熊联动正常；实体手机与更广泛权限场景待验证。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色卡与旧卡资料',items:['旧卡黄色提醒现在只检查职业。自定义种族、背景、装备、特性或法术不会单独触发提醒。','旧卡同步按“原内容 → 替换内容”同行列出选项，资料来源显示中文全名，悬停可以阅读正文，也可以保留自定义或手动查找。','最后确认后创建同步副本，原卡与已消耗次数保留。正常角色也可从“导入 / 导出”打开资料核对。','编辑模式下，每项技能名称后可以填写正负额外调整值；保存、刷新和导入导出后保留。']},
+ {title:'快捷栏与资源',items:['资源可以选择条形、圆环、方形或图标样式，自行拖动位置，并拖动八个边角点调整大小。','缩窄武器区域，为资源模块留出空间；空间不足时可翻页查看。资源外观与使用次数分别保存。','新布局与实体触屏拖动仍待玩家体验确认。']},
+ {title:'Wiki 与自定义内容',items:['自定义条目可以右键移除；已经填入角色卡的内容保留。','新建界面增加“使用必看”；“填充格式示例”会直接填入字段，并提供撤回按钮。','格式输入与 JSON 输入可以切换并同步；未改正文或撤销回原文时，保留原内容结构。','参考格式的标题与关闭按钮保持可见，分类内搜索框加高。']},
+ {title:'基础自动化',items:['增加按熟练加值计算的部分来源法术次数。','资料明确列出可选法术时，可以勾选并保存选择，也可以暂时少选。','增加短休、长休来源次数的恢复预览，只恢复列出的来源次数，不代表完成整次休息。','按条件筛选的赠送法术、其他动态次数、完整休息和完整英文翻译仍未完成，未支持规则继续显示说明。']},
+ {title:'支持与反馈',items:['支持者弹幕连续显示；公告打开时也会在背景显示，关闭后消失。','公告内增加作者支持入口和可以放大的赞助二维码。','赞助过的朋友可将 cn 与头像或立绘发送到 1763086701psw@gmail.com。']},
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'角色切换与玩家资源',items:['已经读取的授权角色可以直接切换，后台接收资料更新，减少等待宿主回复的时间。','撤回权限时同步清理对应卡面、资料正文和固定浮窗。','玩家、怪物和公共资源使用紧凑资源模块，并保留各自的操作权限。','新代码的真实双端切换、新建、修改与同步仍待房间验收。']},
+ {title:'骰子与历史',items:['减少骰子图形内存占用，增加动画中断和图形恢复处理；群体投掷同时起播。','骰子历史移至左上角 Action 栏的历史标签；新增记录时自动显示。','结果以数字和文字显示在对应棋子头顶，飞线指向同一位置。真实房间中的定位、历史点击与并发效果待验证。']},
+ {title:'群体区域',items:['DM 多选单位后自动打开总览中的群体区域，支持群体先攻、豁免和属性检定；战斗准备时默认显示先攻。','投掷前可以批量调整生命值、生命上限或护甲等级；结果生成后可直接输入 DC 结算。','头顶结果支持隐藏、显示和单独关闭。结算不自动关闭，进入结算后改变选中单位也会保留本轮结果。','群体投掷最多同时使用 100 枚骰子：普通最多 100 个单位，优势或劣势最多 50 个。超过时会提示，不会遗漏选中的单位；真实房间结算与权限联动待验证。']},
+ {title:'仍在排查与待验证',items:['枭熊宿主内跨窗口的骰子置顶问题仍在排查。','实体手机与真实多人房间仍需验证；独立网站预览不能证明完整枭熊联动正常。']},
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-01',sections:mode==='suite'?SUITE_RELEASE_216_SECTIONS:RELEASE_216_SECTIONS},
  {title:'2026-09-30-二',sections:mode==='suite'?SUITE_RELEASE_213_SECTIONS:RELEASE_213_SECTIONS},
  {title:'2026-09-30-一',sections:mode==='suite'?SUITE_RELEASE_210_SECTIONS:RELEASE_210_SECTIONS},
  {title:'2026-09-28',sections:mode==='suite'?SUITE_RELEASE_209_SECTIONS:RELEASE_209_SECTIONS},

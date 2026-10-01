@@ -1,3 +1,4 @@
+import {validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
 import {legacyTraining} from './legacyTraining';
 import {validateActionState} from './automation/actions';
 import { ABILITIES, KIND_LABELS, SKILLS, SHEET_BONUS_KEYS, SIZE_LABELS, skillKey, newCharacter, uid, type Character, type Effect, type Entry, type Raw, type RulePack } from './model';
@@ -108,10 +109,12 @@ export function validateCharacter(value: unknown): Character {
   assert(c.expertise === undefined || plain(c.expertise) && Object.entries(c.expertise).every(([key, value]) => Object.hasOwn(SKILLS, key) && typeof value === 'boolean'), '专精记录无效。');
   assert(c.jackOfAllTrades === undefined || typeof c.jackOfAllTrades === 'boolean', '万事通记录无效。');
   assert(c.size === undefined || typeof c.size === 'string' && Object.hasOwn(SIZE_LABELS, c.size), '体型记录无效。');
+  assert(c.skillBonuses === undefined || plain(c.skillBonuses) && Object.entries(c.skillBonuses).every(([key,value])=>Object.hasOwn(SKILLS,key)&&typeof value==='number'&&Number.isInteger(value)&&Math.abs(value)<=9999), '技能额外调整值无效。');
   assert(c.sheetBonuses === undefined || plain(c.sheetBonuses) && Object.entries(c.sheetBonuses).every(([key, value]) => (SHEET_BONUS_KEYS as readonly string[]).includes(key) && typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 9999), '卡面调整值无效。');
   assert(c.dismissedFeatures === undefined || Array.isArray(c.dismissedFeatures) && c.dismissedFeatures.length <= 10000 && c.dismissedFeatures.every((value: unknown) => typeof value === 'string' && value.length <= 4000), '移除特性记录无效。');
   if(c.rulePacks!==undefined){assert(Array.isArray(c.rulePacks)&&c.rulePacks.length<=100,'扩展包列表无效。');for(const pack of c.rulePacks)validatePack({...pack,entries:pack.entries?.map((entry:any)=>({...entry,id:typeof entry.id==='string'&&entry.id.startsWith(pack.id+':')?entry.id.slice(pack.id.length+1):entry.id}))},c.rulePacks.filter((p:any)=>p!==pack));}
   if(c.quickbarLayout!==undefined)assert(plain(c.quickbarLayout)&&['order','hidden'].every(k=>Array.isArray(c.quickbarLayout[k])&&c.quickbarLayout[k].length<=3000&&c.quickbarLayout[k].every((v:unknown)=>typeof v==='string')),'快捷栏排序无效。');
+  if(c.quickbarLayout!==undefined)assert(validWidgets(c.quickbarLayout.widgets),'资源模块布局无效。');
   assert(c.quickbar === undefined || Array.isArray(c.quickbar) && c.quickbar.length <= 100 && c.quickbar.every((id: unknown) => typeof id === 'string') && new Set(c.quickbar).size === c.quickbar.length, '快捷栏需要最多 100 个互不重复的条目身份。');
   if(c.quickbarCopies!==undefined){assert(Array.isArray(c.quickbarCopies)&&c.quickbarCopies.length<=100&&c.quickbarCopies.every((row:any)=>plain(row)&&typeof row.id==='string'&&validEntry(row.entry))&&new Set(c.quickbarCopies.map((row:any)=>row.id)).size===c.quickbarCopies.length,'快捷栏副本无效。');for(const row of c.quickbarCopies)validateEntryContent(row.entry.entries);}
   if(c.quickbarActions!==undefined)assert(Array.isArray(c.quickbarActions)&&c.quickbarActions.length<=100&&c.quickbarActions.every((row:any)=>plain(row)&&['id','name','attack','damage'].every(k=>typeof row[k]==='string'&&row[k].length<=160))&&new Set(c.quickbarActions.map((row:any)=>row.id)).size===c.quickbarActions.length,'自定义快捷动作无效。');
@@ -210,6 +213,7 @@ export function importOwlbear(value: unknown): Character {
   c.identity.description = String(value.background?.appearance || ''); c.identity.alignment = String(value.identity.alignment || ''); c.identity.gender = String(value.identity.gender || ''); c.identity.age = String(value.identity.age || '');
   c.baseHp = Number(value.core_stats?.hp?.max || 0); c.runtime.hp = Number(value.core_stats?.hp?.current || 0); c.runtime.tempHp = Number(value.core_stats?.hp?.temp || 0); c.runtime.inspiration = Number(value.core_stats?.inspiration || 0);
   c.runtime.resources = structuredClone(value.web_resources||{});
+  if(value.web_resource_widgets!==undefined){assert(validWidgets(value.web_resource_widgets),'资源模块布局无效。');c.quickbarLayout={order:[],hidden:[],widgets:Object.fromEntries(Object.entries(value.web_resource_widgets as Record<string,ResourceWidgetLayout>).filter(([id])=>Object.hasOwn(c.runtime.resources,id)))};}
   c.adjustments = [];
   const adjust = (target: string, v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) c.adjustments!.push({ id: uid(), target, value: v, reason: '保留枭熊原卡总值；更换规则条目后请重新核对此修正。' }); };
   for (const [key, target] of [['ac', 'ac'], ['initiative', 'initiative'], ['speed', 'speed'], ['passive_perception', 'passive']]) adjust(target, value.core_stats?.[key]);

@@ -16,7 +16,7 @@ test('highest class watermark follows levels, tie order, removal, page changes a
  const margins=await badge.evaluate(e=>{const b=e.getBoundingClientRect(),p=e.closest('.paper')!.getBoundingClientRect();return {left:(b.left-p.left)/p.width,right:(p.right-b.right)/p.width,top:(b.top-p.top)/p.height,bottom:(p.bottom-b.bottom)/p.height};});
  for(const value of Object.values(margins))expect(value).toBeGreaterThan(.15);
  await page.getByRole('tab',{name:/特性/}).click();await expect(badge).toHaveAttribute('data-class-badge','fighter');
- await page.reload();await expect(badge).toHaveAttribute('data-class-badge','fighter');await page.getByRole('tab',{name:/主要/}).click();await page.getByRole('switch',{name:'编辑模式'}).click();
+ await page.reload();await expect(badge).toHaveAttribute('data-class-badge','fighter');await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','true');await page.getByRole('tab',{name:/主要/}).click();
  await page.locator('.identity-class .identity-title').filter({hasText:'战士'}).press('Delete');await expect(badge).toHaveAttribute('data-class-badge','wizard');
  await page.evaluate(() => { (window as any).watermarkLeft = false; const node = document.querySelector('.class-watermarks')!; const observer = new MutationObserver(() => { if (node.getAttribute('data-phase') === 'leaving') { (window as any).watermarkLeft = true; observer.disconnect(); } }); observer.observe(node, { attributes: true }); });
  await page.locator('.identity-class .identity-title').filter({hasText:'法师'}).press('Delete');await expect.poll(() => page.evaluate(() => (window as any).watermarkLeft)).toBe(true);await expect(badge).toHaveCount(0);
@@ -45,6 +45,7 @@ test('all effects coexist, death saves persist, editing restores five pages and 
  await expect(page.locator('.portrait-cell')).toHaveCSS('rotate','0deg');await expect(page.locator('[data-card-effect]')).toHaveCount(0);
  const home=await page.locator('.death-saves-cell').boundingBox(),prof=await page.locator('.proficiency-cell').boundingBox();expect(home!.y+home!.height).toBeLessThan(prof!.y);
  await page.reload();await expect(page.getByRole('checkbox',{name:'死亡豁免成功2',exact:true})).toBeChecked();await expect(page.getByRole('checkbox',{name:'死亡豁免失败1',exact:true})).toBeChecked();await expect(page.getByRole('spinbutton',{name:'力竭层数'})).toHaveValue('4');
+ await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','true');await page.getByRole('switch',{name:'编辑模式'}).click();
  for(const name of ['特性','背景','法术','背包']){
    await page.getByRole('tab',{name:new RegExp(name)}).click();await page.waitForTimeout(1100);await noOverlap(page);await expect(page.locator('.status-strip .feature-bubble')).toHaveCount(Object.keys(CONDITION_VISUALS).length);await expect(page.locator('.portrait-cell')).toHaveCSS('rotate','180deg');
    await page.getByRole('switch',{name:'编辑模式'}).click();await page.waitForTimeout(1000);await expect(page.locator('.paper')).not.toHaveClass(/condition-/);await page.getByRole('switch',{name:'编辑模式'}).click();

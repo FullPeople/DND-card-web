@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {newCharacter,type Character,type Entry,type Kind} from '../src/core/model';
-import {cardMigrationIssues,migrationCandidates,migrationDraft,planCardMigration,emptyMigrationChoices} from '../src/core/cardMigration';
+import {cardMigrationIssues,migrationCandidates,migrationDraft,planCardMigration,emptyMigrationChoices,retainedProficiencies} from '../src/core/cardMigration';
 import {readCharacterTransfer} from '../src/core/transfers';
 import {readCharacter,validateCharacter} from '../src/core/validation';
 import {syncFeatures,removeSelection} from '../src/core/sheet';
@@ -72,3 +72,21 @@ describe('legacy no-op save expertise compatibility',()=>{
  it('also imports a backed-up old native card without dropping any active proficiency',()=>{const c=newCharacter();c.expertise={arcana:true,'save:con':false};const [copy]=readCharacterTransfer([JSON.stringify({format:'dnd-card-web',version:1,character:c})]);expect(copy.expertise).toEqual({arcana:true});expect(c.expertise['save:con']).toBe(false);});
  it('still rejects active save expertise, unknown keys, and other malformed data',()=>{for(const expertise of [{'save:cha':true},{'save:unknown':false},{'unknown':false},{'save:con':false,perception:'yes'}])expect(()=>readCharacter({...newCharacter(),expertise})).toThrow('专精记录无效');});
 });
+
+it('warns only about classes, retaining arbitrary custom content on an already current card',()=>{
+ const c=newCharacter();add(c,mage);
+ for(const kind of ['race','background','subclass','item','spell','feature','feat'] as const)add(c,{...mage,id:'personal:'+kind,kind,source:'CUSTOM',packId:'custom',raw:{_custom:true}});
+ expect(cardMigrationIssues(c,[mage])).toEqual([]);
+ const restored=readCharacter(JSON.parse(JSON.stringify(c))).character;
+ expect(cardMigrationIssues(restored,[mage])).toEqual([]);
+ restored.selections=restored.selections.filter(row=>row.entry.kind!=='class');
+ expect(cardMigrationIssues(restored,[mage])).toEqual([]);
+ add(restored,legacy(mage));expect(cardMigrationIssues(restored,[mage]).map(row=>row.entry.kind)).toEqual(['class']);
+});
+
+ it('accepts an explicitly searched training replacement but rejects another category or edition',()=>{
+  const c=newCharacter();c.training={languages:'旧卡不一致的名称'};const language=e('不同名称的语言','rule',{_category:'language'}),armor=e('测试护甲','item',{type:'S'}),oldLanguage={...language,id:'old-language',edition:'2014' as const,source:'PHB'};const catalog=[language,armor,oldLanguage],choices=emptyMigrationChoices();choices.training['languages:0']=language.id;
+  expect(migrationDraft(c,catalog,choices).card.training?.languages).toBe('{@language 不同名称的语言|XPHB}');expect(c.training.languages).toBe('旧卡不一致的名称');choices.training['languages:0']=armor.id;expect(()=>migrationDraft(c,catalog,choices)).toThrow('类别不同');choices.training['languages:0']=oldLanguage.id;expect(()=>migrationDraft(c,catalog,choices)).toThrow('当前规则版本');
+ });
+
+it('explains retained save abilities in Chinese in the migration preview',()=>{const c=newCharacter();c.proficiencies={'save:wis':true,athletics:true};expect(retainedProficiencies(c)).toEqual(['感知豁免','运动']);});

@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:['customRoundtrip217.spec.ts','sourceSpellMechanics217.spec.ts','resourceWidgets217.spec.ts','resource-burst182.spec.ts','refinement183.spec.ts'],timeout:60000,expect:{timeout:10000},workers:1,reporter:'list',outputDir:process.env.DND_RESOURCE_ARTIFACTS||'test-results-resource-widgets',use:{baseURL:process.env.DND_RESOURCE_BASE_URL||'http://127.0.0.1:5238',channel:'msedge',viewport:{width:1440,height:1100},trace:'retain-on-failure'}});

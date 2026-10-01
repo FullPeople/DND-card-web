@@ -85,8 +85,13 @@ window.addEventListener('message',event=>{
  if(m.type!=='resource'&&m.type!=='save'&&m.type!=='inventory')return;
  fixture.requests.push(clone(m));fixture.pending.push(clone(m));fixture.wireEvents.push({type:m.type,resourceId:m.resourceId,resource:clone(m.resource),delta:clone(m.delta)});
 });
+fixture.dense=()=>{
+ for(let i=0;i<10;i++)native.runtime.resources['dense'+i]={id:'dense'+i,name:i===0?'1环法术位':`银色黎明传承的第${i+1}项长名称资源`,type:i===0?'count':'number',max:i===0?4:12345,current:i===0?2:i===2?3.5:2345,locked:i===3,unlimited:i===4};
+ const snap=snapshot(),base=choice(snap),styles=['bar','ring','square','icon'];base.resourceWidgets=Object.fromEntries(base.resources.map((r,i)=>[r.id,{style:styles[i%4],x:i%3*4,y:Math.floor(i/3)%3*2,w:4,h:2,page:Math.floor(i/9)}]));
+ send('catalog',{sequence:++sequence,role:'PLAYER',cards:[base,{...clone(base),id:'second',itemId:'second-token',name:'原创同伴乙',write:false},{...clone(base),id:'third',itemId:'third-token',name:'原创同伴丙',write:false}],monsters:[],enabled:{inventory:false,resourceTracker:true},visibility:{wiki:true,monsters:true}});
+};
 const initial=snapshot();fixture.history.push(clone(initial));send('ready');catalog(initial);send('selection',initial);
 if(mode==='card')createRoot(document.getElementById('test-root')).render(<SourceProvider><App/></SourceProvider>);
 else {document.body.style.cssText='height:auto;overflow:auto';document.getElementById('test-root').style.cssText='width:1050px;padding:12px';createRoot(document.getElementById('test-root')).render(<SourceProvider><EntryDragProvider character={newCharacter()} receive={()=>{}}><DMConsole navigate={()=>{}}/></EntryDragProvider></SourceProvider>);}
-const sample=()=>{fixture.samples.push({at:performance.now(),rows:[...document.querySelectorAll('.resource179-row')].map(row=>({name:row.querySelector('strong')?.textContent,value:row.querySelectorAll('.resource-pips button[aria-pressed=true]').length}))});if(fixture.samples.length>3000)fixture.samples.shift();requestAnimationFrame(sample);};requestAnimationFrame(sample);
+const sample=()=>{fixture.samples.push({at:performance.now(),rows:[...[...document.querySelectorAll('.resource179-row')].map(row=>({name:row.querySelector('strong')?.textContent,value:row.querySelectorAll('.resource-pips button[aria-pressed=true]').length})),...[...document.querySelectorAll('.resource-widget,.compact-resource')].map(row=>({name:row.dataset.resourceName,value:Number(row.dataset.resourceCurrent)}))]});if(fixture.samples.length>3000)fixture.samples.shift();requestAnimationFrame(sample);};requestAnimationFrame(sample);
 fixture.ready=true;

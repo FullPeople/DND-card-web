@@ -82,6 +82,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     else if (target.startsWith('save:') && saves[target.slice(5) as Ability]) saves[target.slice(5) as Ability].value = value;
     (trace[target] ??= []).push(`人工修正为 ${value}：${adjustment.reason}`);
   }
+  for (const [key,value] of Object.entries(c.skillBonuses || {})) if (skills[key] && value) {
+    skills[key].value += value;
+    const note=`技能额外调整 ${value >= 0 ? '+' : ''}${value}`;
+    skills[key].sources.push(note);(trace['skill:'+key] ||= []).push(note);
+  }
   if (!(c.adjustments || []).some(a => a.target === 'passive')) passive = 10 + skills.perception.value;
   ac += c.sheetBonuses?.ac || 0;
   initiative += c.sheetBonuses?.initiative || 0;

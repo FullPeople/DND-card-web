@@ -1,15 +1,15 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
 import {RELEASE_NOTES,SUITE_RELEASE_NOTES} from '../../src/platform/releaseNotes';
 
-async function ready(page:Page){await mockSource(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
+async function ready(page:Page){await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
 test('spell authoring offers field examples, saves without guessing JSON, and selected entries open as reading',async({page})=>{
  await ready(page);await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'自定义',exact:true}).click();
  await page.getByLabel('自定义条目类型',{exact:true}).selectOption('spell');
  await page.getByRole('button',{name:'施法时间填写帮助',exact:true}).hover();const help=page.getByRole('tooltip');await expect(help).toContainText('1 附赠动作');await expect(help).toContainText('"unit":"reaction"');await expect(help.locator('p')).toHaveCount(4);
  await page.getByRole('button',{name:'查看参考格式',exact:true}).click();const reference=page.getByRole('dialog',{name:'自定义条目参考格式'});await expect(reference).toContainText('JSON');await expect(reference).toContainText('"concentration":true');await page.screenshot({path:test.info().outputPath('reference-format.png')});await reference.getByRole('button',{name:'关闭参考格式'}).click();
- await page.getByRole('button',{name:'创作建议填写帮助'}).hover();await expect(page.getByRole('tooltip')).toContainText('强烈建议复制创作提示词让AI');
+ await page.getByRole('button',{name:'使用必看！填写帮助'}).hover();await expect(page.getByRole('tooltip')).toContainText('复制创作提示词并打开 AI');
  await page.getByLabel('自定义条目名称',{exact:true}).fill('格式帮助验收法术');await page.getByLabel('法术环阶',{exact:true}).fill('1');await page.getByLabel('法术学派',{exact:true}).selectOption('V');
  await page.getByLabel('法术time结构').fill('action');await page.getByLabel('法术range结构').fill('{"type":"point","distance":{"type":"feet","amount":60}}');await page.getByLabel('法术components结构').fill('{"v":true,"s":true}');await page.getByLabel('法术duration结构').fill('[{"type":"instant"}]');await page.getByLabel('自定义条目正文',{exact:true}).fill('自制的完整规则说明。');
  await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.getByRole('alert')).toContainText('施法时间需要 JSON 数组');

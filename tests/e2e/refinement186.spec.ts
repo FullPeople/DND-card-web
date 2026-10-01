@@ -8,12 +8,12 @@ async function load(page:Page,c:Character){await mockSource(page);await page.got
 test('hit dice keep their existing resource state through repeated clicks, type changes, undo and reload',async({page})=>{
  const c=newCharacter();c.name='生命骰操作验收';add(c,entry('class','奥术旅人',{hd:{faces:6}}),6);add(c,entry('class','持盾者',{hd:{faces:10}}),4);
  c.runtime.resources={'hit-die:6':{name:'生命骰 d6',current:2,max:6,automatic:true,type:'count'},'hit-die:10':{name:'生命骰 d10',current:4,max:4,automatic:true,type:'count'}};
- await load(page,c);await expect(page.locator('.hit-die')).toHaveCount(10);await expect(page.locator('.hit-die.available')).toHaveCount(6);await expect(page.locator('.quickbar-resources')).not.toContainText('生命骰');
+ await load(page,c);await expect(page.locator('.hit-die')).toHaveCount(10);await expect(page.locator('.hit-die.available')).toHaveCount(6);const quickbar=page.getByRole('region',{name:'资源模块快捷栏'});await expect(quickbar).toBeVisible();await expect(quickbar.locator('.resource-widget')).toHaveCount(0);await expect(quickbar.locator('[data-resource-id^="hit-die:"]')).toHaveCount(0);
  await page.getByRole('button',{name:'d6 生命骰 1，可用',exact:true}).click();const panel=page.getByRole('dialog',{name:'生命骰',exact:true});await expect(panel).toBeVisible();
  await panel.getByRole('button',{name:'生命骰 d6 2',exact:true}).click();await panel.getByRole('button',{name:'生命骰 d6 1',exact:true}).click();await panel.getByRole('button',{name:'生命骰 d6 1',exact:true}).click();
  await expect(page.getByRole('group',{name:'d6：1 / 6',exact:true}).locator('.available')).toHaveCount(1);
  await panel.getByRole('tab',{name:'d10 4/4',exact:true}).click();await panel.getByRole('button',{name:'生命骰 d10 4',exact:true}).click();await expect(page.getByRole('group',{name:'d10：3 / 4',exact:true})).toBeVisible();
- await page.screenshot({path:'test-results-186/hit-dice-open.png'});await page.locator('.brand').click();await expect(panel).toHaveCount(0);
+ await page.screenshot({path:test.info().outputPath('hit-dice-open.png')});await page.locator('.brand').click();await expect(panel).toHaveCount(0);
  await page.getByRole('button',{name:'撤销',exact:true}).click();await expect(page.getByRole('group',{name:'d10：4 / 4',exact:true})).toBeVisible();
  await page.reload();await expect(page.getByRole('group',{name:'d6：1 / 6',exact:true})).toBeVisible();await expect(page.getByRole('group',{name:'d10：4 / 4',exact:true})).toBeVisible();
  const bounds=await page.locator('.dice-cell .cell-content').evaluate(el=>{const outer=el.getBoundingClientRect();return [...el.querySelectorAll('.hit-die svg')].map(d=>{const r=d.getBoundingClientRect();return r.right-outer.right;});});expect(Math.max(...bounds)).toBeLessThanOrEqual(1);
@@ -46,5 +46,6 @@ test('player overview hides automatic hit dice while retaining ordinary resource
  await page.goto('/resources186-harness#suite=resources179&bridge='+encodeURIComponent(test.info().project.use.baseURL as string));
  await expect(page.locator('[data-resource-target="hero0"]')).toBeVisible();
  await page.evaluate(()=>{(window as any).cards[0].resources.push({id:'hit-die:6',name:'生命骰 d6',current:3,max:4,type:'count',automatic:true});(window as any).refresh('PLAYER');});
- const card=page.locator('[data-resource-target="hero0"]');await expect(card.locator('.resource179-flow')).not.toContainText('生命骰 d6');await expect(card.locator('.resource179-flow')).toContainText('旅途补给');
+ const card=page.locator('[data-resource-target="hero0"]'),resources=card.locator('.compact-resources');await expect(resources).toBeVisible();await expect(resources.locator('.compact-resource')).toHaveCount(4);await expect(resources.locator('[data-resource-id="hit-die:6"]')).toHaveCount(0);await expect(resources.locator('[data-resource-id="a"]')).toContainText('生命骰');
+ const supply=resources.locator('[data-resource-id="d"]');await expect(supply).toContainText('旅途补给');await expect(supply).toHaveAttribute('data-resource-current','3');await supply.locator('.resource-widget-face').click();const panel=page.getByRole('dialog',{name:'旅途补给资源操作',exact:true});await expect(panel).toBeVisible();await expect(panel.locator('.resource-bar')).toHaveText('3 / 10');await panel.getByRole('button',{name:'消耗艾拉旅途补给',exact:true}).click();await expect.poll(()=>page.evaluate(()=>(window as any).requests.filter((r:any)=>r.type==='resource').map((r:any)=>({itemId:r.itemId,id:r.resourceId,current:r.resource.current})))).toEqual([{itemId:'card:hero0',id:'d',current:2}]);await panel.getByRole('button',{name:'关闭资源操作'}).click();await expect(panel).toBeHidden();
 });

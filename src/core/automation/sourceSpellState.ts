@@ -20,11 +20,12 @@ export function sourceOwnerIdentity(c:Character,row:Selection):string{
  }
  return JSON.stringify(path);
 }
-export function rememberSourceSpellUses(c:Character,id?:string){
+// A zero counter may hide spent uses above a lowered maximum; only an explicit positive restoration clears that debt.
+export function rememberSourceSpellUses(c:Character,id?:string,preserveOverflow=true){
  for(const [selectionId,config] of Object.entries(c.spellSettings?.special||{})){
   if(id&&selectionId!==id||!config.sourceGrant?.usageKey||config.mode!=='uses')continue;
   const r=c.runtime.resources[specialSpellResource(selectionId,c)];if(!r)continue;
-  (c.runtime.sourceSpellSpent||={})[config.sourceGrant.usageKey]=Math.max(0,r.max-r.current);
+  const ledger=c.runtime.sourceSpellSpent||={};ledger[config.sourceGrant.usageKey]=Math.max(0,r.max-r.current,preserveOverflow&&r.current===0?ledger[config.sourceGrant.usageKey]||0:0);
  }
 }
 

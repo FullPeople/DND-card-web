@@ -1,4 +1,5 @@
-import {useState,useRef,useEffect} from 'react';
+import {ResourceDisplayContext} from './resourceDisplay';
+import {useState,useRef,useEffect,useContext} from 'react';
 import './resource179.css';
 import {StatInput} from './StatInput';
 import {LockIcon} from './ResourceEditor';
@@ -6,6 +7,7 @@ import {pointerDrag} from './pointerDrag';
 import {usePresets,removePreset,type ResourceValue} from './resourcePresets';
 export function ResourceRow({resource:r,enabled,gm,change,configure,label='',lock,confirmedCurrent}:{resource:ResourceValue;enabled:boolean;gm:boolean;confirmedCurrent?:number;change:(n:number)=>Promise<unknown>;configure?:(()=>void);label?:string;lock?:()=>void}){
  const [input,setInput]=useState(false),[shown,setShown]=useState(r.current),[waitingRevision,setWaitingRevision]=useState(0),busy=useRef(0),desired=useRef(r.current),authoritative=useRef(r.current),generation=useRef(0);
+ const displayCurrent=useContext(ResourceDisplayContext);useEffect(()=>{displayCurrent?.(shown);},[displayCurrent,shown]);
  const waiting=useRef<{requestId?:string;turn:number;target:number;queueBlocked?:boolean}|undefined>(undefined),resource=useRef(r);resource.current=r;authoritative.current=r.current;
  const intent=useRef<{turn:number;target:number;observed:boolean;lastAuthority:number}|undefined>(undefined);
  useEffect(()=>{const confirmed=confirmedCurrent??r.current;if(busy.current&&intent.current&&confirmed!==intent.current.lastAuthority){intent.current.lastAuthority=confirmed;if(confirmed===intent.current.target)intent.current.observed=true;}const wait=waiting.current;if(wait){if(wait.requestId){if(wait.queueBlocked||confirmedCurrent!==wait.target)return;waiting.current=undefined;desired.current=confirmedCurrent;setShown(confirmedCurrent);window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:wait.requestId}}));return;}if(r.current!==wait.target)return;waiting.current=undefined;}if(!busy.current){desired.current=r.current;setShown(r.current);}},[r.current,confirmedCurrent,waitingRevision]);
