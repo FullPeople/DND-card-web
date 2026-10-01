@@ -46,7 +46,7 @@ test('original spell height, cut frame, ritual wash and rotating concentration s
  await known.click();const prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]');await expect(prepared).toBeVisible();await expect(known).toContainText('已预备');
  for(const tile of [known,prepared,gift]){await expect(tile).toHaveCSS('height','28px');await tile.hover();await expect(tile).toHaveCSS('background-image',/linear-gradient/);}
  await page.mouse.move(1200,40);await page.screenshot({path:test.info().outputPath('spell-style-desktop.png')});await page.locator('.paper').screenshot({path:test.info().outputPath('spell-style-card.png')});
- await page.setViewportSize({width:390,height:844});for(const tile of [known,prepared,gift,cantrip])await expect(tile).toHaveCSS('height','48px');
+ await page.setViewportSize({width:390,height:844});await expect(page.locator('.sheet-viewport')).toHaveAttribute('data-sheet-display','a4');for(const tile of [known,prepared,gift,cantrip])await expect(tile).toHaveCSS('height','28px');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await page.screenshot({path:test.info().outputPath('spell-style-mobile.png'),fullPage:true});await known.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('spell-style-mobile-selected.png')});
 });
 
