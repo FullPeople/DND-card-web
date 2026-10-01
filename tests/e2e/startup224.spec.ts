@@ -4,12 +4,12 @@ import {mockSource,suppressAnnouncement} from './fixtures';
 test('application preload starts before a delayed entry and slow loading remains recoverable',async({page})=>{
  await mockSource(page);await suppressAnnouncement(page);await page.clock.install();
  let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
- let appRequested=false;
- page.on('request',request=>{if(/\/assets\/App-.*\.js/.test(request.url()))appRequested=true;});
+ let appRequested=false,largeIconRequested=false;
+ page.on('request',request=>{if(request.url().endsWith('/exe_icon.png'))largeIconRequested=true;if(/\/assets\/App-.*\.js/.test(request.url()))appRequested=true;});
  await page.route('**/assets/index-*.js',async route=>{await gate;await route.continue();});
  await page.goto('/',{waitUntil:'commit'});
  await expect(page.locator('#startup-title')).toBeVisible();
- await expect.poll(()=>appRequested).toBe(true);
+ await expect.poll(()=>appRequested).toBe(true);expect(largeIconRequested).toBe(false);
  await expect(page.locator('#startup-message')).toContainText('秒');
  await page.clock.fastForward(21000);
  await expect(page.locator('#startup-title')).toHaveText('程序仍在加载');

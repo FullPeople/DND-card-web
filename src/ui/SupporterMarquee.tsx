@@ -34,5 +34,5 @@ export function SupporterMarquee({fullScreen=false}:{fullScreen?:boolean}){
  };
  spawn();timer=setInterval(spawn,180);
  });return()=>{stopped=true;clearInterval(timer);for(const timeout of timers)clearTimeout(timeout);};},[fullScreen]);
- return <div className={'supporter-marquee '+(fullScreen?'is-fullscreen':'')} aria-hidden="true" data-supporter-marquee>{flights.map(f=><span key={f.id} className="supporter-flight" style={{'--flight-duration':`${f.duration}ms`,top:8+f.lane*52,color:f.color,fontSize:f.size} as CSSProperties}>{f.avatar&&<img src={'./support/'+f.avatar} alt=""/>}{f.name}</span>)}</div>;
+ return <div className={'supporter-marquee '+(fullScreen?'is-fullscreen':'')} aria-hidden="true" data-supporter-marquee>{flights.map(f=><span key={f.id} className="supporter-flight" style={{'--flight-duration':`${f.duration}ms`,top:8+f.lane*52,color:f.color,fontSize:f.size} as CSSProperties}>{f.avatar&&<img fetchPriority="low" decoding="async" src={'./support/'+f.avatar} alt=""/>}{f.name}</span>)}</div>;
 }
