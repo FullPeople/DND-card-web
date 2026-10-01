@@ -20,42 +20,80 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
-      - run: npx playwright install --with-deps chromium
-      - run: npx playwright test --config playwright.screen.config.ts
-      - run: npm run test:release
-      - run: npx playwright test --config playwright.feedback198.config.ts
-      - run: npx playwright test --config playwright.compat207.config.ts
-      - run: npx playwright test --config playwright.touch.config.ts
       - run: npm run build:standalone
-      - run: npx playwright test --config playwright.wiki-recovery.config.ts
-      - run: npx playwright test --config playwright.integration230.config.ts
-      - run: npx playwright test --config playwright.feedback217.config.ts
-        env:
-          DND_217_RESULTS: test-results/feedback217
-      - run: npx playwright test --config playwright.source-feedback.config.ts
-      - run: npx playwright test --config playwright.choices.config.ts
-      - run: npm run test:standalone
-      - run: npx playwright test --config playwright.automation209.config.ts
-        env:
-          DND_AUTOMATION_TEST_MODE: standalone
-      - run: npx playwright test --config playwright.unified191.config.ts
       - uses: actions/upload-artifact@v4
-        if: failure()
         with:
-          name: browser-failure
+          name: verified-web-builds
           path: |
-            test-results/
-            test-results-*/
-          retention-days: 7
+            dist/
+            dist-standalone/
+          if-no-files-found: error
+          retention-days: 1
       - uses: actions/configure-pages@v5
         if: github.ref == 'refs/heads/main'
       - uses: actions/upload-pages-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
           path: dist-standalone
+  browsers:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: screen-release
+            commands: |
+              npx playwright test --config playwright.screen.config.ts
+              npm run test:release
+          - group: feedback-touch
+            commands: |
+              npx playwright test --config playwright.feedback198.config.ts
+              npx playwright test --config playwright.compat207.config.ts
+              npx playwright test --config playwright.touch.config.ts
+          - group: startup-integration
+            commands: |
+              npx playwright test --config playwright.wiki-recovery.config.ts
+              npx playwright test --config playwright.integration230.config.ts
+          - group: resources-sources
+            commands: |
+              npx playwright test --config playwright.feedback217.config.ts
+              npx playwright test --config playwright.source-feedback.config.ts
+          - group: choices-standalone
+            commands: |
+              npx playwright test --config playwright.choices.config.ts
+              npm run test:standalone
+          - group: automation-unified
+            commands: |
+              DND_AUTOMATION_TEST_MODE=standalone npx playwright test --config playwright.automation209.config.ts
+              npx playwright test --config playwright.unified191.config.ts
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: verified-web-builds
+      - run: npx playwright install --with-deps chromium
+      - name: Run all checks in group
+        run: ${{ matrix.commands }}
+        env:
+          DND_217_RESULTS: test-results/feedback217
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-${{ matrix.group }}
+          path: |
+            test-results/
+            test-results-*/
+            .local-evidence/integration230-browser/
+          retention-days: 7
   deploy:
     if: github.ref == 'refs/heads/main'
-    needs: verify
+    needs: [verify, browsers]
     runs-on: ubuntu-latest
     permissions:
       pages: write
