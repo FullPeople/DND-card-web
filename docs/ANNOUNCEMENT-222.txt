@@ -29,4 +29,4 @@
 GitHub Issues：https://github.com/FullPeople/DND-card/issues
 邮箱：1763086701psw@gmail.com
 
-本文件随本次发布准备，是否已上线以发布回执为准，未代发聊天消息。
+本批已于 2026-10-01 发布，网站版本 standalone-1.0.222，新版插件 1.0.222-dev。完整验证与未测范围见 RELEASE-222-RESULT.md。本文件供复制发群，未代发聊天消息。
