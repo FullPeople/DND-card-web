@@ -1,0 +1,5 @@
+.editing-load-error{flex:none;margin:4px 12px 8px;padding:8px 10px;border:1px solid #b18a26;background:#fff0bd;color:#473810;min-width:0;font-size:12px}
+.editing-load-error p{margin:0 0 5px;line-height:1.4}
+.editing-load-error>div{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.editing-load-error button{font-size:12px;padding:5px 8px;border:1px solid #b18a26;background:#fff8df;color:#473810}
+.editing-load-error details{max-width:100%;min-width:0}.editing-load-error summary{cursor:pointer}.editing-load-error pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:100px;overflow:auto}

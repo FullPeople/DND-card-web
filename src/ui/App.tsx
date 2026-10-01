@@ -1,4 +1,6 @@
 import {ToolBoundary} from './ToolBoundary';
+import './classCompatibility.css';
+import './editingRecovery.css';
 import {ownedTrainingReference} from './entryMenuEntries';
 import {overviewConditionEntry} from './OverviewVisuals';
 import {useGroupRoll,getGroupRoll} from '../platform/groupRoll';
@@ -255,7 +257,8 @@ export default function App() {
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
-  useEffect(()=>{if(!workspace)return;return afterPaint(()=>{void import('../core/automation/cardRuntime').then(setAutomationRuntime).catch(error=>setNotice(`自动化编辑功能加载失败，已保存的角色仍可查阅：${String(error)}`));});},[!!workspace]);
+  const [editingLoadError,setEditingLoadError]=useState('');
+  useEffect(()=>{if(!workspace)return;let alive=true;const cancel=afterPaint(()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});});return()=>{alive=false;cancel();};},[!!workspace]);
   const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
   const editing=editingRequested&&!!automationRuntime;
   useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editingRequested));}catch{/* A session still keeps the global editing preference. */}},[editingRequested]);
@@ -321,6 +324,11 @@ export default function App() {
     queue.current = queue.current.catch(() => {}).then(() => saveWorkspace(next)).then(() => {
       if (workspaceRef.current === next) { saveFailed.current = false; setSaving('已保存到本机'); }
     }).catch(error => { saveFailed.current = true; setSaving('保存失败'); setNotice(`本机保存失败，请立即导出角色备份。${String(error)}`); }).finally(() => { pendingSaves.current--; });
+  }
+  async function reloadSavedWorkspace(){
+    await queue.current;
+    if(saveFailed.current){setNotice('保存未成功，请先导出角色备份。');return;}
+    location.reload();
   }
   function acceptWorkspace(value: Workspace) {
     if (value.schemaVersion !== 1 || !Array.isArray(value.characters) || !value.characters.length || !Array.isArray(value.packs)) throw new Error('工作区结构不完整');
@@ -719,6 +727,7 @@ export default function App() {
         <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span><div className="character-tabs" role="tablist" aria-label={t('currentCharacter')}>{!inWorkbench&&workspace.characters.map(x=><button key={x.id} role="tab" aria-selected={x.id===c.id} onClick={()=>persist({...workspace,activeId:x.id})}>{x.name}{classWarnings.has(x.id)&&<span className="class-warning-icon" aria-label="旧卡资料需要核对">⚠</span>}</button>)}</div></div>
           <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&wb.role==='GM'&&wb.cards.find(card=>card.id===wb.target?.cardId)&&<CardOwnership key={wb.target?.cardId} card={wb.cards.find(card=>card.id===wb.target?.cardId)!}/>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}{editing&&<button onClick={()=>setModal('personal')}>{t('entriesLevels')}</button>}{editing && <button className="adjust-shortcut" aria-label={t('adjustDetails')} onClick={() => setModal('adjust')}>{t('adjust')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><SheetDisplayButton/><button disabled={!automationRuntime||inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
         </div>
+        {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {classNeedsReview&&!loading&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
         <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button></span></div>
