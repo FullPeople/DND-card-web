@@ -34,6 +34,7 @@ function make(){
   focus:normalizeWidget({x:0,y:0,w:3,h:3,page:1,style:'ring'}),
   coins:normalizeWidget({x:3,y:0,w:4,h:3,page:1,style:'fraction'}),
  }};
+ if(scenario==='empty'){c.baseHp=12;c.runtime.hp=3;c.runtime.resources={};c.quickbarLayout.widgets={};}
  if(scenario==='resize'){
   c.runtime.resources={probe:{name:'八点缩放样本',current:2,max:5,type:'number'}};
   c.quickbarLayout.widgets={probe:normalizeWidget({x:5,y:2,w:4,h:2,page:0,style:'segments',color:'#527880'})};

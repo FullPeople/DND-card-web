@@ -11,11 +11,14 @@ import {ResourceModuleEditor} from './ResourceModuleEditor';
 import {ResourceEditor} from './ResourceEditor';
 import {ResourceDashboardIcon} from './ResourceModuleFace';
 import {useResourceTemplateDrag} from './useResourceTemplateDrag';
+import {automationEnabled} from '../core/automation/state';
+import {ResourceRestActions,useResourceRest} from './ResourceRestActions';
 import './resourceDashboard.css';
 export type DashboardViewport={page:number;width?:number;height?:number};
 const colors=['#527880','#8a7652','#727aa0','#558977','#a36d61','#686f61','#80505b','#454a58'];
 const iconNames={spark:'星芒',diamond:'菱形',shield:'盾牌',flame:'火焰',leaf:'叶片',bottle:'药瓶'};
 export function ResourceDashboard({c:live,d,edit,inspect,disabled,gm,viewport}:{c:Character;d:Derived;edit:(f:(c:Character)=>void)=>void;inspect:(entry:Entry)=>void;disabled:boolean;gm:boolean;viewport:DashboardViewport}){
+ const rest=useResourceRest(live,edit);
  const [initial]=useState(()=>({base:structuredClone(live),draft:createDashboardDraft(live)}));
  const host=useRef<HTMLElement>(null),base=useRef(initial.base),pristine=useRef(initial.draft);
  const [dirty,setDirty]=useState(false);
@@ -71,6 +74,8 @@ export function ResourceDashboard({c:live,d,edit,inspect,disabled,gm,viewport}:{
     <button type="button" className="primary" disabled={disabled||!dirty||!!overlap.count||interacting||templateDrag.dragging} onClick={save}>保存布局</button>
    </div>
   </div>
+  {rest.popup}
+  {automationEnabled(live)&&!config&&<ResourceRestActions c={live} disabled={disabled||interacting||templateDrag.dragging} open={rest.open}/>}
   {config?<section className="dashboard-configuration"><header><strong>{config===newResourceKey?'添加资源':config===attackId?'整理快捷栏':'模块设置'}</strong><button type="button" aria-label="返回模块库" onClick={()=>setConfig('')}>完成</button></header>
    {config===attackId?<QuickbarManager c={c} edit={change}/>:config===newResourceKey?<ResourceEditor inline disabled={disabled} gm={gm} close={()=>setConfig('')} save={async value=>{
     let created:{id:string;page:number}|undefined;

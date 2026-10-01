@@ -61,6 +61,10 @@ jobs:
             commands: |
               DND_AUTOMATION_TEST_MODE=standalone npx playwright test --config playwright.automation209.config.ts
               npx playwright test --config playwright.unified191.config.ts
+          - group: followup-230
+            commands: |
+              npx playwright test --config playwright.followup231.config.ts
+              npx playwright test --config playwright.followup-ui231.config.ts
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
@@ -72,6 +76,8 @@ jobs:
         with:
           name: verified-web-builds
       - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps firefox
+        if: matrix.group == 'followup-230'
       - name: Run all checks in group
         run: ${{ matrix.commands }}
         env:
@@ -84,4 +90,6 @@ jobs:
             test-results/
             test-results-*/
             .local-evidence/integration230-browser/
+            .local-evidence/followup231-browser/
+            .local-evidence/followup231-ui/
           retention-days: 7

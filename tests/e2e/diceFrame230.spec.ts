@@ -38,7 +38,7 @@ test('dice history bridge forwards same-id reveals and keeps single/group replay
  await send(host,'rolls',{rolls:[roll]});await expect(frame.locator('#deliveries')).toContainText('solo230');
  await send(host,'rolls',{rolls:[{...roll,hidden:false}]});await expect.poll(()=>frame.locator('#deliveries').evaluate(e=>JSON.parse(e.textContent||'[]').filter((r:any)=>r.rollId==='solo230'&&!r.hidden).length)).toBe(1);
  await send(host,'rolls',{rolls:[{...roll,hidden:false}]});await expect.poll(()=>frame.locator('#deliveries').evaluate(e=>JSON.parse(e.textContent||'[]').length)).toBe(2);
- const actions=[['solo230','open'],['solo230','close'],['group230','open'],['group230','close'],['solo230','open'],['group230','open'],['group230','close']];
+ const actions=[['solo230','open'],['solo230','close'],['group230','open'],['group230','close'],['solo230','open'],['group230','open'],['group230','close'],['solo230','toggle'],['solo230','toggle'],['group230','toggle'],['group230','toggle']];
  await frame.locator('body').evaluate((_,actions)=>{actions.forEach(([cid,action],i)=>(window as any).sendReplay(cid,action,'intent-'+i));},actions);
  await expect.poll(()=>host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='diceRpc'&&m.method==='broadcast.sendMessage').length)).toBe(actions.length);
  const requests=await host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='diceRpc'&&m.method==='broadcast.sendMessage'));

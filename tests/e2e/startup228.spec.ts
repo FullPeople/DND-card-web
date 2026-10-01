@@ -57,7 +57,8 @@ test.describe('offline cache',()=>{
  for(const tool of ['search','sheetImage','AutomationPanel','ResourceDashboard','SpellsPage','CardMigration'])expect(cached.some(url=>new RegExp('/assets/'+tool+'-.*\\.js').test(url)),tool).toBe(false);
 });
 
-test('first-visit libraries and used pages are retained for offline reopening',async({page,context})=>{
+test('first-visit libraries and used pages are retained for offline reopening',async({page,context,browserName})=>{
+ test.skip(browserName!=='chromium','Playwright service-worker offline controls are Chromium-only; real server-loss coverage is in runtimeRecovery231.');
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/');
  await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
  await page.waitForFunction(()=>!!navigator.serviceWorker.controller);

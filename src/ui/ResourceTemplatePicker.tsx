@@ -3,15 +3,14 @@ import {RESOURCE_TEMPLATES, normalizeWidget, type ResourceTemplate, type Resourc
 import {ResourceModuleFace} from './ResourceModuleFace';
 import './resourceTemplates.css';
 
-const colors=['#527880','#8a7652','#727aa0','#558977','#a36d61','#686f61'];
 const grouped=new Set(['pool','poolchips','poolbars','poolpips']);
 
 /** The gallery and the drag preview show the same example, at their actual display size. */
 export function resourceTemplatePreview(template:ResourceTemplate,values?:ResourceTemplateValues){
- const group=grouped.has(template.id),isReady=template.id==='ready',index=RESOURCE_TEMPLATES.findIndex(item=>item.id===template.id);
+ const group=grouped.has(template.id),isReady=template.id==='ready';
  const module:ResourceModule={id:'preview',name:'动作如潮',slots:group,rows:group?[['spell-slot:1',{name:'动作如潮',current:4,max:4}],['spell-slot:2',{name:'动作如潮',current:3,max:3}],['spell-slot:3',{name:'动作如潮',current:2,max:2}]]:[['preview',{name:'动作如潮',current:isReady?1:template.id==='counter'?1874.6:template.id==='matrix'?4:3,max:isReady?1:template.id==='counter'?2000:template.id==='matrix'?6:5}]]};
  if(values){module.slots=false;module.name=values.name.trim()||'新资源';module.rows=module.rows.map(([id],i)=>[id,{name:group?`${module.name} ${i+1}`:module.name,current:values.current,max:values.max,unlimited:values.unlimited}]);}
- return {module,layout:normalizeWidget({style:template.style,w:template.w,h:template.h,color:colors[Math.max(0,index)%colors.length],icon:isReady?'shield':'spark'})};
+ return {module,layout:normalizeWidget({style:template.style,w:template.w,h:template.h,color:'#527880',icon:isReady?'shield':'spark'})};
 }
 
 export function ResourceTemplatePicker({choose,disabled=false,hidden=0,restore,drag}:{hidden?:number;restore?:()=>void;choose:(template:ResourceTemplate,values:ResourceTemplateValues)=>void;disabled?:boolean;drag?:(event:PointerEvent<HTMLButtonElement>,template:ResourceTemplate,values:ResourceTemplateValues)=>void}) {

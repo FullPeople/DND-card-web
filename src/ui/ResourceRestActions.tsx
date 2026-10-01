@@ -1,4 +1,4 @@
-import {lazy,Suspense,useEffect,useState} from 'react';
+import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Character} from '../core/model';
 const RestPopup=lazy(()=>import('./RestPopup').then(module=>({default:module.RestPopup})));
 
@@ -6,8 +6,11 @@ const RestPopup=lazy(()=>import('./RestPopup').then(module=>({default:module.Res
  * closes that menu without losing the confirmation or mutating resources. */
 export function useResourceRest(c:Character,edit:(update:(draft:Character)=>void)=>void){
  const [kind,setKind]=useState<'short'|'long'>();
+ const trigger=useRef<HTMLElement|null>(null);
  useEffect(()=>setKind(undefined),[c.id]);
- return {open:setKind,popup:kind?<Suspense fallback={<p role="status">正在加载休息选项…</p>}><RestPopup c={c} kind={kind} edit={edit} close={()=>setKind(undefined)}/></Suspense>:null};
+ function open(next:'short'|'long'){trigger.current=document.activeElement instanceof HTMLElement?document.activeElement:null;setKind(next);}
+ function close(){setKind(undefined);requestAnimationFrame(()=>{if(trigger.current?.isConnected)trigger.current.focus();});}
+ return {open,popup:kind?<Suspense fallback={<p role="status">正在加载休息选项…</p>}><RestPopup c={c} kind={kind} edit={edit} close={close}/></Suspense>:null};
 }
 
 export function ResourceRestActions({disabled,open,c}:{disabled:boolean;open:(kind:'short'|'long')=>void;c:Character}){

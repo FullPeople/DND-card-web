@@ -14,8 +14,10 @@ test('name and numbers preview before creating, persist after explicit save, and
  await dialog.getByRole('spinbutton',{name:'新模块上限',exact:true}).fill('8');
  await dialog.getByRole('spinbutton',{name:'新模块当前值',exact:true}).fill('5');
  const sample=dialog.locator('[data-template-id="pips"]');await expect(sample.locator('.rm-name')).toHaveText('旅途储备');await expect(sample.locator('.rm-icon-count')).toHaveText('5 / 8');
+ const previewColor=await sample.locator('.resource-dashboard-icon').first().evaluate(el=>getComputedStyle(el).color);
  expect((await read(page)).runtime.resources).toEqual(before);
  await sample.click();const added=dialog.locator('.resource-widget[data-selected=true]');await expect(added.locator('.rm-name')).toHaveText('旅途储备');await expect(added.locator('.rm-icon-count')).toHaveText('5 / 8');
+ await expect(added.locator('.resource-dashboard-icon').first()).toHaveCSS('color',previewColor);
  const id=(await added.getAttribute('data-resource-id'))!;
  await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=(await read(page)).runtime.resources;expect(saved[id]).toMatchObject({name:'旅途储备',current:5,max:8});for(const [key,value] of Object.entries(before))expect(saved[key]).toEqual(value);
  await dialog.screenshot({path:test.info().outputPath('resource-gray-preview-wide.png')});
@@ -85,4 +87,27 @@ test('custom name and values follow the drag ghost into the draft without changi
  await expect(ghost).toHaveCount(0);const added=dialog.locator('.resource-widget[data-resource-name="幽灵储备"]');await expect(added).toHaveCount(1);await expect(added.locator('.rm-readout')).toHaveText('2/ 7');expect((await read(page)).runtime.resources).toEqual(before);
  await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=(await read(page)).runtime.resources;for(const [key,value] of Object.entries(before))expect(saved[key]).toEqual(value);
  expect(Object.values(saved).find(r=>r.name==='幽灵储备')).toMatchObject({current:2,max:7});
+});
+
+test('a card without resources can rest through the dashboard and cancel, Escape and confirm preserve its layout draft',async({page})=>{
+ const dialog=await open(page,'empty'),before=await read(page),dashboard=dialog.getByRole('region',{name:'仪表盘编辑器',exact:true});expect(before.runtime.resources).toEqual({});
+ const attacks=dialog.locator('.resource-attacks-widget');await attacks.locator('.resource-attacks-drag').focus();await page.keyboard.press('ArrowRight');await expect(attacks).toHaveAttribute('data-grid-x','1');await expect(dashboard).toHaveAttribute('data-dirty','true');
+ const menu=dialog.getByLabel('休息选项'),rest=dialog.getByRole('dialog',{name:'长休',exact:true});
+ await menu.getByRole('button',{name:'长休',exact:true}).click();await expect(rest).toBeVisible();expect(await rest.evaluate(el=>el.closest('dialog')===Array.from(document.querySelectorAll('dialog[open]')).at(-1))).toBe(true);
+ await rest.getByRole('button',{name:'关闭休息',exact:true}).click();await expect(rest).toHaveCount(0);await expect(dialog).toBeVisible();await expect(attacks).toHaveAttribute('data-grid-x','1');expect(await read(page)).toEqual(before);
+ await menu.getByRole('button',{name:'长休',exact:true}).click();await expect(rest).toBeVisible();await page.keyboard.press('Escape');await expect(rest).toHaveCount(0);await expect(dialog).toBeVisible();await expect(dashboard).toHaveAttribute('data-dirty','true');await expect(attacks).toHaveAttribute('data-grid-x','1');expect(await read(page)).toEqual(before);
+ await expect(menu.getByRole('button',{name:'长休',exact:true})).toBeFocused();await menu.getByRole('button',{name:'长休',exact:true}).click();await rest.getByRole('button',{name:'确认长休',exact:true}).click();await expect(rest).toHaveCount(0);await expect(dialog).toBeVisible();const rested=await read(page);expect(rested.runtime.hp).toBe(12);expect(rested.runtime.resources).toEqual({});expect(rested.quickbarLayout).toEqual(before.quickbarLayout);expect(rested.runtime.rests?.sequence).toBe(1);await expect(attacks).toHaveAttribute('data-grid-x','1');await expect(dashboard).toHaveAttribute('data-dirty','true');
+ await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=await read(page);expect(saved.quickbarLayout?.attacks?.x).toBe(1);expect(saved.runtime).toEqual(rested.runtime);await dialog.screenshot({path:test.info().outputPath('empty-resource-rest-dashboard.png')});
+});
+
+test('rest cancellation preserves every balance and confirmation merges with an unsaved icon change',async({page})=>{
+ const dialog=await open(page),before=await read(page),dashboard=dialog.getByRole('region',{name:'仪表盘编辑器',exact:true}),surge=dialog.locator('[data-resource-id="surge"]');
+ await surge.locator('.resource-widget-face').click();await dialog.getByRole('button',{name:'色调 #a36d61',exact:true}).click();await expect(dashboard).toHaveAttribute('data-dirty','true');
+ const longRest=dialog.getByLabel('休息选项').getByRole('button',{name:'长休',exact:true}),rest=dialog.getByRole('dialog',{name:'长休',exact:true});
+ await longRest.click();await rest.getByRole('button',{name:'关闭休息',exact:true}).click();expect(await read(page)).toEqual(before);await expect(dashboard).toHaveAttribute('data-dirty','true');
+ await longRest.click();await expect(rest).toBeVisible();await page.keyboard.press('Escape');await expect(dialog).toBeVisible();expect(await read(page)).toEqual(before);await expect(surge.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#a36d61');
+ await longRest.click();await rest.getByRole('button',{name:'确认长休',exact:true}).click();const rested=await read(page),expected=structuredClone(before.runtime.resources);
+ for(const [id,r] of Object.entries(expected))if(id.startsWith('spell-slot:')||id.startsWith('pact-slot:'))r.current=r.max;
+ expect(rested.runtime.resources).toEqual(expected);expect(rested.quickbarLayout).toEqual(before.quickbarLayout);await expect(dashboard).toHaveAttribute('data-dirty','true');
+ await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=await read(page);expect(saved.quickbarLayout?.widgets?.surge.color).toBe('#a36d61');expect(saved.runtime.resources).toEqual(expected);await expect(dashboard).toHaveAttribute('data-dirty','false');
 });
