@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "10000000-0000-4000-8000-000000000001",
+  "revision": 1,
+  "name": "协议测试角色",
+  "player": "",
+  "edition": "2024",
+  "createdAt": "2026-10-01T00:00:00Z",
+  "updatedAt": "2026-10-01T00:00:00Z",
+  "abilities": {"str": 10, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": 10},
+  "baseHp": 20,
+  "identity": {"gender": "", "alignment": "", "age": "", "description": ""},
+  "selections": [],
+  "answers": {},
+  "reviewed": [],
+  "profile": {"enabledSources": [], "optional": {"feats": true, "multiclass": false, "legacy": false}, "exceptions": {}},
+  "notes": "原创合成测试数据",
+  "runtime": {"hp": 20, "tempHp": 0, "inspiration": 0, "resources": {}}
+}

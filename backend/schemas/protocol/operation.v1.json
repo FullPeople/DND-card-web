@@ -1,0 +1,192 @@
+{
+  "type": "object",
+  "properties": {
+    "operationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "clientId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "baseRevision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "set"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 4096,
+                "pattern": "^/(?:[^~]|~[01])+$"
+              },
+              "value": {}
+            },
+            "required": [
+              "op",
+              "path",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "unset"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 4096,
+                "pattern": "^/(?:[^~]|~[01])+$"
+              }
+            },
+            "required": [
+              "op",
+              "path"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "inc"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 4096,
+                "pattern": "^/(?:[^~]|~[01])+$"
+              },
+              "value": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "op",
+              "path",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "entity.upsert"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 4096,
+                "pattern": "^/(?:[^~]|~[01])+$"
+              },
+              "value": {
+                "type": "object"
+              },
+              "entityId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "op",
+              "path",
+              "value",
+              "entityId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "entity.delete"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 4096,
+                "pattern": "^/(?:[^~]|~[01])+$"
+              },
+              "entityId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "op",
+              "path",
+              "entityId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "order.move"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 4096,
+                "pattern": "^/(?:[^~]|~[01])+$"
+              },
+              "entityId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "beforeId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "path",
+              "entityId"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "maxItems": 128,
+      "minItems": 1
+    }
+  },
+  "required": [
+    "operationId",
+    "clientId",
+    "baseRevision",
+    "operations"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dnd-card.local/schemas/protocol/operation.v1.json"
+}

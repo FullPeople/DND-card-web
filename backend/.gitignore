@@ -1,0 +1,6 @@
+/data/
+/dnd-backend
+/dnd-backend.exe
+*.db
+*.db-shm
+*.db-wal

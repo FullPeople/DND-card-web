@@ -1,0 +1,3914 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DND Character Backend",
+    "version": "1.0.0",
+    "description": "Snapshot + stable-ID operations. Protocol v1. Default limits documented in backend/README.md. JSON syntax is valid YAML."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8080"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {
+      "sessionCookie": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Process readiness after database migration",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "const": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "status": "ok"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "me",
+        "summary": "Authenticated identity",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Identity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/session": {
+      "post": {
+        "operationId": "sessionCreate",
+        "summary": "Exchange Bearer token for HttpOnly SameSite=Strict session cookie",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Identity"
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "dnd_session token; HttpOnly; SameSite=Strict; Path=/api/v1; Max-Age=86400; Secure when configured"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "sessionDelete",
+        "summary": "Clear browser cookie; does not revoke provisioning token",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Success, no response body"
+          }
+        }
+      }
+    },
+    "/api/v1/characters": {
+      "get": {
+        "operationId": "charactersList",
+        "summary": "Permission-filtered metadata only",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "characters": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CharacterSummary"
+                      }
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "characters",
+                    "limit",
+                    "offset"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "characterCreate",
+        "summary": "Create/import native Character v1; new server UUID and revision 1",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                },
+                "example": {
+                  "id": "40000000-0000-4000-8000-000000000001",
+                  "ownerId": "50000000-0000-4000-8000-000000000001",
+                  "system": "dnd5e",
+                  "schemaVersion": 1,
+                  "revision": 1,
+                  "document": {
+                    "schemaVersion": 1,
+                    "id": "10000000-0000-4000-8000-000000000001",
+                    "revision": 1,
+                    "name": "协议测试角色",
+                    "player": "",
+                    "edition": "2024",
+                    "createdAt": "2026-10-01T00:00:00Z",
+                    "updatedAt": "2026-10-01T00:00:00Z",
+                    "abilities": {
+                      "str": 10,
+                      "dex": 10,
+                      "con": 10,
+                      "int": 10,
+                      "wis": 10,
+                      "cha": 10
+                    },
+                    "baseHp": 20,
+                    "identity": {
+                      "gender": "",
+                      "alignment": "",
+                      "age": "",
+                      "description": ""
+                    },
+                    "selections": [],
+                    "answers": {},
+                    "reviewed": [],
+                    "profile": {
+                      "enabledSources": [],
+                      "optional": {
+                        "feats": true,
+                        "multiclass": false,
+                        "legacy": false
+                      },
+                      "exceptions": {}
+                    },
+                    "notes": "原创合成测试数据",
+                    "runtime": {
+                      "hp": 20,
+                      "tempHp": 0,
+                      "inspiration": 0,
+                      "resources": {}
+                    }
+                  },
+                  "createdAt": "2026-10-01T00:00:00Z",
+                  "updatedAt": "2026-10-01T00:00:00Z"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRequest"
+              },
+              "example": {
+                "document": {
+                  "schemaVersion": 1,
+                  "id": "10000000-0000-4000-8000-000000000001",
+                  "revision": 1,
+                  "name": "协议测试角色",
+                  "player": "",
+                  "edition": "2024",
+                  "createdAt": "2026-10-01T00:00:00Z",
+                  "updatedAt": "2026-10-01T00:00:00Z",
+                  "abilities": {
+                    "str": 10,
+                    "dex": 10,
+                    "con": 10,
+                    "int": 10,
+                    "wis": 10,
+                    "cha": 10
+                  },
+                  "baseHp": 20,
+                  "identity": {
+                    "gender": "",
+                    "alignment": "",
+                    "age": "",
+                    "description": ""
+                  },
+                  "selections": [],
+                  "answers": {},
+                  "reviewed": [],
+                  "profile": {
+                    "enabledSources": [],
+                    "optional": {
+                      "feats": true,
+                      "multiclass": false,
+                      "legacy": false
+                    },
+                    "exceptions": {}
+                  },
+                  "notes": "原创合成测试数据",
+                  "runtime": {
+                    "hp": 20,
+                    "tempHp": 0,
+                    "inspiration": 0,
+                    "resources": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/characters/{id}": {
+      "get": {
+        "operationId": "characterSnapshot",
+        "summary": "Owner/editor/viewer snapshot",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                },
+                "example": {
+                  "id": "40000000-0000-4000-8000-000000000001",
+                  "ownerId": "50000000-0000-4000-8000-000000000001",
+                  "system": "dnd5e",
+                  "schemaVersion": 1,
+                  "revision": 1,
+                  "document": {
+                    "schemaVersion": 1,
+                    "id": "10000000-0000-4000-8000-000000000001",
+                    "revision": 1,
+                    "name": "协议测试角色",
+                    "player": "",
+                    "edition": "2024",
+                    "createdAt": "2026-10-01T00:00:00Z",
+                    "updatedAt": "2026-10-01T00:00:00Z",
+                    "abilities": {
+                      "str": 10,
+                      "dex": 10,
+                      "con": 10,
+                      "int": 10,
+                      "wis": 10,
+                      "cha": 10
+                    },
+                    "baseHp": 20,
+                    "identity": {
+                      "gender": "",
+                      "alignment": "",
+                      "age": "",
+                      "description": ""
+                    },
+                    "selections": [],
+                    "answers": {},
+                    "reviewed": [],
+                    "profile": {
+                      "enabledSources": [],
+                      "optional": {
+                        "feats": true,
+                        "multiclass": false,
+                        "legacy": false
+                      },
+                      "exceptions": {}
+                    },
+                    "notes": "原创合成测试数据",
+                    "runtime": {
+                      "hp": 20,
+                      "tempHp": 0,
+                      "inspiration": 0,
+                      "resources": {}
+                    }
+                  },
+                  "createdAt": "2026-10-01T00:00:00Z",
+                  "updatedAt": "2026-10-01T00:00:00Z"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/characters/{id}/operations": {
+      "post": {
+        "operationId": "operationSubmit",
+        "summary": "Owner/editor operation batch; same request ID returns original result",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                },
+                "example": {
+                  "characterId": "40000000-0000-4000-8000-000000000001",
+                  "revision": 2,
+                  "operationId": "20000000-0000-4000-8000-000000000001",
+                  "clientId": "30000000-0000-4000-8000-000000000001",
+                  "baseRevision": 1,
+                  "operations": [
+                    {
+                      "op": "inc",
+                      "path": "/runtime/hp",
+                      "value": -5
+                    }
+                  ],
+                  "origin": "web",
+                  "touchedPaths": [
+                    "/runtime/hp"
+                  ],
+                  "updatedAt": "2026-10-01T00:01:00Z",
+                  "rebased": false
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationBatch"
+              },
+              "example": {
+                "operationId": "20000000-0000-4000-8000-000000000001",
+                "clientId": "30000000-0000-4000-8000-000000000001",
+                "baseRevision": 1,
+                "operations": [
+                  {
+                    "op": "inc",
+                    "path": "/runtime/hp",
+                    "value": -5
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "operationDelta",
+        "summary": "Permission-checked contiguous retained history",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Delta"
+                },
+                "example": {
+                  "characterId": "40000000-0000-4000-8000-000000000001",
+                  "currentRevision": 2,
+                  "operations": [
+                    {
+                      "characterId": "40000000-0000-4000-8000-000000000001",
+                      "revision": 2,
+                      "operationId": "20000000-0000-4000-8000-000000000001",
+                      "clientId": "30000000-0000-4000-8000-000000000001",
+                      "baseRevision": 1,
+                      "operations": [
+                        {
+                          "op": "inc",
+                          "path": "/runtime/hp",
+                          "value": -5
+                        }
+                      ],
+                      "origin": "web",
+                      "touchedPaths": [
+                        "/runtime/hp"
+                      ],
+                      "updatedAt": "2026-10-01T00:01:00Z",
+                      "rebased": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "afterRevision",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/characters/{id}/permissions": {
+      "get": {
+        "operationId": "permissionsList",
+        "summary": "Owner only",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Permissions"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/characters/{id}/permissions/{userId}": {
+      "put": {
+        "operationId": "permissionSet",
+        "summary": "Owner grants editor/viewer to a provisioned user",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Success, no response body"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "enum": [
+                      "editor",
+                      "viewer"
+                    ]
+                  }
+                },
+                "required": [
+                  "role"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "role": "editor"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "permissionDelete",
+        "summary": "Owner revokes member; affected sockets disconnect",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Success, no response body"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/ws": {
+      "get": {
+        "operationId": "websocket",
+        "summary": "Authenticated WebSocket upgrade; see docs/protocol/WEBSOCKET.md",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict or resync required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "101": {
+            "description": "Success, no response body"
+          },
+          "400": {
+            "description": "Invalid WebSocket handshake (transport-level response)"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "dnd_session"
+      }
+    },
+    "schemas": {
+      "Character": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "player": {
+            "type": "string"
+          },
+          "edition": {
+            "enum": [
+              "2014",
+              "2024"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "abilities": {
+            "type": "object",
+            "properties": {
+              "str": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "dex": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "con": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "int": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "wis": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "cha": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ],
+            "additionalProperties": false
+          },
+          "baseHp": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "identity": {
+            "type": "object",
+            "properties": {
+              "gender": {
+                "type": "string"
+              },
+              "alignment": {
+                "type": "string"
+              },
+              "age": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "gender",
+              "alignment",
+              "age",
+              "description"
+            ],
+            "additionalProperties": true
+          },
+          "biography": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 100000
+            },
+            "maxProperties": 10000
+          },
+          "portrait": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string",
+                "maxLength": 650000,
+                "pattern": "^data:image/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$"
+              },
+              "x": {
+                "type": "number",
+                "minimum": -300,
+                "maximum": 300
+              },
+              "y": {
+                "type": "number",
+                "minimum": -300,
+                "maximum": 300
+              },
+              "zoom": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "frameWidth": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 2000,
+                "exclusiveMinimum": 0
+              },
+              "frameHeight": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 2000,
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "data",
+              "x",
+              "y",
+              "zoom"
+            ],
+            "additionalProperties": false
+          },
+          "illustration": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string",
+                "maxLength": 650000,
+                "pattern": "^data:image/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$"
+              },
+              "x": {
+                "type": "number",
+                "minimum": -300,
+                "maximum": 300
+              },
+              "y": {
+                "type": "number",
+                "minimum": -300,
+                "maximum": 300
+              },
+              "zoom": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "frameWidth": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 2000,
+                "exclusiveMinimum": 0
+              },
+              "frameHeight": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 2000,
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "data",
+              "x",
+              "y",
+              "zoom"
+            ],
+            "additionalProperties": false
+          },
+          "palette": {
+            "type": "object",
+            "properties": {
+              "paper": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "surface": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "frame": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "heading": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "ink": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "badge": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "selections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Character/$defs/selection"
+            },
+            "maxItems": 3000
+          },
+          "answers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 10000
+            },
+            "maxProperties": 10000
+          },
+          "reviewed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10000
+          },
+          "notes": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "object",
+            "properties": {
+              "enabledSources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000
+              },
+              "optional": {
+                "type": "object",
+                "properties": {
+                  "feats": {
+                    "type": "boolean"
+                  },
+                  "multiclass": {
+                    "type": "boolean"
+                  },
+                  "legacy": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "feats",
+                  "multiclass",
+                  "legacy"
+                ],
+                "additionalProperties": true
+              },
+              "exceptions": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "maxProperties": 10000
+              },
+              "disabledEntries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 100000
+              },
+              "autoSourceDefaults": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000
+              },
+              "sourceConflicts": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "enum": [
+                      "latest",
+                      "manual",
+                      "all"
+                    ]
+                  },
+                  "selected": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 10000
+                    },
+                    "maxProperties": 10000
+                  }
+                },
+                "required": [
+                  "mode",
+                  "selected"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "enabledSources",
+              "optional",
+              "exceptions"
+            ],
+            "additionalProperties": true
+          },
+          "runtime": {
+            "type": "object",
+            "properties": {
+              "hp": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "tempHp": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "inspiration": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "resources": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "current": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "icon": {
+                      "type": "string"
+                    },
+                    "order": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "automatic": {
+                      "type": "boolean"
+                    },
+                    "unlimited": {
+                      "type": "boolean"
+                    },
+                    "locked": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "current",
+                    "max"
+                  ],
+                  "additionalProperties": true
+                },
+                "maxProperties": 10000
+              },
+              "deathSaves": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3
+                  },
+                  "failure": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3
+                  }
+                },
+                "required": [
+                  "success",
+                  "failure"
+                ],
+                "additionalProperties": false
+              },
+              "sourceSpellSpent": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "maxProperties": 10000
+              },
+              "automationActions": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "sequence": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "last": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "maxProperties": 10000
+                  }
+                },
+                "required": [
+                  "version",
+                  "sequence"
+                ],
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "hp",
+              "tempHp",
+              "inspiration",
+              "resources"
+            ],
+            "additionalProperties": true
+          },
+          "inventory": {
+            "type": "object",
+            "properties": {
+              "capacityAdjustment": {
+                "type": "string",
+                "maxLength": 180
+              },
+              "displayEquipment": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000
+              },
+              "displayAttunement": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000
+              },
+              "positions": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9999
+                },
+                "maxProperties": 10000
+              },
+              "view": {
+                "enum": [
+                  "grid",
+                  "list"
+                ]
+              },
+              "order": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000,
+                "uniqueItems": true
+              },
+              "attunementLimit": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30
+              },
+              "coins": {
+                "type": "object",
+                "properties": {
+                  "cp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  },
+                  "sp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  },
+                  "ep": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  },
+                  "gp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  },
+                  "pp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  }
+                },
+                "required": [
+                  "cp",
+                  "sp",
+                  "ep",
+                  "gp",
+                  "pp"
+                ],
+                "additionalProperties": false
+              },
+              "grantedCoins": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "maxProperties": 10000
+              }
+            },
+            "required": [
+              "view",
+              "order",
+              "attunementLimit",
+              "coins"
+            ],
+            "additionalProperties": true
+          },
+          "spellSettings": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "enum": [
+                  "known",
+                  "prepared"
+                ]
+              },
+              "modeOverride": {
+                "type": "boolean"
+              },
+              "ability": {
+                "enum": [
+                  "str",
+                  "dex",
+                  "con",
+                  "int",
+                  "wis",
+                  "cha"
+                ]
+              },
+              "abilityOverride": {
+                "type": "boolean"
+              },
+              "abilityClassId": {
+                "type": "string"
+              },
+              "capacity": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "capacityAdjustment": {
+                "type": "integer",
+                "minimum": -100,
+                "maximum": 100
+              },
+              "attackBonus": {
+                "type": "number",
+                "minimum": -100,
+                "maximum": 100
+              },
+              "dcBonus": {
+                "type": "number",
+                "minimum": -100,
+                "maximum": 100
+              },
+              "prepared": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 3000
+              },
+              "cantrips": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 3000
+                },
+                "maxProperties": 10000
+              },
+              "cantripCapacityAdjustments": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "maxProperties": 10000
+              },
+              "sourceCantripCapacities": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "maxProperties": 10000
+              },
+              "sourceCapacityAdjustments": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "maxProperties": 10000
+              },
+              "knownCapacityAdjustment": {
+                "type": "integer",
+                "minimum": -100,
+                "maximum": 100
+              },
+              "special": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "mode": {
+                      "enum": [
+                        "locked",
+                        "uses"
+                      ]
+                    },
+                    "max": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100
+                    },
+                    "recovery": {
+                      "enum": [
+                        "long",
+                        "short",
+                        "manual"
+                      ]
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "manualSource": {
+                      "type": "object",
+                      "properties": {
+                        "ownerId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "ownerId"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "sourceGrant": {
+                      "type": "object",
+                      "properties": {
+                        "ownerId": {
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "usageKey": {
+                          "type": "string"
+                        },
+                        "resourceKey": {
+                          "type": "string"
+                        },
+                        "canUseSlots": {
+                          "type": "boolean"
+                        },
+                        "ability": {
+                          "enum": [
+                            "str",
+                            "dex",
+                            "con",
+                            "int",
+                            "wis",
+                            "cha"
+                          ]
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "usage": {
+                          "enum": [
+                            "slot",
+                            "free",
+                            "ritual",
+                            "check"
+                          ]
+                        },
+                        "castLevel": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9
+                        }
+                      },
+                      "required": [
+                        "ownerId",
+                        "key",
+                        "active",
+                        "usage"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "mode"
+                  ],
+                  "additionalProperties": true
+                },
+                "maxProperties": 10000
+              },
+              "slots": {
+                "type": "object",
+                "patternProperties": {
+                  "^[1-9]$": {
+                    "type": "object",
+                    "properties": {
+                      "max": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 30
+                      },
+                      "used": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 30
+                      }
+                    },
+                    "required": [
+                      "max",
+                      "used"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "mode",
+              "ability",
+              "capacity",
+              "attackBonus",
+              "dcBonus",
+              "prepared",
+              "slots"
+            ],
+            "additionalProperties": true
+          },
+          "backgroundChoices": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "abilities": {
+                  "type": "object",
+                  "properties": {
+                    "str": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    "dex": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    "con": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    "int": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    "wis": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    "cha": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "equipment": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "maxProperties": 10000
+                }
+              },
+              "required": [],
+              "additionalProperties": true
+            },
+            "maxProperties": 10000
+          },
+          "hpProgression": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "enum": [
+                  "average",
+                  "rolled"
+                ]
+              },
+              "rolls": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maxItems": 20
+                },
+                "maxProperties": 10000
+              }
+            },
+            "required": [
+              "mode",
+              "rolls"
+            ],
+            "additionalProperties": false
+          },
+          "rulePacks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "schemaVersion": {
+                  "const": 1
+                },
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "author": {
+                  "type": "string"
+                },
+                "editions": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "2014",
+                      "2024"
+                    ]
+                  },
+                  "maxItems": 10000
+                },
+                "requires": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "version"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 10000
+                },
+                "conflicts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 10000
+                },
+                "entries": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Character/$defs/entry"
+                  },
+                  "maxItems": 3000
+                }
+              },
+              "required": [
+                "schemaVersion",
+                "id",
+                "name",
+                "version",
+                "editions",
+                "requires",
+                "conflicts",
+                "entries"
+              ],
+              "additionalProperties": true
+            },
+            "maxItems": 100
+          },
+          "quickbar": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "uniqueItems": true
+          },
+          "quickbarCopies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "entry": {
+                  "$ref": "#/components/schemas/Character/$defs/entry"
+                }
+              },
+              "required": [
+                "id",
+                "entry"
+              ],
+              "additionalProperties": true
+            },
+            "maxItems": 100
+          },
+          "quickbarActions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "attack": {
+                  "type": "string"
+                },
+                "damage": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "attack",
+                "damage"
+              ],
+              "additionalProperties": true
+            },
+            "maxItems": 100
+          },
+          "quickbarLayout": {
+            "type": "object",
+            "properties": {
+              "order": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 3000
+              },
+              "hidden": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 3000
+              },
+              "widgets": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "style": {
+                      "enum": [
+                        "bar",
+                        "ring",
+                        "square",
+                        "icon"
+                      ]
+                    },
+                    "x": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "w": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "h": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "page": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "maxProperties": 10000
+              }
+            },
+            "required": [
+              "order",
+              "hidden"
+            ],
+            "additionalProperties": true
+          },
+          "proficiencies": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "maxProperties": 10000
+          },
+          "expertise": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "maxProperties": 10000
+          },
+          "jackOfAllTrades": {
+            "type": "boolean"
+          },
+          "training": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "maxProperties": 10000
+          },
+          "size": {
+            "enum": [
+              "T",
+              "S",
+              "M",
+              "L",
+              "H",
+              "G"
+            ]
+          },
+          "sheetBonuses": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": -9999,
+              "maximum": 9999
+            },
+            "maxProperties": 10000
+          },
+          "skillBonuses": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": -9999,
+              "maximum": 9999
+            },
+            "maxProperties": 10000
+          },
+          "dismissedFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10000
+          },
+          "featureLayout": {
+            "type": "object",
+            "properties": {
+              "order": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000,
+                "uniqueItems": true
+              },
+              "expanded": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000,
+                "uniqueItems": true
+              },
+              "detailsExpanded": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000
+              }
+            },
+            "required": [
+              "order",
+              "expanded"
+            ],
+            "additionalProperties": true
+          },
+          "adjustments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "number",
+                  "minimum": -10000,
+                  "maximum": 10000
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "id",
+                "target",
+                "value",
+                "reason"
+              ],
+              "additionalProperties": true
+            },
+            "maxItems": 10000
+          },
+          "externalSnapshot": {
+            "type": "object",
+            "additionalProperties": {},
+            "maxProperties": 10000
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "automation": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "protocol": {
+                    "const": 2
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "rulesVersion": {
+                    "type": "string"
+                  },
+                  "spellSets": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "maxProperties": 10000
+                  },
+                  "spellAbilities": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "enum": [
+                        "str",
+                        "dex",
+                        "con",
+                        "int",
+                        "wis",
+                        "cha"
+                      ]
+                    },
+                    "maxProperties": 10000
+                  },
+                  "spellUsageModes": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "enum": [
+                        "shared",
+                        "each"
+                      ]
+                    },
+                    "maxProperties": 10000
+                  },
+                  "spellChoices": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 100,
+                      "uniqueItems": true
+                    },
+                    "maxProperties": 10000
+                  }
+                },
+                "required": [
+                  "protocol",
+                  "enabled",
+                  "rulesVersion"
+                ],
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "protocol": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991,
+                    "not": {
+                      "const": 2
+                    }
+                  }
+                },
+                "required": [
+                  "protocol"
+                ],
+                "additionalProperties": true
+              }
+            ]
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "id",
+          "revision",
+          "name",
+          "player",
+          "edition",
+          "createdAt",
+          "updatedAt",
+          "abilities",
+          "baseHp",
+          "identity",
+          "selections",
+          "answers",
+          "reviewed",
+          "profile",
+          "notes",
+          "runtime"
+        ],
+        "additionalProperties": true,
+        "$defs": {
+          "entry": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "class",
+                  "subclass",
+                  "race",
+                  "background",
+                  "feat",
+                  "spell",
+                  "item",
+                  "feature",
+                  "condition",
+                  "rule",
+                  "monster"
+                ]
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "english": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "edition": {
+                "enum": [
+                  "2014",
+                  "2024",
+                  "both"
+                ]
+              },
+              "packId": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "page": {
+                "type": "number",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "entries": {
+                "type": "array",
+                "items": {},
+                "maxItems": 10000
+              },
+              "raw": {
+                "type": "object",
+                "additionalProperties": {},
+                "maxProperties": 10000
+              },
+              "effects": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "enum": [
+                        "add",
+                        "set",
+                        "proficiency"
+                      ]
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "skill": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "op"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000
+              },
+              "choices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "maxProperties": 10000
+                },
+                "maxItems": 200
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "english",
+              "source",
+              "edition",
+              "packId",
+              "revision",
+              "entries",
+              "raw"
+            ],
+            "additionalProperties": true
+          },
+          "selection": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "entry": {
+                "$ref": "#/components/schemas/Character/$defs/entry"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "equipped": {
+                "type": "boolean"
+              },
+              "attuned": {
+                "type": "boolean"
+              },
+              "weaponAbility": {
+                "enum": [
+                  "str",
+                  "dex",
+                  "con",
+                  "int",
+                  "wis",
+                  "cha"
+                ]
+              },
+              "requirementId": {
+                "type": "string"
+              },
+              "parentId": {
+                "type": "string"
+              },
+              "grantKey": {
+                "type": "string"
+              },
+              "section": {
+                "enum": [
+                  "features",
+                  "heritage"
+                ]
+              },
+              "catalogReview": {
+                "type": "object",
+                "properties": {
+                  "edition": {
+                    "enum": [
+                      "2014",
+                      "2024"
+                    ]
+                  },
+                  "entryId": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "enum": [
+                      "class",
+                      "subclass",
+                      "race",
+                      "background",
+                      "feat",
+                      "spell",
+                      "item",
+                      "feature",
+                      "condition",
+                      "rule",
+                      "monster"
+                    ]
+                  }
+                },
+                "required": [
+                  "edition",
+                  "entryId",
+                  "source",
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "entry",
+              "quantity",
+              "level",
+              "equipped"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "description": "Character v1; stable-ID arrays are preserved. Additional imported fields are retained, not interpreted as rules."
+      },
+      "OperationBatch": {
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "set"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "unset"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "inc"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "value": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "entity.upsert"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "value": {
+                      "type": "object"
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "value",
+                    "entityId"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "entity.delete"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "entityId"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "order.move"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "beforeId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "entityId"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "operationId",
+          "clientId",
+          "baseRevision",
+          "operations"
+        ],
+        "additionalProperties": false
+      },
+      "Snapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "system": {
+            "const": "dnd5e"
+          },
+          "schemaVersion": {
+            "const": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "document": {
+            "$ref": "#/components/schemas/Character"
+          }
+        },
+        "required": [
+          "id",
+          "ownerId",
+          "system",
+          "schemaVersion",
+          "revision",
+          "createdAt",
+          "updatedAt",
+          "document"
+        ],
+        "additionalProperties": false
+      },
+      "CharacterSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "system": {
+            "const": "dnd5e"
+          },
+          "schemaVersion": {
+            "const": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ownerId",
+          "system",
+          "schemaVersion",
+          "revision",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "OperationResult": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "operationId": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "set"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "unset"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "inc"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "value": {
+                      "type": "number",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "entity.upsert"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "value": {
+                      "type": "object"
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "value",
+                    "entityId"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "entity.delete"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "entityId"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "const": "order.move"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 4096,
+                      "pattern": "^/(?:[^~]|~[01])+$"
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "beforeId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "entityId"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1
+          },
+          "touchedPaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "rebased": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "characterId",
+          "revision",
+          "baseRevision",
+          "operationId",
+          "clientId",
+          "origin",
+          "operations",
+          "touchedPaths",
+          "updatedAt",
+          "rebased"
+        ],
+        "additionalProperties": false
+      },
+      "Conflict": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "serverValue": {},
+          "clientValue": {},
+          "serverExists": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path",
+          "serverValue",
+          "clientValue",
+          "serverExists"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "enum": [
+              "validation_error",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "revision_conflict",
+              "schema_mismatch",
+              "resync_required",
+              "duplicate_operation",
+              "invalid_operation",
+              "invalid_path",
+              "payload_too_large",
+              "rate_limited",
+              "internal_error"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "currentRevision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Conflict"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Identity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "Delta": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string"
+          },
+          "currentRevision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationResult"
+            }
+          }
+        },
+        "required": [
+          "characterId",
+          "currentRevision",
+          "operations"
+        ],
+        "additionalProperties": false
+      },
+      "Permissions": {
+        "type": "object",
+        "properties": {
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "enum": [
+                    "owner",
+                    "editor",
+                    "viewer"
+                  ]
+                }
+              },
+              "required": [
+                "userId",
+                "role"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "permissions"
+        ],
+        "additionalProperties": false
+      },
+      "CreateRequest": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/Character"
+          }
+        },
+        "required": [
+          "document"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}
