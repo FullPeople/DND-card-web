@@ -20,3 +20,5 @@ export function visualConditions(character: Character) {
 export const CardVisualContext = createContext<{ active: Set<ConditionVisual>; exhaustion: number }>({ active: new Set(), exhaustion: 0 });
 
 export const CardIdentityContext = createContext('');
+
+export function adaptiveConditionClasses(active:ReadonlySet<ConditionVisual>,editing=false){return `adaptive-card-host${editing?' adaptive-editing':[...active].map(id=>` adaptive-condition-${id}`).join('')}`;}

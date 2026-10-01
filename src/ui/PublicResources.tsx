@@ -2,7 +2,7 @@ import {resourceModules,normalizeWidget,type WidgetStyle} from '../core/resource
 import {CompactResource,CompactResourceGrid} from './CompactResources';
 import {useState} from 'react';
 import {useWorkbench,getWorkbench} from '../platform/workbench';
-import {inventoryRequest} from './StockBoard';
+import {requestInventory as inventoryRequest} from '../platform/workbench';
 import {ResourceEditor} from './ResourceEditor';
 import {ResourcePresets,ResourceRow} from './ResourceRow';
 import type {ResourceValue} from './resourcePresets';

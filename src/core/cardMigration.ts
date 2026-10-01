@@ -18,12 +18,8 @@ export const MIGRATION_ROOTS:Kind[]=['background','class','race','subclass','ite
 const bubbles:Kind[]=['feature','feat','rule'];
 export const unlinkedEntry=(e:Entry)=>e.packId==='imported'||e.source==='IMPORTED'||e.source==='CUSTOM'||!!e.raw._custom;
 export const reviewedLegacy=(row:Selection,edition:Character['edition'])=>row.catalogReview?.edition===edition&&row.catalogReview.entryId===row.entry.id&&row.catalogReview.source===row.entry.source&&row.catalogReview.kind===row.entry.kind;
-export function cardMigrationIssues(c:Character,entries:Entry[]):Selection[]{
- // The old-card indicator is about class compatibility only. Custom gear,
- // ancestry, spells and personal bubbles remain valid player choices; they
- // can still be reviewed explicitly in the full migration wizard.
- return classCompatibilityIssues(c,entries).map(issue=>issue.row);
-}
+export {cardMigrationIssues} from './cardMigrationIssues';
+
 type CatalogIndex={rows:Entry[];names:Map<string,Entry[]>;ids:Map<string,Entry[]>};
 const indexes=new WeakMap<Entry[],CatalogIndex>();
 function index(entries:Entry[]):CatalogIndex{

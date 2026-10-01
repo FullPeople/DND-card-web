@@ -1,25 +1,28 @@
+import {ToolBoundary} from './ToolBoundary';
 import {ownedTrainingReference} from './entryMenuEntries';
 import {overviewConditionEntry} from './OverviewVisuals';
 import {useGroupRoll} from '../platform/groupRoll';
 const CardMigration=lazy(()=>import('./CardMigration').then(module=>({default:module.CardMigration})));
-import {cardMigrationIssues} from '../core/cardMigration';
+import {cardMigrationIssues} from '../core/cardMigrationIssues';
 import {ClearableSearch} from './ClearableSearch';
 import {classCompatibilityIssues,migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigration';
-import {RuleOptions} from './RuleOptions';
+const RuleOptions=lazy(()=>import('./RuleOptions').then(m=>({default:m.RuleOptions})));
 import {rulesSetupComplete,rememberRulesSetup} from '../platform/rulesSetup';
 import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
-import {syncSourceSpells} from '../core/automation/sourceSpells';
+
 const AutomationPanel=lazy(()=>import('./AutomationPanel').then(module=>({default:module.AutomationPanel})));
 
 import {automationEnabled,initializeAutomation,newAutomationState} from '../core/automation/state';
 import {reconcileEquipping} from '../core/automation/equipment';
 import {CardOwnership} from './CardOwnership';
-import {Announcement} from './Announcement';
+const Announcement=lazy(()=>import('./Announcement').then(m=>({default:m.Announcement})));
 import {useUiLanguage} from './UiLanguage';
 
 import {uiEntryLabel} from './uiText';
 import {useEntryMenuActions} from './EntrySharing';
-import {CharacterManager,localCharacterRow,type CharacterRow} from './CharacterManager';
+import type {CharacterRow} from './CharacterManager';
+import {localCharacterRow} from './characterRows';
+const CharacterManager=lazy(()=>import('./CharacterManager').then(m=>({default:m.CharacterManager})));
 const TransferPanel=lazy(()=>import('./TransferPanel').then(module=>({default:module.TransferPanel})));
 const CharacterReview=lazy(()=>import('./CharacterReview').then(module=>({default:module.CharacterReview})));
 import {readCharacterTransfer,deleteLocalCharacters} from '../core/transfers';
@@ -33,7 +36,7 @@ const PersonalEntries=lazy(()=>import('./PersonalEntries').then(module=>({defaul
 const HitPointEditor=lazy(()=>import('./HitPointEditor').then(module=>({default:module.HitPointEditor})));
 import {includeNewProfileSources,startAllSources} from '../core/sourceDefaults';
 import {ensureSiteSources,sourceSettings,withSiteSources} from '../core/siteSources';
-import {WikiLayout,WikiEmptyPrompt} from './WikiLayout';
+
 import {standalone} from '../platform/buildMode';
 import {LocalDice} from '../standalone/LocalDice';
 import {pinEntry} from '../core/quickbar';
@@ -49,35 +52,39 @@ const ResourceDashboard=lazy(()=>import('./ResourceDashboard').then(module=>({de
 import {ensureResourceWidget} from '../core/resourceWidgets';
 import {ValueTraceProvider} from './ValueTrace';
 import {applyInventory} from '../core/inventory';
-import {WorkbenchInventory} from './StockBoard';
+const WorkbenchInventory=lazy(()=>import('./StockBoard').then(m=>({default:m.WorkbenchInventory})));
 import {WorkbenchPanel,MusicWorkspace} from './WorkbenchPanel';
 import {useNarrowWikiDrag} from './useNarrowWikiDrag';
-import {CustomEntryEditor} from './CustomEntryEditor';
+
 import {Toast} from './Toast';
 import {CopyDiagnostic,diagnosticText} from './CopyDiagnostic';
 import {isHitDieResource,syncAutoResources} from '../core/resources';
 import {NumberInput} from './NumberInput';
 import {inWorkbench,useWorkbench,markWorkbenchView,workbenchCharacterId,patchWorkbenchStats,workbenchRequest,chooseWorkbench,workbenchDiagnostics,type SharedRules} from '../platform/workbench';
 import {WorkbenchBar,DicePage,WorkbenchMonster,DMConsole} from './Workbench';
-import {DetailHeader,FeaturesPage,BackgroundPage} from './CharacterPages';
+const DetailHeader=lazy(()=>import('./CharacterPages').then(m=>({default:m.DetailHeader})));
+const FeaturesPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.FeaturesPage})));
+const BackgroundPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.BackgroundPage})));
 import {ChoiceWorkspaceContext} from './ChoiceWorkspaceContext';
 import {sheetChoices} from '../core/automation/choices';
 import {choiceCatalog} from './choiceCatalog';
-import {SpellsPage} from './SpellsPage';
+const SpellsPage=lazy(()=>import('./SpellsPage').then(m=>({default:m.SpellsPage})));
 import {DmNotes} from './DmNotes';
-import {InventoryPage} from './InventoryPage';
+const InventoryPage=lazy(()=>import('./InventoryPage').then(m=>({default:m.InventoryPage})));
 import {WorkspaceSplitter} from './WorkspaceSplitter';
 import {Palette} from './Portrait';
-import { captureSheet, type SheetCaptureOptions } from '../platform/sheetImage';
-import { ClassNavigation } from './ClassNavigation';
-import { CatalogList } from './CatalogList';
-import { MonsterDocument, MonsterPortrait } from './MonsterDocument';
+import type {SheetCaptureOptions} from '../platform/sheetImage';
+
+
+
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, subclassOwner, entryEdition, editionAllows, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
 import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
-import { loadCatalog, DEFAULT_SOURCE, type LoadProgress } from '../data/catalog';
+import type {LoadProgress} from '../data/catalog';
+import {DEFAULT_SOURCE} from '../data/catalogSource';
+import {afterPaint} from '../platform/afterPaint';
 import { download,saveRecovery,loadRecoveries, loadWorkspace, pickFile, restoreBackup, saveWorkspace, type Workspace } from '../platform/storage';
 import { ContentBoundary, Entries } from './Entries';
 import { EntryFacts } from './EntryFacts';
@@ -93,18 +100,18 @@ import {SheetDisplayButton} from './SheetDisplayButton';
 import { PaperFrame, type SheetPage } from './PaperFrame';
 import {SheetFullscreenButton,exitSheetFullscreen} from './SheetFullscreenButton';
 import { DropZone, EntryDragProvider, EntryDraggable } from './DragEntry';
-import { GlobalSearch } from './GlobalSearch';
-import { SourceSettings } from './SourceSettings';
-import { RoomRulesSummary } from './RoomRulesSummary';
+
+const SourceSettings=lazy(()=>import('./SourceSettings').then(m=>({default:m.SourceSettings})));
+const RoomRulesSummary=lazy(()=>import('./RoomRulesSummary').then(m=>({default:m.RoomRulesSummary})));
 import {confirmedChanges} from '../core/syncRecovery';
 import { SourceName, useSources } from './SourceName';
 import { KeywordPreview } from './KeywordPreview';
 import { Reference } from './Reference';
-import { LibraryFilters } from './LibraryFilters';
-import { LibraryDocument } from './LibraryDocument';
+
+
 import { useLibrary } from './useLibrary';
 import { explicitlyExcluded, librarySourceEnabled, LIBRARY_TABS, tabOf, matchesLibraryTab, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
-import { WikiSplitter } from './WikiSplitter';
+
 import { registerOffline } from '../platform/offline';
 
 const emptyProgress: LoadProgress = { done: 0, total: 1, label: '等待资料', failed: [], cached: 0 };
@@ -247,8 +254,11 @@ export default function App() {
 
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
-  const [editing, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
-  useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editing));}catch{/* A session still keeps the global editing preference. */}},[editing]);
+  const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
+  useEffect(()=>{if(!workspace)return;return afterPaint(()=>{void import('../core/automation/cardRuntime').then(setAutomationRuntime).catch(error=>setNotice(`自动化编辑功能加载失败，已保存的角色仍可查阅：${String(error)}`));});},[!!workspace]);
+  const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
+  const editing=editingRequested&&!!automationRuntime;
+  useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editingRequested));}catch{/* A session still keeps the global editing preference. */}},[editingRequested]);
   const [sheetPage, setSheetPage] = useState<SheetPage>('主要');
   const readableMenuEntry=(entry:Entry)=>{
     const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;
@@ -337,7 +347,7 @@ export default function App() {
     setLoading(true); setProgress(emptyProgress);
     let lastPublish=0;
     try {
-      await loadCatalog(batch => {
+      await (await import('../data/catalog')).loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e));
         if(performance.now()-lastPublish>500){lastPublish=performance.now();setEntries([...catalogRef.current.values()]);}
       }, setProgress, controller.signal, refresh, DEFAULT_SOURCE, sourceDisplay.merge);
@@ -345,7 +355,10 @@ export default function App() {
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
     finally { if (!controller.signal.aborted) setLoading(false); }
   }
-  useEffect(() => { void load(); return () => loadController.current?.abort(); }, []);
+  const [wikiUiError,setWikiUiError]=useState('');
+  const [wikiUi,setWikiUi]=useState<typeof import('./WikiUi')>();
+  useEffect(()=>{if(!workspace)return;const cancel=afterPaint(()=>{void import('./WikiUi').then(setWikiUi).catch(error=>setWikiUiError(String(error)));});return cancel;},[!!workspace]);
+  useEffect(()=>{if(!wikiUi)return;void load();return()=>loadController.current?.abort();},[!!wikiUi]);
   useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const d = useMemo(() => c ? evaluate(c) : undefined, [c]);
@@ -446,6 +459,7 @@ export default function App() {
     recordAction({label:after.name,undo:()=>restore(after,before),redo:()=>restore(before,after)});
   }
   const edit: Edit = (action, key) => {
+    if(!automationRuntime){setNotice('正在加载编辑功能，请稍候。');return;}
     if (!writable.current) { setNotice('此标签页为只读。关闭另一编辑页并刷新后可继续。'); return; }
     const current = workspaceRef.current; if (!current) return;
     const character = current.characters.find(x => x.id === current.activeId)!;
@@ -455,7 +469,7 @@ export default function App() {
     if (!key || record.key !== key || Date.now() - record.time > 900) record.past = [...record.past.slice(-59), character];
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
     const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
-    const draft = structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries); syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return; draft.updatedAt = new Date().toISOString(); draft.revision++;
+    const draft = structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries); automationRuntime.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return; draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
     if(inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
@@ -489,12 +503,12 @@ export default function App() {
     try{await workbenchRequest('rules',{key:undefined,itemId:undefined,scopeKey:wb.shared.key,expected:wb.shared.revision,rules});return true;}catch(e){setNotice(String(e));return false;}finally{setRulesDraft(undefined);setRulesBusy(false);}
   }
   useEffect(() => {
-    if (!c || !workspace || !writable.current || inWorkbench) return;
+    if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench) return;
     const draft = structuredClone(c);
     const castingChanged=hydrateImportedCasting(draft,allEntries);
-    const featuresChanged=syncFeatures(draft, allEntries),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=syncSourceSpells(draft,allEntries);
+    const featuresChanged=syncFeatures(draft, allEntries),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=automationRuntime.syncSourceSpells(draft,allEntries);
     if (featuresChanged || resourcesChanged || castingChanged || sourceSpellsChanged) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
-  }, [c, allEntries]);
+  }, [c, allEntries,automationRuntime]);
   function undo(redo=false){void travelHistory(redo);}
 
   useEffect(() => {
@@ -600,7 +614,7 @@ export default function App() {
     const original={page:sheetPage,editing,workbenchPage,tab,id:workspaceRef.current?.activeId};
     const result:{page:SheetPage;blob:Blob}[]=[];
     const settle=()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
-    try{setExportView(options);setEditing(false);setWorkbenchPage('sheet');setTab('sheet');for(const page of (['主要','特性','背景','法术','背包'] as SheetPage[]).filter(p=>pages.includes(p))){setSheetPage(page);await settle();if(workspaceRef.current?.activeId!==original.id)throw Error('角色已切换，已停止导出');result.push({page,blob:await captureSheet(options)});}return result;}
+    try{setExportView(options);setEditing(false);setWorkbenchPage('sheet');setTab('sheet');for(const page of (['主要','特性','背景','法术','背包'] as SheetPage[]).filter(p=>pages.includes(p))){setSheetPage(page);await settle();if(workspaceRef.current?.activeId!==original.id)throw Error('角色已切换，已停止导出');result.push({page,blob:await (await import('../platform/sheetImage')).captureSheet(options)});}return result;}
     finally{exportInProgress.current=false;setExportView(undefined);setSheetPage(original.page);setEditing(original.editing);setWorkbenchPage(original.workbenchPage);setTab(original.tab);}
   }
   async function importFile(mode: string, file?: File, text?: string) {
@@ -691,22 +705,22 @@ export default function App() {
       <section data-inventory-recipient={inWorkbench&&workbenchPage==='sheet'&&wb.target?wb.target.cardId?`card:${wb.target.cardId}`:`monster:${wb.target.itemId}`:undefined} className={`sheet-pane ${tab === 'sheet' ? 'mobile-active' : ''} ${editing&&(!inWorkbench||workbenchPage==='sheet'&&wb.target?.write)&&!exportView?'sheet-editing':''}`} aria-label={t('cardWorkspace')}>
         {inWorkbench&&workbenchPage==='music'?<MusicWorkspace close={()=>setWorkbenchPage('console')}/>:inWorkbench&&['settings','features'].includes(workbenchPage)?<WorkbenchPanel key={workbenchPage} panel="settings" section={workbenchPage==='features'?'features':undefined} close={()=>setWorkbenchPage('console')}/>:inWorkbench&&workbenchPage==='notes'&&wb.role==='GM'?<DmNotes/>:inWorkbench&&workbenchPage==='dice'?<DicePage online={wb.online} target={wb.target} rolls={wb.rolls} compose={wb.compose}/>:inWorkbench&&workbenchPage==='console'?<DMConsole navigate={setWorkbenchPage}/>:inWorkbench&&(!wb.target||wb.target.kind==='character'&&(!wb.document||c.id!==workbenchCharacterId(wb.target)||workbenchReadError?.key===wb.target.key))?<div className="workbench-monster">{workbenchReadError&&workbenchReadError.key===wb.target?.key?<p role="alert">{workbenchReadError?.message}。原始资料保留，请选择其他角色或重新读取角色簿。</p>:<p role="status">{wb.loading||wb.document?'读取角色资料…':'从上方选择角色卡'}</p>}</div>:inWorkbench&&(wb.target?.kind==='monster'||wb.target?.kind==='token')?<WorkbenchMonster editing={editing} setEditing={setEditing} key={wb.target.key} target={wb.target} raw={wb.document} online={wb.online} onLink={link}/>:<>
         <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span><div className="character-tabs" role="tablist" aria-label={t('currentCharacter')}>{!inWorkbench&&workspace.characters.map(x=><button key={x.id} role="tab" aria-selected={x.id===c.id} onClick={()=>persist({...workspace,activeId:x.id})}>{x.name}{classWarnings.has(x.id)&&<span className="class-warning-icon" aria-label="旧卡资料需要核对">⚠</span>}</button>)}</div></div>
-          <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&wb.role==='GM'&&wb.cards.find(card=>card.id===wb.target?.cardId)&&<CardOwnership key={wb.target?.cardId} card={wb.cards.find(card=>card.id===wb.target?.cardId)!}/>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}{editing&&<button onClick={()=>setModal('personal')}>{t('entriesLevels')}</button>}{editing && <button className="adjust-shortcut" aria-label={t('adjustDetails')} onClick={() => setModal('adjust')}>{t('adjust')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><SheetDisplayButton/><button disabled={inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
+          <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&wb.role==='GM'&&wb.cards.find(card=>card.id===wb.target?.cardId)&&<CardOwnership key={wb.target?.cardId} card={wb.cards.find(card=>card.id===wb.target?.cardId)!}/>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}{editing&&<button onClick={()=>setModal('personal')}>{t('entriesLevels')}</button>}{editing && <button className="adjust-shortcut" aria-label={t('adjustDetails')} onClick={() => setModal('adjust')}>{t('adjust')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><SheetDisplayButton/><button disabled={!automationRuntime||inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
         </div>
         {classNeedsReview&&!loading&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
         <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button></span></div>
           {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
-</> : <div className="sheet-details">
+</> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><Suspense fallback={<p role="status">正在加载这一页…</p>}><div className="sheet-details">
           <div className="edition-divider"><span/><strong>{t('cardTitle')}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
           <DetailHeader openSpellAbility={()=>setModal('spellAbility')} page={sheetPage} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>
           {sheetPage==='特性'?<FeaturesPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='背景'?<BackgroundPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='法术'?<SpellsPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:inWorkbench?<WorkbenchInventory id={`card:${wb.target!.cardId}`} capacity={<CarryCapacity c={c} d={d} edit={edit}/>}/>:<InventoryPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>}
-        </div>}
+        </div></Suspense></ToolBoundary>}
           <footer className="paper-footer"><span>{t('cardFooter',{edition:c.edition,level:d.level||'—',revision:c.revision})}</span><span>{t('snapshotSaved')}</span></footer>
         </PaperFrame></ValueTraceProvider></SheetEditContext.Provider><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} role="status"><span className="status-dot"/>{inWorkbench?(workbenchUncertain.current.has(c.id)?'待核对 · 本地修改已保留':workbenchDirty.current.has(c.id)?'正在同步至枭熊…':workbenchFailed.current.has(c.id)?'同步失败 · 已保留本地备份':wb.target?.projectionPending?'资料已保存 · 棋子显示待同步':wb.online?'与枭熊同步':'等待枭熊重连'):saving}{workbenchUncertain.current.has(c.id)&&wb.document&&<button onClick={()=>{window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:workbenchUncertain.current.get(c.id)?.requestId}}));workbenchUncertain.current.delete(c.id);workbenchDirty.current.delete(c.id);workbenchFailed.current.delete(c.id);workbenchDocuments.current.delete(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已采用枭熊当前数据；未确认的本地修改仍保留在恢复备份中。');}}>核对并采用枭熊数据</button>}{syncDiagnostic&&<CopyDiagnostic text={syncDiagnostic}/>}<span>{inWorkbench?'角色资料自动保存':'资料与角色保存在当前浏览器 · 请定期导出'}</span></div></>}
       </section>
 
-      {tableOpen?<><WorkspaceSplitter/><section className={`wiki-pane table-pane ${tab==='wiki'?'mobile-active':''}`} aria-label="三龙牌"><WorkbenchPanel panel="table" close={()=>setTableOpen(false)}/></section></>:wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料"><WikiLayout><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
+      {tableOpen?<><WorkspaceSplitter/><section className={`wiki-pane table-pane ${tab==='wiki'?'mobile-active':''}`} aria-label="三龙牌"><WorkbenchPanel panel="table" close={()=>setTableOpen(false)}/></section></>:wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料">{wikiUi?(()=>{const {WikiLayout,WikiEmptyPrompt,GlobalSearch,LibraryFilters,CatalogList,WikiSplitter,CustomEntryEditor,ClassNavigation,MonsterDocument,MonsterPortrait,LibraryDocument}=wikiUi;return <WikiLayout><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div>
         <GlobalSearch query={query} change={setQuery} entries={libraryEntries} c={c} inspect={entry=>{inspect(entry);library.patch({query:"",filters:{},edition:entry.edition==="both"?"all":entry.edition},tabOf(readingTarget(entry).entry));}}/>
         <nav className="category-tabs" aria-label="资料分类">{Object.entries(LIBRARY_TABS).filter(([key])=>(key!=='custom'||canAuthor)&&(key!=='monster'||monstersVisible)&&(key!=='weaponMastery'||c.edition==='2024'||editionFilter==='2024'||editionFilter==='all')).map(([key, label]) => <button key={key} className={kind === key ? 'active' : ''} onClick={() => setKind(key as keyof typeof LIBRARY_TABS)}>{label}</button>)}</nav>
         {choiceScope?.wiki&&<div className="wiki-choice-notice"><span>选择{activeChoice!.label} · 拖拽加入左侧空格</span><button onClick={()=>setTab('sheet')}>查看选择</button><button onClick={closeChoice}>退出选择</button></div>}<div className="wiki-filters"><ClearableSearch className="category-search-control" label={`${LIBRARY_TABS[kind]}分类搜索`} clearLabel="清空分类搜索" placeholder={`搜索${LIBRARY_TABS[kind]}`} value={categoryQuery} change={query=>library.patch({query})}/><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames}/>
@@ -723,13 +737,13 @@ export default function App() {
           <div className="detail-actions">{blocked && <p className="inline-warning">{blocked}</p>}<a href={DEFAULT_SOURCE} target="_blank" rel="noreferrer">在中文站查阅 ↗</a>
           {blocked === '此来源或规则版本未启用' && <details><summary>记录 DM 特许</summary><p>仅对此条目启用；会随角色及审卡导出保留。</p><input aria-label="DM 特许说明" value={exception} placeholder="填写原因或 DM 的裁定" onChange={e => setException(e.target.value)}/><button disabled={rulesReadonly||!exception.trim()} onClick={() => editRules(draft => { draft.profile.exceptions[detail.id] = exception.trim(); })}>保存特许</button></details>}
           {c.profile.exceptions[detail.id] && <p>DM 特许：{c.profile.exceptions[detail.id]} <button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[detail.id]; })}>撤回</button></p>}</div>
-        </article>}{!detail && kind!=='custom' && <div className="reading-placeholder"><WikiEmptyPrompt/></div>}</div></WikiLayout>
+        </article>}{!detail && kind!=='custom' && <div className="reading-placeholder"><WikiEmptyPrompt/></div>}</div></WikiLayout>;})():<div className="wiki-loading" role="status">{wikiUiError?<><p>Wiki 加载失败，角色卡仍可编辑和保存。</p><button onClick={async()=>{await queue.current;if(saveFailed.current){setNotice('保存未成功，请先导出角色备份。');return;}location.reload();}}>保存后重新加载</button><details><summary>错误详情</summary><pre>{wikiUiError}</pre></details></>:<>角色卡已打开，正在加载 Wiki…</>}</div>}
         <footer className="wiki-footer">{inWorkbench&&<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">单机版 ↗</a>}<a href={inWorkbench?'./source.zip':'https://github.com/FullPeople/DND-card-web'} target="_blank" rel="noreferrer">源码 ↗</a><a href="https://github.com/FullPeople/DND-card-web/blob/main/LICENSE" target="_blank" rel="noreferrer">非商用共享许可 ↗</a></footer>
       </section></>}
     </main>
-    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&announcement&&<Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/>}{notice&&<Toast message={notice} action={!editing&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
+    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&announcement&&<Suspense fallback={<p role="status">正在加载公告…</p>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={!editing&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
     {modal && <Dialog title={modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}setModal(''); setImportError('');} }}>
-      <Suspense fallback={<p role="status">正在加载面板…</p>}>
+      <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<p role="status">正在加载面板…</p>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}
       {modal === 'adjust' && <><p className="muted">特殊规则尚未自动适配时，可填写最终数值与原因。修正会覆盖计算值，持续保留到手动撤回，并列入审卡。</p><div className="adjust-form"><label>数值<select aria-label="人工修正目标" value={adjustTarget} onChange={e => setAdjustTarget(e.target.value)}>{[['ac', '护甲等级'], ['hp', '生命值上限'], ['speed', '速度'], ['initiative', '先攻'], ['passive', '被动察觉'], ...Object.entries(SKILLS).map(([key, s]) => [`skill:${key}`, `${s.name}检定`]), ...ABILITIES.map(a => [`save:${a}`, `${ABILITY_LABELS[a]}豁免`])].map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label><label>最终值<NumberInput aria-label="人工修正数值" type="number" min="-9999" max="9999" value={adjustValue} onChange={e => setAdjustValue(clamp(e.target.value, -9999, 9999))}/></label><label className="full-width">原因<input aria-label="人工修正原因" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="例如：DM 允许的护甲修正，或尚未适配的专长"/></label><button disabled={!adjustReason.trim()} onClick={() => { edit(draft => { draft.adjustments = [...(draft.adjustments || []).filter(a => a.target !== adjustTarget), { id: uid(), target: adjustTarget, value: adjustValue, reason: adjustReason.trim() }]; }); setAdjustReason(''); }}>记录修正</button></div>{(c.adjustments || []).map(a => <div className="pack-row" key={a.id}><span><strong>{a.target} → {a.value}</strong><small>{a.reason}</small></span><button onClick={() => edit(draft => { draft.adjustments = draft.adjustments?.filter(x => x.id !== a.id); })}>撤回</button></div>)}<details className="calculation-trace"><summary>展开计算依据</summary>{Object.entries(d.trace).map(([key, items]) => <p key={key}><strong>{choiceLabel(key)}</strong>：{items.join('；')}</p>)}</details></>}
       {modal==='classSync'&&<CardMigration key={c.id} c={c} entries={allEntries} loading={loading} readOnly={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} save={saveClassCopy} busy={classSyncBusy} setBusy={setClassSyncBusy}/>}
@@ -753,7 +767,7 @@ export default function App() {
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
       </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} capture={capturePages} disabled={readOnly||inWorkbench&&!wb.online} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>单文件导入与本机恢复</h3><div className="dialog-actions"><button onClick={()=>importFile('character')}>导入角色 JSON</button></div><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup);history.current.clear();setNotice('已读取上一次保存；确认后继续编辑即可保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
 
-      </Suspense>
+      </Suspense></ToolBoundary>
     </Dialog>}
 
   </div></EntryDragProvider></KeywordPreview></ChoiceWorkspaceContext.Provider>;

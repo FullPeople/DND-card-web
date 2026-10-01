@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:['startup228.spec.ts','startup224.spec.ts','automationChoices.spec.ts','localFeedback212.spec.ts'],outputDir:'.local-evidence/browser',timeout:60000,expect:{timeout:10000},workers:1,reporter:'list',use:{baseURL:'http://127.0.0.1:5292',serviceWorkers:'block',channel:'msedge',viewport:{width:1512,height:982},trace:'retain-on-failure',screenshot:'only-on-failure'}});

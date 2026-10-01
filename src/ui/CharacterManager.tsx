@@ -6,7 +6,7 @@ import {download} from '../platform/storage';
 import './characterManager.css';
 
 export type CharacterRow={id:string;name:string;player?:string;edition?:string;classes?:string;hp?:number;maxHp?:number;ac?:number;level?:number;write:boolean;locked?:boolean;inScene?:boolean};
-export function localCharacterRow(c:Character):CharacterRow{const d=evaluate(c);return {id:c.id,name:c.name,player:c.player,edition:c.edition,classes:c.selections.filter(s=>s.entry.kind==='class').map(s=>`${s.entry.name} ${s.level}`).join(' / '),hp:c.runtime.hp,maxHp:d.maxHp,ac:d.ac,level:d.level,write:true,locked:c.locked};}
+export {localCharacterRow} from './characterRows';
 
 export function CharacterManager({rows,currentId,disabled,open,read,remove,create,review}:{rows:CharacterRow[];currentId:string;disabled:boolean;open:(id:string)=>void;read:(ids:string[])=>Promise<Character[]>;remove:(ids:string[])=>Promise<void>;create:(names:string[],edition:Edition)=>Promise<void>;review:(card:Character)=>void}){
  const [selected,setSelected]=useState<string[]>([]),[query,setQuery]=useState(''),[edition,setEdition]=useState<Edition>('2024'),[names,setNames]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[confirm,setConfirm]=useState(false),[createUncertain,setCreateUncertain]=useState(false);

@@ -5,16 +5,17 @@ import {useSheetRenderMode} from './sheetDisplay';
 import './responsive177.css';
 import { useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Character } from '../core/model';
-import { CardAtmosphere } from './CardAtmosphere';
-import { CardIdentityContext, CardVisualContext, visualConditions } from './cardVisualState';
-import { SheetEditContext } from './SheetEdit';
-import { useCardGravity } from './useCardGravity';
-import { DragContext } from './DragEntry';
-import {AdaptiveCardAtmosphere,adaptiveConditionClasses} from './AdaptiveCardAtmosphere';
-import {AdaptivePaperLayers} from './AdaptivePaperLayers';
-import {useAdaptiveCardGravity} from './useAdaptiveCardGravity';
-import {classBadge} from './classBadges';
 
+import {CardIdentityContext,CardVisualContext,visualConditions,adaptiveConditionClasses} from './cardVisualState';
+import { SheetEditContext } from './SheetEdit';
+
+import { DragContext } from './DragEntry';
+
+
+
+
+
+import {afterPaint} from '../platform/afterPaint';
 export const SHEET_PAGES = ['主要', '特性', '背景', '法术', '背包'] as const;
 export type SheetPage = typeof SHEET_PAGES[number];
 const pageLabels:Record<SheetPage,UiTextKey>={'主要':'pageMain','特性':'pageFeatures','背景':'pageBackground','法术':'pageSpells','背包':'pageInventory'};
@@ -31,11 +32,9 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const effects = visualConditions(character);
   const visuals = editing || !effectsEnabled ? { active: new Set<import('./conditionVisuals').ConditionVisual>(), exhaustion: 0 } : effects;
   const originalVisuals=adaptive?{active:new Set<import('./conditionVisuals').ConditionVisual>(),exhaustion:0}:visuals;
-  const primary=character.selections.filter(row=>row.entry.kind==='class').reduce<(typeof character.selections)[number]|undefined>((best,row)=>!best||row.level>best.level?row:best,undefined);
-  const badge=primary&&classBadge(primary.entry);
-  const paper = useRef<HTMLDivElement>(null);
-  useCardGravity(paper, !adaptive&&visuals.active.has('incapacitated'), page, character.id);
-  useAdaptiveCardGravity(paper,adaptive&&visuals.active.has('incapacitated'),character.id,`${page}:${compact}`,editing);
+  const paper=useRef<HTMLDivElement>(null);
+  const [decoration,setDecoration]=useState<typeof import('./CardDecoration')>();
+  useEffect(()=>{if(!effectsEnabled)return;return afterPaint(()=>{void import('./CardDecoration').then(setDecoration).catch(error=>console.warn('Card decoration unavailable:',error));});},[effectsEnabled]);
   const viewport = useRef<HTMLDivElement>(null);
   const {view:zoom,reset:resetZoom}=useSheetZoom(viewport,`${character.id}:${mode}`,!compact);
   const drag = useContext(DragContext);
@@ -53,7 +52,7 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   }, [compact]);
   return <CardIdentityContext.Provider value={character.id}><CardVisualContext.Provider value={originalVisuals}><div className={`sheet-viewport ${compact?'screen-mode':'a4-mode'}`} data-sheet-display={mode} ref={viewport}>
     <div className="paper-stack" style={{ width:compact?'100%':WIDTH*scale+42,height:compact?'auto':HEIGHT*scale,transform:`translate(${zoom.x}px,${zoom.y}px) scale(${zoom.zoom})` }}>
-      <div ref={paper} data-visual-editing={editing} className={`paper has-card-art ${editing ? 'visual-editing' : ''} ${adaptive?adaptiveConditionClasses(visuals.active,editing):[...visuals.active].map(id => `condition-${id}`).join(' ')} page-${SHEET_PAGES.indexOf(page)}`} role="tabpanel" id="sheet-page" aria-labelledby={`page-tab-${page}`} style={{ ...Object.fromEntries(Object.entries(character.palette||{}).map(([key,value])=>[`--paper-${key}`,value])),width:compact?'100%':WIDTH,height:compact?'auto':HEIGHT,top:0,transform:compact?'none':`scale(${scale})` } as CSSProperties}>{effectsEnabled&&(adaptive?<><AdaptiveCardAtmosphere key={character.id} active={effects.active} exhaustion={effects.exhaustion} editing={editing} watermarkUrl={badge?.url}/><AdaptivePaperLayers paper={paper} active={effects.active} exhaustion={effects.exhaustion} editing={editing} layoutKey={`${character.id}:${page}`}/></>:<CardAtmosphere key={character.id} character={character}/>)}{children}</div>
+      <div ref={paper} data-visual-editing={editing} className={`paper has-card-art ${editing ? 'visual-editing' : ''} ${adaptive?adaptiveConditionClasses(visuals.active,editing):[...visuals.active].map(id => `condition-${id}`).join(' ')} page-${SHEET_PAGES.indexOf(page)}`} role="tabpanel" id="sheet-page" aria-labelledby={`page-tab-${page}`} style={{ ...Object.fromEntries(Object.entries(character.palette||{}).map(([key,value])=>[`--paper-${key}`,value])),width:compact?'100%':WIDTH,height:compact?'auto':HEIGHT,top:0,transform:compact?'none':`scale(${scale})` } as CSSProperties}>{effectsEnabled&&decoration&&<decoration.CardDecoration character={character} paper={paper} adaptive={adaptive} editing={editing} page={page} compact={compact}/>}{children}</div>
       <nav className="sheet-pages" role="tablist" aria-label={t('sheetPages')} style={{ left: compact?0:WIDTH * scale, top: compact?0:25 }} aria-orientation={compact?'horizontal':'vertical'}>
         {pages.map((name, index) => <button key={name} id={`page-tab-${name}`} role="tab" aria-selected={page === name} aria-controls="sheet-page" tabIndex={page === name ? 0 : -1} onClick={() => changePage(name)} data-sheet-tab={name} onKeyDown={event => {
           const next = ['ArrowRight','ArrowDown'].includes(event.key) ? (index + 1) % pages.length : ['ArrowLeft','ArrowUp'].includes(event.key) ? (index + pages.length-1) % pages.length : event.key === 'Home' ? 0 : event.key === 'End' ? pages.length-1 : -1;

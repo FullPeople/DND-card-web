@@ -1,46 +1,29 @@
-import {entryLabel} from '../core/entryLabel';
-import {SpellLearners} from './SpellLearners';
-import { MonsterDocument } from './MonsterDocument';
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import {ToolBoundary} from './ToolBoundary';
+
+
+
+import {lazy,Suspense,useEffect,useRef,useState,type ReactNode} from 'react';
 import { createPortal } from 'react-dom';
-import { type Entry, entryEdition, KIND_LABELS } from '../core/model';
-import { ContentBoundary, Entries } from './Entries';
+import type {Entry} from '../core/model';
+
 import { plainText } from '../core/export';
-import { EntryBadges } from './EntryBadges';
-import { EntryFacts } from './EntryFacts';
+
+
 import { ReferenceContext } from './Reference';
-import { useSources } from './SourceName';
+
 import type { Point } from './pointerDrag';
 import './reference176.css';
 
+const Pane=lazy(()=>import('./KeywordPreviewPane'));
 function wikiIsVisible(){
   if(document.querySelector('.sheet-pane.sheet-fullscreen')||document.fullscreenElement&&!document.fullscreenElement.querySelector('.wiki-pane'))return false;
   const pane=document.querySelector<HTMLElement>('.wiki-pane:not(.table-pane)');
-  if(!pane)return false;
+  if(!pane||pane.querySelector('.wiki-loading'))return false;
   const bounds=pane.getBoundingClientRect(),style=getComputedStyle(pane);
   return style.visibility!=='hidden'&&bounds.width>0&&bounds.height>0&&bounds.right>0&&bounds.left<innerWidth&&bounds.bottom>0&&bounds.top<innerHeight;
 }
 
-type Preview = { id: string; anchor: HTMLElement; reference: string; entry?: Entry; sourceLabel?: string; point: Point; fixed?: Point; excluded?:boolean; layer:number };
-function Pane({ value, pinned, index, keep, leave, open }: { value: Preview; pinned: boolean; index: number; keep: () => void; leave: () => void; open: (reference: string, kind?: string) => void }) {
-  const {format}=useSources();
-  const ref = useRef<HTMLElement>(null);
-  const [position, setPosition] = useState({ left: 0, top: 0 });
-  const { entry } = value;
-  useLayoutEffect(() => {
-    const place = () => {
-      const b = ref.current!.getBoundingClientRect();
-      const x = value.fixed?.x ?? value.point.x + 16;
-      const y = value.fixed?.y ?? (value.point.y + b.height + 18 < innerHeight ? value.point.y + 18 : value.point.y - b.height - 14);
-      setPosition({ left: Math.max(8, Math.min(innerWidth - b.width - 8, x)), top: Math.max(8, Math.min(innerHeight - b.height - 8, y)) });
-    };
-    place(); window.addEventListener('resize', place); return () => window.removeEventListener('resize', place);
-  }, [value]);
-  return <aside ref={ref} className={`keyword-preview ${pinned ? 'is-pinned' : ''} ${value.excluded?'entry-disabled':''}`} id={value.id} data-tooltip-id={value.id} role="tooltip" onDragStart={event => event.preventDefault()} style={{ ...position, zIndex: value.layer + 1 + index }} onMouseEnter={keep} onMouseLeave={leave}>
-    <header><strong>{entry?entryLabel(entry):value.reference.split('|')[0]}{entry?.english && entry.english !== entry.name && <small className="tooltip-english"> {entry.english}</small>}</strong>{entry && <EntryBadges entry={entry}/>}<small>{value.sourceLabel || (entry ? `${KIND_LABELS[entry.kind]} · ${format(entry.source)} · ${entryEdition(entry) === 'both' ? '通用' : entryEdition(entry)}` : '资料尚未收录')}{pinned && <span className="tooltip-pin"> · 已固定</span>}</small></header>
-    <div className="keyword-content rules-prose">{entry ? <ContentBoundary key={entry.id}>{entry.kind==='monster'?<MonsterDocument entry={entry} onLink={open}/>:<>{!value.sourceLabel && <EntryFacts entry={entry} onLink={open}/>}<Entries compact={entry.kind==='feature'} value={entry.entries} onLink={open}/><SpellLearners entry={entry} onLink={open}/></>}</ContentBoundary> : null}</div>
-  </aside>;
-}
+export type Preview = { id: string; anchor: HTMLElement; reference: string; entry?: Entry; sourceLabel?: string; point: Point; fixed?: Point; excluded?:boolean; layer:number };
 export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCommit, isExcluded, readableEntry, wikiVisible=wikiIsVisible }: { readableEntry?:(entry:Entry)=>Entry|undefined; isExcluded?:(entry:Entry)=>boolean; wikiVisible?:()=>boolean; sheetPreview?:(entry?:Entry)=>void; sheetCommit?:(entry:Entry)=>void; children: ReactNode; resolve: (reference: string, kind?: string) => Entry | undefined; open: (reference: string, kind?: string) => void }) {
   const sheetAnchor=useRef<HTMLElement | undefined>(undefined);
   const sheetCallbacks=useRef({sheetPreview,sheetCommit,resolve,wikiVisible});sheetCallbacks.current={sheetPreview,sheetCommit,resolve,wikiVisible};
@@ -129,6 +112,6 @@ export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCom
   }
   return <ReferenceContext.Provider value={{ show, move, leave, close, resolve:(reference,kind)=>sheetCallbacks.current.resolve(reference,kind), commit:(anchor,reference,kind,entry)=>{if(!anchor.closest('.paper,[data-wiki-preview]')||!sheetCallbacks.current.sheetCommit)return false;const found=sheetCallbacks.current.resolve(reference,kind)||entry;if(!found)return false;sheetCallbacks.current.sheetCommit(found);return true;}, active: visiblePreview?.anchor, activeId: visiblePreview?.id }}>
     {children}
-    {createPortal(<>{visiblePinned.length > 0 && <div className="tooltip-backdrop" data-testid="tooltip-backdrop" onPointerDown={e => { backdropPressed.current = true; e.preventDefault(); e.stopPropagation(); }} onPointerUp={e => { e.preventDefault(); e.stopPropagation(); if (e.button !== 0 && backdropPressed.current) { backdropPressed.current = false; suppressUntil.current = Date.now() + 800; clear(); } }} onClick={e => { e.preventDefault(); e.stopPropagation(); clear(); }} onContextMenu={e => e.preventDefault()} onWheel={e => e.stopPropagation()}/>}{visiblePinned.map((value, index) => <Pane key={value.id} value={value} pinned index={index} keep={keep} leave={leave} open={open}/>)}{visiblePreview && <Pane key={visiblePreview.id} value={visiblePreview} pinned={false} index={visiblePinned.length} keep={keep} leave={leave} open={open}/>}</>, document.body)}
+    {createPortal(<>{visiblePinned.length > 0 && <div className="tooltip-backdrop" data-testid="tooltip-backdrop" onPointerDown={e => { backdropPressed.current = true; e.preventDefault(); e.stopPropagation(); }} onPointerUp={e => { e.preventDefault(); e.stopPropagation(); if (e.button !== 0 && backdropPressed.current) { backdropPressed.current = false; suppressUntil.current = Date.now() + 800; clear(); } }} onClick={e => { e.preventDefault(); e.stopPropagation(); clear(); }} onContextMenu={e => e.preventDefault()} onWheel={e => e.stopPropagation()}/>}{(visiblePinned.length>0||visiblePreview)&&<ToolBoundary key={visiblePreview?.id||visiblePinned[0]?.id} label="条目说明" close={clear}><Suspense fallback={<aside className="keyword-preview" role="tooltip" style={{left:Math.max(8,Math.min(innerWidth-300,(visiblePreview?.point.x||8)+16)),top:Math.max(8,Math.min(innerHeight-100,(visiblePreview?.point.y||8)+18)),zIndex:(visiblePreview?.layer||100)+1}}>正在加载条目说明…</aside>}>{visiblePinned.map((value, index) => <Pane key={value.id} value={value} pinned index={index} keep={keep} leave={leave} open={open}/>)}{visiblePreview && <Pane key={visiblePreview.id} value={visiblePreview} pinned={false} index={visiblePinned.length} keep={keep} leave={leave} open={open}/>}</Suspense></ToolBoundary>}</>, document.body)}
   </ReferenceContext.Provider>;
 }

@@ -4,7 +4,8 @@ import {offlineShell} from '../tools/offlineShell';
 
 function worker(fetch:()=>Promise<Response>,saved?:Response){
  let source='';const listeners:Record<string,(event:any)=>void>={};
- const hook=offlineShell().generateBundle as Function;
+ const generate=offlineShell().generateBundle;
+ const hook=(typeof generate==='function'?generate:generate!.handler) as Function;
  hook.call({emitFile:(file:{source:string})=>source=file.source},{},{'assets/main.js':{}});
  runInNewContext(source,{URL,Promise,setTimeout,clearTimeout,fetch,caches:{open:async()=>({match:async()=>saved})},self:{location:new URL('https://example.test/card/sw.js'),addEventListener:(name:string,listener:(event:any)=>void)=>listeners[name]=listener}});
  let response!:Promise<Response>;
@@ -13,6 +14,16 @@ function worker(fetch:()=>Promise<Response>,saved?:Response){
 }
 afterEach(()=>vi.useRealTimers());
 describe('cached startup navigation',()=>{
+ it('an HTML-only update gets a separate cache instead of replacing the active version',()=>{
+  const revision=(html:string)=>{
+   let source='';const generate=offlineShell().generateBundle;
+   const hook=(typeof generate==='function'?generate:generate!.handler) as Function;
+   hook.call({emitFile:(file:{source:string})=>source=file.source},{},{'index.html':{type:'asset',source:html},'assets/main.js':{type:'chunk',isEntry:true,imports:[]}});
+   return source.match(/const CACHE = PREFIX \+ "([^"]+)"/)?.[1];
+  };
+  expect(revision('<html>first</html>')).toBeTruthy();
+  expect(revision('<html>first</html>')).not.toBe(revision('<html>second</html>'));
+ });
  it('opens cached HTML after 1.5 seconds when the network never responds',async()=>{
   vi.useFakeTimers();const cached=new Response('saved');const result=worker(()=>new Promise(()=>{}),cached);
   await vi.advanceTimersByTimeAsync(1500);expect(await result).toBe(cached);expect(vi.getTimerCount()).toBe(0);

@@ -7,7 +7,7 @@ import {SheetCell} from './SheetCell';
 import {SheetEditContext} from './SheetEdit';
 import {Reference} from './Reference';
 import {pointerDrag} from './pointerDrag';
-import {inventoryRequest} from './StockBoard';
+import {requestInventory as inventoryRequest} from '../platform/workbench';
 import type {Edit} from './CharacterPages';
 export function InventoryMarks({c,edit}:{c:Character;edit:Edit}){
  const wb=useWorkbench(),id=inWorkbench?`card:${wb.target?.cardId}`:`local:${c.id}`,stock=wb.inventory?.containers[id];

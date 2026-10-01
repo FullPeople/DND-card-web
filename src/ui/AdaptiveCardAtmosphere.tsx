@@ -3,7 +3,7 @@ import type {ConditionVisual} from './conditionVisuals';
 import './adaptiveCardAtmosphere.css';
 
 export type AdaptiveVisualProps={active:ReadonlySet<ConditionVisual>;exhaustion?:number;editing?:boolean};
-export function adaptiveConditionClasses(active:ReadonlySet<ConditionVisual>,editing=false){return `adaptive-card-host${editing?' adaptive-editing':[...active].map(id=>` adaptive-condition-${id}`).join('')}`;}
+export {adaptiveConditionClasses} from './cardVisualState';
 function useArtSize(){const ref=useRef<HTMLDivElement>(null),[size,setSize]=useState({width:0,height:0});useLayoutEffect(()=>{const node=ref.current;if(!node)return;const measure=()=>{const width=Math.round(node.clientWidth),height=Math.round(node.clientHeight);setSize(old=>old.width===width&&old.height===height?old:{width,height});};measure();const observer=new ResizeObserver(measure);observer.observe(node);return()=>observer.disconnect();},[]);return {ref,...size};}
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
 function Effect({id,active,children}:{id:ConditionVisual;active:boolean;children:ReactNode}){const [retained,setRetained]=useState(active);useEffect(()=>{if(active){setRetained(true);return;}const timer=setTimeout(()=>setRetained(false),850);return()=>clearTimeout(timer);},[active]);if(!active&&!retained)return null;return <g className={`adaptive-effect adaptive-effect-${id} ${active?'adaptive-present':'adaptive-leaving'}`} data-adaptive-effect={id} data-phase={active?'present':'leaving'}>{children}</g>;}

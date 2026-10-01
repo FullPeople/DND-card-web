@@ -8,7 +8,8 @@ import { readCache, writeCache } from '../platform/storage';
 import { prepareBody, specificMagicItems, expandVersions, expandCopies } from './expand';
 import { inheritSubrace, readableEntries } from './adapt';
 import {DEFAULT_HOMEBREW,homebrewPaths,homebrewMetadata,homebrewBody} from './homebrew';
-export const DEFAULT_SOURCE = 'https://5e.kiwee.top';
+import {DEFAULT_SOURCE} from './catalogSource';
+export {DEFAULT_SOURCE} from './catalogSource';
 export interface LoadProgress { done: number; total: number; label: string; failed: string[]; cached: number }
 const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition', variantrule: 'rule', action: 'rule', sense: 'rule', skill: 'rule', language: 'rule', status: 'condition', disease: 'condition', itemGroup: 'item', magicvariant: 'item', itemMastery: 'feature', itemProperty: 'rule', itemType: 'rule', reward: 'feature', charoption: 'feature', psionic: 'feature', deity: 'rule', cult: 'rule', boon: 'feature', facility: 'rule', table: 'rule', tableGroup: 'rule', monster: 'monster' };
 const canonical = (s: unknown) => String(s ?? '').trim().toLowerCase();
