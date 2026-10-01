@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
@@ -6,6 +6,12 @@ import {exportCharacter,exportOwlbear} from '../../src/core/export';
 import {evaluate} from '../../src/core/engine';
 import {normalizeLegacyUpload} from '../../src/platform/legacyPlayerBridge';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
+
+async function closeImportedCard(page:Page,name:string){
+ // File.text() completes asynchronously; the import selects its card and reopens this dialog.
+ await expect(page.locator('.character-tabs').getByRole('tab',{name:name+'（导入）'})).toHaveAttribute('aria-selected','true');
+ const dialog=page.getByRole('dialog',{name:'导入与导出',exact:true});await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
+}
 test('suite notice shows a collapsed red Owner explanation near the front and requires acknowledgement',async({page,baseURL})=>{
  await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=notice197&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);
  const dialog=page.getByRole('dialog',{name:'欢迎使用 Full Suite 枭熊工作台！'}),owner=dialog.locator('.announcement-owner');await expect(dialog).toBeVisible();expect(await owner.evaluate(e=>(e as HTMLDetailsElement).open)).toBe(false);
@@ -47,7 +53,7 @@ test('website weapon attacks stay visible and editable after Owlbear file roundt
  const upload=normalizeLegacyUpload(exportCharacter(c));expect(upload.combat.weapons[0]).toMatchObject({attack_bonus:'+7',damage:'1d8+4'});
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
  await page.getByTestId('character-file').setInputFiles({name:'owlbear-weapon.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(upload))});
- await page.keyboard.press('Escape');
+ await closeImportedCard(page,c.name);
  const row=page.locator('.quick-weapon').filter({hasText:'验收长弓'});await expect(row).toHaveCount(1);await expect(row).toContainText('+7');await expect(row).toContainText('1d8+4');
  await page.reload();await expect(row).toHaveCount(1);await expect(row).toContainText('1d8+4');
  await page.screenshot({path:test.info().outputPath('weapon-roundtrip208.png')});
@@ -59,7 +65,7 @@ test('dragged shield and martial training affect equipped automation once and su
  const entries:Entry[]=[{name:'训练盾牌',type:'S',ac:2},{name:'训练军用剑',type:'M',weaponCategory:'martial',dmg1:'1d8',dmgType:'S'}].map((raw,i)=>({id:'training-item:'+i,kind:'item',name:raw.name,english:raw.name,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:[],raw}));
  c.selections=entries.map(entry=>({id:entry.id,entry,quantity:1,level:1,equipped:true}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
- await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'training.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'training.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
  await page.getByRole('button',{name:'自动化设置',exact:true}).click();await expect(page.getByTestId('automation-ac')).toHaveText('10');await expect(page.locator('.automation-panel summary').filter({hasText:'训练军用剑'})).toContainText('命中 4');await page.keyboard.press('Escape');
  await page.getByRole('switch',{name:'编辑模式'}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备词条',exact:true}).click();
  for(const [name,label] of [['盾牌','护甲'],['军用武器','武器']]){
@@ -74,7 +80,7 @@ for(const action of ['remove','zero'] as const)test(`background gift ${action} s
  await mockSource(page);const c=newCharacter();c.name='赠品移除验收';
  const background:Entry={id:'gift-background',kind:'background',name:'原创赠品背景',english:'Gift Background',source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['用于赠品生命周期验收。'],raw:{startingEquipment:[{_:['测试皮甲|XPHB']}]}};
  c.selections=[{id:'background-gift-owner',entry:background,quantity:1,level:1,equipped:false}];
- await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'gift.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await page.keyboard.press('Escape');await page.getByRole('tab',{name:'背包',exact:true}).click();
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'gift.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);await page.getByRole('tab',{name:'背包',exact:true}).click();
  const gift=page.locator('.paper .stock-item').filter({hasText:'测试皮甲'});await expect(gift).toHaveCount(1);
  if(action==='remove'){await gift.locator('.stock-name').click({button:'right'});await page.getByRole('menuitem',{name:'移除',exact:true}).click();}
  else {const quantity=gift.getByLabel('测试皮甲数量');await quantity.click();await quantity.fill('0');await quantity.press('Enter');}
