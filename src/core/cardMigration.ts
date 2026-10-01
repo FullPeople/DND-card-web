@@ -40,6 +40,18 @@ export function migrationCandidates(c:Character,row:Selection,entries:Entry[],ki
  const parent=row.parentId?c.selections.find(s=>s.id===row.parentId):undefined;
  return [...matches.values()].filter(e=>e.kind!=='subclass'||!parent||unlinkedEntry(parent.entry)||classMatches(e,parent.entry)).sort((a,b)=>Number(selectionAllowed(c,b))-Number(selectionAllowed(c,a))||a.source.localeCompare(b.source)||a.id.localeCompare(b.id));
 }
+/** Recommend only; the wizard keeps every explicit choice, including custom. */
+export function suggestedMigrationTarget(c:Character,candidates:Entry[],current?:Entry):string{
+ const books=c.edition==='2024'?['XPHB','XDMG','XMM']:['PHB','DMG','MM'];
+ const coreBooks=['PHB','DMG','MM','XPHB','XDMG','XMM'];
+ const available=candidates.filter(e=>selectionAllowed(c,e)&&editionAllows(e,c.edition)&&(!coreBooks.includes(e.source)||books.includes(e.source)));
+ const same=available.filter(e=>e.id===current?.id&&e.source===current.source&&e.packId===current.packId&&e.edition===current.edition&&e.kind===current.kind);
+ if(same.length===1)return same[0].id;
+ // A matching core handbook takes priority over ambiguous expansion names.
+ // Two different entries from the same preferred book still need a decision.
+ for(const source of books){const rows=available.filter(e=>e.source===source);if(rows.length)return rows.length===1?rows[0].id:'';}
+ return available.length===1?available[0].id:'';
+}
 export function migrationOptions(c:Character,entries:Entry[],kinds:Kind[],query:string):Entry[]{
  const q=nameKey(query);return index(entries).rows.filter(e=>kinds.includes(e.kind)&&editionAllows(e,c.edition)&&(!q||aliases(e).some(n=>n.includes(q)))).slice(0,100);
 }

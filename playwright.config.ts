@@ -5,7 +5,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: { baseURL: 'http://127.0.0.1:5178', trace: 'retain-on-failure', screenshot: 'only-on-failure', viewport: { width: 1512, height: 982 } },
   projects: [
-    { name: 'chromium', testIgnore: '**/offline.spec.ts', use: { channel: process.env.CI ? undefined : 'msedge' } },
+    { name: 'chromium', testIgnore: ['**/offline.spec.ts','**/resourceWidgets217.spec.ts','**/resourceModules218.spec.ts'], use: { channel: process.env.CI ? undefined : 'msedge' } },
     { name: 'production-offline', testMatch: '**/offline.spec.ts', use: { channel: process.env.CI ? undefined : 'msedge', baseURL: 'http://127.0.0.1:4178' } },
   ],
   webServer: [

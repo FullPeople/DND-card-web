@@ -43,7 +43,7 @@ test('quickbar pins references without duplicate grants, survives reload and rem
   await page.getByRole('navigation', { name: '资料分类' }).getByRole('button', { name: '法术', exact: true }).click();
   await page.locator('.catalog-row').filter({ hasText: '微光术' }).dragTo(page.locator('.quickbar-cell'));
   await expect(page.locator('.quickbar-row')).toHaveCount(2);
-  await page.getByRole('button', { name: '管理快捷栏' }).click();
+  await page.getByRole('button', { name: '整理快捷栏' }).click();
   await page.getByRole('button', { name: '上移微光术' }).click(); await page.getByRole('button', { name: '关闭弹窗' }).click();
   await expect(page.locator('.quickbar-row').first()).toContainText('微光术');
   await page.reload(); await expect(page.locator('.quickbar-row').first()).toContainText('微光术');

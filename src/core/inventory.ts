@@ -1,6 +1,6 @@
 import type {Character,Entry} from './model';
 import {removeSelection} from './sheet';
-export type Stock={id:string;kind:'item'|'condition'|'currency'|'resource';name:string;quantity:number;slot:number;revision:number;entry?:Entry;coin?:string;max?:number;locked?:boolean;equipped?:boolean;attuned?:boolean;unitWeight?:number;unlimited?:boolean;type?:string;presentation?:{style:'bar'|'ring'|'square'|'icon'}};
+export type Stock={id:string;kind:'item'|'condition'|'currency'|'resource';name:string;quantity:number;slot:number;revision:number;entry?:Entry;coin?:string;max?:number;locked?:boolean;equipped?:boolean;attuned?:boolean;unitWeight?:number;unlimited?:boolean;type?:string;presentation?:Pick<import('./resourceWidgets').ResourceWidgetLayout,'style'|'color'|'icon'>};
 /** Stack identity excludes position, quantity and transport revision, never source or rules. */
 export function sameStock(a:Stock,b:Stock):boolean {
  if(a.kind==='resource'||b.kind==='resource')return false;

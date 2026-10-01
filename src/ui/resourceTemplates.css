@@ -1,0 +1,23 @@
+.resource-template-library{max-width:760px;width:100%;color:#43444b;box-sizing:border-box}
+.resource-template-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:stretch}
+.resource-template-option{position:relative;display:grid;place-items:center;min-width:0;height:112px;padding:9px!important;border:1px solid #d0d5ca!important;border-radius:5px;background:#eaede5!important;color:inherit;transition:border-color .15s,background .15s,transform .15s}
+.resource-template-option:hover:not(:disabled){border-color:#7a9a70!important;background:#e0e8d8!important;transform:translateY(-2px)}
+.resource-template-option:focus-visible{outline:2px solid #527880;outline-offset:2px}
+.resource-template-option:disabled{opacity:.45;cursor:not-allowed}
+.resource-template-preview{display:block;height:78px;width:100%;min-width:0;pointer-events:none}
+.resource-template-preview:is(.template-ring,.template-orbit,.template-square,.template-diamond){width:80px;height:86px}
+.resource-template-preview.template-half{height:80px}
+.resource-template-preview.template-reservoir{width:76px;height:88px}
+.resource-template-preview:is(.template-segments,.template-ready){height:60px}
+.resource-template-preview.template-matrix{width:96px;height:88px}
+.resource-template-preview .rm-name{font-size:10px}
+.resource-template-add{position:absolute;right:5px;top:0;font-size:16px;color:#77946b;opacity:0}
+.resource-template-option:hover .resource-template-add,.resource-template-option:focus-visible .resource-template-add{opacity:1}
+.resource-template-restore{margin-bottom:10px;font-size:11px}
+.resource-module-tabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.resource-module-tabs button[aria-pressed=true]{border-color:#80505b;background:#e2d4d8}
+.resource-module-heading{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.resource-module-heading input{min-width:0;flex:1}
+@media(max-width:650px){.resource-template-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
+@media(max-width:430px){.resource-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.resource-template-option{transition:none}}

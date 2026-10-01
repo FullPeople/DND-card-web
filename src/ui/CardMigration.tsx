@@ -1,6 +1,6 @@
 import {useId,useMemo,useState} from 'react';
 import {KIND_LABELS,selectionAllowed,editionAllows,uid,type Character,type Entry,type Kind,type Selection} from '../core/model';
-import {MIGRATION_ROOTS,emptyMigrationChoices,migrationCandidates,migrationOptions,migrationDraft,planCardMigration,retainedProficiencies,type MigrationChoices,type GrantChoice} from '../core/cardMigration';
+import {MIGRATION_ROOTS,suggestedMigrationTarget,emptyMigrationChoices,migrationCandidates,migrationOptions,migrationDraft,planCardMigration,retainedProficiencies,type MigrationChoices,type GrantChoice} from '../core/cardMigration';
 import {migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigration';
 import {MigrationEntry} from './MigrationEntry';
 import {trainingCategory} from '../core/training';
@@ -9,7 +9,6 @@ import {ClearableSearch} from './ClearableSearch';
 import './cardMigration.css';
 const stages=['基础资料','来源气泡','额外气泡','保留自定义','法术与熟练','最终预览'];
 const extraKinds:Kind[]=['feat','feature','rule','spell','item'];
-function suggested(c:Character,rows:Entry[],current?:Entry){const available=rows.filter(e=>selectionAllowed(c,e));return available.find(e=>e.id===current?.id&&e.source===current.source)?.id||(available.length===1?available[0].id:'');}
 function MatchChoices({c,original,candidates,options,value,change,label,meta}:{c:Character;original:Entry;candidates:Entry[];options:(query:string)=>Entry[];value:string;change:(v:string)=>void;label:string;meta?:string}){
  const [query,setQuery]=useState(''),[manual,setManual]=useState(false),group=useId();
  const standard=candidates.some(e=>e.id===value),custom=manual||!!value&&!standard;
@@ -28,10 +27,10 @@ export function CardMigration({c,entries,loading,readOnly,save,busy,setBusy}:{c:
  const draftResult=useMemo(()=>{try{return {draft:migrationDraft(c,entries,step===0?emptyMigrationChoices():choices,step),error:''};}catch(e){return {draft:undefined,error:String(e)};}},[c,entries,choices,step]);
  const draft=draftResult.draft;
  const roots=useMemo(()=>c.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind)),[c]);
- const value=(bucket:'roots'|'extras'|'spells',row:Selection,kinds:Kind[])=>choices[bucket][row.id]??suggested(draft?.card||c,migrationCandidates(draft?.card||c,row,entries,kinds),row.entry);
+ const value=(bucket:'roots'|'extras'|'spells',row:Selection,kinds:Kind[])=>choices[bucket][row.id]??suggestedMigrationTarget(draft?.card||c,migrationCandidates(draft?.card||c,row,entries,kinds),row.entry);
  const setValue=(bucket:'roots'|'extras'|'spells',id:string,v:string)=>{setChoices(old=>({...old,[bucket]:{...old[bucket],[id]:v}}));setError('');};
  const grantValue=(g:NonNullable<typeof draft>['grants'][number]):GrantChoice=>choices.grants[g.key]??{include:true,replaceId:g.matches.length===1?g.matches[0].id:undefined};
- const trainingValue=(t:NonNullable<typeof draft>['training'][number])=>choices.training[t.id]??suggested(c,t.candidates);
+ const trainingValue=(t:NonNullable<typeof draft>['training'][number])=>choices.training[t.id]??suggestedMigrationTarget(c,t.candidates);
  function next(){if(!draft)return;try{
   const selected=structuredClone(choices);
   if(step===0){selected.roots=Object.fromEntries(roots.map(row=>[row.id,value('roots',row,[row.entry.kind])]));selected.grants={};selected.extras={};selected.keep={};selected.spells={};selected.training={};}

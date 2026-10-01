@@ -43,7 +43,7 @@ export interface Character {
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];
-  quickbarLayout?: {order:string[];hidden:string[];widgets?:Record<string,import('./resourceWidgets').ResourceWidgetLayout>};
+  quickbarLayout?: {order:string[];hidden:string[];widgets?:Record<string,import('./resourceWidgets').ResourceWidgetLayout>;attacks?:import('./resourceWidgets').ResourceWidgetLayout};
   quickbar?: string[];
   quickbarCopies?: {id:string;entry:Entry}[];
   quickbarActions?: {id:string;name:string;attack:string;damage:string}[];

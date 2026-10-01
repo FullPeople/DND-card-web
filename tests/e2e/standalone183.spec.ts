@@ -11,10 +11,10 @@ test('standalone has no room transport, survives offline reload and rolls withou
  await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
  await page.getByRole('switch',{name:'编辑模式'}).click();
  await page.getByRole('textbox',{name:'角色姓名',exact:true}).fill('单机冒险者');
- await page.getByRole('button',{name:'管理快捷栏',exact:true}).click();
- await page.getByLabel('名字',{exact:true}).fill('训练剑');await page.getByLabel('命中加值',{exact:true}).fill('+4');await page.getByLabel('伤害',{exact:true}).fill('1d6+2');await page.getByRole('button',{name:'添加',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();
- await page.getByRole('button',{name:'管理资源',exact:true}).click();await page.getByRole('button',{name:'＋ 资源',exact:true}).click();
- await expect(page.locator('dialog[open] .resource-editor-shade')).toBeVisible();await page.getByRole('textbox',{name:'资源名称',exact:true}).fill('活力');await page.getByRole('spinbutton',{name:'资源上限',exact:true}).fill('3');await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();
+ await page.getByRole('button',{name:'整理快捷栏',exact:true}).click();
+ await page.getByRole('button',{name:'＋ 新建手填攻击',exact:true}).click();await page.getByLabel('名字',{exact:true}).fill('训练剑');await page.getByLabel('命中加值',{exact:true}).fill('+4');await page.getByLabel('伤害',{exact:true}).fill('1d6+2');await page.getByRole('button',{name:'添加',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();
+ await page.getByRole('button',{name:'管理资源',exact:true}).click();await page.getByRole('button',{name:'添加细线刻度资源模块',exact:true}).click();await page.getByRole('button',{name:'新资源，选择资源模块，双击配置',exact:true}).dblclick();
+ await expect(page.getByRole('dialog',{name:'资源配置',exact:true})).toBeVisible();await page.getByRole('textbox',{name:'资源名称',exact:true}).fill('活力');await page.getByRole('spinbutton',{name:'资源上限',exact:true}).fill('3');await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByRole('switch',{name:'编辑模式'}).click();
  const resource=page.getByRole('region',{name:'资源模块快捷栏'}),face=resource.getByRole('button',{name:/^活力：.*打开资源操作$/});
  const savedResource=()=>page.evaluate(async()=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open('dnd-card-standalone');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});return new Promise<number|undefined>(resolve=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{const w=req.result,card=w.characters.find((c:any)=>c.id===w.activeId);db.close();resolve((Object.values(card.runtime.resources) as any[]).find(r=>r.name==='活力')?.current);};});});
  await expect(face).toHaveAccessibleName('活力：3 / 3，打开资源操作');await face.click();const controls=page.getByRole('dialog',{name:'活力资源操作',exact:true});
@@ -25,7 +25,7 @@ test('standalone has no room transport, survives offline reload and rolls withou
  await context.setOffline(true);await page.reload();await expect.poll(()=>page.locator('.brand-logo').evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>0)).toBe(true);
  await expect(page.getByRole('textbox',{name:'角色姓名',exact:true})).toHaveValue('单机冒险者');
  await expect(page.locator('.quick-weapon').filter({hasText:'训练剑'})).toBeVisible();await expect(face).toHaveAccessibleName('活力：3 / 3，打开资源操作');await expect.poll(savedResource).toBe(3);
- await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','true');await page.getByRole('switch',{name:'编辑模式'}).click();
+ await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','false');
  await page.locator('.quick-weapon').filter({hasText:'训练剑'}).getByRole('button',{name:'+4',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'})).toBeVisible();await page.getByRole('button',{name:'投骰',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'}).getByRole('status')).toContainText('1d20');await page.getByRole('button',{name:'关闭',exact:true}).click();

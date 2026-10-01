@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:'compactDashboard220.spec.ts',fullyParallel:false,workers:1,retries:0,timeout:30000,expect:{timeout:6000},outputDir:process.env.COMPACT220_OUT||'../browser-compact220-r1',reporter:[['list'],['json',{outputFile:(process.env.COMPACT220_OUT||'../browser-compact220-r1')+'/results.json'}]],use:{baseURL:process.env.COMPACT220_BASE_URL||'http://127.0.0.1:5280',channel:'msedge',headless:true,trace:'retain-on-failure',screenshot:'only-on-failure'}});

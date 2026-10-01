@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-01-二';
+export const RELEASE_DATE='2026-10-01-四';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -166,24 +166,40 @@ const SUITE_RELEASE_216_SECTIONS:ReleaseSection[]=[...RELEASE_216_SECTIONS,
  {title:'投骰',items:['骰子已准备好时，重新打开骰盘不再闪出加载进度；首次加载和故障仍显示实际状态。','保留已上线的常驻骰子服务和五种材质预览；旧插件本批不更新。','枭熊宿主内跨窗口的骰子置顶问题仍未解决。']},
  {title:'枭熊联动待验证',items:['独立预览不能证明完整枭熊联动正常；实体手机与更广泛权限场景待验证。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_217_SECTIONS:ReleaseSection[]=[
  {title:'角色卡与旧卡资料',items:['旧卡黄色提醒现在只检查职业。自定义种族、背景、装备、特性或法术不会单独触发提醒。','旧卡同步按“原内容 → 替换内容”同行列出选项，资料来源显示中文全名，悬停可以阅读正文，也可以保留自定义或手动查找。','最后确认后创建同步副本，原卡与已消耗次数保留。正常角色也可从“导入 / 导出”打开资料核对。','编辑模式下，每项技能名称后可以填写正负额外调整值；保存、刷新和导入导出后保留。']},
  {title:'快捷栏与资源',items:['资源可以选择条形、圆环、方形或图标样式，自行拖动位置，并拖动八个边角点调整大小。','缩窄武器区域，为资源模块留出空间；空间不足时可翻页查看。资源外观与使用次数分别保存。','新布局与实体触屏拖动仍待玩家体验确认。']},
  {title:'Wiki 与自定义内容',items:['自定义条目可以右键移除；已经填入角色卡的内容保留。','新建界面增加“使用必看”；“填充格式示例”会直接填入字段，并提供撤回按钮。','格式输入与 JSON 输入可以切换并同步；未改正文或撤销回原文时，保留原内容结构。','参考格式的标题与关闭按钮保持可见，分类内搜索框加高。']},
  {title:'基础自动化',items:['增加按熟练加值计算的部分来源法术次数。','资料明确列出可选法术时，可以勾选并保存选择，也可以暂时少选。','增加短休、长休来源次数的恢复预览，只恢复列出的来源次数，不代表完成整次休息。','按条件筛选的赠送法术、其他动态次数、完整休息和完整英文翻译仍未完成，未支持规则继续显示说明。']},
  {title:'支持与反馈',items:['支持者弹幕连续显示；公告打开时也会在背景显示，关闭后消失。','公告内增加作者支持入口和可以放大的赞助二维码。','赞助过的朋友可将 cn 与头像或立绘发送到 1763086701psw@gmail.com。']},
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_217_SECTIONS:ReleaseSection[]=[...RELEASE_217_SECTIONS,
  {title:'角色切换与玩家资源',items:['已经读取的授权角色可以直接切换，后台接收资料更新，减少等待宿主回复的时间。','撤回权限时同步清理对应卡面、资料正文和固定浮窗。','玩家、怪物和公共资源使用紧凑资源模块，并保留各自的操作权限。','新代码的真实双端切换、新建、修改与同步仍待房间验收。']},
  {title:'骰子与历史',items:['减少骰子图形内存占用，增加动画中断和图形恢复处理；群体投掷同时起播。','骰子历史移至左上角 Action 栏的历史标签；新增记录时自动显示。','结果以数字和文字显示在对应棋子头顶，飞线指向同一位置。真实房间中的定位、历史点击与并发效果待验证。']},
  {title:'群体区域',items:['DM 多选单位后自动打开总览中的群体区域，支持群体先攻、豁免和属性检定；战斗准备时默认显示先攻。','投掷前可以批量调整生命值、生命上限或护甲等级；结果生成后可直接输入 DC 结算。','头顶结果支持隐藏、显示和单独关闭。结算不自动关闭，进入结算后改变选中单位也会保留本轮结果。','群体投掷最多同时使用 100 枚骰子：普通最多 100 个单位，优势或劣势最多 50 个。超过时会提示，不会遗漏选中的单位；真实房间结算与权限联动待验证。']},
  {title:'仍在排查与待验证',items:['枭熊宿主内跨窗口的骰子置顶问题仍在排查。','实体手机与真实多人房间仍需验证；独立网站预览不能证明完整枭熊联动正常。']},
+];
+const SUITE_RELEASE_219_SECTIONS:ReleaseSection[]=[
+ {title:'骰子历史',items:['点击左上角历史记录显示或隐藏棋子头顶结果时，Action 栏保持打开；需要时仍可手动关闭。']},
+ {title:'先攻投掷',items:['修复从先攻栏发起投掷时，骰子无法正常出现的问题。','投掷提交失败时会显示原因，不再提前写入先攻数值。']},
+ {title:'验证范围',items:['本次仅更新新版 Full Suite 的这两项修复，角色卡网站与旧版插件不变。','自动回归已覆盖先攻提交和历史窗口行为；真实房间中的玩家端动画与权限联动待验证。']},
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'资源仪表盘',items:['快捷栏增加“仪表盘”，在与卡面相同大小的画布中调整模块位置、大小和页数，双击设置对应资源。','提供 16 款资源模块，可以选择颜色和计数图标；默认添加按资源上限选择合适的样式，刷新后保留。','可以从模块库直接拖入画布，拖动时显示半透明落点预览；画布外松手或按 Esc 取消。','移动和缩放不会挤动其他模块。排版时允许临时重叠，冲突标红，移开后才能保存。','点击“保存布局”才保留修改；关闭窗口或“放弃修改”会丢弃本次未保存的排版。','共用的普通法术位合并显示，契约等独立资源池分别显示，已有次数不会重置。']},
+ {title:'角色卡与整理',items:['核对旧卡遇到多个候选时，优先选择当前规则版本的三宝书条目，也可以自行改选或保留自定义。','快捷栏整理只列出已加入的内容，需要其他攻击时可从资料或卡面拖入。','收窄主要页左侧数值区及背景与专长区域，为其他内容留出空间。']},
+ {title:'待验证与未完成',items:['实体手机操作仍待验证；复杂自动化、完整休息与完整英文翻译仍未完成。']},
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'总览与历史',items:['总览中的玩家、怪物和公共资源采用同一套模块外观；角色资源保留颜色、图标及资源池分组。','骰子历史只保留最近 100 条；点击左上角历史查看头顶结果时，Action 栏保持打开。','保留上一批先攻投骰修复。']},
+ {title:'联动待验证',items:['真实房主与玩家同步、权限变化及实体触屏仍待验证；独立网页预览不能代替房间验收。','切卡的剩余卡顿及跨窗口骰子置顶仍未解决，本批不宣称已修复。']},
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ ...(mode==='suite'?[{title:'2026-10-01-三',sections:SUITE_RELEASE_219_SECTIONS}]:[]),
+ {title:'2026-10-01-二',sections:mode==='suite'?SUITE_RELEASE_217_SECTIONS:RELEASE_217_SECTIONS},
  {title:'2026-10-01',sections:mode==='suite'?SUITE_RELEASE_216_SECTIONS:RELEASE_216_SECTIONS},
  {title:'2026-09-30-二',sections:mode==='suite'?SUITE_RELEASE_213_SECTIONS:RELEASE_213_SECTIONS},
  {title:'2026-09-30-一',sections:mode==='suite'?SUITE_RELEASE_210_SECTIONS:RELEASE_210_SECTIONS},

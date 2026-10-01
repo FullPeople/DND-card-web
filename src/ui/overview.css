@@ -86,7 +86,7 @@
 .edition-divider{display:flex;align-items:center;gap:15px;color:#484b43}
 .edition-divider strong{font:600 17px Georgia,serif;white-space:nowrap;letter-spacing:1px}
 .edition-divider>span{height:5px;border-block:1px solid #a0a294;flex:1;transform:skewX(-30deg)}
-.overview-body{min-height:0;display:grid;grid-template-columns:35% minmax(0,1fr);gap:10px}
+.overview-body{min-height:0;display:grid;grid-template-columns:33% minmax(0,1fr);gap:10px}
 .overview-left{min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) 132px;gap:9px}
 .physical-abilities{min-height:0;display:grid;grid-template-rows:49px minmax(92px,1.2fr) minmax(125px,1.6fr) minmax(78px,1fr) minmax(52px,.75fr);gap:8px}
 .mental-abilities{min-height:0;display:grid;grid-template-rows:1fr 1fr 1fr;gap:10px}
@@ -128,7 +128,8 @@
 .overview-vitals .cell-heading{border:0;min-height:18px}
 .overview-vitals .cell-heading h3{font-size:11px;line-height:1}
 .overview-vitals .cell-fill{font-size:8px!important;line-height:10px;padding:0!important}
-.overview-lower{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* Fixed 680px A4: the former 204.55px heritage column is now two thirds wide. */
+.overview-lower{min-height:0;display:grid;grid-template-columns:minmax(0,136.4px) minmax(0,1fr);gap:10px}
 .overview-sheet .traits-box,.overview-sheet .spells-box{min-height:0;margin:0}
 .class-features .cell-content,.heritage-features .cell-content,.overview-spells .cell-content{background-image:linear-gradient(#979c8709 1px,transparent 1px),linear-gradient(90deg,#979c8709 1px,transparent 1px);background-size:6px 6px}
 .quickbar-columns,.quickbar-row{display:grid;grid-template-columns:minmax(0,1fr) 36px 40px 12px;gap:5px;align-items:center;padding:6px 2px;border-bottom:1px solid #c4c9b9}
@@ -264,3 +265,10 @@
 .dice-cell strong{font-size:11px;line-height:13px;min-width:0}.dice-cell .cell-content{gap:3px}.dice-cell button{flex:none}
 
 .overview-sheet .ability-cha .cell-content{padding:3px 5px;overflow:hidden}.overview-sheet .ability-cha .ability-values{min-height:45px;height:45px}.overview-sheet .ability-cha .ability-save,.overview-sheet .ability-cha .ability-skill{min-height:15px;line-height:15px}
+
+/* Keep both proficiency controls, the skill name and its adjustment on one row.
+   Reflow keeps its larger touch targets and full-width stacked panels. */
+.paper .overview-sheet .ability-box .cell-content{padding:2px}
+.paper .overview-sheet .ability-skill.skill-editing:has(.skill-extra-adjustment){grid-template-columns:10px 10px 18px minmax(20px,1fr) 30px;gap:1px}
+.paper .overview-sheet .ability-skill input.skill-extra-adjustment{padding-inline:0}
+.paper .training-chips input{width:100%;min-width:0}

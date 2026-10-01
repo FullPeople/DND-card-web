@@ -1,3 +1,4 @@
+import {boundedDiceHistory} from './diceHistory';
 import {WorkbenchSnapshotCache,type CacheAccess} from './workbench-cache';
 import {previewInventory,overlayInventory} from '../core/inventory';
 import {WorkbenchRevisions,currentInventory,documentRevision} from '../core/workbenchRevisions';
@@ -10,11 +11,12 @@ import {mutationQueue} from './mutationQueue';
 import {exportOwlbear} from '../core/export';
 import {useSyncExternalStore} from 'react';
 import type {Character,Derived,RulePack,Entry,Edition,RuleProfile} from '../core/model';
+import type {ResourceWidgetLayout} from '../core/resourceWidgets';
 const protocol='full-suite-workbench/v1',params=new URLSearchParams(location.hash.slice(1));
 const session=params.get('suite'),origin=params.get('bridge');
 export const inWorkbench=!!session&&origin===location.origin;
 export type Target={tokenPortrait?:{url:string;width?:number;height?:number};projectionPending?:boolean;documentRevision?:number;key:string;itemId:string;name:string;cardId:string;slug:string;kind:'character'|'monster'|'token';stats:Record<string,number>;write:boolean;role:string;pinned:boolean;locked?:boolean;statsLocked?:boolean;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];resources?:any[]};
-export type CardChoice={resourceWidgets?:Record<string,{style:'bar'|'ring'|'square'|'icon';x:number;y:number;w:number;h:number;page:number}>;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
+export type CardChoice={resourceWidgets?:Record<string,ResourceWidgetLayout>;resourceAttacks?:ResourceWidgetLayout;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
 export type SharedRules={edition:Edition;sourceMode:'full'|'short'|'both';profile:RuleProfile;packs:RulePack[];customEntries:Entry[]};
 export type SharedDocument={key:string;scope:'room'|'scene';revision:number;rules:SharedRules};
 type State={access?:CacheAccess;inventory?:InventoryState;shared?:SharedDocument;settings?:Record<string,any>;visibility?:{wiki:boolean;monsters:boolean};console?:{timeStop:boolean;portalEffects:boolean;players:{id:string;name:string}[]};cards:CardChoice[];monsters:CardChoice[];role?:string;enabled:Record<string,boolean>;online:boolean;target?:Target;document?:any;loading?:boolean;message:string;rolls:any[];compose?:{id:string;expression:string;label?:string}};
@@ -134,7 +136,7 @@ if(inWorkbench){
   if(m.type==='cacheSnapshot'){if(accessAccepted){const snap=revisions.snapshot(m);rememberDocument(snap);if(snap.state?.key===state.target?.key)acceptSnapshot(snap);}return;}
   if(m.type==='ready')handshakeReady=true;
   if(m.type==='groupRollState'||m.type==='ready')window.dispatchEvent(new CustomEvent('workbench-group-roll-state',{detail:{group:m.type==='ready'?m.groupRoll??null:m.group,groupRevision:m.groupRevision??0,hostStarted:m.hostStarted||hostStarted,snapshot:m.type==='ready'}}));
-  if(m.type==='ready'||m.type==='rolls')update({rolls:Array.isArray(m.rolls)?m.rolls:[]});
+  if(m.type==='ready'||m.type==='rolls')update({rolls:boundedDiceHistory(m.rolls)});
   if(m.type==='directory'&&(!m.sequence||m.sequence>=catalogSequence)){catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:m.monsters||[],role:m.role,enabled:m.enabled||{}});}
   if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){handshakeCatalog=true;catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:(m.monsters||[]).map((card:CardChoice)=>{const previous=state.monsters.find(c=>c.itemId===card.itemId);if(previous&&(monsterRuntimeSequence.get(card.itemId)||0)>(m.sequence||0))return {...card,...runtimeFrom(previous)};monsterRuntimeSequence.set(card.itemId,m.sequence||0);return card;}),role:m.role,enabled:m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
   if(m.type==='catalog'&&state.target){const card=state.target.cardId?state.cards.find(c=>c.id===state.target!.cardId):state.monsters.find(c=>c.itemId===state.target!.itemId);if(card&&card.write!==state.target.write)update({target:{...state.target,write:card.write,locked:card.locked}});}

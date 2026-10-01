@@ -10,7 +10,7 @@ export const exportCharacter = (c: Character) => ({ format: 'dnd-card-web', vers
 // File exchange retains native identities; the live legacy projection stays small.
 export function exportLinkedOwlbear(c:Character,d:Derived){
   const native=structuredClone(c);if(native.externalSnapshot&&typeof native.externalSnapshot==='object')delete native.externalSnapshot.dnd_card_web;
-  const legacy=exportOwlbear(c,d);delete legacy.web_resource_widgets;
+  const legacy=exportOwlbear(c,d);delete legacy.web_resource_widgets;delete legacy.web_quickbar_attacks;
   return {...legacy,dnd_card_web:native};
 }
 export const exportCharacters = (characters:Character[]) => ({format:'dnd-card-web-collection',version:1,exportedAt:new Date().toISOString(),characters});
@@ -36,6 +36,7 @@ export function exportOwlbear(c: Character, d: Derived) {
     background: { background_name: entryName('background'), appearance: c.identity.description, story: c.biography?.story??c.notes, description: plainText(active.find(s => s.entry.kind === 'background')?.entry.entries) },
     web_resources: c.runtime.resources,
     ...(c.quickbarLayout?.widgets?{web_resource_widgets:Object.fromEntries(Object.entries(c.quickbarLayout.widgets).filter(([id])=>Object.hasOwn(c.runtime.resources,id)))}:{}),
+    ...(c.quickbarLayout?.attacks?{web_quickbar_attacks:c.quickbarLayout.attacks}:{}),
     export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };
 }
 export function plainText(value: unknown): string {
