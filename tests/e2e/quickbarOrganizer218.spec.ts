@@ -31,6 +31,23 @@ async function saved(page:Page):Promise<Character>{return page.evaluate(async()=
  return new Promise<Character>((resolve,reject)=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{const w=req.result;db.close();resolve(w.characters.find((c:Character)=>c.id===w.activeId));};req.onerror=()=>reject(req.error);});
 });}
 async function open(page:Page){await page.getByRole('button',{name:'整理快捷栏',exact:true}).click();await expect(page.getByRole('heading',{name:'整理快捷栏',exact:true})).toBeVisible();}
+async function allShortcuts(page:Page){
+ const panel=page.locator('.paper .quickbar-attacks');await expect(panel).toBeVisible();
+ const previous=panel.getByRole('button',{name:'上一页攻击',exact:true}),next=panel.getByRole('button',{name:'下一页攻击',exact:true}),counter=panel.locator('.quickbar-attacks-heading small');
+ while(await previous.count()&&await previous.isEnabled())await previous.click();
+ const pages=await counter.count()?Number((await counter.innerText()).split('/')[1]):1;
+ expect(pages).toBeGreaterThan(0);
+ const rows:{key:string;entryId:string|null;text:string;pin:boolean}[]=[];
+ for(let index=0;index<pages;index++){
+  if(pages>1)await expect(counter).toHaveText(`${index+1}/${pages}`);
+  rows.push(...await panel.locator('[data-quick-id]').evaluateAll(elements=>elements.map(el=>({key:el.getAttribute('data-quick-id')!,entryId:el.getAttribute('data-entry-id'),text:el.textContent||'',pin:el.classList.contains('quick-pin')}))));
+  if(index<pages-1){await expect(next).toBeEnabled();await next.click();}
+ }
+ expect(new Set(rows.map(row=>row.key)).size).toBe(rows.length);
+ if(pages>1)await expect(next).toBeDisabled();
+ while(await previous.count()&&await previous.isEnabled())await previous.click();
+ return rows;
+}
 
 test('organizer only lists active shortcuts; reorder and removal preserve source data, resources and grouped widget layout across reload',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await load(page,fixture());const before=await saved(page);await open(page);
@@ -44,7 +61,10 @@ test('organizer only lists active shortcuts; reorder and removal preserve source
  await organizer.getByRole('button',{name:'取消固定▞ 专注姿态',exact:true}).click();await expect(pins.locator('li')).toHaveCount(1);
  await expect.poll(async()=>(await saved(page)).quickbarLayout?.hidden).toEqual(['resource:reserve','selection:organizer-sword']);
  const changed=await saved(page);expect(changed.selections).toEqual(before.selections);expect(changed.runtime.resources).toEqual(before.runtime.resources);expect(changed.quickbarLayout?.widgets).toEqual(before.quickbarLayout?.widgets);expect(changed.quickbarActions).toEqual(before.quickbarActions);expect(changed.externalSnapshot).toEqual(before.externalSnapshot);expect(changed.quickbarLayout?.order).toContain('resource:reserve');
- await page.getByRole('button',{name:'关闭弹窗'}).click();await page.reload();await expect(page.locator('.quickbar-attacks [data-quick-id]').first()).toContainText('月刃');await expect(page.locator('[data-quick-id="selection:organizer-sword"]')).toHaveCount(0);await expect(page.locator('.quick-pin')).toHaveCount(1);
+ expect(changed.quickbarCopies?.map(row=>[row.id,row.entry.id,row.entry.name])).toEqual([['selection-organizer-spell','organizer-spell','微光印记']]);expect(changed.quickbar).toEqual([]);
+ await page.getByRole('button',{name:'关闭弹窗'}).click();await page.reload();await expect(page.locator('.quickbar-attacks [data-quick-id]').first()).toContainText('月刃');
+ const reloaded=await saved(page);expect(reloaded.quickbarCopies).toEqual(changed.quickbarCopies);expect(reloaded.quickbar).toEqual([]);
+ const shortcuts=await allShortcuts(page);expect(shortcuts.filter(row=>!row.pin).map(row=>row.key)).toEqual(['custom:beta','custom:alpha','weapon:0:旧式徒手攻击']);expect(shortcuts.filter(row=>row.pin)).toEqual([{key:'pin:selection-organizer-spell',entryId:'organizer-spell',text:expect.stringContaining('微光印记'),pin:true}]);
  await open(page);await organizer.getByRole('button',{name:'显示已隐藏攻击（1）',exact:true}).click();await expect(attacks.locator('li')).toHaveCount(4);
  await expect.poll(async()=>(await saved(page)).quickbarLayout?.hidden).toEqual(['resource:reserve']);
  const restored=await saved(page);expect(restored.quickbarLayout?.widgets).toEqual(before.quickbarLayout?.widgets);expect(restored.runtime.resources).toEqual(before.runtime.resources);expect(restored.selections).toEqual(before.selections);expect(restored.quickbarLayout?.order?.[0]).toBe('resource:reserve');
@@ -61,7 +81,8 @@ test('manual attack editor is optional, updates existing actions, and preserves 
  await organizer.getByRole('button',{name:'从快捷栏移除星矢',exact:true}).click();await organizer.getByRole('button',{name:'从快捷栏移除旧式徒手攻击',exact:true}).click();
  await expect.poll(async()=>(await saved(page)).quickbarActions?.map(a=>[a.name,a.attack,a.damage])).toEqual([['星矢','+8','2d8+4'],['月刃','+5','1d10+3'],['晨星','+7','2d6+3']]);
  await expect.poll(async()=>(await saved(page)).quickbarLayout?.hidden?.length).toBe(3);
- await page.getByRole('button',{name:'关闭弹窗'}).click();await page.reload();await expect(page.locator('.quick-weapon').filter({hasText:'星矢'})).toHaveCount(0);await expect(page.locator('.quick-weapon').filter({hasText:'旧式徒手攻击'})).toHaveCount(0);await expect(page.locator('.quick-weapon').filter({hasText:'晨星'})).toContainText('+7');
+ const newAction=(await saved(page)).quickbarActions!.find(action=>action.name==='晨星')!;
+ await page.getByRole('button',{name:'关闭弹窗'}).click();await page.reload();const shortcuts=await allShortcuts(page);expect(shortcuts.filter(row=>!row.pin).map(row=>row.key)).toEqual(['custom:beta',`custom:${newAction.id}`,'selection:organizer-sword']);expect(shortcuts.find(row=>row.key===`custom:${newAction.id}`)?.text).toContain('+7');
  await open(page);await organizer.getByRole('button',{name:'显示已隐藏攻击（2）',exact:true}).click();await expect(organizer.locator('[data-organizer-key="custom:alpha"]')).toContainText('+8');await expect(organizer.getByRole('list',{name:'在用攻击'})).toContainText('旧式徒手攻击');
  await expect.poll(async()=>(await saved(page)).quickbarLayout?.hidden).toEqual(['resource:reserve']);
 });
