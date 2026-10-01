@@ -1,7 +1,7 @@
 import {defineConfig} from '@playwright/test';
 const outputDir=process.env.DND_FOLLOWUP_RESULTS||'.local-evidence/followup231-browser';
 export default defineConfig({
- testDir:'./tests/e2e',testMatch:['runtimeRecovery231.spec.ts','startup224.spec.ts','startup228.spec.ts','wikiRecovery229.spec.ts'],
+ testDir:'./tests/e2e',testMatch:['runtimeRecovery231.spec.ts','backupRuntimeRecovery231.spec.ts','startup224.spec.ts','startup228.spec.ts','wikiRecovery229.spec.ts'],
  outputDir,timeout:60000,expect:{timeout:15000},workers:1,
  reporter:[['list'],['json',{outputFile:outputDir+'/report.json'}]],
  use:{baseURL:'http://127.0.0.1:5651',viewport:{width:1512,height:982},serviceWorkers:'block',trace:'retain-on-failure',screenshot:'only-on-failure'},

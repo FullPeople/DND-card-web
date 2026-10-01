@@ -180,6 +180,7 @@ export default function App() {
   const queue = useRef(Promise.resolve());
   const pendingSaves = useRef(0);
   const saveFailed = useRef(false);
+  const restoredWorkspacePendingSave = useRef(false);
   const history = useRef(new Map<string, { past: Character[]; future: Character[]; key?: string; time: number }>());
   const [historyTick, setHistoryTick] = useState(0);
   useEffect(()=>{const handler=(event:Event)=>{const receipt=(event as CustomEvent).detail;if(receipt.uncertain)return;let changed=false;for(const [id,pending] of workbenchUncertain.current){if(pending.requestId!==receipt.requestId)continue;const remote=receipt.result?.snapshot?.document?.dnd_card_web;if(receipt.ok&&(!remote||!confirmedChanges(pending.before,pending.after,remote)))continue;workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);if(receipt.ok)workbenchFailed.current.delete(id);changed=true;}if(changed){appliedWorkbench.current='';setHistoryTick(n=>n+1);}};window.addEventListener('workbench-operation-result',handler);return()=>window.removeEventListener('workbench-operation-result',handler);},[]);
@@ -258,6 +259,8 @@ export default function App() {
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
   const [editingLoadError,setEditingLoadError]=useState('');
+  const [editingReloadPending,setEditingReloadPending]=useState(false);
+  const editingReloadInProgress=useRef(false);
   useEffect(()=>{if(!workspace)return;let alive=true;const cancel=afterPaint(()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});});return()=>{alive=false;cancel();};},[!!workspace]);
   const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
   const editing=editingRequested&&!!automationRuntime;
@@ -322,15 +325,26 @@ export default function App() {
     if (!writable.current) { setNotice('另一标签页正在编辑；此页仅供查阅与导出。关闭另一页后刷新即可编辑。'); return; }
     workspaceRef.current = next; setWorkspace(next); setSaving('保存中…'); pendingSaves.current++;
     queue.current = queue.current.catch(() => {}).then(() => saveWorkspace(next)).then(() => {
-      if (workspaceRef.current === next) { saveFailed.current = false; setSaving('已保存到本机'); }
+      if (workspaceRef.current === next) { restoredWorkspacePendingSave.current = false; saveFailed.current = false; setSaving('已保存到本机'); }
     }).catch(error => { saveFailed.current = true; setSaving('保存失败'); setNotice(`本机保存失败，请立即导出角色备份。${String(error)}`); }).finally(() => { pendingSaves.current--; });
   }
   async function reloadSavedWorkspace(){
-    await queue.current;
-    if(saveFailed.current){setNotice('保存未成功，请先导出角色备份。');return;}
-    location.reload();
+    if(editingReloadInProgress.current)return;
+    editingReloadInProgress.current=true;setEditingReloadPending(true);
+    try{
+      if(restoredWorkspacePendingSave.current){
+        if(!writable.current){setNotice('此标签页为只读，恢复的备份尚未保存。请先导出角色备份。');return;}
+        const accepted=workspaceRef.current;if(!accepted)return;
+        // Save the accepted book, not the active character's derived view.
+        // Ordinary retries leave the existing previous-save backup untouched.
+        persist(accepted);
+      }
+      await queue.current;
+      if(saveFailed.current||restoredWorkspacePendingSave.current||pendingSaves.current>0){setNotice('保存尚未完成或未成功，请先导出角色备份。');return;}
+      location.reload();
+    }finally{editingReloadInProgress.current=false;setEditingReloadPending(false);}
   }
-  function acceptWorkspace(value: Workspace) {
+  function acceptWorkspace(value: Workspace,fromBackup=false) {
     if (value.schemaVersion !== 1 || !Array.isArray(value.characters) || !value.characters.length || !Array.isArray(value.packs)) throw new Error('工作区结构不完整');
     const repaired: string[] = [];
     value = {...value, characters: value.characters.map(character => { const read = readCharacter(character); if (read.repaired.length) repaired.push(`${character.name || '未命名'}（${read.repaired.join('、')}）`); if(!inWorkbench)initializeAutomation(read.character);return read.character; })};
@@ -339,7 +353,8 @@ export default function App() {
     for (const pack of value.packs) validatePack({ ...pack, entries: pack.entries.map(e => ({ ...e, id: e.id.slice(pack.id.length + 1) })) }, value.packs);
     if (!value.characters.some(c => c.id === value.activeId)) value.activeId = value.characters[0].id;
     if(localSources)value=ensureSiteSources(value);
-    workspaceRef.current = value; setWorkspace(value); setSaving('已保存到本机'); setStartupError('');
+    restoredWorkspacePendingSave.current=fromBackup;
+    workspaceRef.current = value; setWorkspace(value); setSaving(fromBackup?'备份已读取，尚未保存':'已保存到本机'); setStartupError('');
     if(repaired.length)setNotice(`这些角色的图片数据无法读取，已忽略并保留其余内容：${repaired.join('；')}。请重新设置后再保存。`);
   }
   useEffect(() => {
@@ -380,7 +395,7 @@ export default function App() {
   useEffect(()=>{if(!workspace)return;const cancel=afterPaint(()=>{void import('./WikiUi').then(setWikiUi).catch(error=>setWikiUiError(String(error)));});return cancel;},[!!workspace]);
   useEffect(()=>{if(!wikiUi)return;void load();return()=>loadController.current?.abort();},[!!wikiUi]);
   useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
-  useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
+  useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const d = useMemo(() => c ? evaluate(c) : undefined, [c]);
   /** 一张坏图片只丢弃它自己：头像或立绘读不出来时仍然打开整张角色卡。 */
   function readDocument(document: unknown): Character {
@@ -673,7 +688,7 @@ export default function App() {
     workspaceRef.current=next;pendingSaves.current++;setSaving('保存同步副本…');
     const operation=queue.current.catch(()=>{}).then(()=>saveWorkspace(next));
     queue.current=operation.catch(()=>{});
-    try{await operation;setWorkspace(workspaceRef.current);saveFailed.current=false;setSaving('已保存到本机');setModal('');setNotice('同步副本已保存。原卡仍在角色簿中，可随时切回。');}
+    try{await operation;if(workspaceRef.current===next)restoredWorkspacePendingSave.current=false;setWorkspace(workspaceRef.current);saveFailed.current=false;setSaving('已保存到本机');setModal('');setNotice('同步副本已保存。原卡仍在角色簿中，可随时切回。');}
     catch(e){if(workspaceRef.current===next){workspaceRef.current=w;setWorkspace(w);}setSaving('保存失败');saveFailed.current=true;throw Error(`同步副本保存失败，原卡保留。${String(e)}`);}
     finally{pendingSaves.current--;}
   }
@@ -702,7 +717,7 @@ export default function App() {
   const addButton = (kind: Kind) => <button className="sheet-add" onClick={() => browse(kind)}>＋ 查阅{KIND_LABELS[kind]}</button>;
 
 
-  if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?t('cardBrand'):'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup); } catch (e) { setStartupError(String(e)); } }}>读取备份</button><button onClick={() => { const next = createLocalCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button></> : <p>正在打开你的角色卡…</p>}</main>;
+  if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?t('cardBrand'):'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup,true); } catch (e) { setStartupError(String(e)); } }}>读取备份</button><button onClick={() => { const next = createLocalCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button></> : <p>正在打开你的角色卡…</p>}</main>;
   void historyTick;
   const blocked = detail ? candidateReason(c, detail) : '';
   const dragDisabledReason=
@@ -727,7 +742,7 @@ export default function App() {
         <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span><div className="character-tabs" role="tablist" aria-label={t('currentCharacter')}>{!inWorkbench&&workspace.characters.map(x=><button key={x.id} role="tab" aria-selected={x.id===c.id} onClick={()=>persist({...workspace,activeId:x.id})}>{x.name}{classWarnings.has(x.id)&&<span className="class-warning-icon" aria-label="旧卡资料需要核对">⚠</span>}</button>)}</div></div>
           <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&wb.role==='GM'&&wb.cards.find(card=>card.id===wb.target?.cardId)&&<CardOwnership key={wb.target?.cardId} card={wb.cards.find(card=>card.id===wb.target?.cardId)!}/>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}{editing&&<button onClick={()=>setModal('personal')}>{t('entriesLevels')}</button>}{editing && <button className="adjust-shortcut" aria-label={t('adjustDetails')} onClick={() => setModal('adjust')}>{t('adjust')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><SheetDisplayButton/><button disabled={!automationRuntime||inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
         </div>
-        {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
+        {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {classNeedsReview&&!loading&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
         <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button></span></div>
@@ -787,7 +802,7 @@ export default function App() {
         <SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/>
 
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
-      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} capture={capturePages} disabled={readOnly||inWorkbench&&!wb.online} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>单文件导入与本机恢复</h3><div className="dialog-actions"><button onClick={()=>importFile('character')}>导入角色 JSON</button></div><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup);history.current.clear();setNotice('已读取上一次保存；确认后继续编辑即可保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
+      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} capture={capturePages} disabled={readOnly||inWorkbench&&!wb.online} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>单文件导入与本机恢复</h3><div className="dialog-actions"><button onClick={()=>importFile('character')}>导入角色 JSON</button></div><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup,true);history.current.clear();setNotice('已读取上一次保存，尚未保存。继续编辑或重试编辑加载时将保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
 
       </Suspense></ToolBoundary>
     </Dialog>}
