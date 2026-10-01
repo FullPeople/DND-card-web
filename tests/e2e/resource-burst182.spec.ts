@@ -7,13 +7,18 @@ async function open(page:Page,mode='overview',rage=5,extra=''){
  await page.route('**/resource-burst182?*',r=>r.fulfill({contentType:'text/html; charset=utf-8',body:`<!doctype html><meta charset="utf-8"><div id="test-root"></div><script type="module">import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$=()=>{};window.$RefreshSig$=()=>type=>type;window.__vite_plugin_react_preamble_installed__=true;</script><script type="module" src="/tests/e2e/resourceBurst182.harness.jsx"></script>`}));
  await page.goto('/resource-burst182?mode='+mode+'&rage='+rage+extra+'#suite=resource-burst182&bridge='+encodeURIComponent(String(test.info().project.use.baseURL)));
  await page.waitForFunction(()=>(window as any).resource182?.ready);
- if(mode==='card'){await expect(page.locator('.app-shell')).toBeVisible();await page.evaluate(()=>(window as any).resource182.showCard());await page.locator('.resource-widget').filter({has:page.locator('.resource-widget-name',{hasText:'怒气'})}).locator('.resource-widget-face').click();}
+ if(mode==='card'){await expect(page.locator('.app-shell')).toBeVisible();await page.evaluate(()=>(window as any).resource182.showCard());await page.locator('.resource-widget[data-resource-name="怒气"] .resource-widget-face').click();}
  if(mode==='monster')await page.getByRole('button',{name:'怪物',exact:true}).click();
  if(mode!=='card')await page.locator(mode==='public'?'.public-resources .compact-resource[data-resource-name="怒气"] .resource-widget-face':'.resource-overview .compact-resource[data-resource-name="怒气"] .resource-widget-face').click();
  await expect(row(page,'怒气',mode).locator('.resource-pips button[aria-pressed=true]')).toHaveCount(rage);
 }
 function row(page:Page,name:string,mode='overview'){return page.locator(mode==='card'?'.resource-widget-popover .resource179-row':mode==='public'?'.public-resources .resource179-row':'.resource-overview .resource179-row').filter({has:page.locator('.resource-title strong',{hasText:name})});}
-async function pips(page:Page,name:string,value:number,mode='overview'){if(mode==='card'){await expect(page.locator('.resource-widget').filter({has:page.locator('.resource-widget-name',{hasText:name})})).toHaveAttribute('data-resource-current',String(value));return;}await expect(row(page,name,mode).locator('.resource-pips button[aria-pressed=true]')).toHaveCount(value);}
+async function pips(page:Page,name:string,value:number,mode='overview'){if(mode==='card'){
+ // Spell levels share a module; each subresource retains its own live balance.
+ const level=/^(\d+)环法术位$/.exec(name);
+ const balance=page.locator(level?`.resource-widget [data-subresource-id="spell-slot:${level[1]}"]`:`.resource-widget[data-resource-name="${name}"]`);
+ await expect(balance).toHaveAttribute('data-resource-current',String(value));return;
+}await expect(row(page,name,mode).locator('.resource-pips button[aria-pressed=true]')).toHaveCount(value);}
 async function requests(page:Page,n:number){await expect.poll(()=>page.evaluate(()=>(window as any).resource182.requests.length)).toBe(n);}
 async function frames(page:Page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));}
 async function noRebound(page:Page,name:string,value:number){await frames(page);const values=await page.evaluate(name=>(window as any).resource182.samples.flatMap((sample:any)=>sample.rows.filter((r:any)=>r.name===name).map((r:any)=>r.value)),name);expect(values.length).toBeGreaterThan(0);expect(values.every((n:number)=>n===value),'frame samples: '+JSON.stringify(values)).toBe(true);}
@@ -65,7 +70,7 @@ test('actual App quickbar spend/restore survives ACK boundaries, stale selection
 });
 
 test('actual App quickbar 2→1→2→0 and another resource preserve final local values during delayed saves',async({page})=>{
- await open(page,'card',2);const r=row(page,'怒气','card');await r.getByRole('button',{name:'怒气 2',exact:true}).click();await requests(page,1);await r.getByRole('button',{name:'怒气 2',exact:true}).click();await r.getByRole('button',{name:'怒气 1',exact:true}).click();await page.locator('.resource-widget').filter({has:page.locator('.resource-widget-name',{hasText:'战术点'})}).locator('.resource-widget-face').click();await row(page,'战术点','card').getByRole('button',{name:'战术点 3',exact:true}).click();await pips(page,'怒气',0,'card');await pips(page,'战术点',2,'card');await page.evaluate(()=>(window as any).resource182.samples=[]);await page.waitForTimeout(100);
+ await open(page,'card',2);const r=row(page,'怒气','card');await r.getByRole('button',{name:'怒气 2',exact:true}).click();await requests(page,1);await r.getByRole('button',{name:'怒气 2',exact:true}).click();await r.getByRole('button',{name:'怒气 1',exact:true}).click();await page.locator('.resource-widget[data-resource-name="战术点"] .resource-widget-face').click();await row(page,'战术点','card').getByRole('button',{name:'战术点 3',exact:true}).click();await pips(page,'怒气',0,'card');await pips(page,'战术点',2,'card');await page.evaluate(()=>(window as any).resource182.samples=[]);await page.waitForTimeout(100);
  await page.evaluate(()=>(window as any).resource182.confirmNext());await requests(page,2);await pips(page,'怒气',0,'card');await pips(page,'战术点',2,'card');await frames(page);
  // Real pointer clicks can straddle the 80ms batch boundary. A third batch is
  // valid; flush what the App actually emitted and inspect every intermediate frame.
@@ -100,7 +105,7 @@ test('resource undo/redo reverses the actual confirmed rapid restore and resists
 });
 
 test('actual App automatic caster slots keep resource current, native used and legacy slots consistent through a burst',async({page})=>{
- await open(page,'card',5,'&caster=1');await page.locator('[data-resource-id="spell-slot:1"] .resource-widget-face').click();const spell=row(page,'1环法术位','card'),last=spell.getByRole('button',{name:'1环法术位 4',exact:true});await pips(page,'1环法术位',4,'card');
+ await open(page,'card',5,'&caster=1');await page.getByRole('button',{name:'关闭资源操作',exact:true}).click();await page.locator('[data-resource-id="spell-slot:1"] .resource-widget-face').click();await expect(page.getByRole('dialog',{name:'法术位（共用）资源操作',exact:true}).locator('.resource179-row')).toHaveCount(2);const spell=row(page,'1环法术位','card'),last=spell.getByRole('button',{name:'1环法术位 4',exact:true});await pips(page,'1环法术位',4,'card');
  const consistent=async(current:number)=>expect(await page.evaluate(()=>(window as any).resource182.slotState())).toMatchObject({resource:{current,max:4,automatic:true},settings:{max:4,used:4-current},legacy:{max:4,current}});
  await consistent(4);await last.click();await pips(page,'1环法术位',3,'card');await requests(page,1);await last.click();await pips(page,'1环法术位',4,'card');await page.evaluate(()=>(window as any).resource182.samples=[]);await page.waitForTimeout(100);
  await page.evaluate(()=>(window as any).resource182.confirmNext());await consistent(3);await requests(page,2);await pips(page,'1环法术位',4,'card');await page.evaluate(()=>(window as any).resource182.confirmNext());await consistent(4);await page.evaluate(()=>(window as any).resource182.stale(1));await noRebound(page,'1环法术位',4);
