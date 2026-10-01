@@ -1,7 +1,6 @@
 import {specialSpellResource} from './spellResourceKeys';
 import {resolveEntryReference} from './entryReferences';
 import {equipmentBlocks,syncChoiceContent} from './automation/choices';
-import {automationEnabled} from './automation/state';
 import {rememberFeatureResources} from './automation/featureResources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import { requirementMismatch } from './engine';
@@ -79,7 +78,8 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
     for (const block of Array.isArray(raw.feats) ? raw.feats : []) for (const [ref, granted] of Object.entries(block || {})) {
       if (granted === true) grants.push({ key: `feat:${ref}`, entry: resolve(ref, 'feat') });
     }
-    if(owner.entry.kind==='background'&&!automationEnabled(c))for(const [index,block] of equipmentBlocks(owner.entry).entries()){
+    // Existing background grants retain their saved ownership and dismissal ledger.
+    if(owner.entry.kind==='background')for(const [index,block] of equipmentBlocks(owner.entry).entries()){
       const chosen=c.backgroundChoices?.[owner.id]?.equipment?.[String(index)];
       const options=Object.keys(block).filter(k=>k!=='_');
       const selectedKey=chosen&&options.includes(chosen)?chosen:options.length===1?options[0]:undefined;

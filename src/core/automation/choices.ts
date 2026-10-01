@@ -52,7 +52,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
     push(`${channel}:${index}`,`${row.entry.kind==='class'?'起始':''}${label}`,count,options,channel);
    });
   }
-  if(row.entry.kind!=='class'||row.id===first?.id){const data=equipmentBlocks(row.entry);
+  if(row.entry.kind==='class'&&row.id===first?.id){const data=equipmentBlocks(row.entry);
    if(data.length===1){const keys=Object.keys(data[0]).filter(k=>k!=='_');push('equipment:0','起始装备',1,keys.length?keys.map(value=>({value,label:`方案 ${value}`,entry:equipmentOptionConcept(row.entry,0,value)})):[{value:'default',label:'固定起始装备',entry:concept(row.entry,'equipment:default','固定起始装备',row.entry.raw.startingEquipment?.entries||[])}],'equipment',keys.length?0:-1);}
    else if(data.length>1)push('equipment:bundle','起始装备',1,[{value:'default',label:'选择职业起始装备',entry:concept(row.entry,'equipment:bundle','起始装备',row.entry.raw.startingEquipment?.default||row.entry.raw.startingEquipment?.entries||[])}],'equipment',-1);
   }

@@ -21,6 +21,8 @@ it('optimistic merge and acknowledged overlay preserve one exact quantity',()=>{
 // Authored background and equipment, independent of upstream source snapshots.
 import {syncFeatures} from '../src/core/sheet';
 import {readCharacter} from '../src/core/validation';
+import {initializeAutomation} from '../src/core/automation/state';
+import {sheetChoices} from '../src/core/automation/choices';
 function backgroundGift(){
  const c=newCharacter();const background:Entry={...entry,id:'background:test',kind:'background',name:'原创赠品背景',raw:{startingEquipment:[{_:['测试盔甲|XPHB']}]}};
  c.selections=[{id:'background',entry:background,level:1,quantity:1,equipped:false}];syncFeatures(c,[entry]);return c;
@@ -37,4 +39,16 @@ it.each(['remove','update'])('explicit gift %s remains dismissed through invento
 it('a snapshot missing a background gift is not an explicit dismissal',()=>{
  const c=backgroundGift(),state=inventory();state.containers.public.items=[];applyInventory(c,state.containers.public);
  expect(c.dismissedFeatures).toBeUndefined();syncFeatures(c,[entry]);expect(c.selections.filter(s=>s.entry.kind==='item')).toHaveLength(1);
+});
+it.each([false,true])('default automation preserves legacy background gifts and their dismissal state (%s)',dismissed=>{
+ const c=backgroundGift(),gift=c.selections.find(s=>s.entry.kind==='item')!;
+ c.selections[0].entry=structuredClone(c.selections[0].entry);
+ c.selections[0].entry.raw.startingEquipment[0]._.push({value:500});
+ syncFeatures(c,[entry]);c.inventory!.coins.gp=2;gift.quantity=3;
+ if(dismissed){c.dismissedFeatures=[`${gift.parentId}|${gift.grantKey}`];c.selections=c.selections.filter(s=>s.id!==gift.id);}
+ const restored=readCharacter(JSON.parse(JSON.stringify(c))).character;
+ initializeAutomation(restored);for(let i=0;i<3;i++)syncFeatures(restored,[entry]);
+ expect(restored.inventory!.coins.gp).toBe(2);
+ expect(restored.selections.filter(s=>s.entry.kind==='item').map(s=>[s.id,s.quantity])).toEqual(dismissed?[]:[[gift.id,3]]);
+ expect(sheetChoices(restored).filter(r=>r.channel==='equipment')).toHaveLength(0);
 });
