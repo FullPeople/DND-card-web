@@ -3,7 +3,7 @@
 .pane-toolbar .toolbar-actions button.sheet-display-toggle{font-size:12px;line-height:20px;min-height:24px;padding:2px 6px;white-space:nowrap;color:inherit}
 .sheet-viewport.screen-mode{display:block;overflow-y:auto;overflow-x:hidden;margin:5px 7px 3px;padding:0;container-type:inline-size;container-name:screen;touch-action:pan-y pinch-zoom;overscroll-behavior-y:contain;scrollbar-width:thin}
 .sheet-viewport.screen-mode .paper-stack{width:100%!important;height:auto!important;transform:none!important;display:flex;flex-direction:column;min-width:0}
-.sheet-viewport.screen-mode .paper:not(.sheet-export){position:relative;inset:auto;width:100%!important;height:auto!important;min-height:0;transform:none!important;flex:none;display:flex;flex-direction:column;gap:4px;padding:6px 7px;font-size:14px;overflow:hidden;box-shadow:none}
+.sheet-viewport.screen-mode .paper:not(.sheet-export){position:relative;inset:auto;width:100%!important;height:auto!important;min-height:0;transform:none!important;flex:none;display:flex;flex-direction:column;gap:4px;padding:3px 7px;font-size:14px;overflow:hidden;box-shadow:none}
 .sheet-viewport.screen-mode .paper:not(.sheet-export)>.paper-heading{flex:none;font-size:12px;letter-spacing:.6px;min-height:20px;margin:0;padding:0;border:0;line-height:16px}
 .sheet-viewport.screen-mode .paper-footer{flex:none;font-size:13px;line-height:18px;gap:8px;flex-wrap:wrap}
 .sheet-viewport.screen-mode .paper-heading .card-lock{height:20px;min-height:20px;padding:0 2px}
