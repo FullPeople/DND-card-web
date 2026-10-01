@@ -173,17 +173,23 @@ export const RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'基础自动化',items:['增加按熟练加值计算的部分来源法术次数。','资料明确列出可选法术时，可以勾选并保存选择，也可以暂时少选。','增加短休、长休来源次数的恢复预览，只恢复列出的来源次数，不代表完成整次休息。','按条件筛选的赠送法术、其他动态次数、完整休息和完整英文翻译仍未完成，未支持规则继续显示说明。']},
  {title:'支持与反馈',items:['支持者弹幕连续显示；公告打开时也会在背景显示，关闭后消失。','公告内增加作者支持入口和可以放大的赞助二维码。','赞助过的朋友可将 cn 与头像或立绘发送到 1763086701psw@gmail.com。']},
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_217_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
  {title:'角色切换与玩家资源',items:['已经读取的授权角色可以直接切换，后台接收资料更新，减少等待宿主回复的时间。','撤回权限时同步清理对应卡面、资料正文和固定浮窗。','玩家、怪物和公共资源使用紧凑资源模块，并保留各自的操作权限。','新代码的真实双端切换、新建、修改与同步仍待房间验收。']},
  {title:'骰子与历史',items:['减少骰子图形内存占用，增加动画中断和图形恢复处理；群体投掷同时起播。','骰子历史移至左上角 Action 栏的历史标签；新增记录时自动显示。','结果以数字和文字显示在对应棋子头顶，飞线指向同一位置。真实房间中的定位、历史点击与并发效果待验证。']},
  {title:'群体区域',items:['DM 多选单位后自动打开总览中的群体区域，支持群体先攻、豁免和属性检定；战斗准备时默认显示先攻。','投掷前可以批量调整生命值、生命上限或护甲等级；结果生成后可直接输入 DC 结算。','头顶结果支持隐藏、显示和单独关闭。结算不自动关闭，进入结算后改变选中单位也会保留本轮结果。','群体投掷最多同时使用 100 枚骰子：普通最多 100 个单位，优势或劣势最多 50 个。超过时会提示，不会遗漏选中的单位；真实房间结算与权限联动待验证。']},
  {title:'仍在排查与待验证',items:['枭熊宿主内跨窗口的骰子置顶问题仍在排查。','实体手机与真实多人房间仍需验证；独立网站预览不能证明完整枭熊联动正常。']},
 ];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'骰子历史',items:['点击左上角历史记录显示或隐藏棋子头顶结果时，Action 栏保持打开；需要时仍可手动关闭。']},
+ {title:'先攻投掷',items:['修复从先攻栏发起投掷时，骰子无法正常出现的问题。','投掷提交失败时会显示原因，不再提前写入先攻数值。']},
+ {title:'验证范围',items:['本次仅更新新版 Full Suite 的这两项修复，角色卡网站与旧版插件不变。','自动回归已覆盖先攻提交和历史窗口行为；真实房间中的玩家端动画与权限联动待验证。']},
+];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ ...(mode==='suite'?[{title:'2026-10-01-三',sections:SUITE_RELEASE_SECTIONS}]:[]),
+ {title:RELEASE_DATE,sections:mode==='suite'?SUITE_RELEASE_217_SECTIONS:RELEASE_SECTIONS},
  {title:'2026-10-01',sections:mode==='suite'?SUITE_RELEASE_216_SECTIONS:RELEASE_216_SECTIONS},
  {title:'2026-09-30-二',sections:mode==='suite'?SUITE_RELEASE_213_SECTIONS:RELEASE_213_SECTIONS},
  {title:'2026-09-30-一',sections:mode==='suite'?SUITE_RELEASE_210_SECTIONS:RELEASE_210_SECTIONS},
