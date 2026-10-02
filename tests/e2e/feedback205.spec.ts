@@ -4,25 +4,31 @@ import {mockSource} from './fixtures';
 import {exportOwlbear} from '../../src/core/export';
 import {evaluate} from '../../src/core/engine';
 
-test('DM assignment dialog and live player permission updates do not rewrite remote cards to local storage',async({page,baseURL})=>{
+test('native-owner permissions update live without assignment UI or remote cards written to local storage',async({page,baseURL})=>{
  await mockSource(page);await page.goto('/#suite=feedback205&bridge='+encodeURIComponent(new URL(baseURL!).origin));await expect(page.locator('.app-shell')).toBeVisible();
- const c=newCharacter();c.name='分配测试卡';c.runtime.hp=12;c.baseHp=20;
+ const c=newCharacter();c.name='分配测试卡';c.runtime.hp=12;c.baseHp=20;c.locked=true;
  await page.evaluate(document=>{
   const w=window as any;w.sent=[];w.workspaceWrites=0;const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(value:any,key?:IDBValidKey){if(this.name==='documents'&&['workspace','backup'].includes(String(key)))w.workspaceWrites++;return put.call(this,value,key!);};
   let sequence=0;w.emit=(type:string,payload:any={})=>window.dispatchEvent(new MessageEvent('message',{source:window,origin:location.origin,data:{protocol:'full-suite-workbench/v1',session:'feedback205',hostStarted:205,type,...payload}}));
   w.state={key:'room:card:one',itemId:'card:one',cardId:'one',kind:'character',name:'分配测试卡',role:'GM',write:true,documentRevision:1,stats:{},resources:[],conditions:[]};
-  w.catalog=(role:string,write:boolean,owners:string[]=[])=>{w.state={...w.state,role,write};w.emit('catalog',{sequence:++sequence,role,cards:[{...w.state,id:'one',inScene:true,locked:true,owner_ids:owners}],monsters:[],enabled:{},console:{players:[{id:'player',name:'测试玩家'}],timeStop:false,portalEffects:false}});};
+  // Synthetic host boundary: native Set Owner changes the token creator/owner.
+  // Suite separately tests the production SDK owner resolution and write guards.
+  w.token={id:'native-one',createdUserId:'other'};
+  w.catalog=(role:string,owner:string,locked:boolean)=>{w.token.createdUserId=owner;const write=role==='GM'||w.token.createdUserId==='player';w.state={...w.state,role,write,locked};w.emit('catalog',{sequence:++sequence,role,cards:[{...w.state,id:'one',inScene:true,owner_ids:[w.token.createdUserId]}],monsters:[],enabled:{},console:{players:[{id:'player',name:'测试玩家'}],timeStop:false,portalEffects:false}});};
   window.addEventListener('message',event=>{if(['assignOwners','save','createCard'].includes(event.data?.type)){w.sent.push(event.data);w.emit('ack',{requestId:event.data.requestId,ok:true});}});
-  w.emit('ready');w.catalog('GM',true);w.emit('selection',{sequence:++sequence,state:w.state,document});w.emit('navigate');
+  w.emit('ready');w.catalog('GM','other',true);w.emit('selection',{sequence:++sequence,state:w.state,document});w.emit('navigate');
  },{...exportOwlbear(c,evaluate(c)),dnd_card_web:c,_suiteRevision:1});
- await page.getByRole('tab',{name:'分配测试卡',exact:true}).click(); await expect(page.getByRole('switch',{name:'编辑模式'})).toBeEnabled();await page.getByRole('button',{name:'分配玩家',exact:true}).click();const dialog=page.getByRole('dialog',{name:'分配角色卡玩家'});await dialog.getByLabel('测试玩家').check();await dialog.getByRole('button',{name:'保存分配'}).click();await expect(dialog).toHaveCount(0);expect(await page.evaluate(()=>(window as any).sent[0].ownerIds)).toEqual(['player']);
- await page.evaluate(()=>(window as any).catalog('PLAYER',false));await expect(page.getByRole('switch',{name:'编辑模式'})).toBeDisabled();
- await page.evaluate(()=>(window as any).catalog('PLAYER',true,['player']));await page.getByRole('switch',{name:'编辑模式'}).click();await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','true');await expect(page.getByRole('button',{name:'分配玩家',exact:true})).toHaveCount(0);
+ await page.getByRole('tab',{name:'分配测试卡',exact:true}).click();await expect(page.getByRole('switch',{name:'编辑模式'})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'分配玩家',exact:true})).toHaveCount(0);await expect(page.getByRole('dialog',{name:'分配角色卡玩家'})).toHaveCount(0);
+ expect(await page.evaluate(()=>(window as any).sent.filter((m:any)=>m.type==='assignOwners'))).toEqual([]);
+ await page.evaluate(()=>(window as any).catalog('PLAYER','other',false));await expect(page.getByRole('switch',{name:'编辑模式'})).toBeDisabled();
+ await page.evaluate(()=>(window as any).catalog('PLAYER','player',true));await expect(page.getByRole('tab',{name:'分配测试卡',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'解锁角色卡',exact:true})).toHaveAttribute('aria-pressed','true');await page.getByRole('switch',{name:'编辑模式'}).click();await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','true');await expect(page.getByRole('button',{name:'分配玩家',exact:true})).toHaveCount(0);
  expect(await page.evaluate(()=>(window as any).workspaceWrites)).toBe(0);
  await page.getByRole('button',{name:'自动化设置',exact:true}).click();const automation=page.getByRole('dialog',{name:'基础自动化'});await expect(automation.getByRole('checkbox',{name:'启用自动计算'})).toBeChecked();expect(await page.evaluate(()=>(window as any).sent.filter((m:any)=>m.type==='save').length)).toBe(0);await automation.getByRole('checkbox',{name:'启用自动计算'}).uncheck();
  await expect.poll(()=>page.evaluate(()=>(window as any).sent.filter((m:any)=>m.type==='save').length)).toBe(1);
  const saves=await page.evaluate(()=>(window as any).sent);expect(saves.some((m:any)=>m.type==='createCard')).toBe(false);expect(saves.find((m:any)=>m.type==='save').delta.native).toContainEqual(expect.objectContaining({path:['automation'],after:expect.objectContaining({enabled:false,defaultsVersion:1})}));
- await page.evaluate(()=>(window as any).catalog('PLAYER',false));await expect(automation.getByRole('checkbox',{name:'启用自动计算'})).toBeDisabled();await automation.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.getByRole('tab',{name:'分配测试卡',exact:true})).toHaveAttribute('aria-selected','true');
+ await page.evaluate(()=>(window as any).catalog('PLAYER','other',false));await expect(automation.getByRole('checkbox',{name:'启用自动计算'})).toBeDisabled();await automation.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.getByRole('tab',{name:'分配测试卡',exact:true})).toHaveAttribute('aria-selected','true');
+ expect(await page.evaluate(()=>(window as any).workspaceWrites)).toBe(0);expect(await page.evaluate(()=>(window as any).sent.some((m:any)=>m.type==='assignOwners'))).toBe(false);
 });
 
 test('custom entry Chinese and English names survive save and reload independently',async({page})=>{
