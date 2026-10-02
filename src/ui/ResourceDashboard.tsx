@@ -2,7 +2,7 @@ import {useState,useEffect,useRef,useMemo} from 'react';
 import type {Character,Derived,Entry} from '../core/model';
 import {sameValue} from '../core/merge';
 import {createDashboardDraft,commitDashboardDraft} from '../core/dashboardDraft';
-import {addResourceModule,ensureResourceWidget,freeDashboardLayout,dashboardOverlaps,resourceModules,resourceCanvasRows,WIDGET_ICONS,canonicalWidgetStyle,type ResourceTemplate,type ResourceWidgetLayout} from '../core/resourceWidgets';
+import {addResourceModule,ensureResourceWidget,freeDashboardLayout,dashboardOverlaps,resourceModules,resourceCanvasRows,WIDGET_ICONS,canonicalWidgetStyle,type ResourceTemplate,type ResourceWidgetLayout,type ResourceTemplateValues} from '../core/resourceWidgets';
 import {Quickbar} from './Quickbar';
 import {attackWidgetKey} from './ResourceWidgets';
 import {QuickbarManager} from './QuickbarManager';
@@ -11,11 +11,14 @@ import {ResourceModuleEditor} from './ResourceModuleEditor';
 import {ResourceEditor} from './ResourceEditor';
 import {ResourceDashboardIcon} from './ResourceModuleFace';
 import {useResourceTemplateDrag} from './useResourceTemplateDrag';
+import {automationEnabled} from '../core/automation/state';
+import {ResourceRestActions,useResourceRest} from './ResourceRestActions';
 import './resourceDashboard.css';
 export type DashboardViewport={page:number;width?:number;height?:number};
 const colors=['#527880','#8a7652','#727aa0','#558977','#a36d61','#686f61','#80505b','#454a58'];
 const iconNames={spark:'星芒',diamond:'菱形',shield:'盾牌',flame:'火焰',leaf:'叶片',bottle:'药瓶'};
 export function ResourceDashboard({c:live,d,edit,inspect,disabled,gm,viewport}:{c:Character;d:Derived;edit:(f:(c:Character)=>void)=>void;inspect:(entry:Entry)=>void;disabled:boolean;gm:boolean;viewport:DashboardViewport}){
+ const rest=useResourceRest(live,edit);
  const [initial]=useState(()=>({base:structuredClone(live),draft:createDashboardDraft(live)}));
  const host=useRef<HTMLElement>(null),base=useRef(initial.base),pristine=useRef(initial.draft);
  const [dirty,setDirty]=useState(false);
@@ -26,7 +29,7 @@ export function ResourceDashboard({c:live,d,edit,inspect,disabled,gm,viewport}:{
  const modules=useMemo(()=>resourceModules(resourceCanvasRows(c),c.quickbarLayout?.widgets),[c]),layout=useMemo(()=>freeDashboardLayout(modules,c.quickbarLayout?.widgets,c.quickbarLayout?.attacks),[modules,c.quickbarLayout]),module=modules.find(m=>m.id===selected),selectedLayout=layout.widgets[selected],overlap=dashboardOverlaps(layout);
  const preview=tone&&selectedLayout?{...c,quickbarLayout:{...c.quickbarLayout!,widgets:{...c.quickbarLayout?.widgets,[selected]:{...selectedLayout,color:tone}}}}:c;
  const iconStyle=selectedLayout&&['pips','matrix','ready','poolpips'].includes(canonicalWidgetStyle(selectedLayout.style));
- const templateDrag=useResourceTemplateDrag({host,page,disabled,drop:(template,placement)=>add(template,placement)});
+ const templateDrag=useResourceTemplateDrag({host,page,disabled,drop:(template,placement,values)=>add(template,values,placement)});
  useEffect(()=>setTone(''),[selected]);
  // A clean editor follows incoming data. A dirty draft is merged at explicit save.
  useEffect(()=>{if(!dirty&&!sameValue(base.current,live)){base.current=structuredClone(live);pristine.current=createDashboardDraft(live);draftRef.current=pristine.current;setDraft(pristine.current);}},[live,dirty]);
@@ -39,9 +42,9 @@ export function ResourceDashboard({c:live,d,edit,inspect,disabled,gm,viewport}:{
   setSelected(created.id);setPage(created.page);setMessage('');
   requestAnimationFrame(()=>host.current?.dispatchEvent(new CustomEvent('resource-widget-created',{bubbles:true,detail:{...created,cardId:c.id,draft:true}})));
  }
- function add(template:ResourceTemplate,placement?:{x:number;y:number;page:number}){
+ function add(template:ResourceTemplate,values?:ResourceTemplateValues,placement?:{x:number;y:number;page:number}){
   if(disabled)return;
-  try{let created:{id:string;page:number}|undefined;change(draft=>{created=addResourceModule(draft,template,placement?.page??page,()=>crypto.randomUUID(),undefined,placement);});if(created)inserted(created);}
+  try{let created:{id:string;page:number}|undefined;change(draft=>{created=addResourceModule(draft,template,placement?.page??page,()=>crypto.randomUUID(),undefined,placement,values);});if(created)inserted(created);}
   catch(error){setMessage(error instanceof Error?error.message:String(error));}
  }
  function save(){
@@ -62,8 +65,8 @@ export function ResourceDashboard({c:live,d,edit,inspect,disabled,gm,viewport}:{
     <Quickbar key={canvasEpoch} c={preview} d={d} edit={change} inspect={inspect} manage={()=>{}} manageQuickbar={()=>setConfig(attackId)} disabled={disabled} dashboard={{layoutEditor:true,initialPage:viewport.page,onSelect:setSelected,onPage:setPage,configure:setConfig,onInteracting:setInteracting}}/>
    </div>
    <div className="dashboard-tools">
-    <div className="dashboard-palette"><strong>{selected===attackId?'武器与攻击':module?.name||'选择一个模块'}</strong><div className="dashboard-swatches" aria-label="模块颜色" data-active={!!module}>{colors.map(color=><button key={color} type="button" aria-label={'色调 '+color} aria-pressed={selectedLayout?.color===color} disabled={!module||disabled} style={{backgroundColor:color}} onClick={()=>{setTone('');patch({color});}}/>)}<input type="color" aria-label="自选模块颜色" disabled={!module||disabled} value={tone||selectedLayout?.color||colors[0]} onChange={e=>setTone(e.target.value)} onBlur={()=>{if(tone){patch({color:tone});setTone('');}}}/></div><button type="button" disabled={!selected||disabled} onClick={()=>setConfig(selected)}>设置</button></div>
-    <div className="dashboard-icons" aria-label="模块图标" data-active={!!iconStyle}>{WIDGET_ICONS.map(icon=><button key={icon} type="button" title={iconNames[icon]} aria-label={'图标 '+iconNames[icon]} aria-pressed={selectedLayout?.icon===icon} disabled={!iconStyle||disabled} onClick={()=>patch({icon})}><ResourceDashboardIcon icon={icon}/></button>)}<small>{iconStyle?'选择计数图标':'拖动位置 · 八点缩放 · 双击设置'}</small></div>
+    <div className="dashboard-palette"><strong>{selected===attackId?'武器与攻击':module?.name||'选择一个模块'}</strong><div className="dashboard-swatches" aria-label="图标颜色" data-active={!!module}>{colors.map(color=><button key={color} type="button" aria-label={'色调 '+color} aria-pressed={selectedLayout?.color===color} disabled={!module||disabled} style={{backgroundColor:color}} onClick={()=>{setTone('');patch({color});}}/>)}<input type="color" aria-label="自选图标颜色" disabled={!module||disabled} value={tone||selectedLayout?.color||colors[0]} onChange={e=>setTone(e.target.value)} onBlur={()=>{if(tone){patch({color:tone});setTone('');}}}/></div><button type="button" disabled={!selected||disabled} onClick={()=>setConfig(selected)}>设置</button></div>
+    <div className="dashboard-icons" aria-label="模块图标" data-active={!!iconStyle}>{WIDGET_ICONS.map(icon=><button key={icon} type="button" title={iconNames[icon]} aria-label={'图标 '+iconNames[icon]} aria-pressed={selectedLayout?.icon===icon} disabled={!iconStyle||disabled} onClick={()=>patch({icon})}><ResourceDashboardIcon icon={icon}/></button>)}<small>{iconStyle?'颜色仅用于图标':'拖动位置 · 八点缩放 · 双击设置'}</small></div>
    </div>
    <div className="dashboard-savebar">
     <span role="status" className={overlap.count?'dashboard-conflict':''} title={overlap.count?'模块重叠，请移开红框后保存':message||undefined}>{overlap.count?'模块重叠，请移开红框后保存':message|| (dirty?'尚未保存 · 关闭会放弃修改':'拖入模块，自由排版后保存')}</span>
@@ -71,6 +74,8 @@ export function ResourceDashboard({c:live,d,edit,inspect,disabled,gm,viewport}:{
     <button type="button" className="primary" disabled={disabled||!dirty||!!overlap.count||interacting||templateDrag.dragging} onClick={save}>保存布局</button>
    </div>
   </div>
+  {rest.popup}
+  {automationEnabled(live)&&!config&&<ResourceRestActions c={live} disabled={disabled||interacting||templateDrag.dragging} open={rest.open}/>}
   {config?<section className="dashboard-configuration"><header><strong>{config===newResourceKey?'添加资源':config===attackId?'整理快捷栏':'模块设置'}</strong><button type="button" aria-label="返回模块库" onClick={()=>setConfig('')}>完成</button></header>
    {config===attackId?<QuickbarManager c={c} edit={change}/>:config===newResourceKey?<ResourceEditor inline disabled={disabled} gm={gm} close={()=>setConfig('')} save={async value=>{
     let created:{id:string;page:number}|undefined;

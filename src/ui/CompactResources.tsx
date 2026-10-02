@@ -2,7 +2,7 @@ import {ResourceDisplayContext} from './resourceDisplay';
 import {useCallback,useRef,useState,type CSSProperties,type ReactNode} from 'react';
 import type {ResourceValue} from './resourcePresets';
 import {normalizeWidget,normalizeModuleWidget,type WidgetStyle,type ResourceWidgetLayout,type ResourceModule} from '../core/resourceWidgets';
-import {ResourceModuleFace} from './ResourceModuleFace';
+import {ResourceModuleFace,resourceAmount} from './ResourceModuleFace';
 import './resourceWidgets.css';
 import './compactResources.css';
 function ResourceOperation({id,change,children}:{id:string;change:(id:string,value:number)=>void;children:ReactNode}){
@@ -17,7 +17,7 @@ export function CompactResource({resource:r,style='bar',layout,module:group,rend
  const requested=layout?.style||style,presentation=group?normalizeModuleWidget(group,layout):normalizeWidget({...layout,style:requested}),shape=!group&&(requested==='bar'||requested==='icon')?requested:presentation.style;
  const module:ResourceModule=group?{...group,rows:group.rows.map(([id,row])=>[id,{...row,current:shownRows[id]??row.current}])}:{id:r.id||'resource',name:r.name||'资源',slots:false,rows:[[r.id||'resource',{...r,current:shown}]]};
  const multiple=module.slots||module.rows.length>1,name=module.name,current=group?module.rows[0][1].current:shown;
- const summary=multiple?module.rows.map(([id,row])=>`${row.name||id}：${row.current} / ${row.unlimited?'不限':row.max}`).join('，'):`${current} / ${r.unlimited?'不限':r.max}`;
+ const summary=multiple?module.rows.map(([id,row])=>`${row.name||id}：${resourceAmount(row)}`).join('，'):resourceAmount({...r,current});
  function show(){const node=panel.current,anchor=button.current;if(!node||!anchor)return;if(node.matches(':popover-open')){node.hidePopover();return;}node.showPopover();const rect=anchor.getBoundingClientRect(),width=Math.min(310,innerWidth-24);node.style.width=`${width}px`;node.style.left=`${Math.max(12,Math.min(rect.left,innerWidth-width-12))}px`;node.style.top=`${Math.max(8,Math.min(rect.bottom+5,innerHeight-node.offsetHeight-8))}px`;}
  return <div className={`compact-resource widget-${shape} ${multiple?'compact-resource-group':''}`} data-resource-id={module.id} data-resource-name={name} data-resource-current={current} data-resource-pool={module.slots?'spell':undefined} style={{'--resource-ratio':r.unlimited?1:r.max?Math.max(0,Math.min(1,current/r.max)):0,'--compact-pool-rows':Math.ceil(module.rows.length/3)} as CSSProperties}><button ref={button} className="resource-widget-face" aria-label={`${name}：${summary}，打开资源操作`} title={`${name} · ${summary}`} aria-expanded={opened} onClick={show}><ResourceModuleFace module={module} style={presentation.style} layout={presentation}/></button><div ref={panel} popover="auto" className="compact-resource-popover" role="dialog" aria-label={`${name}资源操作`} onClickCapture={e=>{if(e.target instanceof Element&&e.target.closest('button.resource-configure:not(:disabled)'))panel.current?.hidePopover();}} onToggle={e=>setOpened((e.nativeEvent as ToggleEvent).newState==='open')}><button type="button" className="compact-resource-close" aria-label="关闭资源操作" onClick={()=>{panel.current?.hidePopover();button.current?.focus();}}>×</button>{group&&render?group.rows.map(([id,row])=><ResourceOperation key={id} id={id} change={display}>{render({...row,id})}</ResourceOperation>):<ResourceDisplayContext.Provider value={setShown}>{children}</ResourceDisplayContext.Provider>}</div></div>;
 }

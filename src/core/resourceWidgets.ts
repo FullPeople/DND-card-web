@@ -109,6 +109,7 @@ export const RESOURCE_TEMPLATES=[
  {id:'diamond',name:'菱形',description:'',style:'diamond',w:3,h:3,multi:false},
 ] as const;
 export type ResourceTemplate=typeof RESOURCE_TEMPLATES[number];
+export type ResourceTemplateValues={name:string;current:number;max:number;unlimited:boolean};
 /** A group needs room for every actual resource pool, not only its first row. */
 export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle):{w:number;h:number}{
  const min=minimumWidgetSize(style),multi=module.slots||module.rows.length>1,wide=multi&&module.rows.length>4;
@@ -184,13 +185,14 @@ export function ensureResourceWidget(c:Character,id:string,rng:()=>number=Math.r
 }
 export function resourceCanvasRows(c:Character){return Object.entries(c.runtime.resources).filter(([id])=>!id.startsWith('hit-die:')&&sourceSpellResourceEnabled(c,id)&&!c.quickbarLayout?.hidden.includes(`resource:${id}`));}
 /** Explicit creation only. Existing values, locks and automatic resources remain untouched. */
-export function addResourceModule(c:Character,template:ResourceTemplate|undefined,page:number,newId:()=>string,rng:()=>number=Math.random,placement?:{x:number;y:number}){
+export function addResourceModule(c:Character,template:ResourceTemplate|undefined,page:number,newId:()=>string,rng:()=>number=Math.random,placement?:{x:number;y:number},values?:ResourceTemplateValues){
  const chosen=template??RESOURCE_TEMPLATES.find(t=>t.id===chooseDefaultWidgetStyle({max:3},rng))!;
+ if(values&&(!values.name.trim()||values.name.trim().length>100||!Number.isInteger(values.current)||values.current<0||values.current>999999999||!Number.isInteger(values.max)||values.max<0||values.max>99999||!values.unlimited&&values.current>values.max))throw Error('检查名称、当前值与上限');
  const ids=Array.from({length:chosen.multi?3:1},()=>newId());if(new Set(ids).size!==ids.length||ids.some(id=>!id||id.length>2000||Object.hasOwn(c.runtime.resources,id)))throw Error('资源标识重复');
  const layout=c.quickbarLayout||={order:[],hidden:[]},saved=layout.widgets||={},before=resourceModules(resourceCanvasRows(c),saved),current=freeDashboardLayout(before,saved,layout.attacks),occupied=[current.attacks,...Object.values(current.widgets)];
- const initial=normalizeWidget({style:chosen.style,w:chosen.w,h:chosen.h,page,...placement,...(ids.length>1?{members:ids,label:'组合资源'}:{})});
+ const initial=normalizeWidget({style:chosen.style,w:chosen.w,h:chosen.h,page,...placement,...(ids.length>1?{members:ids,label:values?.name.trim()||'组合资源'}:{})});
  const placed=placement?initial:place(initial,occupied);
- ids.forEach((id,i)=>Object.defineProperty(c.runtime.resources,id,{value:{name:ids.length>1?`子资源 ${i+1}`:'新资源',current:chosen.id==='ready'?1:3,max:chosen.id==='ready'?1:3,type:'count'},enumerable:true,writable:true,configurable:true}));
+ ids.forEach((id,i)=>Object.defineProperty(c.runtime.resources,id,{value:values?{name:ids.length>1?`${values.name.trim()} ${i+1}`:values.name.trim(),current:values.current,max:values.max,unlimited:values.unlimited,type:values.unlimited?'number':'count'}:{name:ids.length>1?`子资源 ${i+1}`:'新资源',current:chosen.id==='ready'?1:3,max:chosen.id==='ready'?1:3,type:'count'},enumerable:true,writable:true,configurable:true}));
  layout.widgets={...saved,...current.widgets,[ids[0]]:placed};layout.attacks=current.attacks;
  return {id:ids[0],page:placed.page};
 }

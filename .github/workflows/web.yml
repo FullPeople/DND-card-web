@@ -1,4 +1,4 @@
-name: Test and publish web
+name: Verify web
 on:
   push:
     branches: [main]
@@ -29,12 +29,6 @@ jobs:
             dist-standalone/
           if-no-files-found: error
           retention-days: 1
-      - uses: actions/configure-pages@v5
-        if: github.ref == 'refs/heads/main'
-      - uses: actions/upload-pages-artifact@v4
-        if: github.ref == 'refs/heads/main'
-        with:
-          path: dist-standalone
   browsers:
     needs: verify
     runs-on: ubuntu-latest
@@ -67,6 +61,10 @@ jobs:
             commands: |
               DND_AUTOMATION_TEST_MODE=standalone npx playwright test --config playwright.automation209.config.ts
               npx playwright test --config playwright.unified191.config.ts
+          - group: followup-230
+            commands: |
+              npx playwright test --config playwright.followup231.config.ts
+              npx playwright test --config playwright.followup-ui231.config.ts
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
@@ -78,6 +76,8 @@ jobs:
         with:
           name: verified-web-builds
       - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps firefox
+        if: matrix.group == 'followup-230'
       - name: Run all checks in group
         run: ${{ matrix.commands }}
         env:
@@ -90,17 +90,6 @@ jobs:
             test-results/
             test-results-*/
             .local-evidence/integration230-browser/
+            .local-evidence/followup231-browser/
+            .local-evidence/followup231-ui/
           retention-days: 7
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: [verify, browsers]
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment

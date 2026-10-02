@@ -84,6 +84,17 @@ describe('220 approved dashboard persistence and shared canvas',()=>{
   const ready=Object.entries(c.quickbarLayout!.widgets!).find(([,w])=>w.style==='ready')!;
   expect(c.runtime.resources[ready[0]]).toMatchObject({current:1,max:1});
  });
+ it('creates configured bounded and unbounded modules while preserving automatic resources and rejects invalid creation atomically',()=>{
+  const c=newCharacter();c.runtime.resources.existing={...value(9),automatic:true};const existing=structuredClone(c.runtime.resources.existing);let serial=0;
+  const bounded=addResourceModule(c,RESOURCE_TEMPLATES.find(t=>t.id==='pips')!,0,()=>`custom-${serial++}`,undefined,undefined,{name:' 远行储备 ',current:4,max:8,unlimited:false});
+  expect(c.runtime.resources[bounded.id]).toMatchObject({name:'远行储备',current:4,max:8,unlimited:false});
+  const unbounded=addResourceModule(c,RESOURCE_TEMPLATES.find(t=>t.id==='counter')!,0,()=>`custom-${serial++}`,undefined,undefined,{name:'金币记录',current:100000,max:0,unlimited:true});
+  expect(c.runtime.resources[unbounded.id]).toMatchObject({current:100000,max:0,unlimited:true,type:'number'});expect(c.runtime.resources.existing).toEqual(existing);
+  const before=structuredClone(c);
+  for(const invalid of [{name:'',current:2,max:3,unlimited:false},{name:'无效',current:4,max:3,unlimited:false},{name:'小数',current:.5,max:3,unlimited:false}]){
+   expect(()=>addResourceModule(c,RESOURCE_TEMPLATES[0],0,()=>`invalid-${serial++}`,undefined,undefined,invalid)).toThrow('检查名称、当前值与上限');expect(c).toEqual(before);
+  }
+ });
  it('keeps nine standard spell levels and a pact pool separate, readable and unchanged after presentation edits',()=>{
   const c=newCharacter();c.runtime.resources=Object.fromEntries(Array.from({length:9},(_,i)=>[`spell-slot:${i+1}`,value(4)]));c.runtime.resources['pact-slot:5']=value(2);
   const before=structuredClone(c.runtime.resources),modules=resourceModules(Object.entries(c.runtime.resources));

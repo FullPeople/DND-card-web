@@ -18,7 +18,7 @@ test('retains exactly 16 approved visual modules and mirrors the actual quickbar
  await visit(page);const values=(await read(page)).runtime.resources;const before=(await canvas(main(page)).boundingBox())!;const dialog=await open(page);
  await expect(dialog.locator('[data-template-id]')).toHaveCount(16);expect(await dialog.locator('[data-template-id]').evaluateAll(nodes=>nodes.map(el=>(el as HTMLElement).dataset.templateId))).toEqual(retained);
  for(const id of removed)await expect(dialog.locator(`[data-template-id="${id}"]`)).toHaveCount(0);
- await expect(dialog.locator('.resource-template-option .rm-name')).toHaveText(Array(16).fill('动作如潮'));
+ await expect(dialog.locator('.resource-template-option .rm-name')).toHaveText(Array(16).fill('新资源'));
  const after=(await canvas(dialog).boundingBox())!;expect(Math.abs(after.width-before.width)).toBeLessThanOrEqual(1);expect(Math.abs(after.height-before.height)).toBeLessThanOrEqual(1);
  const sizes=await canvas(dialog).evaluate(el=>({w:el.clientWidth,h:el.clientHeight,sw:el.scrollWidth,sh:el.scrollHeight}));expect(sizes.sw).toBeLessThanOrEqual(sizes.w+1);expect(sizes.sh).toBeLessThanOrEqual(sizes.h+1);
  expect((await read(page)).runtime.resources).toEqual(values);await dialog.screenshot({path:test.info().outputPath('dashboard-wide.png')});

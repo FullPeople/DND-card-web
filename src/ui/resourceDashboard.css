@@ -57,4 +57,35 @@
 .resource-workspace[data-layout-editing=true] .resource-widget-canvas{background-image:linear-gradient(to right,#52788012 1px,transparent 1px),linear-gradient(to bottom,#52788012 1px,transparent 1px);background-size:calc(100% / 12) calc(100% / 6)}
 .sheet-export .resource-workspace-toolbar button{visibility:hidden}
 
+/* Match the sheet's gray resource cards throughout both editing and operation menus. */
+.dialog:has(.resource-dashboard),.dashboard-stage{background:#ededee}
+.dashboard-preview,.resource-diy-quickbar .resource-attacks-content{background:#e7e7e8;border-color:#85888e}
+.resource-widget-popover,.compact-resource-popover{border:1px solid #909399;border-radius:7px;background:#ededee;color:#414349;padding:24px 10px 10px;box-shadow:0 8px 24px #0003}
+.resource-widget-popover .resource179-row,.compact-resource-popover .resource179-row{position:relative;display:grid;grid-template-columns:1fr;border:1px solid #c1c3c6;border-radius:5px;background:#e3e3e5;padding:8px!important;margin:0 0 7px;min-width:0}
+.resource-widget-popover .resource-title,.compact-resource-popover .resource-title{padding-right:40px}
+.resource-widget-popover .resource-title>.resource-actions,.compact-resource-popover .resource-title>.resource-actions{opacity:1;pointer-events:auto}
+.resource-widget-popover .console-resource-controls,.compact-resource-popover .console-resource-controls{flex-wrap:wrap!important;width:100%;gap:5px!important}
+.resource-widget-popover .resource-current-label,.compact-resource-popover .resource-current-label{flex:none;min-width:32px;font:700 13px/22px system-ui;white-space:nowrap;color:#414349}
+.resource-widget-popover .resource-pips,.compact-resource-popover .resource-pips{flex-wrap:wrap!important;max-width:100%!important}
+.resource-menu-rests{display:flex;align-items:center;gap:6px;border-top:1px solid #c1c3c6;padding-top:8px;font-size:11px}
+.resource-menu-rests>span{flex:1;color:#64666b}
+.resource-menu-rests button{padding:4px 9px;border:1px solid #b2b5b9;border-radius:4px;background:#e3e3e5;color:#414349;font:inherit}
+.resource-editor-form{border:1px solid #b9bbbe;border-radius:6px;background:#e7e7e8;color:#414349}
+.resource-editor-inline .resource-editor-form{padding:12px;border:1px solid #b9bbbe;background:#e7e7e8}
+.resource-editor-form .resource-edit-numbers{gap:10px}
+.resource-editor-form .resource-edit-numbers label{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0}
+.resource-editor-form input{border:1px solid #b9bbbe;border-radius:3px;background:#f6f6f6;color:#414349}
+.resource-editor-form .resource-edit-numbers input[type=number]{flex:1;min-width:45px}
+.resource-editor-form .resource-editor-actions{margin-top:12px;gap:7px}
+.resource-editor-form .resource-editor-actions button{padding:5px 9px!important;border-radius:4px}
+
 @media(max-width:480px){.dialog:has(.resource-dashboard) .dialog-body{padding:10px}.dashboard-stage{top:-10px}.dashboard-swatches{gap:3px}.dashboard-swatches button{width:15px;height:15px}.dashboard-palette>strong{max-width:80px}.dashboard-icons{gap:3px}.dashboard-icons small{max-width:120px;line-height:1.2}.dashboard-preview{max-width:calc(100% - 4px)}}
+
+.resource-editor-preview{height:88px;max-width:170px;margin:12px auto 0}
+
+.resource-menu-rests{flex-wrap:wrap}
+.resource-menu-rests>.rest-result{flex-basis:100%;margin:0;padding:3px 0 0;font-size:10px;line-height:1.4;color:#64666b}
+
+.resource-widget-popover .resource-title,.compact-resource-popover .resource-title{position:relative}
+.resource-widget-popover .resource-title>.resource-actions,.compact-resource-popover .resource-title>.resource-actions{position:absolute;right:0;top:0;display:flex;align-items:center;gap:4px}
+.resource-widget-popover .resource-title .resource-configure,.compact-resource-popover .resource-title .resource-configure{visibility:visible}

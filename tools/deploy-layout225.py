@@ -14,7 +14,7 @@ def tree(p):
 def valid_name(n):
     p=PurePosixPath(n);assert n and not p.is_absolute() and '..' not in p.parts and '\\' not in n and ':' not in n and p.as_posix()==n,n
 def allowed(site,n):
-    if site=='card':return n.startswith(('assets/','dice/','support/')) or n=='downloads/DND-Card-Standalone-225.zip' or n in ['index.html','sw.js','exe_icon.png','favicon.svg','owner-step1.png','owner-step2.png','owner-step3.png','standalone-audit.json','third-party-licenses.txt','LICENSE.txt','release.json','source.zip','layout225-hashes.json']
+    if site=='card':return n.startswith(('assets/','dice/','support/')) or n in ['index.html','sw.js','exe_icon.png','favicon.svg','owner-step1.png','owner-step2.png','owner-step3.png','standalone-audit.json','third-party-licenses.txt','LICENSE.txt','release.json','source.zip','layout225-hashes.json']
     return n.startswith('card-viewer/') or site=='suite-dev' and n.startswith('workbench/') or n in [MANIFESTS[site],'source.zip','suite-source.zip','layout225-hashes.json']
 def started(n):
     assert subprocess.check_output(['systemctl','is-active',n],text=True).strip()=='active'

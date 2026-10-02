@@ -41,7 +41,8 @@ for(const levels of [2,4,6,9])test(`retained regression: ${levels} standard leve
  }
 });
 
-test('retained regression: touch can spend a resource and change resource pages without scrollbars',async({browser,baseURL})=>{
+test('retained regression: touch can spend a resource and change resource pages without scrollbars',async({browser,baseURL,browserName})=>{
+ test.skip(browserName==='firefox','Firefox does not support Playwright isMobile contexts; narrow desktop interactions have separate coverage');
  const context=await browser.newContext({baseURL,viewport:{width:375,height:650},hasTouch:true,isMobile:true});
  try {
   const page=await context.newPage();await page.goto(fixture);const scope=page.locator('.fixture-quickbar');
@@ -59,11 +60,11 @@ test('retained regression: a custom group edits only its selected child and pres
  await page.locator('.fixture-quickbar').getByRole('button',{name:'仪表盘',exact:true}).click();const dialog=page.getByRole('dialog',{name:'仪表盘',exact:true});
  await dialog.locator('[data-template-id="pool"]').click();await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const added=await read(page),ids=Object.keys(added.runtime.resources).filter(id=>!Object.hasOwn(initial,id));expect(ids).toHaveLength(3);
  const anchor=ids.find(id=>added.quickbarLayout?.widgets?.[id]?.members?.length===3)!;const group=await seek(dialog,anchor);await group.locator('.resource-widget-face').click();expect((await read(page)).runtime.resources).toEqual(added.runtime.resources);await expect(page.locator('.resource-widget-popover')).toHaveCount(0);
- await group.locator('.resource-widget-face').dblclick();await expect(dialog.locator('.resource-module-tabs button')).toHaveCount(3);await dialog.getByRole('button',{name:'子资源 2',exact:true}).click();
+ await group.locator('.resource-widget-face').dblclick();await expect(dialog.locator('.resource-module-tabs button')).toHaveCount(3);await dialog.getByRole('button',{name:'新资源 2',exact:true}).click();
  await dialog.getByRole('textbox',{name:'资源名称',exact:true}).fill('余烬');await dialog.getByRole('spinbutton',{name:'资源剩余',exact:true}).fill('1');await dialog.getByRole('button',{name:'保存',exact:true}).click();
- const expected=structuredClone(added.runtime.resources),child=ids.find(id=>expected[id].name==='子资源 2')!;expected[child]={...expected[child],name:'余烬',current:1,unlimited:false,locked:false,icon:'gem'};
+ const expected=structuredClone(added.runtime.resources),child=ids.find(id=>expected[id].name==='新资源 2')!;expected[child]={...expected[child],name:'余烬',current:1,unlimited:false,locked:false,icon:'gem'};
  await dialog.getByRole('button',{name:'保存布局',exact:true}).click();expect((await read(page)).runtime.resources).toEqual(expected);await page.reload();expect((await read(page)).runtime.resources).toEqual(expected);
  const main=page.locator('.fixture-quickbar'),restored=await seek(main,anchor);await expect(restored.locator('.resource-subvalue')).toHaveCount(3);await restored.locator('.resource-widget-face').click();
- const panel=page.getByRole('dialog',{name:'组合资源资源操作',exact:true});await panel.getByText('余烬',{exact:true}).hover();await panel.getByRole('button',{name:'设置余烬',exact:true}).click();const config=page.getByRole('dialog',{name:'资源配置',exact:true});
+ const panel=page.getByRole('dialog',{name:'新资源资源操作',exact:true});await panel.getByText('余烬',{exact:true}).hover();await panel.getByRole('button',{name:'设置余烬',exact:true}).click();const config=page.getByRole('dialog',{name:'资源配置',exact:true});
  await expect(config.getByRole('textbox',{name:'资源名称',exact:true})).toHaveValue('余烬');await expect(config.locator('.resource-editor-form')).toHaveCount(1);
 });

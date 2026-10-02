@@ -1,0 +1,5 @@
+/* These warnings belong to the card shell, even before settings are downloaded. */
+.class-warning-icon{color:#ffcc38;text-shadow:0 1px #493c09;margin-left:6px}
+.class-compatibility-banner{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid #b18a26;background:#fff0bd;color:#473810;padding:8px 10px;margin:4px 12px 8px;flex:none;min-width:0}
+.class-compatibility-banner p{flex:1 1 220px;margin:0;min-width:0;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.class-compatibility-banner button{flex:none;border:1px solid #b18a26;background:#fff8df;color:#473810;font-size:12px;padding:5px 8px}

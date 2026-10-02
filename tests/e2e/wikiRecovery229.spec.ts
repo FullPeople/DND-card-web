@@ -86,7 +86,8 @@ test('a mid-download outage stops the parallel file readers and preserves the ex
 
 test.describe('activation timing',()=>{
  test.use({serviceWorkers:'allow'});
- test('a tool requested before activation and completed afterwards is cached for offline use',async({page,context})=>{
+ test('a tool requested before activation and completed afterwards is cached for offline use',async({page,context,browserName})=>{
+  test.skip(browserName!=='chromium','This fault injection routes ServiceWorker requests, supported only in Playwright Chromium.');
   let releaseInstall!:()=>void,releaseTool!:()=>void,installBlocked=false,toolRequested=false;
   const installGate=new Promise<void>(done=>releaseInstall=done),toolGate=new Promise<void>(done=>releaseTool=done);
   await context.route('**/favicon.svg',async route=>{if(route.request().serviceWorker()){installBlocked=true;await installGate;}await route.continue();});

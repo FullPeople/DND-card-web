@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {newCharacter,type Character} from '../../../src/core/model';
 import {evaluate} from '../../../src/core/engine';
+import {newAutomationState} from '../../../src/core/automation/state';
 import {normalizeWidget} from '../../../src/core/resourceWidgets';
 import {Quickbar} from '../../../src/ui/Quickbar';
 import {ResourceDashboard,type DashboardViewport} from '../../../src/ui/ResourceDashboard';
@@ -14,7 +15,7 @@ import '../../../src/ui/resource179.css';
 const scenario=new URLSearchParams(location.search).get('scenario')||'default';
 const key=`resource-dashboard220:${scenario}`;
 function make(){
- const c=newCharacter();c.id='dashboard220-original-fixture';c.name='原创仪表盘验收';
+ const c=newCharacter();c.id='dashboard220-original-fixture';c.name='原创仪表盘验收';c.automation=newAutomationState();
  c.quickbarActions=[{id:'sword',name:'练习长剑',attack:'+5',damage:'1d8+3'},{id:'bow',name:'练习短弓',attack:'+4',damage:'1d6+2'}];
  c.runtime.resources={
   'spell-slot:1':{name:'1环法术位',current:3,max:4,type:'count'},
@@ -33,6 +34,7 @@ function make(){
   focus:normalizeWidget({x:0,y:0,w:3,h:3,page:1,style:'ring'}),
   coins:normalizeWidget({x:3,y:0,w:4,h:3,page:1,style:'fraction'}),
  }};
+ if(scenario==='empty'){c.baseHp=12;c.runtime.hp=3;c.runtime.resources={};c.quickbarLayout.widgets={};}
  if(scenario==='resize'){
   c.runtime.resources={probe:{name:'八点缩放样本',current:2,max:5,type:'number'}};
   c.quickbarLayout.widgets={probe:normalizeWidget({x:5,y:2,w:4,h:2,page:0,style:'segments',color:'#527880'})};

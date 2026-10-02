@@ -1,31 +1,44 @@
-import {useContext,useEffect,useRef,useState} from 'react';
+import {useContext,useEffect,useMemo,useRef,useState} from 'react';
 import type {Character,Entry} from '../core/model';
-import {chooseSheetOption,setSheetChoiceSlot,sheetChoices,claimStartingEquipment,equipmentBlocks,equipmentCandidates,equipmentTypeLabel,equipmentOptionConcept,equipmentPackage} from '../core/automation/choices';
+import {chooseSheetOption,setSheetChoiceSlot,sheetChoices,choiceSource,claimStartingEquipment,equipmentBlocks,equipmentCandidates,equipmentTypeLabel,equipmentOptionConcept,equipmentPackage,type ChoiceOption} from '../core/automation/choices';
 import {Reference} from './Reference';
 import {SheetCell} from './SheetCell';
 import {DragContext,DropZone} from './DragEntry';
-import {choiceCatalog,optionForEntry} from './choiceCatalog';
+import {choiceCatalog,choiceEntryMatcher} from './choiceCatalog';
+import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import './automationChoices.css';
 
+// Only this small leaf follows pointer hover state. Resolving a whole catalog on
+// every drag frame makes the drop targets lag behind the pointer on large wikis.
+function DraggableChoice({option}:{option:ChoiceOption}){
+ const drag=useContext(DragContext);
+ return <Reference className="choice-slot-entry" entry={option.entry} reference={`entry:${option.entry.id}`} commitOnClick={false} onPointerDown={event=>drag?.start(event,option.entry)}>{option.label}</Reference>;
+}
+
 export function ChoiceWorkspace({c,id,catalog,edit,close}:{c:Character;id:string;catalog:Entry[];edit:(action:(c:Character)=>void)=>void;close:()=>void}){
- const choice=sheetChoices(c,catalog).find(r=>r.id===id),drag=useContext(DragContext),[error,setError]=useState(''),[equipment,setEquipment]=useState(''),[picks,setPicks]=useState<Record<string,string>>(()=>({...c.backgroundChoices?.[id.split(':equipment')[0]]?.equipment})),confirmed=useRef(false);
- useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){e.preventDefault();close();}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[close]);
- if(!choice)return null;
- const scope=choiceCatalog(c,choice,catalog),selected=choice.channel==='equipment'?(equipment?[equipment]:choice.selected.length?choice.selected:choice.equipmentIndex!<0?[choice.options[0].value]:[]):choice.selected,owner=c.selections.find(s=>s.id===choice.ownerId)!,packageItems=choice.channel==='equipment'&&selected[0]?equipmentPackage(owner.entry,choice.equipmentIndex!,selected[0],picks):[],grouped=choice.channel==='equipment'&&choice.equipmentIndex!<0?equipmentBlocks(owner.entry):[];
+ const choices=useMemo(()=>sheetChoices(c,catalog),[c,catalog]),choice=choices.find(r=>r.id===id),workspace=useChoiceWorkspace(),[error,setError]=useState(''),[equipment,setEquipment]=useState(''),[picks,setPicks]=useState<Record<string,string>>(()=>({...c.backgroundChoices?.[id.split(':equipment')[0]]?.equipment})),confirmed=useRef(false);
+ const scope=useMemo(()=>choice?choiceCatalog(c,choice,catalog):undefined,[c,choice,catalog]);
+ const matchEntry=useMemo(()=>choice?choiceEntryMatcher(c,choice):()=>undefined,[c,choice]);
+ const exit=()=>{window.dispatchEvent(new Event('sheet-gesture'));close();requestAnimationFrame(()=>document.querySelector<HTMLElement>(`[data-choice-id="${CSS.escape(id)}"]`)?.focus({preventScroll:true}));};
+ useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape'&&!e.defaultPrevented&&!document.body.classList.contains('pointer-dragging')){e.preventDefault();exit();}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[close,id]);
+ if(!choice||!scope)return null;
+ const selected=choice.channel==='equipment'?(equipment?[equipment]:choice.selected.length?choice.selected:choice.equipmentIndex!<0?[choice.options[0].value]:[]):choice.selected,owner=c.selections.find(s=>s.id===choice.ownerId)!,packageItems=choice.channel==='equipment'&&selected[0]?equipmentPackage(owner.entry,choice.equipmentIndex!,selected[0],picks):[],grouped=choice.channel==='equipment'&&choice.equipmentIndex!<0?equipmentBlocks(owner.entry):[],related=choices.filter(row=>choiceSource(c,row)===choiceSource(c,choice));
  const act=(action:(draft:Character)=>void)=>{try{edit(action);setError('');}catch(e){setError(e instanceof Error?e.message:String(e));}};
  const claim=()=>{if(confirmed.current)return;try{if(!selected[0])throw Error('请先选择起始装备方案。');confirmed.current=true;edit(draft=>claimStartingEquipment(draft,id,selected[0],catalog,picks));close();}catch(e){confirmed.current=false;setError(e instanceof Error?e.message:String(e));}};
- return <SheetCell label={`选择${choice.label}`} className="choice-workspace" trailing={<button className="choice-exit" onClick={close}>返回特性</button>}><div data-choice-workspace data-local-preview>
-  <p className="choice-progress">{choice.label} {choice.selected.length}/{choice.count}</p>
+ return <SheetCell label={`选择${choice.label}`} className="choice-workspace" trailing={<button className="choice-exit" onClick={exit}>返回特性</button>}><div data-choice-workspace data-local-preview>
+  <p className="choice-owner">{owner.entry.name} · {choice.channel==='equipment'?'领取后生效，返回可放弃当前方案':'选择即时生效，返回保留已选内容'}</p>
+  {related.length>1&&<nav className="choice-navigation" aria-label="职业选择项">{related.map(row=><button key={row.id} aria-current={row.id===id?'step':undefined} onClick={()=>workspace.open(row.id)}>{row.label}<span>{row.selected.length}/{row.count}</span></button>)}</nav>}
+  <p className="choice-progress" role="status">{choice.label} {choice.selected.length}/{choice.count}<span>{choice.complete?'已完成，可继续调整':`还需选择 ${choice.count-choice.selected.length} 项`}</span></p>
   {choice.hint&&<p className="choice-hint">{choice.hint}</p>}
-  {scope.wiki?<><p className="choice-hint">从 Wiki 拖拽条目到下方空格，可删除或拖拽替换。</p><div className="choice-slots">{Array.from({length:Math.max(choice.count,choice.slots?.length||0)},(_,index)=>{
+  {scope.wiki?<><p className="choice-hint">从 Wiki 拖拽到选择格。拖到已选格可替换；重复条目会交换位置。Esc 取消拖拽。</p><div className="choice-slots">{Array.from({length:Math.max(choice.count,choice.slots?.length||0)},(_,index)=>{
    const option=choice.options.find(o=>o.value===(choice.slots||choice.selected)[index]);
-   return <DropZone referenceOnly key={index} className="choice-slot" aria-label={`${choice.label}选择格 ${index+1}`} accepts={entry=>!choice.restricted&&!!optionForEntry(c,choice,entry)&&!optionForEntry(c,choice,entry)?.unavailable} onReceive={entry=>{const match=optionForEntry(c,choice,entry);if(match)act(draft=>setSheetChoiceSlot(draft,id,index,match.value,catalog));}}>
-    {option?<><Reference className="choice-slot-entry" entry={option.entry} reference={`entry:${option.entry.id}`} commitOnClick={false} onPointerDown={event=>drag?.start(event,option.entry)}>{option.label}</Reference><button className="choice-remove" aria-label={`移除${option.label}`} disabled={choice.restricted} onClick={()=>act(draft=>setSheetChoiceSlot(draft,id,index,undefined,catalog))}>×</button></>:<span className="choice-empty">等待拖拽加入</span>}
+   return <DropZone referenceOnly key={index} className={`choice-slot ${option?'is-filled':''}`} aria-label={`${choice.label}选择格 ${index+1}`} accepts={entry=>{const match=matchEntry(entry);return !choice.restricted&&!!match&&!match.unavailable;}} rejectReason={choice.restricted?'此选择来源尚未启用。':'此条目不属于当前可选内容，请从右侧 Wiki 候选中拖入。'} onReceive={entry=>{const match=matchEntry(entry);if(match&&match.value!==option?.value)act(draft=>setSheetChoiceSlot(draft,id,index,match.value,catalog));}}>
+    <span className="choice-slot-number" aria-hidden="true">{index+1}</span>{option?<><DraggableChoice option={option}/><button className="choice-remove" aria-label={`移除${option.label}`} disabled={choice.restricted} onClick={()=>act(draft=>setSheetChoiceSlot(draft,id,index,undefined,catalog))}>×</button></>:<span className="choice-empty">等待拖拽加入</span>}
    </DropZone>;
-  })}</div>{!scope.entries.length&&<p className="choice-hint">{choice.spellKind==='prepared'&&owner.entry.raw.spellsKnownProgressionFixed?'请先选择法术书中的法术。':'候选资料尚未加载，保留此选择。'}</p>}</>:<div className="choice-options">{choice.options.map(option=><Reference key={option.value} entry={option.entry} reference={`entry:${option.entry.id}`} commitOnClick={false} onPointerDown={e=>e.stopPropagation()} className={`choice-option ${selected.includes(option.value)?'is-picked':''}`} aria-pressed={selected.includes(option.value)} aria-disabled={choice.restricted||!!option.unavailable} onClick={()=>{if(choice.restricted||option.unavailable){setError(option.unavailable||'此选择来源尚未启用。');return;}if(choice.channel==='equipment'){setEquipment(option.value);setError('');}else act(draft=>chooseSheetOption(draft,id,option.value,catalog));}}>{option.label}{option.unavailable&&<small>{option.unavailable}</small>}</Reference>)}</div>}
+  })}</div>{!scope.entries.length&&<p className="choice-hint choice-loading" role="status">{choice.spellKind==='prepared'&&owner.entry.raw.spellsKnownProgressionFixed?'请先选择法术书中的法术。':'候选资料尚未加载；可以先返回，已有选择会保留。资料载入后可继续。'}</p>}</>:<div className="choice-options">{choice.options.map(option=><Reference key={option.value} entry={option.entry} reference={`entry:${option.entry.id}`} commitOnClick={false} onPointerDown={e=>e.stopPropagation()} className={`choice-option ${selected.includes(option.value)?'is-picked':''}`} aria-pressed={selected.includes(option.value)} aria-disabled={choice.restricted||!!option.unavailable} onClick={()=>{if(choice.restricted||option.unavailable){setError(option.unavailable||'此选择来源尚未启用。');return;}if(choice.channel==='equipment'){setEquipment(option.value);setError('');}else act(draft=>chooseSheetOption(draft,id,option.value,catalog));}}>{option.label}{option.unavailable&&<small>{option.unavailable}</small>}</Reference>)}</div>}
   {grouped.map((block,index)=>{const keys=Object.keys(block).filter(k=>k!=='_');return keys.length>1&&<div className="choice-options" key={`group:${index}`}><strong>装备选择 {index+1}</strong>{keys.map(value=>{const entry=equipmentOptionConcept(owner.entry,index,value);return <Reference key={value} entry={entry} reference={`entry:${entry.id}`} commitOnClick={false} onPointerDown={e=>e.stopPropagation()} className={`choice-option ${picks[`group:${index}`]===value?'is-picked':''}`} aria-pressed={picks[`group:${index}`]===value} onClick={()=>setPicks({...Object.fromEntries(Object.entries(picks).filter(([key])=>key.startsWith('group:'))),[`group:${index}`]:value})}>方案 {value}</Reference>;})}</div>;})}
   {packageItems.flatMap((item:any,index:number)=>item.equipmentType?Array.from({length:item.quantity||1},(_,n)=><div className="choice-options" key={`${index}:${n}`}><strong>{equipmentTypeLabel(item.equipmentType)} · {n+1}</strong>{equipmentCandidates(item.equipmentType,owner.entry,catalog).map(entry=><Reference key={entry.id} entry={entry} reference={`entry:${entry.id}`} commitOnClick={false} onPointerDown={e=>e.stopPropagation()} className={`choice-option ${picks[`${index}:${n}`]===entry.id?'is-picked':''}`} aria-pressed={picks[`${index}:${n}`]===entry.id} onClick={()=>setPicks({...picks,[`${index}:${n}`]:entry.id})}>{entry.name}</Reference>)}</div>):[])}
   {error&&<p role="alert">{error}</p>}
-  {choice.channel==='equipment'&&<footer><button disabled={choice.restricted} onClick={claim}>领取装备</button></footer>}
+  <footer className="choice-footer"><button onClick={exit}>{choice.channel==='equipment'?'取消并返回':'完成并返回'}</button>{choice.channel==='equipment'&&<button disabled={choice.restricted} onClick={claim}>领取装备</button>}</footer>
  </div></SheetCell>;
 }

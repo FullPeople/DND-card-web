@@ -6,5 +6,4 @@
 .source-group .source-books{display:flex;flex-direction:column;max-height:none;overflow:visible;padding:0;gap:0;width:100%;margin:0;border:0;background:#eee;scrollbar-gutter:auto}
 .source-group .source-book{border:0;border-bottom:1px solid #aaa;border-radius:0;background:transparent}
 .source-group-note{margin:8px;font-size:12px}
-.class-warning-icon{color:#ffcc38;text-shadow:0 1px #493c09;margin-left:6px}.class-compatibility-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #b18a26;background:#fff0bd;color:#473810;padding:10px;margin:4px 12px 8px}.class-compatibility-banner p{flex:1;margin:0;min-width:180px}
 @media(max-width:560px){.source-group>summary{gap:5px;font-size:13px}.source-group>summary label{font-size:11px}.source-group .source-counts{display:none}}
