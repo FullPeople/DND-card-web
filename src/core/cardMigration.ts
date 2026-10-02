@@ -149,6 +149,10 @@ export function migrationDraft(original:Character,entries:Entry[],choices:Migrat
 }
 export function planCardMigration(original:Character,entries:Entry[],choices:MigrationChoices,identity:{id:string;now:string}):ClassMigrationPlan{
  const {card,changed,warnings}=migrationDraft(original,entries,choices,5);
+ return finalizeCardMigration(original,entries,card,changed,warnings,identity);
+}
+/** Shared transaction finalizer: previews keep the original fingerprint and spent balances. */
+export function finalizeCardMigration(original:Character,entries:Entry[],card:Character,changed:string[],warnings:string[],identity:{id:string;now:string}):ClassMigrationPlan{
  for(const row of card.selections)if(unlinkedEntry(row.entry))markKept(row,card);
  rememberSourceSpellUses(card);syncAutoResources(card,original);syncSourceSpells(card,entries);
  for(const [id,r] of Object.entries(card.runtime.resources))setResource(card,id,r.unlimited?(original.runtime.resources[id]?.current??0):Math.min(r.max,original.runtime.resources[id]?.current??0));

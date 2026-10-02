@@ -1,14 +1,13 @@
-import {useId,useMemo,useState} from 'react';
-import {KIND_LABELS,selectionAllowed,editionAllows,uid,type Character,type Entry,type Kind,type Selection} from '../core/model';
-import {MIGRATION_ROOTS,suggestedMigrationTarget,emptyMigrationChoices,migrationCandidates,migrationOptions,migrationDraft,planCardMigration,retainedProficiencies,type MigrationChoices,type GrantChoice} from '../core/cardMigration';
+import {useId,useMemo,useRef,useState} from 'react';
+import {KIND_LABELS,selectionAllowed,uid,type Character,type Entry,type Kind,type Selection} from '../core/model';
+import {MIGRATION_ROOTS,migrationCandidates,migrationOptions,retainedProficiencies} from '../core/cardMigration';
+import {planBatchCardMigration,suggestedBatchRoots} from '../core/batchCardMigration';
 import {migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigration';
 import {MigrationEntry} from './MigrationEntry';
-import {trainingCategory} from '../core/training';
 import {useSources} from './SourceName';
 import {ClearableSearch} from './ClearableSearch';
 import './cardMigration.css';
-const stages=['基础资料','来源气泡','额外气泡','保留自定义','法术与熟练','最终预览'];
-const extraKinds:Kind[]=['feat','feature','rule','spell','item'];
+const stages=['基础资料','整卡同步预览'];
 function MatchChoices({c,original,candidates,options,value,change,label,meta}:{c:Character;original:Entry;candidates:Entry[];options:(query:string)=>Entry[];value:string;change:(v:string)=>void;label:string;meta?:string}){
  const [query,setQuery]=useState(''),[manual,setManual]=useState(false),group=useId();
  const standard=candidates.some(e=>e.id===value),custom=manual||!!value&&!standard;
@@ -23,37 +22,24 @@ function Mapping({c,row,entries,kinds,value,change}:{c:Character;row:Selection;e
 }
 export function CardMigration({c,entries,loading,readOnly,save,busy,setBusy}:{c:Character;entries:Entry[];loading:boolean;readOnly:boolean;save:(plan:ClassMigrationPlan)=>Promise<void>;busy:boolean;setBusy:(v:boolean)=>void}){
  const {registry}=useSources(),explain=(text:string)=>text.replace(/\b[A-Z][A-Z0-9-]*\b/g,id=>id==='CUSTOM'||id==='IMPORTED'?'自定义':registry[id]?.name||id);
- const [step,setStep]=useState(0),[choices,setChoices]=useState<MigrationChoices>(emptyMigrationChoices),[plan,setPlan]=useState<ClassMigrationPlan>(),[error,setError]=useState(''),[uncertain,setUncertain]=useState(false);
- const draftResult=useMemo(()=>{try{return {draft:migrationDraft(c,entries,step===0?emptyMigrationChoices():choices,step),error:''};}catch(e){return {draft:undefined,error:String(e)};}},[c,entries,choices,step]);
- const draft=draftResult.draft;
- const roots=useMemo(()=>c.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind)),[c]);
- const value=(bucket:'roots'|'extras'|'spells',row:Selection,kinds:Kind[])=>choices[bucket][row.id]??suggestedMigrationTarget(draft?.card||c,migrationCandidates(draft?.card||c,row,entries,kinds),row.entry);
- const setValue=(bucket:'roots'|'extras'|'spells',id:string,v:string)=>{setChoices(old=>({...old,[bucket]:{...old[bucket],[id]:v}}));setError('');};
- const grantValue=(g:NonNullable<typeof draft>['grants'][number]):GrantChoice=>choices.grants[g.key]??{include:true,replaceId:g.matches.length===1?g.matches[0].id:undefined};
- const trainingValue=(t:NonNullable<typeof draft>['training'][number])=>choices.training[t.id]??suggestedMigrationTarget(c,t.candidates);
- function next(){if(!draft)return;try{
-  const selected=structuredClone(choices);
-  if(step===0){selected.roots=Object.fromEntries(roots.map(row=>[row.id,value('roots',row,[row.entry.kind])]));selected.grants={};selected.extras={};selected.keep={};selected.spells={};selected.training={};}
-  if(step===1){selected.grants=Object.fromEntries(draft.grants.map(g=>[g.key,grantValue(g)]));selected.extras={};selected.keep={};selected.spells={};selected.training={};}
-  if(step===2){selected.extras=Object.fromEntries(draft.extraRows.map(row=>[row.id,value('extras',row,extraKinds)]));selected.keep={};selected.spells={};selected.training={};}
-  if(step===3)selected.keep=Object.fromEntries(draft.leftovers.map(row=>[row.id,choices.keep[row.id]!==false]));
-  if(step===4){selected.spells=Object.fromEntries(draft.spellRows.map(row=>[row.id,value('spells',row,['spell'])]));selected.training=Object.fromEntries(draft.training.map(t=>[t.id,trainingValue(t)]));setPlan(planCardMigration(c,entries,selected,{id:uid(),now:new Date().toISOString()}));}
-  else migrationDraft(c,entries,selected,step+1);
-  setChoices(selected);setStep(step+1);setError('');
- }catch(e){setError(String(e));}}
- const stale=!!plan&&!migrationStillCurrent(plan,c);
- async function create(){if(!plan||stale||busy||uncertain)return;setBusy(true);setError('');try{await save(plan);}catch(e){setError(String(e));setUncertain(!!(e as {uncertain?:boolean}).uncertain);}finally{setBusy(false);}}
- return <section className="card-migration"><p>逐步核对旧卡与 {c.edition} 资料库。每一步由你确认，最后创建同步副本，原角色卡保留。</p><p className="muted">同名只作为候选；等级、背包数量、已消耗资源和手动熟练记录会保留。资料未找到的内容可继续保留为自定义。</p>
- <ol className="migration-steps" aria-label="同步步骤">{stages.map((label,i)=><li key={label} aria-current={step===i?'step':undefined}><span>{i+1}</span>{label}</li>)}</ol>
+ const [roots,setRoots]=useState<Record<string,string>>({}),[keep,setKeep]=useState<Record<string,boolean>>({}),[review,setReview]=useState<{original:Character;roots:Record<string,string>;identity:{id:string;now:string}}>(),[error,setError]=useState(''),[uncertain,setUncertain]=useState(false),saving=useRef(false);
+ const suggested=useMemo(()=>suggestedBatchRoots(c,entries,roots),[c,entries,roots]);
+ const mappingContext=useMemo(()=>({...c,selections:c.selections.map(row=>({...row,entry:entries.find(e=>e.id===suggested[row.id])||row.entry}))}),[c,entries,suggested]);
+ const rootRows=useMemo(()=>c.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind)&&s.entry.kind!=='item'),[c]);
+ const result=useMemo(()=>{if(!review)return {};try{return {batch:planBatchCardMigration(review.original,entries,review.roots,keep,review.identity)};}catch(e){return {error:String(e)};}},[review,entries,keep]);
+ const batch=result.batch,plan=batch?.plan,stale=!!plan&&!migrationStillCurrent(plan,c);
+ function next(){try{const snapshot={original:structuredClone(c),roots:{...suggested,...roots},identity:{id:uid(),now:new Date().toISOString()}};planBatchCardMigration(snapshot.original,entries,snapshot.roots,{},snapshot.identity);setKeep({});setReview(snapshot);setError('');}catch(e){setError(String(e));}}
+ async function create(){if(!plan||stale||busy||uncertain||readOnly||saving.current)return;saving.current=true;setBusy(true);setError('');try{await save(plan);}catch(e){setError(String(e));setUncertain(!!(e as {uncertain?:boolean}).uncertain);}finally{saving.current=false;setBusy(false);}}
+ return <section className="card-migration"><p>核对基础资料后，一次同步 {c.edition} 规则对应的来源气泡、法术与相关内容。最后统一预览，并筛选要保留的自定义内容。</p><p className="muted">原角色卡保留。等级、已有装备、已消耗资源、手动调整和选择记录不会重置；资料不明确的内容默认保留。</p>
+ <ol className="migration-steps" aria-label="同步步骤">{stages.map((label,i)=><li key={label} aria-current={Number(!!review)===i?'step':undefined}><span>{i+1}</span>{label}</li>)}</ol>
  {loading&&<p role="status">正在加载资料，完成后才可继续核对。</p>}
- <fieldset disabled={busy||uncertain}><h3>{step+1}. {stages[step]}</h3>
- {step===0&&<><p>核对背景、职业、种族、子职和背包。原项在左、目标在右；悬停可读正文。选「自定义」保留原项或手动查找。</p>{roots.map(row=><Mapping key={row.id} c={c} row={row} entries={entries} kinds={[row.entry.kind]} value={value('roots',row,[row.entry.kind])} change={v=>setValue('roots',row.id,v)}/>)}{!roots.length&&<p>没有需要核对的基础资料。</p>}</>}
- {step===1&&draft&&<><p>以下内容来自刚确认的资料声明。选择替换对应旧气泡，或添加新气泡；取消勾选后，后续刷新也不会自动补回。</p>{draft.grants.map(g=>{const v=grantValue(g);return <article className="migration-row migration-mapping" key={g.key}><div className="migration-original" role="radiogroup" aria-label={`${g.row.entry.name}对应旧气泡`}>{g.matches.map(row=><label key={row.id} className={'migration-candidate '+(v.replaceId===row.id?'is-selected':'')}><input type="radio" name={g.key} checked={v.replaceId===row.id} disabled={!v.include} onChange={()=>setChoices(old=>({...old,grants:{...old.grants,[g.key]:{...v,replaceId:row.id}}}))}/><MigrationEntry entry={row.entry}/></label>)}<label className="migration-candidate"><input type="radio" name={g.key} checked={!v.replaceId} disabled={!v.include} onChange={()=>setChoices(old=>({...old,grants:{...old.grants,[g.key]:{...v,replaceId:undefined}}}))}/><span>新增气泡<small>旧项留到后续核对</small></span></label></div><span className="migration-arrow" aria-hidden="true">→</span><div className="migration-candidates"><label className={'migration-candidate '+(v.include?'is-selected':'')}><input type="checkbox" checked={v.include} onChange={e=>setChoices(old=>({...old,grants:{...old.grants,[g.key]:{...v,include:e.target.checked}}}))}/><MigrationEntry entry={g.row.entry}/></label><small>来自 {g.owner.entry.name}；取消则保留删除状态</small></div></article>;})}{!draft.grants.length&&<p>没有新增的明确来源气泡。已主动删除的赠品会继续保留删除状态。</p>}</>}
- {step===2&&draft&&<><p>核对剩余的特性气泡。匹配到专长、法术或装备时，会放入对应位置，避免继续混在「其他特性」中。</p>{draft.extraRows.map(row=><Mapping key={row.id} c={draft.card} row={row} entries={entries} kinds={extraKinds} value={value('extras',row,extraKinds)} change={v=>setValue('extras',row.id,v)}/>)}{!draft.extraRows.length&&<p>没有额外气泡。</p>}</>}
- {step===3&&draft&&<><p>以下内容仍未关联资料库。勾选保留；取消勾选只会从同步副本移除，原卡保留。</p>{draft.leftovers.map(row=><article className="migration-row" key={row.id}><label><input type="checkbox" checked={choices.keep[row.id]!==false} onChange={e=>setChoices(old=>({...old,keep:{...old.keep,[row.id]:e.target.checked}}))}/>保留 {row.entry.name} · {KIND_LABELS[row.entry.kind]}</label><MigrationEntry entry={row.entry}/></article>)}{!draft.leftovers.length&&<p>没有未匹配的额外自定义气泡。</p>}</>}
- {step===4&&draft&&<><p>核对法术、装备训练与语言。法术已预备状态随原记录保留；技能、豁免和专精保留玩家当前选择。</p>{draft.spellRows.map(row=><Mapping key={row.id} c={draft.card} row={row} entries={entries} kinds={['spell']} value={value('spells',row,['spell'])} change={v=>setValue('spells',row.id,v)}/>)}{draft.training.map(t=><MatchChoices key={t.id} c={c} original={{id:t.id,name:t.text,english:'',source:'CUSTOM',packId:'custom',kind:'rule',edition:'both',revision:'1',entries:[],raw:{_custom:true}}} candidates={t.candidates} options={q=>entries.filter(e=>editionAllows(e,c.edition)&&trainingCategory(e)===t.group&&(q?`${e.name} ${e.english}`.toLocaleLowerCase().includes(q.toLocaleLowerCase()):e.id===trainingValue(t)))} value={trainingValue(t)} change={v=>setChoices(old=>({...old,training:{...old.training,[t.id]:v}}))} label={`${t.text}熟练同步目标`} meta={({armor:'护甲',weapons:'武器',tools:'工具',languages:'语言'} as Record<string,string>)[t.group]}/>)}<p>保留熟练：{retainedProficiencies(c).join('、')||'无手动记录'}</p></>}
- {step===5&&plan&&<div className="migration-preview"><p>请核对副本变化。新出现的资源次数从 0 开始，不会把同步当作休息或再次领取起始装备、金钱。</p>{([['资料替换',plan.changed],['数值变化',plan.stats],['新增内容',plan.added],['移除内容',plan.removed],['资源变化',plan.resources],['保留与待核对',plan.warnings]] as const).map(([label,items])=>items.length>0&&<section key={label}><h4>{label}</h4><ul>{items.map((item,i)=><li key={i}>{explain(item)}</li>)}</ul></section>)}{stale&&<p role="alert">角色记录已变化，请返回重新核对并预览。</p>}</div>}
- {!!draft?.warnings.length&&step<5&&<details><summary>尚待核对的规则声明（{draft.warnings.length}）</summary><ul>{draft.warnings.map((w,i)=><li key={i}>{explain(w)}</li>)}</ul></details>}
- <div className="migration-actions">{step>0&&<button onClick={()=>{setStep(step-1);setPlan(undefined);setError('');}}>上一步</button>}{step<5?<button className="primary" disabled={loading||!draft} onClick={next}>确认并继续</button>:<button className="primary" disabled={loading||readOnly||stale||!plan} onClick={()=>void create()}>{busy?'正在保存…':'创建同步副本'}</button>}</div></fieldset>
- {(error||draftResult.error)&&<p className="inline-error" role="alert">{error||draftResult.error}</p>}{uncertain&&<p>创建结果尚未确认。请先重新读取角色簿核对副本，避免重复创建。</p>}</section>;
+ <fieldset disabled={busy||uncertain}><h3>{review?'2. 整卡同步预览':'1. 基础资料'}</h3>
+ {!review&&<><p>选择目标基础资料，其来源内容会一起处理，无需逐个同步。选「自定义」保留原项或手动查找。</p>{rootRows.map(row=><Mapping key={row.id} c={mappingContext} row={row} entries={entries} kinds={[row.entry.kind]} value={roots[row.id]??suggested[row.id]??''} change={v=>{setRoots(old=>({...old,[row.id]:v}));setError('');}}/>)}{!rootRows.length&&<p>没有需要核对的基础资料，继续预览其余内容。</p>}</>}
+ {review&&batch&&<div className="migration-preview"><p>来源内容已统一处理。新增资源从 0 开始，已有装备和金钱不会重复领取。核对以下变化，再创建同步副本。</p>
+ <div className="migration-batch-counts" aria-label="同步变化汇总"><span>更新 {plan!.refreshed.length}</span><span>新增 {plan!.added.length}</span><span>移除 {plan!.removed.length}</span><span>待筛选 {batch.retained.length}</span></div>
+ {([['资料替换',plan!.changed],['数值变化',plan!.stats],['新增内容',plan!.added],['移除内容',plan!.removed],['资源变化',plan!.resources],['保留与待核对',plan!.warnings]] as const).map(([label,items])=>items.length>0&&<details key={label} open={label==='数值变化'||label==='移除内容'}><summary>{label}（{items.length}）</summary><ul>{items.map((item,i)=><li key={i}>{explain(item)}</li>)}</ul></details>)}
+ <section className="migration-retention"><h4>自定义与未匹配内容</h4><p>默认全部保留。逐项勾选或取消；取消只影响同步副本。</p><div className="migration-retention-grid">{batch.retained.map(({row,reason})=><label className={'migration-retention-tile '+(keep[row.id]!==false?'is-kept':'')} key={row.id}><input type="checkbox" aria-label={'保留 '+row.entry.name} checked={keep[row.id]!==false} onChange={e=>setKeep(old=>({...old,[row.id]:e.target.checked}))}/><span><MigrationEntry entry={row.entry}/><small>{KIND_LABELS[row.entry.kind]} · {reason}</small></span></label>)}</div>{!batch.retained.length&&<p>没有需要筛选的自定义或未匹配内容。</p>}</section>
+ <p>保留熟练：{retainedProficiencies(review.original).join('、')||'无手动记录'}</p>{stale&&<p role="alert">角色记录已变化，请返回重新核对并预览。</p>}</div>}
+ <div className="migration-actions">{review&&<button onClick={()=>{setReview(undefined);setKeep({});setError('');}}>上一步</button>}{!review?<button className="primary" disabled={loading||busy} onClick={next}>确认并继续</button>:<button className="primary" disabled={loading||readOnly||stale||!plan||busy||uncertain} onClick={()=>void create()}>{busy?'正在保存…':'创建同步副本'}</button>}</div></fieldset>
+ {(error||result.error)&&<p className="inline-error" role="alert">{error||result.error}</p>}{uncertain&&<p>创建结果尚未确认。请先重新读取角色簿核对副本，避免重复创建。</p>}</section>;
 }

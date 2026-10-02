@@ -110,6 +110,9 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
  if(!supportedAutomation(c))return false;
  const fingerprint=()=>JSON.stringify([c.selections.filter(s=>sourceSpellKey(s.grantKey)).map(s=>[s.id,c.spellSettings?.special?.[s.id],c.runtime.resources[specialSpellResource(s.id,c)]]),c.spellSettings?.prepared,c.runtime.sourceSpellSpent]);
  const before=fingerprint();rememberSourceSpellUses(c,undefined,true);const plan=planSourceSpells(c,catalog),matched=new Set<string>();
+ // Explicit old-card review removals remain removed after a late catalog recovery.
+ // Ordinary version retirement does not create this receipt.
+ plan.grants=plan.grants.filter(grant=>!c.dismissedFeatures?.includes(grant.owner.id+'|'+grant.key));
  const transfers=new Map<string,{max:number;old:Set<string>}>();
  for(const grant of plan.grants){const old=c.spellSettings?.special?.[grant.id];if(old?.mode!=='uses'||grant.config.mode!=='uses')continue;
   const previousKey=specialSpellResource(grant.id,c),nextKey=grant.config.sourceGrant?.resourceKey||`innate-spell:${grant.id}`;

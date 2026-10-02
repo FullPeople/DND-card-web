@@ -17,7 +17,7 @@ test('multi-candidate migration recommends the current handbook, respects custom
  await expect(group.getByRole('radio')).toHaveCount(5);await expect(core).toBeChecked();await expect(custom).not.toBeChecked();
  await page.screenshot({path:test.info().outputPath('core-handbook-default.png')});
  await custom.check();await dialog.getByRole('button',{name:'确认并继续',exact:true}).click();await dialog.getByRole('button',{name:'上一步',exact:true}).click();await expect(custom).toBeChecked();
- await core.check();for(let i=0;i<5;i++)await dialog.getByRole('button',{name:'确认并继续',exact:true}).click();
+ await core.check();await dialog.getByRole('button',{name:'确认并继续',exact:true}).click();
  await expect(dialog.locator('.migration-preview')).toContainText('原创旅人');expect((await workspace(page)).characters).toEqual(before.characters);
  await dialog.getByRole('button',{name:'创建同步副本',exact:true}).click();await expect(dialog).toHaveCount(0);await page.reload();await expect(page.locator('.paper')).toBeVisible();
  const after=await workspace(page),copy=after.characters.find((row:Character)=>row.id===after.activeId);expect(after.characters.find((row:Character)=>row.id===original.id)).toEqual(original);expect(copy.id).not.toBe(original.id);expect(copy.selections.find((row:any)=>row.entry.kind==='race').entry.source).toBe('XPHB');
