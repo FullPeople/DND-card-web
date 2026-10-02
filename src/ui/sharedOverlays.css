@@ -1,0 +1,6 @@
+/* Shared by cold-loaded spells, entry menus and inventory in both builds. */
+.stock-menu-shade{position:fixed;inset:0;z-index:2147482001}.stock-menu,.stock-split-dialog{position:absolute;min-width:225px;max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--suite-paper,#fafbfe);border:1px solid var(--suite-line,#95a5c3);box-shadow:0 5px 24px #29395233}.stock-menu button{text-align:left}.stock-menu label,.stock-split-dialog label{display:flex;align-items:center;justify-content:space-between;gap:8px}.stock-menu input,.stock-split-dialog input{width:75px}.stock-split-dialog{left:50%;top:45%;transform:translate(-50%,-50%)}.stock-split-dialog>div{display:flex;gap:8px;justify-content:end}
+.stock-drag-source{position:fixed;left:0;top:0;pointer-events:none;z-index:2147483000;box-sizing:border-box;box-shadow:0 6px 16px #1114}.stock-drag-source .stock-item{font-size:12px;opacity:1}
+.pointer-drag-layer{position:fixed;inset:0;overflow:clip;pointer-events:none;z-index:2147483000;contain:strict}
+
+.stock-drag-source.pointer-ghost{display:block;padding:0;border:0;border-radius:0;background:transparent;overflow:hidden}.stock-drag-source .stock-name{display:block;text-align:left;line-height:17px;font-size:11px}.stock-drag-source .stock-frame-art{display:block}

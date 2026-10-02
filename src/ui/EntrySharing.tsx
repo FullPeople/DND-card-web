@@ -1,3 +1,4 @@
+import './sharedOverlays.css';
 import {createContext,useCallback,useContext,useEffect,useLayoutEffect,useRef,useState,type ReactNode,type MouseEvent} from 'react';
 import {createPortal} from 'react-dom';
 import type {Character,Entry} from '../core/model';

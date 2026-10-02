@@ -11,6 +11,7 @@ const viewer=new URLSearchParams(location.search).get('legacyViewer')==='1';
 // attaches each entry's own CSS dependencies (including the standalone reader).
 const App=viewer?lazy(()=>import('./ui/PlayerViewer')):lazy(()=>import('./ui/App'));
 import './ui/style.css';
+import './ui/characterTabs.css';
 import './ui/workspace.css';
 import './ui/overview.css';
 import './ui/library.css';

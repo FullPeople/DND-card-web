@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [main]
+    branches: [main, codex/direct232-followup-20261002]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -61,6 +61,9 @@ jobs:
             commands: |
               DND_AUTOMATION_TEST_MODE=standalone npx playwright test --config playwright.automation209.config.ts
               npx playwright test --config playwright.unified191.config.ts
+          - group: direct-232
+            commands: |
+              npx playwright test --config playwright.direct232.config.ts --grep "menu is positioned|cold spell dragging|backpack has"
           - group: followup-230
             commands: |
               npx playwright test --config playwright.followup231.config.ts
@@ -92,4 +95,5 @@ jobs:
             .local-evidence/integration230-browser/
             .local-evidence/followup231-browser/
             .local-evidence/followup231-ui/
+            .local-evidence/direct232-browser/
           retention-days: 7

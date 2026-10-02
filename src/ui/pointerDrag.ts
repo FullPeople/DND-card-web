@@ -1,3 +1,4 @@
+import './sharedOverlays.css';
 import {flushSync} from 'react-dom';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 
@@ -28,7 +29,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
   const width = gesture.appearance==='source'?bounds.width:Math.max(48, Math.min(240, bounds.width)), height = gesture.appearance==='source'?bounds.height:Math.max(24, Math.min(80, bounds.height));
   const grab = { x: Math.max(0, Math.min(width, (event.clientX - bounds.x) / Math.max(1, bounds.width) * width)), y: Math.max(0, Math.min(height, (event.clientY - bounds.y) / Math.max(1, bounds.height) * height)) };
   const origin = { x: event.clientX, y: event.clientY };
-  let point = origin, painted = origin, active = false, finished = false, frame = 0, ghost: HTMLDivElement | undefined;
+  let point = origin, painted = origin, active = false, finished = false, frame = 0, ghost: HTMLDivElement | undefined, layer: HTMLDivElement | undefined;
   let hold: ReturnType<typeof setTimeout> | undefined, touchMoved = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function paint() {
@@ -65,7 +66,10 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
         const originals=[source,...source.querySelectorAll<HTMLElement>('*')],clones=[copy,...copy.querySelectorAll<HTMLElement>('*')];
         originals.forEach((node,i)=>{const clone=clones[i],style=getComputedStyle(node);clone.removeAttribute('id');for(const property of ['display','position','box-sizing','width','height','padding','margin','gap','grid-template-columns','grid-template-rows','grid-area','align-items','justify-content','flex-direction','flex-grow','color','background','border','border-radius','box-shadow','clip-path','font','line-height','letter-spacing','text-align','white-space','overflow','opacity','fill','stroke','stroke-width'])clone.style.setProperty(property,style.getPropertyValue(property));clone.style.transition='none';clone.style.animation='none';});
         const scale=bounds.width/source.offsetWidth||1;copy.style.width=`${source.offsetWidth}px`;copy.style.height=`${source.offsetHeight}px`;copy.style.minHeight='0';copy.style.margin='0';copy.style.translate='none';copy.style.transform=`scale(${scale})`;copy.style.transformOrigin='0 0';copy.style.visibility='visible';ghost.append(copy);
-      }else ghost.append(title); document.body.append(ghost);source.classList.add('drag-lifted');
+      }else ghost.append(title);
+      // Clip this transient viewport layer, not the page. The removal animation
+      // may travel offscreen without growing the document's scrollable area.
+      layer=document.createElement('div');layer.className='pointer-drag-layer';layer.setAttribute('aria-hidden','true');layer.inert=true;layer.append(ghost);document.body.append(layer);source.classList.add('drag-lifted');
       window.dispatchEvent(new CustomEvent('card-drag-start',{detail:{source}})); gesture.start?.(); paint();
   }
   function move(e: PointerEvent) {
@@ -92,7 +96,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
     if (!touchReading) { document.addEventListener('click', suppress, true); setTimeout(() => document.removeEventListener('click', suppress, true), 0); }
     let destination:Landing|void;
     const hit=document.elementFromPoint(point.x,point.y);
-    try{flushSync(()=>{destination=cancelled?(gesture.cancel(),undefined):gesture.finish(point,hit);});}catch(error){gesture.cancel();ghost?.remove();source.classList.remove('drag-lifted');window.dispatchEvent(new Event('card-drag-end'));throw error;}
+    try{flushSync(()=>{destination=cancelled?(gesture.cancel(),undefined):gesture.finish(point,hit);});}catch(error){gesture.cancel();layer?.remove();ghost?.remove();source.classList.remove('drag-lifted');window.dispatchEvent(new Event('card-drag-end'));throw error;}
     if(ghost){
       const element=ghost;
       const landing=destination!;
@@ -107,7 +111,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
       target?.getAnimations().forEach(animation=>animation.cancel());const rect=target?.getBoundingClientRect(),area=region?.getBoundingClientRect();
       const anchor=area&&area.width&&area.height?{x:Math.max(area.left,Math.min(area.right-width,point.x-grab.x)),y:Math.max(area.top,Math.min(area.bottom-height,point.y-grab.y)),width,height}:undefined;
       const end=rect&&rect.width?{x:rect.x,y:rect.y,width:rect.width,height:rect.height}:anchor|| (landing&&'removed' in landing&&landing.removed?{x:point.x<innerWidth/2?-width-20:innerWidth+20,y:point.y-grab.y,width,height}:landing&&'x' in landing?{...landing,width,height}:{x:bounds.x,y:bounds.y,width,height});
-      const restore=()=>{element.remove();source.classList.remove('drag-lifted');target?.classList.remove('drag-landing-hidden');window.dispatchEvent(new Event('card-drag-end'));};
+      const restore=()=>{layer?.remove();element.remove();source.classList.remove('drag-lifted');target?.classList.remove('drag-landing-hidden');window.dispatchEvent(new Event('card-drag-end'));};
       if(reduced){restore();return;}
       const hideTarget=!!target;
       if(hideTarget)target?.classList.add('drag-landing-hidden');element.dataset.landing='true';
