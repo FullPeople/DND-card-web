@@ -88,7 +88,7 @@ test('a compact spell group keeps the saved geometry on the card and after reloa
 });
 
 test('discarding a draft on another page resets gallery drop placement to the original page',async({page})=>{
- await page.goto('/tests/fixtures/resource-dashboard220/index.html');await open(page);const initial=await read(page);await editor(page).getByRole('button',{name:'下一页资源',exact:true}).click();await editor(page).locator('[data-template-id="ring"]').click();await expect(editor(page).locator('.resource-page-nav output')).toHaveText('2/2');await discard(page).click();await expect(editor(page).locator('.resource-page-nav output')).toHaveText('1/2');
+ await visit(page);const initial=await read(page);await editor(page).getByRole('button',{name:'下一页资源',exact:true}).click();await editor(page).locator('[data-template-id="ring"]').click();await expect(editor(page).locator('.resource-page-nav output')).toHaveText('2/2');await discard(page).click();await expect(editor(page).locator('.resource-page-nav output')).toHaveText('1/2');
  await startTemplate(page,'counter');await finishOnCanvas(page,8,5);const selected=editor(page).locator('.resource-widget[data-selected="true"]');await expect(selected).toHaveCount(1);await expect(selected).toHaveAttribute('data-grid-page','0');const id=(await selected.getAttribute('data-resource-id'))!;await expect(save(page)).toBeEnabled();await save(page).click();const saved=await read(page);expect(saved.quickbarLayout!.widgets![id].page).toBe(0);expect(Object.keys(saved.runtime.resources)).toHaveLength(Object.keys(initial.runtime.resources).length+1);for(const[key,value]of Object.entries(initial.runtime.resources))expect(saved.runtime.resources[key]).toEqual(value);
 });
 
