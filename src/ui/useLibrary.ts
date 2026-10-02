@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Entry, Kind } from '../core/model';
+import {useWikiPreviewTransition} from './useWikiPreviewTransition';
 import { LIBRARY_TABS, tabOf, type FacetSelection, type LibraryTab } from './libraryData';
 
 type TabState = { query:string; subclassesOpen?:boolean; focus?:string; edition: string; detailId?: string; filters: FacetSelection; sort: string; descending: boolean; positions: Record<string, number>; collapsed: Record<string, string[]> };
@@ -24,6 +25,13 @@ export function useLibrary(entries: Entry[],selectedEntries:Entry[]=[],strictSel
   const kind = visibleHover ? tabOf(visibleHover.entry) : saved.active;
   useEffect(()=>{if(strictSelected){for(const id of snapshots.current.keys())if(!selectedById.has(id)&&!byId.has(id))snapshots.current.delete(id);if(hover&&!visibleHover)setHover(undefined);}},[strictSelected,selectedById,byId,hover,visibleHover]);
   const state=useMemo(()=>saved.tabs[kind]||initial(kind),[saved.tabs,kind]);
+  const detail = visibleHover?.entry || selectedById.get(state.detailId || '') || byId.get(state.detailId || '') || (!strictSelected?snapshots.current.get(state.detailId || ''):undefined);
+  const previewTransition = useWikiPreviewTransition(detail?.id, setHover);
+  const preview = (target: typeof hover) => {
+    const readingId = saved.tabs[saved.active]?.detailId;
+    previewTransition.request(target, target?.entry.id || readingId);
+  };
+  const clearHover = () => { previewTransition.cancel(); setHover(undefined); };
   const [backStack,setBackStack]=useState<{tab:LibraryTab;state:TabState}[]>([]);
   const [navigationKey,setNavigationKey]=useState(0);
   const latest = useRef(saved); latest.current = saved;
@@ -31,13 +39,13 @@ export function useLibrary(entries: Entry[],selectedEntries:Entry[]=[],strictSel
   useEffect(() => { const timer = setTimeout(flush, 120); return () => clearTimeout(timer); }, [saved]);
   useEffect(() => { window.addEventListener('pagehide', flush); return () => { clearTimeout(scrollSave.current); flush(); window.removeEventListener('pagehide', flush); }; }, []);
   function patch(value: Partial<TabState>,tab?:LibraryTab) { setSaved(s => {const target=tab||s.active;return { ...s, tabs: { ...s.tabs, [target]: { ...initial(target), ...s.tabs[target], ...value } } };}); }
-  return { snapshot:()=>structuredClone(latest.current),restore:(snapshot:ReturnType<typeof read>)=>{setHover(undefined);setSaved(structuredClone(snapshot));setNavigationKey(n=>n+1);},kind, state, patch, globalQuery:saved.globalQuery, setGlobalQuery:(globalQuery:string)=>setSaved(s=>({...s,globalQuery})), hover:visibleHover, preview:setHover, navigationKey, canGoBack:backStack.length>0,
-    back:()=>{const target=backStack.at(-1);if(!target)return;setHover(undefined);setBackStack(s=>s.slice(0,-1));setSaved(s=>({...s,active:target.tab,tabs:{...s.tabs,[target.tab]:structuredClone(target.state)}}));setNavigationKey(n=>n+1);},
-    navigate:(entry:Entry,focus?:string,push=true)=>{const current=latest.current,previous=current.tabs[current.active];if(push && previous?.detailId && (previous.detailId!==entry.id || previous.focus!==focus))setBackStack(stack=>[...stack.slice(-99),{tab:current.active,state:structuredClone(previous)}]);setNavigationKey(n=>n+1);snapshots.current.set(entry.id,entry);setHover(undefined);const next=tabOf(entry);setSaved(s=>({...s,active:next,tabs:{...s.tabs,[next]:{...initial(next),...s.tabs[next],detailId:entry.id,focus,...(focus==='subclasses'?{subclassesOpen:true}:{})}}}));},
+  return { snapshot:()=>structuredClone(latest.current),restore:(snapshot:ReturnType<typeof read>)=>{clearHover();setSaved(structuredClone(snapshot));setNavigationKey(n=>n+1);},kind, state, patch, globalQuery:saved.globalQuery, setGlobalQuery:(globalQuery:string)=>setSaved(s=>({...s,globalQuery})), hover:visibleHover, preview, navigationKey, canGoBack:backStack.length>0,
+    back:()=>{const target=backStack.at(-1);if(!target)return;clearHover();setBackStack(s=>s.slice(0,-1));setSaved(s=>({...s,active:target.tab,tabs:{...s.tabs,[target.tab]:structuredClone(target.state)}}));setNavigationKey(n=>n+1);},
+    navigate:(entry:Entry,focus?:string,push=true)=>{const current=latest.current,previous=current.tabs[current.active];if(push && previous?.detailId && (previous.detailId!==entry.id || previous.focus!==focus))setBackStack(stack=>[...stack.slice(-99),{tab:current.active,state:structuredClone(previous)}]);setNavigationKey(n=>n+1);snapshots.current.set(entry.id,entry);clearHover();const next=tabOf(entry);setSaved(s=>({...s,active:next,tabs:{...s.tabs,[next]:{...initial(next),...s.tabs[next],detailId:entry.id,focus,...(focus==='subclasses'?{subclassesOpen:true}:{})}}}));},
     focus:visibleHover ? visibleHover.focus : state.focus,
-    setKind: (next: Kind | LibraryTab) => {setHover(undefined);setSaved(s => ({ ...s, active: next === 'subclass' || next === 'feature' ? 'class' : next }));},
-    detail: visibleHover?.entry || selectedById.get(state.detailId || '') || byId.get(state.detailId || '') || (!strictSelected?snapshots.current.get(state.detailId || ''):undefined),
-    setDetail: (entry?: Entry) => {setHover(undefined);if(entry){snapshots.current.set(entry.id,entry);const next=tabOf(entry);setSaved(s=>({...s,active:next,tabs:{...s.tabs,[next]:{...initial(next),...s.tabs[next],detailId:entry.id,focus:undefined}}}));}else patch({detailId:undefined,focus:undefined});},
+    setKind: (next: Kind | LibraryTab) => {clearHover();setSaved(s => ({ ...s, active: next === 'subclass' || next === 'feature' ? 'class' : next }));},
+    detail,
+    setDetail: (entry?: Entry) => {clearHover();if(entry){snapshots.current.set(entry.id,entry);const next=tabOf(entry);setSaved(s=>({...s,active:next,tabs:{...s.tabs,[next]:{...initial(next),...s.tabs[next],detailId:entry.id,focus:undefined}}}));}else patch({detailId:undefined,focus:undefined});},
     savePosition: (id: string, top: number) => { if(visibleHover)return; const current = latest.current; const tab = current.tabs[current.active] || initial(current.active); tab.positions = { ...tab.positions, [id]: top }; current.tabs[current.active] = tab; clearTimeout(scrollSave.current); scrollSave.current = setTimeout(flush, 120); },
   };
 }

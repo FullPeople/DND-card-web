@@ -12,7 +12,7 @@ const render=(style:WidgetStyle,icon:WidgetIcon='shield',extra={})=>renderToStat
 describe('220 compact resource presentation preserves operation containers',()=>{
  it.each(WIDGET_STYLES)('renders %s with the same runtime values and appearance metadata',style=>{
   const html=render(style);
-  expect(html).toContain(`data-module-style="${style==='ready'?'orbit':style}"`);
+  expect(html).toContain(`data-module-style="${style}"`);
   expect(html).toContain('--rm-icon-tone:#334455');
   expect(html).toContain('data-resource-current="2"');
   expect(html).toContain('动作如潮：2 / 4，打开资源操作');
@@ -30,9 +30,9 @@ describe('220 compact resource presentation preserves operation containers',()=>
   const shield=render('pips','shield'),flame=render('pips','flame');expect(shield).not.toEqual(flame);
   expect(shield).toContain('data-resource-id="test"');expect(flame).toContain('data-resource-id="test"');
  });
- it('displays unbounded resources as numbers rather than a false percentage',()=>{
+ it('keeps an unbounded ring with its actual current value and no false percentage',()=>{
   const html=render('ring','spark',{current:123456,max:0,unlimited:true});
-  expect(html).toContain('data-module-style="number"');expect(html).toContain('123456，打开资源操作');expect(html).not.toContain('∞');expect(html).not.toContain('不限');
+  expect(html).toContain('data-module-style="ring"');expect(html).toContain('123456，打开资源操作');expect(html).toContain('class="rm-readout"><strong>123456</strong></span>');expect(html).not.toContain('class="rm-arc"');expect(html).not.toContain('∞');expect(html).not.toContain('不限');
  });
  it('retains resource operation components on hidden pagination pages',()=>{
   const rows=Array.from({length:10},(_,i)=>({...resource,id:String(i)}));

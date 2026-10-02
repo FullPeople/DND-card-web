@@ -21,9 +21,9 @@ describe('220 approved dashboard persistence and shared canvas',()=>{
  it.each([[0,'counter'],[1,'ready'],[6,'orbit'],[7,'segments'],[10,'segments'],[11,'ring'],[100,'ring'],[10000,'counter'],[2.5,'counter']] as const)('chooses a capacity-driven default for maximum %s',(max,style)=>{
   const rng=vi.fn(()=>{throw Error('must not randomize');});expect(chooseDefaultWidgetStyle({max},rng)).toBe(style);expect(rng).not.toHaveBeenCalled();expect(chooseDefaultWidgetStyle({max,unlimited:true},rng)).toBe('counter');
  });
- it('adapts an incompatible low-count face after capacity grows without spending or rewriting a read',()=>{
+ it('preserves an explicitly chosen low-count face after capacity grows without spending or rewriting a read',()=>{
   const c=newCharacter();c.runtime.resources.a=value(6);const rng=vi.fn(()=>.9);ensureResourceWidget(c,'a',rng);expect(c.quickbarLayout?.widgets?.a.style).toBe('orbit');expect(rng).not.toHaveBeenCalled();
-  c.runtime.resources.a.max=1000;const before=structuredClone(c);const shown=dashboardLayout(resourceModules(Object.entries(c.runtime.resources)),c.quickbarLayout?.widgets,c.quickbarLayout?.attacks);expect(shown.widgets.a.style).toBe('ring');expect(c).toEqual(before);
+  c.runtime.resources.a.max=1000;const before=structuredClone(c);const shown=dashboardLayout(resourceModules(Object.entries(c.runtime.resources)),c.quickbarLayout?.widgets,c.quickbarLayout?.attacks);expect(shown.widgets.a.style).toBe('orbit');expect(c).toEqual(before);
   for(const restored of [readCharacter(exportCharacter(c)).character,importOwlbear(exportLinkedOwlbear(c,evaluate(c)))])expect(restored.quickbarLayout).toEqual(c.quickbarLayout);
  });
  it('never randomizes or mutates unsaved old cards while repeatedly projecting their dashboard',()=>{

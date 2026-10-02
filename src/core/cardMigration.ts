@@ -93,7 +93,7 @@ export function migrationDraft(original:Character,entries:Entry[],choices:Migrat
  }
  // Generate declarations separately; generating new content never deletes old bubbles.
  const template=structuredClone(card);template.selections=template.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind));
- syncFeatures(template,entries,{owners,refresh:true});
+ syncFeatures(template,entries,{owners,refresh:true,equipmentPreview:true});
  const grants:GrantReview[]=template.selections.filter(s=>s.parentId&&owners.has(s.parentId)&&s.grantKey&&!s.grantKey.startsWith('source-spell:')&&bubbles.includes(s.entry.kind)).map(row=>{
   const key=row.parentId+'|'+row.grantKey,owner=card.selections.find(s=>s.id===row.parentId)!;
   const exact=card.selections.filter(s=>s.parentId===row.parentId&&s.grantKey===row.grantKey);

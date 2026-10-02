@@ -67,8 +67,8 @@ describe('independent identity and source constraints', () => {
     c.profile.enabledSources = []; expect(evaluate(c).abilities.int).toBe(10);
     c.profile.exceptions[e.id] = 'DM 同意'; expect(evaluate(c).abilities.int).toBe(12);
   });
-  it('keeps ability declarations readable without silently changing player-entered scores', () => {
-    const c = newCharacter(); c.profile.optional.legacy = true; add(c, entry('race', { ability: [{ str: 2 }] }, '2014'));
+  it('keeps legacy ability declarations readable without silently changing player-entered scores', () => {
+    const c = newCharacter(); delete c.racialAbilityMode; c.profile.optional.legacy = true; add(c, entry('race', { ability: [{ str: 2 }] }, '2014'));
     expect(evaluate(c).abilities.str).toBe(10); c.edition = '2014'; expect(evaluate(c).abilities.str).toBe(10); c.abilities.str = 12; expect(evaluate(c).abilities.str).toBe(12);
   });
 });
@@ -116,7 +116,7 @@ describe('requirements and transitions', () => {
   it('merges parent race mechanics and body into a subrace without losing source identity', () => {
     const entries = normalizeData({ race: [{ name: '测试矮人', source: 'PHB', speed: 25, ability: [{ con: 2 }], entries: ['父种族'] }], subrace: [{ name: '山地', source: 'PHB', raceName: '测试矮人', raceSource: 'PHB', ability: [{ str: 2 }], entries: ['亚种族'] }] }, 'fixed');
     const c = newCharacter('2014'); add(c, entries[1]); const d = evaluate(c);
-    expect(entries[1].raw.ability).toEqual([{ con: 2, str: 2 }]); expect(d.abilities.con).toBe(10); expect(d.abilities.str).toBe(10); expect(d.speed).toBe(25); expect(entries[1].entries).toContain('父种族');
+    expect(entries[1].raw.ability).toEqual([{ con: 2, str: 2 }]); expect(d.abilities.con).toBe(12); expect(d.abilities.str).toBe(12); expect(d.speed).toBe(25); expect(entries[1].entries).toContain('父种族');
   });
   it('leaves feat prerequisites for the player and DM to check', () => {
     const c = newCharacter(); const feat = entry('feat', { prerequisite: [{ level: 4, ability: [{ str: 13 }] }] });

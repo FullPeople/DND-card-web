@@ -132,8 +132,9 @@ test('weapon proficiency chips use translated catalog entities and keep exact so
  data.item=weapons.map(([english,name])=>({name,ENG_name:english,source:'PHB',type:'M',entries:['原创熟练标签与来源检验。']}));
  await ready(page,data);const chips=page.locator('.training-row').filter({has:page.locator('dt').filter({hasText:/^武器$/})});
  for(const [english,name] of weapons){const chip=chips.getByRole('button',{name,exact:true});await expect(chip).toBeVisible();await expect(chip).toHaveAttribute('data-reference',`item:${english}|PHB`);}
- await expect(chips).not.toContainText('|PHB');await chips.getByRole('button',{name:'战斧',exact:true}).hover();await expect(page.getByRole('tooltip').last()).toContainText('原创熟练标签与来源检验');
+ await expect(chips).not.toContainText('|PHB');await chips.getByRole('button',{name:'战斧',exact:true}).hover();const preview=page.locator('.wiki-pane .entry-detail.is-sheet-preview');await expect(preview).toContainText('原创熟练标签与来源检验');await expect(preview.locator('.detail-title')).toContainText('战斧');await expect(preview.locator('.detail-heading')).toContainText('PHB');await expect(page.getByRole('tooltip')).toHaveCount(0);await chips.getByRole('button',{name:'手斧',exact:true}).hover();await expect(preview.locator('.detail-title')).toContainText('手斧');await expect(preview.locator('.detail-title')).not.toContainText('战斧');await page.mouse.move(1,1);await expect(page.locator('.entry-detail.is-sheet-preview')).toHaveCount(0);
  await page.reload({waitUntil:'domcontentloaded'});for(const [,name] of weapons)await expect(chips.getByRole('button',{name,exact:true})).toBeVisible();
+ await page.setViewportSize({width:390,height:844});await page.locator('.brand').click();await expect(page.locator('.wiki-pane')).toBeHidden();await chips.getByRole('button',{name:'战斧',exact:true}).hover();const tooltip=page.getByRole('tooltip').last();await expect(tooltip).toContainText('战斧');await expect(tooltip).toContainText('原创熟练标签与来源检验');
 });
 
 test('book rituals remain separate from ordinary preparation and survive a no-slot cast and reload',async({page})=>{

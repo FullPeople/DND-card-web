@@ -1,3 +1,4 @@
+import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEquipment';
 import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
 import {resolveEntryReference} from './entryReferences';
@@ -14,6 +15,9 @@ export function belongsToClass(child: Selection, parent: Selection) {
 }
 export function removeSelection(c: Character, id: string, dismiss = true) {
   rememberFeatureResources(c);
+  rememberSourceEquipment(c);
+  // Already delivered starting possessions outlive their source selection.
+  for(const item of c.selections)if(item.parentId===id&&item.entry.kind==='item'&&item.grantKey?.startsWith('equipment:')){delete item.parentId;if(item.requirementId?.startsWith(`${id}:`))delete item.requirementId;}
   const row = c.selections.find(s => s.id === id);
   if(dismiss&&row?.grantKey?.startsWith('source-spell:'))return;
   if (dismiss && row?.parentId && row.grantKey) c.dismissedFeatures = [...new Set([...(c.dismissedFeatures || []), `${row.parentId}|${row.grantKey}`])];
@@ -38,8 +42,8 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
 
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
-export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
-  let changed = false;
+export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean;equipmentPreview?:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
+  let changed = review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id)));
   for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
   const selectedNames=entryNameIndex(c.selections.map(s=>s.entry)),publishedNames=catalogNames||entryNameIndex(catalog);
   const named=(name:string)=>review?.refresh?[...(publishedNames.get(name)||[]),...(selectedNames.get(name)||[])]:[...(selectedNames.get(name)||[]),...(publishedNames.get(name)||[])];
@@ -78,8 +82,9 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
     for (const block of Array.isArray(raw.feats) ? raw.feats : []) for (const [ref, granted] of Object.entries(block || {})) {
       if (granted === true) grants.push({ key: `feat:${ref}`, entry: resolve(ref, 'feat') });
     }
-    // Existing background grants retain their saved ownership and dismissal ledger.
-    if(owner.entry.kind==='background')for(const [index,block] of equipmentBlocks(owner.entry).entries()){
+    // The old-card review builds a disposable linked-grant template. Runtime
+    // hydration uses sourceEquipment receipts and never executes this preview path.
+    if(review?.equipmentPreview&&owner.entry.kind==='background')for(const [index,block] of equipmentBlocks(owner.entry).entries()){
       const chosen=c.backgroundChoices?.[owner.id]?.equipment?.[String(index)];
       const options=Object.keys(block).filter(k=>k!=='_');
       const selectedKey=chosen&&options.includes(chosen)?chosen:options.length===1?options[0]:undefined;
@@ -96,7 +101,7 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       if(money!==before){const inv=c.inventory||=structuredClone(inventoryState(c));(inv.grantedCoins||={})[coinKey]=money;inv.coins.gp=Math.max(0,inv.coins.gp+money-before);changed=true;}
     }
     const expected = new Set(grants.map(g => g.key));
-    for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !s.grantKey.startsWith('source-spell:') && !s.grantKey.startsWith('choice:') && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
+    for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !s.grantKey.startsWith('source-spell:') && !s.grantKey.startsWith('choice:') && (!s.grantKey.startsWith('equipment:')||!!review?.equipmentPreview) && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
     for (const grant of grants) {
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);

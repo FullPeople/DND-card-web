@@ -4,17 +4,9 @@ import {newCharacter,type Character} from '../../src/core/model';
 // Retained behaviors from the 217/218 suites, exercised through the approved dashboard.
 const fixture='/tests/fixtures/resource-dashboard220/index.html';
 const read=async(page:Page):Promise<Character>=>JSON.parse((await page.locator('#fixture-data').textContent())!);
-async function seek(scope:Locator,id:string){
- const previous=scope.getByRole('button',{name:'上一页资源',exact:true});
- while(await previous.isEnabled())await previous.click();
- for(let page=0;page<40;page++){
-  const match=scope.locator(`[data-resource-id="${id}"]`);if(await match.isVisible())return match;
-  const next=scope.getByRole('button',{name:'下一页资源',exact:true});if(await next.isDisabled())break;await next.click();
- }
- throw Error(`找不到资源模块 ${id}`);
-}
+async function seek(scope:Locator,id:string){const match=scope.locator(`[data-resource-id="${id}"]`);await match.scrollIntoViewIfNeeded();await expect(match).toBeVisible();return match;}
 
-for(const levels of [2,4,6,9])test(`retained regression: ${levels} standard levels and an independent pact pool remain fully visible across pages`,async({page})=>{
+for(const levels of [2,4,6,9])test(`retained regression: ${levels} standard levels and an independent pact pool remain accessible through continuous vertical scrolling`,async({page})=>{
  const c=newCharacter();c.id='dashboard220-original-fixture';c.name='原创密集法术位';
  c.runtime.resources=Object.fromEntries(Array.from({length:levels},(_,i)=>[`spell-slot:${i+1}`,{name:`${i+1}环法术位`,current:2,max:4,type:'count'}]));
  c.runtime.resources['pact-slot:5']={name:'5环契约法术位',current:1,max:3,type:'count'};
@@ -23,17 +15,17 @@ for(const levels of [2,4,6,9])test(`retained regression: ${levels} standard leve
  await page.addInitScript(([key,data])=>localStorage.setItem(key,data),[`resource-dashboard220:${scenario}`,JSON.stringify(c)]);
  await page.goto(`${fixture}?scenario=${scenario}`);const scope=page.locator('.fixture-quickbar');
  for(const width of [1512,390]){
-  await page.setViewportSize({width,height:982});const previous=scope.getByRole('button',{name:'上一页资源',exact:true});while(await previous.isEnabled())await previous.click();
+  await page.setViewportSize({width,height:982});await expect(scope.locator('.resource-page-nav')).toHaveCount(0);
   const seen=new Map<string,string>();
-  for(let n=0;n<20;n++){
+  for(const id of ['spell-slot:1','pact-slot:5']){
+   await seek(scope,id);
    const faces=scope.locator('.resource-widget-face');
    expect(await faces.evaluateAll(nodes=>nodes.every(face=>{
     const bounds=face.getBoundingClientRect();
     return face.scrollHeight<=face.clientHeight+1&&[...face.querySelectorAll('.rm-name,.resource-subvalue,.rm-pool-label,.rm-pool-current')].every(child=>{const rect=child.getBoundingClientRect(),styles=getComputedStyle(child);return rect.width>0&&rect.height>0&&Number.parseFloat(styles.fontSize)>=8&&styles.visibility==='visible'&&Number(styles.opacity)>0&&rect.top>=bounds.top-1&&rect.bottom<=bounds.bottom+1&&rect.left>=bounds.left-1&&rect.right<=bounds.right+1;});
    }))).toBe(true);
    for(const row of await scope.locator('[data-subresource-id]').evaluateAll(nodes=>nodes.map(node=>({id:node.getAttribute('data-subresource-id')!,level:node.querySelector('.rm-pool-label')!.textContent!,current:node.querySelector('.rm-pool-current')!.textContent!})))){seen.set(row.id,row.level);expect(row.current).toBe(String(c.runtime.resources[row.id].current));}
-   await scope.screenshot({path:test.info().outputPath(`dense-${levels}-${width}-page-${n+1}.png`)});
-   const next=scope.getByRole('button',{name:'下一页资源',exact:true});if(await next.isDisabled())break;await next.click();
+   await scope.screenshot({path:test.info().outputPath(`dense-${levels}-${width}-${id.replace(':','-')}.png`)});
   }
   expect([...seen.keys()].sort()).toEqual(Object.keys(c.runtime.resources).sort());
   expect(Array.from({length:levels},(_,i)=>seen.get(`spell-slot:${i+1}`))).toEqual(['I','II','III','IV','V','VI','VII','VIII','IX'].slice(0,levels));expect(seen.get('pact-slot:5')).toBe('V');
@@ -41,7 +33,7 @@ for(const levels of [2,4,6,9])test(`retained regression: ${levels} standard leve
  }
 });
 
-test('retained regression: touch can spend a resource and change resource pages without scrollbars',async({browser,baseURL,browserName})=>{
+test('retained regression: touch can spend and vertically reach other resources without losing balances',async({browser,baseURL,browserName})=>{
  test.skip(browserName==='firefox','Firefox does not support Playwright isMobile contexts; narrow desktop interactions have separate coverage');
  const context=await browser.newContext({baseURL,viewport:{width:375,height:650},hasTouch:true,isMobile:true});
  try {
@@ -49,20 +41,20 @@ test('retained regression: touch can spend a resource and change resource pages 
   await scope.locator('[data-resource-id="surge"] .resource-widget-face').tap();const panel=page.getByRole('dialog',{name:'动作如潮资源操作',exact:true});
   await panel.getByRole('button',{name:'动作如潮 3',exact:true}).tap();await panel.getByRole('button',{name:'关闭资源操作',exact:true}).tap();
   expect((await read(page)).runtime.resources.surge.current).toBe(2);await expect(scope.locator('[data-resource-id="surge"]')).toHaveAttribute('data-resource-current','2');
-  await scope.getByRole('button',{name:'下一页资源',exact:true}).tap();await expect(scope.locator('[data-resource-id="focus"]')).toBeVisible();
+  await seek(scope,'focus');await expect(scope.locator('.resource-page-nav')).toHaveCount(0);
   const geometry=await scope.locator('.resource-widget-canvas').evaluate(el=>({w:el.clientWidth,h:el.clientHeight,sw:el.scrollWidth,sh:el.scrollHeight}));expect(geometry.sw).toBeLessThanOrEqual(geometry.w+1);expect(geometry.sh).toBeLessThanOrEqual(geometry.h+1);
-  await scope.getByRole('button',{name:'上一页资源',exact:true}).tap();await expect(scope.locator('[data-resource-id="surge"]')).toHaveAttribute('data-resource-current','2');await page.reload();expect((await read(page)).runtime.resources.surge.current).toBe(2);
+  await seek(scope,'surge');await expect(scope.locator('[data-resource-id="surge"]')).toHaveAttribute('data-resource-current','2');await page.reload();expect((await read(page)).runtime.resources.surge.current).toBe(2);
  } finally {await context.close();}
 });
 
 test('retained regression: a custom group edits only its selected child and preserves other balances after reload',async({page})=>{
  await page.goto(fixture);const initial=(await read(page)).runtime.resources;
- await page.locator('.fixture-quickbar').getByRole('button',{name:'仪表盘',exact:true}).click();const dialog=page.getByRole('dialog',{name:'仪表盘',exact:true});
- await dialog.locator('[data-template-id="pool"]').click();await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const added=await read(page),ids=Object.keys(added.runtime.resources).filter(id=>!Object.hasOwn(initial,id));expect(ids).toHaveLength(3);
+ await page.getByTestId('dashboard-open').click();const dialog=page.getByRole('dialog',{name:'仪表盘',exact:true});
+ await dialog.getByRole('button',{name:'多模块',exact:true}).click();await dialog.getByRole('button',{name:'添加子项',exact:true}).click();await dialog.locator('[data-template-id="pool"]').click();await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const added=await read(page),ids=Object.keys(added.runtime.resources).filter(id=>!Object.hasOwn(initial,id));expect(ids).toHaveLength(3);
  const anchor=ids.find(id=>added.quickbarLayout?.widgets?.[id]?.members?.length===3)!;const group=await seek(dialog,anchor);await group.locator('.resource-widget-face').click();expect((await read(page)).runtime.resources).toEqual(added.runtime.resources);await expect(page.locator('.resource-widget-popover')).toHaveCount(0);
- await group.locator('.resource-widget-face').dblclick();await expect(dialog.locator('.resource-module-tabs button')).toHaveCount(3);await dialog.getByRole('button',{name:'新资源 2',exact:true}).click();
+ await group.locator('.resource-widget-face').dblclick();await expect(dialog.locator('.resource-module-tabs button')).toHaveCount(3);await dialog.getByRole('button',{name:'子资源 2',exact:true}).click();
  await dialog.getByRole('textbox',{name:'资源名称',exact:true}).fill('余烬');await dialog.getByRole('spinbutton',{name:'资源剩余',exact:true}).fill('1');await dialog.getByRole('button',{name:'保存',exact:true}).click();
- const expected=structuredClone(added.runtime.resources),child=ids.find(id=>expected[id].name==='新资源 2')!;expected[child]={...expected[child],name:'余烬',current:1,unlimited:false,locked:false,icon:'gem'};
+ const expected=structuredClone(added.runtime.resources),child=ids.find(id=>expected[id].name==='子资源 2')!;expected[child]={...expected[child],name:'余烬',current:1,unlimited:false,locked:false,icon:'gem'};
  await dialog.getByRole('button',{name:'保存布局',exact:true}).click();expect((await read(page)).runtime.resources).toEqual(expected);await page.reload();expect((await read(page)).runtime.resources).toEqual(expected);
  const main=page.locator('.fixture-quickbar'),restored=await seek(main,anchor);await expect(restored.locator('.resource-subvalue')).toHaveCount(3);await restored.locator('.resource-widget-face').click();
  const panel=page.getByRole('dialog',{name:'新资源资源操作',exact:true});await panel.getByText('余烬',{exact:true}).hover();await panel.getByRole('button',{name:'设置余烬',exact:true}).click();const config=page.getByRole('dialog',{name:'资源配置',exact:true});

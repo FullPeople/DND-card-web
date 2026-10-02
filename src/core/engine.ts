@@ -1,4 +1,5 @@
 import {planFeatureResources} from './automation/featureResources';
+import {planRacialAbilities} from './racialAbilities';
 import {sheetChoices} from './automation/choices';
 import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
@@ -34,7 +35,15 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(JSON.stringify(e.entries)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
     // Background ability choices are annotations. The sheet's base scores
     // already contain the player's allocation, so do not apply it a second time.
-    if (e.kind === 'race') { (raw.size || []).forEach((s: string) => sizes.add(s)); }
+    if (e.kind === 'race') {
+      (raw.size || []).forEach((s: string) => sizes.add(s));
+      const racial = planRacialAbilities(c, selection);
+      issues.push(...racial.issues);
+      for (const a of ABILITIES) {
+        abilities[a] += racial.bonuses[a] || 0;
+        if (racial.trace[a]) trace[a].push(...racial.trace[a]!);
+      }
+    }
     if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
     // Choices are explicit saved answers; evaluation never creates an answer or grant.
     const skillBlocks = e.kind === 'class' ? (selection.id===classes[0]?.id?raw.startingProficiencies?.skills:raw.multiclassing?.proficienciesGained?.skills) : raw.skillProficiencies;

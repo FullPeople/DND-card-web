@@ -7,7 +7,7 @@ export type CanonicalWidgetStyle=typeof WIDGET_STYLES[number];
 export type WidgetStyle=CanonicalWidgetStyle|'bar'|'icon';
 export const WIDGET_ICONS=['spark','diamond','shield','flame','leaf','bottle'] as const;
 export type WidgetIcon=typeof WIDGET_ICONS[number];
-export type ResourceWidgetLayout={x:number;y:number;w:number;h:number;page:number;style:WidgetStyle;members?:string[];label?:string;color?:string;icon?:WidgetIcon;resourceArea?:true;split?:number};
+export type ResourceWidgetLayout={x:number;y:number;w:number;h:number;page:number;style:WidgetStyle;members?:string[];label?:string;color?:string;icon?:WidgetIcon;resourceArea?:true;split?:number;contentScale?:number};
 export const WIDGET_COLS=12,WIDGET_ROWS=6,ATTACKS_WIDGET_ID='__attacks__';
 export const widgetStyleNames:Record<WidgetStyle,string>={ring:'环形',pips:'图标',pool:'子资源',half:'半圆',orbit:'断环',square:'方框',segments:'分段槽',reservoir:'容器',matrix:'图标矩阵',fraction:'斜分数',counter:'计数牌',poolchips:'子资源铭牌',poolbars:'子资源条',poolpips:'子资源图标',ready:'单次状态',diamond:'菱形',bar:'分段槽',icon:'图标'};
 const clamp=(n:number,min:number,max:number)=>Math.max(min,Math.min(max,Math.round(Number.isFinite(n)?n:min)));
@@ -19,12 +19,12 @@ export function canonicalWidgetStyle(style?:WidgetStyle):CanonicalWidgetStyle{
 }
 export function normalizeWidget(input?:Partial<ResourceWidgetLayout>):ResourceWidgetLayout{
  const w=clamp(input?.w??4,2,WIDGET_COLS),h=clamp(input?.h??2,2,WIDGET_ROWS);
- return {w,h,x:clamp(input?.x??0,0,WIDGET_COLS-w),y:clamp(input?.y??0,0,WIDGET_ROWS-h),page:clamp(input?.page??0,0,2999),style:canonicalWidgetStyle(input?.style),...(input?.members?{members:[...input.members]}:{}),...(input?.label?{label:input.label}:{}),...(isColor(input?.color)?{color:input.color}:{}),...(isIcon(input?.icon)?{icon:input.icon}:{}),...(input?.resourceArea===true?{resourceArea:true as const}:{}),...(input?.split!==undefined?{split:dashboardSplit(input.split)}:{})};
+ return {w,h,x:clamp(input?.x??0,0,WIDGET_COLS-w),y:clamp(input?.y??0,0,WIDGET_ROWS-h),page:clamp(input?.page??0,0,2999),style:canonicalWidgetStyle(input?.style),...(input?.members?{members:[...input.members]}:{}),...(input?.label?{label:input.label}:{}),...(isColor(input?.color)?{color:input.color}:{}),...(isIcon(input?.icon)?{icon:input.icon}:{}),...(input?.resourceArea===true?{resourceArea:true as const}:{}),...(input?.split!==undefined?{split:dashboardSplit(input.split)}:{}),...(input?.contentScale!==undefined?{contentScale:Math.max(.5,Math.min(2,Number.isFinite(input.contentScale)?input.contentScale:1))}:{})};
 }
 export function validWidget(value:unknown):value is ResourceWidgetLayout{
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
  const v=value as ResourceWidgetLayout;
- return ['x','y','w','h','page'].every(k=>Number.isInteger(v[k as keyof ResourceWidgetLayout]))&&v.x>=0&&v.y>=0&&v.w>=2&&v.h>=2&&v.x+v.w<=WIDGET_COLS&&v.y+v.h<=WIDGET_ROWS&&v.page>=0&&v.page<3000&&(v.style==='bar'||v.style==='icon'||WIDGET_STYLES.includes(v.style))&&(v.members===undefined||Array.isArray(v.members)&&v.members.length>=2&&v.members.length<=12&&new Set(v.members).size===v.members.length&&v.members.every(id=>typeof id==='string'&&id.length>0&&id.length<=2000))&&(v.label===undefined||typeof v.label==='string'&&v.label.length<=100)&&(v.color===undefined||isColor(v.color))&&(v.icon===undefined||isIcon(v.icon))&&(v.resourceArea===undefined||v.resourceArea===true)&&(v.split===undefined||Number.isFinite(v.split)&&v.split>=.2&&v.split<=.55);
+ return ['x','y','w','h','page'].every(k=>Number.isInteger(v[k as keyof ResourceWidgetLayout]))&&v.x>=0&&v.y>=0&&v.w>=2&&v.h>=2&&v.x+v.w<=WIDGET_COLS&&v.y+v.h<=WIDGET_ROWS&&v.page>=0&&v.page<3000&&(v.style==='bar'||v.style==='icon'||WIDGET_STYLES.includes(v.style))&&(v.members===undefined||Array.isArray(v.members)&&v.members.length>=2&&v.members.length<=12&&new Set(v.members).size===v.members.length&&v.members.every(id=>typeof id==='string'&&id.length>0&&id.length<=2000))&&(v.label===undefined||typeof v.label==='string'&&v.label.length<=100)&&(v.color===undefined||isColor(v.color))&&(v.icon===undefined||isIcon(v.icon))&&(v.resourceArea===undefined||v.resourceArea===true)&&(v.split===undefined||Number.isFinite(v.split)&&v.split>=.2&&v.split<=.55)&&(v.contentScale===undefined||Number.isFinite(v.contentScale)&&v.contentScale>=.5&&v.contentScale<=2);
 }
 export function validWidgets(value:unknown){return value===undefined||!!value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=3000&&Object.values(value).every(validWidget);}
 const overlaps=(a:ResourceWidgetLayout,b:ResourceWidgetLayout)=>a.page===b.page&&a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
@@ -48,6 +48,7 @@ export function resourceWidgetLayout(ids:string[],saved:Record<string,ResourceWi
 }
 export function minimumWidgetSize(style:WidgetStyle):{w:number;h:number}{
  const id=canonicalWidgetStyle(style);
+ if(id==='ready')return {w:2,h:2};
  if(['ring','orbit','square','reservoir'].includes(id))return {w:2,h:3};
  if(['pool','poolchips'].includes(id))return {w:4,h:2};
  if(['counter','poolbars','poolpips'].includes(id))return {w:4,h:3};
@@ -76,14 +77,18 @@ export function chooseDefaultWidgetStyle(resource:Pick<ResourceValue,'max'|'unli
  return resource.max>=10000?'counter':'ring';
 }
 export const countableResource=(resource:Pick<ResourceValue,'max'|'unlimited'>)=>!resource.unlimited&&Number.isInteger(resource.max)&&resource.max>=1&&resource.max<=10;
-export function suitableWidgetStyle(style:WidgetStyle,rows:ResourceModule['rows']):CanonicalWidgetStyle{
- const requested=canonicalWidgetStyle(style),grouped=['pool','poolchips','poolbars','poolpips'];
- if(rows.length>1)return grouped.includes(requested)?requested:rows.every(([,r])=>countableResource(r))?'poolpips':'poolbars';
- const r=rows[0]?.[1];if(!r)return requested;
- if(['orbit','segments','pips','matrix'].includes(requested)&&!countableResource(r)||requested==='ready'&&(r.unlimited||r.max!==1))return chooseDefaultWidgetStyle(r);
- return requested;
+/** Candidate eligibility only. A saved style is never substituted after capacity changes. */
+export function supportsWidgetStyle(style:WidgetStyle,rows:ResourceModule['rows'],multi=rows.length>1){
+ const id=canonicalWidgetStyle(style),grouped=['pool','poolchips','poolbars','poolpips'].includes(id);
+ if(grouped!==multi||!rows.length)return false;
+ if(multi)return id!=='poolpips'||rows.every(([,r])=>countableResource(r));
+ const r=rows[0][1];
+ if(r.unlimited||r.max<=0)return ['counter','fraction','ring'].includes(id);
+ if(id==='ready')return r.max===1;
+ if(['pips','matrix','orbit','segments'].includes(id))return countableResource(r);
+ return true;
 }
-export function dashboardSplit(value?:number){return Math.max(.2,Math.min(.55,Number.isFinite(value)?value!:.32));}
+export function dashboardSplit(value?:number){return Math.max(.2,Math.min(.55,Number.isFinite(value)?value!:.40));}
 function fixedAttacks(input?:ResourceWidgetLayout){return normalizeWidget({...input,x:0,y:0,w:4,h:6,page:0,style:'segments',resourceArea:true,split:dashboardSplit(input?.split??(input?input.w/12:undefined))});}
 export type ResourceModule={id:string;name:string;rows:[string,ResourceValue][];slots:boolean};
 export const isWidgetSpellSlot=(id:string)=>/^(spell|pact)-slot:[1-9]$/.test(id);
@@ -117,23 +122,23 @@ export const RESOURCE_TEMPLATES=[
  {id:'poolchips',name:'子资源铭牌',description:'',style:'poolchips',w:6,h:3,multi:true},
  {id:'poolbars',name:'子资源条',description:'',style:'poolbars',w:6,h:4,multi:true},
  {id:'poolpips',name:'子资源图标',description:'',style:'poolpips',w:6,h:4,multi:true},
- {id:'ready',name:'单次状态',description:'',style:'ready',w:4,h:2,multi:false},
+ {id:'ready',name:'单次状态',description:'',style:'ready',w:2,h:2,multi:false},
  {id:'diamond',name:'菱形',description:'',style:'diamond',w:3,h:3,multi:false},
 ] as const;
 export type ResourceTemplate=typeof RESOURCE_TEMPLATES[number];
-export type ResourceTemplateValues={name:string;current:number;max:number;unlimited:boolean;count?:number};
+export type ResourceTemplateValues={name:string;current:number;max:number;unlimited:boolean;count?:number;children?:{name:string;current:number;max:number;unlimited:boolean}[]};
 /** A group needs room for every actual resource pool, not only its first row. */
 export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle):{w:number;h:number}{
  const min=minimumWidgetSize(style),multi=module.slots||module.rows.length>1,wide=multi&&module.rows.length>4;
  const multiHeight=!multi?2:module.rows.length>9?6:module.rows.length>6?5:module.rows.length>3?4:['poolbars','poolpips'].includes(canonicalWidgetStyle(style))?4:module.slots?2:3;
  const capacity=module.rows[0]?.[1].max||0,digits=Math.max(...module.rows.map(([,r])=>Math.max(String(r.current).length,String(r.max).length))),discrete=['pips','matrix','orbit','segments'].includes(canonicalWidgetStyle(style));
- return {w:Math.max(min.w,multi?(digits>6?12:wide?8:6):digits>6?6:digits>4?4:discrete&&capacity>6?5:3),h:Math.max(min.h,multiHeight,discrete&&capacity>6&&style!=='segments'?3:2)};
+ return {w:Math.max(min.w,multi?(digits>6?12:wide?8:6):digits>6?6:digits>4?4:discrete&&capacity>6?5:style==='ready'?2:3),h:Math.max(min.h,multiHeight,discrete&&capacity>6&&style!=='segments'?3:2)};
 }
 /** Changes only this module when growing resource data requires more room.
  * Any resulting collision remains visible for the user to resolve. */
 export function normalizeModuleWidget(module:ResourceModule,input?:Partial<ResourceWidgetLayout>):ResourceWidgetLayout{
  const savedStyle=input?canonicalWidgetStyle(input.style):undefined;
- const style=suitableWidgetStyle(savedStyle??(module.slots||module.rows.length>1?'poolpips':chooseDefaultWidgetStyle(module.rows[0][1])),module.rows);
+ const style=savedStyle??(module.slots||module.rows.length>1?'poolpips':chooseDefaultWidgetStyle(module.rows[0][1]));
  const template=RESOURCE_TEMPLATES.find(t=>t.id===style)!;
  const widget=normalizeWidget(input??{style,w:template.w,h:module.slots?2:template.h}),min=resourceModuleMinimum(module,style);
  return normalizeWidget({...widget,style,w:Math.max(widget.w,min.w),h:Math.max(widget.h,min.h)});
@@ -204,14 +209,17 @@ export function resourceCanvasRows(c:Character){return Object.entries(c.runtime.
 /** Explicit creation only. Existing values, locks and automatic resources remain untouched. */
 export function addResourceModule(c:Character,template:ResourceTemplate|undefined,page:number,newId:()=>string,rng:()=>number=Math.random,placement?:{x:number;y:number},values?:ResourceTemplateValues){
  const chosen=template??RESOURCE_TEMPLATES.find(t=>t.id===chooseDefaultWidgetStyle(values??{max:3},rng))!;
- if(values&&(!values.name.trim()||values.name.trim().length>100||!Number.isInteger(values.current)||values.current<0||values.current>999999999||!Number.isInteger(values.max)||values.max<0||values.max>99999||!values.unlimited&&values.current>values.max))throw Error('检查名称、当前值与上限');
+ if(values&&(!values.name.trim()||values.name.trim().length>100||!(chosen.multi&&values.children)&&(!Number.isInteger(values.current)||values.current<0||values.current>999999999||!Number.isInteger(values.max)||values.max<0||values.max>99999||!values.unlimited&&values.current>values.max)))throw Error('检查名称、当前值与上限');
  if(chosen.multi&&values?.count!==undefined&&(!Number.isInteger(values.count)||values.count<2||values.count>12))throw Error('子资源数量应为2至12');
- const ids=Array.from({length:chosen.multi?values?.count??3:1},()=>newId());if(new Set(ids).size!==ids.length||ids.some(id=>!id||id.length>2000||Object.hasOwn(c.runtime.resources,id)))throw Error('资源标识重复');
+ const childValues=chosen.multi?values?.children:undefined;
+ if(childValues&&(childValues.length<2||childValues.length>12||childValues.some(v=>!v.name.trim()||v.name.trim().length>100||!Number.isInteger(v.current)||v.current<0||v.current>999999999||!Number.isInteger(v.max)||v.max<0||v.max>99999||!v.unlimited&&v.current>v.max)))throw Error('检查子资源名称、当前值与上限');
+ const ids=Array.from({length:chosen.multi?childValues?.length??values?.count??3:1},()=>newId());if(new Set(ids).size!==ids.length||ids.some(id=>!id||id.length>2000||Object.hasOwn(c.runtime.resources,id)))throw Error('资源标识重复');
  const layout=c.quickbarLayout||={order:[],hidden:[]},saved=layout.widgets||={},before=resourceModules(resourceCanvasRows(c),saved),current=freeDashboardLayout(before,saved,layout.attacks),occupied=Object.values(current.widgets);
- const sample=values??{name:'新资源',current:chosen.id==='ready'?1:3,max:chosen.id==='ready'?1:3,unlimited:false},module:ResourceModule={id:ids[0],name:sample.name,rows:ids.map(id=>[id,sample]),slots:false};
+ const sample=values??{name:'新资源',current:chosen.id==='ready'?1:3,max:chosen.id==='ready'?1:3,unlimited:false},module:ResourceModule={id:ids[0],name:sample.name,rows:ids.map((id,i)=>[id,childValues?.[i]??sample]),slots:false};
+ if(!supportsWidgetStyle(chosen.style,module.rows,chosen.multi))throw Error('当前资源不能使用此样式');
  const initial=normalizeModuleWidget(module,{style:chosen.style,w:chosen.w,h:chosen.h,page,...placement,...(ids.length>1?{members:ids,label:values?.name.trim()||'组合资源'}:{})});
  const placed=placement?initial:place(initial,occupied);
- ids.forEach((id,i)=>Object.defineProperty(c.runtime.resources,id,{value:values?{name:ids.length>1?`${values.name.trim()} ${i+1}`:values.name.trim(),current:values.current,max:values.max,unlimited:values.unlimited,type:values.unlimited?'number':'count'}:{name:ids.length>1?`子资源 ${i+1}`:'新资源',current:chosen.id==='ready'?1:3,max:chosen.id==='ready'?1:3,type:'count'},enumerable:true,writable:true,configurable:true}));
+ ids.forEach((id,i)=>Object.defineProperty(c.runtime.resources,id,{value:childValues?{...childValues[i],name:childValues[i].name.trim(),type:childValues[i].unlimited?'number':'count'}:values?{name:ids.length>1?`${values.name.trim()} ${i+1}`:values.name.trim(),current:values.current,max:values.max,unlimited:values.unlimited,type:values.unlimited?'number':'count'}:{name:ids.length>1?`子资源 ${i+1}`:'新资源',current:chosen.id==='ready'?1:3,max:chosen.id==='ready'?1:3,type:'count'},enumerable:true,writable:true,configurable:true}));
  layout.widgets={...migrateDashboardWidgets(saved,layout.attacks),...current.widgets,[ids[0]]:placed};layout.attacks=current.attacks;
  return {id:ids[0],page:placed.page};
 }

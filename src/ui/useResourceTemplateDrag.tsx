@@ -47,17 +47,20 @@ export function useResourceTemplateDrag(options:Options){
    if(active.disabled||!source.isConnected||!canvas)return null;
    const rect=canvas.getBoundingClientRect();
    if(rect.width<=0||rect.height<=0)return null;
-   const width=rect.width*size.w/WIDGET_COLS,height=rect.height*size.h/WIDGET_ROWS;
-   const inside=x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom;
+   const bands=Number(canvas.dataset.bands)||1,rows=bands*WIDGET_ROWS;
+   const width=rect.width*size.w/WIDGET_COLS,height=rect.height*size.h/rows;
+   const viewport=canvas.closest('.resource-widget-scroll')?.getBoundingClientRect()??rect;
+   const inside=x>=Math.max(rect.left,viewport.left)&&x<=Math.min(rect.right,viewport.right)&&y>=Math.max(rect.top,viewport.top)&&y<=Math.min(rect.bottom,viewport.bottom);
    if(!inside)return {template,values,portal,bounds:{left:x-width/2,top:y-height/2,width,height},overlap:false};
    const col=Math.max(0,Math.min(WIDGET_COLS-size.w,Math.round((x-rect.left)/rect.width*WIDGET_COLS-size.w/2)));
-   const row=Math.max(0,Math.min(WIDGET_ROWS-size.h,Math.round((y-rect.top)/rect.height*WIDGET_ROWS-size.h/2)));
-   const left=rect.left+col/WIDGET_COLS*rect.width,top=rect.top+row/WIDGET_ROWS*rect.height;
+   const globalRow=Math.max(0,Math.min(rows-size.h,Math.round((y-rect.top)/rect.height*rows-size.h/2)));
+   const page=Math.floor(globalRow/WIDGET_ROWS),row=Math.min(WIDGET_ROWS-size.h,globalRow%WIDGET_ROWS);
+   const left=rect.left+col/WIDGET_COLS*rect.width,top=rect.top+(page*WIDGET_ROWS+row)/rows*rect.height;
    const overlap=[...canvas.querySelectorAll<HTMLElement>('.resource-widget')].some(widget=>{
     const box=widget.getBoundingClientRect();
     return box.width>0&&box.height>0&&left<box.right-.25&&left+width>box.left+.25&&top<box.bottom-.25&&top+height>box.top+.25;
    });
-   return {template,values,portal,bounds:{left,top,width,height},placement:{x:col,y:row,page:active.page},overlap};
+   return {template,values,portal,bounds:{left,top,width,height},placement:{x:col,y:row,page},overlap};
   }
   function move(event:PointerEvent){
    if(event.pointerId!==pointerId)return;

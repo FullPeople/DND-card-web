@@ -1,3 +1,4 @@
+import {planRacialAbilities} from '../racialAbilities';
 import {numericExpression} from '../numericExpression';
 import {type Character,type Selection,type Issue,type RuntimeResource,type Ability} from '../model';
 import {parentClass} from '../featureOwnership';
@@ -13,7 +14,7 @@ const count=(v:string)=>/^\d+$/.test(v)?Number(v):words[v];
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const strings=(v:unknown,depth=0):string[]=>depth>12?[]:typeof v==='string'?[v]:Array.isArray(v)?v.flatMap(n=>strings(n,depth+1)):plain(v)?[...strings(v.entries,depth+1),...strings(v.items,depth+1)]:[];
 const clean=(v:unknown)=>String(v??'').replace(/\{@\w+ ([^|}]+)(?:[^}]*)}/g,'$1').replace(/<[^>]*>/g,'').replace(/\s/g,'');
-function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&selectionActive(c,row))for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;return Math.floor((value-10)/2);}
+function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
 function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();return {cls,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0))-1)/4)+(c.sheetBonuses?.proficiency||0)};}
 function formulaText(c:Character,row:Selection,formula:string):string{
  const {level,prof}=context(c,row);

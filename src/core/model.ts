@@ -22,6 +22,7 @@ export interface Entry {
   packId: string; revision: string; page?: number; entries: unknown[]; raw: Raw;
   effects?: Effect[]; choices?: ChoiceDefinition[]; dependencies?: string[];
 }
+export interface SourceEquipmentReceipt { received:string[]; choices:Record<string,string>; itemIds:string[]; ownerIds:string[]; completed:boolean }
 export interface Selection { catalogReview?:{edition:Edition;entryId:string;source:string;kind:Kind}; id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; weaponAbility?:Ability; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
 export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check';castLevel?:number}}
 export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; classSpells?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
@@ -29,6 +30,8 @@ export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').Confli
 export interface RuntimeResource {current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string}}
 export interface Character {
   automation?:import('./automation/state').AutomationState;
+  /** Present only when abilities exclude source-declared racial increases. */
+  racialAbilityMode?:'separate-v1';
   locked?:boolean;
   schemaVersion: 1; id: string; revision: number; name: string; player: string; edition: Edition;
   createdAt: string; updatedAt: string; abilities: Record<Ability, number>; baseHp: number;
@@ -38,7 +41,7 @@ export interface Character {
   illustration?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
   palette?: Partial<Record<'paper'|'surface'|'frame'|'heading'|'ink'|'badge',string>>;
   spellSettings?: SpellSettings;
-  inventory?: {capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
+  inventory?: {sourceEquipment?:Record<string,SourceEquipmentReceipt>;capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
   backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
@@ -75,7 +78,7 @@ export const uid = () => crypto.randomUUID();
 export function newCharacter(edition: Edition = '2024'): Character {
   const now = new Date().toISOString();
   return { schemaVersion: 1, id: uid(), revision: 1, name: '未命名的冒险者', player: '', edition, createdAt: now, updatedAt: now,
-    abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, baseHp: 0,
+    abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, racialAbilityMode:'separate-v1', baseHp: 0,
     identity: { gender: '', alignment: '', age: '', description: '' }, selections: [], answers: {}, reviewed: [], notes: '',
     profile: { enabledSources: ['PHB', 'XPHB'], optional: { feats: true, multiclass: false, legacy: false }, exceptions: {} },
     runtime: { hp: 0, tempHp: 0, inspiration: 0, resources: {} } };
@@ -105,4 +108,3 @@ export function skillKey(name: string): string {
   const compact = name.toLowerCase().replace(/[\s_-]/g, '');
   return Object.keys(SKILLS).find(k => k.toLowerCase() === compact || SKILLS[k].name === name) ?? name;
 }
-

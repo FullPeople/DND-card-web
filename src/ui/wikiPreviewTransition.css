@@ -1,0 +1,5 @@
+.library-document .reading-focus-overlay{position:absolute;top:0;left:0;z-index:0;pointer-events:none;opacity:0;background:#ffdf794d;box-shadow:inset 3px 0 #d2ad4c;contain:layout style paint;transition:transform 100ms ease-out,width 100ms ease-out,height 100ms ease-out,opacity 100ms ease-out}
+.library-document .reading-focus-overlay[data-active=true]{opacity:1}
+.library-document:has(>.reading-focus-overlay)>.document-prose{position:relative;z-index:1}
+.library-document .document-section.reading-highlight{background:transparent;box-shadow:none}
+@media(prefers-reduced-motion:reduce){.library-document .reading-focus-overlay{transition:none}}

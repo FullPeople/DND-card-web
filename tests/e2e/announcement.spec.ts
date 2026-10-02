@@ -20,6 +20,7 @@ async function settle(page:Page,scroller:Locator){let last=-1;for(let i=0;i<25;i
 
 test('首次打开单机站弹出公告，版本、问题清单与默认展开的 Q&A 完整',async({page})=>{
  await open(page);
+ const updates=dialog(page).locator('.announcement-issues');await expect(updates.locator('> summary')).toHaveText('版本更新');expect(await updates.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);await expect(updates.locator('.announcement-current')).toBeHidden();await updates.locator('> summary').click();
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
  await expect(dialog(page).locator('.announcement-current>h3')).toHaveText(RELEASE_DATE);
  await expect(dialog(page).locator('.announcement-current li')).toHaveCount(RELEASE_NOTES.length);
@@ -51,7 +52,7 @@ test('首次打开单机站弹出公告，版本、问题清单与默认展开�
 });
 
 test('弹窗高度固定：展开答案只滚动正文，超出部分可滑下去看',async({page})=>{
- await open(page);
+ await open(page);await dialog(page).locator('.announcement-issues>summary').click();
  const body=dialog(page).locator('.announcement-body');
  const height=async()=>(await dialog(page).boundingBox())!.height;
  const before=await height();
@@ -173,4 +174,18 @@ test('手机端弹窗内滑动正常：只滚正文、不误触、不换面板',
  await page.screenshot({path:'test-results-standalone/announcement-phone.png'});
  expect(errors).toEqual([]);
  await context.close();
+});
+
+test('foreground barrage retains color above the backdrop and release identity comes only from shipped manifest',async({page})=>{
+ await page.route('**/release.json',r=>r.fulfill({json:{version:'standalone-1.0.232',announcementVersion:APP_VERSION,sourceCommit:'unshipped-sha-must-not-be-shown'}}));
+ await page.route('**/support/supporters.json',r=>r.fulfill({json:[{name:'原创彩色验收',amount:4}]}));await open(page);
+ await expect(dialog(page).locator('.announcement-version')).toContainText('standalone-1.0.232');await expect(dialog(page)).not.toContainText('unshipped-sha');
+ const flight=dialog(page).locator('.supporter-flight').first();await expect(flight).toBeAttached();
+ expect(await flight.evaluate(node=>node.closest('dialog')?.matches(':modal'))).toBe(true);
+ const paint=await flight.evaluate(node=>{const s=getComputedStyle(node),rgb=s.color.match(/\d+/g)!.map(Number);return {color:Math.max(...rgb)-Math.min(...rgb),duration:parseFloat(s.animationDuration),filter:s.filter,opacity:s.opacity,viewport:innerWidth};});expect(paint).toMatchObject({filter:'none',opacity:'1'});expect(paint.color).toBeGreaterThan(50);expect(paint.duration).toBeLessThan((paint.viewport+700+50)/125);
+ await expect(dialog(page).locator('.supporter-marquee')).toHaveCSS('pointer-events','none');
+ expect(await dialog(page).evaluate(node=>getComputedStyle(node,'::backdrop').backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+ await page.screenshot({path:test.info().outputPath('announcement-colored-barrage.png')});
+ await page.emulateMedia({reducedMotion:'reduce'});await expect(dialog(page).locator('.supporter-marquee')).toBeHidden();await expect(dialog(page).locator('.supporter-flight')).toHaveCount(0);
+ await dialog(page).getByRole('button',{name:'我知道了',exact:true}).click();await expect(dialog(page)).toHaveCount(0);
 });

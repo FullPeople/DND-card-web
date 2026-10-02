@@ -1,16 +1,16 @@
 import {describe,it,expect} from 'vitest';
 import {newCharacter} from '../src/core/model';
 import {createDashboardDraft,commitDashboardDraft} from '../src/core/dashboardDraft';
-import {RESOURCE_TEMPLATES,addResourceModule,chooseDefaultWidgetStyle,suitableWidgetStyle,freeDashboardLayout,normalizeWidget,resourceModules,validWidget,migrateDashboardWidgets} from '../src/core/resourceWidgets';
+import {RESOURCE_TEMPLATES,addResourceModule,supportsWidgetStyle,freeDashboardLayout,normalizeWidget,resourceModules,validWidget,migrateDashboardWidgets} from '../src/core/resourceWidgets';
 describe('capacity matched resource dashboard',()=>{
  it('keeps exact count styles only for bounded integer capacities 1 through 10',()=>{
   for(const max of [0,1,2,5,10,11,99999,2.5])for(const style of ['pips','orbit','segments','matrix'] as const){
    const rows:[string,{current:number;max:number}][]=[['r',{current:0,max}]];
-   expect(suitableWidgetStyle(style,rows)).toBe(Number.isInteger(max)&&max>=1&&max<=10?style:chooseDefaultWidgetStyle({max}));
-   expect(suitableWidgetStyle(style,[['r',{current:0,max,unlimited:true}]])).toBe('counter');
+   expect(supportsWidgetStyle(style,rows)).toBe(Number.isInteger(max)&&max>=1&&max<=10);
+   expect(supportsWidgetStyle(style,[['r',{current:0,max,unlimited:true}]])).toBe(false);
   }
-  expect(suitableWidgetStyle('ready',[['r',{current:0,max:1}]])).toBe('ready');
-  expect(suitableWidgetStyle('ready',[['r',{current:0,max:10}]])).toBe('segments');
+  expect(supportsWidgetStyle('ready',[['r',{current:0,max:1}]])).toBe(true);
+  expect(supportsWidgetStyle('ready',[['r',{current:0,max:10}]])).toBe(false);
  });
  it('migrates hidden coordinates once, preserves values and restores them in the right canvas',()=>{
   const c=newCharacter();c.runtime.resources={visible:{current:2,max:3},hidden:{current:4,max:5}};

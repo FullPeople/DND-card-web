@@ -7,6 +7,7 @@ import { ContentBoundary, Entries, Inline } from './Entries';
 import { EntryDraggable } from './DragEntry';
 import { SourceName, compareSources, useSources } from './SourceName';
 import { wikiEditionAllows } from './wikiEdition';
+import {useReadingHighlight} from './useReadingHighlight';
 
 type Section = { id: string; name: string; english?: string; level?: number; source?: string; page?: number; body: unknown; depth: number; reference?: Entry; excluded?:boolean; subclassHeading?:boolean; starting?:boolean };
 export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false,editionFilter='character' }: { editionFilter?:string;subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void }) {
@@ -72,21 +73,33 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
     const observer=new ResizeObserver(measure);observer.observe(ref.current!);container.addEventListener('scroll',update,{passive:true});measure();
     return()=>{cancelAnimationFrame(frame);observer.disconnect();container.removeEventListener('scroll',update);};
   }, [entry.id, sections, collapsed]);
-  function go(id: string) {
+  const jumpFrame = useRef(0);
+  function go(id: string, revealOnly = false) {
+    cancelAnimationFrame(jumpFrame.current);
     const section = sections.find(s => s.id === id);
-    if (!section) { const node=ref.current?.closest('.entry-detail')?.querySelector<HTMLElement>(`[data-anchor="${id}"]`); if(node) jump(node); return; }
+    if (!section) { const node=ref.current?.closest('.entry-detail')?.querySelector<HTMLElement>(`[data-anchor="${CSS.escape(id)}"]`); if(node) jump(node, revealOnly); return; }
     const ancestors = sections.slice(0, sections.indexOf(section)).filter(s => effectiveCollapsed.includes(s.id) && section.id.startsWith(`${s.id}-body`));
     if (ancestors.length && !focus) onCollapse(collapsed.filter(x => !ancestors.some(s => s.id === x)));
-    requestAnimationFrame(() => { const node = ref.current?.querySelector<HTMLElement>(`[data-section="${id}"]`), pane = ref.current?.closest('.entry-detail'); if (node && pane) jump(node); });
+    jumpFrame.current = requestAnimationFrame(() => { jumpFrame.current = 0; const node = ref.current?.querySelector<HTMLElement>(`[data-section="${CSS.escape(id)}"]`); if (node) jump(node, revealOnly); });
   }
   useEffect(()=>{const pane=ref.current?.closest<HTMLElement>('.entry-detail'), frozen=pane?.querySelector('.detail-frozen');if(!pane||!frozen)return;const observer=new ResizeObserver(()=>pane.style.setProperty('--frozen-height',`${frozen.getBoundingClientRect().height+8}px`));observer.observe(frozen);return()=>observer.disconnect();},[entry.id]);
-  function jump(node: HTMLElement) { const pane=ref.current?.closest('.entry-detail'); if(!pane)return; const frozen=pane.querySelector('.detail-frozen')?.getBoundingClientRect().height || 0; pane.scrollTo({top:pane.scrollTop+node.getBoundingClientRect().top-pane.getBoundingClientRect().top-frozen-8,behavior:'instant'}); }
+  function jump(node: HTMLElement, revealOnly = false) {
+    const pane=ref.current?.closest('.entry-detail'); if(!pane || !node.isConnected)return;
+    const frozen=pane.querySelector('.detail-frozen')?.getBoundingClientRect().height || 0;
+    const bounds=pane.getBoundingClientRect(), target=node.getBoundingClientRect(), top=bounds.top+frozen+8, bottom=bounds.bottom-8;
+    // Nearby trait hovers move only the yellow marker, not the paragraph being read.
+    if(revealOnly && target.top>=top && target.bottom<=bottom)return;
+    const delta=revealOnly && target.top>=top && target.height<=bottom-top ? target.bottom-bottom : target.top-top;
+    pane.scrollTo({top:pane.scrollTop+delta,behavior:'instant'});
+  }
   useEffect(()=>{const pane=ref.current?.closest('.entry-detail'); const handler=(event:Event)=>go((event as CustomEvent<string>).detail); pane?.addEventListener('library-jump',handler);return()=>pane?.removeEventListener('library-jump',handler);});
-  useEffect(()=>{if(!focus)return;const section=sections.find(s=>s.reference?.id===focus || focus===`name:${s.name}`);go(section?.id || focus);},[focus,entry.id,showSubclasses]);
+  useEffect(()=>{if(focus){const section=sections.find(s=>s.reference?.id===focus || focus===`name:${s.name}`);go(section?.id || focus, !!preview);}return()=>cancelAnimationFrame(jumpFrame.current);},[focus,entry.id,showSubclasses,sections,preview]);
   const focusSection=sections.find(s=>s.reference?.id===focus||focus===`name:${s.name}`||s.id===focus)?.id;
+  const highlightOverlay = useReadingHighlight(ref, focusSection, !!preview);
   return <div className="library-document" ref={ref}>
+    <div ref={highlightOverlay} className="reading-focus-overlay" aria-hidden="true"/>
     {navigation.length > 0 && <nav className="document-nav" aria-label="正文目录"><strong>目录</strong><div>{navigation.map((s, index) => <div key={s.id}>{s.level && s.level !== navigation[index - 1]?.level && <span className="nav-level">等级 {s.level}</span>}<button data-nav-section={s.id} title={s.name} onClick={() => go(s.id)}>{s.name}{s.subclassHeading&&s.source&&<small> <SourceName id={s.source}/></small>}</button></div>)}</div></nav>}
-    <div className={`document-prose rules-prose ${navigation.length ? 'with-nav' : ''}`}><ContentBoundary key={entry.id}>{sections.filter(s => !hidden.has(s.id)).map(s => <section key={`${s.id}:${s.id===focusSection?highlight||0:0}`} data-anchor={s===sections.find(x=>x.id!=='progression')?'body':undefined} data-section={s.name ? s.id : undefined} data-entry-id={s.reference?.id} data-described-entry={s.reference?.id} className={`document-section ${s.id===focusSection && (preview||highlight) ? preview?'reading-highlight':'reading-highlight-fade' : ''} depth-${Math.min(s.depth, 2)} ${s.excluded ? 'entry-disabled' : ''}`}>
+    <div className={`document-prose rules-prose ${navigation.length ? 'with-nav' : ''}`}><ContentBoundary key={entry.id}>{sections.filter(s => !hidden.has(s.id)).map(s => <section key={s.id} data-anchor={s===sections.find(x=>x.id!=='progression')?'body':undefined} data-section={s.name ? s.id : undefined} data-entry-id={s.reference?.id} data-described-entry={s.reference?.id} className={`document-section ${s.id===focusSection && (preview||highlight) ? preview?'reading-highlight':'reading-highlight-fade' : ''} depth-${Math.min(s.depth, 2)} ${s.excluded ? 'entry-disabled' : ''}`}>
       {s.name && <h4><EntryDraggable className="document-heading-toggle" dragEnabled={!!s.reference} entry={s.reference || entry} aria-expanded={!effectiveCollapsed.includes(s.id)} aria-label={`${effectiveCollapsed.includes(s.id) ? '展开' : '折叠'}段落 ${s.name}`} onClick={() => onCollapse(effectiveCollapsed.includes(s.id) ? collapsed.filter(x => x !== s.id) : [...collapsed, s.id])}>
         {s.level && s.reference && <span>等级 {s.level}：</span>}<Inline text={s.name}/> {s.english && s.english !== s.name && <small>{s.english}</small>}{s.source && <span className="section-tools"><small><SourceName id={s.source}/>{s.page ? ` p${s.page}` : ''}</small></span>}
       </EntryDraggable></h4>}

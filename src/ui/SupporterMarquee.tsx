@@ -1,4 +1,5 @@
 import {useEffect,useState,type CSSProperties} from 'react';
+import {supporterFlightTiming} from './supporterMarqueeMotion';
 import './supporterMarquee.css';
 type Supporter={name:string;amount:number};
 type Flight=Supporter&{id:number;lane:number;duration:number;color:string;size:number;avatar?:string};
@@ -24,15 +25,18 @@ let listPromise:Promise<Supporter[]>|undefined;
 const load=()=>listPromise||=(fetch('./support/supporters.json').then(r=>{if(!r.ok)throw Error('supporters');return r.json();}).then(v=>Array.isArray(v)?v.filter(s=>s&&typeof s.name==='string').map(s=>({name:s.name,amount:Math.max(0,Number(s.amount)||0)})):[]).catch(()=>{listPromise=undefined;return [];}));
 export function SupporterMarquee({fullScreen=false}:{fullScreen?:boolean}){
  const [flights,setFlights]=useState<Flight[]>([]);
+ const [reducedMotion,setReducedMotion]=useState(()=>typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+ useEffect(()=>{const preference=matchMedia('(prefers-reduced-motion: reduce)'),update=()=>setReducedMotion(preference.matches);update();preference.addEventListener('change',update);return()=>preference.removeEventListener('change',update);},[]);
  useEffect(()=>{let stopped=false,serial=0,index=0,nextLane:number[]=[],timer:ReturnType<typeof setInterval>|undefined;const timers=new Set<ReturnType<typeof setTimeout>>();
+ setFlights([]);if(reducedMotion)return;
  void load().then(supporters=>{if(stopped||!supporters.length)return;
- const spawn=()=>{if(document.hidden)return;const now=performance.now(),speed=matchMedia('(prefers-reduced-motion: reduce)').matches?65:125,lanes=Math.max(2,Math.floor((fullScreen?innerHeight:190)/52));if(nextLane.length!==lanes)nextLane=Array(lanes).fill(0);const lane=nextLane.indexOf(Math.min(...nextLane));if(nextLane[lane]>now)return;
- const supporter=supporters[index++%supporters.length],size=Math.min(30,15+Math.sqrt(supporter.amount)),width=Math.min(700,supporter.name.length*size+size+24),duration=(innerWidth+width+50)/speed*1000,id=++serial;
- nextLane[lane]=now+(width+44)/speed*1000;
+ const spawn=()=>{if(document.hidden)return;const now=performance.now(),lanes=Math.max(2,Math.floor((fullScreen?innerHeight:190)/52));if(nextLane.length!==lanes)nextLane=Array(lanes).fill(0);const lane=nextLane.indexOf(Math.min(...nextLane));if(nextLane[lane]>now)return;
+ const supporter=supporters[index++%supporters.length],size=Math.min(30,15+Math.sqrt(supporter.amount)),width=Math.min(700,supporter.name.length*size+size+24),{duration,laneDelay}=supporterFlightTiming(innerWidth,width),id=++serial;
+ nextLane[lane]=now+laneDelay;
  const avatar=avatars[supporter.name],flight={...supporter,id,lane,duration,size,color:colors[(index-1)%colors.length],avatar};setFlights(old=>[...old,flight]);
  const cleanup=setTimeout(()=>{timers.delete(cleanup);setFlights(old=>old.filter(v=>v.id!==id));},duration+100);timers.add(cleanup);
  };
  spawn();timer=setInterval(spawn,180);
- });return()=>{stopped=true;clearInterval(timer);for(const timeout of timers)clearTimeout(timeout);};},[fullScreen]);
+ });return()=>{stopped=true;clearInterval(timer);for(const timeout of timers)clearTimeout(timeout);};},[fullScreen,reducedMotion]);
  return <div className={'supporter-marquee '+(fullScreen?'is-fullscreen':'')} aria-hidden="true" data-supporter-marquee>{flights.map(f=><span key={f.id} className="supporter-flight" style={{'--flight-duration':`${f.duration}ms`,top:8+f.lane*52,color:f.color,fontSize:f.size} as CSSProperties}>{f.avatar&&<img fetchPriority="low" decoding="async" src={'./support/'+f.avatar} alt=""/>}{f.name}</span>)}</div>;
 }
