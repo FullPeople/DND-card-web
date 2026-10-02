@@ -54,3 +54,20 @@ test('230 large Wiki catalog keeps pointer movement free of character clones',as
  const row=page.locator('.catalog-row').filter({hasText:'运动'}).first(),box=await row.boundingBox();await page.mouse.move(box!.x+30,box!.y+box!.height/2);await page.mouse.down();await page.mouse.move(box!.x+40,box!.y+box!.height/2,{steps:3});for(let i=0;i<12;i++){const target=await page.locator('.choice-slot').nth(i%2).boundingBox();await page.mouse.move(target!.x+target!.width/2,target!.y+target!.height/2,{steps:2});}
  const meter=await page.evaluate(()=>(window as any).choicePointerMeter);await testInfo.attach('pointer-performance.json',{body:JSON.stringify({catalogFixtureEntries:2000,movementSamples:12,...meter},null,2),contentType:'application/json'});expect(meter.clones).toBe(0);await page.keyboard.press('Escape');await page.mouse.up();await expect(page.locator('.choice-slot-entry')).toHaveCount(0);await expect(page.locator('.pointer-ghost')).toHaveCount(0);
 });
+
+for(const choice of [{label:'起始熟练项',count:2},{label:'起始装备',count:1}])test(`source completion during a pointer press preserves the first ${choice.label} activation`,async({page})=>{
+ let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
+ try{
+  await ready(page,raw,{skillsGate:gate});await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');await page.getByRole('tab',{name:'特性',exact:true}).click();
+  const chip=page.getByRole('button',{name:`${choice.label} 0/${choice.count}`,exact:true}),banner=page.locator('.class-compatibility-banner');
+  await expect(chip).toBeVisible();await expect(banner).toHaveCount(0);await chip.scrollIntoViewIfNeeded();const before=await chip.boundingBox();expect(before).not.toBeNull();
+  await page.mouse.move(before!.x+before!.width/2,before!.y+before!.height/2);await page.mouse.down();
+  // Finish the real source queue while the physical button is held. A late
+  // warning must not move the target between pointerdown and pointerup.
+  release();await expect(page.locator('.wiki-header button')).toBeEnabled();await expect(banner).toHaveCount(0);
+  const held=await chip.boundingBox();expect(held).not.toBeNull();for(const key of ['x','y','width','height'] as const)expect(Math.abs(held![key]-before![key])).toBeLessThan(.5);
+  await page.mouse.up();await expect(workspace(page,choice.label)).toBeVisible();await expect(banner).toBeVisible();
+  if(choice.label==='起始熟练项')await expect(page.locator('.catalog-row')).toHaveCount(3);else await expect(workspace(page,choice.label).getByRole('button',{name:'方案 A',exact:true})).toBeVisible();
+  await page.keyboard.press('Escape');await expect(page.locator('.choice-workspace')).toHaveCount(0);await expect(chip).toBeFocused();
+ }finally{release();await page.mouse.up();}
+});
