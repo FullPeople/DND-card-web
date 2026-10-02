@@ -33,22 +33,18 @@ async function saved(page:Page):Promise<Character>{return page.evaluate(async()=
  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open(name);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
  return new Promise<Character>((resolve,reject)=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{const w=req.result;db.close();resolve(w.characters.find((c:Character)=>c.id===w.activeId));};req.onerror=()=>reject(req.error);});
 });}
-async function open(page:Page){await page.getByRole('button',{name:'整理快捷栏',exact:true}).click();await expect(page.getByRole('heading',{name:'整理快捷栏',exact:true})).toBeVisible();}
+async function open(page:Page){await page.getByRole('button',{name:'武器与攻击',exact:true}).click();await expect(page.getByRole('heading',{name:'整理快捷栏',exact:true})).toBeVisible();}
 async function allShortcuts(page:Page){
  const panel=page.locator('.paper .quickbar-attacks');await expect(panel).toBeVisible();
- const previous=panel.getByRole('button',{name:'上一页攻击',exact:true}),next=panel.getByRole('button',{name:'下一页攻击',exact:true}),counter=panel.locator('.quickbar-attacks-heading small');
- while(await previous.count()&&await previous.isEnabled())await previous.click();
- const pages=await counter.count()?Number((await counter.innerText()).split('/')[1]):1;
- expect(pages).toBeGreaterThan(0);
- const rows:{key:string;entryId:string|null;text:string;pin:boolean}[]=[];
- for(let index=0;index<pages;index++){
-  if(pages>1)await expect(counter).toHaveText(`${index+1}/${pages}`);
-  rows.push(...await panel.locator('[data-quick-id]').evaluateAll(elements=>elements.map(el=>({key:el.getAttribute('data-quick-id')!,entryId:el.getAttribute('data-entry-id'),text:el.textContent||'',pin:el.classList.contains('quick-pin')}))));
-  if(index<pages-1){await expect(next).toBeEnabled();await next.click();}
+ await expect(panel.getByRole('button',{name:/上一页攻击|下一页攻击/})).toHaveCount(0);
+ const entries=panel.locator('[data-quick-id]');
+ for(const entry of await entries.all()){
+  await entry.scrollIntoViewIfNeeded();
+  expect(await entry.evaluate(node=>{const box=node.getBoundingClientRect(),pane=node.closest('.quickbar-attacks')!.getBoundingClientRect();return box.bottom>pane.top&&box.top<pane.bottom&&box.left>=pane.left-1&&box.right<=pane.right+1;})).toBe(true);
  }
+ const rows=await entries.evaluateAll(elements=>elements.map(el=>({key:el.getAttribute('data-quick-id')!,entryId:el.getAttribute('data-entry-id'),text:el.textContent||'',pin:el.classList.contains('quick-pin')})));
  expect(new Set(rows.map(row=>row.key)).size).toBe(rows.length);
- if(pages>1)await expect(next).toBeDisabled();
- while(await previous.count()&&await previous.isEnabled())await previous.click();
+ await panel.evaluate(node=>node.scrollTop=0);
  return rows;
 }
 

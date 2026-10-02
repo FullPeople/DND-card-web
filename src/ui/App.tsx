@@ -74,6 +74,7 @@ const FeaturesPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.Featu
 const BackgroundPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.BackgroundPage})));
 import {ChoiceWorkspaceContext} from './ChoiceWorkspaceContext';
 import {sheetChoices} from '../core/automation/choices';
+import {SheetChoicesContext} from './SheetChoicesContext';
 import {choiceCatalog} from './choiceCatalog';
 const SpellsPage=lazy(()=>import('./SpellsPage').then(m=>({default:m.SpellsPage})));
 import {DmNotes} from './DmNotes';
@@ -225,6 +226,7 @@ export default function App() {
   const mechanicsRef=useRef<Character|undefined>(undefined);
   if(c&&!sameCharacterMechanics(mechanicsRef.current,c))mechanicsRef.current=c;
   const mechanics=mechanicsRef.current;
+  const choicesSnapshot=useMemo(()=>mechanics?{character:mechanics,catalog:allEntries,choices:sheetChoices(mechanics,allEntries)}:undefined,[mechanics,allEntries]);
   function createLocalCharacter(edition:Edition='2024'){const next=newCharacter(edition);initializeAutomation(next);return localSources?(workspaceRef.current?.siteSources?withSiteSources(next,workspaceRef.current.siteSources,workspaceRef.current.packs):startAllSources(next,defaultSources)):next;}
   useEffect(()=>{
     const current=workspaceRef.current;
@@ -312,10 +314,10 @@ export default function App() {
 
   const [choiceRoute,setChoiceRoute]=useState<{id:string;characterId:string}>();
   const choiceSnapshot=useRef<ReturnType<typeof library.snapshot>|undefined>(undefined);
-  const activeChoice=useMemo(()=>c&&choiceRoute?.characterId===c.id?sheetChoices(c,allEntries).find(r=>r.id===choiceRoute.id):undefined,[c,allEntries,choiceRoute]);
+  const activeChoice=useMemo(()=>c&&choiceRoute?.characterId===c.id?choicesSnapshot?.choices.find(r=>r.id===choiceRoute.id):undefined,[c?.id,choicesSnapshot,choiceRoute]);
   const choiceScope=useMemo(()=>c&&activeChoice?choiceCatalog(c,activeChoice,allEntries):undefined,[c,activeChoice,allEntries]);
   function closeChoice(){setChoiceRoute(undefined);if(choiceSnapshot.current){library.restore(choiceSnapshot.current);choiceSnapshot.current=undefined;}}
-  function openChoice(id:string){if(!c||!editing||readOnly||inWorkbench&&!wb.target?.write)return;const choice=sheetChoices(c,allEntries).find(r=>r.id===id);if(!choice)return;
+  function openChoice(id:string){if(!c||!editing||readOnly||inWorkbench&&!wb.target?.write)return;const choice=choicesSnapshot?.choices.find(r=>r.id===id);if(!choice)return;
     choiceSnapshot.current??=library.snapshot();setChoiceRoute({id,characterId:c.id});setSheetPage('特性');exitSheetFullscreen();
     const scope=choiceCatalog(c,choice,allEntries);if(scope.wiki){library.setKind(scope.tab);library.patch({query:'',detailId:undefined,focus:undefined,edition:c.edition,filters:scope.filters,sort:scope.tab==='spell'?'level':'source',descending:false},scope.tab);setFillPulse(n=>n+1);setTab('wiki');}else setTab('sheet');
   }
@@ -741,7 +743,7 @@ export default function App() {
     workbenchUncertain.current.has(c.id)?'上一项修改尚未确认，请先核对枭熊数据。':undefined;
   const managerId=inWorkbench?wb.target?.cardId||'':c.id;
   const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!readOnly}));
-  return <ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
+  return <SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src="./exe_icon.png" alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
       <div className="header-tools">{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<button aria-pressed={tableOpen} onClick={()=>{setTableOpen(value=>!value);setTab('wiki');}}>{t('threeDragon')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{setWorkbenchPage('features');setTab('sheet');}}>{t('featuresToggle')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{setWorkbenchPage('settings');setTab('sheet');}}>{t('settings')}</button>}{(standalone||inWorkbench)&&<button onClick={()=>setAnnouncement(true)}>{t('announcements')}</button>}<button onClick={() => setModal('characters')}>{t('characters')} <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>{t('rules')}</button><button className="primary" onClick={() => setModal('export')}>{t('transfer')}</button></div>
     </header>
@@ -820,5 +822,5 @@ export default function App() {
       </Suspense></ToolBoundary>
     </Dialog>}
 
-  </div></EntryDragProvider></KeywordPreview></ChoiceWorkspaceContext.Provider>;
+  </div></EntryDragProvider></KeywordPreview></ChoiceWorkspaceContext.Provider></SheetChoicesContext.Provider>;
 }

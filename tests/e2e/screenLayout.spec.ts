@@ -37,7 +37,7 @@ test('real five pages reflow without clipped frames at desktop, phone and breakp
   for(const width of [850,1320,520,390,320,280,375,386,398]){
     await pane(page,width,width>=850?720:844);
     for(const name of ['主要','特性','背景','法术','背包']){
-      await page.getByRole('tab',{name,exact:true}).click();await page.waitForTimeout(100);
+      await page.getByRole('tab',{name,exact:true}).click();await page.locator('.sheet-viewport').evaluate(root=>root.scrollTop=0);await page.waitForTimeout(100);
       const result=await page.locator('.sheet-viewport').evaluate(root=>{
         const paper=root.querySelector<HTMLElement>('.paper')!;
         const clipped=[...paper.querySelectorAll<HTMLElement>('.cell-content,.identity-title,.ability-skill>span:last-child,.stock-name')].filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+2).map(node=>({class:node.className,text:node.textContent?.slice(0,45),client:node.clientWidth,scroll:node.scrollWidth}));
@@ -47,10 +47,19 @@ test('real five pages reflow without clipped frames at desktop, phone and breakp
         return {overflow:root.scrollWidth-root.clientWidth,clipped,overlaps,scroll:root.scrollHeight,height:root.clientHeight,outside,frames:frames.map(node=>({name:node.getAttribute("aria-label"),class:node.className,h:node.offsetHeight,y:Math.round(node.getBoundingClientRect().y),min:getComputedStyle(node).minHeight}))};
       });results.push({width,name,...result});
       if([850,390,320].includes(width))await page.locator('.sheet-pane').screenshot({path:`evidence/screen/${width}-${name}.png`});
+      // Responsive content may grow with owner headings and feature bubbles. Its
+      // end must remain reachable, rather than being clipped to a fixed height.
+      const viewport=page.locator('.sheet-viewport');await viewport.evaluate(root=>root.scrollTop=root.scrollHeight);
+      await expect.poll(()=>viewport.evaluate(root=>{
+        const bounds=root.getBoundingClientRect(),footer=root.querySelector<HTMLElement>('.paper-footer')!,paper=root.querySelector<HTMLElement>('.paper')!;
+        const end=footer.getBoundingClientRect(),last=[...paper.querySelectorAll<HTMLElement>('.sheet-cell')].reduce((bottom,node)=>Math.max(bottom,node.getBoundingClientRect().bottom),0);
+        return {scrollable:['auto','scroll'].includes(getComputedStyle(root).overflowY),atEnd:Math.abs(root.scrollHeight-root.clientHeight-root.scrollTop)<=1,footerVisible:end.height>0&&end.top>=bounds.top&&end.bottom<=bounds.bottom+1,framesReachable:last<=bounds.bottom+1};
+      }),{message:`${width}px ${name}: the responsive sheet's final content must be reachable`}).toEqual({scrollable:true,atEnd:true,footerVisible:true,framesReachable:true});
+      if(width===850&&name==='主要')await test.info().attach('850-main-scrolled-end',{body:await page.locator('.sheet-pane').screenshot(),contentType:'image/png'});
     }
   }
   writeFileSync('evidence/screen/geometry.json',JSON.stringify({errors,results},null,2));expect(errors).toEqual([]);expect(results.filter(r=>r.overflow>2||r.clipped.length||r.overlaps.length)).toEqual([]);
-  expect(results.find(r=>r.width===850&&r.name==='主要')!.scroll).toBeLessThanOrEqual(results.find(r=>r.width===850&&r.name==='主要')!.height+1);
+  await test.info().attach('screen-geometry',{body:Buffer.from(JSON.stringify({errors,results},null,2)),contentType:'application/json'});
 });
 test('display preference survives page changes and reload; A4 stays A4 at narrow widths',async({page})=>{
   await ready(page);await page.getByRole('button',{name:'切换为 A4 显示',exact:true}).click();await expect(page.locator('.sheet-viewport')).toHaveAttribute('data-sheet-display','a4');await pane(page,320,740);await expect(page.locator('.paper')).toHaveCSS('width','680px');await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(page.locator('.sheet-viewport')).toHaveAttribute('data-sheet-display','a4');await page.reload({waitUntil:'domcontentloaded'});await expect(page.locator('.sheet-viewport')).toHaveAttribute('data-sheet-display','a4');await page.getByRole('button',{name:'切换为非 A4 显示',exact:true}).click();await expect(page.locator('.sheet-viewport')).toHaveAttribute('data-sheet-display','screen');

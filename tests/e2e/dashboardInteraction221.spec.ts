@@ -10,7 +10,7 @@ const widget=(page:Page,id:string)=>editor(page).locator(`[data-resource-id="${i
 const save=(page:Page)=>editor(page).getByRole('button',{name:'保存布局',exact:true});
 const discard=(page:Page)=>editor(page).getByRole('button',{name:'放弃修改',exact:true});
 const edits=async(page:Page)=>Number(await page.locator('#fixture-edits').textContent());
-async function open(page:Page){await page.getByTestId('dashboard-open').click();await expect(editor(page)).toBeVisible();}
+async function open(page:Page){await page.getByTestId('dashboard-open').click();await expect(editor(page)).toBeVisible();await expect(editor(page).locator('.resource-dashboard')).toHaveAttribute('data-overlap-count','0');}
 async function visit(page:Page){await page.goto(fixture);await expect(page.locator('#fixture-data')).toHaveText(/dashboard220-original-fixture/);await open(page);}
 async function geometry(node:Locator){return node.evaluate(el=>Object.fromEntries(['x','y','w','h','page'].map(key=>[key,Number(el.getAttribute(`data-grid-${key}`))])));}
 async function dragBy(page:Page,target:Locator,dx:number,dy:number){const box=(await target.boundingBox())!;await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+dx,box.y+box.height/2+dy,{steps:6});await page.mouse.up();}

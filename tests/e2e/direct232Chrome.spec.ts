@@ -30,7 +30,16 @@ test('backpack has five default coins on one row and retains quantity and moves 
 for(const edition of ['2014','2024'] as const)test(`class-derived ${edition} title stays visible across page and narrow layout changes`,async({page})=>{
  await ready(page);const c=newCharacter(edition);c.name=`原创${edition}职业标题`;
  const source=edition==='2014'?'PHB':'XPHB';c.selections=[{id:'title-owner',entry:{id:`title-owner-${source}`,kind:'class',name:'原创学者',english:'Authored Title Scholar',source,edition,packId:'fixture',revision:'1',raw:{hd:{faces:6}},entries:['原创卡头验收。']},level:1,quantity:1,equipped:false}];
- await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'title.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab').filter({hasText:c.name})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'title.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});// Cross-edition imports deliberately stop before mutating the workspace.
+ if(edition==='2014'){
+  const review=page.getByRole('dialog',{name:'导入前核对',exact:true});await expect(review).toBeVisible();
+  await expect(review).toContainText('导入角色使用 2014，当前规则使用 2024。导入后保留该角色自己的规则版本。');
+  await expect(page.getByRole('tablist',{name:'当前角色'}).getByRole('tab')).toHaveCount(2);
+  await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await expect(review).toHaveCount(0);
+ }
+ const selected=page.locator('.character-tabs [role="tab"]').filter({hasText:c.name});
+ await expect(selected).toHaveAttribute('title',c.name+'（导入）');await expect(selected).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.getByRole('combobox',{name:'资料版本',exact:true}).selectOption(edition==='2014'?'2024':'2014');
  for(const width of [1512,390]){await page.setViewportSize({width,height:982});for(const name of ['主要','特性','法术']){await page.getByRole('tab',{name,exact:true}).click();const title=page.locator('.paper .edition-divider>strong');await expect(title).toHaveText(`DND 五版角色卡 · ${edition}`);const visible=await title.evaluate(el=>{const a=el.getBoundingClientRect(),b=el.parentElement!.getBoundingClientRect();return a.left>=b.left-1&&a.right<=b.right+1&&a.width>0;});expect(visible).toBe(true);expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);}await page.screenshot({path:test.info().outputPath(`class-title-${edition}-${width}.png`)});}
 });

@@ -3,9 +3,12 @@ import type {Character} from '../core/model';
 /** A single-row, roving-tabindex list; navigation never moves the sheet viewport. */
 export function CharacterTabs({characters,activeId,warnings,label,select}:{characters:Character[];activeId:string;warnings:Set<string>;label:string;select:(id:string)=>void}){
  const list=useRef<HTMLDivElement>(null);
+ const tabIds=JSON.stringify(characters.map(character=>character.id));
  const reveal=(button:HTMLButtonElement)=>{const container=list.current;if(!container)return;const strip=container.getBoundingClientRect(),tab=button.getBoundingClientRect();if(tab.left<strip.left)container.scrollLeft+=tab.left-strip.left;else if(tab.right>strip.right)container.scrollLeft+=tab.right-strip.right;};
- useLayoutEffect(()=>{const button=list.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);},[activeId,characters]);
- useLayoutEffect(()=>{const container=list.current;if(!container)return;const observer=new ResizeObserver(()=>{const button=container.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);});observer.observe(container);return()=>observer.disconnect();},[]);
+ useLayoutEffect(()=>{const button=list.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);},[activeId,tabIds]);
+ useLayoutEffect(()=>{const container=list.current;if(!container)return;const observer=new ResizeObserver(()=>{const button=container.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);});// Tab names can change width without changing the strip width. ResizeObserver
+ // runs after layout, avoiding a forced whole-sheet layout on every character edit.
+ observer.observe(container);for(const button of container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))observer.observe(button);return()=>observer.disconnect();},[tabIds]);
  const navigate=(event:KeyboardEvent<HTMLButtonElement>,index:number)=>{let next=index;if(event.key==='ArrowRight')next=(index+1)%characters.length;else if(event.key==='ArrowLeft')next=(index-1+characters.length)%characters.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=characters.length-1;else return;event.preventDefault();const button=list.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next];button?.focus({preventScroll:true});if(button)reveal(button);select(characters[next].id);};
  return <div ref={list} className="character-tabs" role="tablist" aria-orientation="horizontal" aria-label={label}>{characters.map((character,index)=><button key={character.id} type="button" role="tab" tabIndex={character.id===activeId?0:-1} aria-selected={character.id===activeId} title={character.name} onKeyDown={event=>navigate(event,index)} onClick={()=>select(character.id)}>{character.name}{warnings.has(character.id)&&<span className="class-warning-icon" aria-label="旧卡资料需要核对">⚠</span>}</button>)}</div>;
 }

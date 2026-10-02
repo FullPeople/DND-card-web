@@ -29,8 +29,8 @@ function make(){
  c.spellSettings={ability:'int',attackBonus:0,dcBonus:0,mode:'prepared',capacity:0,prepared:[],slots:{'1':{max:4,used:1},'2':{max:3,used:1},'3':{max:2,used:1}}};
  c.quickbarLayout={order:[],hidden:[],attacks:normalizeWidget({x:0,y:0,w:4,h:6,page:0,style:'segments',resourceArea:true,split:.4}),widgets:{
   'spell-slot:1':normalizeWidget({x:0,y:0,w:12,h:2,page:0,style:'pool'}),
-  'pact-slot:2':normalizeWidget({x:0,y:2,w:4,h:2,page:0,style:'pool'}),
-  surge:normalizeWidget({x:4,y:2,w:5,h:2,page:0,style:'pips',color:'#527880',icon:'spark'}),
+  'pact-slot:2':normalizeWidget({x:0,y:2,w:6,h:2,page:0,style:'pool'}),
+  surge:normalizeWidget({x:6,y:2,w:5,h:2,page:0,style:'pips',color:'#527880',icon:'spark'}),
   focus:normalizeWidget({x:0,y:0,w:3,h:3,page:1,style:'ring'}),
   coins:normalizeWidget({x:3,y:0,w:4,h:3,page:1,style:'fraction'}),
  }};

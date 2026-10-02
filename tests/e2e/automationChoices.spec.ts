@@ -23,7 +23,7 @@ async function ready(page:Page,data:Record<string,any[]>=raw){
  await page.goto('/',{waitUntil:'domcontentloaded'});await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const entries:Entry[]=Object.entries(data).flatMap(([kind,values])=>Array.isArray(values)?values.map(r=>({id:`fixture:${kind}:${r.source}:${r.level||0}:${r.ENG_name||r.name}`,kind:kind==='classFeature'||kind==='subclassFeature'?'feature':kind as Entry['kind'],name:r.name,english:r.ENG_name||r.name,source:r.source,edition:r.source==='PHB'?'2014':'2024',packId:'fixture',revision:'1',choices:r.choices,entries:r.entries||[],raw:{...r,_category:kind}})):[]),c=newCharacter();c.name='选择与资源验收';c.automation=newAutomationState();const owner=entries.find(e=>e.kind==='class'&&e.source==='XPHB')!;c.selections=[{id:'class-owner',entry:owner,level:1,quantity:1,equipped:false}];
  for(const [i,value] of (owner.raw.classFeatures||[]).entries()){const ref=typeof value==='string'?value:value.classFeature,[name,cls,source,level,featureSource]=ref.split('|');if(Number(level)!==1)continue;const entry=entries.find(e=>e.kind==='feature'&&e.name===name&&e.raw.className===cls&&e.raw.classSource===source&&e.raw.level===1&&e.source===(featureSource||source));if(entry)c.selections.push({id:'feature-'+i,entry,level:1,quantity:1,equipped:false,parentId:'class-owner',grantKey:`ref:${ref}`});}
- await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'choices.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:/^选择与资源验收（导入）(?:\s*旧卡资料需要核对)?$/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'choices.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:/^选择与资源验收（导入）(?:\s*旧卡资料需要核对)?$/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await expect(page.getByRole('dialog',{name:'导入与导出',exact:true})).toHaveCount(0);const editSwitch=page.getByRole('switch',{name:'编辑模式',exact:true});await editSwitch.click();await expect(editSwitch).toHaveAttribute('aria-checked','true');
 }
 
 const workspace=(page:Page,label:string)=>page.getByRole('region',{name:`选择${label}`,exact:true});
@@ -75,10 +75,43 @@ test('a multi-group equipment package claims every selected group and its fixed 
 test('trace input stays over the original field and edits update final result at A4 scale',async({page})=>{
  await ready(page);const input=page.getByRole('spinbutton',{name:'力量基础值',exact:true});await input.scrollIntoViewIfNeeded();const before=await input.boundingBox();await input.click();const overlay=page.getByRole('spinbutton',{name:'力量追溯输入',exact:true});await expect(overlay).toBeVisible();const after=await overlay.boundingBox();for(const key of ['x','y','width','height'] as const)expect(Math.abs(before![key]-after![key])).toBeLessThan(1.1);await overlay.fill('16');await overlay.press('Enter');await expect(input).toHaveValue('16');await page.getByRole('button',{name:'护甲等级数据追溯',exact:true}).click();await expect(page.getByRole('dialog',{name:'护甲等级数据追溯'})).toContainText('最终结果');await page.locator('.choice-popup,.value-trace-panel').evaluateAll(async els=>{await Promise.all(els.flatMap(el=>el.getAnimations().map(a=>a.finished)));});await page.screenshot({path:'evidence/trace-desktop.png'});await page.keyboard.press('Escape');
 });
-test('title menu reclaims equipment once, life dice omit rest entries and reload retains equipment',async({page})=>{
- await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();await page.getByRole('button',{name:'起始装备 0/1',exact:true}).click();await page.getByRole('button',{name:'方案 A',exact:true}).click();await page.getByRole('button',{name:'领取装备',exact:true}).click();await expect(page.getByRole('button',{name:'起始装备 1/1',exact:true})).toBeVisible();
- await page.locator('.feature-group h4').getByRole('button',{name:'职业 测试职业 Lv.1',exact:true}).click({button:'right'});await expect(page.getByRole('menuitem')).toHaveCount(1);await page.getByRole('menuitem',{name:'隐藏自带选项',exact:true}).click();await page.locator('.feature-group h4').getByRole('button',{name:'职业 测试职业 Lv.1',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'显示自带选项',exact:true}).click();await page.getByRole('button',{name:'起始装备 1/1',exact:true}).click();await page.getByRole('button',{name:'领取装备',exact:true}).click();await page.getByRole('tab',{name:'背包',exact:true}).click();await expect(page.locator('.stock-item').filter({hasText:'测试剑'})).toHaveCount(2);
- await page.getByRole('tab',{name:'主要',exact:true}).click();await page.locator('.hit-dice-groups .hit-die').first().click();const dice=page.getByRole('dialog',{name:'生命骰',exact:true});await expect(dice.getByRole('button',{name:/短休|长休/})).toHaveCount(0);await page.keyboard.press('Escape');await page.reload({waitUntil:'domcontentloaded'});await page.getByRole('tab',{name:'背包',exact:true}).click();await expect(page.locator('.stock-item').filter({hasText:'测试剑'})).toHaveCount(2);
+test('title menu reclaims equipment once, life dice omit rest entries and reload retains equipment',async({page},testInfo)=>{
+ const pageErrors:string[]=[];
+ const recordError=(error:Error)=>{if(pageErrors.length<30)pageErrors.push(error.message);};
+ page.on('pageerror',recordError);
+ // Observe only discrete input events, not pointer movement, and bound the log.
+ await page.addInitScript(()=>{
+  const events:unknown[]=[];
+  const describe=(element:Element|null)=>{
+   if(!element)return null;
+   const bounds=element.getBoundingClientRect();
+   return {tag:element.tagName,role:element.getAttribute('role'),label:element.getAttribute('aria-label'),text:element.textContent?.slice(0,160),bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height}};
+  };
+  const snapshot=()=>({
+   editing:document.querySelector('[role="switch"][aria-label="编辑模式"]')?.getAttribute('aria-checked'),
+   chip:describe(document.querySelector('.sheet-choice-chip[data-choice-id="class-owner:equipment:0"]')),
+   banner:describe(document.querySelector('.class-compatibility-banner')),
+   workspace:describe(document.querySelector('.choice-workspace')),
+   saveStatus:document.querySelector('.save-status')?.textContent,
+   importDialogOpen:!!document.querySelector('dialog[open] [data-testid="character-file"]')
+  });
+  for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{
+   const pointer=event as MouseEvent,target=event.target instanceof Element?event.target:null;
+   events.push({type,at:performance.now(),x:pointer.clientX,y:pointer.clientY,button:pointer.button,target:describe(target),buttonTarget:describe(target?.closest('button')||null),...snapshot()});
+   if(events.length>60)events.shift();
+  },true);
+  (window as any).__equipmentOpenDiagnostics=()=>({events,snapshot:snapshot()});
+ });
+ let stage='setup';
+ try{
+ await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();stage='open first equipment workspace';await page.getByRole('button',{name:'起始装备 0/1',exact:true}).click();const equipmentWorkspace=workspace(page,'起始装备');await expect(equipmentWorkspace).toBeVisible();stage='claim first equipment package';await equipmentWorkspace.getByRole('button',{name:'方案 A',exact:true}).click();await equipmentWorkspace.getByRole('button',{name:'领取装备',exact:true}).click();await expect(page.getByRole('button',{name:'起始装备 1/1',exact:true})).toBeVisible();stage='reopen and reclaim equipment';
+ await page.locator('.feature-group h4').getByRole('button',{name:'职业 测试职业 Lv.1',exact:true}).click({button:'right'});await expect(page.getByRole('menuitem')).toHaveCount(1);await page.getByRole('menuitem',{name:'隐藏自带选项',exact:true}).click();await page.locator('.feature-group h4').getByRole('button',{name:'职业 测试职业 Lv.1',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'显示自带选项',exact:true}).click();await page.getByRole('button',{name:'起始装备 1/1',exact:true}).click();await expect(equipmentWorkspace).toBeVisible();await equipmentWorkspace.getByRole('button',{name:'领取装备',exact:true}).click();await page.getByRole('tab',{name:'背包',exact:true}).click();await expect(page.locator('.stock-item').filter({hasText:'测试剑'})).toHaveCount(2);
+ stage='life dice and reload persistence';await page.getByRole('tab',{name:'主要',exact:true}).click();await page.locator('.hit-dice-groups .hit-die').first().click();const dice=page.getByRole('dialog',{name:'生命骰',exact:true});await expect(dice.getByRole('button',{name:/短休|长休/})).toHaveCount(0);await page.keyboard.press('Escape');await page.reload({waitUntil:'domcontentloaded'});await page.getByRole('tab',{name:'背包',exact:true}).click();await expect(page.locator('.stock-item').filter({hasText:'测试剑'})).toHaveCount(2);
+ }catch(error){
+  const browser=await page.evaluate(()=>(window as any).__equipmentOpenDiagnostics?.()||{unavailable:'Diagnostics were not installed in this document.'}).catch(captureError=>({unavailable:String(captureError)}));
+  await testInfo.attach('equipment-open-diagnostics.json',{body:JSON.stringify({stage,pageErrors,error:error instanceof Error?error.message:String(error),browser},null,2),contentType:'application/json'}).catch(()=>{});
+  throw error;
+ }finally{page.off('pageerror',recordError);}
 });
 function spellData(name:string){
  const data=JSON.parse(readFileSync(`${externalDirectory}/data_class_class-${name}.json`,'utf8').replace(/^\uFEFF/,'')),owner=data.class.find((c:any)=>c.source==='XPHB');

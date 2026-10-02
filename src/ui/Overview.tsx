@@ -1,3 +1,4 @@
+import {useSheetChoices} from './SheetChoicesContext';
 import {displayCharacterEdit} from '../core/displayCharacterEdit';
 import {ScreenAbilities} from './ScreenAbilities';
 import {ProficiencyStatus} from './ProficiencyStatus';
@@ -5,7 +6,7 @@ import {AutoSheetName} from './AutoSheetName';
 import {useSheetRenderMode} from './sheetDisplay';
 
 import {TraceValue} from './ValueTrace';
-import {sheetChoices,selectionActive} from '../core/automation/choices';
+import {selectionActive} from '../core/automation/choices';
 import {classMatches} from '../core/model';
 import {proficiencyText} from '../core/proficiencyText';
 import {spellIsReady} from '../core/spellWorkspace';
@@ -42,6 +43,7 @@ const sizes: Record<string, string> = { T: '微型', S: '小型', M: '中型', L
 export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openResources, openQuickbar, openHp, pinDrop }: Props) {
   const editing = useContext(SheetEditContext),screen=useSheetRenderMode()==='screen';
   const spells = spellState(c);
+  const choices=useSheetChoices(c,catalog);
   const trainingNames=useMemo(()=>{const map=new Map<string,Entry[]>();for(const e of catalog)if(e.kind==='item'||e.raw._category==='language'){for(const name of [e.name,e.english]){const key=name.toLowerCase();map.set(key,[...(map.get(key)||[]),e]);}}return map;},[catalog]);
   const [trainingEditor, setTrainingEditor] = useState(false);
   function receiveTraining(entry:Entry,key:string) {edit(draft=>{const current=draft.training?.[key]??training.find(t=>t.key===key)!.values.join('、');const token=`{@${entry.raw._category==='language'?'language':entry.raw._category==='itemProperty'?'itemProperty':entry.raw._category==='itemMastery'?'itemMastery':'item'} ${entry.name}|${entry.source}}`; (draft.training||={})[key]=[...new Set([...current.split(/[、\n；;]/).filter(Boolean),token])].join('、');});}
@@ -89,7 +91,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
       return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
     });
-    values.push(...sheetChoices(c,catalog).filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.map(v=>r.options.find(o=>o.value===v)?.label||v)));
+    values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.map(v=>r.options.find(o=>o.value===v)?.label||v)));
     return { key, label, values: [...new Set<string>(values.map(v => {const entry=(trainingNames.get(v.toLowerCase())||[]).find(e=>e.source===(c.edition==='2024'?'XPHB':'PHB'))||(trainingNames.get(v.toLowerCase())||[])[0];return names[v] || (entry?`{@${key==='languages'?'language':'item'} ${entry.name}|${entry.source}}`:proficiencyText(v,c.edition==='2024'?'XPHB':'PHB',key));}))] };
   });
     const identity = <div className="identity-main overview-identity">

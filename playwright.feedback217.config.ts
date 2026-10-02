@@ -5,7 +5,8 @@ export default defineConfig({
  use:{channel:process.env.CI?undefined:'msedge',viewport:{width:1512,height:982},screenshot:'only-on-failure',trace:'retain-on-failure'},
  projects:[
   {name:'standalone',testMatch:['feedback217.spec.ts','customRoundtrip217.spec.ts'],use:{baseURL:'http://127.0.0.1:5256'}},
-  {name:'integrated',testMatch:['resourceDashboard220.spec.ts','resourceDashboard220App.spec.ts','resourceDashboard220Compatibility.spec.ts','dashboardInteraction221.spec.ts','compactDashboard220.spec.ts','sourceSpellMechanics217.spec.ts','workbench-instant217.spec.ts','groupRoll217.spec.ts','card-atmosphere.spec.ts'],use:{baseURL:'http://127.0.0.1:5257'}}
+  {name:'dashboard-production',testMatch:'resourceDashboard220App.spec.ts',grep:/production dashboard diagnostic/,use:{baseURL:'http://127.0.0.1:5256'}},
+  {name:'integrated',grepInvert:/production dashboard diagnostic/,testMatch:['resourceDashboard220.spec.ts','resourceDashboard220App.spec.ts','resourceDashboard220Compatibility.spec.ts','dashboardInteraction221.spec.ts','compactDashboard220.spec.ts','sourceSpellMechanics217.spec.ts','workbench-instant217.spec.ts','groupRoll217.spec.ts','card-atmosphere.spec.ts'],use:{baseURL:'http://127.0.0.1:5257'}}
  ],
  webServer:[
   {command:`node node_modules/vite/bin/vite.js preview --mode standalone --outDir "${standalone}" --host 127.0.0.1 --port 5256 --strictPort`,url:'http://127.0.0.1:5256',reuseExistingServer:false},

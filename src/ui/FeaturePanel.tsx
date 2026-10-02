@@ -1,6 +1,7 @@
+import {useSheetChoices} from './SheetChoicesContext';
 import {useEntryMenu} from './EntrySharing';
 import {useSheetRenderMode} from './sheetDisplay';
-import {sheetChoices,builtinChoices,builtinOptionsVisible,setBuiltinOptionsVisible} from '../core/automation/choices';
+import {builtinChoices,builtinOptionsVisible,setBuiltinOptionsVisible} from '../core/automation/choices';
 import {ChoiceOutline} from './ChoiceOutline';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import {spellState} from '../core/characterDetails';
@@ -30,7 +31,7 @@ export function FeaturePanel({ catalog=[], owners=[], detailed = false, inline =
   const {format}=useSources(); const editing=useContext(SheetEditContext);
   const screen=useSheetRenderMode()==='screen';
   const menu=useEntryMenu();
-  const choices=useMemo(()=>sheetChoices(c,catalog),[c,catalog]),workspace=useChoiceWorkspace(),setChoiceId=workspace.open;
+  const choices=useSheetChoices(c,catalog),workspace=useChoiceWorkspace(),setChoiceId=workspace.open;
   const byOwner=useMemo(()=>{const result=new Map<string,typeof choices>();for(const choice of choices)result.set(choice.ownerId,[...(result.get(choice.ownerId)||[]),choice]);return result;},[choices]);
   const choicesFor=(id:string)=>byOwner.get(id)||[];
   const spells = kinds.length === 1 && kinds[0] === 'spell';

@@ -9,7 +9,7 @@ const main=(page:Page)=>page.locator('.fixture-quickbar');
 const editor=(page:Page)=>page.getByRole('dialog',{name:'仪表盘',exact:true});
 const canvas=(scope:Locator)=>scope.locator('.resource-widget-canvas');
 const widget=(scope:Locator,id:string)=>scope.locator(`[data-resource-id="${id}"]`);
-async function open(page:Page){await page.getByTestId('dashboard-open').click();await expect(editor(page)).toBeVisible();return editor(page);}
+async function open(page:Page){await page.getByTestId('dashboard-open').click();await expect(editor(page)).toBeVisible();await expect(editor(page).locator('.resource-dashboard')).toHaveAttribute('data-overlap-count','0');return editor(page);}
 async function visit(page:Page,scenario='default'){await page.goto(`${fixture}?scenario=${scenario}`);await expect(page.locator('#fixture-data')).toHaveText(/dashboard220-original-fixture/);}
 async function seek(scope:Locator,id:string){await widget(scope,id).scrollIntoViewIfNeeded();await expect(widget(scope,id)).toBeVisible();}
 async function pointDrag(page:Page,target:Locator,dx:number,dy:number){const rect=(await target.boundingBox())!;await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();await page.mouse.move(rect.x+rect.width/2+dx,rect.y+rect.height/2+dy,{steps:5});await page.mouse.up();}
