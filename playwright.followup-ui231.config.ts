@@ -5,7 +5,7 @@ export default defineConfig({
  reporter:[['list'],['json',{outputFile:outputDir+'/report.json'}]],
  use:{viewport:{width:1512,height:982},serviceWorkers:'block',trace:'retain-on-failure',screenshot:'only-on-failure'},
  projects:['chromium','firefox'].flatMap(browserName=>[
-  {name:browserName+'-resources',testMatch:['resourceFollowup231.spec.ts'],use:{browserName:browserName as 'chromium'|'firefox',baseURL:'http://127.0.0.1:5660'}},
+  {name:browserName+'-resources',testMatch:['resourceFollowup231.spec.ts','resourceRedesign232.spec.ts'],use:{browserName:browserName as 'chromium'|'firefox',baseURL:'http://127.0.0.1:5660'}},
   {name:browserName+'-dice-wide',testMatch:['diceFrame230.spec.ts'],use:{browserName:browserName as 'chromium'|'firefox',baseURL:'http://127.0.0.1:5660'}},
   {name:browserName+'-dice-narrow',testMatch:['diceFrame230.spec.ts'],use:{browserName:browserName as 'chromium'|'firefox',baseURL:'http://127.0.0.1:5660',viewport:{width:390,height:844}}},
   {name:browserName+'-choices',testMatch:['automationChoiceFollowup230.spec.ts'],use:{browserName:browserName as 'chromium'|'firefox',baseURL:'http://127.0.0.1:5662'}},

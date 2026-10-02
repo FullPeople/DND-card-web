@@ -22,24 +22,24 @@ const draftIds=async(page:Page)=>editor(page).locator('.resource-widget').evalua
 test('overlapping movement keeps neighbors fixed, blocks saving, then commits once after correction',async({page})=>{
  await visit(page);const initial=await read(page),neighbor=await geometry(widget(page,'beta')),attacks=await geometry(widget(page,'__attacks__'));
  await moveCells(page,'alpha',2,0);await expect(widget(page,'alpha')).toHaveAttribute('data-overlapping','true');await expect(widget(page,'beta')).toHaveAttribute('data-overlapping','true');
- expect(await geometry(widget(page,'alpha'))).toMatchObject({x:5,y:0,w:3,h:2,page:0});expect(await geometry(widget(page,'beta'))).toEqual(neighbor);expect(await geometry(widget(page,'__attacks__'))).toEqual(attacks);
+ expect(await geometry(widget(page,'alpha'))).toMatchObject({x:2,y:0,w:4,h:2,page:0});expect(await geometry(widget(page,'beta'))).toEqual(neighbor);expect(await geometry(widget(page,'__attacks__'))).toEqual(attacks);
  await expect(save(page)).toBeDisabled();expect(await edits(page)).toBe(0);expect(await read(page)).toEqual(initial);await editor(page).screenshot({path:test.info().outputPath('overlap-save-blocked.png')});
  await moveCells(page,'alpha',0,2);await expect(save(page)).toBeEnabled();expect(await geometry(widget(page,'beta'))).toEqual(neighbor);expect(await read(page)).toEqual(initial);
- await save(page).click();expect(await edits(page)).toBe(1);const saved=await read(page);expect(saved.quickbarLayout!.widgets!.alpha).toMatchObject({x:5,y:2,w:3,h:2,page:0});expect(saved.quickbarLayout!.widgets!.beta).toEqual(initial.quickbarLayout!.widgets!.beta);expect(saved.runtime.resources).toEqual(initial.runtime.resources);
- await page.reload();expect((await read(page)).quickbarLayout).toEqual(saved.quickbarLayout);expect((await read(page)).runtime.resources).toEqual(initial.runtime.resources);expect(await geometry(page.locator('.fixture-quickbar [data-resource-id="alpha"]'))).toMatchObject({x:5,y:2,w:3,h:2,page:0});
+ await save(page).click();expect(await edits(page)).toBe(1);const saved=await read(page);expect(saved.quickbarLayout!.widgets!.alpha).toMatchObject({x:2,y:2,w:4,h:2,page:0});expect(saved.quickbarLayout!.widgets!.beta).toMatchObject(neighbor);expect(saved.runtime.resources).toEqual(initial.runtime.resources);
+ await page.reload();expect((await read(page)).quickbarLayout).toEqual(saved.quickbarLayout);expect((await read(page)).runtime.resources).toEqual(initial.runtime.resources);expect(await geometry(page.locator('.fixture-quickbar [data-resource-id="alpha"]'))).toMatchObject({x:2,y:2,w:4,h:2,page:0});
 });
 
 test('resizing into neighbors leaves every other module in place and dragging back clears the conflict',async({page})=>{
  await visit(page);const initial=await read(page),neighbor=await geometry(widget(page,'beta')),attacks=await geometry(widget(page,'__attacks__'));await widget(page,'alpha').locator('.resource-widget-face').click();
- await moveCells(page,'alpha',2,0,'.handle-e');expect(await geometry(widget(page,'alpha'))).toMatchObject({x:3,y:0,w:5,h:2});expect(await geometry(widget(page,'beta'))).toEqual(neighbor);expect(await geometry(widget(page,'__attacks__'))).toEqual(attacks);await expect(save(page)).toBeDisabled();
+ await moveCells(page,'alpha',2,0,'.handle-e');expect(await geometry(widget(page,'alpha'))).toMatchObject({x:0,y:0,w:6,h:2});expect(await geometry(widget(page,'beta'))).toEqual(neighbor);expect(await geometry(widget(page,'__attacks__'))).toEqual(attacks);await expect(save(page)).toBeDisabled();
  await moveCells(page,'alpha',-2,0,'.handle-e');await expect(widget(page,'alpha')).not.toHaveAttribute('data-overlapping','true');expect(await read(page)).toEqual(initial);expect(await edits(page)).toBe(0);
  await moveCells(page,'alpha',0,1,'.handle-s');await expect(save(page)).toBeEnabled();await save(page).click();expect(await edits(page)).toBe(1);expect((await read(page)).runtime.resources).toEqual(initial.runtime.resources);
 });
 
 test('collisions are scoped to a page and paging a module never relocates other modules',async({page})=>{
  await visit(page);const initial=await read(page);await expect(dashboard(page)).toHaveAttribute('data-overlap-count','0');const face=widget(page,'alpha').locator('.resource-widget-face');await face.focus();await face.press('PageDown');
- await expect(editor(page).locator('.resource-page-nav output')).toHaveText('2/2');await expect(widget(page,'alpha')).toHaveAttribute('data-overlapping','true');expect(await geometry(widget(page,'peer'))).toMatchObject({x:3,y:0,w:3,h:3,page:1});await expect(save(page)).toBeDisabled();
- await moveCells(page,'alpha',0,3);await expect(save(page)).toBeEnabled();await save(page).click();const saved=await read(page);expect(saved.quickbarLayout!.widgets!.alpha.page).toBe(1);expect(saved.quickbarLayout!.widgets!.peer).toEqual(initial.quickbarLayout!.widgets!.peer);expect(saved.quickbarLayout!.widgets!.beta).toEqual(initial.quickbarLayout!.widgets!.beta);expect(saved.runtime.resources).toEqual(initial.runtime.resources);
+ await expect(editor(page).locator('.resource-page-nav output')).toHaveText('2/2');await expect(widget(page,'alpha')).toHaveAttribute('data-overlapping','true');expect(await geometry(widget(page,'peer'))).toMatchObject({x:0,y:0,w:4,h:3,page:1});await expect(save(page)).toBeDisabled();
+ await moveCells(page,'alpha',0,3);await expect(save(page)).toBeEnabled();await save(page).click();const saved=await read(page);expect(saved.quickbarLayout!.widgets!.alpha.page).toBe(1);expect(saved.quickbarLayout!.widgets!.peer).toMatchObject({x:0,y:0,w:4,h:3,page:1});expect(saved.quickbarLayout!.widgets!.beta).toMatchObject({x:4,y:0,w:4,h:2,page:0});expect(saved.runtime.resources).toEqual(initial.runtime.resources);
 });
 
 test('palette, configuration and additions remain draft until saving; discard and close restore the card',async({page})=>{
@@ -81,8 +81,8 @@ test('narrow touch pointer dragging from the gallery places one module without c
 test('a compact spell group keeps the saved geometry on the card and after reload without repacking neighbors',async({page})=>{
  await page.goto('/tests/fixtures/resource-dashboard220/index.html');await open(page);const initial=await read(page),pool=widget(page,'spell-slot:1'),pactBefore=await geometry(widget(page,'pact-slot:2')),surgeBefore=await geometry(widget(page,'surge'));
  await pool.locator('.resource-widget-face').click();await moveCells(page,'spell-slot:1',-8,0,'.handle-e');
- // Three actual spell pools remain legible at the supported four-cell minimum.
- await expect(pool).toHaveAttribute('data-grid-w','4');await expect(pool.locator('[data-subresource-id]')).toHaveCount(3);expect(await geometry(widget(page,'pact-slot:2'))).toEqual(pactBefore);expect(await geometry(widget(page,'surge'))).toEqual(surgeBefore);
+ // Three actual spell pools remain legible at the supported six-cell minimum.
+ await expect(pool).toHaveAttribute('data-grid-w','6');await expect(pool.locator('[data-subresource-id]')).toHaveCount(3);expect(await geometry(widget(page,'pact-slot:2'))).toEqual(pactBefore);expect(await geometry(widget(page,'surge'))).toEqual(surgeBefore);
  const arranged=await geometry(pool);await save(page).click();await editor(page).getByRole('button',{name:'关闭弹窗',exact:true}).click();const main=page.locator('.fixture-quickbar');expect(await geometry(main.locator('[data-resource-id="spell-slot:1"]'))).toEqual(arranged);expect(await geometry(main.locator('[data-resource-id="pact-slot:2"]'))).toEqual(pactBefore);expect(await geometry(main.locator('[data-resource-id="surge"]'))).toEqual(surgeBefore);
  await page.reload();expect(await geometry(main.locator('[data-resource-id="spell-slot:1"]'))).toEqual(arranged);expect((await read(page)).runtime.resources).toEqual(initial.runtime.resources);
 });
