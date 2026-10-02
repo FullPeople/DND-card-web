@@ -7,7 +7,7 @@ const resource=(name='原创资源')=>({name,current:3,max:5,type:'count',locked
 const template=(id:string)=>RESOURCE_TEMPLATES.find(t=>t.id===id)!;
 function card():Character{
  const c=newCharacter();c.runtime.resources={a:resource('甲'),b:resource('乙')};
- c.quickbarLayout={order:[],hidden:[],attacks:normalizeWidget({x:0,y:0,w:3,h:6}),widgets:{a:normalizeWidget({x:3,y:0,w:3,h:3,style:'orbit'}),b:normalizeWidget({x:6,y:0,w:3,h:3,style:'diamond'})}};
+ c.quickbarLayout={order:[],hidden:[],attacks:normalizeWidget({x:0,y:0,w:4,h:6,resourceArea:true,split:.32}),widgets:{a:normalizeWidget({x:3,y:0,w:3,h:3,style:'orbit'}),b:normalizeWidget({x:6,y:0,w:3,h:3,style:'diamond'})}};
  return c;
 }
 function visible(c:Character){return freeDashboardLayout(resourceModules(Object.entries(c.runtime.resources),c.quickbarLayout?.widgets),c.quickbarLayout?.widgets,c.quickbarLayout?.attacks);}
@@ -22,13 +22,13 @@ describe('221 free dashboard placement',()=>{
  });
  it('counts pairs but not touching edges or distinct pages, and never confuses an attacks-named resource',()=>{
   const layout:DashboardLayout={attacks:normalizeWidget({x:0,w:3,h:3}),widgets:{__attacks__:normalizeWidget({x:0,w:3,h:3}),a:normalizeWidget({x:0,w:3,h:3}),edge:normalizeWidget({x:3,w:3,h:3}),next:normalizeWidget({x:0,w:3,h:3,page:1})}};
-  expect(dashboardOverlaps(layout)).toEqual({resources:['__attacks__','a'],attacks:true,count:3});
+  expect(dashboardOverlaps(layout)).toEqual({resources:['__attacks__','a'],attacks:false,count:1});
   layout.attacks={...layout.attacks,page:2};expect(dashboardOverlaps(layout)).toEqual({resources:['__attacks__','a'],attacks:false,count:1});
  });
  it('finds a position for missing attacks and resources without moving explicit saved coordinates',()=>{
   const rows:[string,ReturnType<typeof resource>][]=[['a',resource()],['b',resource()]],saved={a:normalizeWidget({w:12,h:6,page:0})},before=structuredClone(saved);
   const result=freeDashboardLayout(resourceModules(rows),saved);
-  expect(result.widgets.a).toEqual(saved.a);expect(result.attacks.page).toBe(1);expect(result.widgets.b.page).toBe(1);expect(dashboardOverlaps(result).count).toBe(0);expect(saved).toEqual(before);
+  expect(result.widgets.a).toEqual(saved.a);expect(result.attacks.page).toBe(0);expect(result.widgets.b.page).toBe(1);expect(dashboardOverlaps(result).count).toBe(0);expect(saved).toEqual(before);
  });
  it('drops a new template exactly at a requested overlapping cell without moving existing content',()=>{
   const c=card(),before=structuredClone(c.quickbarLayout!),balances=structuredClone(c.runtime.resources);
@@ -50,8 +50,8 @@ describe('221 free dashboard placement',()=>{
  it('uses a group-aware resize minimum and displays the exact saved geometry after shrinking a custom group',()=>{
   const c=card();c.runtime.resources.extra=resource('丙');c.quickbarLayout!.widgets={a:normalizeWidget({x:3,y:0,w:6,h:5,style:'pool',members:['a','b','extra'],label:'组合资源'})};
   const draft=createDashboardDraft(c),module=resourceModules(Object.entries(draft.runtime.resources),draft.quickbarLayout!.widgets)[0],minimum=resourceModuleMinimum(module,'pool');
-  expect(minimum).toEqual({w:4,h:3});draft.quickbarLayout!.widgets!.a=moveWidget(draft.quickbarLayout!.widgets!.a,-99,-99,'se',minimum);
-  expect(draft.quickbarLayout!.widgets!.a).toMatchObject({x:3,y:0,w:4,h:3});
+  expect(minimum).toEqual({w:6,h:3});draft.quickbarLayout!.widgets!.a=moveWidget(draft.quickbarLayout!.widgets!.a,-99,-99,'se',minimum);
+  expect(draft.quickbarLayout!.widgets!.a).toMatchObject({x:3,y:0,w:6,h:3});
   const result=commitDashboardDraft(c,c,draft),shown=visible(result);expect(shown.widgets.a).toEqual(result.quickbarLayout!.widgets!.a);expect(shown.widgets.a).toEqual(draft.quickbarLayout!.widgets!.a);
  });
  it('grows a spell module for new levels without moving neighbours and keeps the resulting collision explicit',()=>{
@@ -65,11 +65,11 @@ describe('221 free dashboard placement',()=>{
  });
  it('normalizes only the dense module and does not silently shrink its requested presentation',()=>{
   const rows:[string,ReturnType<typeof resource>][]=[['a',resource()],['b',resource()],['c',resource()]],saved=normalizeWidget({x:8,y:4,w:4,h:2,style:'poolpips',members:['a','b','c']});
-  const module=resourceModules(rows,{a:saved})[0];expect(resourceModuleMinimum(module,'poolpips')).toEqual({w:4,h:4});expect(normalizeModuleWidget(module,saved)).toMatchObject({x:8,y:2,w:4,h:4});expect(saved).toMatchObject({x:8,y:4,w:4,h:2});
+  const module=resourceModules(rows,{a:saved})[0];expect(resourceModuleMinimum(module,'poolpips')).toEqual({w:6,h:4});expect(normalizeModuleWidget(module,saved)).toMatchObject({x:6,y:2,w:6,h:4});expect(saved).toMatchObject({x:8,y:4,w:4,h:2});
  });
  it('keeps enough room for an attack heading and row without pushing any resource aside',()=>{
   const c=card();c.quickbarLayout!.attacks=normalizeWidget({x:4,y:4,w:2,h:2});const before=structuredClone(c),shown=visible(c);
-  expect(shown.attacks).toMatchObject({x:4,y:3,w:3,h:3});expect(shown.widgets).toEqual(c.quickbarLayout!.widgets);expect(c).toEqual(before);
+  expect(shown.attacks).toMatchObject({x:0,y:0,w:4,h:6,page:0,resourceArea:true});expect(Object.keys(shown.widgets)).toEqual(['a','b']);expect(c).toEqual(before);
  });
 });
 describe('221 atomic dashboard save',()=>{

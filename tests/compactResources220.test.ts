@@ -12,7 +12,7 @@ const render=(style:WidgetStyle,icon:WidgetIcon='shield',extra={})=>renderToStat
 describe('220 compact resource presentation preserves operation containers',()=>{
  it.each(WIDGET_STYLES)('renders %s with the same runtime values and appearance metadata',style=>{
   const html=render(style);
-  expect(html).toContain(`data-module-style="${style}"`);
+  expect(html).toContain(`data-module-style="${style==='ready'?'orbit':style}"`);
   expect(html).toContain('--rm-icon-tone:#334455');
   expect(html).toContain('data-resource-current="2"');
   expect(html).toContain('动作如潮：2 / 4，打开资源操作');

@@ -7,6 +7,7 @@ import {ATTACKS_WIDGET_ID,RESOURCE_TEMPLATES,WIDGET_STYLES,addResourceModule,cho
 
 const value=(max=5)=>({name:'原创资源',current:Math.min(2,max),max,locked:true,type:'count'});
 function expectNoOverlap(widgets:ResourceWidgetLayout[]){
+ widgets=widgets.filter(w=>!w.resourceArea);
  for(const [i,a] of widgets.entries()){
   expect(validWidget(a)).toBe(true);
   for(const b of widgets.slice(i+1))expect(a.page!==b.page||a.x>=b.x+b.w||a.x+a.w<=b.x||a.y>=b.y+b.h||a.y+a.h<=b.y).toBe(true);
@@ -17,20 +18,12 @@ describe('220 approved dashboard persistence and shared canvas',()=>{
   expect(WIDGET_STYLES).toEqual(['ring','pips','pool','half','orbit','square','segments','reservoir','matrix','fraction','counter','poolchips','poolbars','poolpips','ready','diamond']);
   expect(RESOURCE_TEMPLATES.map(t=>t.id)).toEqual(WIDGET_STYLES);
  });
- it.each([
-  [0,['orbit','diamond']],[6,['orbit','diamond']],[7,['orbit','segments','diamond']],
-  [12,['orbit','segments','diamond']],[13,['segments','fraction']],[100,['segments','fraction']],[101,['fraction']],[2.5,['fraction']],
- ] as const)('chooses a suitable randomized default for maximum %s', (max,expected)=>{
-  const actual=new Set(Array.from({length:30},(_,i)=>chooseDefaultWidgetStyle({max},()=>i/30)));
-  expect([...actual]).toEqual(expected);
-  expect(chooseDefaultWidgetStyle({max,unlimited:true},()=>0)).toBe('fraction');
+ it.each([[0,'counter'],[1,'ready'],[6,'orbit'],[7,'segments'],[10,'segments'],[11,'ring'],[100,'ring'],[10000,'counter'],[2.5,'counter']] as const)('chooses a capacity-driven default for maximum %s',(max,style)=>{
+  const rng=vi.fn(()=>{throw Error('must not randomize');});expect(chooseDefaultWidgetStyle({max},rng)).toBe(style);expect(rng).not.toHaveBeenCalled();expect(chooseDefaultWidgetStyle({max,unlimited:true},rng)).toBe('counter');
  });
- it('chooses only once during creation and preserves the choice across maximum changes and native/linked backups',()=>{
-  const c=newCharacter();c.runtime.resources.a=value(6);const rng=vi.fn(()=>.9);ensureResourceWidget(c,'a',rng);
-  expect(c.quickbarLayout?.widgets?.a.style).toBe('diamond');expect(rng).toHaveBeenCalledTimes(1);
-  c.runtime.resources.a.max=1000;ensureResourceWidget(c,'a',rng);expect(rng).toHaveBeenCalledTimes(1);
-  const before=structuredClone(c.runtime.resources),shown=dashboardLayout(resourceModules(Object.entries(c.runtime.resources)),c.quickbarLayout?.widgets,c.quickbarLayout?.attacks);
-  expect(shown.widgets.a.style).toBe('diamond');expect(c.runtime.resources).toEqual(before);
+ it('adapts an incompatible low-count face after capacity grows without spending or rewriting a read',()=>{
+  const c=newCharacter();c.runtime.resources.a=value(6);const rng=vi.fn(()=>.9);ensureResourceWidget(c,'a',rng);expect(c.quickbarLayout?.widgets?.a.style).toBe('orbit');expect(rng).not.toHaveBeenCalled();
+  c.runtime.resources.a.max=1000;const before=structuredClone(c);const shown=dashboardLayout(resourceModules(Object.entries(c.runtime.resources)),c.quickbarLayout?.widgets,c.quickbarLayout?.attacks);expect(shown.widgets.a.style).toBe('ring');expect(c).toEqual(before);
   for(const restored of [readCharacter(exportCharacter(c)).character,importOwlbear(exportLinkedOwlbear(c,evaluate(c)))])expect(restored.quickbarLayout).toEqual(c.quickbarLayout);
  });
  it('never randomizes or mutates unsaved old cards while repeatedly projecting their dashboard',()=>{
@@ -38,13 +31,11 @@ describe('220 approved dashboard persistence and shared canvas',()=>{
   const rng=vi.spyOn(Math,'random').mockImplementation(()=>{throw Error('render must not randomize');});
   try {const modules=resourceModules(Object.entries(c.runtime.resources));expect(dashboardLayout(modules)).toEqual(dashboardLayout(modules));expect(c).toEqual(before);}finally{rng.mockRestore();}
  });
- it('reserves a movable attacks box, relocates collisions, and preserves an intentional empty page',()=>{
+ it('keeps attacks fixed on all resource pages and gives resources their own full grid',()=>{
   const modules=resourceModules([['a',value()],['b',value()]]),initial=dashboardLayout(modules);
-  expect(initial.attacks).toMatchObject({x:0,y:0,w:3,h:6,page:0});expectNoOverlap([initial.attacks,...Object.values(initial.widgets)]);
-  const moved=dashboardLayout(modules,{...initial.widgets,a:{...initial.widgets.a,x:0,y:0,w:6}},initial.attacks,'a');
-  expect(moved.widgets.a).toMatchObject({x:0,y:0,w:6});expect(moved.attacks.x).toBeGreaterThan(0);expectNoOverlap([moved.attacks,...Object.values(moved.widgets)]);
-  const next=dashboardLayout(modules,moved.widgets,{...moved.attacks,page:3},ATTACKS_WIDGET_ID);
-  expect(next.attacks.page).toBe(3);expect(dashboardLayout(modules,next.widgets,next.attacks)).toEqual(next);
+  expect(initial.attacks).toMatchObject({x:0,y:0,w:4,h:6,page:0,resourceArea:true});expectNoOverlap(Object.values(initial.widgets));
+  const moved=dashboardLayout(modules,{...initial.widgets,a:{...initial.widgets.a,x:0,y:0,w:6}},initial.attacks,'a');expect(moved.widgets.a).toMatchObject({x:0,y:0,w:6});expect(moved.attacks).toEqual(initial.attacks);expectNoOverlap(Object.values(moved.widgets));
+  const next=dashboardLayout(modules,moved.widgets,{...moved.attacks,page:3,x:8},ATTACKS_WIDGET_ID);expect(next.attacks).toEqual(initial.attacks);
  });
  it('persists tone, flat icons and independent attacks geometry through both native and legacy formats',()=>{
   const c=newCharacter();c.runtime.resources.a=value();ensureResourceWidget(c,'a',()=>0);

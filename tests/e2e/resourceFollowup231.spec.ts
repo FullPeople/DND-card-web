@@ -57,24 +57,17 @@ test('module settings use name and upper limit, preview immediately, and cancel 
  await dialog.getByRole('button',{name:'关闭弹窗'}).click();expect((await read(page)).runtime.resources).toEqual(before);
 });
 
-test('resource menus preserve spend and rest confirmation while the quickbar keeps its height',async({page})=>{
- await page.goto(fixture);const quickbar=page.locator('.fixture-quickbar'),before=await read(page),bounds=(await quickbar.locator('.resource-widget-canvas').boundingBox())!;
- await expect(quickbar.getByRole('button',{name:'短休',exact:true})).toHaveCount(0);await expect(quickbar.getByRole('button',{name:'长休',exact:true})).toHaveCount(0);
+test('resource menus preserve spending and omit every rest entry',async({page})=>{
+ await page.goto(fixture);const quickbar=page.locator('.fixture-quickbar'),before=await read(page),bounds=await quickbar.boundingBox();
  await quickbar.locator('[data-resource-id="surge"] .resource-widget-face').click();const menu=page.getByRole('dialog',{name:'动作如潮资源操作',exact:true});
- await expect(menu.locator('.resource-current-label')).toHaveText('3 / 5');await menu.getByRole('button',{name:'动作如潮 3',exact:true}).click();expect((await read(page)).runtime.resources.surge.current).toBe(2);
- await menu.getByRole('button',{name:'长休',exact:true}).click();const rest=page.getByRole('dialog',{name:'长休',exact:true});await expect(rest).toBeVisible();await expect(menu).toHaveCount(0);await rest.getByRole('button',{name:'关闭休息',exact:true}).click();
- expect((await read(page)).runtime.resources['spell-slot:1']).toEqual(before.runtime.resources['spell-slot:1']);
- await quickbar.locator('[data-resource-id="surge"] .resource-widget-face').click();await menu.getByRole('button',{name:'短休',exact:true}).click();await page.getByRole('dialog',{name:'短休',exact:true}).getByRole('button',{name:'确认短休',exact:true}).click();
- expect((await read(page)).runtime.resources['pact-slot:2'].current).toBe(2);expect((await read(page)).runtime.resources['spell-slot:1'].current).toBe(3);
- await quickbar.locator('[data-resource-id="surge"] .resource-widget-face').click();await menu.getByRole('button',{name:'长休',exact:true}).click();await rest.getByRole('button',{name:'确认长休',exact:true}).click();
- const after=await read(page);expect(after.runtime.resources['spell-slot:1'].current).toBe(4);expect(after.runtime.resources.surge.current).toBe(2);expect(after.runtime.rests?.sequence).toBe(2);
- const changed=(await quickbar.locator('.resource-widget-canvas').boundingBox())!;expect(changed).toEqual(bounds);
- await quickbar.locator('[data-resource-id="surge"] .resource-widget-face').click();await menu.screenshot({path:test.info().outputPath('resource-gray-operation-menu.png')});await page.keyboard.press('Escape');await expect(menu).toHaveCount(0);await page.reload();expect((await read(page)).runtime.resources).toEqual(after.runtime.resources);
+ await expect(menu.getByRole('button',{name:/短休|长休/})).toHaveCount(0);await menu.getByRole('button',{name:'动作如潮 3',exact:true}).click();
+ const after=await read(page);expect(after.runtime.resources.surge.current).toBe(2);expect(after.runtime.resources['spell-slot:1']).toEqual(before.runtime.resources['spell-slot:1']);expect(after.runtime.rests).toEqual(before.runtime.rests);expect(await quickbar.boundingBox()).toEqual(bounds);
+ await menu.screenshot({path:test.info().outputPath('resource-operation-no-rest.png')});await page.keyboard.press('Escape');await page.reload();expect((await read(page)).runtime.resources).toEqual(after.runtime.resources);
 });
 
 test('invalid previews cannot add modules and closing a valid draft discards it',async({page})=>{
  const dialog=await open(page),before=await read(page);await dialog.getByRole('spinbutton',{name:'新模块当前值'}).fill('9');await expect(dialog.locator('[data-template-id="matrix"]')).toBeDisabled();
- await dialog.getByRole('spinbutton',{name:'新模块上限'}).fill('12');await dialog.locator('[data-template-id="matrix"]').click();await expect(dialog).toContainText('尚未保存');await dialog.getByRole('button',{name:'关闭弹窗'}).click();expect(await read(page)).toEqual(before);
+ await dialog.getByRole('spinbutton',{name:'新模块上限'}).fill('10');await dialog.locator('[data-template-id="matrix"]').click();await expect(dialog).toContainText('尚未保存');await dialog.getByRole('button',{name:'关闭弹窗'}).click();expect(await read(page)).toEqual(before);
 });
 
 test('custom name and values follow the drag ghost into the draft without changing live balances',async({page})=>{
@@ -89,25 +82,14 @@ test('custom name and values follow the drag ghost into the draft without changi
  expect(Object.values(saved).find(r=>r.name==='幽灵储备')).toMatchObject({current:2,max:7});
 });
 
-test('a card without resources can rest through the dashboard and cancel, Escape and confirm preserve its layout draft',async({page})=>{
- const dialog=await open(page,'empty'),before=await read(page),dashboard=dialog.getByRole('region',{name:'仪表盘编辑器',exact:true});expect(before.runtime.resources).toEqual({});
- const attacks=dialog.locator('.resource-attacks-widget');await attacks.locator('.resource-attacks-drag').focus();await page.keyboard.press('ArrowRight');await expect(attacks).toHaveAttribute('data-grid-x','1');await expect(dashboard).toHaveAttribute('data-dirty','true');
- const menu=dialog.getByLabel('休息选项'),rest=dialog.getByRole('dialog',{name:'长休',exact:true});
- await menu.getByRole('button',{name:'长休',exact:true}).click();await expect(rest).toBeVisible();expect(await rest.evaluate(el=>el.closest('dialog')===Array.from(document.querySelectorAll('dialog[open]')).at(-1))).toBe(true);
- await rest.getByRole('button',{name:'关闭休息',exact:true}).click();await expect(rest).toHaveCount(0);await expect(dialog).toBeVisible();await expect(attacks).toHaveAttribute('data-grid-x','1');expect(await read(page)).toEqual(before);
- await menu.getByRole('button',{name:'长休',exact:true}).click();await expect(rest).toBeVisible();await page.keyboard.press('Escape');await expect(rest).toHaveCount(0);await expect(dialog).toBeVisible();await expect(dashboard).toHaveAttribute('data-dirty','true');await expect(attacks).toHaveAttribute('data-grid-x','1');expect(await read(page)).toEqual(before);
- await expect(menu.getByRole('button',{name:'长休',exact:true})).toBeFocused();await menu.getByRole('button',{name:'长休',exact:true}).click();await rest.getByRole('button',{name:'确认长休',exact:true}).click();await expect(rest).toHaveCount(0);await expect(dialog).toBeVisible();const rested=await read(page);expect(rested.runtime.hp).toBe(12);expect(rested.runtime.resources).toEqual({});expect(rested.quickbarLayout).toEqual(before.quickbarLayout);expect(rested.runtime.rests?.sequence).toBe(1);await expect(attacks).toHaveAttribute('data-grid-x','1');await expect(dashboard).toHaveAttribute('data-dirty','true');
- await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=await read(page);expect(saved.quickbarLayout?.attacks?.x).toBe(1);expect(saved.runtime).toEqual(rested.runtime);await dialog.screenshot({path:test.info().outputPath('empty-resource-rest-dashboard.png')});
+test('an empty dashboard adjusts its divider without creating resources or recovering health',async({page})=>{
+ const dialog=await open(page,'empty'),before=await read(page),divider=dialog.getByRole('separator');
+ await expect(dialog.getByRole('button',{name:/短休|长休/})).toHaveCount(0);await divider.focus();await page.keyboard.press('ArrowRight');
+ await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=await read(page);expect(saved.runtime).toEqual(before.runtime);expect(saved.quickbarLayout?.attacks?.resourceArea).toBe(true);
 });
 
-test('rest cancellation preserves every balance and confirmation merges with an unsaved icon change',async({page})=>{
- const dialog=await open(page),before=await read(page),dashboard=dialog.getByRole('region',{name:'仪表盘编辑器',exact:true}),surge=dialog.locator('[data-resource-id="surge"]');
- await surge.locator('.resource-widget-face').click();await dialog.getByRole('button',{name:'色调 #a36d61',exact:true}).click();await expect(dashboard).toHaveAttribute('data-dirty','true');
- const longRest=dialog.getByLabel('休息选项').getByRole('button',{name:'长休',exact:true}),rest=dialog.getByRole('dialog',{name:'长休',exact:true});
- await longRest.click();await rest.getByRole('button',{name:'关闭休息',exact:true}).click();expect(await read(page)).toEqual(before);await expect(dashboard).toHaveAttribute('data-dirty','true');
- await longRest.click();await expect(rest).toBeVisible();await page.keyboard.press('Escape');await expect(dialog).toBeVisible();expect(await read(page)).toEqual(before);await expect(surge.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#a36d61');
- await longRest.click();await rest.getByRole('button',{name:'确认长休',exact:true}).click();const rested=await read(page),expected=structuredClone(before.runtime.resources);
- for(const [id,r] of Object.entries(expected))if(id.startsWith('spell-slot:')||id.startsWith('pact-slot:'))r.current=r.max;
- expect(rested.runtime.resources).toEqual(expected);expect(rested.quickbarLayout).toEqual(before.quickbarLayout);await expect(dashboard).toHaveAttribute('data-dirty','true');
- await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=await read(page);expect(saved.quickbarLayout?.widgets?.surge.color).toBe('#a36d61');expect(saved.runtime.resources).toEqual(expected);await expect(dashboard).toHaveAttribute('data-dirty','false');
+test('discarding an icon draft preserves every live balance and saved presentation',async({page})=>{
+ const dialog=await open(page),before=await read(page),surge=dialog.locator('[data-resource-id="surge"]');
+ await surge.locator('.resource-widget-face').click();await dialog.getByRole('button',{name:'色调 #a36d61',exact:true}).click();await expect(dialog.getByRole('button',{name:/短休|长休/})).toHaveCount(0);
+ await dialog.getByRole('button',{name:'放弃修改',exact:true}).click();expect(await read(page)).toEqual(before);await expect(surge.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#527880');
 });

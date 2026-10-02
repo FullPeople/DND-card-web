@@ -30,3 +30,12 @@
 @media(max-width:650px){.resource-template-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
 @media(max-width:430px){.resource-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.resource-template-option{transition:none}}
+.resource-template-matching{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;font-size:11px}
+.resource-template-matching>button{padding:6px 10px;border:1px solid #527880;background:#e2e7e8;color:#38494d;font:inherit}
+.resource-template-matching>label{display:flex;gap:6px;align-items:center}
+.resource-template-matching input{width:44px;padding:4px;border:1px solid #b9bbbe;background:#f6f6f6;font:inherit}
+.resource-template-option[data-recommended=true]{border:2px solid #527880!important}
+.resource-template-option[data-supported=false]{opacity:.3}
+.resource-template-option[data-supported=false] .resource-template-preview{filter:grayscale(1)}
+.resource-template-option[data-multi=true][data-dense=true]{height:calc(var(--preview-pool-rows)*44px + 38px)}
+.resource-template-option[data-multi=true][data-dense=true] .resource-template-preview{height:100%}

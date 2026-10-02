@@ -244,40 +244,12 @@
  .sheet-pane .toolbar-actions>button{flex:none}
 }
 
-/* Preserve saved dashboard layout in its editor; the sheet uses readable resource rows. */
-.sheet-viewport.screen-mode .resource-diy-quickbar,.sheet-viewport.screen-mode .resource-diy-quickbar .resource-workspace{height:auto;min-height:0}
-.sheet-viewport.screen-mode .resource-widget-canvas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;flex:none;height:auto;min-height:0}
-.sheet-viewport.screen-mode .resource-widget{position:relative;inset:auto!important;width:auto!important;height:auto!important;min-height:44px;padding:0;grid-column:auto}
-.sheet-viewport.screen-mode .resource-attacks-widget{grid-column:1 / span 2;grid-row:1 / span var(--screen-resource-count)}
-.sheet-viewport.screen-mode .resource-attacks-content{height:100%;overflow:visible}
-.sheet-viewport.screen-mode .resource-diy-quickbar .quickbar-attacks{height:auto;overflow:visible!important;padding:2px 3px}
-.sheet-viewport.screen-mode .quickbar-attacks-heading{display:none}
-.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon{height:auto;min-height:26px;grid-template-columns:minmax(0,1fr) auto auto}
-.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon>:last-child{grid-column:auto}
-.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon button{font-size:13px!important;max-width:none}
-.sheet-viewport.screen-mode .resource-diy-quickbar .quick-weapon>span{font-size:13px}
-.sheet-viewport.screen-mode .resource-diy-quickbar .quickbar-manage-strip{height:23px;font-size:13px}
-.sheet-viewport.screen-mode .resource-workspace-toolbar{height:25px;line-height:23px;font-size:13px}
-.sheet-viewport.screen-mode .resource-workspace-toolbar button,.sheet-viewport.screen-mode .resource-page-nav output{font-size:13px;min-height:23px}
-.sheet-viewport.screen-mode .resource-module-art{min-height:44px}
-.sheet-viewport.screen-mode .resource-module-art .rm-name{font-size:13px;white-space:normal;line-height:16px;overflow-wrap:anywhere}
-.sheet-viewport.screen-mode .resource-module-art :is(.rm-readout small,.rm-inline-value small,.rm-counter-max,.rm-pool-label,.rm-pool-max){font-size:12px}
-.sheet-viewport.screen-mode .resource-module-art :is(.rm-inline-value,.rm-pool-current){font-size:16px}
-.sheet-viewport.screen-mode .resource-module-art:is(.rm-ring,.rm-orbit,.rm-square,.rm-half,.rm-diamond,.rm-reservoir){min-height:44px;display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:3px;align-items:center;padding:3px}
-.sheet-viewport.screen-mode .resource-module-art:is(.rm-pool,.rm-poolchips,.rm-poolbars,.rm-poolpips){min-height:50px}
 .sheet-viewport.screen-mode .paper .ability-skill.skill-editing:has(.skill-extra-adjustment){grid-template-columns:10px 10px 20px minmax(0,1fr) 20px;gap:1px}
 .sheet-viewport.screen-mode .paper .ability-skill.skill-editing>span{font-size:13px;line-height:21px}
 .sheet-viewport.screen-mode .paper .ability-skill input.skill-extra-adjustment{width:20px;max-width:20px;height:20px;font-size:12px;line-height:18px;padding:0}
 @container screen (max-width:479px){
- .sheet-viewport.screen-mode .resource-widget-canvas{grid-template-columns:repeat(2,minmax(0,1fr))}
- .sheet-viewport.screen-mode .resource-widget{grid-column:auto}
- .sheet-viewport.screen-mode .resource-attacks-widget{grid-column:1/-1;grid-row:auto}
 }
 
-.sheet-viewport.screen-mode .resource-widget:has(.rm-pools.has-many-pools){grid-column:span 2}
-.sheet-viewport.screen-mode .resource-module-art .rm-shape{width:36px;height:36px;max-height:36px}
-.sheet-viewport.screen-mode .resource-module-art .rm-readout strong{font-size:16px}
-.sheet-viewport.screen-mode .resource-module-art:is(.rm-ring,.rm-orbit,.rm-square,.rm-half,.rm-diamond,.rm-reservoir)>.rm-name{text-align:left}
 
 .sheet-viewport.screen-mode .resource-module-art.rm-group{container-type:inline-size;height:auto}
 .sheet-viewport.screen-mode .resource-module-art .rm-pools{flex:none;min-height:22px}

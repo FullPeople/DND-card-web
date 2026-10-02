@@ -54,9 +54,7 @@ test('dragging either canvas edge changes page and reload preserves its geometry
  await page.mouse.move(face.x+face.width/2,face.y+face.height/2);await page.mouse.down();await page.mouse.move(rect.x+rect.width+4,rect.y+rect.height/2,{steps:5});await expect(canvas(dialog)).toHaveAttribute('data-edge','right');await page.waitForTimeout(650);await page.mouse.up();
  await dialog.getByRole('button',{name:'保存布局',exact:true}).click();await expect.poll(async()=>(await read(page)).quickbarLayout!.widgets!.probe.page).toBe(1);await expect(dialog.locator('.resource-page-nav output')).toHaveText('2/2');
  const onSecond=(await probe.locator('.resource-widget-face').boundingBox())!;await page.mouse.move(onSecond.x+onSecond.width/2,onSecond.y+onSecond.height/2);await page.mouse.down();await page.mouse.move(rect.x-4,rect.y+rect.height/2,{steps:5});await expect(canvas(dialog)).toHaveAttribute('data-edge','left');await page.waitForTimeout(650);await page.mouse.up();
- await expect(probe).toHaveAttribute('data-grid-page','0');await expect(dialog.getByRole('button',{name:'保存布局',exact:true})).toBeDisabled();await expect(probe).toHaveAttribute('data-overlapping','true');
- // A left-edge drop may overlap the weapon block. Move it clear explicitly; neighbors must stay put.
- await pointDrag(page,probe.locator('.resource-widget-face'),rect.width*3/12,0);
+ await expect(probe).toHaveAttribute('data-grid-page','0');await expect(probe).toHaveAttribute('data-overlapping','false');
  await dialog.getByRole('button',{name:'保存布局',exact:true}).click();await expect.poll(async()=>(await read(page)).quickbarLayout!.widgets!.probe.page).toBe(0);expect((await read(page)).runtime.resources).toEqual(before);
  const saved=(await read(page)).quickbarLayout;await page.reload();expect((await read(page)).quickbarLayout).toEqual(saved);expect((await read(page)).runtime.resources).toEqual(before);
 });
@@ -69,7 +67,7 @@ test('choosing a sample adds one module and moves it onto a free page without ch
  await page.reload();expect((await read(page)).quickbarLayout!.widgets![id]).toEqual(moved.quickbarLayout!.widgets![id]);
 });
 
-for(const [maximum,styles] of [[2,['orbit','diamond']],[8,['orbit','segments','diamond']],[30,['segments','fraction']],[9999,['fraction']]] as const)test(`default resource with maximum ${maximum} persists an allowed capacity-based style`,async({page})=>{
+for(const [maximum,styles] of [[2,['orbit']],[8,['segments']],[30,['ring']],[9999,['ring']]] as const)test(`default resource with maximum ${maximum} persists an allowed capacity-based style`,async({page})=>{
  await visit(page);const before=(await read(page)).runtime.resources,dialog=await open(page);await dialog.getByRole('button',{name:'默认添加资源',exact:true}).click();
  await dialog.getByRole('textbox',{name:'资源名称',exact:true}).fill(`上限 ${maximum} 的测试资源`);await dialog.getByRole('spinbutton',{name:'资源上限',exact:true}).fill(String(maximum));await dialog.getByRole('button',{name:'保存',exact:true}).click();
  await expect(dialog.locator('.dashboard-configuration')).toHaveCount(0);await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const after=await read(page),id=Object.keys(after.runtime.resources).find(key=>!Object.hasOwn(before,key))!;expect(id).toBeTruthy();expect(styles).toContain(after.quickbarLayout!.widgets![id].style);expect(after.runtime.resources[id]).toMatchObject({current:maximum,max:maximum});

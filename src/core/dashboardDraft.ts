@@ -1,6 +1,6 @@
 import type {Character} from './model';
 import {applyPatch,sameValue} from './merge';
-import {dashboardOverlaps,freeDashboardLayout,resourceCanvasRows,resourceModules} from './resourceWidgets';
+import {dashboardOverlaps,freeDashboardLayout,resourceCanvasRows,resourceModules,migrateDashboardWidgets} from './resourceWidgets';
 import {validateCharacter} from './validation';
 
 /** A detached editing snapshot. Missing geometry is materialized once without
@@ -8,7 +8,7 @@ import {validateCharacter} from './validation';
 export function createDashboardDraft(character:Character):Character{
  const draft=structuredClone(character),layout=draft.quickbarLayout||={order:[],hidden:[]};
  const visible=freeDashboardLayout(resourceModules(resourceCanvasRows(draft),layout.widgets),layout.widgets,layout.attacks);
- layout.widgets={...layout.widgets,...visible.widgets};layout.attacks=visible.attacks;
+ layout.widgets={...migrateDashboardWidgets(layout.widgets,layout.attacks),...visible.widgets};layout.attacks=visible.attacks;
  return draft;
 }
 

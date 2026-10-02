@@ -89,3 +89,28 @@
 .resource-widget-popover .resource-title,.compact-resource-popover .resource-title{position:relative}
 .resource-widget-popover .resource-title>.resource-actions,.compact-resource-popover .resource-title>.resource-actions{position:absolute;right:0;top:0;display:flex;align-items:center;gap:4px}
 .resource-widget-popover .resource-title .resource-configure,.compact-resource-popover .resource-title .resource-configure{visibility:visible}
+
+/* Fixed attack column, adjustable divider, independent resource canvas. */
+.resource-diy-quickbar .resource-quickbar-split{display:grid;grid-template-columns:minmax(0,var(--attack-split,32%)) 6px minmax(0,1fr);height:100%;min-height:0;min-width:0;overflow:visible}
+.resource-fixed-attacks{min-width:0;min-height:0;height:100%;overflow:hidden;container-type:inline-size}
+.resource-diy-quickbar .resource-fixed-attacks .quickbar-attacks{overflow-y:auto!important;overflow-x:hidden!important;height:100%;box-sizing:border-box;padding:0 4px 0 0}
+.resource-diy-quickbar .resource-fixed-attacks .quickbar-attacks-heading{position:sticky;top:0;z-index:1;height:19px;background:#ededee;font-size:10px}
+.resource-diy-quickbar .resource-fixed-attacks .quick-weapon{height:auto;min-height:24px;gap:2px;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;padding:4px 0;border:0}
+.resource-diy-quickbar .resource-fixed-attacks .quick-weapon>span{white-space:normal;overflow:visible;overflow-wrap:anywhere;cursor:default;font-size:10px}
+.resource-diy-quickbar .resource-fixed-attacks .quick-weapon button{white-space:normal;overflow:visible;text-overflow:clip;max-width:none;font-size:10px!important}
+.resource-diy-quickbar .resource-fixed-attacks .quick-weapon>:last-child{grid-column:auto;justify-self:end}
+.resource-diy-quickbar .resource-fixed-attacks .quick-pin{cursor:pointer;white-space:normal;height:auto;min-height:23px}
+.resource-diy-quickbar .quickbar-divider{position:relative;width:6px;padding:0!important;border:0!important;background:transparent;cursor:col-resize;touch-action:none;z-index:12;min-width:0;min-height:0}
+.quickbar-divider::before{content:'';position:absolute;width:1px;top:0;bottom:0;left:2px;background:#b5b6b9}
+.quickbar-divider::after{content:'';position:absolute;inset:0 -3px}
+.quickbar-divider:hover::before,.quickbar-divider:focus-visible::before{width:2px;background:#527880}
+.quickbar-divider:focus-visible{outline:1px solid #527880;outline-offset:1px}
+.quickbar-divider:disabled{cursor:default}
+.resource-diy-quickbar .resource-quickbar-split>.resource-workspace{min-width:0;padding:0 0 0 3px}
+.resource-diy-quickbar .resource-quickbar-split .resource-workspace-toolbar{min-width:0;flex-wrap:nowrap}
+.resource-diy-quickbar .resource-quickbar-split .resource-widget-canvas{display:block;position:relative;flex:1;min-height:0;min-width:0;overflow:visible}
+.sheet-viewport.screen-mode .resource-diy-quickbar{height:215px;min-height:215px}
+@container (max-width:110px){.resource-fixed-attacks .quick-weapon{grid-template-columns:1fr auto!important}.resource-fixed-attacks .quick-weapon>span{grid-column:1/-1}.resource-fixed-attacks .quick-weapon>:last-child{grid-column:auto}}
+.sheet-export .quickbar-divider{pointer-events:none}
+
+.resource-quickbar-split[data-has-attacks=false]{grid-template-columns:minmax(0,1fr)}

@@ -1,0 +1,47 @@
+import {test,expect,type Page,type Locator} from '@playwright/test';
+import type {Character} from '../../src/core/model';
+const fixture='/tests/fixtures/resource-dashboard220/index.html';
+const read=async(page:Page):Promise<Character>=>JSON.parse((await page.locator('#fixture-data').textContent())!);
+async function open(page:Page,scenario='empty'){await page.goto(`${fixture}?scenario=${scenario}`);await page.locator('.fixture-quickbar').getByRole('button',{name:'仪表盘',exact:true}).click();return page.getByRole('dialog',{name:'仪表盘',exact:true});}
+async function setValues(dialog:Locator,max:number,current=max){await dialog.getByLabel('新模块上限',{exact:true}).fill(String(max));await dialog.getByLabel('新模块当前值',{exact:true}).fill(String(current));}
+async function clips(scope:Locator){return scope.evaluate(el=>[...el.querySelectorAll('.rm-readout strong,.rm-readout small,.rm-icon-count,.rm-pool-current,.rm-pool-max,.rm-inline-value,.rm-counter b,.rm-fraction strong,.rm-fraction small')].flatMap(node=>{const range=document.createRange();range.selectNodeContents(node);const r=range.getBoundingClientRect(),a=node.closest('.rm-vessel,.rm-shape,.resource-module-art')!.getBoundingClientRect();return r.left<a.left-1||r.right>a.right+1||r.top<a.top-1||r.bottom>a.bottom+1?[`${node.closest('[data-template-id]')?.getAttribute('data-template-id')||node.closest('[data-module-style]')?.getAttribute('data-module-style')}: ${node.textContent}`]:[]}));}
+test('divider persists independently, attacks stay fixed and cancelled pointer movement preserves values',async({page})=>{
+ const dialog=await open(page,'default'),before=await read(page),divider=dialog.getByRole('separator');
+ await expect(dialog.locator('.resource-widget-canvas .quickbar-attacks')).toHaveCount(0);await expect(dialog.locator('.resource-attacks-drag')).toHaveCount(0);await expect(dialog.locator('.quick-attack-name[data-editing]')).toHaveCount(0);
+ await divider.focus();await page.keyboard.press('ArrowRight');const split=Number(await divider.getAttribute('aria-valuenow'));await expect(dialog.getByRole('button',{name:'保存布局',exact:true})).toBeEnabled();
+ const box=(await divider.boundingBox())!;await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+45,box.y+box.height/2,{steps:4});await page.keyboard.press('Escape');await page.mouse.up();await expect(divider).toHaveAttribute('aria-valuenow',String(split));
+ expect(await read(page)).toEqual(before);await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const after=await read(page);expect(after.runtime).toEqual(before.runtime);expect(after.quickbarLayout!.attacks).toMatchObject({x:0,y:0,page:0,resourceArea:true,split:split/100});
+ await dialog.getByRole('button',{name:'下一页资源',exact:true}).click();await expect(dialog.locator('.resource-fixed-attacks')).toBeVisible();await page.reload();await expect(page.locator('.fixture-quickbar').getByRole('separator')).toHaveAttribute('aria-valuenow',String(split));
+});
+for(const max of [1,2,5,10,11,99999])test(`capacity ${max} matches units, filled count, preview and saved resource`,async({page})=>{
+ const dialog=await open(page);await setValues(dialog,max,Math.max(0,max-1));
+ for(const style of ['pips','orbit','segments','matrix']){
+  const tile=dialog.locator(`[data-template-id=${style}]`);if(max<=10){await expect(tile).toBeEnabled();const units=tile.locator(style==='pips'||style==='matrix'?'.rm-icon-unit':'[data-resource-unit]');await expect(units).toHaveCount(max);await expect(tile.locator('.is-filled')).toHaveCount(max-1);}else await expect(tile).toBeDisabled();
+ }
+ if(max===1)await expect(dialog.locator('[data-template-id=ready]')).toBeEnabled();else await expect(dialog.locator('[data-template-id=ready]')).toBeDisabled();
+ expect(await clips(dialog.locator('.resource-template-option[data-supported=true]').first())).toEqual([]);
+ await dialog.getByRole('button',{name:/自动匹配/}).click();const module=dialog.locator('.resource-widget[data-selected=true]');
+ const style=max===1?'ready':max<=6?'orbit':max<=10?'segments':max>=10000?'counter':'ring';await expect(module.locator('[data-module-style]')).toHaveAttribute('data-module-style',style);if(max===1)await expect(module.locator('.rm-ready[aria-label]')).toHaveAttribute('aria-label','已消耗');
+ await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const card=await read(page),id=Object.keys(card.runtime.resources)[0];expect(card.runtime.resources[id]).toMatchObject({current:max-1,max});await page.reload();expect((await read(page)).runtime.resources[id]).toEqual(card.runtime.resources[id]);
+});
+test('large values and 12 independently counted pools remain inside their modules at narrow width',async({page})=>{
+ const dialog=await open(page);await setValues(dialog,99999);await dialog.getByLabel('子资源数量').fill('12');
+ for(const style of ['pool','poolchips','poolbars','poolpips'])expect(await clips(dialog.locator(`[data-template-id=${style}]`))).toEqual([]);
+ await dialog.locator('[data-template-id=poolpips]').click();const group=dialog.locator('.resource-widget[data-selected=true]');await expect(group.locator('[data-subresource-id]')).toHaveCount(12);expect(await clips(group)).toEqual([]);
+ await dialog.getByRole('separator').focus();await page.keyboard.press('End');await dialog.getByRole('button',{name:'保存布局',exact:true}).click();await page.setViewportSize({width:390,height:844});expect(await clips(group)).toEqual([]);expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
+ await dialog.screenshot({path:test.info().outputPath('twelve-large-pools-narrow.png')});
+});
+test('mixed pools show each own capacity without fake units or shared balances',async({page})=>{
+ await page.goto(`${fixture}?scenario=empty`);const c=await read(page);c.runtime.resources=Object.fromEntries([1,2,5,10,11,99999].map((max,i)=>[`pool${i}`,{name:`分项 ${i+1}`,current:max-1,max}]));c.quickbarLayout={order:[],hidden:[],attacks:{x:0,y:0,w:4,h:6,page:0,style:'segments',resourceArea:true,split:.32},widgets:{pool0:{x:0,y:0,w:12,h:6,page:0,style:'poolpips',members:Object.keys(c.runtime.resources),label:'混合容量'}}};
+ await page.evaluate(c=>localStorage.setItem('resource-dashboard220:empty',JSON.stringify(c)),c);await page.reload();
+ const group=page.locator('.fixture-quickbar [data-resource-id=pool0]');for(const [i,max] of [1,2,5,10,11,99999].entries()){const row=group.locator(`[data-subresource-id=pool${i}]`);await expect(row.locator('.rm-pool-current')).toHaveText(String(max-1));await expect(row.locator('.rm-icon-unit')).toHaveCount(max<=10?max:0);}
+ expect(await clips(group)).toEqual([]);await group.locator('.resource-widget-face').click();const menu=page.getByRole('dialog',{name:'混合容量资源操作',exact:true});await expect(menu.getByRole('button',{name:/短休|长休/})).toHaveCount(0);await menu.getByRole('button',{name:'分项 3 4',exact:true}).click();expect((await read(page)).runtime.resources.pool2.current).toBe(3);expect((await read(page)).runtime.resources.pool3.current).toBe(9);
+});
+test('every numeric face fits large balances at its minimum size and an unbounded nine digit value stays complete',async({page})=>{
+ await page.goto(`${fixture}?scenario=empty`);const c=await read(page),styles=['ring','half','square','reservoir','fraction','counter','diamond'];
+ c.runtime.resources=Object.fromEntries(styles.map(style=>[style,{name:style,current:88888,max:99999}]));c.runtime.resources.unlimited={name:'无限制数值',current:999999999,max:0,unlimited:true};
+ c.quickbarLayout={order:[],hidden:[],attacks:{x:0,y:0,w:4,h:6,page:0,style:'segments',resourceArea:true,split:.55},widgets:Object.fromEntries([...styles,'unlimited'].map((style,page)=>[style,{x:0,y:0,w:4,h:3,page,style:style==='unlimited'?'counter':style}])) as any};
+ await page.evaluate(c=>localStorage.setItem('resource-dashboard220:empty',JSON.stringify(c)),c);await page.reload();await page.setViewportSize({width:390,height:844});const scope=page.locator('.fixture-quickbar');
+ for(const style of [...styles,'unlimited']){const module=scope.locator(`[data-resource-id=${style}]`);await expect(module).toBeVisible();expect(await clips(module)).toEqual([]);if(style==='unlimited')await expect(module.locator('.rm-readout')).toHaveText('999999999');else await expect(module).toContainText('99999');const next=scope.getByRole('button',{name:'下一页资源',exact:true});if(await next.isEnabled())await next.click();}
+ expect((await read(page)).runtime.resources).toEqual(c.runtime.resources);
+});

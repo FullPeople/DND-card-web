@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState,type PointerEvent as ReactPointerEvent,type RefObject} from 'react';
 import {createPortal} from 'react-dom';
-import {WIDGET_COLS,WIDGET_ROWS,type ResourceTemplate,type ResourceTemplateValues} from '../core/resourceWidgets';
+import {WIDGET_COLS,WIDGET_ROWS,normalizeModuleWidget,type ResourceTemplate,type ResourceTemplateValues} from '../core/resourceWidgets';
 import {ResourceModuleFace} from './ResourceModuleFace';
 import {resourceTemplatePreview} from './ResourceTemplatePicker';
 import './resourceTemplateDrag.css';
@@ -37,6 +37,7 @@ export function useResourceTemplateDrag(options:Options){
   if(!host)return;
   const portal=host.closest<HTMLDialogElement>('dialog[open]')||document.body;
   const pointerId=event.pointerId,startX=event.clientX,startY=event.clientY;
+  const example=resourceTemplatePreview(template,values),size=normalizeModuleWidget(example.module,example.layout);
   let moved=false,finished=false;
   // Capture keeps a release over a backdrop from being interpreted as a backdrop click.
   try{source.setPointerCapture(pointerId);}catch{/* Detached hosts are cancelled below. */}
@@ -46,11 +47,11 @@ export function useResourceTemplateDrag(options:Options){
    if(active.disabled||!source.isConnected||!canvas)return null;
    const rect=canvas.getBoundingClientRect();
    if(rect.width<=0||rect.height<=0)return null;
-   const width=rect.width*template.w/WIDGET_COLS,height=rect.height*template.h/WIDGET_ROWS;
+   const width=rect.width*size.w/WIDGET_COLS,height=rect.height*size.h/WIDGET_ROWS;
    const inside=x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom;
    if(!inside)return {template,values,portal,bounds:{left:x-width/2,top:y-height/2,width,height},overlap:false};
-   const col=Math.max(0,Math.min(WIDGET_COLS-template.w,Math.round((x-rect.left)/rect.width*WIDGET_COLS-template.w/2)));
-   const row=Math.max(0,Math.min(WIDGET_ROWS-template.h,Math.round((y-rect.top)/rect.height*WIDGET_ROWS-template.h/2)));
+   const col=Math.max(0,Math.min(WIDGET_COLS-size.w,Math.round((x-rect.left)/rect.width*WIDGET_COLS-size.w/2)));
+   const row=Math.max(0,Math.min(WIDGET_ROWS-size.h,Math.round((y-rect.top)/rect.height*WIDGET_ROWS-size.h/2)));
    const left=rect.left+col/WIDGET_COLS*rect.width,top=rect.top+row/WIDGET_ROWS*rect.height;
    const overlap=[...canvas.querySelectorAll<HTMLElement>('.resource-widget')].some(widget=>{
     const box=widget.getBoundingClientRect();
