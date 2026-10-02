@@ -110,6 +110,7 @@
 .resource-diy-quickbar .resource-quickbar-split .resource-workspace-toolbar{min-width:0;flex-wrap:nowrap}
 .resource-diy-quickbar .resource-quickbar-split .resource-widget-canvas{display:block;position:relative;flex:1;min-height:0;min-width:0;overflow:visible}
 .sheet-viewport.screen-mode .resource-diy-quickbar{height:215px;min-height:215px}
+@container screen (min-width:760px){.sheet-viewport.screen-mode .resource-diy-quickbar{height:150px;min-height:150px}}
 @container (max-width:110px){.resource-fixed-attacks .quick-weapon{grid-template-columns:1fr auto!important}.resource-fixed-attacks .quick-weapon>span{grid-column:1/-1}.resource-fixed-attacks .quick-weapon>:last-child{grid-column:auto}}
 .sheet-export .quickbar-divider{pointer-events:none}
 
