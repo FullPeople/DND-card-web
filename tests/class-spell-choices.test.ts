@@ -5,7 +5,7 @@ import {normalizeData} from '../src/data/catalog';
 import {sheetChoices,chooseSheetOption,setSheetChoiceSlot} from '../src/core/automation/choices';
 import {newAutomationState} from '../src/core/automation/state';
 import {cantripGroups,clearCantrip,spellIsReady} from '../src/core/spellWorkspace';
-import {prepareSpellEntry} from '../src/core/spells';
+import {prepareSpellEntry,setPreparedSpell} from '../src/core/spells';
 import {syncFeatures,removeSelection} from '../src/core/sheet';
 import {syncAutoResources} from '../src/core/resources';
 import {spellState} from '../src/core/characterDetails';
@@ -21,37 +21,37 @@ const choice=(c:Character,kind:string,catalog:Entry[])=>sheetChoices(c,catalog).
 it('drag slots preserve holes, allow full replacement and deletion without forgetting learned spells',()=>{
  const c=setup(),catalog=spells();setSheetChoiceSlot(c,choice(c,'cantrips',catalog).id,2,catalog[0].id,catalog);expect(choice(c,'cantrips',catalog).slots).toEqual(['','',catalog[0].id]);
  const book=choice(c,'book',catalog);setSheetChoiceSlot(c,book.id,5,catalog[4].id,catalog);expect(choice(c,'book',catalog).slots).toEqual(['','','','','',catalog[4].id]);for(let i=0;i<5;i++)setSheetChoiceSlot(c,book.id,i,catalog[5+i].id,catalog);expect(choice(c,'book',catalog).complete).toBe(true);
- const prep=choice(c,'prepared',catalog);setSheetChoiceSlot(c,prep.id,3,catalog[4].id,catalog);expect(choice(c,'prepared',catalog).slots).toEqual(['','','',catalog[4].id]);setSheetChoiceSlot(c,prep.id,0,catalog[5].id,catalog);setSheetChoiceSlot(c,prep.id,1,catalog[6].id,catalog);setSheetChoiceSlot(c,prep.id,2,catalog[7].id,catalog);setSheetChoiceSlot(c,prep.id,0,catalog[8].id,catalog);expect(choice(c,'prepared',catalog).selected).not.toContain(catalog[5].id);expect(c.selections.some(s=>s.entry.id===catalog[5].id)).toBe(true);
- setSheetChoiceSlot(c,book.id,5,catalog[10].id,catalog);expect(choice(c,'book',catalog).selected).toContain(catalog[10].id);expect(choice(c,'prepared',catalog).slots?.[3]).toBe('');expect(c.selections.some(s=>s.entry.id===catalog[4].id)).toBe(true);setSheetChoiceSlot(c,book.id,1,undefined,catalog);expect(choice(c,'book',catalog).slots?.[1]).toBe('');expect(validateCharacter(JSON.parse(JSON.stringify(c))).spellSettings).toEqual(c.spellSettings);
+ expect(prepareSpellEntry(c,catalog[4],3,'owner')).toBeTruthy();expect(spellState(c).prepared.map(id=>c.selections.find(s=>s.id===id)?.entry.id||'')).toEqual(['','','',catalog[4].id]);for(let i=0;i<3;i++)expect(prepareSpellEntry(c,catalog[5+i],i,'owner')).toBeTruthy();expect(prepareSpellEntry(c,catalog[8],0,'owner')).toBeTruthy();expect(spellState(c).prepared).not.toContain(c.selections.find(s=>s.entry.id===catalog[5].id)!.id);expect(c.selections.some(s=>s.entry.id===catalog[5].id)).toBe(true);
+ setSheetChoiceSlot(c,book.id,5,catalog[10].id,catalog);expect(choice(c,'book',catalog).selected).toContain(catalog[10].id);expect(spellState(c).prepared[3]).toBe('');expect(c.selections.some(s=>s.entry.id===catalog[4].id)).toBe(true);setSheetChoiceSlot(c,book.id,1,undefined,catalog);expect(choice(c,'book',catalog).slots?.[1]).toBe('');expect(validateCharacter(JSON.parse(JSON.stringify(c))).spellSettings).toEqual(c.spellSettings);
 });
-it('reads source-shaped cantrip, book and prepared choices without creating spells or saved answers',()=>{
+it('lists source-shaped cantrip and book tasks without a daily-preparation prerequisite or any mutation',()=>{
  const c=setup(),catalog=spells(),before=JSON.stringify(c);
- expect(sheetChoices(c,catalog).map(r=>[r.label,r.count])).toEqual([['戏法',3],['法术书',6],['预备法术',4]]);
- expect(choice(c,'prepared',catalog).options).toEqual([]);expect(choice(c,'cantrips',catalog).options).toHaveLength(4);expect(JSON.stringify(c)).toBe(before);
+ expect(sheetChoices(c,catalog).map(r=>[r.label,r.count])).toEqual([['戏法',3],['法术书',6]]);
+ expect(choice(c,'prepared',catalog)).toBeUndefined();expect(choice(c,'cantrips',catalog).options).toHaveLength(4);expect(JSON.stringify(c)).toBe(before);
  c.automation!.enabled=false;expect(sheetChoices(c,catalog)).toEqual([]);
 });
 it('fills the existing workspace, filters preparation to the book and preserves consumed slots through refresh/import',()=>{
  const c=setup(),catalog=spells();syncAutoResources(c);c.runtime.resources['spell-slot:1'].current=0;
  for(const e of catalog.slice(0,3))chooseSheetOption(c,choice(c,'cantrips',catalog).id,e.id,catalog);
  for(const e of catalog.slice(4,10))chooseSheetOption(c,choice(c,'book',catalog).id,e.id,catalog);
- expect(choice(c,'book',catalog).complete).toBe(true);expect(choice(c,'prepared',catalog).options).toHaveLength(6);
- for(const e of catalog.slice(4,8))chooseSheetOption(c,choice(c,'prepared',catalog).id,e.id,catalog);
+ expect(choice(c,'book',catalog).complete).toBe(true);expect(choice(c,'prepared',catalog)).toBeUndefined();
+ for(const e of catalog.slice(4,8))expect(prepareSpellEntry(c,e,undefined,'owner')).toBeTruthy();
  expect(spellState(c).prepared.filter(Boolean)).toHaveLength(4);expect(cantripGroups(c)[0].slots.filter(Boolean)).toHaveLength(3);
  const rows=c.selections.filter(s=>s.entry.kind==='spell');expect(rows).toHaveLength(9);expect(Object.values(c.answers)).toHaveLength(0);
  for(let i=0;i<3;i++){syncFeatures(c,catalog);syncAutoResources(c);sheetChoices(c,catalog);}
  const restored=validateCharacter(JSON.parse(JSON.stringify(c)));expect(restored.spellSettings).toEqual(c.spellSettings);expect(restored.runtime.resources['spell-slot:1'].current).toBe(0);expect(restored.selections.filter(s=>s.entry.kind==='spell')).toHaveLength(9);
 });
-it('rejects non-book, wrong-list, disabled and over-quota candidates before changing durable state',()=>{
+it('rejects removed preparation tasks, wrong-list and over-quota choices before changing durable state',()=>{
  const c=setup(),catalog=spells(),other=spells('Other caster')[4];other.id='wrong-list';catalog.push(other);
- const before=JSON.stringify(c);expect(()=>chooseSheetOption(c,choice(c,'prepared',catalog).id,catalog[4].id,catalog)).toThrow();expect(JSON.stringify(c)).toBe(before);
+ const before=JSON.stringify(c);expect(()=>chooseSheetOption(c,'owner:spells:prepared',catalog[4].id,catalog)).toThrow();expect(JSON.stringify(c)).toBe(before);
  expect(()=>chooseSheetOption(c,choice(c,'book',catalog).id,other.id,catalog)).toThrow();
  for(const e of catalog.slice(0,3))chooseSheetOption(c,choice(c,'cantrips',catalog).id,e.id,catalog);
  const full=JSON.stringify(c);expect(()=>chooseSheetOption(c,choice(c,'cantrips',catalog).id,catalog[3].id,catalog)).toThrow(/最多/);expect(JSON.stringify(c)).toBe(full);
 });
 it('shows changes made in the spell page immediately, and replacing selections never duplicates learned rows',()=>{
  const c=setup(),catalog=spells();chooseSheetOption(c,choice(c,'cantrips',catalog).id,catalog[0].id,catalog);clearCantrip(c,'owner',0);expect(choice(c,'cantrips',catalog).selected).toEqual([]);
- chooseSheetOption(c,choice(c,'book',catalog).id,catalog[4].id,catalog);prepareSpellEntry(c,catalog[4]);expect(choice(c,'prepared',catalog).selected).toEqual([catalog[4].id]);
- chooseSheetOption(c,choice(c,'prepared',catalog).id,catalog[4].id,catalog);expect(c.selections.some(s=>s.entry.id===catalog[4].id)).toBe(true);
+ chooseSheetOption(c,choice(c,'book',catalog).id,catalog[4].id,catalog);const prepared=prepareSpellEntry(c,catalog[4]);expect(prepared).toBeTruthy();expect(spellState(c).prepared).toContain(prepared);
+ expect(setPreparedSpell(c,prepared!,false)).toBe(true);expect(c.selections.some(s=>s.entry.id===catalog[4].id)).toBe(true);
  chooseSheetOption(c,choice(c,'book',catalog).id,catalog[4].id,catalog);chooseSheetOption(c,choice(c,'book',catalog).id,catalog[4].id,catalog);expect(c.selections.filter(s=>s.entry.id===catalog[4].id)).toHaveLength(1);
 });
 it('keeps learned caster and multiclass allocations separate while retaining inactive learned records',()=>{
@@ -68,7 +68,16 @@ it('keeps learned caster and multiclass allocations separate while retaining ina
 it('does not count source-granted spells as ordinary choices or restore their free uses',()=>{
  const c=setup({casterProgression:'full',spellcastingAbility:'wis',cantripProgression:[3],preparedSpellsProgression:[4],preparedSpellsChange:'restLong'}),catalog=spells();
  const row={id:'gift',entry:catalog[4],quantity:1,level:1,equipped:false};c.selections.push(row);setSpecialSpell(c,row.id,{mode:'uses',max:1,recovery:'long'});changeSpecialSpellUses(c,row.id,0);
- expect(choice(c,'prepared',catalog).selected).toEqual([]);chooseSheetOption(c,choice(c,'prepared',catalog).id,row.entry.id,catalog);expect(c.selections.filter(s=>s.entry.id===row.entry.id)).toHaveLength(2);expect(c.runtime.resources[specialSpellResource('gift',c)].current).toBe(0);
+ expect(choice(c,'prepared',catalog)).toBeUndefined();expect(prepareSpellEntry(c,row.entry,undefined,'owner')).toBeTruthy();expect(c.selections.filter(s=>s.entry.id===row.entry.id)).toHaveLength(2);expect(c.runtime.resources[specialSpellResource('gift',c)].current).toBe(0);
+});
+it('removes only preparation tasks and preserves old selections, holes, answers and consumed slots',()=>{
+ const c=setup(),catalog=spells(),raw=c.selections[0].entry.raw;
+ raw.startingProficiencies={skills:[{choose:{from:['arcana','history'],count:1}}]};raw.startingEquipment={defaultData:[{A:[{special:'原创测试装备'}]}]};
+ expect(sheetChoices(c,catalog).map(r=>r.channel==='spells'?r.spellKind:r.channel)).toEqual(['skills','equipment','cantrips','book']);
+ chooseSheetOption(c,choice(c,'book',catalog).id,catalog[4].id,catalog);prepareSpellEntry(c,catalog[4],2,'owner');syncAutoResources(c);c.runtime.resources['spell-slot:1'].current=0;c.answers['owner:spells:prepared']=[catalog[4].id];
+ const before=JSON.stringify(c);for(let i=0;i<3;i++)expect(sheetChoices(c,catalog).some(r=>r.spellKind==='prepared')).toBe(false);expect(JSON.stringify(c)).toBe(before);
+ const restored=validateCharacter(JSON.parse(before));expect(restored.spellSettings).toEqual(c.spellSettings);expect(restored.answers).toEqual(c.answers);expect(restored.selections).toEqual(c.selections);expect(restored.runtime.resources['spell-slot:1'].current).toBe(0);
+ c.automation!.enabled=false;const off=JSON.stringify(c);expect(sheetChoices(c,catalog)).toEqual([]);expect(JSON.stringify(c)).toBe(off);c.automation!.enabled=true;expect(sheetChoices(c,catalog).map(r=>r.channel==='spells'?r.spellKind:r.channel)).toEqual(['skills','equipment','cantrips','book']);
 });
 it('applies explicit extra-cantrip clauses from selected features and ignores unselected branches',()=>{
  const c=setup(),catalog=spells(),f=entry('Original extra choice','feature');f.entries=['你从{@filter 职业法术|spells|class=Renamed book caster}中额外学会一道戏法。'];
@@ -77,7 +86,7 @@ it('applies explicit extra-cantrip clauses from selected features and ignores un
 });
 
 const external=process.env.DND_AUTOMATION_CORE_DATA;
-const matrix:[string,string,[number,number,number,number]][]=[['wizard','PHB',[3,6,0,1]],['wizard','XPHB',[3,6,0,4]],['cleric','PHB',[3,0,0,1]],['cleric','XPHB',[3,0,0,4]],['druid','PHB',[2,0,0,1]],['druid','XPHB',[2,0,0,4]],['bard','PHB',[2,0,4,0]],['bard','XPHB',[2,0,4,0]],['sorcerer','PHB',[4,0,2,0]],['sorcerer','XPHB',[4,0,2,0]],['warlock','PHB',[2,0,2,0]],['warlock','XPHB',[2,0,2,0]],['paladin','PHB',[0,0,0,0]],['paladin','XPHB',[0,0,0,2]],['ranger','PHB',[0,0,0,0]],['ranger','XPHB',[0,0,0,2]],['artificer','TCE',[2,0,0,1]]];
+const matrix:[string,string,[number,number,number,number]][]=[['wizard','PHB',[3,6,0,0]],['wizard','XPHB',[3,6,0,0]],['cleric','PHB',[3,0,0,0]],['cleric','XPHB',[3,0,0,0]],['druid','PHB',[2,0,0,0]],['druid','XPHB',[2,0,0,0]],['bard','PHB',[2,0,4,0]],['bard','XPHB',[2,0,4,0]],['sorcerer','PHB',[4,0,2,0]],['sorcerer','XPHB',[4,0,2,0]],['warlock','PHB',[2,0,2,0]],['warlock','XPHB',[2,0,2,0]],['paladin','PHB',[0,0,0,0]],['paladin','XPHB',[0,0,0,0]],['ranger','PHB',[0,0,0,0]],['ranger','XPHB',[0,0,0,0]],['artificer','TCE',[2,0,0,0]]];
 it.skipIf(!external).each(matrix)('reads the external %s %s opening quotas from structure', (name,source,expected)=>{
  const catalog=normalizeData(JSON.parse(readFileSync(`${external}/data_class_class-${name}.json`,'utf8').replace(/^\uFEFF/,'')),'external'),owner=catalog.find(e=>e.kind==='class'&&e.source===source)!;
  const c:Character=setup();c.edition=source==='PHB'||source==='TCE'?'2014':'2024';if(source==='TCE')c.profile.enabledSources.push('TCE');c.selections[0].entry=owner;

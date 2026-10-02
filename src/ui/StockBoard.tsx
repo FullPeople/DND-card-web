@@ -32,7 +32,7 @@ export function StockBoard({container,targets=[],gm=false,disabled=false,operati
  const selectionCleanup=useRef<()=>void>(undefined);useEffect(()=>()=>selectionCleanup.current?.(),[]);
  const canEdit=gm||(container.kind==='public'?!container.locked:container.write),allowed=(row:Stock|undefined)=>!!row&&!disabled&&canEdit&&(gm||!row.locked);
  const rows=container.items.filter(row=>row.kind!=='resource'&&(container.kind==='public'||row.kind!=='condition'));
- const columns=container.kind==='public'?4:container.kind==='card'?5:container.columns,slots=Math.ceil(Math.max(container.kind==='public'?20:25,Math.max(-1,...rows.map(row=>row.slot))+1)/columns)*columns;
+ const columns=container.kind==='public'?4:container.kind==='card'?5:container.columns,slots=Math.ceil(Math.max(container.kind==='public'?20:container.kind==='card'?25:24,Math.max(-1,...rows.map(row=>row.slot))+1)/columns)*columns;
  useCardGravity(grid,falling,view,container.id,rows.map(row=>row.id+':'+row.slot).join('|'),4);
  const layoutKey=rows.map(row=>row.id+':'+row.slot).join('|');
  useLayoutEffect(()=>{const next=new Map<string,{x:number;y:number}>();for(const node of grid.current?.querySelectorAll<HTMLElement>('[data-stock-id]')||[]){const id=node.dataset.stockId!,after={x:node.offsetLeft,y:node.offsetTop},before=positions.current.get(id);next.set(id,after);if(before&&!falling&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const x=before.x-after.x,y=before.y-after.y;if(Math.abs(x)>.8||Math.abs(y)>.8)node.animate([{transform:`translate(${x}px,${y}px)`},{transform:'none'}],{duration:220,easing:'cubic-bezier(.2,.8,.25,1)'});}}positions.current=next;},[layoutKey,view,falling]);

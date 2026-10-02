@@ -3,6 +3,7 @@ import {specialSpellResource} from '../spellResourceKeys';
 import {setResource} from '../resources';
 import {sourceSpellEnabled,rememberSourceSpellUses} from './sourceSpellState';
 import {automationEnabled} from './state';
+import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../bookRituals';
 
 export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string}
 export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long'}
@@ -13,7 +14,12 @@ export type SpellActionResult={status:'applied'|'duplicate';receipt:SpellActionR
 /** A read-only offer. Reading the menu never spends or creates resources. */
 export function spellPayments(c:Character,id:string):{options:SpellPayment[];reason?:string}{
  const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell'),config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;
- if(!row||!grant||!automationEnabled(c)||!sourceSpellEnabled(c,id))return {options:[],reason:'此来源法术当前不可用。'};
+ if(!row||!automationEnabled(c))return {options:[],reason:'此来源法术当前不可用。'};
+ if(!grant){
+  const groups=config?[]:bookRitualGroups(c).filter(group=>group.spells.some(spell=>spell.id===id));
+  return {options:groups.map(group=>({id:bookRitualPaymentId(group.owner.id),label:`书内仪式施法（${group.owner.entry.name}；${BOOK_RITUAL_TIME}）`,level:Number(row.entry.raw.level),cost:0,available:true})),...(!groups.length?{reason:'此法术没有已核实的书内仪式资格；普通施法仍须按预备与法术位规则处理。'}:{})};
+ }
+ if(!sourceSpellEnabled(c,id))return {options:[],reason:'此来源法术当前不可用。'};
  const base=Number(row.entry.raw.level),level=grant.castLevel??base;
  if(!Number.isInteger(base)||base<0||base>9||level<base)return {options:[],reason:'法术环阶未支持，请人工核对。'};
  const options:SpellPayment[]=[];
@@ -81,10 +87,10 @@ export function performSpellAction(c:Character,request:SpellActionRequest):Spell
   return {status:'applied',receipt,message:`已按${request.rest==='short'?'短':'长'}休恢复 ${plan.resources.length} 项来源次数。`};
  }
  const config=c.spellSettings?.special?.[request.selectionId];
- if(!config?.sourceGrant||!sourceSpellEnabled(c,request.selectionId))return reject('此来源法术当前不可用。');
+ if(config?.sourceGrant&&!sourceSpellEnabled(c,request.selectionId))return reject('此来源法术当前不可用。');
  let payment:SpellPayment|undefined;
  if(request.mode==='restore'){
-  if(config.mode!=='uses'||request.paymentId!=='source')return reject('这个法术没有可恢复的来源次数。');
+  if(!config?.sourceGrant||config.mode!=='uses'||request.paymentId!=='source')return reject('这个法术没有可恢复的来源次数。');
   const resourceId=specialSpellResource(request.selectionId,c),r=c.runtime.resources[resourceId];
   if(!r||!Number.isSafeInteger(r.max)||r.max<1||!Number.isSafeInteger(r.current))return reject('次数记录无效，未恢复。');
   if(r.current>=r.max)return reject('次数已经充足。');
@@ -99,8 +105,8 @@ export function performSpellAction(c:Character,request:SpellActionRequest):Spell
  if(after!==undefined&&(!Number.isSafeInteger(after)||after<0||after>resource!.max))return reject('资源状态已变化，未执行。');
  const receipt:SpellActionReceipt={id:request.id,sequence,fingerprint,selectionId:request.selectionId,mode:request.mode,level:payment.level,...(payment.resourceId?{resourceId:payment.resourceId,before,after}:{})};
  if(payment.resourceId&&after!==undefined)setResource(c,payment.resourceId,after);
- c.runtime.automationActions={version:1,sequence:sequence+1,last:receipt};rememberSourceSpellUses(c);
- return {status:'applied',receipt,message:request.mode==='restore'?'已恢复来源次数。':payment.resourceId?`已记录 ${payment.level} 环施法，${payment.label.split('（')[0]}剩余 ${after}。`:'已记录施法，不消耗资源。'};
+ c.runtime.automationActions={version:1,sequence:sequence+1,last:receipt};if(config?.sourceGrant)rememberSourceSpellUses(c);
+ return {status:'applied',receipt,message:payment.id.startsWith('book-ritual:')?`已记录仪式施法。${BOOK_RITUAL_TIME}`:request.mode==='restore'?'已恢复来源次数。':payment.resourceId?`已记录 ${payment.level} 环施法，${payment.label.split('（')[0]}剩余 ${after}。`:'已记录施法，不消耗资源。'};
 }
 
 export function validateActionState(value:unknown):void{

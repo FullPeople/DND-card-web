@@ -17,9 +17,10 @@ test('reference layout groups skills by ability and marks the whole incomplete f
   await expect(field).not.toHaveClass(/cell-missing/);
   await expect(page.locator('.ability-int')).toContainText('奥秘'); await expect(page.locator('.ability-dex')).toContainText('隐匿');
   await expect(page.locator('.ability-str')).not.toContainText('奥秘');
-  for (const name of ['奥秘熟练', '洞悉熟练', '历史熟练']) await page.getByRole('checkbox', { name, exact: true }).check();
+  for (const name of ['奥秘', '洞悉', '历史']) await expect(page.getByRole('checkbox', { name: new RegExp(`^${name}熟练状态：`) })).toBeDisabled();
+  await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).fill('2'); await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).press('Tab');
   await expect(page.locator('.ability-int')).not.toHaveClass(/cell-missing/);
-  await expect(page.getByRole('checkbox', { name: '历史熟练', exact: true })).toBeEnabled();
+  await expect(page.getByRole('checkbox', { name: '历史熟练状态：无熟练', exact: true })).toBeDisabled();
   await page.getByRole('spinbutton', { name: '测试法师等级' }).fill('3');
   await expect(page.locator('.total-level strong')).toHaveText('3');
   await expect(page.locator('.inspiration-cell')).toHaveCount(0); await expect(page.locator('.portrait-cell')).toBeVisible(); await expect(page.locator('.death-saves-cell')).toContainText('死亡豁免');
@@ -28,7 +29,8 @@ test('reference layout groups skills by ability and marks the whole incomplete f
   await page.emulateMedia({ reducedMotion: 'reduce' });
   expect(await page.locator('.identity-race .cell-perimeter path').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
   await page.reload(); await expect(page.locator('.total-level strong')).toHaveText('3'); await page.getByRole('switch', { name: '编辑模式' }).click();
-  await expect(page.locator('.ability-int').getByRole('checkbox', { name: '历史熟练', exact: true })).toBeChecked();
+  await expect(page.locator('.ability-int [aria-label="历史无熟练"]')).toBeVisible();
+  await expect(page.locator('.ability-int .ability-skill').filter({hasText:'历史'}).locator('b')).toHaveText('+2');
 });
 
 test('quickbar pins references without duplicate grants, survives reload and removes stale links with undo', async ({ page }) => {

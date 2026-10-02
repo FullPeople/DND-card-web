@@ -1,6 +1,5 @@
 import {editionAllows,selectionAllowed,type Character,type Entry} from '../model';
 import {cantripCapacity,casterProfiles,spellOnClassList} from '../spellcastingRules';
-import {profilePreparation} from '../preparation';
 import {assignClassSpell,cantripGroups,chooseCantrip,clearCantrip,classSpellGroups,learnActiveSpell} from '../spellWorkspace';
 import {prepareSpellEntry,setPreparedSpell} from '../spells';
 import type {SheetChoice} from './choices';
@@ -13,7 +12,7 @@ const count=(n:unknown)=>typeof n==='number'&&Number.isSafeInteger(n)&&n>0&&n<=1
 export function classSpellChoices(c:Character,catalog:Entry[]):SheetChoice[]{
  const entries=[...new Map([...catalog,...c.selections.map(s=>s.entry)].filter(e=>e.kind==='spell').map(e=>[e.id,e])).values()],out:SheetChoice[]=[],groups=classSpellGroups(c),cantrips=cantripGroups(c);
  for(const p of casterProfiles(c)){
-  const raw=p.casting.entry.raw,ids=groups.find(g=>g.profile.owner.id===p.owner.id)?.ids||[],prepared=spellState(c).prepared.filter(id=>!id||ids.includes(id));
+  const raw=p.casting.entry.raw,ids=groups.find(g=>g.profile.owner.id===p.owner.id)?.ids||[];
   const add=(kind:ClassSpellChoiceKind,label:string,capacity:number,selectedIds:string[],hint:string)=>{
    if(!capacity)return;
    const slots=selectedIds.map(id=>c.selections.find(s=>s.id===id)?.entry.id||'');
@@ -29,7 +28,8 @@ export function classSpellChoices(c:Character,catalog:Entry[]):SheetChoice[]{
    add('book','法术书',capacity,ids,'选择职业授予的法术书法术。额外抄录仍可在法术页记录；预备法术只能从书中选择。');
   }
   if(p.mode==='known')add('learned','职业法术',count(raw.spellsKnownProgression?.[p.owner.level-1]??raw.preparedSpellsProgression?.[p.owner.level-1]),ids,'按该职业的等级数量表选择。更换时机请按该职业原文；赠送法术另计。');
-  else add('prepared','预备法术',count(profilePreparation(c,p)),prepared,p.pool==='book'?'先填写法术书，再从书中选择预备法术；取消预备会保留已学记录。':'从该职业法表选择预备法术；取消预备会保留已学记录。');
+  // Daily preparation belongs to the spell page, not opening character choices.
+  // Merely listing these tasks must not clear or migrate saved prepared spells.
  }
  return out;
 }

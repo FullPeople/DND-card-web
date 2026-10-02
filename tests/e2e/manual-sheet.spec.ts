@@ -13,7 +13,7 @@ async function dragOut(page: Page, source: Locator) {
 }
 test.beforeEach(async ({ page }) => { await mockSource(page); await page.route('https://5e.kiwee.top/data/races.json', route => route.fulfill({ json: { race: [{ name: '测试精灵', source: 'XPHB', size: ['M'], entries: [{ type: 'entries', name: '测试感官', entries: ['自制感官内容。'] }] }] } })); await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); await page.getByRole('switch', { name: '编辑模式' }).click(); });
 
-test('declared features arrive automatically, controls are manual and HP follows the new layout', async ({ page }) => {
+test('declared features arrive automatically, proficiency is derived and numeric adjustments remain editable and HP follows the new layout', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await expect(page.locator('.edition-divider')).toHaveText('DND 五版角色卡');
   await add(page, '职业', '测试法师');
@@ -24,9 +24,10 @@ test('declared features arrive automatically, controls are manual and HP follows
   await add(page, '种族', '测试精灵'); await expect(page.locator('.class-features')).toContainText('测试感官');
   await add(page, '背景', '抄书员'); await expect(page.locator('.heritage-features .feature-caption')).toContainText(['旅行笔记']);
   await expect(page.locator('.target-banner,.wiki-choice-editor,.feature-pending,.requirement-field')).toHaveCount(0);
-  for (const name of ['奥秘熟练', '自然熟练', '宗教熟练', '察觉熟练']) await page.getByRole('checkbox', { name, exact: true }).check();
-  for (const name of ['奥秘熟练', '自然熟练', '宗教熟练', '察觉熟练']) await expect(page.getByRole('checkbox', { name, exact: true })).toBeChecked();
-  await page.getByRole('checkbox', { name: '历史熟练', exact: true }).uncheck();
+  for (const name of ['奥秘', '自然', '宗教', '察觉']) await expect(page.getByRole('checkbox', { name: new RegExp(`^${name}熟练状态：`) })).toBeDisabled();
+  await expect(page.getByRole('checkbox', { name: '历史熟练状态：熟练', exact: true })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: '历史熟练状态：熟练', exact: true })).toBeDisabled();
+  await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).fill('-2'); await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).press('Tab');
   await page.getByRole('button', { name: '编辑装备训练与其他熟练' }).click();
   await page.getByRole('textbox', { name: '工具熟练记录' }).fill('玩家自行填写');
   await page.getByRole('spinbutton', { name: '当前生命值', exact: true }).fill('9');
@@ -36,7 +37,8 @@ test('declared features arrive automatically, controls are manual and HP follows
   await expect(page.locator('.life-fields input')).toHaveCount(3);
   const positions = await page.locator('.life-fields input').evaluateAll(els => els.map(e => e.getBoundingClientRect().x)); expect(positions[0]).toBeLessThan(positions[1]); expect(positions[1]).toBeLessThan(positions[2]);
   await page.reload(); await expect(page.locator('[data-stat=hp]')).toHaveText('15');
-  await expect(page.locator('[aria-label="历史无熟练"]')).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: '历史熟练状态：熟练', exact: true })).toBeDisabled();
+  await expect(page.getByRole('spinbutton', { name: '历史额外调整值', exact: true })).toHaveValue('-2');
   await expect(page.locator('.training-chips')).toContainText(['玩家自行填写']);
   await expect(page.locator('.feature-panel .feature-caption')).toHaveCount(3); expect(errors).toEqual([]);
 });

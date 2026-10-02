@@ -3,7 +3,7 @@ import {raw,ready,workspace,dragWiki} from './automationChoiceFixture';
 
 test('230 expanded automation choices have clear collapse, fast navigation and focus return',async({page})=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();
- const feature=page.locator('[data-feature-id="feature-0"]');await expect(feature).toHaveClass(/is-expanded/);await expect(feature.getByRole('button',{name:'选择测试圣职 0/1',exact:true})).toBeVisible();
+ const feature=page.locator('[data-feature-id="feature-0"]');await expect(feature).not.toHaveClass(/is-expanded/);await page.getByRole('button',{name:'展开全部职业特性',exact:true}).click();await expect(feature).toHaveClass(/is-expanded/);await expect(feature.getByRole('button',{name:'选择测试圣职 0/1',exact:true})).toBeVisible();
  await feature.getByRole('button',{name:'折叠测试圣职',exact:true}).click();await expect(feature).not.toHaveClass(/is-expanded/);await expect(feature.locator('.feature-prose')).toHaveCount(0);await feature.locator('.feature-caption').click();
  const navigation=page.getByRole('navigation',{name:'职业选择项'});await expect(navigation.getByRole('button')).toHaveCount(3);await workspace(page,'测试圣职').getByRole('button',{name:'保护者',exact:true}).click();await expect(workspace(page,'测试圣职').getByRole('status').first()).toContainText('已完成');
  await navigation.getByRole('button',{name:'起始装备 0/1',exact:true}).click();await workspace(page,'起始装备').getByRole('button',{name:'方案 A',exact:true}).click();await navigation.getByRole('button',{name:'测试圣职 1/1',exact:true}).click();await navigation.getByRole('button',{name:'起始装备 0/1',exact:true}).click();await expect(workspace(page,'起始装备').getByRole('button',{name:'方案 A',exact:true})).toHaveAttribute('aria-pressed','false');
@@ -39,7 +39,18 @@ test('230 delayed Wiki candidates preserve saved choices and the narrow workspac
 
 test('230 large Wiki catalog keeps pointer movement free of character clones',async({page},testInfo)=>{
  const data=structuredClone(raw) as Record<string,any[]>;data.spell=Array.from({length:2000},(_,i)=>({name:`原创载荷法术${i}`,ENG_name:`Authored Load Spell ${i}`,source:'XPHB',level:1,entries:['原创性能回归条目。']}));await ready(page,data);await page.getByRole('tab',{name:'特性',exact:true}).click();await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(3);
- await page.evaluate(()=>{const original=window.structuredClone;const meter={clones:0,longTasks:[] as number[]};Object.assign(window,{choicePointerMeter:meter});window.structuredClone=((...args:Parameters<typeof structuredClone>)=>{meter.clones++;return original(...args);}) as typeof structuredClone;if(PerformanceObserver.supportedEntryTypes.includes('longtask'))new PerformanceObserver(list=>meter.longTasks.push(...list.getEntries().map(e=>e.duration))).observe({type:'longtask'});});
+ await page.evaluate(()=>{
+  const original=window.structuredClone,start=performance.now();
+  const meter={clones:0,longTasks:[] as number[],calls:[] as Array<Record<string,unknown>>,pointer:{type:'not-started',at:0}};
+  Object.assign(window,{choicePointerMeter:meter});
+  for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,()=>{meter.pointer={type,at:performance.now()-start};},true);
+  window.structuredClone=((...args:Parameters<typeof structuredClone>)=>{
+   const value=args[0] as any,kind=value?.characters?'workspace':value?.selections&&value?.runtime?'character':value?.kind&&value?.raw?'entry':Array.isArray(value)?'array':value===null?'null':typeof value;
+   meter.clones++;meter.calls.push({at:performance.now()-start,kind,id:typeof value?.id==='string'?value.id:undefined,keys:value&&typeof value==='object'?Object.keys(value).slice(0,24):[],selections:value?.selections?.length,characters:value?.characters?.length,arrayLength:Array.isArray(value)?value.length:undefined,pointer:{...meter.pointer},saveStatus:document.querySelector('.save-status')?.textContent,loading:!!document.querySelector('.wiki-header button[disabled]'),stack:new Error('structuredClone attribution').stack});
+   return original(...args);
+  }) as typeof structuredClone;
+  if(PerformanceObserver.supportedEntryTypes.includes('longtask'))new PerformanceObserver(list=>meter.longTasks.push(...list.getEntries().map(e=>e.duration))).observe({type:'longtask'});
+ });
  const row=page.locator('.catalog-row').filter({hasText:'运动'}).first(),box=await row.boundingBox();await page.mouse.move(box!.x+30,box!.y+box!.height/2);await page.mouse.down();await page.mouse.move(box!.x+40,box!.y+box!.height/2,{steps:3});for(let i=0;i<12;i++){const target=await page.locator('.choice-slot').nth(i%2).boundingBox();await page.mouse.move(target!.x+target!.width/2,target!.y+target!.height/2,{steps:2});}
- const meter=await page.evaluate(()=>(window as any).choicePointerMeter);expect(meter.clones).toBe(0);await testInfo.attach('pointer-performance.json',{body:JSON.stringify({catalogFixtureEntries:2000,movementSamples:12,...meter}),contentType:'application/json'});await page.keyboard.press('Escape');await page.mouse.up();await expect(page.locator('.choice-slot-entry')).toHaveCount(0);await expect(page.locator('.pointer-ghost')).toHaveCount(0);
+ const meter=await page.evaluate(()=>(window as any).choicePointerMeter);await testInfo.attach('pointer-performance.json',{body:JSON.stringify({catalogFixtureEntries:2000,movementSamples:12,...meter},null,2),contentType:'application/json'});expect(meter.clones).toBe(0);await page.keyboard.press('Escape');await page.mouse.up();await expect(page.locator('.choice-slot-entry')).toHaveCount(0);await expect(page.locator('.pointer-ghost')).toHaveCount(0);
 });

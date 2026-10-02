@@ -63,13 +63,19 @@ jobs:
               npx playwright test --config playwright.unified191.config.ts
           - group: direct-232
             commands: |
-              npx playwright test --config playwright.direct232.config.ts --grep "menu is positioned|cold spell dragging|backpack has"
+              npx playwright test --config playwright.direct232.config.ts
+              npx playwright test --config playwright.wiki232.config.ts
+          - group: edit-profile-232
+            commands: |
+              node tools/profileCharacterEdits232.mjs
           - group: followup-230
             commands: |
               npx playwright test --config playwright.followup231.config.ts
               npx playwright test --config playwright.followup-ui231.config.ts
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -96,4 +102,15 @@ jobs:
             .local-evidence/followup231-browser/
             .local-evidence/followup231-ui/
             .local-evidence/direct232-browser/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always() && (matrix.group == 'direct-232' || matrix.group == 'edit-profile-232')
+        with:
+          name: direct232-evidence-${{ matrix.group }}
+          include-hidden-files: true
+          path: |
+            .local-evidence/direct232-browser/
+            .local-evidence/wiki232/
+            .local-evidence/edit-perf232/
+          if-no-files-found: warn
           retention-days: 7

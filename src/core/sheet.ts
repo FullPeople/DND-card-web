@@ -1,3 +1,4 @@
+import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
 import {resolveEntryReference} from './entryReferences';
 import {equipmentBlocks,syncChoiceContent} from './automation/choices';
@@ -37,20 +38,19 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
 
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
-export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean}): boolean {
+export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
   let changed = false;
   for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
-  const known = review?.refresh ? [...catalog, ...c.selections.map(s => s.entry)] : [...c.selections.map(s => s.entry), ...catalog];
-  const byName = new Map<string, Entry[]>();
-  for (const entry of known) for (const name of new Set([entry.name.toLowerCase(), entry.english.toLowerCase()])) { const group = byName.get(name) || []; group.push(entry); byName.set(name, group); }
+  const selectedNames=entryNameIndex(c.selections.map(s=>s.entry)),publishedNames=catalogNames||entryNameIndex(catalog);
+  const named=(name:string)=>review?.refresh?[...(publishedNames.get(name)||[]),...(selectedNames.get(name)||[])]:[...(selectedNames.get(name)||[]),...(publishedNames.get(name)||[])];
   function resolve(ref: string, kind: Entry['kind']) {
-    const exact = (byName.get(ref.split('|')[0].toLowerCase()) || []).find(e => e.kind === kind && !requirementMismatch(e, { refs: [ref] }));
+    const exact = named(ref.split('|')[0].toLowerCase()).find(e => e.kind === kind && !requirementMismatch(e, { refs: [ref] }));
     if (exact || kind !== 'feat') return exact;
     // A declared grant can qualify a catalog feat with a choice after a separator.
     // Preserve that qualifier as content; do not interpret or enforce the choice.
     const [name, source] = ref.split('|'), base = name.split(/[：:；;]/)[0].trim();
     if (base === name) return undefined;
-    const entry = (byName.get(base.toLowerCase()) || []).find(e => e.kind === kind && !requirementMismatch(e, { refs: [`${base}|${source || ''}`] }));
+    const entry = named(base.toLowerCase()).find(e => e.kind === kind && !requirementMismatch(e, { refs: [`${base}|${source || ''}`] }));
     return entry ? { ...entry, id: `${entry.id}#grant:${name}`, name, raw: { ...entry.raw, _grantReference: ref } } : undefined;
   }
   const roots = c.selections.filter(s => ['class', 'subclass', 'race', 'background'].includes(s.entry.kind)&&(!review||review.owners.has(s.id)));

@@ -137,7 +137,7 @@
 .detail-actions{font-size:10px}.detail-actions>a{display:inline;margin:0}.wiki-footer{justify-content:flex-end}
 @media(max-width:520px){.category-tabs{display:flex;flex-wrap:wrap}.category-tabs button{flex:0 0 auto;font-size:11px;padding:3px 6px}.library-body .columns-spell{grid-template-columns:minmax(100px,1fr) 28px 43px 28px 25px 44px 38px}.library-body .columns-item{grid-template-columns:minmax(85px,1fr) 46px 40px 28px 31px 35px}.library-body .entry-name{font-size:11px}.library-body .entry-name small{font-size:9px}.catalog-value{font-size:9px}.document-prose.with-nav{margin-right:76px}.document-nav{width:70px}.document-prose{font-size:12px}.document-prose h4{font-size:13px}.filter-body{grid-template-columns:93px minmax(0,1fr)}.filter-body>section{padding:7px}.filter-options{grid-template-columns:1fr}.filter-options-tools{flex-wrap:wrap}.filter-options-tools input{width:100%}.entry-detail{padding:7px 9px}}
 .paper .ability-skill{grid-template-columns:10px 21px minmax(0,1fr);gap:3px}
-.paper .ability-skill.skill-editing{grid-template-columns:10px 10px 19px minmax(0,1fr);gap:2px}
+.paper .ability-skill.skill-editing{grid-template-columns:10px 19px minmax(0,1fr);gap:2px}
 .proficiency-mark{display:inline-block;width:9px;height:9px;border:1.3px solid #51544f;border-radius:50%;justify-self:center}
 .proficiency-mark.trained{background:#51544f}
 .proficiency-mark.expert,.paper .expertise-check{border:0;border-radius:0;background:#51544f;clip-path:polygon(50% 0,65% 35%,100% 50%,65% 65%,50% 100%,35% 65%,0 50%,35% 35%)}

@@ -1,3 +1,8 @@
+import {entryNameIndex} from '../core/entryNameIndex';
+import {classEditionSuffix} from '../core/classEdition';
+import {wikiEditionAllows} from './wikiEdition';
+import {CharacterTabs} from './CharacterTabs';
+import {applyDisplayCharacterEdit,sameCharacterMechanics} from '../core/displayCharacterEdit';
 import {ToolBoundary} from './ToolBoundary';
 import './classCompatibility.css';
 import './editingRecovery.css';
@@ -14,7 +19,7 @@ import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
 
 const AutomationPanel=lazy(()=>import('./AutomationPanel').then(module=>({default:module.AutomationPanel})));
 
-import {automationEnabled,initializeAutomation,newAutomationState} from '../core/automation/state';
+import {automationEnabled,automationNeedsInitialization,initializeAutomation,newAutomationState} from '../core/automation/state';
 import {reconcileEquipping} from '../core/automation/equipment';
 import {CardOwnership} from './CardOwnership';
 const Announcement=lazy(()=>import('./Announcement').then(m=>({default:m.Announcement})));
@@ -80,7 +85,7 @@ import type {SheetCaptureOptions} from '../platform/sheetImage';
 
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, subclassOwner, entryEdition, editionAllows, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
+import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
 import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
@@ -205,16 +210,21 @@ export default function App() {
   const localSources=!inWorkbench;
   const storedCharacter=workspace?.characters.find(x=>x.id===workspace.activeId);
   const allEntries = useMemo(() => [...SIZE_ENTRIES, ...entries, ...activePacks.flatMap(p => p.entries), ...(canAuthor?customEntries:[])].filter(e=>monstersVisible||e.kind!=='monster'), [entries, activePacks,monstersVisible,canAuthor,customEntries]);
+  const catalogNames=useMemo(()=>entryNameIndex(allEntries),[allEntries]);
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
+  const localProfile=useMemo(()=>storedCharacter?withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile:undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks]);
   const c=useMemo(()=>{
     if(!storedCharacter)return;
-    const effective=inWorkbench&&wb.shared?{...storedCharacter,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources?withSiteSources(storedCharacter,workspace?.siteSources,activePacks):storedCharacter;
+    const effective=inWorkbench&&wb.shared?{...storedCharacter,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources&&workspace?.siteSources?{...storedCharacter,profile:localProfile!,rulePacks:activePacks}:storedCharacter;
     // Reading an old card must not create competing network writes. Casting
     // metadata is a view until the owner performs an explicit edit.
     if(inWorkbench&&effective.selections.some(s=>s.entry.packId==='imported'&&s.entry.kind==='class'&&!s.entry.raw._castingSource)){const view=structuredClone(effective);const hydrated=hydrateImportedCasting(view,allEntries),initialized=initializeAutomation(view);if(hydrated||initialized){syncAutoResources(view);return view;}}
-    const autoView=structuredClone(effective);if(initializeAutomation(autoView)){syncAutoResources(autoView);return autoView;}return effective;
-  },[storedCharacter,roomRules,roomProfile,workspace?.siteSources,activePacks,allEntries]);
+    if(automationNeedsInitialization(effective)){const autoView=structuredClone(effective);if(initializeAutomation(autoView)){syncAutoResources(autoView);return autoView;}}return effective;
+  },[storedCharacter,roomRules,roomProfile,localProfile,activePacks,allEntries]);
+  const mechanicsRef=useRef<Character|undefined>(undefined);
+  if(c&&!sameCharacterMechanics(mechanicsRef.current,c))mechanicsRef.current=c;
+  const mechanics=mechanicsRef.current;
   function createLocalCharacter(edition:Edition='2024'){const next=newCharacter(edition);initializeAutomation(next);return localSources?(workspaceRef.current?.siteSources?withSiteSources(next,workspaceRef.current.siteSources,workspaceRef.current.packs):startAllSources(next,defaultSources)):next;}
   useEffect(()=>{
     const current=workspaceRef.current;
@@ -239,7 +249,7 @@ export default function App() {
   const [modal, setModal] = useState('');
   const [classSyncBusy,setClassSyncBusy]=useState(false);
   const [workbenchReadError,setWorkbenchReadError]=useState<{key:string;message:string}>();
-  const classReview=useMemo(()=>c?cardMigrationIssues(c,allEntries):[],[c,allEntries]);
+  const classReview=useMemo(()=>mechanics?cardMigrationIssues(mechanics,allEntries):[],[mechanics,allEntries]);
   const classNeedsReview=classReview.length>0;
   const migrationWarningCache=useMemo(()=>new WeakMap<Character,boolean>(),[allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
   const classWarnings=useMemo(()=>new Set(!loading&&workspace?workspace.characters.filter(row=>{let issue=migrationWarningCache.get(row);if(issue===undefined){issue=cardMigrationIssues(inWorkbench&&roomRules?{...row,edition:roomRules.edition,profile:roomProfile!}:withSiteSources(row,workspace.siteSources,activePacks),allEntries).length>0;migrationWarningCache.set(row,issue);}return issue;}).map(row=>row.id):[]),[workspace?.characters,loading,migrationWarningCache]);
@@ -396,7 +406,7 @@ export default function App() {
   useEffect(()=>{if(!wikiUi)return;void load();return()=>loadController.current?.abort();},[!!wikiUi]);
   useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
-  const d = useMemo(() => c ? evaluate(c) : undefined, [c]);
+  const d = useMemo(() => mechanics ? evaluate(mechanics) : undefined, [mechanics]);
   /** 一张坏图片只丢弃它自己：头像或立绘读不出来时仍然打开整张角色卡。 */
   function readDocument(document: unknown): Character {
     const { character, repaired } = readCharacter(document);
@@ -475,7 +485,7 @@ export default function App() {
     if (!c) return [];
     const candidates=choiceScope?.wiki&&choiceScope.tab===kind?new Set(choiceScope.entries.map(e=>e.id)):undefined;
     return libraryEntries.filter(e => (candidates?candidates.has(e.id):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
-      (editionFilter === 'all' || editionAllows(e,(editionFilter === 'character' ? c.edition : editionFilter) as Edition,editionFilter === 'character' && c.profile.optional.legacy)));
+      wikiEditionAllows(e,c,editionFilter));
   }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope]);
   const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery);
   const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery,matchesEntrySearch]);
@@ -504,9 +514,12 @@ export default function App() {
     if (!key || record.key !== key || Date.now() - record.time > 900) record.past = [...record.past.slice(-59), character];
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
     const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
-    const draft = structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries); automationRuntime.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return; draft.updatedAt = new Date().toISOString(); draft.revision++;
+    const displayDraft=applyDisplayCharacterEdit(character,action);
+    let draft:Character;
+    if(displayDraft){if(displayDraft===character)return;draft=displayDraft;}
+    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
-    if(inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
+    if(!displayDraft&&inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
     rememberCharacter(character,draft);void sendCharacter(character,draft).catch(()=>{});setHistoryTick(x=>x+1);
   };
@@ -541,9 +554,9 @@ export default function App() {
     if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench) return;
     const draft = structuredClone(c);
     const castingChanged=hydrateImportedCasting(draft,allEntries);
-    const featuresChanged=syncFeatures(draft, allEntries),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=automationRuntime.syncSourceSpells(draft,allEntries);
+    const featuresChanged=syncFeatures(draft, allEntries,undefined,catalogNames),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=automationRuntime.syncSourceSpells(draft,allEntries);
     if (featuresChanged || resourcesChanged || castingChanged || sourceSpellsChanged) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
-  }, [c, allEntries,automationRuntime]);
+  }, [mechanics, allEntries,automationRuntime]);
   function undo(redo=false){void travelHistory(redo);}
 
   useEffect(() => {
@@ -739,16 +752,16 @@ export default function App() {
     <main className={`workspace ${wikiVisible||tableOpen?'':'wiki-hidden'}`}>
       <section data-inventory-recipient={inWorkbench&&workbenchPage==='sheet'&&wb.target?wb.target.cardId?`card:${wb.target.cardId}`:`monster:${wb.target.itemId}`:undefined} className={`sheet-pane ${tab === 'sheet' ? 'mobile-active' : ''} ${editing&&(!inWorkbench||workbenchPage==='sheet'&&wb.target?.write)&&!exportView?'sheet-editing':''}`} aria-label={t('cardWorkspace')}>
         {inWorkbench&&workbenchPage==='music'?<MusicWorkspace close={()=>setWorkbenchPage('console')}/>:inWorkbench&&['settings','features'].includes(workbenchPage)?<WorkbenchPanel key={workbenchPage} panel="settings" section={workbenchPage==='features'?'features':undefined} close={()=>setWorkbenchPage('console')}/>:inWorkbench&&workbenchPage==='notes'&&wb.role==='GM'?<DmNotes/>:inWorkbench&&workbenchPage==='dice'?<DicePage online={wb.online} target={wb.target} rolls={wb.rolls} compose={wb.compose}/>:inWorkbench&&workbenchPage==='console'?<DMConsole navigate={setWorkbenchPage}/>:inWorkbench&&(!wb.target||wb.target.kind==='character'&&(!wb.document||c.id!==workbenchCharacterId(wb.target)||workbenchReadError?.key===wb.target.key))?<div className="workbench-monster">{workbenchReadError&&workbenchReadError.key===wb.target?.key?<p role="alert">{workbenchReadError?.message}。原始资料保留，请选择其他角色或重新读取角色簿。</p>:<p role="status">{wb.loading||wb.document?'读取角色资料…':'从上方选择角色卡'}</p>}</div>:inWorkbench&&(wb.target?.kind==='monster'||wb.target?.kind==='token')?<WorkbenchMonster editing={editing} setEditing={setEditing} key={wb.target.key} target={wb.target} raw={wb.document} online={wb.online} onLink={link}/>:<>
-        <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span><div className="character-tabs" role="tablist" aria-label={t('currentCharacter')}>{!inWorkbench&&workspace.characters.map(x=><button key={x.id} role="tab" aria-selected={x.id===c.id} onClick={()=>persist({...workspace,activeId:x.id})}>{x.name}{classWarnings.has(x.id)&&<span className="class-warning-icon" aria-label="旧卡资料需要核对">⚠</span>}</button>)}</div></div>
+        <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span>{!inWorkbench&&<CharacterTabs characters={workspace.characters} activeId={c.id} warnings={classWarnings} label={t('currentCharacter')} select={id=>persist({...workspace,activeId:id})}/>}</div>
           <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&wb.role==='GM'&&wb.cards.find(card=>card.id===wb.target?.cardId)&&<CardOwnership key={wb.target?.cardId} card={wb.cards.find(card=>card.id===wb.target?.cardId)!}/>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}{editing&&<button onClick={()=>setModal('personal')}>{t('entriesLevels')}</button>}{editing && <button className="adjust-shortcut" aria-label={t('adjustDetails')} onClick={() => setModal('adjust')}>{t('adjust')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><SheetDisplayButton/><button disabled={!automationRuntime||inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
         </div>
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {classNeedsReview&&!loading&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
         <SheetEditContext.Provider value={editing&&(!inWorkbench||!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{editing&&<Palette c={c} edit={edit}/>}<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button></span></div>
-          {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
+          {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
 </> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><Suspense fallback={<p role="status">正在加载这一页…</p>}><div className="sheet-details">
-          <div className="edition-divider"><span/><strong>{t('cardTitle')}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
+          <div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
           <DetailHeader openSpellAbility={()=>setModal('spellAbility')} page={sheetPage} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>
           {sheetPage==='特性'?<FeaturesPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='背景'?<BackgroundPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='法术'?<SpellsPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:inWorkbench?<WorkbenchInventory id={`card:${wb.target!.cardId}`} capacity={<CarryCapacity c={c} d={d} edit={edit}/>}/>:<InventoryPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>}
         </div></Suspense></ToolBoundary>}

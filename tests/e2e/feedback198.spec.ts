@@ -78,7 +78,7 @@ test('wide custom reading keeps edit and new buttons clickable across reload and
  await page.getByRole('button',{name:'编辑此条目',exact:true}).click({timeout:5000});await expect(page.getByLabel('自定义条目名称',{exact:true})).toHaveValue('双列按钮验收');
  await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();
  await page.getByRole('button',{name:'编辑此条目',exact:true}).click();await expect(page.getByLabel('自定义条目名称',{exact:true})).toHaveValue('双列按钮验收');
- await page.getByRole('button',{name:'保存条目',exact:true}).click();await page.setViewportSize({width:1920,height:1080});await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
+ await page.getByRole('button',{name:'保存条目',exact:true}).click();await page.setViewportSize({width:1280,height:1080});await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
  await page.getByRole('button',{name:'编辑此条目',exact:true}).click();await page.getByRole('button',{name:'＋ 新建条目',exact:true}).click();await expect(page.getByLabel('自定义条目名称',{exact:true})).toHaveValue('');
  await page.setViewportSize({width:2560,height:1080});await expect(page.locator('.wiki-layout')).toHaveClass(/wiki-columns/);await expect(page.getByLabel('自定义条目名称',{exact:true})).toBeEditable();
 });

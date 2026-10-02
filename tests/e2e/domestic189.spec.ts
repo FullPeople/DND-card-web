@@ -26,7 +26,7 @@ test('wide Wiki uses full-height side columns, narrow Wiki returns to stacked wi
  await page.locator('.wiki-pane').screenshot({path:info.outputPath('wiki-columns.png')});
  await page.locator('.entry-detail').evaluate(node=>{(window as any).readerBeforeResize=node;node.scrollTop=250;});
  await page.locator('.catalog-list').evaluate(node=>{node.scrollTop=560;});
- await page.setViewportSize({width:1920,height:1080});
+ await page.setViewportSize({width:1280,height:1080});
  await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
  b=await bounds(page);expect(b.detail.y).toBeGreaterThan(b.list.bottom);
  await expect(page.getByRole('separator',{name:'调整资料列表与正文高度'})).toBeVisible();
@@ -37,7 +37,7 @@ test('wide Wiki uses full-height side columns, narrow Wiki returns to stacked wi
  await expect.poll(()=>page.locator('.catalog-list').evaluate(node=>node.scrollTop)).toBe(560);
  // Resizing the outer split, without changing the browser width, also switches layout.
  const outer=page.getByRole('separator',{name:'调整角色卡与规则资料宽度'});await outer.focus();
- for(let i=0;i<7;i++)await page.keyboard.press('ArrowRight');
+ for(let i=0;i<13;i++)await page.keyboard.press('ArrowRight');
  await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
  await page.keyboard.press('Home');await expect(page.locator('.wiki-layout')).toHaveClass(/wiki-columns/);
  expect(errors).toEqual([]);
@@ -49,7 +49,7 @@ test('column and row divider sizes are independently draggable, keyboard accessi
  await page.mouse.move(handle.x+4,handle.y+80);await page.mouse.down();await page.mouse.move(handle.x+54,handle.y+80,{steps:8});await page.mouse.up();
  await expect.poll(async()=>Math.round((await bounds(page)).list.width-start.list.width)).toBe(50);
  const width=await page.evaluate(()=>localStorage.getItem('dnd-card:wiki-column-ratio'));expect(Number(width)).toBeGreaterThan(.42);
- await page.setViewportSize({width:1920,height:1080});const row=page.getByRole('separator',{name:'调整资料列表与正文高度'});
+ await page.setViewportSize({width:1280,height:1080});const row=page.getByRole('separator',{name:'调整资料列表与正文高度'});
  await row.focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowDown');
  const height=await page.evaluate(()=>localStorage.getItem('dnd-card:wiki-split-ratio'));expect(height).toBeTruthy();
  await page.setViewportSize({width:2560,height:1080});await page.reload();

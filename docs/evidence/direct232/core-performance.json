@@ -1,0 +1,222 @@
+{
+  "baselineSha": "79078c1cfb1a1ee4de15e7612a66f720321eaaab",
+  "scope": "Node core only; excludes React layout, IndexedDB save, drag events and browser long tasks.",
+  "results": [
+    {
+      "catalogSize": 100,
+      "selectionCount": 20,
+      "label": "name-before",
+      "samples": 30,
+      "p50": 0.9078020000000038,
+      "p95": 2.0085669999999993,
+      "max": 2.784060000000011
+    },
+    {
+      "catalogSize": 100,
+      "selectionCount": 20,
+      "label": "name-after",
+      "samples": 30,
+      "p50": 0.00068999999996322,
+      "p95": 0.005046999999990476,
+      "max": 0.01298700000000963
+    },
+    {
+      "catalogSize": 100,
+      "selectionCount": 20,
+      "label": "grants-before",
+      "samples": 30,
+      "p50": 0.2610730000000103,
+      "p95": 0.6532320000000027,
+      "max": 1.8027210000000196
+    },
+    {
+      "catalogSize": 100,
+      "selectionCount": 20,
+      "label": "grants-after",
+      "samples": 30,
+      "p50": 0.250821999999971,
+      "p95": 0.6125260000000026,
+      "max": 0.8452400000000466
+    },
+    {
+      "catalogSize": 100,
+      "selectionCount": 100,
+      "label": "name-before",
+      "samples": 30,
+      "p50": 5.101939999999956,
+      "p95": 8.468058999999982,
+      "max": 8.98787900000002
+    },
+    {
+      "catalogSize": 100,
+      "selectionCount": 100,
+      "label": "name-after",
+      "samples": 30,
+      "p50": 0.0008670000000279288,
+      "p95": 0.0026349999999979445,
+      "max": 0.007061999999962154
+    },
+    {
+      "catalogSize": 100,
+      "selectionCount": 100,
+      "label": "grants-before",
+      "samples": 30,
+      "p50": 1.729675000000043,
+      "p95": 2.558742999999936,
+      "max": 2.8643859999999677
+    },
+    {
+      "catalogSize": 100,
+      "selectionCount": 100,
+      "label": "grants-after",
+      "samples": 30,
+      "p50": 1.8102330000000393,
+      "p95": 2.509521999999947,
+      "max": 3.511235000000056
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 20,
+      "label": "name-before",
+      "samples": 30,
+      "p50": 18.952096000000097,
+      "p95": 24.443408999999974,
+      "max": 24.936274000000026
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 20,
+      "label": "name-after",
+      "samples": 30,
+      "p50": 0.0007540000001426961,
+      "p95": 0.0015570000000479922,
+      "max": 0.0016660000001138542
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 20,
+      "label": "grants-before",
+      "samples": 30,
+      "p50": 5.7075700000000325,
+      "p95": 9.371176999999989,
+      "max": 10.710524000000078
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 20,
+      "label": "grants-after",
+      "samples": 30,
+      "p50": 0.49681299999997464,
+      "p95": 1.2190590000000157,
+      "max": 3.9203880000000026
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 100,
+      "label": "name-before",
+      "samples": 30,
+      "p50": 21.992075999999997,
+      "p95": 30.164708999999675,
+      "max": 30.302138000000014
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 100,
+      "label": "name-after",
+      "samples": 30,
+      "p50": 0.0008029999999052961,
+      "p95": 0.00243399999999383,
+      "max": 0.002498000000286993
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 100,
+      "label": "grants-before",
+      "samples": 30,
+      "p50": 7.048361000000114,
+      "p95": 10.276450999999724,
+      "max": 10.83318700000018
+    },
+    {
+      "catalogSize": 10000,
+      "selectionCount": 100,
+      "label": "grants-after",
+      "samples": 30,
+      "p50": 2.33290100000022,
+      "p95": 3.542642999999771,
+      "max": 3.632282000000032
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 20,
+      "label": "name-before",
+      "samples": 30,
+      "p50": 67.3424,
+      "p95": 79.01317999999992,
+      "max": 93.69438799999989
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 20,
+      "label": "name-after",
+      "samples": 30,
+      "p50": 0.0007200000000011642,
+      "p95": 0.0025969999996959814,
+      "max": 0.0031079999998837593
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 20,
+      "label": "grants-before",
+      "samples": 30,
+      "p50": 25.255348000000595,
+      "p95": 37.39430899999934,
+      "max": 40.62653800000044
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 20,
+      "label": "grants-after",
+      "samples": 30,
+      "p50": 2.4585589999996955,
+      "p95": 5.675982999999178,
+      "max": 9.501664000000346
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 100,
+      "label": "name-before",
+      "samples": 30,
+      "p50": 89.42114799999945,
+      "p95": 159.60754499999985,
+      "max": 196.8759060000002
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 100,
+      "label": "name-after",
+      "samples": 30,
+      "p50": 0.0007409999998344574,
+      "p95": 0.002379999999902793,
+      "max": 0.002694000000701635
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 100,
+      "label": "grants-before",
+      "samples": 30,
+      "p50": 26.620709000000716,
+      "p95": 40.41173499999968,
+      "max": 43.39063200000055
+    },
+    {
+      "catalogSize": 30000,
+      "selectionCount": 100,
+      "label": "grants-after",
+      "samples": 30,
+      "p50": 4.041893999999957,
+      "p95": 16.903684000000794,
+      "max": 18.422264000000723
+    }
+  ]
+}

@@ -3,23 +3,23 @@ import { mockSource } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
   await mockSource(page);
-  await page.route('**/data/class/class-test.json', route => route.fulfill({ json: { class: [{ name: '测试法师', source: 'XPHB', hd: { faces: 6 }, proficiency: ['int', 'wis'], classFeatures: ['测试特性|测试法师|XPHB|1'], classTableGroups: [{ colLabels: ['回气次数', '固定值'], rows: [[2, 0], [2, 0], [2, 0], [3, 0]] }], startingEquipment: { default: ['测试装备。'] } }], classFeature: [{ name: '测试特性', source: 'XPHB', className: '测试法师', classSource: 'XPHB', level: 1, entries: ['自制正文。参见 {@item 测试皮甲|XPHB}。', { name: '细节', type: 'entries', entries: ['第二段。'] }] }] } }));
+  await page.route('**/data/class/class-test.json', route => route.fulfill({ json: { class: [{ name: '测试法师', source: 'XPHB', hd: { faces: 6 }, proficiency: ['int', 'wis'], startingProficiencies: { skills: [{ perception: true }] }, classFeatures: ['测试特性|测试法师|XPHB|1'], classTableGroups: [{ colLabels: ['回气次数', '固定值'], rows: [[2, 0], [2, 0], [2, 0], [3, 0]] }], startingEquipment: { default: ['测试装备。'] } }], classFeature: [{ name: '测试特性', source: 'XPHB', className: '测试法师', classSource: 'XPHB', level: 1, entries: ['自制正文。参见 {@item 测试皮甲|XPHB}。', { name: '细节', type: 'entries', entries: ['第二段。'] }] }] } }));
   await page.route('**/data/items-base.json', route => route.fulfill({ json: { baseitem: [{ name: '测试皮甲', source: 'XPHB', weight: 2, value: 50, entries: [{ name: '装备正文', type: 'entries', entries: ['短正文。'] }] }] } }));
   await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled();
 });
 
 test('edit switch locks setup fields while additive modifiers follow level and survive reload', async ({ page }) => {
   await expect(page.getByRole('spinbutton', { name: '敏捷基础值' })).toHaveAttribute('readonly', '');
-  await expect(page.getByRole('checkbox', { name: '察觉熟练', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('checkbox', { name: /^察觉熟练状态：/ })).toHaveCount(0);
   await page.getByRole('spinbutton', { name: '当前生命值', exact: true }).fill('5');
   await page.locator('.catalog-row').filter({ hasText: '测试法师' }).dragTo(page.locator('.identity-class'));
   const mode = page.getByRole('switch', { name: '编辑模式' }); await mode.click();
-  await page.getByRole('spinbutton', { name: '敏捷基础值' }).fill('14'); await page.getByRole('checkbox', { name: '察觉熟练', exact: true }).check();
+  await page.getByRole('spinbutton', { name: '敏捷基础值' }).fill('14'); await expect(page.getByRole('checkbox', { name: '察觉熟练状态：熟练', exact: true })).toBeDisabled();
   for (const [name, value] of [['熟练加值调整值', '1'], ['先攻调整值', '4'], ['速度调整值', '5'], ['被动察觉调整值', '2'], ['生命值上限调整值', '3']]) await page.getByRole('spinbutton', { name, exact: true }).fill(value);
   await page.getByRole('combobox', { name: '体型', exact: true }).selectOption('L');
   await page.getByRole('button', { name: '编辑装备训练与其他熟练' }).click(); await page.getByRole('textbox', { name: '工具熟练记录' }).fill('自制工具'); await page.getByRole('textbox', { name: '工具熟练记录' }).press('Tab');
   await expect(page.locator('[data-stat=proficiency]')).toHaveText('+3'); await expect(page.locator('[data-stat=initiative]')).toHaveText('+6'); await expect(page.locator('[data-stat=hp]')).toHaveText('9');
-  await mode.click(); await expect(page.getByRole('spinbutton', { name: '速度调整值' })).toHaveCount(0); await expect(page.getByRole('checkbox', { name: '察觉熟练', exact: true })).toHaveCount(0);
+  await mode.click(); await expect(page.getByRole('spinbutton', { name: '速度调整值' })).toHaveCount(0); await expect(page.getByRole('checkbox', { name: /^察觉熟练状态：/ })).toHaveCount(0);
   await page.getByRole('spinbutton', { name: '临时生命值', exact: true }).fill('2');
   await page.getByRole('spinbutton', { name: '测试法师等级', exact: true }).fill('5');
   await expect(page.locator('[data-stat=proficiency]')).toHaveText('+4'); await expect(page.locator('[data-stat=passive]')).toHaveText('16');

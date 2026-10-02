@@ -14,8 +14,9 @@ test('card-led creation, manual choices, undo and refresh persistence', async ({
   await page.locator('.catalog-row').filter({ hasText: '测试法师' }).click();
   await fillFromDetail(page);
   await expect(page.getByRole('spinbutton', { name: '测试法师等级' })).toHaveValue('1');
-  await page.getByRole('checkbox', { name: '奥秘熟练', exact: true }).check();
-  await page.getByRole('checkbox', { name: '洞悉熟练', exact: true }).check();
+  await expect(page.getByRole('checkbox', { name: '奥秘熟练状态：无熟练', exact: true })).toBeDisabled();
+  await page.getByRole('spinbutton', { name: '奥秘额外调整值', exact: true }).fill('2'); await page.getByRole('spinbutton', { name: '奥秘额外调整值', exact: true }).press('Tab');
+  await expect(page.getByRole('checkbox', { name: '洞悉熟练状态：无熟练', exact: true })).toBeDisabled();
   await expect(page.locator('.class-features .feature-bubble')).toContainText('初始特性');
   await page.getByRole('button', { name: '展开初始特性', exact: true }).press('Delete');
   await expect(page.locator('.class-features .feature-bubble')).toHaveCount(0);
@@ -44,7 +45,7 @@ test('edition isolation, character copies and source suspension', async ({ page 
   await expect(page.getByRole('textbox', { name: '角色姓名', exact: true })).toHaveValue('未命名的冒险者');
 });
 
-test('custom pack import is atomic, its declared effect works alongside manual skills and disabling preserves the snapshot', async ({ page }) => {
+test('custom pack import is atomic, its declared effect works alongside manual skill adjustments and disabling preserves the snapshot', async ({ page }) => {
   await page.getByRole('button', { name: '规则与扩展', exact: true }).click();
   const file = page.getByTestId('pack-file');
   await file.setInputFiles({ name: 'study.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(EXAMPLE_PACK)) });
@@ -55,7 +56,8 @@ test('custom pack import is atomic, its declared effect works alongside manual s
   await expect(page.locator('.pack-row')).toHaveCount(1); await closeDialog(page);
   await page.getByRole('navigation', { name: '资料分类' }).getByRole('button', { name: '专长', exact: true }).click();
   await page.locator('.catalog-row').filter({ hasText: '学者笔记' }).click(); await fillFromDetail(page);
-  await page.getByRole('checkbox', { name: '历史熟练', exact: true }).check();
+  await expect(page.getByRole('checkbox', { name: /^历史熟练状态：/ })).toBeDisabled();
+  await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).fill('2'); await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).press('Tab');
   await expect(page.locator('.ability-box').filter({ hasText: 'INT' })).toContainText('总值 11');
   await page.getByRole('button', { name: '规则与扩展', exact: true }).click();
   await page.locator('.source-books').getByRole('checkbox', { name: /我的扩展/ }).uncheck(); await closeDialog(page);

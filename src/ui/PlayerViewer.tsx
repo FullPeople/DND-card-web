@@ -2,6 +2,7 @@ import {ToolBoundary} from './ToolBoundary';
 import {lazy,Suspense,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {type Character,type Entry} from '../core/model';
 import {evaluate} from '../core/engine';
+import {classEditionSuffix} from '../core/classEdition';
 import {readCharacter,importOwlbear,parseFile} from '../core/validation';
 import {SheetDisplayButton} from './SheetDisplayButton';
 import {useSheetRenderMode} from './sheetDisplay';
@@ -56,7 +57,7 @@ export default function PlayerViewer(){
  return <KeywordPreview resolve={resolve} open={link}><SheetEditContext.Provider value={false}><main ref={root} className="player-viewer">
   <header className="player-viewer-toolbar"><strong>{card.name}</strong><span>{card.edition} · {t('readOnly')}</span><button onClick={()=>setReload(n=>n+1)}>{t('refreshData')}</button><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('createOnSite')}</a></header>
   <section className="sheet-pane"><div className="pane-toolbar"><SheetDisplayButton/></div><PaperFrame character={card} page={page} changePage={setPage}>
-   <ToolBoundary key={page} label={page} close={()=>setPage('主要')}><Suspense fallback={<p role="status">正在加载这一页…</p>}>{page==='主要'?<Overview {...props} catalog={entries} statusRibbon={<div className="edition-divider"><span/><strong>DND 五版角色卡</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={card} rows={card.selections.filter(s=>s.entry.kind==='condition')} edit={noop} browse={noop} onLink={link}/><span/></div>} addEntry={noop} renderSelection={()=>null} openResources={noop} openQuickbar={noop} pinDrop={noop}/>:<div className="sheet-details"><DetailHeader {...props} page={page}/>{page==='特性'?<FeaturesPage {...props}/>:page==='背景'?<BackgroundPage {...props}/>:page==='法术'?<SpellsPage {...props}/>:<InventoryPage {...props}/>}</div>}
+   <ToolBoundary key={page} label={page} close={()=>setPage('主要')}><Suspense fallback={<p role="status">正在加载这一页…</p>}>{page==='主要'?<Overview {...props} catalog={entries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(card)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={card} rows={card.selections.filter(s=>s.entry.kind==='condition')} edit={noop} browse={noop} onLink={link}/><span/></div>} addEntry={noop} renderSelection={()=>null} openResources={noop} openQuickbar={noop} pinDrop={noop}/>:<div className="sheet-details"><DetailHeader {...props} page={page}/>{page==='特性'?<FeaturesPage {...props}/>:page==='背景'?<BackgroundPage {...props}/>:page==='法术'?<SpellsPage {...props} readOnly/>:<InventoryPage {...props}/>}</div>}
   </Suspense></ToolBoundary></PaperFrame></section>
   {detail&&<div className="player-entry-shade" onPointerDown={event=>{if(event.target===event.currentTarget)setDetail(undefined);}}><section role="dialog" aria-label={t('entryDetails')}><header><div><strong>{uiEntryName(detail,language)}</strong><small><SourceName id={detail.source}/> · {detail.edition}</small></div><button aria-label={t('closeEntry')} onClick={()=>setDetail(undefined)}>×</button></header><ContentBoundary key={detail.id}><EntryFacts entry={detail} onLink={link}/><Entries value={detail.entries} onLink={link}/></ContentBoundary></section></div>}
  </main></SheetEditContext.Provider></KeywordPreview>;

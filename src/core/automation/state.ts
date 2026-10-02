@@ -8,6 +8,7 @@ export const supportedAutomation=(c:Character)=>c.automation?.protocol===AUTOMAT
 export const automationEnabled=(c:Character)=>supportedAutomation(c)&&c.automation?.enabled===true;
 export function newAutomationState():AutomationState{return {protocol:AUTOMATION_PROTOCOL,enabled:true,defaultsVersion:1,rulesVersion:RULES_VERSION};}
 /** Apply the default once at a validated loading boundary, preserving later manual opt-outs. */
+export const automationNeedsInitialization=(c:Character)=>!c.automation||supportedAutomation(c)&&c.automation.defaultsVersion!==1;
 export function initializeAutomation(c:Character):boolean{
  if(!c.automation){c.automation=newAutomationState();return true;}
  if(!supportedAutomation(c)||c.automation.defaultsVersion===1)return false;

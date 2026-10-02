@@ -1,3 +1,6 @@
 * text=auto eol=lf
 *.png binary
 *.woff2 binary
+
+# Unified patch context deliberately contains a single space on blank lines.
+docs/held-candidates/*.patch whitespace=-blank-at-eol

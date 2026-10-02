@@ -1,0 +1,171 @@
+diff --git a/src/ui/Quickbar.tsx b/src/ui/Quickbar.tsx
+--- a/src/ui/Quickbar.tsx
++++ b/src/ui/Quickbar.tsx
+@@ -20,10 +20,10 @@
+  const visibleWeapons=weaponAttacks(c,d);
+  const resources=Object.entries(c.runtime.resources).filter(([id])=>!isHitDieResource(id)&&sourceSpellResourceEnabled(c,id)&&!layout.hidden.includes(`resource:${id}`)).sort((a,b)=>rank(`resource:${a[0]}`)-rank(`resource:${b[0]}`)||(a[1].order||0)-(b[1].order||0));
+  const roll=(expression:string,label:string)=>{if((inWorkbench||standalone)&&!editing)composeRoll(expression,label);};
+- const attacks=<AttackPages>{editing&&<button disabled={!editing} className="quickbar-manage-strip" onClick={manageQuickbar}>{editing?'整理快捷栏':'攻击与常用动作'}</button>}<div className="quick-weapon"><span>法术攻击</span><button disabled={!inWorkbench&&!standalone} className="rollable-stat" onClick={()=>roll(`1d20${signed(spell.attack)}`,'法术攻击')}>{signed(spell.attack)}</button><strong>DC {spell.dc}</strong></div>{visibleWeapons.map((w:any)=>{const bonus=String(w.attack_bonus??'').match(/[+-]?\s*\d+/)?.[0].replace(/\s/g,'');const damage=[w.damage,w.extra_damage].filter(Boolean).join('+').replace(/\s/g,'');return <div className="quick-weapon" key={w.key} data-quick-id={w.key} data-quick-side="attacks"><span className="quick-attack-name" >{w.entry?`${entryLabel(w.entry)}${w.modeLabel?` · ${w.modeLabel}`:''}`:w.name}</span><button className="rollable-stat" disabled={(!inWorkbench&&!standalone)||bonus===undefined} onClick={()=>roll(`1d20${signed(Number(bonus))}`,`${w.name} 命中`)}>{bonus===undefined?'—':signed(Number(bonus))}</button><button className="rollable-stat" disabled={(!inWorkbench&&!standalone)||!damage} onClick={()=>roll(damage,`${w.name} 伤害`)}>{damage||'—'} {w.damage_type||''}</button></div>;})}{quickbarEntries(c).map(s=><Reference className="quick-pin" reference={`entry:${s.entry.id}`} entry={s.entry} data-quick-id={`pin:${s.id}`} data-entry-id={s.entry.id} data-quick-side="pins"  key={s.id} onClick={()=>inspect(s.entry)}>{entryLabel(s.entry)}</Reference>)}</AttackPages>;
++ const attacks=<AttackPages manage={manageQuickbar} enabled={editing&&!disabled&&(!inWorkbench||!!wb.target?.write)}><div className="quick-weapon"><span>法术攻击</span><button disabled={!inWorkbench&&!standalone} className="rollable-stat" onClick={()=>roll(`1d20${signed(spell.attack)}`,'法术攻击')}>{signed(spell.attack)}</button><strong>DC {spell.dc}</strong></div>{visibleWeapons.map((w:any)=>{const bonus=String(w.attack_bonus??'').match(/[+-]?\s*\d+/)?.[0].replace(/\s/g,'');const damage=[w.damage,w.extra_damage].filter(Boolean).join('+').replace(/\s/g,'');return <div className="quick-weapon" key={w.key} data-quick-id={w.key} data-quick-side="attacks"><span className="quick-attack-name" >{w.entry?`${entryLabel(w.entry)}${w.modeLabel?` · ${w.modeLabel}`:''}`:w.name}</span><button className="rollable-stat" disabled={(!inWorkbench&&!standalone)||bonus===undefined} onClick={()=>roll(`1d20${signed(Number(bonus))}`,`${w.name} 命中`)}>{bonus===undefined?'—':signed(Number(bonus))}</button><button className="rollable-stat" disabled={(!inWorkbench&&!standalone)||!damage} onClick={()=>roll(damage,`${w.name} 伤害`)}>{damage||'—'} {w.damage_type||''}</button></div>;})}{quickbarEntries(c).map(s=><Reference className="quick-pin" reference={`entry:${s.entry.id}`} entry={s.entry} data-quick-id={`pin:${s.id}`} data-entry-id={s.entry.id} data-quick-side="pins"  key={s.id} onClick={()=>inspect(s.entry)}>{entryLabel(s.entry)}</Reference>)}</AttackPages>;
+  return <div className="resource-diy-quickbar"><ResourceWidgets c={c} rows={resources} editing={editing} enabled={!disabled&&(!inWorkbench||!!wb.target?.write)} gm={!inWorkbench||wb.role==='GM'} edit={edit} manage={manage} attacks={attacks} {...dashboard}/></div>;
+ }
+ 
+-function AttackPages({children}:{children:ReactNode}){
+- return <div className="quickbar-attacks"><div className="quickbar-attacks-heading"><span>武器与攻击</span></div>{children}</div>;
++function AttackPages({children,manage,enabled}:{children:ReactNode;manage:()=>void;enabled:boolean}){
++ return <div className="quickbar-attacks"><div className="quickbar-attacks-heading"><button type="button" className="quickbar-attacks-manage" disabled={!enabled} onClick={manage} title={enabled?'整理武器与攻击快捷栏':'开启编辑模式后整理武器与攻击快捷栏'}>武器与攻击</button></div>{children}</div>;
+ }
+diff --git a/src/core/resourceWidgets.ts b/src/core/resourceWidgets.ts
+--- a/src/core/resourceWidgets.ts
++++ b/src/core/resourceWidgets.ts
+@@ -83,7 +83,7 @@
+  if(['orbit','segments','pips','matrix'].includes(requested)&&!countableResource(r)||requested==='ready'&&(r.unlimited||r.max!==1))return chooseDefaultWidgetStyle(r);
+  return requested;
+ }
+-export function dashboardSplit(value?:number){return Math.max(.2,Math.min(.55,Number.isFinite(value)?value!:.32));}
++export function dashboardSplit(value?:number){return Math.max(.2,Math.min(.55,Number.isFinite(value)?value!:.42));}
+ function fixedAttacks(input?:ResourceWidgetLayout){return normalizeWidget({...input,x:0,y:0,w:4,h:6,page:0,style:'segments',resourceArea:true,split:dashboardSplit(input?.split??(input?input.w/12:undefined))});}
+ export type ResourceModule={id:string;name:string;rows:[string,ResourceValue][];slots:boolean};
+ export const isWidgetSpellSlot=(id:string)=>/^(spell|pact)-slot:[1-9]$/.test(id);
+diff --git a/src/ui/resourceDashboard.css b/src/ui/resourceDashboard.css
+--- a/src/ui/resourceDashboard.css
++++ b/src/ui/resourceDashboard.css
+@@ -91,7 +91,7 @@
+ .resource-widget-popover .resource-title .resource-configure,.compact-resource-popover .resource-title .resource-configure{visibility:visible}
+ 
+ /* Fixed attack column, adjustable divider, independent resource canvas. */
+-.resource-diy-quickbar .resource-quickbar-split{display:grid;grid-template-columns:minmax(0,var(--attack-split,32%)) 6px minmax(0,1fr);height:100%;min-height:0;min-width:0;overflow:visible}
++.resource-diy-quickbar .resource-quickbar-split{display:grid;grid-template-columns:minmax(0,var(--attack-split,42%)) 6px minmax(0,1fr);height:100%;min-height:0;min-width:0;overflow:visible}
+ .resource-fixed-attacks{min-width:0;min-height:0;height:100%;overflow:hidden;container-type:inline-size}
+ .resource-diy-quickbar .resource-fixed-attacks .quickbar-attacks{overflow-y:auto!important;overflow-x:hidden!important;height:100%;box-sizing:border-box;padding:0 4px 0 0}
+ .resource-diy-quickbar .resource-fixed-attacks .quickbar-attacks-heading{position:sticky;top:0;z-index:1;height:19px;background:#ededee;font-size:10px}
+@@ -115,3 +115,9 @@
+ .sheet-export .quickbar-divider{pointer-events:none}
+ 
+ .resource-quickbar-split[data-has-attacks=false]{grid-template-columns:minmax(0,1fr)}
++
++/* The original manager is reached from the fixed attack heading, without a second strip. */
++.resource-diy-quickbar .quickbar-attacks-heading .quickbar-attacks-manage{display:block;box-sizing:border-box;width:100%;height:19px;min-height:19px;line-height:19px;padding:0 2px!important;border:0;border-radius:0;font:inherit!important;color:inherit;text-align:left;background:transparent;white-space:nowrap}
++.resource-diy-quickbar .quickbar-attacks-manage:disabled{opacity:1;cursor:default}
++.resource-diy-quickbar .quickbar-attacks-manage:not(:disabled):hover{background:#00000012;text-decoration:underline;text-underline-offset:2px}
++.resource-diy-quickbar .quickbar-attacks-manage:focus-visible{outline:2px solid #527880;outline-offset:-2px;background:#00000012}
+diff --git a/tests/resourceRedesign232.test.ts b/tests/resourceRedesign232.test.ts
+--- a/tests/resourceRedesign232.test.ts
++++ b/tests/resourceRedesign232.test.ts
+@@ -1,7 +1,7 @@
+ import {describe,it,expect} from 'vitest';
+ import {newCharacter} from '../src/core/model';
+ import {createDashboardDraft,commitDashboardDraft} from '../src/core/dashboardDraft';
+-import {RESOURCE_TEMPLATES,addResourceModule,chooseDefaultWidgetStyle,suitableWidgetStyle,freeDashboardLayout,normalizeWidget,resourceModules,validWidget,migrateDashboardWidgets} from '../src/core/resourceWidgets';
++import {RESOURCE_TEMPLATES,addResourceModule,chooseDefaultWidgetStyle,suitableWidgetStyle,freeDashboardLayout,normalizeWidget,resourceModules,validWidget,migrateDashboardWidgets,dashboardSplit} from '../src/core/resourceWidgets';
+ describe('capacity matched resource dashboard',()=>{
+  it('keeps exact count styles only for bounded integer capacities 1 through 10',()=>{
+   for(const max of [0,1,2,5,10,11,99999,2.5])for(const style of ['pips','orbit','segments','matrix'] as const){
+@@ -31,6 +31,11 @@
+   }
+   for(const count of [1,13,2.5]){const c=newCharacter(),before=structuredClone(c);expect(()=>addResourceModule(c,RESOURCE_TEMPLATES.find(t=>t.id==='pool'),0,()=>crypto.randomUUID(),undefined,undefined,{name:'多项',current:1,max:2,unlimited:false,count})).toThrow();expect(c).toEqual(before);}
+  });
++ it('widens only the unsaved attack default while preserving explicit splits and legacy widths',()=>{
++  expect(dashboardSplit()).toBe(.42);expect(freeDashboardLayout([],{},undefined).attacks.split).toBe(.42);
++  for(const split of [.2,.32,.4,.55])expect(freeDashboardLayout([],{},normalizeWidget({resourceArea:true,split})).attacks.split).toBe(split);
++  expect(freeDashboardLayout([],{},normalizeWidget({w:3,h:6})).attacks.split).toBe(.25);
++ });
+  it('validates and clamps divider preferences while leaving resource geometry untouched',()=>{
+   expect(validWidget({...normalizeWidget(),resourceArea:true,split:.32})).toBe(true);
+   for(const split of [NaN,Infinity,.1,.6])expect(validWidget({...normalizeWidget(),split})).toBe(false);
+diff --git a/tests/e2e/quickbarOrganizer218.spec.ts b/tests/e2e/quickbarOrganizer218.spec.ts
+--- a/tests/e2e/quickbarOrganizer218.spec.ts
++++ b/tests/e2e/quickbarOrganizer218.spec.ts
+@@ -33,7 +33,7 @@
+  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open(name);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
+  return new Promise<Character>((resolve,reject)=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{const w=req.result;db.close();resolve(w.characters.find((c:Character)=>c.id===w.activeId));};req.onerror=()=>reject(req.error);});
+ });}
+-async function open(page:Page){await page.getByRole('button',{name:'整理快捷栏',exact:true}).click();await expect(page.getByRole('heading',{name:'整理快捷栏',exact:true})).toBeVisible();}
++async function open(page:Page){await page.getByRole('button',{name:'武器与攻击',exact:true}).click();await expect(page.getByRole('heading',{name:'整理快捷栏',exact:true})).toBeVisible();}
+ async function allShortcuts(page:Page){
+  const panel=page.locator('.paper .quickbar-attacks');await expect(panel).toBeVisible();
+  const previous=panel.getByRole('button',{name:'上一页攻击',exact:true}),next=panel.getByRole('button',{name:'下一页攻击',exact:true}),counter=panel.locator('.quickbar-attacks-heading small');
+diff --git a/tests/e2e/refinement183.spec.ts b/tests/e2e/refinement183.spec.ts
+--- a/tests/e2e/refinement183.spec.ts
++++ b/tests/e2e/refinement183.spec.ts
+@@ -17,7 +17,7 @@
+ test('quickbar copies a class without granting it and has editable action and resource settings',async({page})=>{
+  const c=newCharacter();c.runtime.resources.rage={name:'怒气',type:'count',max:3,current:2};await load(page,c);await page.getByRole('switch',{name:'编辑模式'}).click();await page.getByRole('button',{name:'职业',exact:true}).first().click();
+  const row=page.locator('.catalog-row').filter({hasText:'测试法师'}).first();await row.dragTo(page.locator('.quickbar-copy-zone'));await expect(page.locator('.quick-pin')).toContainText('测试法师');await expect(page.locator('.identity-class .identity-token')).toHaveCount(0);
+- await page.getByRole('button',{name:'整理快捷栏',exact:true}).click();await page.getByRole('button',{name:'＋ 新建手填攻击',exact:true}).click();await page.getByLabel('名字',{exact:true}).fill('星矢');await page.getByLabel('命中加值',{exact:true}).fill('+6');await page.getByLabel('伤害',{exact:true}).fill('2d8+4');await page.getByRole('button',{name:'添加',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.locator('.quick-weapon').filter({hasText:'星矢'})).toContainText('+6');
++ await page.getByRole('button',{name:'武器与攻击',exact:true}).click();await page.getByRole('button',{name:'＋ 新建手填攻击',exact:true}).click();await page.getByLabel('名字',{exact:true}).fill('星矢');await page.getByLabel('命中加值',{exact:true}).fill('+6');await page.getByLabel('伤害',{exact:true}).fill('2d8+4');await page.getByRole('button',{name:'添加',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.locator('.quick-weapon').filter({hasText:'星矢'})).toContainText('+6');
+  const main=page.locator('.paper .resource-workspace');await main.getByRole('button',{name:'仪表盘',exact:true}).click();const dashboard=page.getByRole('dialog',{name:'仪表盘',exact:true});await dashboard.locator('[data-resource-id="rage"] .resource-widget-face').dblclick();await expect(dashboard.locator('.resource-editor-form')).toBeVisible();await dashboard.getByRole('textbox',{name:'资源名称',exact:true}).fill('战意');await dashboard.getByRole('button',{name:'保存',exact:true}).click();await expect(dashboard.locator('.resource-editor-form')).toHaveCount(0);
+  await expect(main.locator('[data-resource-id="rage"]')).toHaveAttribute('data-resource-name','怒气');await dashboard.getByRole('button',{name:'保存布局',exact:true}).click();await dashboard.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(main.locator('[data-resource-id="rage"]')).toHaveAttribute('data-resource-name','战意');await expect(main.locator('[data-resource-id="rage"]')).toHaveAttribute('data-resource-current','2');
+  await page.reload();await expect(main.locator('[data-resource-id="rage"]')).toHaveAttribute('data-resource-name','战意');await expect(main.locator('[data-resource-id="rage"]')).toHaveAttribute('data-resource-current','2');await expect(page.locator('.quick-weapon').filter({hasText:'星矢'})).toContainText('+6');
+diff --git a/tests/e2e/standalone183.spec.ts b/tests/e2e/standalone183.spec.ts
+--- a/tests/e2e/standalone183.spec.ts
++++ b/tests/e2e/standalone183.spec.ts
+@@ -11,7 +11,7 @@
+  await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
+  await page.getByRole('switch',{name:'编辑模式'}).click();
+  await page.getByRole('textbox',{name:'角色姓名',exact:true}).fill('单机冒险者');
+- await page.getByRole('button',{name:'整理快捷栏',exact:true}).click();
++ await page.getByRole('button',{name:'武器与攻击',exact:true}).click();
+  await page.getByRole('button',{name:'＋ 新建手填攻击',exact:true}).click();await page.getByLabel('名字',{exact:true}).fill('训练剑');await page.getByLabel('命中加值',{exact:true}).fill('+4');await page.getByLabel('伤害',{exact:true}).fill('1d6+2');await page.getByRole('button',{name:'添加',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();
+  await page.getByRole('button',{name:'仪表盘',exact:true}).click();const dashboard=page.getByRole('dialog',{name:'仪表盘',exact:true});await dashboard.locator('[data-template-id="pips"]').click();await dashboard.locator('.resource-widget[data-selected="true"] .resource-widget-face').dblclick();
+  await expect(dashboard.locator('.resource-editor-form')).toBeVisible();await dashboard.getByRole('textbox',{name:'资源名称',exact:true}).fill('活力');await dashboard.getByRole('spinbutton',{name:'资源上限',exact:true}).fill('3');await dashboard.getByRole('button',{name:'保存',exact:true}).click();await dashboard.getByRole('button',{name:'保存布局',exact:true}).click();await dashboard.getByRole('button',{name:'关闭弹窗',exact:true}).click();await page.getByRole('switch',{name:'编辑模式'}).click();
+diff --git a/tests/e2e/reference-layout.spec.ts b/tests/e2e/reference-layout.spec.ts
+--- a/tests/e2e/reference-layout.spec.ts
++++ b/tests/e2e/reference-layout.spec.ts
+@@ -45,7 +45,7 @@
+   await page.getByRole('navigation', { name: '资料分类' }).getByRole('button', { name: '法术', exact: true }).click();
+   await page.locator('.catalog-row').filter({ hasText: '微光术' }).dragTo(page.locator('.quickbar-cell'));
+   await expect(page.locator('.quickbar-row')).toHaveCount(2);
+-  await page.getByRole('button', { name: '整理快捷栏' }).click();
++  await page.getByRole('button', { name: '武器与攻击' }).click();
+   await page.getByRole('button', { name: '上移微光术' }).click(); await page.getByRole('button', { name: '关闭弹窗' }).click();
+   await expect(page.locator('.quickbar-row').first()).toContainText('微光术');
+   await page.reload(); await expect(page.locator('.quickbar-row').first()).toContainText('微光术');
+diff --git a/tests/e2e/direct232SkillsAttacks.spec.ts b/tests/e2e/direct232SkillsAttacks.spec.ts
+--- a/tests/e2e/direct232SkillsAttacks.spec.ts
++++ b/tests/e2e/direct232SkillsAttacks.spec.ts
+@@ -18,6 +18,12 @@
+ }
+ async function editMode(page:Page,enabled=true){const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!==String(enabled))await toggle.click();}
+ 
++test('attack heading opens the original manager by pointer, Enter and Space; no duplicate strip or rest action',async({page})=>{
++ await load(page);const before=await saved(page),heading=page.locator('.quickbar-attacks-heading').getByRole('button',{name:'武器与攻击',exact:true});await expect(heading).toBeDisabled();await expect(page.getByRole('button',{name:'整理快捷栏',exact:true})).toHaveCount(0);await editMode(page);await expect(heading).toBeEnabled();await expect(heading).toHaveAttribute('title','整理武器与攻击快捷栏');await heading.click();await expect(page.locator('.quickbar-organizer')).toBeVisible();await page.getByRole('button',{name:'＋ 新建手填攻击',exact:true}).click();await page.getByLabel('名字',{exact:true}).fill('原创星矢');await page.getByLabel('命中加值',{exact:true}).fill('+6');await page.getByLabel('伤害',{exact:true}).fill('2d8+4');await page.getByRole('button',{name:'添加',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
++ for(const key of ['Enter','Space']){await heading.focus();await expect(heading).toBeFocused();expect(await heading.evaluate(el=>getComputedStyle(el).outlineStyle)).not.toBe('none');await heading.press(key);await expect(page.locator('.quickbar-organizer')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('.quickbar-organizer')).toHaveCount(0);}
++ await expect.poll(async()=>(await saved(page)).quickbarActions?.length).toBe(2);await page.reload();await expect(page.locator('.quick-weapon').filter({hasText:'原创星矢'})).toContainText('+6');const after=await saved(page);expect(after.runtime).toEqual(before.runtime);expect(after.selections).toEqual(before.selections);expect(await page.getByRole('button',{name:/短休|长休/}).count()).toBe(0);await page.screenshot({path:test.info().outputPath('attack-heading-original-manager.png')});
++});
++
+ test('one disabled state follows skill/save rule grant and revoke while adjustments save and reload',async({page})=>{
+  await load(page);await editMode(page);const paper=page.locator('.paper'),before=await saved(page);await expect(paper.locator('.ability-skill input[type=checkbox]')).toHaveCount(18);await expect(paper.locator('.ability-save input[type=checkbox]')).toHaveCount(6);await expect(paper.locator('.ability-proficiency-row input[type=checkbox]:enabled')).toHaveCount(0);
+  const perception=page.getByRole('checkbox',{name:'察觉熟练状态：熟练',exact:true}),expert=page.getByRole('checkbox',{name:'隐匿熟练状态：专精',exact:true}),strengthSave=page.getByRole('checkbox',{name:'力量豁免熟练状态：熟练',exact:true});for(const control of [perception,expert,strengthSave]){await expect(control).toBeDisabled();await expect(control).toBeChecked();}await expect(perception).toHaveAccessibleDescription(/规则.*不能在此手动更改.*额外调整值仍可编辑/);await expect(expert).toHaveClass(/expert/);
+@@ -32,3 +38,9 @@
+   for(const rows of measurements){for(const row of rows){for(let i=0;i<3;i++)expect(Math.abs(row.cells[i].x-rows[0].cells[i].x)).toBeLessThan(1.1);expect(row.baseline).toBeLessThan(1.6);expect(row.overflow).toBeLessThanOrEqual(1);}}await expect(page.locator('.ability-str .ability-skill b')).toHaveText('-12');await expect(page.locator('.ability-wis .ability-skill').filter({hasText:'察觉'}).locator('b')).toHaveText('+13');expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);const longLabel=page.locator('.ability-int .ability-skill').first().locator(':scope > span:nth-child(3)');await longLabel.evaluate(el=>el.textContent='长技能名称与两位加值验收');expect(await longLabel.evaluate(el=>getComputedStyle(el).textOverflow)).toBe('ellipsis');expect(await page.locator('.ability-int').evaluate(el=>el.scrollWidth-el.clientWidth)).toBeLessThanOrEqual(1);await page.screenshot({path:test.info().outputPath(`aligned-${mode}-${width}-${editing?'edit':'read'}.png`)});await longLabel.evaluate(el=>el.textContent=el.getAttribute('title'));
+  }}
+ });
++
++test('wider default attack split keeps spell row on one line and preserves an adjusted saved split',async({page})=>{
++ await load(page);const divider=page.getByRole('separator',{name:'调整武器与资源分割线',exact:true});await expect(divider).toHaveAttribute('aria-valuenow','42');
++ for(const width of [1512,390]){await page.setViewportSize({width,height:982});const layout=await page.locator('.resource-quickbar-split').evaluate(el=>{const attack=el.querySelector('.resource-fixed-attacks')!.getBoundingClientRect(),resource=el.querySelector('.resource-workspace')!.getBoundingClientRect(),spell=el.querySelector('.quick-weapon')!;return {attackRight:attack.right,resourceLeft:resource.left,spellColumns:getComputedStyle(spell).gridTemplateColumns.split(' ').length,rows:[...spell.children].map(node=>{const r=node.getBoundingClientRect();return {top:r.top,bottom:r.bottom};}),overflow:el.scrollWidth-el.clientWidth};});expect(layout.attackRight).toBeLessThan(layout.resourceLeft);expect(layout.spellColumns).toBe(3);expect(Math.max(...layout.rows.map(r=>r.top))).toBeLessThan(Math.min(...layout.rows.map(r=>r.bottom)));expect(layout.overflow).toBeLessThanOrEqual(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);}
++ const before=await saved(page);await divider.focus();await divider.press('ArrowLeft');await expect(divider).toHaveAttribute('aria-valuenow','40');await expect.poll(async()=>(await saved(page)).quickbarLayout?.attacks?.split).toBe(.4);await page.reload();await expect(divider).toHaveAttribute('aria-valuenow','40');expect((await saved(page)).runtime).toEqual(before.runtime);await page.screenshot({path:test.info().outputPath('saved-attack-resource-split.png')});
++});
+diff --git a/tests/quickbar-heading232.test.ts b/tests/quickbar-heading232.test.ts
+new file mode 100644
+--- /dev/null
++++ b/tests/quickbar-heading232.test.ts
+@@ -0,0 +1,17 @@
++import {createElement,type ReactNode} from 'react';
++import {renderToStaticMarkup} from 'react-dom/server';
++import {expect,it,vi} from 'vitest';
++vi.mock('../src/ui/SheetEdit',async()=>({SheetEditContext:(await import('react')).createContext(false)}));
++vi.mock('../src/ui/pointerDrag',()=>({pointerDrag:()=>()=>{},landingWithin:()=>({})}));
++vi.mock('../src/platform/workbench',()=>({inWorkbench:false,useWorkbench:()=>({}),composeRoll:()=>{}}));
++vi.mock('../src/ui/ResourceWidgets',()=>({ResourceWidgets:({attacks}:{attacks:ReactNode})=>attacks}));
++import {Quickbar} from '../src/ui/Quickbar';
++import {SheetEditContext} from '../src/ui/SheetEdit';
++import {newCharacter} from '../src/core/model';
++import {evaluate} from '../src/core/engine';
++
++it.each([[true,false,false],[false,false,true],[true,true,true]])('uses the original manager on a single heading with editing=%s disabled=%s',(editing,disabled,expectedDisabled)=>{
++ const c=newCharacter(),before=structuredClone(c),manageQuickbar=vi.fn();c.quickbarActions=[{id:'one',name:'原创攻击',attack:'+5',damage:'1d6+2'}];
++ const html=renderToStaticMarkup(createElement(SheetEditContext.Provider,{value:editing},createElement(Quickbar,{c,d:evaluate(c),edit:vi.fn(),inspect:vi.fn(),manage:vi.fn(),manageQuickbar,disabled})));
++ const heading=html.match(/<button[^>]*class="quickbar-attacks-manage"[^>]*>武器与攻击<\/button>/)?.[0];expect(heading).toBeTruthy();expect(heading!.includes('disabled=""')).toBe(expectedDisabled);expect(heading).toContain('type="button"');expect(heading).toContain('title=');expect(html).not.toContain('quickbar-manage-strip');expect(html).toContain('原创攻击');expect(html).toContain('法术攻击');expect(manageQuickbar).not.toHaveBeenCalled();expect(c.runtime).toEqual(before.runtime);
++});

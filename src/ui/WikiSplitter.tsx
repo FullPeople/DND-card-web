@@ -1,5 +1,6 @@
 import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import {WikiColumnsContext} from './WikiLayout';
+import {DEFAULT_CATALOG_SHARE,WIKI_CATALOG_MIN_WIDTH,WIKI_READER_MIN_WIDTH,WIKI_DIVIDER_WIDTH} from './workspaceGeometry';
 const KEY = 'dnd-card:wiki-split-ratio';
 const WIDTH_KEY = 'dnd-card:wiki-column-ratio';
 export function WikiSplitter() {
@@ -8,7 +9,7 @@ export function WikiSplitter() {
   const [height, setHeight] = useState(122);
   function apply(pixels: number) {
     const parent = horizontal?ref.current!.closest<HTMLElement>('.wiki-layout')!:ref.current!.parentElement!, total = horizontal?parent.clientWidth:parent.clientHeight;
-    const min = horizontal?360:Math.min(76, total * .3), max = Math.max(min, total - (horizontal?529:128));
+    const min = horizontal?WIKI_CATALOG_MIN_WIDTH:Math.min(76, total * .3), max = Math.max(min, total - (horizontal?WIKI_READER_MIN_WIDTH+WIKI_DIVIDER_WIDTH:128));
     const next = Math.max(min, Math.min(max, pixels));
     parent.style.setProperty(horizontal?'--catalog-width':'--catalog-height', `${next}px`); setHeight(Math.round(next));
     return next / Math.max(1, total);
@@ -18,7 +19,7 @@ export function WikiSplitter() {
     ratio.current=undefined;
     try { const stored = Number(localStorage.getItem(horizontal?WIDTH_KEY:KEY)); if (stored > 0 && stored < 1) ratio.current = stored; } catch { /* Use default size. */ }
     const parent = horizontal?ref.current!.closest<HTMLElement>('.wiki-layout')!:ref.current!.parentElement!;
-    const update=()=>apply(ratio.current ? (horizontal?parent.clientWidth:parent.clientHeight) * ratio.current : horizontal?parent.clientWidth*.42:innerWidth < 760 ? 102 : 122);
+    const update=()=>apply(ratio.current ? (horizontal?parent.clientWidth:parent.clientHeight) * ratio.current : horizontal?parent.clientWidth*DEFAULT_CATALOG_SHARE:innerWidth < 760 ? 102 : 122);
     update();const observer = new ResizeObserver(update);
     observer.observe(parent); return () => { observer.disconnect(); cleanup.current?.(); };
   }, [horizontal]);
