@@ -39,6 +39,7 @@ for(const mode of ['a4','screen'] as const)test(`${mode}: title, eye and keyboar
  await page.screenshot({path:test.info().outputPath(`${mode}-frame-visible.png`)});
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
  await expect(toggle(page)).toHaveAttribute('aria-pressed','false');await expect(cell(page).locator('.portrait-frame-eye')).toBeVisible();
+ const titleBox=await cell(page).locator('.cell-heading h3').boundingBox(),eyeBox=await cell(page).locator('.portrait-frame-eye').boundingBox();expect(titleBox!.x+titleBox!.width).toBeLessThanOrEqual(eyeBox!.x);await expect(cell(page).locator('.cell-heading h3')).toHaveCSS('white-space','nowrap');
  const before=await view.boundingBox();await toggle(page).click();await expect(toggle(page)).toHaveAttribute('aria-pressed','true');
  await assertUnclipped(page);expect(await view.boundingBox()).toEqual(before);
  await expect(toggle(page)).toHaveCSS('opacity','0.4');expect(await cell(page).locator('.cell-face').evaluate(el=>getComputedStyle(el,'::before').opacity)).toBe('0.4');
@@ -46,7 +47,10 @@ for(const mode of ['a4','screen'] as const)test(`${mode}: title, eye and keyboar
  // Sample actual pixels just outside the old avatar frame, not only computed CSS.
  const point=await view.evaluate(el=>{const b=el.getBoundingClientRect();return {x:Math.floor(b.left-5),y:Math.floor(b.top+b.height/2)};});
  expect(await page.evaluate(point=>!!document.elementFromPoint(point.x,point.y)?.closest('.portrait-cell'),point)).toBe(false);
- const screenshot=await page.screenshot({path:test.info().outputPath(`${mode}-frame-hidden-edit.png`)});const pixel=await page.evaluate(async({data,point})=>{const image=new Image();image.src='data:image/png;base64,'+data;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d')!;ctx.drawImage(image,0,0);return [...ctx.getImageData(point.x,point.y,1,1).data];},{data:screenshot.toString('base64'),point});expect(pixel).toEqual([242,10,44,255]);
+ const borderPoint=await cell(page).evaluate((el,y)=>{const b=el.getBoundingClientRect();return {x:Math.floor(b.left+1.5*b.width/(el as HTMLElement).offsetWidth),y};},point.y);
+ const screenshot=await page.screenshot({path:test.info().outputPath(`${mode}-frame-hidden-edit.png`)});const pixels=await page.evaluate(async({data,point,borderPoint})=>{const image=new Image();image.src='data:image/png;base64,'+data;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d')!;ctx.drawImage(image,0,0);return [point,borderPoint].map(p=>[...ctx.getImageData(p.x,p.y,1,1).data]);},{data:screenshot.toString('base64'),point,borderPoint});expect(pixels[0]).toEqual([242,10,44,255]);
+ // The editing guide must be above an opaque image, not merely present in CSS.
+ expect(pixels[1][0]).toBeLessThan(230);expect(pixels[1][1]).toBeGreaterThan(20);expect(pixels[1][3]).toBe(255);
  await expect.poll(async()=>(await readCurrent(page)).portraitFrameHidden).toBe(true);
  expect((await readCurrent(page)).portrait).toEqual(original.portrait);
  await toggle(page).focus();await page.keyboard.press('Space');await expect(toggle(page)).toHaveAttribute('aria-pressed','false');
@@ -76,7 +80,9 @@ test('replacement, move/zoom and deletion preserve the frame preference and inde
  await page.locator('.portrait-view').hover();await page.getByRole('button',{name:'删除头像',exact:true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'删除',exact:true}).click();
  await expect.poll(async()=>(await readCurrent(page)).portrait).toBeUndefined();expect((await readCurrent(page)).portraitFrameHidden).toBe(true);expect((await readCurrent(page)).illustration).toEqual(original.illustration);
  await page.reload();await expect(page.getByAltText('角色头像')).toHaveCount(0);await expect(cell(page)).toHaveClass(/portrait-frame-hidden/);
- await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await toggle(page).click();await expect.poll(async()=>(await readCurrent(page)).portraitFrameHidden).toBe(false);
+ // Editing preference survives reload; ensure the desired state instead of toggling blindly.
+ const editing=page.getByRole('switch',{name:'编辑模式',exact:true});await expect(editing).toBeEnabled();if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await expect(editing).toHaveAttribute('aria-checked','true');
+ await toggle(page).click();await expect.poll(async()=>(await readCurrent(page)).portraitFrameHidden).toBe(false);
 });
 
 test('PNG capture and print hide editing chrome, keep the full avatar, and do not rewrite the character',async({page})=>{

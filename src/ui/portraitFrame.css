@@ -1,5 +1,6 @@
 /* The whole title is one keyboard-accessible toggle; the eye is decorative. */
-.paper .portrait-cell .cell-heading.heading-action{padding-inline:20px;z-index:2}
+.paper .portrait-cell .cell-heading.heading-action{padding-left:3px;padding-right:19px;z-index:2}
+.paper .portrait-cell .cell-heading.heading-action h3{font-size:min(1em,11px);white-space:nowrap}
 .paper .portrait-cell .cell-heading.heading-action:focus-visible{outline:2px solid currentColor;outline-offset:-2px}
 .paper .portrait-cell .cell-heading>.portrait-frame-eye{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* Keep the original frame and title dimensions, including while hidden, so
@@ -10,7 +11,7 @@
 .paper .portrait-frame-hidden .cell-content,
 .paper .portrait-frame-hidden .portrait-view{overflow:visible!important;clip-path:none;background:transparent}
 .paper .portrait-frame-hidden .portrait-image{object-fit:contain}
-.paper .portrait-frame-hidden .cell-face::before{opacity:0;transition:none;pointer-events:none}
+.paper .portrait-frame-hidden .cell-face::before{opacity:0;transition:none;pointer-events:none;z-index:3}
 .paper .portrait-frame-hidden .cell-heading{visibility:hidden;pointer-events:none}
 .paper .portrait-frame-hidden .cell-state-art{display:none}
 .paper .portrait-frame-hidden.portrait-frame-editing .cell-face::before{opacity:.4}
