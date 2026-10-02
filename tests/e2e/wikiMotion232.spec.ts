@@ -3,7 +3,11 @@ import {mockSource,suppressAnnouncement,fillFromDetail} from './fixtures';
 async function ready(page:Page){
  await mockSource(page);await suppressAnnouncement(page);
  await page.route('**/data/races.json',route=>route.fulfill({json:{race:[{name:'原创矮人',source:'XPHB',speed:25,size:['M'],entries:['原创预览验收。',...['年龄','体型','速度'].map((name,i)=>({type:'entries',name,entries:Array.from({length:i+1},()=>`${name}原创说明。`)}))]}]}}));
- await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'种族',exact:true}).click();await page.locator('.catalog-row').filter({hasText:'原创矮人'}).click();await fillFromDetail(page);await page.getByRole('tab',{name:'特性',exact:true}).click();
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'种族',exact:true}).click();await page.locator('.catalog-row').filter({hasText:'原创矮人'}).click();const editing=page.getByRole('switch',{name:'编辑模式',exact:true});await editing.click();await expect(editing).toHaveAttribute('aria-checked','true');await fillFromDetail(page);
+ // A drag completing is not evidence that a readonly sheet accepted the race.
+ await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(page.locator('.identity-race')).toContainText('原创矮人');
+ await editing.click();await expect(editing).toHaveAttribute('aria-checked','false');await page.getByRole('tab',{name:'特性',exact:true}).click();
+ const traits=page.locator('.detail-race-features .feature-caption');await expect(traits).toHaveCount(3);for(const name of ['年龄','体型','速度'])await expect(traits.filter({hasText:name})).toBeVisible();
 }
 for(const reducedMotion of ['no-preference','reduce'] as const)test(`Wiki section highlight moves on one document and restores reading (${reducedMotion})`,async({page})=>{
  await page.emulateMedia({reducedMotion});await ready(page);

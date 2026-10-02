@@ -72,8 +72,34 @@ test('a multi-group equipment package claims every selected group and its fixed 
  const data=JSON.parse(JSON.stringify(raw));data.class[0].startingEquipment.defaultData=[{a:[{item:'测试剑|XPHB'}],b:[{value:500}]},{a:[{special:'选择装备'}],b:[{special:'另一装备'}]},{_:[{special:'固定装备'}]}];await ready(page,data);await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(page.getByRole('button',{name:'起始装备 0/1',exact:true})).toHaveCount(1);await page.getByRole('button',{name:'起始装备 0/1',exact:true}).click();
  const popup=page.getByRole('region',{name:'选择起始装备',exact:true});await popup.getByRole('button',{name:'领取装备',exact:true}).click();await expect(popup.getByRole('alert')).toContainText('第 1 组');await popup.locator('.choice-options').filter({has:page.getByText('装备选择 1', {exact:true})}).getByRole('button',{name:'方案 a',exact:true}).click();await popup.locator('.choice-options').filter({has:page.getByText('装备选择 2',{exact:true})}).getByRole('button',{name:'方案 b',exact:true}).click();await popup.getByRole('button',{name:'领取装备',exact:true}).click();await page.getByRole('tab',{name:'背包',exact:true}).click();await expect(page.locator('.stock-item').filter({hasText:'测试剑'})).toHaveCount(1);await expect(page.locator('.stock-item').filter({hasText:'另一装备'})).toHaveCount(1);await expect(page.locator('.stock-item').filter({hasText:'固定装备'})).toHaveCount(1);
 });
-test('trace input stays over the original field and edits update final result at A4 scale',async({page})=>{
- await ready(page);const input=page.getByRole('spinbutton',{name:'力量基础值',exact:true});await input.scrollIntoViewIfNeeded();const before=await input.boundingBox();await input.click();const overlay=page.getByRole('spinbutton',{name:'力量追溯输入',exact:true});await expect(overlay).toBeVisible();const after=await overlay.boundingBox();for(const key of ['x','y','width','height'] as const)expect(Math.abs(before![key]-after![key])).toBeLessThan(1.1);await overlay.fill('16');await overlay.press('Enter');await expect(input).toHaveValue('16');await page.getByRole('button',{name:'护甲等级数据追溯',exact:true}).click();await expect(page.getByRole('dialog',{name:'护甲等级数据追溯'})).toContainText('最终结果');await page.locator('.choice-popup,.value-trace-panel').evaluateAll(async els=>{await Promise.all(els.flatMap(el=>el.getAnimations().map(a=>a.finished)));});await page.screenshot({path:'evidence/trace-desktop.png'});await page.keyboard.press('Escape');
+test('trace input stays over the original field and edits update final result at A4 scale',async({page},testInfo)=>{
+ await ready(page);
+ // This imported fixture has no catalog source binding. Wait for its asynchronous
+ // compatibility assessment before measuring: CI86 inserted the 64px banner
+ // between the old pre-click box and the click, while the overlay stayed aligned.
+ await expect(page.locator('.class-compatibility-banner')).toBeVisible();
+ const input=page.getByRole('spinbutton',{name:'力量基础值',exact:true});
+ await input.scrollIntoViewIfNeeded();
+ const before=await input.boundingBox();expect(before).not.toBeNull();
+ await input.click();
+ const overlay=page.getByRole('spinbutton',{name:'力量追溯输入',exact:true});
+ await expect(overlay).toBeVisible();await expect(overlay).toBeFocused();
+ const geometry=await page.evaluate(()=>{
+  const box=(selector:string)=>{const el=document.querySelector(selector);if(!el)return null;const b=el.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,height:b.height};};
+  return {original:box('[aria-label="力量基础值"]'),overlay:box('[aria-label="力量追溯输入"]'),banner:box('.class-compatibility-banner'),paper:box('.paper'),paperTransform:document.querySelector('.paper')?.getAttribute('style'),scroll:{x:scrollX,y:scrollY}};
+ });
+ await testInfo.attach('trace-alignment-geometry',{body:JSON.stringify({before,...geometry},null,2),contentType:'application/json'});
+ expect(geometry.original).not.toBeNull();expect(geometry.overlay).not.toBeNull();
+ for(const key of ['x','y','width','height'] as const){
+  // Retain the pre-click contract; a layout shift is not silently normalized away.
+  expect(Math.abs(before![key]-geometry.overlay![key]),`pre-click ${key}`).toBeLessThan(1.1);
+  expect(Math.abs(geometry.original![key]-geometry.overlay![key]),`current ${key}`).toBeLessThan(1.1);
+ }
+ await overlay.fill('16');await expect(page.locator('.value-trace-panel .trace-result')).toContainText('16');
+ await overlay.press('Enter');await expect(input).toHaveValue('16');await expect(overlay).toHaveCount(0);
+ await input.click();await expect(overlay).toBeFocused();await overlay.fill('19');await overlay.press('Escape');await expect(overlay).toHaveCount(0);await expect(input).toHaveValue('16');
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await page.getByRole('button',{name:'护甲等级数据追溯',exact:true}).click();await expect(page.getByRole('dialog',{name:'护甲等级数据追溯'})).toContainText('最终结果');await page.locator('.choice-popup,.value-trace-panel').evaluateAll(async els=>{await Promise.all(els.flatMap(el=>el.getAnimations().map(a=>a.finished)));});await page.screenshot({path:'evidence/trace-desktop.png'});await page.keyboard.press('Escape');
 });
 test('title menu reclaims equipment once, life dice omit rest entries and reload retains equipment',async({page},testInfo)=>{
  const pageErrors:string[]=[];

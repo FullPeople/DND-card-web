@@ -40,7 +40,8 @@ test('color changes only icons and explicit counts remain readable in the narrow
 test('unbounded values display a single number without infinity and keep old data unchanged',async({page})=>{
  const dialog=await open(page),before=(await read(page)).runtime.resources;
  await dialog.getByRole('checkbox',{name:'新模块有上限'}).uncheck();await dialog.getByRole('spinbutton',{name:'新模块当前值'}).fill('123456');
- const sample=dialog.locator('[data-template-id="ring"]');await expect(sample.locator('.rm-readout')).toHaveText('123456');await expect(sample.locator('.rm-track')).toHaveCount(0);
+ const sample=dialog.locator('[data-template-id="ring"]');await expect(sample.locator('.rm-readout')).toHaveText('123456');await expect(sample.locator('.resource-module-art')).toHaveAttribute('data-module-style','ring');await expect(sample.locator('.rm-track')).toBeVisible();await expect(sample.locator('.rm-arc,.rm-readout small,.rm-value-slash')).toHaveCount(0);
+ const number=(await sample.locator('.rm-readout strong').boundingBox())!,shape=(await sample.locator('.rm-shape').boundingBox())!;expect(Math.abs(number.x+number.width/2-shape.x-shape.width/2)).toBeLessThan(1.5);expect(Math.abs(number.y+number.height/2-shape.y-shape.height/2)).toBeLessThan(1.5);
  expect(await dialog.innerText()).not.toContain('∞');await sample.click();await dialog.getByRole('button',{name:'保存布局',exact:true}).click();
  const current=(await read(page)).runtime.resources,id=Object.keys(current).find(key=>!Object.hasOwn(before,key))!;expect(current[id]).toMatchObject({current:123456,unlimited:true,type:'number'});for(const [key,value] of Object.entries(before))expect(current[key]).toEqual(value);
  await dialog.getByRole('button',{name:'关闭弹窗'}).click();await page.reload();const coins=page.locator('.fixture-quickbar [data-resource-id="coins"]');await coins.scrollIntoViewIfNeeded();
@@ -73,11 +74,20 @@ test('invalid previews cannot add modules and closing a valid draft discards it'
 test('custom name and values follow the drag ghost into the draft without changing live balances',async({page})=>{
  const dialog=await open(page,'interaction'),before=(await read(page)).runtime.resources;
  await dialog.getByRole('textbox',{name:'新模块名称'}).fill('幽灵储备');await dialog.getByRole('spinbutton',{name:'新模块上限'}).fill('7');await dialog.getByRole('spinbutton',{name:'新模块当前值'}).fill('2');
- const sample=dialog.locator('[data-template-id="ring"]');await sample.scrollIntoViewIfNeeded();const rect=(await sample.boundingBox())!;
- await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();await page.mouse.move(rect.x+rect.width/2+15,rect.y+rect.height/2-10,{steps:3});
- const ghost=page.getByTestId('resource-template-ghost');await expect(ghost.locator('.rm-name')).toHaveText('幽灵储备');await expect(ghost.locator('.rm-readout')).toHaveText('2/ 7');
- const canvas=(await dialog.locator('.resource-widget-canvas').boundingBox())!;await page.mouse.move(canvas.x+canvas.width*10.5/12,canvas.y+canvas.height*4.5/6,{steps:8});await page.mouse.up();
- await expect(ghost).toHaveCount(0);const added=dialog.locator('.resource-widget[data-resource-name="幽灵储备"]');await expect(added).toHaveCount(1);await expect(added.locator('.rm-readout')).toHaveText('2/ 7');expect((await read(page)).runtime.resources).toEqual(before);
+ const sample=dialog.locator('[data-template-id="ring"]'),scroll=dialog.locator('.resource-widget-scroll');await scroll.evaluate(node=>node.scrollTop=0);
+ const ghost=page.getByTestId('resource-template-ghost');
+ async function startGhost(){await sample.scrollIntoViewIfNeeded();const rect=(await sample.boundingBox())!;await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();await page.mouse.move(rect.x+rect.width/2+15,rect.y+rect.height/2-10,{steps:3});await expect(ghost.locator('.rm-name')).toHaveText('幽灵储备');await expect(ghost.locator('.rm-readout')).toHaveText('2/ 7');}
+ await startGhost();
+ // The complete canvas includes offscreen vertical bands. Releasing over a
+ // clipped band must cancel, even though the point is inside its DOM bounds.
+ const canvas=(await dialog.locator('.resource-widget-canvas').boundingBox())!,viewport=(await scroll.boundingBox())!;
+ const outside={x:canvas.x+canvas.width*10.5/12,y:canvas.y+canvas.height*4.5/6};expect(outside.y).toBeGreaterThan(viewport.y+viewport.height);
+ await page.mouse.move(outside.x,outside.y,{steps:8});await expect(ghost).toHaveAttribute('data-over-canvas','false');await expect(page.getByTestId('resource-template-drop-preview')).toHaveCount(0);await page.mouse.up();
+ await expect(ghost).toHaveCount(0);await expect(dialog.locator('.resource-widget[data-resource-name="幽灵储备"]')).toHaveCount(0);expect((await read(page)).runtime.resources).toEqual(before);
+ await startGhost();const visible=(await scroll.boundingBox())!,target={x:visible.x+visible.width*10.5/12,y:visible.y+visible.height*4.5/6};
+ expect(target.x).toBeGreaterThan(visible.x);expect(target.x).toBeLessThan(visible.x+visible.width);expect(target.y).toBeGreaterThan(visible.y);expect(target.y).toBeLessThan(visible.y+visible.height);
+ await page.mouse.move(target.x,target.y,{steps:8});await expect(ghost).toHaveAttribute('data-over-canvas','true');await expect(page.getByTestId('resource-template-drop-preview')).toHaveAttribute('data-overlap','false');await page.mouse.up();
+ await expect(ghost).toHaveCount(0);const added=dialog.locator('.resource-widget[data-resource-name="幽灵储备"]');await expect(added).toHaveCount(1);await expect(added).toHaveAttribute('data-grid-page','0');await expect(added).toHaveAttribute('data-grid-x','9');await expect(added).toHaveAttribute('data-grid-y','3');await expect(added.locator('.rm-readout')).toHaveText('2/ 7');expect((await read(page)).runtime.resources).toEqual(before);
  await dialog.getByRole('button',{name:'保存布局',exact:true}).click();const saved=(await read(page)).runtime.resources;for(const [key,value] of Object.entries(before))expect(saved[key]).toEqual(value);
  expect(Object.values(saved).find(r=>r.name==='幽灵储备')).toMatchObject({current:2,max:7});
 });
