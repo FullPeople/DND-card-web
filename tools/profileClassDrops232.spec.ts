@@ -8,12 +8,15 @@ import {newAutomationState} from '../src/core/automation/state';
 // All data are original software fixtures. No player card or publisher snapshot.
 async function records(page:Page){return page.evaluate(async()=>{const req=indexedDB.open('dnd-card-standalone');await new Promise<void>((resolve,reject)=>{req.onsuccess=()=>resolve();req.onerror=()=>reject(req.error);});const db=req.result;try{return await new Promise<any>((resolve,reject)=>{const r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}finally{db.close();}});}
 async function setup(page:Page,catalog:number,mode:'a4'|'screen'){
- await mockSource(page,{displayMode:mode});await suppressAnnouncement(page);
+ const baseline=test.info().project.name==='baseline',noticeVersion=baseline?process.env.DND_PERF_BASELINE_NOTICE_VERSION:undefined;
+ if(baseline)expect(noticeVersion).toMatch(/^\d+\.\d+\.\d+/);
+ await mockSource(page,{displayMode:mode});await suppressAnnouncement(page,noticeVersion);
  await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:Array.from({length:catalog},(_,i)=>({name:`原创资料法术${i}`,ENG_name:`Authored Spell ${i}`,source:'XPHB',level:i%10,entries:['原创性能夹具条目，不是公开出版物。']}))},headers:{'access-control-allow-origin':'*'}}));
  const characters=Array.from({length:12},(_,i)=>{const c=newCharacter();c.name=i===0?'短名':`角色${i} - ${'很长的角色名称'.repeat(i%3===0?5:1)}`;c.automation=newAutomationState();c.runtime.resources.manual={name:'自定义资源',current:3,max:7};c.selections=Array.from({length:20},(_,j)=>({id:`sel-${i}-${j}`,entry:{id:`entry-${i}-${j}`,name:`原创特性${j}`,english:`Authored feature ${j}`,kind:'feature',edition:'2024',source:'XPHB',revision:'1',packId:'fixture',entries:['原创卡面性能测试，不带自动化声明。'],raw:{}} as Entry,level:1,quantity:1,equipped:false}));return c;});
  await page.addInitScript(characters=>{localStorage.setItem('dnd-card:editing','true');const r=indexedDB.open('dnd-card-standalone',1);r.onupgradeneeded=()=>{r.result.createObjectStore('documents');r.result.createObjectStore('cache');};r.onsuccess=()=>{const db=r.result,tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),read=store.get('workspace');read.onsuccess=()=>{if(!read.result)store.put({schemaVersion:1,characters,activeId:characters[0].id,packs:[]},'workspace');};tx.oncomplete=()=>db.close();};},characters);
  const spells=page.waitForResponse(r=>r.url().endsWith('/data/spells/spells-test.json')&&r.status()===200);
  await page.goto('/');await spells;await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.waitForTimeout(400);
+ await expect(page.locator('.announcement')).toBeHidden();
  return (await records(page)).characters;
 }
 async function instrument(page:Page){await page.evaluate(()=>{

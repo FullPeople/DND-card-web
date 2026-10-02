@@ -42,8 +42,8 @@ export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean;
   }
 }
 // 单机构建的公告会挡住其他用例的首屏操作；需要时在 goto 之前按当前版本预置确认记录。
-export async function suppressAnnouncement(page: Page) {
-  await page.addInitScript(([key, version]) => { try { localStorage.setItem(key, version); } catch { /* 存储不可用时公告每次都会出现，用例需自行确认。 */ } }, [ANNOUNCEMENT_KEY, APP_VERSION] as const);
+export async function suppressAnnouncement(page: Page, version = APP_VERSION) {
+  await page.addInitScript(([key, version]) => { try { localStorage.setItem(key, version); } catch { /* 存储不可用时公告每次都会出现，用例需自行确认。 */ } }, [ANNOUNCEMENT_KEY, version] as const);
 }
 export async function fillFromDetail(page: Page) {
   const kind = await page.locator('.entry-detail').getAttribute('data-entry-kind');
