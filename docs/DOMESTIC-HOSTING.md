@@ -2,7 +2,7 @@
 
 国内单机网页版入口为 [obr.dnd.center/card/](https://obr.dnd.center/card/)。页面、脚本、样式、图标和[对应源码](https://obr.dnd.center/card/source.zip)均从自有 HTTPS 服务器提供。Wiki 读取指定中文站 5e.kiwee.top 和 homebrew.kiwee.top，并缓存在浏览器中；首次下载和更新资料仍依赖这些上游。
 
-230 后续维护按用户要求移除 GitHub Pages 发布及 Windows 免安装启动包逻辑。CI 保留单元、两种网页构建和浏览器验收，验收产物可独立供国内发布核对；国内发布无需等待 Pages 上传或发布。此次源码调整不操作线上站点、历史下载、release 资源或账号设置。最新已部署基线见 [230 发布回执](RELEASE-230-RESULT.md)。
+230 后续维护按用户要求移除 GitHub Pages 发布及 Windows 免安装启动包逻辑。CI 保留单元、两种网页构建和浏览器验收，验收产物可独立供国内发布核对；国内发布无需等待 Pages 上传或发布。此次源码调整不操作线上站点、历史下载、release 资源或账号设置。最新已部署基线为232，见 [232 发布回执](RELEASE-RESOURCE-232-RESULT.md)；230作为历史保留。
 
 ## 发布流程
 
