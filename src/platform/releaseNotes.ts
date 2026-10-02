@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-02-二';
+export const RELEASE_DATE='2026-10-03';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -205,22 +205,35 @@ const RELEASE_230_SECTIONS:ReleaseSection[]=[
  {title:'Wiki 连接与离线使用',items:['短暂网络故障会自动重试；持续断线时暂停继续下载，已有资料和角色卡仍可使用。','恢复连接后，可以补读失败和未读资料，无需重新下载已经成功的缓存。','使用过的页面工具会保留供离线重开；实际读取失败和未读资料仍显示提醒。']},
  {title:'待验证与未完成',items:['不同玩家的网络、原设备和实体手机效果待验证。','自动选择或筛选式专长赠送规则、完整英文翻译仍未完成；手动调整容量不等于自动规则已完成。']},
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_230_SECTIONS,
+const SUITE_RELEASE_230_SECTIONS:ReleaseSection[]=[...RELEASE_230_SECTIONS,
  {title:'地图选择与窗口跟随',items:['修复中继连接空闲后仍显示在线、却收不到选中变化的问题，并减少重复读取整个房间。','选中角色或怪物时跟随到对应卡；多选时先显示群体区域，取消选择后恢复原来的页面。','旧选择的迟到消息不会抢回当前页面，群体数据尚未读完时不会漏掉目标执行操作。']},
  {title:'骰子加载',items:['合并已验证的骰子加载与缓存恢复修复，避免重复下载物理引擎。','骰子加载失败后可以重新尝试；持续损坏仍会报告原因。已验证本机真实投骰与完整动画。']},
  {title:'枭熊联动待验证',items:['真实房主与玩家的联动、权限变化和原设备效果仍待验证；本机模拟不能替代真实房间验收。','更新后请先关闭附加窗口，刷新枭熊房间，再重新打开附加窗口。']},
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_232_SECTIONS:ReleaseSection[]=[
  {title:'快捷栏与仪表盘',items:['武器与攻击固定在左侧，拖动中间分割线调整宽度；翻页时仍可使用攻击。','右侧资源可以独立排版、缩放和翻页，保存后保留；关闭或放弃修改会丢弃未保存的排版。','旧布局会转换到右侧资源区，已有名称、颜色、图标和已消耗次数保留。']},
  {title:'按上限选择资源模块',items:['输入资源上限后，模块预览会按实际容量显示，并提供自动匹配。','上限为 1 时可使用单个图标，不必显示数字；2 至 10 的计数样式按上限显示对应数量的图标或刻度。','高上限使用圆环、条形或数字等合适的样式；无限资源只显示当前数值。','多项资源分别显示各项名称、余额和上限，普通法术位与契约法术位保留独立资源池。','调整数字、标签和分组的排版，减少窄模块和大数字的错位、遮挡。']},
  {title:'休息与保存',items:['暂时移除全部短休、长休按钮，包括仪表盘设置及资源弹窗；统一休息功能后续再做。','修复读取旧备份后重试保存可能回到磁盘当前版本的问题；保存成功才重载，失败时保留当前内容和导出入口。']},
  {title:'待验证与未完成',items:['实体手机手感、玩家原设备及具体旧卡仍待验证。','完整休息、复杂自动化与完整英文翻译仍未完成。']},
 ];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色卡与 Wiki',items:['调整角色卡、资料库与详情区的默认比例，修复首次显示、拖影、右键菜单和滚动操作。已保存的布局偏好保留。','五种货币单行显示；技能、专精、豁免及额外调整值的显示与对齐得到校正。','职业标题标明实际使用的 2014 / 2024 规则；Wiki 按当前版本筛选，戏法显示 0 环。']},
+ {title:'职业、法术与来源',items:['初始法术选择不再错误地要求完成预备；正常预备操作保留。法术书与仪式范围按已支持的来源规则显示。','修复选择气泡与来源关联；起始装备先检查再领取，刷新不会重复发放。','新增 2014 种族加值会记录来源；旧卡已有基础数值保留并提示核对，不盲目再加一次。','主动删除的来源法术不会因资料迟到而重新出现；异常装备不会只应用一部分。']},
+ {title:'核对并同步旧卡',items:['先统一核对基础资料和规则内容，再在网格中选择保留自定义及无法匹配的内容。','同步先给出预览，最终创建副本才保存，原卡保留；资料缺失时默认保留已有内容。','来源气泡、职业关联、支持的法术及训练统一处理，已保存的自定义选择和资源余额保留。']},
+ {title:'资源与头像',items:['完善资源面板标题、单项与多项设置、样式筛选、内部缩放和编辑草稿保留。','编辑模式可在头像标题栏用眼睛开关或键盘隐藏边框；阅读时框和标题隐藏，头像仍可超出原框。','头像位置、缩放与框设置随每张卡保存，主要、特性、法术和背包页共用；PNG 和打印按阅读状态处理。']},
+ {title:'操作性能与验证范围',items:['姓名等显示修改减少重复规则计算；缓存选择项，减少反复扫描资料库。','已验证本机主要操作，实体手机、玩家原设备及具体旧卡仍待验证。独立网页不能代替插件真实环境验收。','复杂自动化、完整休息、自动选择或筛选式专长赠送规则、完整英文翻译仍未完成；手动调整容量不代表自动规则已完成。']},
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'原生 Owner 与同步',items:['移除“分配玩家”，使用枭熊棋子的原生 Set Owner；Owner 可以阅读锁卡。','非 Owner 可读时不能修改生命值或资源；保存、删除和已打开的资源设置会重新核对权限。','同一卡绑定不同玩家的棋子时，玩家操作只投影到自己所属的棋子，房主的后台同步不会扩大这次操作范围。','测试房间已验证单选跟随、多选总览、取消恢复、双向数值同步和撤权；不同设备与网络仍需继续观察。']},
+ {title:'骰子历史与左上角窗口',items:['左上角 Action 窗口缩窄为 210 像素；隐藏滚动条，保留纵向滚动、长文字换行和历史查看。','查看历史头顶结果时 Action 保持打开；快速切换历史不会被迟到的取消覆盖。','已在房主与玩家端验证先攻投骰、群体豁免和历史重放；跨窗口骰子置顶仍在排查。']},
+ {title:'三龙牌与公告',items:['旧大厅主持离线且旧座位无人在线时，保留宽限时间与在线座位优先，由符合条件的当前 GM 接管。','新版可打开房间内已有的历史牌局；旧稳定版设置增加“恢复此房间的旧版牌局”。缺少原主持浏览器私有存档时只提示恢复，不重建或清桌。','测试房间已验证新旧入口、双方入座及旧稳定牌局刷新恢复；真实断网和多个 GM 同时争抢的操作仍待验证，现有自动检查分别记录。','新旧公告与已读状态分开，保留原重要权限图文和完整折叠历史；反馈邮箱已校对。','更新后请先关闭附加窗口，刷新枭熊房间，再右键以拆分视图重新打开。']},
+];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:mode==='suite'?'2026-10-02':RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:mode==='suite'?'2026-10-02':'2026-10-02-二',sections:mode==='suite'?SUITE_RELEASE_230_SECTIONS:RELEASE_232_SECTIONS},
  ...(mode==='standalone'?[{title:'2026-10-02',sections:RELEASE_230_SECTIONS}]:[]),
  {title:'2026-10-01-六',sections:RELEASE_227_SECTIONS},
  {title:'2026-10-01-五',sections:mode==='suite'?SUITE_RELEASE_223_SECTIONS:RELEASE_223_SECTIONS},
