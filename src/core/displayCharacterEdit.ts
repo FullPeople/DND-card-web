@@ -1,10 +1,10 @@
 import type {Character} from './model';
 
 type EditAction=(draft:Character)=>void;
-type DisplayField='name'|'player';
-const displayEdits=new WeakMap<EditAction,{field:DisplayField;value:string}>();
+type DisplayField='name'|'player'|'portraitFrameHidden';
+const displayEdits=new WeakMap<EditAction,{field:DisplayField;value:string|boolean|undefined}>();
 /** Explicit display-only intent. Ordinary callbacks and history keys never opt out of rules. */
-export function displayCharacterEdit(field:DisplayField,value:string):EditAction{
+export function displayCharacterEdit<K extends DisplayField>(field:K,value:Character[K]):EditAction{
  const action:EditAction=draft=>{draft[field]=value;};
  displayEdits.set(action,{field,value});return action;
 }
@@ -12,7 +12,7 @@ export function applyDisplayCharacterEdit(character:Character,action:EditAction)
  const edit=displayEdits.get(action);if(!edit)return;
  return character[edit.field]===edit.value?character:{...character,[edit.field]:edit.value};
 }
-const displayKeys=new Set(['name','player','revision','updatedAt']);
+const displayKeys=new Set(['name','player','portraitFrameHidden','revision','updatedAt']);
 /** Shallow identity is sufficient: general edits clone the card before mutation. */
 export function sameCharacterMechanics(before:Character|undefined,after:Character):boolean{
  if(!before)return false;

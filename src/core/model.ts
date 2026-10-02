@@ -37,6 +37,8 @@ export interface Character {
   createdAt: string; updatedAt: string; abilities: Record<Ability, number>; baseHp: number;
   identity: { gender: string; alignment: string; age: string; description: string };
   biography?: Partial<Record<'hometown'|'height'|'weight'|'traits'|'ideals'|'bonds'|'flaws'|'story'|'backgroundDescription'|'portraitNotes',string>>;
+  /** Hide only the avatar frame; omitted on older cards means visible. */
+  portraitFrameHidden?: boolean;
   portrait?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
   illustration?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
   palette?: Partial<Record<'paper'|'surface'|'frame'|'heading'|'ink'|'badge',string>>;

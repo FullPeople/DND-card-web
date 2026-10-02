@@ -53,6 +53,9 @@ jobs:
             commands: |
               npx playwright test --config playwright.feedback217.config.ts
               npx playwright test --config playwright.source-feedback.config.ts
+          - group: portrait-frame
+            commands: |
+              npx playwright test --config playwright.portrait-frame.config.ts
           - group: choices-standalone
             commands: |
               npx playwright test --config playwright.choices.config.ts
@@ -125,7 +128,7 @@ jobs:
             .local-evidence/direct232-browser/
           retention-days: 7
       - uses: actions/upload-artifact@v4
-        if: always() && (matrix.group == 'direct-232' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release')
+        if: always() && (matrix.group == 'direct-232' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release' || matrix.group == 'portrait-frame')
         with:
           name: direct232-evidence-${{ matrix.group }}
           include-hidden-files: true
@@ -136,5 +139,6 @@ jobs:
             .local-evidence/class-drop-perf232/
             test-results/feedback217/
             test-results-screen/
+            test-results/portrait-frame/
           if-no-files-found: warn
           retention-days: 7

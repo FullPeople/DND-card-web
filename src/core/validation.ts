@@ -144,6 +144,7 @@ export function validateCharacter(value: unknown): Character {
   if(c.hpProgression!==undefined){const h=c.hpProgression;assert(plain(h)&&['average','rolled'].includes(h.mode)&&plain(h.rolls)&&Object.keys(h.rolls).length<=100&&Object.values(h.rolls).every(v=>Array.isArray(v)&&v.length<=20&&v.every(n=>n===null||Number.isInteger(n)&&n>=1&&n<=100)),'逐级生命骰记录无效。');}
   if(c.biography!==undefined)assert(plain(c.biography)&&Object.values(c.biography).every(v=>typeof v==='string'&&v.length<=100000),'人物背景无效。');
   if(c.palette!==undefined)assert(plain(c.palette)&&Object.entries(c.palette).every(([key,v])=>['paper','surface','frame','heading','ink','badge'].includes(key)&&typeof v==='string'&&/^#[\da-f]{6}$/i.test(v)),'角色卡颜色无效。');
+  assert(c.portraitFrameHidden===undefined||typeof c.portraitFrameHidden==='boolean','头像框显示设置无效。');
   for(const key of ['portrait','illustration'])if(c[key]!==undefined)assert(storedImage(c[key]),key==='portrait'?'头像数据无效。':'立绘数据无效。');
   if(c.featureLayout?.detailsExpanded!==undefined)assert(Array.isArray(c.featureLayout.detailsExpanded)&&c.featureLayout.detailsExpanded.every((id:unknown)=>typeof id==='string'),'详细特性展开记录无效。');
   if(c.featureLayout?.optionsVisible!==undefined)assert(plain(c.featureLayout.optionsVisible)&&Object.entries(c.featureLayout.optionsVisible).length<=10000&&Object.entries(c.featureLayout.optionsVisible).every(([id,value])=>id.length<=2000&&typeof value==='boolean'),'自带选项显示设置无效。');
