@@ -15,7 +15,8 @@ async function prepare(page:Page){
 }
 async function assertBeforeComplete(page:Page){
  await expect(page.locator('dialog[open]')).toHaveCount(0);
- expect(await page.locator('#root').evaluate(el=>getComputedStyle(el).visibility)).toBe('hidden');
+ const value=await page.evaluate(()=>document.documentElement.dataset.cardStartup);
+ expect(await page.locator('#root').evaluate(el=>getComputedStyle(el).visibility)).toBe(value==='fading'?'visible':'hidden');
  expect(await page.evaluate(()=>(window as any).modalStarts)).toEqual([]);
 }
 async function assertAfterComplete(page:Page){
@@ -44,11 +45,33 @@ test('slow app leaves final pose waiting and does not publish an early completio
  await page.goto(url(info),{waitUntil:'commit'});await phase(page,'waiting');await assertBeforeComplete(page);expect(await page.evaluate(key=>localStorage.getItem(key),key(info))).toBeNull();
  release();await assertAfterComplete(page);
 });
-test('slow PNG waits to start, then plays all four layers without an early modal',async({page},info)=>{
- await prepare(page);let release!:()=>void;const blocked=new Promise<void>(resolve=>release=resolve);
- await page.route('**/startup-logo/3.PNG',async route=>{await blocked;await route.continue();});await page.goto(url(info),{waitUntil:'commit'});
- await page.waitForFunction(()=>!!document.querySelector('.app-shell'));expect(await page.evaluate(()=>document.documentElement.dataset.cardStartup)).toBe('loading');await assertBeforeComplete(page);
- release();await assertAfterComplete(page);
+test('embedded four layers do not wait for any external logo request',async({page},info)=>{
+ await prepare(page);const requests:string[]=[];
+ page.on('request',request=>{if(request.url().includes('/startup-logo/'))requests.push(request.url());});
+ await page.route('**/startup-logo/*',route=>route.abort('failed'));
+ await page.goto(url(info),{waitUntil:'commit'});await phase(page,'playing');await assertBeforeComplete(page);
+ const sources=await page.locator('.startup-piece').evaluateAll(nodes=>nodes.map(node=>(node as HTMLImageElement).src));
+ expect(sources.every(src=>src.startsWith('data:image/webp;base64,'))).toBe(true);
+ await assertAfterComplete(page);expect(requests).toEqual([]);
+});
+test('slow card CSS cannot block the opening; transparent exit reveals the styled card before the notice',async({page},info)=>{
+ await prepare(page);let release!:()=>void;const blocked=new Promise<void>(resolve=>release=resolve),optional:{url:string;phase:string|undefined}[]=[];
+ await page.route('**/assets/card-core-*.css',async route=>{await blocked;await route.continue();});
+ page.on('request',request=>{if(/\/(WikiUi-|CardDecoration-|cardRuntime-|sw\.js|exe_icon\.png)|5e\.kiwee\.top/.test(request.url()))void page.evaluate(()=>document.documentElement.dataset.cardStartup).then(phase=>optional.push({url:request.url(),phase})).catch(()=>{});});
+ await page.goto(url(info),{waitUntil:'commit'});await phase(page,'playing');await assertBeforeComplete(page);
+ await phase(page,'waiting');await assertBeforeComplete(page);expect(optional).toEqual([]);
+ expect(await page.locator('link[data-card-style]').evaluateAll(nodes=>nodes.every(node=>(node as HTMLLinkElement).media==='print'))).toBe(true);
+ release();await phase(page,'fading');
+ await page.locator('#startup-intro').evaluate(el=>{for(const animation of el.getAnimations()){animation.pause();animation.currentTime=Number(animation.effect!.getTiming().duration)/2;}});
+ await expect(page.locator('#root')).toHaveCSS('visibility','visible');await expect(page.locator(info.project.name==='suite'?'.app-shell':'.paper').first()).toBeVisible();await expect(page.locator('dialog[open]')).toHaveCount(0);
+ const opacity=Number(await page.locator('#startup-intro').evaluate(el=>getComputedStyle(el).opacity));expect(opacity).toBeGreaterThan(0);expect(opacity).toBeLessThan(1);
+ await page.screenshot({path:info.outputPath('transparent-exit-over-styled-card.png')});
+ await page.locator('#startup-intro').evaluate(el=>el.getAnimations().forEach(animation=>animation.play()));await assertAfterComplete(page);
+ expect(optional.every(row=>row.phase==='complete')).toBe(true);
+});
+test('failed card CSS provides recovery instead of a permanent yellow wait',async({page},info)=>{
+ await prepare(page);await page.route('**/assets/card-core-*.css',route=>route.abort('failed'));await page.goto(url(info),{waitUntil:'commit'});await phase(page,'failed');
+ await expect(page.locator('#startup-help')).toBeVisible();await expect(page.locator('dialog[open]')).toHaveCount(0);expect(await page.evaluate(key=>localStorage.getItem(key),key(info))).toBeNull();
 });
 test('reduced motion still ends its shortened fade before opening the modal',async({page},info)=>{
  await page.emulateMedia({reducedMotion:'reduce'});await prepare(page);await page.goto(url(info),{waitUntil:'commit'});await assertAfterComplete(page);

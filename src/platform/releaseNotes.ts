@@ -242,8 +242,13 @@ const SUITE_RELEASE_238_SECTIONS:ReleaseSection[]=[...RELEASE_238_SECTIONS,
 const currentSections=(sections:ReleaseSection[]):ReleaseSection[]=>sections.map(section=>section.title==='支持者弹幕'?{...section,items:['赞助弹幕更密集，仍以较快流速、不等间隔自然出现；颜色适度柔和，增加黑色阴影提高可读性。','基础字号增大，仍按赞助金额显示字号；新增支持者“洛伦兹力”，金额100元。']}:section);
 const RELEASE_239_SECTIONS=currentSections(RELEASE_238_SECTIONS);
 const SUITE_RELEASE_239_SECTIONS=currentSections(SUITE_RELEASE_238_SECTIONS);
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_240_SECTIONS:ReleaseSection[]=[
  {title:'开屏动画',items:['开场图层在动画前半段完成淡入，后半段保持完全显现。','移动轨迹、整体节奏和动画结束后再显示公告的顺序保留。']}
+];
+const SUITE_RELEASE_240_SECTIONS:ReleaseSection[]=RELEASE_240_SECTIONS;
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'初次打开',items:['开屏不再等待整套卡面样式，徽标图层随页面一起加载，减少黄色界面停留。','资料库、装饰和离线缓存在开屏结束后加载，减少同时下载带来的等待。']},
+ {title:'开屏退出',items:['黄色开屏淡出为透明，直接显露下方已经准备好的角色卡。','公告仍在开屏完全退出后显示；已有角色、资源余额和显示偏好保留。']}
 ];
 export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=RELEASE_SECTIONS;
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -283,6 +288,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_240_SECTIONS:RELEASE_240_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_239_SECTIONS:RELEASE_239_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_238_SECTIONS:RELEASE_238_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?[
