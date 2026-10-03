@@ -232,6 +232,15 @@ export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='suite'?[{title:'2026-10-03',sections:[
+  {title:'3D 骰子紧急修复',items:[
+   '开播确认与时钟消息优先发送，丢失轨迹分片的补传不再挡住其他投骰消息。',
+   '旁观端暂时未响应时，不再让整房等待 20 秒后取消。投骰者与计算端仍须就绪；慢端补齐后播放相同轨迹和结果，不重新掷骰。',
+   '补发遗漏的本机准备消息，处理提前到达的开播指令；减少重复点击和空公式提交，报错时保留公式供修改。',
+   '本机双端与真实物理动画已复验；玩家原设备与线路仍待验证。原报错未提供具体公式，长度限制仍保留，不能据此称所有公式问题已解决。',
+   '3D 通信版本已更新。所有参与者请先关闭附加窗口，刷新枭熊页面，再右键以拆分视图重新打开。'
+  ]}
+ ]}]:[]),
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
  {title:mode==='suite'?'2026-10-02':'2026-10-02-二',sections:mode==='suite'?SUITE_RELEASE_230_SECTIONS:RELEASE_232_SECTIONS},
  ...(mode==='standalone'?[{title:'2026-10-02',sections:RELEASE_230_SECTIONS}]:[]),
