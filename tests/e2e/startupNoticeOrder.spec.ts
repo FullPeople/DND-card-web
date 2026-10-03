@@ -69,9 +69,11 @@ test('a stalled card stylesheet does not hold the yellow shell or logo hostage',
  await page.route('**/assets/card-core-*.css',async route=>{await blocked;await route.continue();});
  await page.goto(url(info),{waitUntil:'commit'});await phase(page,'playing');await expect(page.locator('#startup-intro')).toBeVisible();
  await phase(page,'waiting');await assertBeforeComplete(page);await page.screenshot({path:info.outputPath('logo-with-css-stalled.png')});
- release();await phase(page,'fading');
- const opacity=await page.locator('#startup-intro').evaluate(el=>{const animation=el.getAnimations()[0];if(!animation)throw Error('missing fade transition');animation.pause();animation.currentTime=225;return Number(getComputedStyle(el).opacity);});
- expect(opacity).toBeGreaterThan(0);expect(opacity).toBeLessThan(1);await assertBeforeComplete(page,true);await page.screenshot({path:info.outputPath('transparent-card-reveal.png')});await page.locator('#startup-intro').evaluate(el=>el.getAnimations().forEach(animation=>animation.play()));await assertAfterComplete(page);
+ // Capture inside the page before releasing CSS: a remote evaluate arriving
+ // after the 450 ms transition would sample a completed fade on a busy runner.
+ await page.evaluate(()=>{const capture=(event:Event)=>{if((event as CustomEvent).detail!=='fading')return;window.removeEventListener('dnd-card-startup',capture);queueMicrotask(()=>{const el=document.getElementById('startup-intro')!,animation=el.getAnimations()[0];if(!animation){(window as any).fadeSample={error:'missing fade transition'};return;}animation.pause();animation.currentTime=225;(window as any).fadeSample={opacity:Number(getComputedStyle(el).opacity)};});};window.addEventListener('dnd-card-startup',capture);});
+ release();await page.waitForFunction(()=>(window as any).fadeSample);const sample=await page.evaluate(()=>(window as any).fadeSample);expect(sample.error).toBeUndefined();
+ expect(sample.opacity).toBeGreaterThan(0);expect(sample.opacity).toBeLessThan(1);await assertBeforeComplete(page,true);await page.screenshot({path:info.outputPath('transparent-card-reveal.png')});await page.locator('#startup-intro').evaluate(el=>el.getAnimations().forEach(animation=>animation.play()));await assertAfterComplete(page);
 });
 test('a failed card stylesheet preserves recovery and never exposes an unstyled card',async({page},info)=>{
  await prepare(page);await page.route('**/assets/card-core-*.css',route=>route.abort('failed'));
