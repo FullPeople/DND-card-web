@@ -1,3 +1,7 @@
+# 2026-10-03 · 自动化全覆盖启动，隔离分支，无发布
+
+用户要求以附件执行计划为持续目标。隔离分支 `codex/automation-ir-20261003`，工作树 `/workspace/dnd-automation-web`，基线 `80c94e0` 已与远端 main 核对。G0 本轮复测：729 单元通过 / 24 外部资料条件跳过 / 0 失败，类型及两种生产构建退出码均0，单机审计 singlePlayer=true、multiplayerModules=[]。npm 默认缓存写入先失败，移到工作区缓存后 npm ci 成功；首次失败已保留。尚未执行浏览器矩阵、接线、覆盖标注或独立审计，未达完整底线。计划、分期与边界见 [启动记录](AUTOMATION-OVERLAY-KICKOFF.md)、[G0证据](AUTOMATION-IR-G0-RESULT.md)，后续双待办见根 TODO.md 与 [自动化TODO](AUTOMATION-OVERLAY-TODO.md)。237仍为已验证发布基线；本任务不推送、合并或部署。
+
 # 2026-10-03 · 怪物卡配套修复237已合并并部署
 
 指定19417c25 / 9aa65734已合入main / dev并发布网站standalone-1.0.237（公告0.1.28）、新版Suite1.0.237-dev；保留236与235成果。双方精确SHA完整CI通过，本机729单元通过/24条件跳过、Suite17组与骰子13项、Edge21项、线上727项校验及实际物理动画通过。旧稳定、独立三龙牌、后台及玩家资料保留；真实房间、原设备和实体手机未复验。详见 [本轮最终回执](RELEASE-237-FINAL.md)。下方未部署/准备描述为历史状态。
