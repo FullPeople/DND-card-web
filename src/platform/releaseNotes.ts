@@ -240,8 +240,12 @@ const SUITE_RELEASE_238_SECTIONS:ReleaseSection[]=[...RELEASE_238_SECTIONS,
  {title:'联机验证范围',items:['本批保留此前怪物卡与骰子修复；真实枭熊双账号房间仍待现场复验。']},
 ];
 const currentSections=(sections:ReleaseSection[]):ReleaseSection[]=>sections.map(section=>section.title==='支持者弹幕'?{...section,items:['赞助弹幕更密集，仍以较快流速、不等间隔自然出现；颜色适度柔和，增加黑色阴影提高可读性。','基础字号增大，仍按赞助金额显示字号；新增支持者“洛伦兹力”，金额100元。']}:section);
-export const RELEASE_SECTIONS=currentSections(RELEASE_238_SECTIONS);
-export const SUITE_RELEASE_SECTIONS=currentSections(SUITE_RELEASE_238_SECTIONS);
+const RELEASE_239_SECTIONS=currentSections(RELEASE_238_SECTIONS);
+const SUITE_RELEASE_239_SECTIONS=currentSections(SUITE_RELEASE_238_SECTIONS);
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'开屏动画',items:['开场图层在动画前半段完成淡入，后半段保持完全显现。','移动轨迹、整体节奏和动画结束后再显示公告的顺序保留。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=RELEASE_SECTIONS;
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
@@ -279,6 +283,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_239_SECTIONS:RELEASE_239_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_238_SECTIONS:RELEASE_238_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?[
   {title:'怪物卡与角色卡',items:['同一棋子同时绑定角色与怪物时，两张卡分别选择和操作，生命值、资源和状态不再串用。','收到部分状态回执时保留未改动的资源；迟到的旧消息不再恢复已删除状态或已消耗资源。','怪物原生所属玩家和主持人可按权限查看；解绑或关闭对应组件后，不再沿用旧怪物资料。']},
