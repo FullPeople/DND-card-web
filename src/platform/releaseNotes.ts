@@ -251,7 +251,7 @@ const RELEASE_241_SECTIONS:ReleaseSection[]=[
  {title:'开屏退出',items:['黄色开屏淡出为透明，直接显露下方已经准备好的角色卡。','公告仍在开屏完全退出后显示；已有角色、资源余额和显示偏好保留。']}
 ];
 export const RELEASE_SECTIONS:ReleaseSection[]=[
- {title:'配套更新',items:['与新版枭熊工作台同步更新；已有角色、资源余额和显示偏好保留。']}
+ {title:'维护更新',items:['角色卡网站同步更新；已有角色、资源余额和显示偏好保留。']}
 ];
 export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'玩家加载恢复',items:['修复了首次打开时角色资料已经收到、卡面仍停在读取中的情况。','首次消息未送达时可重新获取当前角色，切换角色后旧回复不会抢回上一张卡。']},
@@ -315,7 +315,7 @@ export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
    '3D 通信版本已更新。所有参与者请先关闭附加窗口，刷新枭熊页面，再右键以拆分视图重新打开。'
   ]}
  ]}]:[]),
- {title:RELEASE_DATE,sections:mode==='suite'?SUITE_RELEASE_234_SECTIONS:RELEASE_234_SECTIONS},
+ {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_234_SECTIONS:RELEASE_234_SECTIONS},
  {title:mode==='suite'?'2026-10-02':'2026-10-02-二',sections:mode==='suite'?SUITE_RELEASE_230_SECTIONS:RELEASE_232_SECTIONS},
  ...(mode==='standalone'?[{title:'2026-10-02',sections:RELEASE_230_SECTIONS}]:[]),
  {title:'2026-10-01-六',sections:RELEASE_227_SECTIONS},
