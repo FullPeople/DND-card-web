@@ -1,6 +1,6 @@
-import {selectionAllowed,type Character,type Selection} from './model';
+import {selectionEffectsAllowed,type Character,type Selection} from './model';
 
-export function hitPointLevels(c:Character,con:number,classes:Selection[]=c.selections.filter(s=>s.entry.kind==='class'&&selectionAllowed(c,s.entry))){
+export function hitPointLevels(c:Character,con:number,classes:Selection[]=c.selections.filter(s=>s.entry.kind==='class'&&selectionEffectsAllowed(c,s.entry))){
   return classes.flatMap((s,index)=>Array.from({length:s.level},(_,i)=>{
     const faces=Number(s.entry.raw.hd?.faces)||8,first=index===0&&i===0,average=Math.floor(faces/2)+1;
     const recorded=c.hpProgression?.rolls[s.id]?.[i];

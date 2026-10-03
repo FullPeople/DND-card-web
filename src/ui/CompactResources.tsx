@@ -1,7 +1,7 @@
 import {ResourceDisplayContext} from './resourceDisplay';
 import {useCallback,useRef,useState,type CSSProperties,type ReactNode} from 'react';
 import type {ResourceValue} from './resourcePresets';
-import {normalizeWidget,normalizeModuleWidget,type WidgetStyle,type ResourceWidgetLayout,type ResourceModule} from '../core/resourceWidgets';
+import {freeDashboardLayout,normalizeWidget,normalizeModuleWidget,type WidgetStyle,type ResourceWidgetLayout,type ResourceModule} from '../core/resourceWidgets';
 import {ResourceModuleFace,resourceAmount} from './ResourceModuleFace';
 import './resourceWidgets.css';
 import './compactResources.css';
@@ -23,5 +23,11 @@ export function CompactResource({resource:r,style='bar',layout,module:group,rend
 }
 export function CompactResourceGrid<T extends {id?:string}>({rows,render,label,span}:{rows:T[];render:(r:T)=>ReactNode;label:string;span?:(r:T)=>number}){
  const [page,setPage]=useState(0),pages=Math.max(1,Math.ceil(rows.length/9)),current=Math.min(page,pages-1);
- return <section className="compact-resources" aria-label={label}><div className="compact-resource-pages"><span>{rows.length} 项资源</span>{pages>1&&<nav aria-label={`${label}分页`}><button aria-label="上一页资源" disabled={!current} onClick={()=>setPage(current-1)}>‹</button><output>{current+1} / {pages}</output><button aria-label="下一页资源" disabled={current>=pages-1} onClick={()=>setPage(current+1)}>›</button></nav>}</div><div className="compact-resource-grid">{rows.map((r,index)=><div key={r.id} hidden={Math.floor(index/9)!==current} style={span?{gridColumn:`span ${span(r)}`} :undefined}>{render(r)}</div>)}</div></section>;
+ return <section className="compact-resources" aria-label={label}><div className="compact-resource-pages">{pages>1&&<nav aria-label={`${label}分页`}><button aria-label="上一页资源" disabled={!current} onClick={()=>setPage(current-1)}>‹</button><output>{current+1} / {pages}</output><button aria-label="下一页资源" disabled={current>=pages-1} onClick={()=>setPage(current+1)}>›</button></nav>}</div><div className="compact-resource-grid">{rows.map((r,index)=><div key={r.id} hidden={Math.floor(index/9)!==current} style={span?{gridColumn:`span ${span(r)}`} :undefined}>{render(r)}</div>)}</div></section>;
+}
+
+/** Render the persisted dashboard geometry while keeping every operation row mounted. */
+export function CompactResourceCanvas({modules,widgets,attacks,label,render}:{modules:ResourceModule[];widgets?:Record<string,ResourceWidgetLayout>;attacks?:ResourceWidgetLayout;label:string;render:(module:ResourceModule,layout:ResourceWidgetLayout)=>ReactNode}){
+ const layout=freeDashboardLayout(modules,widgets,attacks),bands=Math.max(1,...Object.values(layout.widgets).map(w=>w.page+1));
+ return <section className="compact-resource-dashboard" aria-label={label}><div className="compact-resource-dashboard-canvas" style={{height:`${bands*210}px`}}>{modules.map(module=>{const w=layout.widgets[module.id];return <div className="compact-resource-dashboard-widget" key={module.id} data-grid-x={w.x} data-grid-y={w.y} data-grid-w={w.w} data-grid-h={w.h} data-grid-page={w.page} style={{left:`${w.x/12*100}%`,top:(w.page*6+w.y)*35,width:`${w.w/12*100}%`,height:w.h*35}}>{render(module,w)}</div>;})}</div></section>;
 }

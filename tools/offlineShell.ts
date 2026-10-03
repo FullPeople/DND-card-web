@@ -3,7 +3,8 @@ import {createHash} from 'node:crypto';
 export function offlineShell(): Plugin {
   return { name: 'offline-app-shell', apply: 'build', generateBundle:{order:'post',handler(_, bundle) {
     const assets = Object.keys(bundle).filter(name => !name.endsWith('.map'));
-    const first = new Set<string>(['index.html','favicon.svg']);
+    const startupAssets = ['startup-logo/1.PNG','startup-logo/2.PNG','startup-logo/3.PNG','startup-logo/4.PNG'];
+    const first = new Set<string>(['index.html','favicon.svg',...startupAssets]);
     const visit = (name:string) => {
       if(first.has(name))return;
       const chunk=bundle[name];if(!chunk)return;first.add(name);
@@ -20,7 +21,7 @@ export function offlineShell(): Plugin {
 const PREFIX = 'dnd-card-shell:' + new URL('./', self.location.href).pathname + ':';
 const CACHE = PREFIX + ${JSON.stringify(revision)};
 const FILES = ${JSON.stringify(files)};
-const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png'])}.map(file=>new URL(file,self.location.href).href));
+const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png',...startupAssets])}.map(file=>new URL(file,self.location.href).href));
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(file => new URL(file, self.location.href).href)))));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('message', event => {

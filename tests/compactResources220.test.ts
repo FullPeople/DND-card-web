@@ -46,7 +46,7 @@ it('overview preserves actual shared and pact pools plus custom module members w
  const rows:[string,ResourceValue][]=[['spell-slot:1',{name:'一环',current:3,max:4}],['spell-slot:2',{name:'二环',current:2,max:3}],['pact-slot:2',{name:'契约二环',current:1,max:2}],['food',{name:'食物',current:4,max:8}],['water',{name:'饮水',current:5,max:10}]];
  const saved={food:{x:0,y:0,w:6,h:3,page:0,style:'poolbars' as const,members:['food','water'],label:'远行物资',color:'#334455',icon:'leaf' as const}};
  const modules=resourceModules(rows,saved);
- expect(modules.map(m=>[m.name,m.rows.map(([id])=>id)])).toEqual([['法术位（共用）',['spell-slot:1','spell-slot:2']],['契约法术位',['pact-slot:2']],['远行物资',['food','water']]]);
+ expect(modules.map(m=>[m.name,m.rows.map(([id])=>id)])).toEqual([['法术位',['spell-slot:1','spell-slot:2']],['契约法术位',['pact-slot:2']],['远行物资',['food','water']]]);
  const html=renderToStaticMarkup(createElement(CompactResourceGrid<ResourceModule>,{rows:modules,label:'池',render:module=>createElement(CompactResource,{resource:module.rows[0][1],module,layout:saved[module.id as keyof typeof saved],render:r=>createElement('span',{'data-operation-for':r.id},r.name)})}));
  expect(html.match(/data-operation-for=/g)).toHaveLength(5);expect(html.match(/data-resource-pool="spell"/g)).toHaveLength(2);expect(html).toContain('data-module-style="poolbars"');expect(html).toContain('--rm-icon-tone:#334455');
  expect(html).toContain('>I</b>');expect(html.match(/>II<\/b>/g)).toHaveLength(2);

@@ -191,3 +191,6 @@
 .resource-module-art .rm-pools-poolpips.has-many-pools .rm-pool[data-icon-count=true] .rm-icons{grid-column:1;grid-row:2;height:100%}
 
 .resource-module-art.rm-group>.rm-content{display:flex;align-items:stretch;padding:4px 6px}
+
+/* Inset separators do not take space from the default grouped resource rows. */
+.resource-module-art .rm-pools-poolpips .rm-pool{box-shadow:inset 0 -1px color-mix(in srgb,var(--rm-tone) 18%,transparent)}

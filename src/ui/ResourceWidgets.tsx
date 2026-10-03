@@ -16,7 +16,7 @@ export type DashboardControls={selectedId?:string;layoutEditor?:boolean;initialP
 type Props=DashboardControls&{c:Character;rows:[string,Value][];editing:boolean;enabled:boolean;gm:boolean;edit:(f:(c:Character)=>void)=>void;manage:()=>void;attacks?:ReactNode};
 export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage,attacks,selectedId,layoutEditor=false,initialPage=0,onSelect,onPage,configure:openConfiguration,onInteracting}:Props){
  const attackId=attackWidgetKey(c);
- const saved=c.quickbarLayout?.widgets||{},modules=resourceModules(rows,saved);
+ const saved=c.quickbarLayout?.widgets||{},modules=resourceModules(rows,saved,c.selections);
  const base=freeDashboardLayout(modules,saved,c.quickbarLayout?.attacks);
  const [preview,setPreview]=useState<typeof base>(),[page,setPage]=useState(initialPage),[selected,setSelected]=useState(''),[open,setOpen]=useState(''),[edge,setEdge]=useState('');
  const canvas=useRef<HTMLDivElement>(null),panel=useRef<HTMLDivElement>(null),trigger=useRef<HTMLElement|null>(null),cancel=useRef<(()=>void)|undefined>(undefined),suppressClick=useRef(false);

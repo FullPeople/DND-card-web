@@ -5,3 +5,11 @@
 .compact-resource .resource-module-art .rm-readout strong{font-size:12px}
 .compact-resource .resource-module-art .rm-readout small{font-size:7px}
 .compact-resource.compact-resource-group{height:calc(30px + var(--compact-pool-rows,1)*28px)}.compact-resource-group .resource-module-art .rm-name{font-size:10px}.compact-resource-group .resource-module-art .rm-pool-current{font-size:15px}.compact-resource-group .resource-module-art .rm-pool-label{font-size:11px}.compact-resource-popover>.console-resource+.console-resource{margin-top:8px}
+
+.compact-resource-pages:empty{display:none}
+.compact-resource-pages{justify-content:flex-end}
+.compact-resource-dashboard{min-width:0;max-height:210px;overflow:auto;overscroll-behavior:contain}
+.compact-resource-dashboard-canvas{position:relative;min-width:0;min-height:210px}
+.compact-resource-dashboard-widget{position:absolute;box-sizing:border-box;padding:2px;min-width:0;min-height:0}
+.compact-resource-dashboard-widget>.resource179-physical,.compact-resource-dashboard-widget .compact-resource{height:100%!important;min-height:0;min-width:0;margin:0!important}
+.compact-resource-dashboard .adaptive-frame-art{pointer-events:none}

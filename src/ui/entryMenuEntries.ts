@@ -1,4 +1,4 @@
-import {selectionAllowed,type Character,type Entry} from '../core/model';
+import {selectionEffectsAllowed,type Character,type Entry} from '../core/model';
 import {proficiencyText} from '../core/proficiencyText';
 /** Training rows own literal references, not catalog snapshots. Reconstruct only
  * the empty fallback that Reference renders while a lookup is unavailable. */
@@ -7,7 +7,7 @@ export function ownedTrainingReference(c:Character,entry:Entry):Entry|undefined{
  const records=['armor','weapons','tools','languages'].map(group=>{
   if(c.training?.[group]!==undefined)return c.training[group];
   const alternate=({armor:'armorProficiencies',weapons:'weaponProficiencies',tools:'toolProficiencies',languages:'languageProficiencies'} as Record<string,string>)[group];
-  return c.selections.filter(row=>selectionAllowed(c,row.entry)).flatMap(({entry:{raw}})=>{
+  return c.selections.filter(row=>selectionEffectsAllowed(c,row.entry)).flatMap(({entry:{raw}})=>{
    const fixed=raw.startingProficiencies?.[group],extra=raw[alternate];
    return [...(Array.isArray(fixed)?fixed.filter((value:unknown):value is string=>typeof value==='string'):[]),...(Array.isArray(extra)?extra.flatMap(value=>Object.entries(value||{}).filter(([key,on])=>on===true&&key!=='choose').map(([key])=>key)):[])];
   }).map(value=>({common:'通用语',elvish:'精灵语'} as Record<string,string>)[value]||proficiencyText(value,c.edition==='2024'?'XPHB':'PHB',group)).join('、');

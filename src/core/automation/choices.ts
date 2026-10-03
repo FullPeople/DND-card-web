@@ -1,4 +1,4 @@
-import {SKILLS,skillKey,selectionAllowed,uid,type Character,type Entry,type Selection} from '../model';
+import {SKILLS,skillKey,selectionAllowed,selectionEffectsAllowed,uid,type Character,type Entry,type Selection} from '../model';
 import {inventoryState} from '../characterDetails';
 import {resolveEntryReference} from '../entryReferences';
 import {selectionLevel} from '../featureOwnership';
@@ -19,7 +19,7 @@ export function equipmentPackage(entry:Entry,index:number,value:string,picks:Rec
 }
 export function selectionActive(c:Character,row:Selection):boolean{
  const seen=new Set<string>();let current:Selection|undefined=row;
- while(current){if(seen.has(current.id)||!selectionAllowed(c,current.entry))return false;seen.add(current.id);if(!current.parentId)return true;current=c.selections.find(s=>s.id===current!.parentId);}
+ while(current){if(seen.has(current.id)||!selectionEffectsAllowed(c,current.entry))return false;seen.add(current.id);if(!current.parentId)return true;current=c.selections.find(s=>s.id===current!.parentId);}
  return false;
 }
 function concept(owner:Entry,value:string,label:string,entries:unknown[]):Entry{return {...owner,id:`${owner.id}#choice:${value}`,kind:'rule',name:label,english:label,entries,raw:{_choiceConcept:true},effects:undefined,choices:undefined};}

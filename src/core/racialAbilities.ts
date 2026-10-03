@@ -6,14 +6,12 @@ export type RacialAbilityPlan = {
   issues: Issue[];
 };
 
-/** Pure, source-declared fixed racial increases. The version marker describes
- * score ownership, not an automation preference: old/imported totals must never
- * silently become pre-race base scores. Optional allocations remain unresolved. */
-export function planRacialAbilities(c: Character, selection: Selection): RacialAbilityPlan {
+/** Pure, source-declared fixed racial increases. Saved card/version markers do
+ * not suppress an owned source's bonuses. Optional allocations stay unresolved. */
+export function planRacialAbilities(_c: Character, selection: Selection): RacialAbilityPlan {
   const result: RacialAbilityPlan = {bonuses: {}, trace: {}, issues: []};
   const entry = selection.entry, raw = entry.raw;
-  // 2024 ignores racial ASIs even when the player uses a legacy species.
-  if (entry.kind !== 'race' || c.edition !== '2014' || raw.ability === undefined) return result;
+  if (entry.kind !== 'race' || raw.ability === undefined) return result;
   const blocks: unknown = raw.ability;
   if (Array.isArray(blocks) && !blocks.length) return result;
   const block = Array.isArray(blocks) && blocks.length === 1 && blocks[0] && typeof blocks[0] === 'object' && !Array.isArray(blocks[0]) ? blocks[0] as Record<string, unknown> : undefined;
@@ -28,7 +26,6 @@ export function planRacialAbilities(c: Character, selection: Selection): RacialA
     for (const ability of affected) result.trace[ability] = [message];
     return result;
   };
-  if (c.racialAbilityMode !== 'separate-v1') return warn('legacy', `${entry.name}：旧卡基础属性可能已包含种族加值；尚未确认，保留当前数值，未再次叠加。`);
   const fixed = block && Object.entries(block).every(([key, value]) => ABILITIES.includes(key as Ability) && typeof value === 'number' && Number.isInteger(value) && Math.abs(value) <= 10);
   if (!fixed || raw._copy || raw._unresolvedParent) return warn('unsupported', `${entry.name}：种族属性含待选择或尚未支持的规则；未自动叠加，请核对资料与基础属性。`);
   for (const ability of declared) {

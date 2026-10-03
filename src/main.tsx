@@ -16,7 +16,7 @@ import './ui/workspace.css';
 import './ui/overview.css';
 import './ui/library.css';
 import './ui/cardAtmosphere.css';
-const app=<Suspense fallback={null}><StartupReady><App/></StartupReady></Suspense>;
+const app=<Suspense fallback={null}>{viewer?<StartupReady><App/></StartupReady>:<App/>}</Suspense>;
 createRoot(document.getElementById('root')!).render(<StartupBoundary><UiLanguageProvider><SourceProvider>{viewer?app:<EntryMenuProvider>{app}</EntryMenuProvider>}</SourceProvider></UiLanguageProvider></StartupBoundary>);
 import './ui/libraryRefine.css';
 

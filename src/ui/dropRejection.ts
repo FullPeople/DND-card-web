@@ -1,11 +1,13 @@
 import {candidateReason} from '../core/engine';
 import {KIND_LABELS,type Character,type Entry,type Kind,type Requirement} from '../core/model';
 import {trainingCategory} from './trainingData';
+import {entryDragIntent,type EntryDragIntent} from './entryDragIntent';
 
-export interface DropRules {requirement?:Requirement;kinds?:Kind[];allowExisting?:boolean;accepts?:(entry:Entry)=>boolean;rejectReason?:string;referenceOnly?:boolean}
+export interface DropRules {requirement?:Requirement;kinds?:Kind[];allowExisting?:boolean;accepts?:(entry:Entry)=>boolean;rejectReason?:string;referenceOnly?:boolean;training?:boolean}
 /** The hover highlight and refusal message use the same acceptance rules. */
-export function dropRejection(c:Character,entry:Entry,zone:DropRules):string|undefined{
+export function dropRejection(c:Character,entry:Entry,zone:DropRules,intent:EntryDragIntent=entryDragIntent(entry)):string|undefined{
  if(zone.referenceOnly)return zone.accepts&&!zone.accepts(entry)?zone.rejectReason||'此位置不接受这个引用。':undefined;
+ if(intent==='training'&&!zone.training)return '熟练类别请拖到主要页的装备训练与其他熟练栏。';
  const kinds=zone.requirement?.kind?[zone.requirement.kind]:zone.kinds;
  if(kinds&&!kinds.includes(entry.kind))return `此位置需要${kinds.map(kind=>KIND_LABELS[kind]).join('、')}，「${entry.name}」是${KIND_LABELS[entry.kind]}。`;
  if(entry.raw._category==='size'&&!zone.accepts)return '体型条目请拖到主要页的体型格。';

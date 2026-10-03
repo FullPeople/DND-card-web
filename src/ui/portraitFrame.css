@@ -1,8 +1,8 @@
 /* The whole title is one keyboard-accessible toggle; the eye is decorative. */
-.paper .portrait-cell .cell-heading.heading-action{padding-left:3px;padding-right:19px;z-index:2}
+.paper .portrait-cell .cell-heading.heading-action{padding-left:3px;padding-right:3px;z-index:2}
 .paper .portrait-cell .cell-heading.heading-action h3{font-size:min(1em,11px);white-space:nowrap}
 .paper .portrait-cell .cell-heading.heading-action:focus-visible{outline:2px solid currentColor;outline-offset:-2px}
-.paper .portrait-cell .cell-heading>.portrait-frame-eye{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.paper .portrait-cell .cell-heading>.portrait-frame-eye{position:static;flex:none;transform:none;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* Keep the original frame and title dimensions, including while hidden, so
    toggling never moves/resizes the avatar. Only the paper's A4 boundary clips. */
 .paper .portrait-frame-hidden{z-index:2;overflow:visible;clip-path:none;background:transparent}

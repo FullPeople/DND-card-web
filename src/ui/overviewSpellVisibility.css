@@ -1,0 +1,18 @@
+/* Keep the visibility eye beside the summary title, independently of expand-all. */
+.paper .overview-spells .overview-spells-visibility{display:inline-flex;align-items:center;justify-content:center;flex:none;width:16px;height:16px;padding:1px;border:0;background:transparent;color:inherit;line-height:1}
+.paper .overview-spells-visibility svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.paper .overview-spells-visibility:focus-visible{outline:2px solid currentColor;outline-offset:1px}
+.paper .overview-spells-hidden .cell-heading{opacity:.4}
+.paper .overview-lower.overview-spells-collapsed{grid-template-columns:minmax(0,1fr)}
+.paper.sheet-export .overview-spells-visibility{display:none}
+.paper.sheet-export .overview-spells-hidden{display:none}
+.paper.sheet-export .overview-lower:has(>.overview-spells-hidden){grid-template-columns:minmax(0,1fr)}
+@media print{
+ .paper .overview-spells-visibility,.paper .overview-spells-hidden{display:none}
+ .paper .overview-lower:has(>.overview-spells-hidden){grid-template-columns:minmax(0,1fr)}
+}
+
+@container screen (min-width:760px){
+ .sheet-viewport.screen-mode .overview-spells-collapsed .screen-actions>.heritage-features{flex:1 0 auto}
+ .sheet-viewport.screen-mode .overview-spells-collapsed .screen-actions>.heritage-features>.cell-face,.sheet-viewport.screen-mode .overview-spells-collapsed .screen-actions>.heritage-features .cell-content{flex:1}
+}
