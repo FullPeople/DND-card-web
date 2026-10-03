@@ -1,6 +1,6 @@
 import {editionAllows,selectionAllowed,classMatches,type Character,type Entry,type Selection} from './model';
 import {syncFeatures} from './sheet';
-import {syncAutoResources,setResource} from './resources';
+import {syncAutoResources,preserveMigrationResources} from './resources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import {syncSourceSpells} from './automation/sourceSpells';
 import {evaluate} from './engine';
@@ -80,7 +80,7 @@ export function planClassMigration(original:Character,catalog:Entry[],choices:Re
  syncSourceSpells(card,catalog);
  // Migration is not a rest or a new grant of expendable resources. Preserve
  // the available count, clamp to a lower maximum, and start new counters at 0.
- for(const [id,resource] of Object.entries(card.runtime.resources))setResource(card,id,resource.unlimited?(original.runtime.resources[id]?.current??0):Math.min(resource.max,original.runtime.resources[id]?.current??0));
+ preserveMigrationResources(card,original);
  rememberSourceSpellUses(card);
  const oldIds=new Set(original.selections.map(s=>s.id)),newIds=new Set(card.selections.map(s=>s.id));
  const added=card.selections.filter(s=>!oldIds.has(s.id)).map(s=>s.entry.name),removed=original.selections.filter(s=>!newIds.has(s.id)).map(s=>s.entry.name);

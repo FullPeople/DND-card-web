@@ -20,7 +20,7 @@ describe('character file exchange and batch boundaries',()=>{
  });
  it('retains unmapped legacy data without recursive native snapshots and does not merge same-name spells',()=>{
   const card=newCharacter();card.profile.enabledSources.push('HOMEBREW');card.externalSnapshot={core_stats:{hit_dice:{current:2,max:4}},unmapped:{note:'retain'},dnd_card_web:{deep:'old nested copy'}};
-  card.selections=['XPHB','HOMEBREW'].map(source=>({id:source,entry:{id:`spell:${source}:same`,kind:'spell' as const,name:'同名测试术',english:'Same Fixture',source,edition:'2024' as const,packId:'fixture',revision:'1',entries:['测试'],raw:{level:1}},level:1,quantity:1,equipped:false}));
+  card.selections=['XPHB','HOMEBREW'].map(source=>({id:source,entry:{id:`spell:${source}:same`,kind:'spell' as const,name:'同名测试术',english:'Same Fixture',source,edition:'2024' as const,packId:'fixture',revision:'1',entries:['测试'],raw:{level:1},manualSpellLevel:1},level:1,quantity:1,equipped:false}));
   card.spellSettings={mode:'prepared',ability:'int',capacity:1,prepared:['XPHB'],attackBonus:0,dcBonus:0,slots:{}};
   const projected=exportOwlbear(card,evaluate(card));expect(projected.spellcasting.prepared.map(s=>s.source)).toEqual(['XPHB']);expect(projected.spellcasting.always_known.map(s=>s.source)).toEqual(['HOMEBREW']);
   const backup=exportLinkedOwlbear(card,evaluate(card));expect(backup.dnd_card_web.externalSnapshot).toEqual({core_stats:{hit_dice:{current:2,max:4}},unmapped:{note:'retain'}});expect(card.externalSnapshot.dnd_card_web).toEqual({deep:'old nested copy'});

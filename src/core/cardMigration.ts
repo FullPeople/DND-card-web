@@ -3,7 +3,7 @@ import {syncFeatures,removeSelection} from './sheet';
 import {featureOwner} from './featureOwnership';
 import {legacyTraining} from './legacyTraining';
 import {trainingCategory} from './training';
-import {syncAutoResources,setResource} from './resources';
+import {syncAutoResources,preserveMigrationResources} from './resources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import {supportedAutomation} from './automation/state';
 import {syncSourceSpells} from './automation/sourceSpells';
@@ -156,7 +156,7 @@ export function planCardMigration(original:Character,entries:Entry[],choices:Mig
 export function finalizeCardMigration(original:Character,entries:Entry[],card:Character,changed:string[],warnings:string[],identity:{id:string;now:string}):ClassMigrationPlan{
  for(const row of card.selections)if(unlinkedEntry(row.entry))markKept(row,card);
  rememberSourceSpellUses(card);syncAutoResources(card,original);syncSourceSpells(card,entries);
- for(const [id,r] of Object.entries(card.runtime.resources))setResource(card,id,r.unlimited?(original.runtime.resources[id]?.current??0):Math.min(r.max,original.runtime.resources[id]?.current??0));
+ preserveMigrationResources(card,original);
  rememberSourceSpellUses(card);
  const old=new Map(original.selections.map(s=>[s.id,s])),current=new Map(card.selections.map(s=>[s.id,s]));
  const added=card.selections.filter(s=>!old.has(s.id)).map(s=>s.entry.name+' · '+KIND_LABELS[s.entry.kind]),removed=original.selections.filter(s=>!current.has(s.id)).map(s=>s.entry.name),refreshed=card.selections.filter(s=>old.has(s.id)&&stable(s.entry)!==stable(old.get(s.id)!.entry)).map(s=>s.entry.name);

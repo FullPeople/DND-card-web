@@ -1,7 +1,7 @@
 import {automationEnabled} from './automation/state';
 import {irMechanics,irParentClass,irSelectionActive} from './automation/ir';
 import type {Character} from './model';
-import {syncFeatureResources} from './automation/featureResources';
+import {syncFeatureResources,planFeatureResources,featureResourceReceipts} from './automation/featureResources';
 import {spellState} from './characterDetails';
 import {parentClass} from './featureOwnership';
 export function isHitDieResource(id:string){return /^hit-die:\d+$/.test(id);}
@@ -39,5 +39,19 @@ export function syncAutoResources(c:Character,before?:Character){
  const featuresChanged=syncFeatureResources(c);
  return featuresChanged||previous!==JSON.stringify([resources,c.spellSettings?.slots]);
 }
-export function setResource(c:Character,id:string,current:number){const r=c.runtime.resources[id];if(!r)return;r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));if(r.featureGrant)r.featureGrant.spent=Math.max(0,r.max-r.current);if(r.automatic){r.automaticSpent=Math.max(0,r.max-r.current);(c.runtime.automaticResourceArchive||={})[id]=structuredClone(r);if(/^pact-slot:[1-5]$/.test(id))c.runtime.automaticResourceArchive!['pact-slot:pool']=structuredClone(r);}if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};}
-
+export function setResource(c:Character,id:string,current:number,options:{preserveDebt?:boolean}={}){
+ const r=c.runtime.resources[id];if(!r)return;
+ r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));const spent=Math.max(0,r.max-r.current);
+ if(r.featureGrant){r.featureGrant.spent=Math.max(spent,options.preserveDebt?r.featureGrant.spent??0:0);(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}
+ if(r.automatic){r.automaticSpent=Math.max(spent,options.preserveDebt?r.automaticSpent??0:0);(c.runtime.automaticResourceArchive||={})[id]=structuredClone(r);if(/^pact-slot:[1-5]$/.test(id))c.runtime.automaticResourceArchive!['pact-slot:pool']=structuredClone(r);}
+ if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};
+}
+/** Copy synchronization can consume or clamp counters, but cannot restore debt. */
+export function preserveMigrationResources(card:Character,original:Character){
+ const grants=planFeatureResources(card).grants;
+ for(const [id,r]of Object.entries(card.runtime.resources)){
+  const grant=grants.find(grant=>grant.key===id),receipts=grant?featureResourceReceipts(original.runtime.resources,grant,grants):[];
+  const available=original.runtime.resources[id]?.current??(receipts.length?Math.min(...receipts.map(([,r])=>r.current)):0);
+  setResource(card,id,Math.min(r.current,available),{preserveDebt:true});
+ }
+}

@@ -69,7 +69,10 @@ export function irFormulaValues(c:Character,row:Selection,scores:Record<Ability,
  }}
  for(const [key,list]of unqualified)if(list.length===1)values[`@scale.${key}`]=list[0];
  for(const [key,list]of qualified)if(new Set(list).size===1)values[key]=list[0];else delete values[key];
- if(automationEnabled(c))for(const owner of active)for(const modifier of irMechanics(owner.entry)?.modifiers||[])if(modifier.target==='proficiency'&&irCondition(c,owner,modifier.condition)===true&&!(owner.entry.kind==='item'&&(!owner.equipped||owner.quantity<=0||irMechanics(owner.entry)?.equipmentModel?.requiresAttunement&&!owner.attuned)))try{const amount=modifier.formula?evaluateFormula(modifier.formula,values):modifier.value;if(typeof amount==='number')values['@prof']=Math.max(0,applyIrNumber(values['@prof'],modifier,amount));}catch{}
+ if(automationEnabled(c)){
+  const modifiers=active.flatMap(owner=>(irMechanics(owner.entry)?.modifiers||[]).filter(modifier=>modifier.target==='proficiency'&&!modifier.stackGroup).map(modifier=>({owner,modifier}))).sort((a,b)=>irModifierOrder(a.modifier,b.modifier));
+  for(const {owner,modifier}of modifiers)if(irCondition(c,owner,modifier.condition)===true&&!(owner.entry.kind==='item'&&(!owner.equipped||owner.quantity<=0||irMechanics(owner.entry)?.equipmentModel?.requiresAttunement&&!owner.attuned)))try{const amount=modifier.formula?evaluateFormula(modifier.formula,values):modifier.value;if(typeof amount==='number')values['@prof']=Math.max(0,applyIrNumber(values['@prof'],modifier,amount));}catch{}
+ }
  return values;
 }
 export function irAmount(c:Character,row:Selection,value:{value:number}|{formula:string},scores?:Record<Ability,number>):number {

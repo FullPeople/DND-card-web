@@ -7,7 +7,7 @@ import {rememberFeatureResources} from './automation/featureResources';
 import {rememberSourceEquipment} from './automation/sourceEquipment';
 import {removeSelection,syncFeatures} from './sheet';
 import {planSourceSpells,syncSourceSpells} from './automation/sourceSpells';
-import {syncAutoResources,setResource} from './resources';
+import {syncAutoResources,preserveMigrationResources} from './resources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 
 const custom=(e:Entry)=>e.source==='CUSTOM'||!!e.raw._custom;
@@ -127,7 +127,7 @@ export function planBatchCardMigration(original:Character,entries:Entry[],roots:
  // cannot turn this migration into a fresh resource/equipment grant.
  if(supportedAutomation(card)&&card.automation!.enabled===false){
   card.automation!.enabled=true;syncAutoResources(card,original);syncSourceSpells(card,entries);
-  for(const [id,r] of Object.entries(card.runtime.resources))setResource(card,id,r.unlimited?(original.runtime.resources[id]?.current??0):Math.min(r.max,original.runtime.resources[id]?.current??0));
+  preserveMigrationResources(card,original);
   rememberSourceSpellUses(card);rememberFeatureResources(card);card.automation!.enabled=false;
  }
  const plan=finalizeCardMigration(original,entries,card,draft.changed,draft.warnings,identity);

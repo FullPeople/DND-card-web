@@ -7,7 +7,7 @@ import {sourceOwnerIdentity,rememberSourceSpellUses,sourceSpellResourceEnabled} 
 import {specialSpellResource} from '../spellResourceKeys';
 
 type Recovery={short?:number|'all';long?:number|'all'};
-export type ResourceGrant={key:string;ownerId:string;name:string;max:number;formula?:string;recovery:Recovery;origin:string};
+export type ResourceGrant={key:string;ownerId:string;name:string;max:number;formula?:string;recovery:Recovery;origin:string;legacyKey:string;legacyClass?:[string,string,string,string];slot:string};
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 /** Only versioned declarative resources participate; never infer from source prose. */
 export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues:Issue[]}{
@@ -28,29 +28,52 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
     const value=rule.amount==='all'?'all':typeof rule.amount==='number'?rule.amount:irAmount(c,row,{formula:rule.amount},scores);
     if(value!=='all'&&(!Number.isSafeInteger(value)||value<0||value>10000))throw Error('恢复次数超出支持范围');recovery[rule.period as 'short'|'long']=value;
    }
-   const raw=row.entry.raw;
-   // Keep the existing source identity codec solely for receipt compatibility.
-   const identity=cls&&raw.className?JSON.stringify([cls.id,row.entry.source,raw.classSource,raw.subclassShortName||'',row.entry.english]):sourceOwnerIdentity(c,row);
+   const raw=row.entry.raw,record=row.entry.automation!;
+   const identity=JSON.stringify([cls?.id||sourceOwnerIdentity(c,row),record.identity.key]);
+   // The old display-based codec is read only when migrating an existing ledger.
+   const legacyIdentity=cls&&raw.className?JSON.stringify([cls.id,row.entry.source,raw.classSource,raw.subclassShortName||'',row.entry.english]):sourceOwnerIdentity(c,row);
    const legacy=/^resource:(\d+)$/.exec(spec.key),key=legacy?legacy[1]:spec.key;
    // Only the display label comes from the retained source snapshot. Maximum,
    // formula, recovery and resource identity above are exclusively IR values.
    const label=/^resource:\d+$/.test(spec.key)&&Array.isArray(row.entry.raw.resources)?row.entry.raw.resources[Number(spec.key.slice(9))]?.name:undefined;
-   const grant:ResourceGrant={key:`feature-resource:${identity}:${key}`,ownerId:row.id,name:typeof label==='string'&&label.length<=160?label:row.entry.name,max,...(spec.formula?{formula:irRollFormula(c,row,spec.formula)}:{}),recovery,origin:`${row.entry.name} · ${row.entry.source}`};
+   const grant:ResourceGrant={key:`feature-resource:ir-v1:${identity}:${key}`,legacyKey:`feature-resource:${legacyIdentity}:${key}`,slot:key,...(cls&&record.identity.classEngName?{legacyClass:[cls.id,record.identity.source,record.identity.classSource||'',record.identity.engName] as [string,string,string,string]}:{}),ownerId:row.id,name:typeof label==='string'&&label.length<=160?label:row.entry.name,max,...(spec.formula?{formula:irRollFormula(c,row,spec.formula)}:{}),recovery,origin:`${row.entry.name} · ${row.entry.source}`};
    const existing=grants.findIndex(g=>g.key===grant.key);if(existing<0)grants.push(grant);else if(grant.max>=grants[existing].max)grants[existing]=grant;
   }catch(error){issues.push({id:`resource:${row.id}:${index}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${error instanceof Error?error.message:String(error)}，未执行资源规则。`});}
  }
- return {grants,issues};
+ const blocked=new Set<string>();
+ for(const [key,r]of Object.entries({...c.runtime.featureResourceArchive,...c.runtime.resources})){
+  const matches=grants.filter(grant=>legacyResourceMatches(key,r,grant));
+  if(matches.length>1)for(const grant of matches){blocked.add(grant.key);issues.push({id:`resource-ledger:${grant.ownerId}:${grant.slot}`,selectionId:grant.ownerId,severity:'warning',message:`${grant.name}：旧消费记录无法唯一关联，未重新授予次数，请手动核对。`});}
+ }
+ return {grants:grants.filter(grant=>!blocked.has(grant.key)),issues};
 }
 export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
+const normalized=(value:unknown)=>String(value??'').normalize('NFKC').trim().toLowerCase();
+function legacyResourceMatches(key:string,resource:RuntimeResource,grant:ResourceGrant){
+ if(!resource.featureGrant||!key.startsWith('feature-resource:')||key.startsWith('feature-resource:ir-v1:')||!key.endsWith(`:${grant.slot}`))return false;
+ if(key===grant.legacyKey||resource.featureGrant.ownerId===grant.ownerId)return true;
+ if(!grant.legacyClass)return false;
+ try{const parts=JSON.parse(key.slice(17,-grant.slot.length-1));return Array.isArray(parts)&&parts.length===5&&parts[0]===grant.legacyClass[0]&&[parts[1],parts[2],parts[4]].every((value,index)=>normalized(value)===normalized(grant.legacyClass![index+1]));}catch{return false;}
+}
+export function featureResourceReceipts(history:Record<string,RuntimeResource>,grant:ResourceGrant,grants:ResourceGrant[]){
+ return Object.entries(history).filter(([key,r])=>key===grant.key||!grants.some(other=>other.key===key)&&legacyResourceMatches(key,r,grant)&&grants.filter(other=>legacyResourceMatches(key,r,other)).length===1);
+}
 /** Own lifecycle and recovery only; preserve player-owned presentation and overrides. */
 export function syncFeatureResources(c:Character){
  if(!automationEnabled(c))return false;
  const before=JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);rememberFeatureResources(c);
- const needed=new Set<string>();
- for(const grant of planFeatureResources(c).grants){needed.add(grant.key);const old=c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key];
+ const needed=new Set<string>(),grants=planFeatureResources(c).grants;
+ for(const grant of grants){needed.add(grant.key);
+  const history={...c.runtime.featureResourceArchive,...c.runtime.resources};
+  // A legacy key without a canonical identity is adopted only by one unique
+  // matching grant. Merge duplicate receipts using the greatest consumption.
+  const aliases=featureResourceReceipts(history,grant,grants).filter(([key])=>key!==grant.key);
+  const candidates=[c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key],...aliases.map(([,r])=>r)].filter((r):r is RuntimeResource=>!!r);
+  const old=candidates[0];
   const manual=old?.featureGrant?.manualMax||!!old?.featureGrant&&old.max!==old.featureGrant.ruleMax;
-  const max=manual?old!.max:grant.max,spent=old?old.featureGrant?.spent??Math.max(0,old.max-old.current):0;
+  const max=manual?old!.max:grant.max,spent=Math.max(0,...candidates.map(r=>Math.max(r.featureGrant?.spent??0,r.max-r.current)));
   c.runtime.resources[grant.key]={...old,name:grant.name,type:old?.type||'count',icon:old?.icon||'gem',max,current:Math.max(0,max-spent),featureGrant:{ownerId:grant.ownerId,ruleMax:grant.max,manualMax:manual,spent,recovery:grant.recovery,formula:grant.formula,origin:grant.origin}};
+  for(const [key]of aliases){delete c.runtime.resources[key];delete c.runtime.featureResourceArchive?.[key];}
  }
  for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key)&&(!c.selections.some(row=>row.id===r.featureGrant!.ownerId)||c.selections.some(row=>row.id===r.featureGrant!.ownerId&&reviewedRecord(row.entry))))delete c.runtime.resources[key];
  for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant)(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);

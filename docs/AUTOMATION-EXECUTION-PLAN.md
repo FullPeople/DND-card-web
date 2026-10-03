@@ -296,7 +296,7 @@ DND-card-web 加载器 ──► Entry.automation ──► 执行器（evaluate
 
 ```
 identity = {
-  kind, source(大写), engName, 
+  kind, source(大写), engName,
   classSource, classEngName(通过同文件 class[].name↔ENG_name 解析),
   subclassSource, subclassEngShortName(通过 subclass[].shortName↔ENG_shortName 解析),
   level(feature 才有), raceEngName(subrace 才有), extra(规则类附加键)
