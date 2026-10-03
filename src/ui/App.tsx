@@ -158,7 +158,7 @@ export default function App() {
   const firstWorkbenchRole=useRef(false),previousTarget=useRef(''),restoredMapTarget=useRef<string|undefined>(undefined);
   const wikiVisible=!inWorkbench||!!wb.visibility?.wiki,monstersVisible=!inWorkbench||!!wb.visibility?.monsters;
   useEffect(()=>{if(!inWorkbench||!wb.role)return;if(!firstWorkbenchRole.current){firstWorkbenchRole.current=true;setWorkbenchPage('console');}},[wb.role]);
-  useEffect(()=>{const key=wb.target?.key||'',id=wb.target?.targetId||(wb.target?.cardId?`card:${wb.target.cardId}`:wb.target?.itemId);if(!groupRoll&&previousTarget.current&&key&&key!==previousTarget.current){if(restoredMapTarget.current!==id)setWorkbenchPage('sheet');restoredMapTarget.current=undefined;}previousTarget.current=key;},[wb.target?.key]);
+  useEffect(()=>{const key=wb.target?.key||'',id=wb.target?.targetId||(wb.target?.cardId?`card:${wb.target.cardId}`:wb.target?.itemId);if(!groupRoll&&previousTarget.current&&key&&key!==previousTarget.current){if(restoredMapTarget.current!==id&&restoredMapTarget.current!==wb.target?.itemId)setWorkbenchPage('sheet');restoredMapTarget.current=undefined;}previousTarget.current=key;},[wb.target?.key]);
   useEffect(()=>{const show=()=>{if(!groupRoll){setWorkbenchPage('sheet');setTab('sheet');}};window.addEventListener('workbench-show-sheet',show);return()=>window.removeEventListener('workbench-show-sheet',show);},[groupRoll]);
   useEffect(()=>{if(wb.compose&&!groupRoll)setWorkbenchPage('dice');},[wb.compose?.id]);
   useEffect(()=>{if(inWorkbench)document.body.classList.add('suite-workbench');return()=>document.body.classList.remove('suite-workbench');},[]);

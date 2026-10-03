@@ -23,7 +23,7 @@ async function open(page:Page,options:{offRoster?:boolean;malformed?:boolean}={}
   const snapshot=(partial=false)=>({sequence:++sequence,access:access(),state:{...state,...(partial?{resources:undefined}:{})},document:raw});
   const catalog=()=>{const row=options.malformed?{...state,resources:{breath:state.resources[0],bad:null},conditions:[null,{id:'prone',name:'倒地',entry:{id:'legacy-prone',name:'倒地',raw:null,entries:null}}]}:state;send('catalog',{sequence:++sequence,access:access(),cards:[native],monsters:options.offRoster?[]:[row],role:'GM',enabled:access().enabled,visibility:{wiki:true,monsters:true}});};
   const requests:any[]=[],pending:any[]=[];
-  const fixture:any={state,native,requests,pending,hold:false,snapshot,send,catalog,access,setAccess:(value:any)=>{overrideAccess=value;send('access',{access:value});},boot:()=>{send('ready');catalog();send('selection',snapshot());send('navigate');},settle:(message?:any)=>{
+  const fixture:any={state,native,document,requests,pending,hold:false,snapshot,send,catalog,access,setAccess:(value:any)=>{overrideAccess=value;send('access',{access:value});},boot:()=>{send('ready');catalog();send('selection',snapshot());send('navigate');},settle:(message?:any)=>{
    const m=message||pending.shift();if(!m)return;
    if(m.type==='condition'){
     if(m.action==='add')state.conditions=[...state.conditions.filter((c:any)=>c.id!==m.condition.id),m.condition];
@@ -56,9 +56,13 @@ test('drag invisible into the monster overview survives omitted-resource ACK, re
  await drag(page,source,card.locator('.resource179-name'));await expect(card.locator('[data-overview-condition]')).toHaveText('隐形');await expect(card.locator('[data-resource-id="breath"]')).toBeVisible();
  expect(await page.evaluate(()=>(window as any).monster234.requests.find((m:any)=>m.type==='condition').itemId)).toBe('monster:m');
  await page.screenshot({path:info.outputPath('invisible-overview-after-partial-ack.png')});
- const chip=card.locator('[data-overview-condition]'),box=(await chip.boundingBox())!;await page.mouse.move(box.x+8,box.y+8);await page.mouse.down();await page.mouse.move(5,5,{steps:12});await page.mouse.up();await expect(chip).toHaveCount(0);
+ // The add gesture hides the real chip during its landing animation. A raw
+ // mouseDown before that ends hits the page underneath, selecting text instead.
+ const chip=card.locator('[data-overview-condition]');await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(chip).toBeVisible();
+ const box=(await chip.boundingBox())!;await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(5,5,{steps:12});await expect(page.locator('.pointer-ghost.removal-preview')).toHaveCount(1);await page.mouse.up();
+ await expect.poll(()=>page.evaluate(()=>(window as any).monster234.requests.filter((m:any)=>m.type==='condition').at(-1))).toMatchObject({action:'remove',itemId:'monster:m'});await expect(chip).toHaveCount(0);await expect.poll(()=>page.evaluate(()=>(window as any).monster234.state.conditions.length)).toBe(0);await expect(page.locator('.pointer-ghost')).toHaveCount(0);
  await drag(page,source,card.locator('.resource179-name'));await expect(chip).toHaveText('隐形');
- await page.reload();await expect(page.locator('.app-shell')).toBeVisible();await page.evaluate(()=>(window as any).monster234.boot());await expect(page.locator('.workbench-monster [data-overview-condition]')).toHaveText('隐形');expect(errors).toEqual([]);
+ await page.reload();await expect(page.locator('.app-shell')).toBeVisible();await page.evaluate(()=>(window as any).monster234.boot());await expect(page.getByRole('tab',{name:'双绑定旅人',exact:true})).toBeVisible();await page.evaluate(()=>(window as any).monster234.send('navigate'));await expect(page.locator('.workbench-monster [data-overview-condition]')).toHaveText('隐形');expect(errors).toEqual([]);
 });
 
 test('monster sheet stays usable while a condition receipt arrives after switching to the character',async({page},info)=>{
@@ -93,4 +97,13 @@ test('an owner can use their authorized monster card while global monster search
  const errors=await open(page);await page.evaluate(()=>{const f=(window as any).monster234;f.setAccess({...f.access(),epoch:2,role:'PLAYER'});f.send('catalog',{sequence:f.snapshot().sequence,access:f.access(),cards:[f.native],monsters:[f.state],role:'PLAYER',enabled:f.access().enabled,visibility:{wiki:true,monsters:false}});f.send('selection',f.snapshot());f.send('navigate');});
  await expect(page.locator('.paper .workbench-monster')).toBeVisible();await expect(page.getByRole('switch',{name:'怪物编辑模式'})).toBeEnabled();await expect(page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'怪物',exact:true})).toHaveCount(0);
  await drag(page,await wikiCondition(page,'束缚'),page.locator('.workbench-monster > header'));await expect(page.locator('.workbench-monster [data-overview-condition]')).toHaveText('束缚');expect(errors).toEqual([]);
+});
+
+for(const restoreId of ['m','monster:m'])test(`map follow restores the dice page for ${restoreId==='m'?'raw token alias':'explicit monster target'}`,async({page},info)=>{
+ const errors=await open(page);await page.getByRole('button',{name:'投骰',exact:true}).click();await expect(page.locator('.app-shell')).toHaveAttribute('data-workbench-page','dice');
+ await page.evaluate(()=>{const f=(window as any).monster234;f.send('navigate',{itemId:'card:c',followSelection:true,followRevision:1});f.send('selection',{sequence:f.snapshot().sequence,state:f.native,document:f.document,access:f.access(),followRevision:1});});
+ await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('20');await expect(page.locator('.app-shell')).toHaveAttribute('data-workbench-page','sheet');
+ await page.evaluate(itemId=>{const f=(window as any).monster234;f.send('followEnd',{itemId,followRevision:2});f.send('selection',{...f.snapshot(),followRevision:2});},restoreId);
+ await expect(page.locator('.workbench-bar > strong')).toHaveText('桥卫');await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ await expect(page.locator('.app-shell')).toHaveAttribute('data-workbench-page','dice');await page.screenshot({path:info.outputPath('restored-dice-page.png')});expect(errors).toEqual([]);
 });
