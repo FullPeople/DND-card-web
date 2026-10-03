@@ -64,7 +64,9 @@
 .resource-module-art .rm-pools.has-many-pools .rm-pool{padding:1px;gap:1px 3px;border-bottom-width:1px}
 .resource-module-art .rm-pools.has-many-pools .rm-pool-label{font-size:9px}
 .resource-module-art .rm-pools.has-many-pools .rm-pool-current{font-size:13px}
-.resource-module-art .rm-pools-poolchips .rm-pool{border:0;border-radius:3px;padding:2px 4px;justify-content:flex-end;background:color-mix(in srgb,var(--rm-tone) 12%,transparent)}
+/* Rows are column compositions: the old row-axis flex-end pins the last maximum
+   against the clipped edge, where Firefox's glyph bounds exceed the line box. */
+.resource-module-art .rm-pools-poolchips .rm-pool{border:0;border-radius:3px;padding:2px 4px;justify-content:center;background:color-mix(in srgb,var(--rm-tone) 12%,transparent)}
 .resource-module-art .rm-pools-poolchips.is-spell-pool .rm-pool-label{position:absolute;top:0;left:4px;font-size:21px;opacity:.2}
 .resource-module-art .rm-pools-poolchips .rm-pool-current{position:relative;z-index:1}
 .resource-module-art .rm-pools-poolchips.has-many-pools .rm-pool-label{font-size:11px}

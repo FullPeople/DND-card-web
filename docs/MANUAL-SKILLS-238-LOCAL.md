@@ -17,3 +17,15 @@
 ```sh
 npx playwright test --config playwright.direct232.config.ts tests/e2e/direct232SkillsAttacks.spec.ts
 ```
+
+
+## CI2 失败诊断与定向修订
+
+实际 Web 6ad412e4 / CI 37100640190 的 direct232 组为 12 通过、2 失败，不能记为全绿。手动开关、来源撤回/撤销、保存刷新已经走到最终深比较，失败原因是期望漏写取消熟练时明确保存的 expertise.perception=false；现保留完整对象比较并加入该字段。另一标签页只读和两种布局宽窄验收均实际通过。
+
+Suite 权限用例误放在 standalone 配置。日志显示 level0 空卡，而 standalonePlugin 会在编译期移除 Suite 传输并固定 inWorkbench=false，故模拟消息从未载入目标。用例已移到 manualSkillsPermissions.spec.ts，注册于现有 source-feedback 的 integrated 项目，不跳过权限验收。新断言先验证目标姓名按钮、隐匿专精及 +8 数值，再开启编辑验证真实姓名输入和勾选态，撤回权限后验证原目标、衍生结果与无 save 消息。浏览器复验等待下一次 CI；本次不改变运行源码。
+
+```sh
+npx playwright test --config playwright.direct232.config.ts tests/e2e/direct232SkillsAttacks.spec.ts
+npx playwright test --config playwright.source-feedback.config.ts tests/e2e/manualSkillsPermissions.spec.ts --project=integrated
+```
