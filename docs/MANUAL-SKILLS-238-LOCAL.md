@@ -29,3 +29,10 @@ Suite 权限用例误放在 standalone 配置。日志显示 level0 空卡，而
 npx playwright test --config playwright.direct232.config.ts tests/e2e/direct232SkillsAttacks.spec.ts
 npx playwright test --config playwright.source-feedback.config.ts tests/e2e/manualSkillsPermissions.spec.ts --project=integrated
 ```
+
+
+## A4 编辑态技能名窄修
+
+最终浏览器截图与 CI1 编辑态对照确认：双控件把状态列从 10px 增至 24px 后，A4 编辑态两字技能名被挤成一个字；原对齐与行宽断言不能发现文字被省略。只对 A4 编辑态将状态/数值/调整列收为 22/21/24px、列间距 1px，双控件内部间距 2px，两个控件各自 10×10px 和行高保留，读取态与响应式规则不变。
+
+浏览器用例新增全部 18 个真实两字名称的 scrollWidth/clientWidth 检查，并核对控件尺寸与键盘焦点；原有长名称省略、数值列对齐、整页无横溢出断言保留。宽窄 A4 截图改为真实名称，避免被故意的长名称夹具遮蔽。窄修本地类型与发现检查通过不代表浏览器视觉已验收，仍须精确候选 CI 的新断言及截图复验。

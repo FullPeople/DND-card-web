@@ -23,3 +23,9 @@
 .paper .overview-sheet .ability-box .ability-proficiency-row>.proficiency-manual{display:flex;gap:3px;width:var(--check-status-width);height:12px;cursor:default}
 .paper .ability-proficiency-row input.proficiency-manual-check,.paper .ability-proficiency-row input.expertise-check{flex:none;width:10px;min-width:10px;max-width:10px;height:10px;min-height:10px;max-height:10px;margin:0;padding:0;cursor:pointer}
 .paper .overview-sheet .ability-box:has(.proficiency-manual) .ability-proficiency-row>:first-child{height:12px}
+
+/* Two manual controls must not consume the A4 skill-name column. Keep the
+   existing control sizes and row height; compact only the surrounding tracks. */
+.sheet-viewport.a4-mode .paper .overview-sheet .ability-box:has(.proficiency-manual) .ability-proficiency-row{--check-status-width:22px;--check-value-width:21px;--check-adjustment-width:24px;column-gap:1px}
+.sheet-viewport.a4-mode .paper .overview-sheet .ability-box .proficiency-manual{gap:2px}
+.sheet-viewport.a4-mode .paper .overview-sheet .ability-box .ability-proficiency-row input.skill-extra-adjustment{width:var(--check-adjustment-width);max-width:var(--check-adjustment-width)}
