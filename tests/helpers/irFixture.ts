@@ -20,7 +20,7 @@ function fixtureContext(entry:Entry,context:Entry[]){
  const rows=context.map(candidate=>material(candidate,context));
  const declare=(name:string,source:string,kind:Entry['kind'],raw:Entry['raw']={})=>{
   source=source.toUpperCase();
-  if(rows.some(candidate=>candidate.identity.source===source&&(candidate.identity.kind===kind||kind==='feature'&&['classFeature','subclassFeature','optionalfeature'].includes(candidate.identity.kind))&&[candidate.raw.name,candidate.raw.ENG_name,candidate.identity.engName].includes(name)))return;
+  if(rows.some(candidate=>candidate.identity.source===source&&(candidate.identity.kind===kind||kind==='feature'&&['classFeature','subclassFeature','optionalfeature'].includes(candidate.identity.kind)||kind==='item'&&['baseitem','magicvariant','itemGroup'].includes(candidate.identity.kind))&&[candidate.raw.name,candidate.raw.ENG_name,candidate.identity.engName].includes(name)))return;
   rows.push(material({id:`declared:${kind}:${source}:${name}`,kind,name,english:name,source,edition:entry.edition,packId:entry.packId,revision:'fixture',entries:[],raw},context));
  };
  // Author-declared references have identities even when their body has not been
@@ -40,9 +40,11 @@ function fixtureContext(entry:Entry,context:Entry[]){
 export function irFixture(entry:Entry,override?:Mechanics,context:Entry[]=[entry],prepared?:ReturnType<typeof fixtureContext>):Entry{
  const row=material(entry,context),derived=deriveStructured(row,prepared||fixtureContext(entry,context));
  const mechanics:Mechanics={...derived.mechanics,...override};
+ const effectTargets=new Set((entry.effects||[]).flatMap(effect=>effect.op==='proficiency'?[]:[effect.target==='speed'?'speed.walk':effect.target]));
+ if(effectTargets.size)mechanics.modifiers=(mechanics.modifiers||[]).filter(modifier=>!effectTargets.has(modifier.target));
  for(const effect of entry.effects||[]){
   if(effect.op==='proficiency')(mechanics.grants||=[]).push({type:'skillProficiency',fixed:[skillKey(effect.skill)]});
-  else {mechanics.modifiers=(mechanics.modifiers||[]).filter(modifier=>modifier.target!==effect.target);mechanics.modifiers.push({target:effect.target==='speed'?'speed.walk':effect.target,op:effect.op,value:effect.value});}
+  else {(mechanics.modifiers||=[]).push({target:effect.target==='speed'?'speed.walk':effect.target,op:effect.op,value:effect.value});}
  }
  const options:NonNullable<Entry['automationOptions']>={};
  for(const choice of entry.choices||[]){const from=choice.options||choice.refs||[],skills=!choice.kind&&from.every(value=>['athletics','acrobatics','arcana','history','nature','religion','perception'].includes(skillKey(value)));if(!from.length)continue;(mechanics.grants||=[]).push({type:skills?'skillProficiency':'feature',key:`custom:${choice.id}`,choose:{count:choice.count,from},origin:`rulePackChoice:${choice.kind||'option'}`});options[`custom:${choice.id}`]={label:choice.label,options:Object.fromEntries(from.map(reference=>[reference,{label:choice.optionLabels?.[reference]||reference,reference}]))};}

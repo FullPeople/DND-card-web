@@ -1,6 +1,6 @@
 import {resourceModules,type WidgetStyle,type ResourceModule,type ResourceWidgetLayout} from '../core/resourceWidgets';
 import {CompactResource,CompactResourceGrid,CompactResourceCanvas} from './CompactResources';
-import {OverviewResourceDashboard} from './OverviewResourceDashboard';
+import {OverviewDashboardHost,useOverviewDashboard} from './OverviewDashboardHost';
 import {GroupRollArea} from './GroupRollArea';
 import {SpellSlotResources,isSpellSlot} from './SpellSlotResources';
 import {isHitDieResource} from '../core/resources';
@@ -24,7 +24,8 @@ import {OverviewConditions} from './OverviewConditions';
 import {AdaptiveFrameArt} from './AdaptiveCardAtmosphere';
 import {useAdaptiveCardGravity} from './useAdaptiveCardGravity';
 import {currencyRows} from '../core/currency';
-export function DMConsole(_props:{navigate:(page:string)=>void}){
+export function DMConsole(_props:{navigate:(page:string)=>void}){return useOverviewDashboard()?<ConsoleContent/>:<OverviewDashboardHost><ConsoleContent/></OverviewDashboardHost>;}
+function ConsoleContent(){
  const wb=useWorkbench(),[error,setError]=useState(''),[kind,setKind]=useState('text'),[text,setText]=useState(''),[busy,setBusy]=useState(false);
  const gm=wb.role==='GM',history=useActionHistory();
  const act=(action:string,extra:Record<string,unknown>={})=>workbenchRequest('console',{action,...extra}).catch(e=>{setError(String(e));});
@@ -43,6 +44,8 @@ function ResourceOverview(){
  return <section className="resource-overview"><header className="resource-section-heading"><h3>玩家资源</h3><div className="segmented">{(['player','monster'] as const).map(k=><button key={k} aria-pressed={kind===k} onClick={()=>setKind(k)}>{k==='player'?'玩家':'怪物'}</button>)}</div><ResourcePresets give={give} disabled={!wb.online}/></header><div className="console-roster">{roster.map(card=><ResourceCard key={card.id} card={card} online={wb.online} gm={gm} error={setError}/>)}</div>{duplicate&&<DuplicateResource name={duplicate.resource.name||''} choose={choice=>{if(choice!==null)give(duplicate.resource,duplicate.card.id,choice);setDuplicate(undefined);}}/>}</section>;
 }
 function ResourceCard({card,online,gm,error}:{card:CardChoice;online:boolean;gm:boolean;error:(value:string)=>void}){
+ const openDashboard=useOverviewDashboard();
+ const openEditor=(id:string)=>{if(card.kind==='monster')setEditing(id);else openDashboard?.(card,id);};
  const wb=useWorkbench(),stockId=card.kind==='monster'?`monster:${card.id}`:`card:${card.id}`,stock=wb.inventory?.containers[stockId];
  const [pending,setPending]=useState<Record<string,{value:ResourceValue|null;turn:number;requestId?:string}>>({}),[editing,setEditing]=useState(''),generation=useRef(0),unknown=useRef(new Map<string,{id:string;value:ResourceValue|null}>());
  const clearPending=(id:string,turn:number)=>setPending(rows=>{if(rows[id]?.turn!==turn)return rows;const next={...rows};delete next[id];return next;});
@@ -61,15 +64,15 @@ function ResourceCard({card,online,gm,error}:{card:CardChoice;online:boolean;gm:
  const resourceMap=new Map<string,ResourceValue>(card.resources.map(r=>[r.id,r]));for(const [id,row] of Object.entries(pending)){if(row.value)resourceMap.set(id,{...row.value,id});else resourceMap.delete(id);}const resources=[...resourceMap.values()].filter(row=>!isHitDieResource(row.id||''));
  const visibleResources=card.kind==='monster'?resources:resources.filter(row=>!card.resourceHidden?.includes(`resource:${row.id}`));
  const modules=resourceModules(visibleResources.map(r=>[r.id!,r]),card.resourceWidgets,card.classSummary);
- const resourceRow=(r:ResourceValue)=><ResourceRow resource={r} confirmedCurrent={card.resources.find(row=>row.id===r.id)?.current} label={card.name} enabled={editable} gm={gm} change={n=>save(r.id!,{...r,current:n},{current:n})} configure={()=>setEditing(r.id!)} lock={()=>void save(r.id!,{...r,locked:!r.locked},{locked:!r.locked}).catch(()=>{})}/>;
+ const resourceRow=(r:ResourceValue)=><ResourceRow resource={r} confirmedCurrent={card.resources.find(row=>row.id===r.id)?.current} label={card.name} enabled={editable} gm={gm} change={n=>save(r.id!,{...r,current:n},{current:n})} configure={()=>openEditor(r.id!)} lock={()=>void save(r.id!,{...r,locked:!r.locked},{locked:!r.locked}).catch(()=>{})}/>;
  const resourceModule=(module:ResourceModule,layout?:ResourceWidgetLayout)=><div className="resource179-physical" data-adaptive-physical="overview-resource" key={module.id}><CompactResource resource={{...module.rows[0][1],id:module.id}} module={module} layout={layout||card.resourceWidgets?.[module.id]} render={resourceRow}/>{frame()}</div>;
  return <DropZone className="overview-give-zone" kinds={['item','condition']} allowExisting accepts={entry=>entry.kind==='condition'?canReceiveCondition:editable&&!!stock} onReceive={entry=>{if(entry.kind==='condition'){changeCondition('add',{id:entry.id,name:entry.name,entry});return;}if(stock)void inventoryRequest({action:'add',container:stock.id,expected:{[stock.id]:stock.revision},row:stockFromEntry(entry)}).catch(e=>error(diagnosticText(e)));}}><OverviewVisuals visuals={visuals} data-resource-scope="player" data-resource-target={card.id} data-inventory-recipient={stockId} data-condition-recipient={card.kind==='monster'?(card.targetId||card.itemId):`card:${card.id}`} data-condition-write={editable} data-condition-receive={canReceiveCondition}>
- <header className="resource179-heading"><button className="resource179-name" data-adaptive-prone onClick={()=>chooseWorkbench(card.kind==='monster'?(card.targetId||card.itemId):`card:${card.id}`)}><span>{card.name}</span>{'player' in card&&typeof card.player==='string'&&card.player&&<small>{card.player}</small>}</button><OverviewConditions conditions={conditions} editable={editable} source={card.kind==='monster'?(card.targetId||card.itemId):`card:${card.id}`} change={changeCondition}/><button className="resource179-add" aria-label={`管理${card.name}资源`} disabled={!editable} onClick={()=>setEditing('new')}>＋</button></header>
+ <header className="resource179-heading"><button className="resource179-name" data-adaptive-prone onClick={()=>chooseWorkbench(card.kind==='monster'?(card.targetId||card.itemId):`card:${card.id}`)}><span>{card.name}</span>{'player' in card&&typeof card.player==='string'&&card.player&&<small>{card.player}</small>}</button><OverviewConditions conditions={conditions} editable={editable} source={card.kind==='monster'?(card.targetId||card.itemId):`card:${card.id}`} change={changeCondition}/><button className="resource179-add" aria-label={`管理${card.name}资源`} disabled={!editable} onClick={()=>openEditor('new')}>＋</button></header>
  <div className="resource179-body adaptive-physics-area" ref={physical}><div className="resource179-vitals resource179-physical" data-adaptive-physical="overview-vitals" data-adaptive-speed><Vitals stats={card.stats} input={value} locked={card.locked} lockLabel={`${card.name}${card.locked?'解锁':'上锁'}`} disabled={!editable} lock={()=>void request('lock',{locked:!card.locked}).catch(e=>error(diagnosticText(e)))}/>{frame()}</div>
  <div className="overview-passive resource179-physical" data-adaptive-physical="overview-passive">被动察觉 <b>{card.passive??'—'}</b>{frame()}</div>
  <div className="overview-character-facts" data-adaptive-physical="overview-coins">{currencyRows(card.coins).map(row=><span key={row.coin}>{row.amount} {row.name}</span>)}</div>
  {card.kind==='monster'?<CompactResourceGrid rows={modules} render={resourceModule} span={m=>m.slots||m.rows.length>1?3:1} label={`${card.name}资源模块`}/>:<CompactResourceCanvas modules={modules} widgets={card.resourceWidgets} attacks={card.resourceAttacks} render={resourceModule} label={`${card.name}资源模块`}/>}</div>
- </OverviewVisuals>{editing&&(card.kind==='monster'?<ResourceEditor key={editing} gm={gm} value={card.resources.find(r=>r.id===editing)} disabled={!editable} close={()=>setEditing('')} save={resource=>save(editing==='new'?crypto.randomUUID():editing,resource)} remove={editing==='new'?undefined:()=>save(editing,null)}/>:<OverviewResourceDashboard key={editing} card={card} gm={gm} disabled={!editable} initialResourceId={editing==='new'?'':editing} close={()=>setEditing('')}/>)}
+ </OverviewVisuals>{editing&&card.kind==='monster'&&<ResourceEditor key={editing} gm={gm} value={card.resources.find(r=>r.id===editing)} disabled={!editable} close={()=>setEditing('')} save={resource=>save(editing==='new'?crypto.randomUUID():editing,resource)} remove={editing==='new'?undefined:()=>save(editing,null)}/>}
  </DropZone>;
 }
 

@@ -72,6 +72,8 @@ export interface Character {
   dismissedFeatures?: string[];
   featureLayout?: { detailsExpanded?:string[]; optionsVisible?:Record<string,boolean>; order: string[]; expanded: string[] };
   adjustments?: { id: string; target: string; value: number; reason: string }[];
+  /** Evidence retained when the user explicitly resolves a legacy AC override. */
+  armorAdjustmentHistory?: {version:1;action:'restore'|'convert';records:{id:string;target:'ac'|string;value:number;reason:string}[];previousBonus:number;previousTotal:number;ruleTotal:number;resultingBonus:number}[];
   externalSnapshot?: Raw;
   runtime: { rests?:import('./automation/rest').RestState; automaticResourceArchive?:Record<string,RuntimeResource>; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
 }

@@ -1,3 +1,4 @@
+import {startupPhase,subscribeStartup} from './startup';
 import {MonsterRuntime,runtimeFrom} from '../core/workbenchRuntime';
 import {boundedDiceHistory} from './diceHistory';
 import {WorkbenchSnapshotCache,type CacheAccess} from './workbench-cache';
@@ -26,7 +27,7 @@ const listeners=new Set<()=>void>(),pending=new Map<string,{resolve:(value?:any)
 let authoritativeInventory:InventoryState|undefined;
 let revisions=new WorkbenchRevisions();
 const snapshotCache=new WorkbenchSnapshotCache();
-const clientInstance=crypto.randomUUID();
+let clientInstance=crypto.randomUUID(),clientStarted=performance.timeOrigin;
 let clientSelection=0,wantedSelection:string|undefined;
 let switchMetric:{id:number;started:number;key?:string;stages:Record<string,number|boolean>}|undefined;
 function switchStage(stage:string,reused?:boolean){if(!switchMetric||!params.has('measureSwitch')||stage in switchMetric.stages)return;switchMetric.stages[stage]=Math.round((performance.now()-switchMetric.started)*100)/100;if(reused!==undefined)switchMetric.stages.reused=reused;window.dispatchEvent(new CustomEvent('workbench-switch-metric',{detail:{id:switchMetric.id,...switchMetric.stages}}));}
@@ -105,7 +106,7 @@ function acceptSnapshot(m:any){
  }
  selectionSequence=m.sequence||selectionSequence;update({target:m.state,document:m.document!==undefined?m.document:same?state.document:undefined,loading:!!m.loading,message:m.error||''});
 }
-function send(type:string,extra:Record<string,unknown>={}){const m={protocol,type,session,clientInstance,...extra};if(host&&!host.closed)host.postMessage(m,origin!);else if(relay)void relay.send(m).catch(()=>{});}
+function send(type:string,extra:Record<string,unknown>={}){const m={protocol,type,session,clientInstance,clientStarted,...(['hello','ping'].includes(type)?{startupPhase:startupPhase()}:{}),...extra};if(host&&!host.closed)host.postMessage(m,origin!);else if(relay)void relay.send(m).catch(()=>{});}
 function previewSelection(itemId:string){
  const card=state.cards.find(card=>itemId===`card:${card.id}`||itemId===card.itemId),cached=state.online?snapshotCache.get(itemId,card?.documentRevision||0):undefined;
  if(cached){if(switchMetric)switchMetric.key=cached.state.key;switchStage('memory');update({target:{...cached.state,pinned:state.target?.pinned??cached.state.pinned},document:cached.document,loading:false,message:''});}
@@ -132,7 +133,7 @@ function acceptAccess(access:CacheAccess){
  return true;
 }
 export function composeRoll(expression:string,label=''){window.dispatchEvent(new CustomEvent('workbench-compose-local',{detail:{expression,label,id:crypto.randomUUID()}}));}
-function discover(w:Window,depth=0){if(depth>3)return;try{w.postMessage({protocol,type:'hello',session,clientInstance},origin!);for(let i=0;i<Math.min(w.length,64);i++)discover(w.frames[i],depth+1);}catch{}}
+function discover(w:Window,depth=0){if(depth>3)return;try{w.postMessage({protocol,type:'hello',session,clientInstance,clientStarted,startupPhase:startupPhase()},origin!);for(let i=0;i<Math.min(w.length,64);i++)discover(w.frames[i],depth+1);}catch{}}
 function requestHello(){
  // A heartbeat proves transport liveness, not that the initial catalog arrived.
  // Retry only this read-only handshake; pending mutations keep their own ACK path.
@@ -143,6 +144,7 @@ function requestHello(){
  send('hello');
 }
 if(inWorkbench){
+ subscribeStartup(()=>send('startup',{startupPhase:startupPhase()}));
  startWorkbenchSound();
  function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;followRevision=0;monsterRuntime.reset();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;clientSelection=0;update({access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
   if(!state.online)update({online:true,message:''});
@@ -201,7 +203,15 @@ if(inWorkbench){
   if(host&&now-lastDirect>2500)send('ping');
   else if(!host&&relay&&handshakeReady&&handshakeCatalog&&now-lastRelayPing>=10000){lastRelayPing=now;send('ping');}
  };
- connect();setInterval(connect,1000);window.addEventListener('focus',connect);window.addEventListener('pageshow',connect);
+ connect();setInterval(connect,1000);window.addEventListener('focus',connect);window.addEventListener('pageshow',event=>{
+  if((event as PageTransitionEvent).persisted){
+   // BFCache revives the old document after another document may have retired
+   // its identity. Treat this activation as fresh while preserving its actual
+   // intro phase and workspace; never replay edits or skip a pending fade.
+   clientInstance=crypto.randomUUID();clientStarted=Math.max(clientStarted+1,Date.now(),performance.timeOrigin+performance.now());resetHandshake(true,false);
+  }
+  connect();
+ });
 }
 export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},()=>state);}
 export function pinWorkbench(pinned:boolean){if(!state.online||!state.target)return;const target=state.target;update({target:{...target,pinned}});send('pin',{pinned,itemId:target.targetId||target.itemId});}

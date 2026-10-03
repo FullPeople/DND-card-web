@@ -1,6 +1,6 @@
 {
   "sourceRepository": "FullPeople/dnd5e-automation-data",
-  "sourceCommit": "d60422b906a6da646796d2e1bac1194ff8e4e2e9",
+  "sourceCommit": "5f24e49380777d189fc4aefda712c780ac9bbc0f",
   "files": {
     "identity.ts": "011676d56801e0193c89fa903e698d59bdebe6d19a40cd232956d54e5928291b",
     "protocol.ts": "3eab5dc8a6fff17646623e2ebb798c8f43e0f7a6e9fd236415c577980122a663",

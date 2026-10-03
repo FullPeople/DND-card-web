@@ -10,16 +10,16 @@ test.beforeEach(async ({ page }) => {
 
 test('edit switch locks setup fields while additive modifiers follow level and survive reload', async ({ page }) => {
   await expect(page.getByRole('spinbutton', { name: '敏捷基础值' })).toHaveAttribute('readonly', '');
-  await expect(page.getByRole('checkbox', { name: /^察觉熟练状态：/ })).toHaveCount(0);
+  await expect(page.getByRole('checkbox', { name: /^察觉手动熟练$/ })).toHaveCount(0);
   await page.getByRole('spinbutton', { name: '当前生命值', exact: true }).fill('5');
   await page.locator('.catalog-row').filter({ hasText: '测试法师' }).dragTo(page.locator('.identity-class'));
   const mode = page.getByRole('switch', { name: '编辑模式' }); await mode.click();
-  await page.getByRole('spinbutton', { name: '敏捷基础值' }).fill('14'); await expect(page.getByRole('checkbox', { name: '察觉熟练状态：熟练', exact: true })).toBeDisabled();
+  await page.getByRole('spinbutton', { name: '敏捷基础值' }).fill('14'); await expect(page.getByRole('checkbox', { name: '察觉手动熟练', exact: true })).toBeEnabled();
   for (const [name, value] of [['熟练加值调整值', '1'], ['先攻调整值', '4'], ['速度调整值', '5'], ['被动察觉调整值', '2'], ['生命值上限调整值', '3']]) await page.getByRole('spinbutton', { name, exact: true }).fill(value);
   await page.getByRole('combobox', { name: '体型', exact: true }).selectOption('L');
   await page.getByRole('button', { name: '编辑装备训练与其他熟练' }).click(); await page.getByRole('textbox', { name: '工具熟练记录' }).fill('自制工具'); await page.getByRole('textbox', { name: '工具熟练记录' }).press('Tab');
   await expect(page.locator('[data-stat=proficiency]')).toHaveText('+3'); await expect(page.locator('[data-stat=initiative]')).toHaveText('+6'); await expect(page.locator('[data-stat=hp]')).toHaveText('9');
-  await mode.click(); await expect(page.getByRole('spinbutton', { name: '速度调整值' })).toHaveCount(0); await expect(page.getByRole('checkbox', { name: /^察觉熟练状态：/ })).toHaveCount(0);
+  await mode.click(); await expect(page.getByRole('spinbutton', { name: '速度调整值' })).toHaveCount(0); await expect(page.getByRole('checkbox', { name: /^察觉手动熟练$/ })).toHaveCount(0);
   await page.getByRole('spinbutton', { name: '临时生命值', exact: true }).fill('2');
   await page.getByRole('spinbutton', { name: '测试法师等级', exact: true }).fill('5');
   await expect(page.locator('[data-stat=proficiency]')).toHaveText('+4'); await expect(page.locator('[data-stat=passive]')).toHaveText('16');

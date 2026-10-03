@@ -8,7 +8,7 @@ export function reviewedRecord(entry:Entry):AutomationRecord|undefined {
  return record&&record.verdict!=='needsAnnotation'&&record.verdict!=='noMechanics'?record:undefined;
 }
 export const ownedSpellLevel=(entry:Entry):number|undefined=>entry.manualSpellLevel??irMechanics(entry)?.spellModel?.level;
-export const irMechanics=(entry:Entry):Mechanics|undefined=>reviewedRecord(entry)?.mechanics;
+export const irMechanics=(entry:Entry):Mechanics|undefined=>entry.raw._contentOnly?undefined:reviewedRecord(entry)?.mechanics;
 export function irSelectionActive(c:Character,row:Selection):boolean {
  const seen=new Set<string>();let current:Selection|undefined=row;
  while(current){if(seen.has(current.id)||!selectionEffectsAllowed(c,current.entry))return false;seen.add(current.id);const identity=current.entry.automation?.identity,parent=irParentClass(c,current);if(identity?.classEngName&&parent&&(normalize(identity.classEngName)!==normalize(parent.entry.automation?.identity.engName||parent.entry.english)||normalize(identity.classSource)!==normalize(parent.entry.source)))return false;const required=identity?.level;if(required!==undefined&&required>(irParentClass(c,current)?.level??current.level))return false;if(!current.parentId)return true;current=c.selections.find(s=>s.id===current!.parentId);}return false;
@@ -47,8 +47,8 @@ export function irCondition(c:Character,row:Selection,condition?:Condition):bool
  if('all'in condition){const values=condition.all.map(rule=>irCondition(c,row,rule));return values.includes(false)?false:values.includes(undefined)?undefined:true;}
  if('any'in condition){const values=condition.any.map(rule=>irCondition(c,row,rule));return values.includes(true)?true:values.includes(undefined)?undefined:false;}
  if('not'in condition){const value=irCondition(c,row,condition.not);return value===undefined?undefined:!value;}
- const active=c.selections.filter(s=>irSelectionActive(c,s)),armor=active.some(s=>s.equipped&&['lightArmor','mediumArmor','heavyArmor'].includes(irMechanics(s.entry)?.equipmentModel?.category||'')),shield=active.some(s=>s.equipped&&irMechanics(s.entry)?.equipmentModel?.category==='shield');
- const value:unknown=condition.target==='level'?active.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0):condition.target==='class.level'?irParentClass(c,row)?.level:condition.target==='equipped'?row.equipped:condition.target==='attuned'?!!row.attuned:condition.target==='unarmored'?!armor:condition.target==='shield'?shield:condition.target==='choice'?Object.entries(c.answers).filter(([key])=>key.startsWith(`${row.id}:`)).flatMap(([,values])=>values):undefined;
+ const active=c.selections.filter(s=>irSelectionActive(c,s)&&s.quantity>0),armors=active.filter(s=>s.equipped&&['lightArmor','mediumArmor','heavyArmor'].includes(irMechanics(s.entry)?.equipmentModel?.category||'')),shield=active.some(s=>s.equipped&&irMechanics(s.entry)?.equipmentModel?.category==='shield');
+ const value:unknown=condition.target==='level'?active.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0):condition.target==='class.level'?irParentClass(c,row)?.level:condition.target==='equipped'?row.equipped:condition.target==='attuned'?!!row.attuned:condition.target==='unarmored'?armors.length>1?undefined:armors.length===0:condition.target==='shield'?shield:condition.target==='choice'?Object.entries(c.answers).filter(([key])=>key.startsWith(`${row.id}:`)).flatMap(([,values])=>values):undefined;
  if(value===undefined)return;
  if(condition.op==='includes')return Array.isArray(value)?value.includes(condition.value):undefined;
  if(typeof value!==typeof condition.value)return;

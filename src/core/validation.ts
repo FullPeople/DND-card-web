@@ -153,6 +153,7 @@ export function validateCharacter(value: unknown): Character {
   if (c.runtime.deathSaves !== undefined) assert(plain(c.runtime.deathSaves) && ['success', 'failure'].every(key => Number.isInteger(c.runtime.deathSaves[key]) && c.runtime.deathSaves[key] >= 0 && c.runtime.deathSaves[key] <= 3), '死亡豁免记录无效。');
   assert(Object.values(c.runtime.resources).every(v => plain(v) && Number.isFinite(v.current) && Number.isFinite(v.max) && v.current >= 0 && v.max >= 0), '资源计数无效。');
   if (c.adjustments !== undefined) assert(Array.isArray(c.adjustments) && c.adjustments.every((v: unknown) => plain(v) && typeof v.id === 'string' && ['ac', 'hp', 'speed', 'initiative', 'passive', ...Object.keys(SKILLS).map(k => `skill:${k}`), ...ABILITIES.map(k => `save:${k}`)].includes(v.target) && Number.isFinite(v.value) && Math.abs(v.value) <= 10000 && typeof v.reason === 'string' && v.reason.trim()), '人工修正需要合法目标、数值和原因。');
+  if(c.armorAdjustmentHistory!==undefined)assert(Array.isArray(c.armorAdjustmentHistory)&&c.armorAdjustmentHistory.length<=10000&&c.armorAdjustmentHistory.every((r:any)=>plain(r)&&r.version===1&&['restore','convert'].includes(r.action)&&['previousBonus','previousTotal','ruleTotal','resultingBonus'].every(key=>Number.isFinite(r[key]))&&Array.isArray(r.records)&&r.records.length<=10000&&r.records.every((a:any)=>plain(a)&&a.target==='ac'&&typeof a.id==='string'&&Number.isFinite(a.value)&&typeof a.reason==='string')),'旧护甲修正记录无效。');
   assert(plain(c.identity) && ['gender', 'alignment', 'age', 'description'].every(k => typeof c.identity[k] === 'string'), '角色描述数据不正确。');
   if(c.hpProgression!==undefined){const h=c.hpProgression;assert(plain(h)&&['average','rolled'].includes(h.mode)&&plain(h.rolls)&&Object.keys(h.rolls).length<=100&&Object.values(h.rolls).every(v=>Array.isArray(v)&&v.length<=20&&v.every(n=>n===null||Number.isInteger(n)&&n>=1&&n<=100)),'逐级生命骰记录无效。');}
   if(c.biography!==undefined)assert(plain(c.biography)&&Object.values(c.biography).every(v=>typeof v==='string'&&v.length<=100000),'人物背景无效。');
@@ -244,7 +245,10 @@ export function importOwlbear(value: unknown): Character {
   if(value.web_quickbar_attacks!==undefined){assert(validWidget(value.web_quickbar_attacks)&&value.web_quickbar_attacks.members===undefined,'攻击模块布局无效。');(c.quickbarLayout||={order:[],hidden:[]}).attacks=structuredClone(value.web_quickbar_attacks);}
   c.adjustments = [];
   const adjust = (target: string, v: unknown) => { if (typeof v === 'number' && Number.isFinite(v)) c.adjustments!.push({ id: uid(), target, value: v, reason: '保留枭熊原卡总值；更换规则条目后请重新核对此修正。' }); };
-  for (const [key, target] of [['ac', 'ac'], ['initiative', 'initiative'], ['speed', 'speed'], ['passive_perception', 'passive']]) adjust(target, value.core_stats?.[key]);
+  for (const [key, target] of [['initiative', 'initiative'], ['speed', 'speed'], ['passive_perception', 'passive']]) adjust(target, value.core_stats?.[key]);
+  // An explicit legacy import keeps its displayed AC with a removable offset;
+  // the full original document above remains the source evidence.
+  if(typeof value.core_stats?.ac==='number'&&Number.isFinite(value.core_stats.ac))c.sheetBonuses={...c.sheetBonuses,ac:value.core_stats.ac-evaluate(c).ac};
   for (const a of ABILITIES) {adjust(`save:${a}`, value.abilities[a]?.save?.bonus);if(typeof value.abilities[a]?.save?.proficient==='boolean')(c.proficiencies||={})['save:'+a]=value.abilities[a].save.proficient;}
   assert(value.skills === undefined || Array.isArray(value.skills), '枭熊 skills 应为数组。');
   for (const skill of value.skills || []) {

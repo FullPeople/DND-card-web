@@ -617,8 +617,9 @@ function equipment(row, ctx, out) {
           }
           const ref = typeof item === "string" ? item : item?.item, part = { quantity };
           if (ref) {
-            const target = typeof ref === "string" ? ctx.resolve(ref, "item") : void 0;
+            const target = typeof ref === "string" ? ctx.resolve(ref, "item") : void 0, group = typeof ref === "string" ? ctx.resolve(ref, "itemGroup") : void 0, focus = group && code(group.raw.type) === "SCF" ? { holy: "focusSpellcastingHoly", arcane: "focusSpellcastingArcane", druid: "focusSpellcastingDruidic" }[group.raw.scfType] : void 0;
             if (target) part.identity = target.identity.key;
+            else if (focus) part.category = focus;
             else {
               unsupported(out, "startingEquipment", "unresolved-equipment", `${field}/${i}/${key}`);
               part.unresolved = true;

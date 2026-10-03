@@ -12,7 +12,7 @@ export function attackWidgetKey(c:Character){let id='__attacks__';while(Object.h
 type Value=Character['runtime']['resources'][string];
 const handles=['nw','n','ne','e','se','s','sw','w'] as const;
 const handleNames={nw:'左上',n:'上',ne:'右上',e:'右',se:'右下',s:'下',sw:'左下',w:'左'};
-export type DashboardControls={selectedId?:string;layoutEditor?:boolean;initialPage?:number;onSelect?:(id:string)=>void;onPage?:(page:number)=>void;configure?:(id:string)=>void;onInteracting?:(active:boolean)=>void};
+export type DashboardControls={selectedId?:string;layoutEditor?:boolean;initialPage?:number;onSelect?:(id:string)=>void|boolean;onPage?:(page:number)=>void;configure?:(id:string)=>void;onInteracting?:(active:boolean)=>void};
 type Props=DashboardControls&{c:Character;rows:[string,Value][];editing:boolean;enabled:boolean;gm:boolean;edit:(f:(c:Character)=>void)=>void;manage:()=>void;attacks?:ReactNode};
 export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage,attacks,selectedId,layoutEditor=false,initialPage=0,onSelect,onPage,configure:openConfiguration,onInteracting}:Props){
  const attackId=attackWidgetKey(c);
@@ -24,7 +24,7 @@ export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage,attacks,s
  const all:Record<string,ResourceWidgetLayout>=widgets;
  const pages=Math.max(1,...Object.values(all).map(w=>w.page+1)),shownPage=Math.min(page,pages-1),writable=layoutEditor&&enabled;
  const bands=pages+(writable?1:0);
- function select(id:string){setSelected(id);onSelect?.(id);}
+ function select(id:string){if(onSelect?.(id)===false)return false;setSelected(id);return true;}
  function go(next:number){setPage(next);onPage?.(next);requestAnimationFrame(()=>{const scroll=canvas.current?.parentElement;if(scroll)scroll.scrollTop=next*scroll.clientHeight;});}
  useEffect(()=>{if(selectedId!==undefined)setSelected(selectedId);},[selectedId]);
  useEffect(()=>{onPage?.(shownPage);},[shownPage,onPage]);
@@ -41,9 +41,9 @@ export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage,attacks,s
  function configure(id:string){if(!enabled)return;setOpen('');if(openConfiguration)openConfiguration(id);else window.dispatchEvent(new CustomEvent('edit-character-resource',{detail:id}));}
  useEffect(()=>{const inserted=(event:Event)=>{const detail=(event as CustomEvent).detail;if(detail.cardId!==c.id||!!detail.draft!==layoutEditor)return;select(detail.id);go(detail.page);};window.addEventListener('resource-widget-created',inserted);return()=>window.removeEventListener('resource-widget-created',inserted);},[c.id,layoutEditor]);
  function arrange(original:typeof base,id:string,value:ResourceWidgetLayout){return freeDashboardLayout(modules,id===attackId?original.widgets:{...original.widgets,[id]:value},id===attackId?value:original.attacks);}
- function minimum(id:string){const module=modules.find(m=>m.id===id);return module?resourceModuleMinimum(module,all[id].style):{w:3,h:3};}
+ function minimum(id:string){const module=modules.find(m=>m.id===id);return module?resourceModuleMinimum(module,all[id].style,all[id].contentScale):{w:3,h:3};}
  function begin(e:ReactPointerEvent,id:string,handle='move'){
-  if(id===attackId||!writable||e.button!==0||!canvas.current)return;e.preventDefault();e.stopPropagation();cancel.current?.();select(id);onInteracting?.(true);
+  if(id===attackId||!writable||e.button!==0||!canvas.current)return;e.preventDefault();e.stopPropagation();cancel.current?.();if(!select(id)){suppressClick.current=true;setTimeout(()=>{suppressClick.current=false;},200);return;}onInteracting?.(true);
   const rect=canvas.current.getBoundingClientRect(),start=all[id],original=current,x=e.clientX,y=e.clientY;let next=original,moved=false,targetPage=start.page,lastX=x,lastY=y,edgeTimer:ReturnType<typeof setTimeout>|undefined;
   const apply=()=>{const dx=Math.round((lastX-x)/rect.width*12),dy=Math.round((lastY-y)/rect.height*(bands*6));let value:ResourceWidgetLayout;
    if(handle==='move'){const globalY=Math.max(0,Math.min(2999*6,start.page*6+start.y+dy));targetPage=Math.floor(globalY/6);value={...moveWidget(start,dx,0),page:targetPage,y:Math.min(6-start.h,globalY%6)};}

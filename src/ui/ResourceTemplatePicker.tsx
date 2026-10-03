@@ -1,4 +1,6 @@
-import {useState,type PointerEvent,type CSSProperties} from 'react';
+import {useState,useRef,type PointerEvent,type CSSProperties} from 'react';
+import {sameValue} from '../core/merge';
+import {useResourceDraftGuard} from './resourceDraftGuard';
 import {createPortal} from 'react-dom';
 import {RESOURCE_TEMPLATES,normalizeWidget,supportsWidgetStyle,widgetStyleNames,type ResourceTemplate,type ResourceModule,type ResourceTemplateValues} from '../core/resourceWidgets';
 import {ResourceModuleFace} from './ResourceModuleFace';
@@ -17,6 +19,7 @@ const newChild=(n:number):Child=>({name:`子资源 ${n}`,current:3,max:3,unlimit
 export function ResourceTemplatePicker({choose,disabled=false,hidden=0,restore,drag,settingsTarget,activeModule}:{hidden?:number;restore?:()=>void;choose:(template:ResourceTemplate,values:ResourceTemplateValues)=>void;disabled?:boolean;drag?:(event:PointerEvent<HTMLButtonElement>,template:ResourceTemplate,values:ResourceTemplateValues)=>void;settingsTarget?:HTMLElement|null;activeModule?:ResourceModule}) {
  const [name,setName]=useState('新资源'),[current,setCurrent]=useState(3),[max,setMax]=useState(3),[unlimited,setUnlimited]=useState(false),[multi,setMulti]=useState(false),[children,setChildren]=useState<Child[]>([newChild(1),newChild(2)]);
  const values:ResourceTemplateValues={name,current,max,unlimited,count:children.length,...(multi?{children}:{})};
+ const initial=useRef(values);useResourceDraftGuard('new-module',!activeModule&&!sameValue(initial.current,values));
  const validRow=(r:Child)=>!!r.name.trim()&&Number.isInteger(r.current)&&r.current>=0&&r.current<=999999999&&Number.isInteger(r.max)&&r.max>=0&&r.max<=99999&&(r.unlimited||r.current<=r.max);
  const valid=!!name.trim()&&(multi?children.every(validRow):validRow(values)),isMulti=activeModule?activeModule.slots||activeModule.rows.length>1:multi;
  function child(index:number,patch:Partial<Child>){setChildren(rows=>rows.map((row,i)=>i===index?{...row,...patch}:row));}
@@ -27,7 +30,7 @@ export function ResourceTemplatePicker({choose,disabled=false,hidden=0,restore,d
   <div className="resource-template-grid">{RESOURCE_TEMPLATES.filter(template=>{const preview=activeModule??resourceTemplatePreview(template,values).module;return template.multi===isMulti&&supportsWidgetStyle(template.style,preview.rows,isMulti);}).map(template=>{
    const preview=resourceTemplatePreview(template,values),module=activeModule??preview.module,layout=preview.layout;
    return <button type="button" className="resource-template-option" key={template.id} data-template-id={template.id} data-multi={template.multi} data-dense={module.rows.length>3} style={{'--preview-pool-rows':Math.ceil(module.rows.length/3)} as CSSProperties} data-supported="true" data-drag-enabled={!!drag&&!activeModule} disabled={disabled||!activeModule&&!valid} onPointerDown={e=>{if(!activeModule&&valid)drag?.(e,template,values);}} onDragStart={e=>e.preventDefault()} onClick={e=>{if(!e.defaultPrevented)choose(template,values);}} aria-label={`${activeModule?'使用':'添加'}${widgetStyleNames[template.style]}样式`}>
-    <span className={`resource-template-preview template-${template.id}`}><ResourceModuleFace module={module} style={template.style} layout={layout}/></span><span className="resource-template-add" aria-hidden="true">{activeModule?'✓':'+'}</span>
+    <span className={`resource-template-preview template-${template.id}`}><ResourceModuleFace module={module} style={template.style} layout={layout}/></span><span className="resource-template-label">{widgetStyleNames[template.style]}</span><span className="resource-template-add" aria-hidden="true">{activeModule?'✓':'+'}</span>
    </button>;
   })}</div>
  </section>;

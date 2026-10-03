@@ -6,6 +6,7 @@ import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
 import {automationEnabled} from './automation/state';
 import {evaluateArmor,automationCompatibilityIssue} from './automation/equipment';
+import {evaluateFeatureArmor} from './automation/featureArmor';
 import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, selectionEffectsAllowed, editionAllows, entryEdition, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
@@ -28,6 +29,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const grantSkill = (s: string, origin: string) => { const key = skillKey(s); if (SKILLS[key]) (skillSources[key] ??= []).push(origin); };
   let speed=30;
   const automaticExpertise=new Set<string>();
+  const modifierSources=new Set<string>();
   const pendingModifiers:{row:typeof active[number];modifier:NonNullable<NonNullable<Entry['automation']>['mechanics']>['modifiers'] extends (infer T)[]|undefined?T:never}[]=[];
   for (const selection of active) {
     const e=selection.entry,origin=`${e.name} · ${e.source}`,record=e.automation;
@@ -41,13 +43,14 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
         if(grant.type==='expertise'){const key=skillKey(value);if(SKILLS[key]){automaticExpertise.add(key);grantSkill(key,origin);}}
         if(grant.type==='savingThrow')proficientSaves.add(value);
       }
-      for(const modifier of model?.modifiers||[])if(!ABILITIES.includes(modifier.target as Ability))pendingModifiers.push({row:selection,modifier});
+      for(const [index,modifier]of (model?.modifiers||[]).entries())if(!ABILITIES.includes(modifier.target as Ability)){const key=`${e.id}:${index}`;if(['feature','feat','race','background'].includes(e.kind)&&modifierSources.has(key))continue;modifierSources.add(key);pendingModifiers.push({row:selection,modifier});}
       if(e.kind==='race'&&model?.grants?.some(grant=>grant.type==='abilityScore'&&grant.choose&&irGrantValues(c,selection,grant).length<grant.choose.count))issues.push({id:`racial-ability:unsupported:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：属性分配尚未完成，保存的基础属性保留。`});
     }
   }
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
     if (key.startsWith('save:')) { if (value) proficientSaves.add(key.slice(5)); else proficientSaves.delete(key.slice(5)); }
-    else if (SKILLS[key]) { skillSources[key] = value ? ['手动记录'] : []; }
+    // Manual skill choices supplement source grants; clearing one cannot revoke a rule.
+    else if (SKILLS[key] && value) grantSkill(key, '手动记录');
   }
   const modifiers = Object.fromEntries(ABILITIES.map(a => [a, Math.floor((abilities[a] - 10) / 2)])) as Record<Ability, number>;
   const skills = Object.fromEntries(Object.entries(SKILLS).map(([key, s]) => {
@@ -57,6 +60,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   }));
   const armor=automationEnabled(c)?evaluateArmor(c,active,modifiers.dex):undefined;
   if(armor)issues.push(...armor.issues);
+  if(automationEnabled(c))issues.push(...evaluateFeatureArmor(active).issues);
   let ac = (armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (c.baseHp > 0 ? c.baseHp : hpFromClasses));
@@ -88,7 +92,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for (const adjustment of c.adjustments || []) {
     if (!adjustment.reason.trim()) continue;
     const { target, value } = adjustment;
-    if (target === 'ac') ac = value; else if (target === 'hp') maxHp = value; else if (target === 'speed') speed = value;
+    if (target === 'ac') {ac = value;issues.push({id:`legacy-ac:${adjustment.id}`,severity:'warning',message:'旧护甲覆盖仍在生效。请在“自动化设置 → 护甲与盾牌”中恢复规则计算或转为调整值；旧记录会保留。'});} else if (target === 'hp') maxHp = value; else if (target === 'speed') speed = value;
     else if (target === 'initiative') initiative = value; else if (target === 'passive') passive = value;
     else if (target.startsWith('skill:') && skills[target.slice(6)]) skills[target.slice(6)].value = value;
     else if (target.startsWith('save:') && saves[target.slice(5) as Ability]) saves[target.slice(5) as Ability].value = value;
