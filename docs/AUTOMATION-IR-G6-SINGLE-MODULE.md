@@ -22,6 +22,13 @@ Node 22／24 的 `npm run check` 各为 898 通过／25 环境跳过／0 失败�
 同期辅助审计读取误指向非单机目录，随后核对实际单机审计文件；未计作通过。
 现有测试契约变更清单为空。
 
+首轮远端 [CI 37144467359](https://github.com/FullPeople/DND-card-web/actions/runs/37144467359)
+有 17 组成功，class-drop-profile-232 组的单文件 TypeScript 检查失败：
+`TS2307: Cannot find module './identity.ts?full'`。该组 32 项浏览器性能测试
+仍全部通过。原因是显式文件检查未读取项目内的 ambient declaration；
+`validate.ts` 增加声明文件的显式引用，保持运行入口和既有检查命令不变。
+原失败原文保留，修复后的完整 CI 结果单独记录，不覆盖首次失败。
+
 数据仓流水线已实际无人值守通过
 [CI 37143328276](https://github.com/FullPeople/dnd5e-automation-data/actions/runs/37143328276)：
 完整抓取、派生、叠加、严格校验并上传六份机械产物。其数据提交
