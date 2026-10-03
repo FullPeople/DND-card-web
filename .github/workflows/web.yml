@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003]
+    branches: [main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
   pull_request:
   workflow_dispatch:
 permissions:
