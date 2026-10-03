@@ -1,7 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
-import {RELEASE_NOTES,SUITE_RELEASE_NOTES} from '../../src/platform/releaseNotes';
+import {RELEASE_NOTES,SUITE_RELEASE_NOTES,releaseHistoryFor} from '../../src/platform/releaseNotes';
 
 async function ready(page:Page){await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
 test('spell authoring offers field examples, saves without guessing JSON, and selected entries open as reading',async({page})=>{
@@ -52,7 +52,7 @@ test('drag state checks current edit permission and explains source or version r
 });
 test('release notes contain only the selected channel and preserve relevant shared changes',async({page,baseURL})=>{
  expect(RELEASE_NOTES.join('')).not.toMatch(/枭熊|Owner|光源|三龙|旧插件|地图血条/);expect(SUITE_RELEASE_NOTES.join('')).not.toContain('旧插件改用');
- await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=198-notice&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.announcement-current li')).toHaveCount(SUITE_RELEASE_NOTES.length);await expect(page.locator('.announcement-issues')).toContainText('修复了怪物图鉴加载出错的问题');await expect(page.locator('.announcement-issues')).not.toContainText('旧插件公告');
+ await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=198-notice&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);await expect(page.locator('.announcement')).toBeVisible();const history=releaseHistoryFor('suite');await expect(page.locator('.announcement-current>h3')).toHaveText(history[0].title);await expect(page.locator('.announcement-current li')).toHaveText(history[0].sections.flatMap(section=>section.items));await expect(page.locator('.announcement-history').first().locator('li')).toHaveText(history[1].sections.flatMap(section=>section.items));await expect(page.locator('.announcement-issues')).toContainText('修复了怪物图鉴加载出错的问题');await expect(page.locator('.announcement-issues')).not.toContainText('旧插件公告');
 });
 
 test('monster permissions and HP visibility locks explain and send separate actions',async({page,baseURL})=>{

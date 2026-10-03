@@ -6,7 +6,7 @@ import type {ResourceValue} from '../ui/resourcePresets';
 import {mutationQueue} from './mutationQueue';
 export function latestResourceCard(card:CardChoice){const wb=getWorkbench();return [...wb.cards,...wb.monsters].find(c=>c.id===card.id&&c.kind===card.kind)||card;}
 async function commitResource(card:CardChoice,id:string,resource:ResourceValue|null,remember=true,expected?:ResourceValue|null,presentation?:Presentation){
- const live=latestResourceCard(card),before=live.resources.find(r=>r.id===id)||null,target=card.kind==='monster'?card.itemId:`card:${card.id}`;
+ const live=latestResourceCard(card),before=live.resources.find(r=>r.id===id)||null,target=card.kind==='monster'?(card.targetId||card.itemId):`card:${card.id}`;
  const result=await workbenchRequest('resource',{key:undefined,itemId:target,resourceId:id,expected:expected===undefined?before:expected,resource,...(presentation?{presentation}:{})});
  if(remember&&result.snapshot){const after=result.snapshot.state.resources?.find((r:ResourceValue)=>r.id===id)||null;recordAction({label:resource?.name||before?.name||'资源',undo:()=>saveResource(card,id,before,false,after,card.kind==='monster'?undefined:live.resourceWidgets?.[id]||(presentation?{style:'bar'}:undefined)),redo:()=>saveResource(card,id,after,false,before,card.kind==='monster'?undefined:presentation||live.resourceWidgets?.[id])});}return result;
 }

@@ -1,6 +1,6 @@
 import {documentRevision} from '../core/workbenchRevisions';
 
-export type CacheGrant={id:string;itemId:string;itemIds?:string[];key?:string;write:boolean;locked:boolean;documentRevision?:number};
+export type CacheGrant={targetId?:string;id:string;itemId:string;itemIds?:string[];key?:string;write:boolean;locked:boolean;documentRevision?:number};
 export type CacheAccess={room:string;scope:string;epoch:number;role:string;cards:CacheGrant[];monsters:CacheGrant[];enabled:Record<string,boolean>};
 type Snapshot={sequence?:number;state:any;document:any};
 type Entry={snapshot:Snapshot;bytes:number};
@@ -42,10 +42,12 @@ export class WorkbenchSnapshotCache {
  get(id:string,minimumRevision=0):Snapshot|undefined {
   if(!this.confirmed)return;
   for(const [key,entry]of this.entries){const s=entry.snapshot.state;
-   if(id!==(s.cardId?'card:'+s.cardId:s.itemId)&&id!==s.itemId)continue;
+   if(id!==(s.targetId||(s.cardId?'card:'+s.cardId:s.itemId))&&id!==s.itemId&&id!==(s.cardId?'card:'+s.cardId:undefined))continue;
+   // Raw token selection remains the character on a dual-bound token.
+   if(!s.cardId&&id===s.itemId&&this.access?.cards.some(card=>card.itemId===id||card.itemIds?.includes(id)))continue;
    const grant=this.grant(s);if(!grant||documentRevision(entry.snapshot.document,s)<Math.max(minimumRevision,grant.documentRevision||0))return;
    this.entries.delete(key);this.entries.set(key,entry);
-   return {...entry.snapshot,state:{...s,write:grant.write,locked:grant.locked,role:this.access!.role}};
+   return {...entry.snapshot,state:{...s,write:grant.write,locked:grant.locked,role:this.access!.role,...(grant.targetId?{targetId:grant.targetId}:{})}};
   }
  }
  private remove(key:string){const old=this.entries.get(key);if(old)this.bytes-=old.bytes;this.entries.delete(key);}
