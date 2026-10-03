@@ -250,6 +250,7 @@ const RELEASE_241_SECTIONS:ReleaseSection[]=[
  {title:'初次打开',items:['开屏不再等待整套卡面样式，徽标图层随页面一起加载，减少黄色界面停留。','资料库、装饰和离线缓存在开屏结束后加载，减少同时下载带来的等待。']},
  {title:'开屏退出',items:['黄色开屏淡出为透明，直接显露下方已经准备好的角色卡。','公告仍在开屏完全退出后显示；已有角色、资源余额和显示偏好保留。']}
 ];
+const RELEASE_242_SECTIONS:ReleaseSection[]=[...RELEASE_241_SECTIONS,{title:'加载失败恢复',items:['程序或样式下载失败时会显示重新加载入口，避免一直停在黄色开屏。']}];
 export const RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'维护更新',items:['角色卡网站同步更新；已有角色、资源余额和显示偏好保留。']}
 ];
@@ -296,6 +297,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-04',sections:RELEASE_242_SECTIONS},
  {title:'2026-10-03',sections:RELEASE_241_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_240_SECTIONS:RELEASE_240_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_239_SECTIONS:RELEASE_239_SECTIONS},
