@@ -150,3 +150,19 @@
 .resource-child-fields>button{height:29px}
 .resource-child-fields label>span{display:flex;gap:4px;align-items:center}
 @media(max-width:650px){.resource-dashboard{grid-template-columns:minmax(0,1fr)}.dashboard-stage{grid-row:1}.dashboard-configuration{grid-column:1;grid-row:2}.dashboard-library{grid-column:1;grid-row:3;max-height:none}.dashboard-library .resource-template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.dashboard-content-scale{margin-left:0}}
+
+/* A one-pixel divider has a generous hit target without reserving empty space. */
+.resource-diy-quickbar .resource-quickbar-split{grid-template-columns:minmax(0,var(--attack-split,40%)) 1px minmax(0,1fr)}
+.resource-diy-quickbar .resource-fixed-attacks .quickbar-attacks{padding-right:0}
+.resource-diy-quickbar .quickbar-divider{width:1px;overflow:visible}
+.quickbar-divider::before{left:0}.quickbar-divider::after{inset:0 -5px}
+.resource-diy-quickbar .resource-quickbar-split>.resource-workspace{padding:0}
+.resource-diy-quickbar .resource-widget,.compact-resource-dashboard-widget{padding:0}
+.resource-quickbar-split[data-has-attacks=false]{grid-template-columns:minmax(0,1fr)}
+.dashboard-appearance{display:flex;flex-wrap:wrap;gap:5px 10px;align-items:center;border:0;padding:5px 0;margin:0}
+.dashboard-appearance label{display:flex;align-items:center;gap:3px;font-size:11px}
+.dashboard-appearance input[type=number]{width:48px;min-width:0;padding:3px}
+.dashboard-appearance input[type=color]{width:28px;height:25px;padding:0;border:0}
+.dashboard-appearance button{font-size:11px;padding:3px 6px}
+
+.resource-template-label{position:absolute;left:4px;right:20px;bottom:3px;font-size:10px;text-align:left;color:#64666b}.dashboard-library .resource-template-option{padding-bottom:17px!important}

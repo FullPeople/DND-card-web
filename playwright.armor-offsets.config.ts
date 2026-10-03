@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:['armorOffsets.spec.ts','ac193.spec.ts'],outputDir:'.local-evidence/armor-offsets',workers:1,timeout:45000,expect:{timeout:15000},reporter:'list',use:{baseURL:'http://127.0.0.1:5716/',viewport:{width:1512,height:982},launchOptions:process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:undefined},webServer:{command:'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5716 --strictPort',url:'http://127.0.0.1:5716',reuseExistingServer:false}});

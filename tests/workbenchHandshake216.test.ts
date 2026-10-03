@@ -63,6 +63,15 @@ describe('real workbench module initial handshake under live heartbeat traffic',
   expect(posted.filter(r=>r.data.type==='hello').length).toBeLessThanOrEqual(4);
   expect(posted.every(r=>['hello','ping'].includes(r.data.type))).toBe(true);
  });
+ it('renews identity and startup snapshot on BFCache restore without replaying operations',async()=>{
+  await connected();const first=hellos().at(-1)!.message,initial=hellos().length;
+  browser.dispatchEvent(Object.assign(new Event('pageshow'),{persisted:false}));expect(hellos()).toHaveLength(initial);
+  vi.stubGlobal('document',{documentElement:{dataset:{cardStartup:'fading'}}});await heartbeat(1000);
+  browser.dispatchEvent(Object.assign(new Event('pageshow'),{persisted:true}));
+  const restored=hellos().at(-1)!.message;
+  expect(hellos()).toHaveLength(initial+1);expect(restored.clientInstance).not.toBe(first.clientInstance);expect(restored.clientStarted).toBeGreaterThan(first.clientStarted);expect(restored.startupPhase).toBe('fading');
+  expect(wire.sent.every(row=>['hello','ping'].includes(row.message.type))).toBe(true);
+ });
  it('does not restart the hello backoff for every repeated transport fault',async()=>{
   await connected();const initial=hellos().length;
   for(let i=0;i<40;i++){wire.changed!({status:503,message:'still unavailable',retryAt:Date.now()+1400});await heartbeat(500);}

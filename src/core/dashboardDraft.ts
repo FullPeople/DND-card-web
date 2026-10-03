@@ -35,3 +35,10 @@ export function commitDashboardDraft(live:Character,base:Character,draft:Charact
  layout.widgets={...layout.widgets,...visible.widgets};layout.attacks=visible.attacks;
  return result;
 }
+
+/** Do not release a save/dismiss guard while another persistence boundary is
+ * still in flight, even if an earlier boundary has already failed. */
+export async function settleDashboardSave(operations:Promise<unknown>[]){
+ const results=await Promise.allSettled(operations);
+ for(const result of results)if(result.status==='rejected')throw result.reason;
+}

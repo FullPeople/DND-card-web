@@ -57,7 +57,7 @@ describe('220 approved dashboard persistence and shared canvas',()=>{
   expectNoOverlap([c.quickbarLayout!.attacks!,...Object.values(c.quickbarLayout!.widgets!)]);
  });
  it('rejects malicious or invalid appearance metadata and prevents attacks from becoming a resource group',()=>{
-  for(const extra of [{color:'red'},{color:'#abc'},{color:'url(javascript:test)'},{icon:'<svg>'},{w:1},{page:3000}])expect(validWidget({...normalizeWidget(),...extra})).toBe(false);
+  for(const extra of [{color:'red'},{color:'#abc'},{color:'url(javascript:test)'},{icon:'<svg>'},{w:0},{page:3000}])expect(validWidget({...normalizeWidget(),...extra})).toBe(false);
   const c=newCharacter();c.quickbarLayout={order:[],hidden:[],attacks:{...normalizeWidget(),members:['a','b']}};
   expect(()=>validateCharacter(c)).toThrow('攻击模块布局无效');
  });

@@ -194,3 +194,9 @@
 
 /* Inset separators do not take space from the default grouped resource rows. */
 .resource-module-art .rm-pools-poolpips .rm-pool{box-shadow:inset 0 -1px color-mix(in srgb,var(--rm-tone) 18%,transparent)}
+
+/* User-selected frame and density are shared by card, editor and overview. */
+.resource-module-art.resource-module-art{border-width:var(--rm-border-width,0px);border-radius:var(--rm-radius,0px);background:var(--rm-background,transparent)}
+.resource-module-art.resource-module-art>.rm-content{padding:var(--rm-padding,0px);gap:var(--rm-gap,0px)}
+.resource-module-art.resource-module-art .rm-pools.rm-pools{gap:var(--rm-gap,0px)}
+.resource-module-art.resource-module-art .rm-pool.rm-pool{padding:var(--rm-padding,0px)}

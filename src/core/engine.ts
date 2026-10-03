@@ -5,6 +5,7 @@ import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
 import {automationEnabled} from './automation/state';
 import {evaluateArmor,automationCompatibilityIssue} from './automation/equipment';
+import {evaluateFeatureArmor,unhandledFeatureArmorText} from './automation/featureArmor';
 import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, selectionEffectsAllowed, editionAllows, entryEdition, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
@@ -32,7 +33,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const effectTrace:Record<string,string[]>={ac:[],hp:[],speed:[]};
   for (const selection of active) {
     const e = selection.entry; const origin = `${e.name} · ${e.source}`; const raw = e.raw;
-    if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(JSON.stringify(e.entries)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
+    if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(unhandledFeatureArmorText(e)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
     // Background ability choices are annotations. The sheet's base scores
     // already contain the player's allocation, so do not apply it a second time.
     if (e.kind === 'race') {
@@ -76,11 +77,13 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   }));
   const armor=automationEnabled(c)?evaluateArmor(c,active,modifiers.dex):undefined;
   if(armor)issues.push(...armor.issues);
+  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active):undefined;
+  if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  ac += acBonus;
+  ac += acBonus+(featureArmor?.bonus||0);
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac];
+  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[])];
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
   trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
@@ -90,7 +93,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for (const adjustment of c.adjustments || []) {
     if (!adjustment.reason.trim()) continue;
     const { target, value } = adjustment;
-    if (target === 'ac') ac = value; else if (target === 'hp') maxHp = value; else if (target === 'speed') speed = value;
+    if (target === 'ac') {ac = value;issues.push({id:`legacy-ac:${adjustment.id}`,severity:'warning',message:'旧护甲覆盖仍在生效。请在“自动化设置 → 护甲与盾牌”中恢复规则计算或转为调整值；旧记录会保留。'});} else if (target === 'hp') maxHp = value; else if (target === 'speed') speed = value;
     else if (target === 'initiative') initiative = value; else if (target === 'passive') passive = value;
     else if (target.startsWith('skill:') && skills[target.slice(6)]) skills[target.slice(6)].value = value;
     else if (target.startsWith('save:') && saves[target.slice(5) as Ability]) saves[target.slice(5) as Ability].value = value;

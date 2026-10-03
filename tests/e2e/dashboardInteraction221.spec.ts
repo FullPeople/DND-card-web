@@ -1,6 +1,7 @@
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import type {Character} from '../../src/core/model';
 
+test.beforeEach(async({page})=>{page.on('dialog',dialog=>void dialog.accept());});
 const fixture='/tests/fixtures/resource-dashboard220/index.html?scenario=interaction';
 const read=async(page:Page):Promise<Character>=>JSON.parse((await page.locator('#fixture-data').textContent())!);
 const editor=(page:Page)=>page.getByRole('dialog',{name:'仪表盘',exact:true});

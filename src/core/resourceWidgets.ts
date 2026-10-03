@@ -7,7 +7,7 @@ export type CanonicalWidgetStyle=typeof WIDGET_STYLES[number];
 export type WidgetStyle=CanonicalWidgetStyle|'bar'|'icon';
 export const WIDGET_ICONS=['spark','diamond','shield','flame','leaf','bottle'] as const;
 export type WidgetIcon=typeof WIDGET_ICONS[number];
-export type ResourceWidgetLayout={x:number;y:number;w:number;h:number;page:number;style:WidgetStyle;members?:string[];label?:string;color?:string;icon?:WidgetIcon;resourceArea?:true;split?:number;contentScale?:number};
+export type ResourceWidgetLayout={x:number;y:number;w:number;h:number;page:number;style:WidgetStyle;members?:string[];label?:string;color?:string;icon?:WidgetIcon;resourceArea?:true;split?:number;contentScale?:number;background?:string;borderWidth?:number;borderRadius?:number;padding?:number;gap?:number};
 export const WIDGET_COLS=12,WIDGET_ROWS=6,ATTACKS_WIDGET_ID='__attacks__';
 export const widgetStyleNames:Record<WidgetStyle,string>={ring:'环形',pips:'图标',pool:'子资源',half:'半圆',orbit:'断环',square:'方框',segments:'分段槽',reservoir:'容器',matrix:'图标矩阵',fraction:'斜分数',counter:'计数牌',poolchips:'子资源铭牌',poolbars:'子资源条',poolpips:'子资源图标',ready:'单次状态',diamond:'菱形',bar:'分段槽',icon:'图标'};
 const clamp=(n:number,min:number,max:number)=>Math.max(min,Math.min(max,Math.round(Number.isFinite(n)?n:min)));
@@ -18,13 +18,13 @@ export function canonicalWidgetStyle(style?:WidgetStyle):CanonicalWidgetStyle{
  return WIDGET_STYLES.includes(style as CanonicalWidgetStyle)?style as CanonicalWidgetStyle:'segments';
 }
 export function normalizeWidget(input?:Partial<ResourceWidgetLayout>):ResourceWidgetLayout{
- const w=clamp(input?.w??4,2,WIDGET_COLS),h=clamp(input?.h??2,2,WIDGET_ROWS);
- return {w,h,x:clamp(input?.x??0,0,WIDGET_COLS-w),y:clamp(input?.y??0,0,WIDGET_ROWS-h),page:clamp(input?.page??0,0,2999),style:canonicalWidgetStyle(input?.style),...(input?.members?{members:[...input.members]}:{}),...(input?.label?{label:input.label}:{}),...(isColor(input?.color)?{color:input.color}:{}),...(isIcon(input?.icon)?{icon:input.icon}:{}),...(input?.resourceArea===true?{resourceArea:true as const}:{}),...(input?.split!==undefined?{split:dashboardSplit(input.split)}:{}),...(input?.contentScale!==undefined?{contentScale:Math.max(.5,Math.min(2,Number.isFinite(input.contentScale)?input.contentScale:1))}:{})};
+ const w=clamp(input?.w??4,1,WIDGET_COLS),h=clamp(input?.h??2,1,WIDGET_ROWS);
+ return {w,h,x:clamp(input?.x??0,0,WIDGET_COLS-w),y:clamp(input?.y??0,0,WIDGET_ROWS-h),page:clamp(input?.page??0,0,2999),style:canonicalWidgetStyle(input?.style),...(input?.members?{members:[...input.members]}:{}),...(input?.label?{label:input.label}:{}),...(isColor(input?.color)?{color:input.color}:{}),...(isIcon(input?.icon)?{icon:input.icon}:{}),...(input?.resourceArea===true?{resourceArea:true as const}:{}),...(input?.split!==undefined?{split:dashboardSplit(input.split)}:{}),...(input?.contentScale!==undefined?{contentScale:Math.max(.25,Math.min(2,Number.isFinite(input.contentScale)?input.contentScale:1))}:{}),...(input?.background==='transparent'||isColor(input?.background)?{background:input.background}:{}),...Object.fromEntries((['borderWidth','borderRadius','padding','gap'] as const).filter(key=>input?.[key]!==undefined).map(key=>[key,clamp(input![key]!,0,key==='borderWidth'?8:key==='borderRadius'?32:16)]))};
 }
 export function validWidget(value:unknown):value is ResourceWidgetLayout{
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
  const v=value as ResourceWidgetLayout;
- return ['x','y','w','h','page'].every(k=>Number.isInteger(v[k as keyof ResourceWidgetLayout]))&&v.x>=0&&v.y>=0&&v.w>=2&&v.h>=2&&v.x+v.w<=WIDGET_COLS&&v.y+v.h<=WIDGET_ROWS&&v.page>=0&&v.page<3000&&(v.style==='bar'||v.style==='icon'||WIDGET_STYLES.includes(v.style))&&(v.members===undefined||Array.isArray(v.members)&&v.members.length>=2&&v.members.length<=12&&new Set(v.members).size===v.members.length&&v.members.every(id=>typeof id==='string'&&id.length>0&&id.length<=2000))&&(v.label===undefined||typeof v.label==='string'&&v.label.length<=100)&&(v.color===undefined||isColor(v.color))&&(v.icon===undefined||isIcon(v.icon))&&(v.resourceArea===undefined||v.resourceArea===true)&&(v.split===undefined||Number.isFinite(v.split)&&v.split>=.2&&v.split<=.55)&&(v.contentScale===undefined||Number.isFinite(v.contentScale)&&v.contentScale>=.5&&v.contentScale<=2);
+ return ['x','y','w','h','page'].every(k=>Number.isInteger(v[k as keyof ResourceWidgetLayout]))&&v.x>=0&&v.y>=0&&v.w>=1&&v.h>=1&&v.x+v.w<=WIDGET_COLS&&v.y+v.h<=WIDGET_ROWS&&v.page>=0&&v.page<3000&&(v.style==='bar'||v.style==='icon'||WIDGET_STYLES.includes(v.style))&&(v.members===undefined||Array.isArray(v.members)&&v.members.length>=2&&v.members.length<=12&&new Set(v.members).size===v.members.length&&v.members.every(id=>typeof id==='string'&&id.length>0&&id.length<=2000))&&(v.label===undefined||typeof v.label==='string'&&v.label.length<=100)&&(v.color===undefined||isColor(v.color))&&(v.icon===undefined||isIcon(v.icon))&&(v.resourceArea===undefined||v.resourceArea===true)&&(v.split===undefined||Number.isFinite(v.split)&&v.split>=.2&&v.split<=.55)&&(v.contentScale===undefined||Number.isFinite(v.contentScale)&&v.contentScale>=.25&&v.contentScale<=2)&&(v.background===undefined||v.background==='transparent'||isColor(v.background))&&(['borderWidth','borderRadius','padding','gap'] as const).every(key=>v[key]===undefined||Number.isInteger(v[key])&&v[key]!>=0&&v[key]!<=(key==='borderWidth'?8:key==='borderRadius'?32:16));
 }
 export function validWidgets(value:unknown){return value===undefined||!!value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=3000&&Object.values(value).every(validWidget);}
 const overlaps=(a:ResourceWidgetLayout,b:ResourceWidgetLayout)=>a.page===b.page&&a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
@@ -128,11 +128,14 @@ export const RESOURCE_TEMPLATES=[
 export type ResourceTemplate=typeof RESOURCE_TEMPLATES[number];
 export type ResourceTemplateValues={name:string;current:number;max:number;unlimited:boolean;count?:number;children?:{name:string;current:number;max:number;unlimited:boolean}[]};
 /** A group needs room for every actual resource pool, not only its first row. */
-export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle):{w:number;h:number}{
+export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle,contentScale=1):{w:number;h:number}{
  const min=minimumWidgetSize(style),multi=module.slots||module.rows.length>1,wide=multi&&module.rows.length>4;
  const multiHeight=!multi?2:module.rows.length>9?6:module.rows.length>6?5:module.rows.length>3?4:['poolbars','poolpips'].includes(canonicalWidgetStyle(style))?4:module.slots?2:3;
  const capacity=module.rows[0]?.[1].max||0,digits=Math.max(...module.rows.map(([,r])=>Math.max(String(r.current).length,String(r.max).length))),discrete=['pips','matrix','orbit','segments'].includes(canonicalWidgetStyle(style));
- return {w:Math.max(min.w,multi?(digits>6?12:wide?8:6):digits>6?6:digits>4?4:discrete&&capacity>6?5:style==='ready'?2:3),h:Math.max(min.h,multiHeight,discrete&&capacity>6&&style!=='segments'?3:2)};
+ const scale=Math.max(.25,Math.min(1,Number.isFinite(contentScale)?contentScale:1));
+ const size={w:Math.max(min.w,multi?(digits>6?12:wide?8:6):digits>6?6:digits>4?4:discrete&&capacity>6?5:style==='ready'?2:3),h:Math.max(min.h,multiHeight,discrete&&capacity>6&&style!=='segments'?3:2)};
+ // Small artwork may claim genuinely smaller cells; large artwork stays bounded.
+ return {w:Math.max(1,Math.min(WIDGET_COLS,Math.ceil(size.w*scale))),h:Math.max(1,Math.min(WIDGET_ROWS,Math.ceil(size.h*scale)))};
 }
 /** Changes only this module when growing resource data requires more room.
  * Any resulting collision remains visible for the user to resolve. */
@@ -140,7 +143,7 @@ export function normalizeModuleWidget(module:ResourceModule,input?:Partial<Resou
  const savedStyle=input?canonicalWidgetStyle(input.style):undefined;
  const style=savedStyle??(module.slots||module.rows.length>1?'poolpips':chooseDefaultWidgetStyle(module.rows[0][1]));
  const template=RESOURCE_TEMPLATES.find(t=>t.id===style)!;
- const widget=normalizeWidget(input??{style,w:template.w,h:module.slots?2:template.h}),min=resourceModuleMinimum(module,style);
+ const widget=normalizeWidget(input??{style,w:template.w,h:module.slots?2:template.h}),min=resourceModuleMinimum(module,style,widget.contentScale);
  return normalizeWidget({...widget,style,w:Math.max(widget.w,min.w),h:Math.max(widget.h,min.h)});
 }
 function moduleDefaults(modules:ResourceModule[],saved:Record<string,ResourceWidgetLayout>){

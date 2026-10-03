@@ -9,7 +9,7 @@ import {mutationQueue} from './mutationQueue';
 const queue=mutationQueue();
 function writable(card:CardChoice){
  const wb=getWorkbench(),live=wb.cards.find(row=>row.id===card.id);
- if(!wb.online||!live?.write||card.kind==='monster')throw Error('当前角色不可编辑');
+ if(!wb.online||!live?.write||!live.inScene||card.kind==='monster')throw Error('当前角色不可编辑');
  return live;
 }
 function character(document:any):Character{
