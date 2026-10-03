@@ -41,9 +41,11 @@ export function syncAutoResources(c:Character,before?:Character){
 }
 export function setResource(c:Character,id:string,current:number,options:{preserveDebt?:boolean}={}){
  const r=c.runtime.resources[id];if(!r)return;
- r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));const spent=Math.max(0,r.max-r.current);
- if(r.featureGrant){r.featureGrant.spent=Math.max(spent,options.preserveDebt?r.featureGrant.spent??0:0);(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}
- if(r.automatic){r.automaticSpent=Math.max(spent,options.preserveDebt?r.automaticSpent??0:0);(c.runtime.automaticResourceArchive||={})[id]=structuredClone(r);if(/^pact-slot:[1-5]$/.test(id))c.runtime.automaticResourceArchive!['pact-slot:pool']=structuredClone(r);}
+ r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));const spent=Math.max(0,r.max-r.current),preserveDebt=options.preserveDebt||r.current===0;
+ // Keeping an exhausted counter at zero is not a restoration. Only an
+ // explicit positive adjustment or rest can reduce its overflow consumption.
+ if(r.featureGrant){r.featureGrant.spent=Math.max(spent,preserveDebt?r.featureGrant.spent??0:0);(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}
+ if(r.automatic){r.automaticSpent=Math.max(spent,preserveDebt?r.automaticSpent??0:0);(c.runtime.automaticResourceArchive||={})[id]=structuredClone(r);if(/^pact-slot:[1-5]$/.test(id))c.runtime.automaticResourceArchive!['pact-slot:pool']=structuredClone(r);}
  if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};
 }
 /** Copy synchronization can consume or clamp counters, but cannot restore debt. */

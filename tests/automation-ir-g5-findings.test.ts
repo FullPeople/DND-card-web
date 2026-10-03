@@ -37,6 +37,17 @@ describe('F1: synchronization copies retain overflow consumption',()=>{
   restResources(restored,'long');syncAutoResources(restored);expect(restored.runtime.resources[key].current).toBe(5);expect(restored.runtime.resources['spell-slot:1'].current).toBe(4);
  });
 });
+it('F1 follow-up: zero maintenance preserves overflow debt while explicit positive restoration clears it',()=>{
+ const cls=entry('class','Zero maintenance',{classModel:{hitDie:8,casterProgression:'full'},resources:[{key:'uses',max:{formula:'@class.level'},recovery:[{period:'long',amount:'all'}]}]}),c=card([cls]);c.selections[0].level=5;syncAutoResources(c);const key=planFeatureResources(c).grants[0].key;setResource(c,key,0);setResource(c,'spell-slot:1',0);c.selections[0].level=1;syncAutoResources(c);
+ for(let i=0;i<3;i++){setResource(c,key,0);setResource(c,'spell-slot:1',0);syncAutoResources(c);}
+ expect(c.runtime.resources[key].featureGrant!.spent).toBe(5);expect(c.runtime.resources['spell-slot:1'].automaticSpent).toBe(4);
+ const restored=validateCharacter(JSON.parse(JSON.stringify(c)));restored.selections[0].level=5;syncAutoResources(restored);expect(restored.runtime.resources[key].current).toBe(0);expect(restored.runtime.resources['spell-slot:1'].current).toBe(0);
+ setResource(c,key,1);setResource(c,'spell-slot:1',2);expect(c.runtime.resources[key].featureGrant!.spent).toBe(0);expect(c.runtime.resources['spell-slot:1'].automaticSpent).toBe(0);c.selections[0].level=5;syncAutoResources(c);expect(c.runtime.resources[key].current).toBe(5);expect(c.runtime.resources['spell-slot:1'].current).toBe(4);
+});
+it('F1 follow-up: exhausted pact maintenance retains the shared pool debt across slot-level changes',()=>{
+ const c=card([entry('class','Zero pact',{classModel:{hitDie:8,casterProgression:'pact'}})]);c.selections[0].level=5;syncAutoResources(c);setResource(c,'pact-slot:3',0);c.selections[0].level=1;syncAutoResources(c);setResource(c,'pact-slot:1',0);
+ expect(c.runtime.automaticResourceArchive!['pact-slot:pool'].automaticSpent).toBe(2);const restored=validateCharacter(JSON.parse(JSON.stringify(c)));restored.selections[0].level=5;syncAutoResources(restored);expect(restored.runtime.resources['pact-slot:3']).toMatchObject({max:2,current:0,automaticSpent:2});restResources(restored,'short');syncAutoResources(restored);expect(restored.runtime.resources['pact-slot:3'].current).toBe(2);
+});
 describe('F2: canonical resources outlive translated labels and regenerated owners',()=>{
  for(const legacy of [false,true])it(legacy?'adopts an archived legacy ledger after the label changed':'keeps the canonical ledger through removal and restoration',()=>{
   const cls=entry('class','Audit class',{classModel:{hitDie:8}}),feature=entry('feature','Audit uses',{resources:[{key:'uses',max:{value:2},recovery:[{period:'long',amount:'all'}]}]},{kind:'subclassFeature',classEngName:'Audit class',classSource:'XPHB',subclassEngShortName:'Audit subclass',subclassSource:'XPHB',level:3},{className:'Audit class',classSource:'XPHB',subclassShortName:'Old translated'}),sub=entry('subclass','Audit subclass',{classModel:{subclassFeatures:[feature.automation!.identity.key]}},{classEngName:'Audit class',classSource:'XPHB',subclassEngShortName:'Audit subclass',subclassSource:'XPHB'},{className:'Audit class',classSource:'XPHB',shortName:'Audit subclass'});
