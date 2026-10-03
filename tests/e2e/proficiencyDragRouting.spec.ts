@@ -28,6 +28,10 @@ for(const origin of ['list','detail'] as const)test(`equipment training ${origin
  await ready(page);let row=await source(page);if(origin==='detail'){await row.click();await expect(page.getByLabel('装备词条分类搜索',{exact:true})).toBeVisible();row=page.locator('.detail-title');}
  const training=page.locator('.training-row').filter({hasText:'工具'});
  await lift(page,row);await expect(page.getByRole('tab',{name:'主要',exact:true})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await page.mouse.up();await expect(training.locator('.feature-bubble')).toHaveCount(0);
+ // Escape returns the ghost to its source for 220 ms. Until that completes,
+ // the source is intentionally hidden and a coordinate mouseDown cannot hit it.
+ // Assert cancellation cleanup before testing a new drag, as land() does.
+ await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(page.locator('.drag-lifted,.drag-landing-hidden')).toHaveCount(0);await expect(row).toBeVisible();
  for(let i=0;i<2;i++){await lift(page,row);await expect(page.getByRole('tab',{name:'主要',exact:true})).toHaveAttribute('aria-selected','true');await land(page,training);await expect(training.locator('.feature-bubble')).toHaveCount(1);}
  await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await expect(training).toContainText(name);const c=await exported(page);expect(c.training?.tools).toBe(`{@item ${name}|XPHB}`);expect(c.selections.filter(s=>s.entry.kind==='item')).toHaveLength(0);
  await page.screenshot({path:test.info().outputPath(`proficiency-${origin}.png`)});
