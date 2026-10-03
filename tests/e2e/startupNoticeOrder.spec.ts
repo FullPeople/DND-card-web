@@ -86,19 +86,22 @@ test('lossless layers retain alpha and opaque pixels with bounded compositor rou
  expect(animation.map(row=>row.duration)).toEqual(['1.9s','1.9s','1.9s','1.9s']);expect(animation.map(row=>row.delay)).toEqual(['0s','0.14s','0.28s','0.42s']);
  const pixels=await page.evaluate(async()=>{
   async function load(url:string){const image=new Image();image.src=url;await image.decode();return image;}
-  function rgba(image:HTMLImageElement,background?:string){const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d')!;if(background){ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);}ctx.drawImage(image,0,0);return ctx.getImageData(0,0,image.width,image.height).data;}
-  return Promise.all([1,2,3,4].map(async layer=>{
-   const [png,webp]=await Promise.all([load(`./startup-logo/${layer}.PNG`),load(`./startup-logo/${layer}.webp`)]),a=rgba(png),b=rgba(webp);
+  function rgba(image:HTMLImageElement|HTMLCanvasElement,background?:string){const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d')!;if(background){ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);}ctx.drawImage(image,0,0);return ctx.getImageData(0,0,image.width,image.height).data;}
+  const layers=await Promise.all([1,2,3,4].map(async layer=>({layer,png:await load(`./startup-logo/${layer}.PNG`),webp:await load(`./startup-logo/${layer}.webp`)})));
+  function compare(layer:number,png:HTMLImageElement|HTMLCanvasElement,webp:HTMLImageElement|HTMLCanvasElement){
+   const a=rgba(png),b=rgba(webp);
    let alphaChanges=0,opaqueChanges=0,rawChangedPixels=0,maxRawDelta=0;const positions:{x:number;y:number;alpha:number;delta:number}[]=[];
    for(let i=0;i<a.length;i+=4){if(a[i+3]!==b[i+3])alphaChanges++;let delta=0;for(let k=0;k<3;k++)delta=Math.max(delta,Math.abs(a[i+k]-b[i+k]));if(delta){rawChangedPixels++;maxRawDelta=Math.max(maxRawDelta,delta);if(a[i+3]===255)opaqueChanges++;if(positions.length<12)positions.push({x:(i/4)%png.width,y:Math.floor(i/4/png.width),alpha:a[i+3],delta});}}
    const composite=['#ffff56','#50525b','#ffffff'].map(background=>{const x=rgba(png,background),y=rgba(webp,background);let changed=0,maxDelta=0;for(let i=0;i<x.length;i+=4){let delta=0;for(let k=0;k<4;k++)delta=Math.max(delta,Math.abs(x[i+k]-y[i+k]));if(delta)changed++;maxDelta=Math.max(maxDelta,delta);}return {background,changed,maxDelta};});
    return {layer,width:png.width,height:png.height,alphaChanges,opaqueChanges,rawChangedPixels,maxRawDelta,positions,composite};
-  }));
+  }
+  function assembled(format:'png'|'webp'){const canvas=document.createElement('canvas');canvas.width=500;canvas.height=500;const ctx=canvas.getContext('2d')!;for(const id of [4,1,2,3])ctx.drawImage(layers.find(row=>row.layer===id)![format],0,0);return canvas;}
+  return [...layers.map(row=>compare(row.layer,row.png,row.webp)),compare(0,assembled('png'),assembled('webp'))];
  });
  await info.attach('browser-logo-pixels.json',{body:JSON.stringify(pixels,null,2),contentType:'application/json'});
  // PNG and lossless WebP decoder paths can round translucent premultiplication
  // differently. Original/delivery raw RGBA hashes are independently pinned;
  // here verify identical alpha/opaque pixels and <=1/255 displayed-channel
  // error on the actual yellow, card gray and white compositing backgrounds.
- for(const layer of pixels){expect(layer.width).toBe(500);expect(layer.height).toBe(500);expect(layer.alphaChanges).toBe(0);expect(layer.opaqueChanges).toBe(0);for(const row of layer.composite)expect(row.maxDelta,JSON.stringify(layer)).toBeLessThanOrEqual(1);}
+ for(const layer of pixels){expect(layer.width).toBe(500);expect(layer.height).toBe(500);expect(layer.alphaChanges).toBe(0);if(layer.layer!==0)expect(layer.opaqueChanges).toBe(0);for(const row of layer.composite)expect(row.maxDelta,JSON.stringify(layer)).toBeLessThanOrEqual(1);}
 });

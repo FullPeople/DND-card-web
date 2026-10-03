@@ -10,3 +10,6 @@ export function startupPhase():StartupPhase {
 }
 export function subscribeStartup(listener:()=>void){window.addEventListener(STARTUP_EVENT,listener);return()=>window.removeEventListener(STARTUP_EVENT,listener);}
 export function useStartupComplete(){return useSyncExternalStore(subscribeStartup,()=>startupPhase()==='complete',()=>false);}
+
+/** Decorative assets may resume after recovery without opening pending notices. */
+export function useStartupSettled(){return useSyncExternalStore(subscribeStartup,()=>['complete','failed'].includes(startupPhase()),()=>false);}

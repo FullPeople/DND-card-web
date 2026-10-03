@@ -15,7 +15,8 @@ describe('nonblocking startup delivery',()=>{
   const total=[1,2,3,4].reduce((n,i)=>n+statSync(new URL(`../public/startup-logo/${i}.webp`,import.meta.url)).size,0);
   const manifest=JSON.parse(readFileSync(new URL('../docs/STARTUP-LOSSLESS-ASSETS.json',import.meta.url),'utf8'));for(const row of manifest.assets){expect(createHash('sha256').update(readFileSync(new URL('../'+row.delivery,import.meta.url))).digest('hex')).toBe(row.webpSha256);}
   expect(total).toBeLessThan(120*1024);expect(source.match(/as="image"/g)).toHaveLength(4);expect(source.match(/decoding="async" fetchpriority="high"/g)).toHaveLength(4);
-  expect(source).toContain('.startup-intro.leaving{opacity:0}');expect(source).toContain('<div id="root" inert>');
+  expect(source).toContain('.startup-intro.leaving{opacity:0}');
+  expect(readFileSync(new URL('../src/ui/App.tsx',import.meta.url),'utf8')).toContain("src={startupSettled?'./exe_icon.png':undefined}");expect(readFileSync(new URL('../src/platform/startup.ts',import.meta.url),'utf8')).toContain("['complete','failed'].includes(startupPhase())");expect(source).toContain('<div id="root" inert>');
  });
  it('waits for complete and one paint before optional work; cancelled mounts never start',()=>{
   const eventTarget=new EventTarget(),dataset={cardStartup:'playing'},frames=new Map<number,FrameRequestCallback>();let id=0;

@@ -1,7 +1,7 @@
 import {OverviewDashboardHost} from './OverviewDashboardHost';
 import {confirmResourceDraftDiscard} from './resourceDraftGuard';
 import {commitDashboardDraft,settleDashboardSave} from '../core/dashboardDraft';
-import {useStartupComplete} from '../platform/startup';
+import {useStartupComplete,useStartupSettled} from '../platform/startup';
 import {entryNameIndex} from '../core/entryNameIndex';
 import {classEditionSuffix} from '../core/classEdition';
 import {wikiEditionAllows} from './wikiEdition';
@@ -254,6 +254,7 @@ export default function App() {
   const detailPane = useRef<HTMLElement>(null);
   const previewCommit=useRef<{id:string;top:number}|undefined>(undefined);
   const startupComplete=useStartupComplete();
+  const startupSettled=useStartupSettled();
   const [announcement,setAnnouncement]=useState(()=>(standalone||inWorkbench)&&announcementPending(readAnnouncementVersion(inWorkbench?'suite':'standalone'),announcementVersionFor(inWorkbench?'suite':'standalone')));
   const [modal, setModalValue] = useState('');
   const setModal=(value:string)=>{if(confirmResourceDraftDiscard())setModalValue(value);};
@@ -787,7 +788,7 @@ export default function App() {
   const managerId=inWorkbench?wb.target?.cardId||'':c.id;
   const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!readOnly}));
   return <OverviewDashboardHost><SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
-    <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src={startupComplete?'./exe_icon.png':undefined} alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
+    <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src={startupSettled?'./exe_icon.png':undefined} alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
       <div className="header-tools">{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<button aria-pressed={tableOpen} onClick={()=>setTableOpen(value=>!value)}>{t('threeDragon')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{setWorkbenchPage('features');setTab('sheet');}}>{t('featuresToggle')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{setWorkbenchPage('settings');setTab('sheet');}}>{t('settings')}</button>}{(standalone||inWorkbench)&&<button onClick={()=>setAnnouncement(true)}>{t('announcements')}</button>}<button onClick={() => setModal('characters')}>{t('characters')} <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>{t('rules')}</button><button className="primary" onClick={() => setModal('export')}>{t('transfer')}</button></div>
     </header>
     {inWorkbench&&<><WorkbenchBar classWarnings={roomClassWarnings} online={wb.online} target={wb.target} message={wb.message} page={workbenchPage} change={page=>{setWorkbenchPage(page);setTab('sheet');}} save={()=>{if(!wb.target||c.id!==workbenchCharacterId(wb.target)){setNotice('当前角色与选中的棋子不一致');return;}void workbenchRequest('save',{native:c,data:exportOwlbear(c,d)}).then(()=>{workbenchDirty.current.delete(c.id);setNotice('已保存角色资料到枭熊');}).catch(e=>setNotice(String(e)));}}/></>}
