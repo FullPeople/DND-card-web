@@ -7,6 +7,7 @@ import {normalizeWidget} from '../../../src/core/resourceWidgets';
 import {Quickbar} from '../../../src/ui/Quickbar';
 import {ResourceDashboard,type DashboardViewport} from '../../../src/ui/ResourceDashboard';
 import {ResourceModuleEditor} from '../../../src/ui/ResourceModuleEditor';
+import {confirmResourceDraftDiscard} from '../../../src/ui/resourceDraftGuard';
 import {SheetEditContext} from '../../../src/ui/SheetEdit';
 import '../../../src/ui/style.css';
 import '../../../src/ui/workbench.css';
@@ -35,6 +36,10 @@ function make(){
   coins:normalizeWidget({x:3,y:0,w:4,h:3,page:1,style:'fraction'}),
  }};
  if(scenario==='empty'){c.baseHp=12;c.runtime.hp=3;c.runtime.resources={};c.quickbarLayout.widgets={};}
+ if(scenario==='appearance'){
+  c.runtime.resources={ring:{name:'新资源',current:3,max:3,type:'count'},first:{name:'子资源 1',current:3,max:3,type:'count'},second:{name:'子资源 2',current:3,max:3,type:'count'}};
+  c.quickbarLayout.widgets={ring:normalizeWidget({x:0,y:0,w:3,h:3,style:'ring'}),first:normalizeWidget({x:3,y:0,w:6,h:4,style:'poolpips',members:['first','second'],label:'资源组'})};
+ }
  if(scenario==='resize'){
   c.runtime.resources={probe:{name:'八点缩放样本',current:2,max:5,type:'number'}};
   c.quickbarLayout.widgets={probe:normalizeWidget({x:5,y:2,w:4,h:2,page:0,style:'segments',color:'#527880'})};
@@ -53,8 +58,8 @@ function Fixture(){
  function edit(update:(draft:Character)=>void){const next=structuredClone(state.current);update(next);state.current=next;localStorage.setItem(key,JSON.stringify(next));setC(next);setEdits(count=>count+1);}
  useEffect(()=>{localStorage.setItem(key,JSON.stringify(state.current));const capture=(event:Event)=>setViewport((event as CustomEvent<DashboardViewport>).detail);const configure=(event:Event)=>setResource((event as CustomEvent<string>).detail);window.addEventListener('resource-canvas-page',capture);window.addEventListener('edit-character-resource',configure);return()=>{window.removeEventListener('resource-canvas-page',capture);window.removeEventListener('edit-character-resource',configure);};},[]);
  useEffect(()=>{if(open||resource)dialog.current?.showModal();else dialog.current?.close();},[open,resource]);
- const close=()=>{setOpen(false);setResource('');};
- return <main className="dashboard-fixture"><h1>资源仪表盘 · 实际组件交互</h1><button type="button" onClick={()=>{const next=make();state.current=next;setC(next);localStorage.setItem(key,JSON.stringify(next));}}>重置测试卡</button><button type="button" data-testid="dashboard-open" onClick={()=>setOpen(true)}>仪表盘</button><SheetEditContext.Provider value={false}><div className="fixture-quickbar"><Quickbar c={c} d={evaluate(c)} edit={edit} inspect={()=>{}} manage={()=>setOpen(true)} manageQuickbar={()=>setOpen(true)}/></div><dialog className="dialog" aria-label={open?'仪表盘':'资源配置'} ref={dialog} onCancel={event=>{event.preventDefault();close();}}><div className="dialog-head"><h2>{open?'仪表盘':'资源配置'}</h2><button type="button" aria-label="关闭弹窗" onClick={close}>×</button></div><div className="dialog-body">{open?<ResourceDashboard c={c} d={evaluate(c)} edit={edit} inspect={()=>{}} disabled={false} gm={true} viewport={viewport}/>:resource?<ResourceModuleEditor c={c} id={resource} edit={edit} close={close} disabled={false} gm={true}/>:null}</div></dialog></SheetEditContext.Provider><output hidden id="fixture-data">{JSON.stringify(c)}</output><output hidden id="fixture-edits">{edits}</output><output hidden id="fixture-viewport">{JSON.stringify(viewport)}</output></main>;
+ const close=()=>{if(confirmResourceDraftDiscard()){setOpen(false);setResource('');}};
+ return <main className="dashboard-fixture"><h1>资源仪表盘 · 实际组件交互</h1><button type="button" onClick={()=>{const next=make();state.current=next;setC(next);localStorage.setItem(key,JSON.stringify(next));}}>重置测试卡</button><button type="button" data-testid="dashboard-open" onClick={()=>setOpen(true)}>仪表盘</button><SheetEditContext.Provider value={false}><div className="fixture-quickbar"><Quickbar c={c} d={evaluate(c)} edit={edit} inspect={()=>{}} manage={()=>setOpen(true)} manageQuickbar={()=>setOpen(true)}/></div><dialog className="dialog" aria-label={open?'仪表盘':'资源配置'} ref={dialog} onClick={event=>{if(event.target===event.currentTarget)close();}} onCancel={event=>{event.preventDefault();close();}}><div className="dialog-head"><h2>{open?'仪表盘':'资源配置'}</h2><button type="button" aria-label="关闭弹窗" onClick={close}>×</button></div><div className="dialog-body">{open?<ResourceDashboard c={c} d={evaluate(c)} edit={edit} inspect={()=>{}} disabled={false} gm={true} viewport={viewport}/>:resource?<ResourceModuleEditor c={c} id={resource} edit={edit} close={close} disabled={false} gm={true}/>:null}</div></dialog></SheetEditContext.Provider><output hidden id="fixture-data">{JSON.stringify(c)}</output><output hidden id="fixture-edits">{edits}</output><output hidden id="fixture-viewport">{JSON.stringify(viewport)}</output></main>;
 }
 createRoot(document.getElementById('root')!).render(<Fixture/>);
 const style=document.createElement('style');style.textContent=`body{margin:24px;background:#e0e2dc;font:14px system-ui}.dashboard-fixture{max-width:800px;margin:auto}.dashboard-fixture h1{font-size:18px}.dashboard-fixture>button{margin-bottom:14px}.fixture-quickbar{width:422px;max-width:100%;height:153px;background:#e9ece3;outline:2px solid #5b655d;border-radius:3px}.dashboard-fixture .dialog{padding:0;max-height:calc(100dvh - 24px)}.dashboard-fixture .dialog-head{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #b7c1b2;background:#f0f1eb}.dashboard-fixture .dialog-head h2{margin:0;font-size:18px}.dashboard-fixture .dialog-head button{font-size:19px;padding:0 6px}.dashboard-fixture .dialog-body{max-height:calc(100dvh - 92px);overflow:auto}@media(max-width:480px){body{margin:8px}.dashboard-fixture h1{font-size:16px}}`;document.head.append(style);

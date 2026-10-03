@@ -14,9 +14,9 @@ test('card-led creation, manual choices, undo and refresh persistence', async ({
   await page.locator('.catalog-row').filter({ hasText: '测试法师' }).click();
   await fillFromDetail(page);
   await expect(page.getByRole('spinbutton', { name: '测试法师等级' })).toHaveValue('1');
-  await expect(page.getByRole('checkbox', { name: '奥秘熟练状态：无熟练', exact: true })).toBeDisabled();
+  await expect(page.getByRole('checkbox', { name: '奥秘手动熟练', exact: true })).toBeEnabled();
   await page.getByRole('spinbutton', { name: '奥秘额外调整值', exact: true }).fill('2'); await page.getByRole('spinbutton', { name: '奥秘额外调整值', exact: true }).press('Tab');
-  await expect(page.getByRole('checkbox', { name: '洞悉熟练状态：无熟练', exact: true })).toBeDisabled();
+  await expect(page.getByRole('checkbox', { name: '洞悉手动熟练', exact: true })).toBeEnabled();
   await expect(page.locator('.class-features .feature-bubble')).toContainText('初始特性');
   await page.getByRole('button', { name: '展开初始特性', exact: true }).press('Delete');
   await expect(page.locator('.class-features .feature-bubble')).toHaveCount(0);
@@ -56,7 +56,7 @@ test('custom pack import is atomic, its declared effect works alongside manual s
   await expect(page.locator('.pack-row')).toHaveCount(1); await closeDialog(page);
   await page.getByRole('navigation', { name: '资料分类' }).getByRole('button', { name: '专长', exact: true }).click();
   await page.locator('.catalog-row').filter({ hasText: '学者笔记' }).click(); await fillFromDetail(page);
-  await expect(page.getByRole('checkbox', { name: /^历史熟练状态：/ })).toBeDisabled();
+  await expect(page.getByRole('checkbox', { name: /^历史手动熟练$/ })).toBeEnabled();
   await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).fill('2'); await page.getByRole('spinbutton', { name: '历史额外调整值', exact: true }).press('Tab');
   await expect(page.locator('.ability-box').filter({ hasText: 'INT' })).toContainText('总值 11');
   await page.getByRole('button', { name: '规则与扩展', exact: true }).click();
@@ -129,7 +129,8 @@ test('another tab cannot overwrite the active editor and can resume after it clo
   await expect(page.locator('.save-status')).toContainText('已保存到本机');
   const second = await context.newPage(); await mockSource(second); await second.goto('/');
   await expect(second.locator('.read-only-banner')).toBeVisible();
-  await second.getByRole('textbox', { name: '角色姓名', exact: true }).fill('不应覆盖');
+  await expect(second.getByRole('textbox', { name: '角色姓名', exact: true })).toHaveAttribute('readonly', '');
+  await expect(second.locator('.ability-skill input[type=checkbox]')).toHaveCount(0);
   await expect(second.getByRole('textbox', { name: '角色姓名', exact: true })).toHaveValue('受保护的记录');
   await page.close();
   await expect(second.locator('.read-only-banner')).toHaveCount(0);

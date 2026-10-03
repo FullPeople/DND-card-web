@@ -8,11 +8,17 @@ import {validateCharacter} from '../src/core/validation';
 import {exportCharacter} from '../src/core/export';
 
 const render=(proficient:boolean,expertise=false,editing=true,kind:'skill'|'save'='skill')=>renderToStaticMarkup(createElement(ProficiencyStatus,{name:kind==='save'?'力量豁免':'察觉',proficient,expertise,editing,kind}));
-describe('232 derived-only skill and saving-throw proficiency presentation',()=>{
+describe('skill and saving-throw proficiency presentation',()=>{
  it.each([[false,false,'无熟练',''],[true,false,'熟练','trained'],[true,true,'专精','expert']] as const)('keeps one visible disabled marker for proficient=%s expertise=%s',(proficient,expertise,label,shape)=>{
   const html=render(proficient,expertise);
-  expect(html.match(/type="checkbox"/g)).toHaveLength(1);expect(html).toContain('disabled=""');expect(html).toContain(`aria-label="察觉熟练状态：${label}"`);expect(html).toContain('aria-describedby=');expect(html).toContain('不能在此手动更改');expect(html).toContain('额外调整值仍可编辑');expect(html).toContain(`class="proficiency-indicator ${shape}"`);expect(html.includes('checked=""')).toBe(proficient||expertise);
+  expect(html.match(/type="checkbox"/g)).toHaveLength(1);expect(html).toContain('disabled=""');expect(html).toContain(`aria-label="察觉熟练状态：${label}"`);expect(html).toContain('aria-describedby=');expect(html).toContain('由规则和已选能力计算');expect(html).toContain(`class="proficiency-indicator ${shape}"`);expect(html.includes('checked=""')).toBe(proficient||expertise);
   const normal=render(proficient,expertise,false);expect(normal).not.toContain('<input');expect(normal).toContain(`aria-label="察觉${label}"`);expect(normal).toContain(`class="proficiency-mark ${shape}"`);
+ });
+ it('only opens manual choices when editing and both callbacks are available',()=>{
+  const props={name:'察觉',proficient:true,expertise:false,editing:true,manualProficient:false,onProficiencyChange:()=>{},onExpertiseChange:()=>{}};
+  const html=renderToStaticMarkup(createElement(ProficiencyStatus,props));expect(html.match(/type="checkbox"/g)).toHaveLength(2);expect(html).not.toContain('disabled');expect(html).not.toContain('checked=""');expect(html).toContain('察觉手动熟练');expect(html).toContain('察觉专精');expect(html).toContain('当前生效：熟练');expect(html).toContain('来源授予仍生效');
+  expect(renderToStaticMarkup(createElement(ProficiencyStatus,{...props,editing:false}))).not.toContain('<input');
+  const expert=renderToStaticMarkup(createElement(ProficiencyStatus,{...props,expertise:true}));expect(expert.match(/checked=""/g)).toHaveLength(2);
  });
  it.each([false,true])('renders a disabled saving throw status without erasing proficient=%s',proficient=>{
   const html=render(proficient,false,true,'save');expect(html).toContain('disabled=""');expect(html.includes('checked=""')).toBe(proficient);expect(html).toContain('豁免熟练由规则和已选能力自动计算');expect(html).not.toContain('expert');

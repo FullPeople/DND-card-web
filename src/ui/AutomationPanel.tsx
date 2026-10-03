@@ -1,3 +1,4 @@
+import {ArmorAdjustmentReview} from './ArmorAdjustmentReview';
 import {SourceSpellChoiceControl} from './SourceSpellControls';
 import {planSourceSpells} from '../core/automation/sourceSpells';
 import {ABILITIES,ABILITY_LABELS,type Entry,type Ability} from '../core/model';
@@ -14,10 +15,11 @@ export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:E
  return <section className="automation-panel"><fieldset disabled={!writable} style={{border:0,padding:0,margin:0,minWidth:0}}>
   <p>自动化支持装备、职业与特性选择、可适配的次数资源和休息恢复；未支持的规则会列出。</p>
   {supported?<><p>新建、导入和旧角色默认开启自动化。手写内容、修正和已消耗资源保留；可在此手动关闭。</p><label><input type="checkbox" aria-label="启用自动计算" checked={enabled} onChange={e=>edit(draft=>setAutomationEnabled(draft,e.target.checked))}/>启用自动计算</label></>:<p role="alert">这张卡使用尚未支持的自动化协议或规则版本。原始记录已保留，暂不执行或转换。</p>}
-  <h3>护甲与盾牌</h3><p>当前 AC：<strong data-testid="automation-ac">{d.ac}</strong>。卸下后恢复适用方案，手工绝对修正与卡面加减仍有效。</p>
+  <h3>护甲与盾牌</h3><p>当前 AC：<strong data-testid="automation-ac">{d.ac}</strong>。卸下后恢复适用方案，卡面调整值保留。</p>
+  <ArmorAdjustmentReview c={c} edit={edit}/>
   {enabled&&c.selections.filter(row=>armorType(row.entry)).map(row=><label key={row.id} style={{display:'block'}}><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>)}
   <ul>{d.trace.ac?.map((line,i)=><li key={i}>{line}</li>)}</ul>
-  {d.issues.filter(issue=>issue.id.startsWith('armor-')||issue.id.startsWith('equipment-')||issue.id==='automation-protocol').map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
+  {d.issues.filter(issue=>issue.id.startsWith('armor-')||issue.id.startsWith('feature-ac-rule:')||issue.id.startsWith('equipment-')||issue.id==='automation-protocol').map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <h3>装备武器与快捷攻击</h3><p>装备后按属性、熟练和武器加值生成攻击。每件武器可选择命中与伤害所用属性，默认自动；武器额外加值保留。投掷、双手使用分别显示；不自动消耗弹药或判定战场条件，手工动作保留。</p>
   {enabled&&c.selections.filter(row=>weaponType(row.entry)).map(row=><div key={row.id} data-weapon-selection={row.id} style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}><label><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>{row.entry.raw.attackBonus===undefined?<label>命中与伤害属性<select aria-label={`${row.entry.name}计算属性`} value={row.weaponAbility||''} onChange={e=>edit(draft=>{const stored=draft.selections.find(s=>s.id===row.id);if(!stored)return;if(e.target.value)stored.weaponAbility=e.target.value as Ability;else delete stored.weaponAbility;})}><option value="">自动（{ABILITY_LABELS[automaticWeaponAbility(row.entry,d)]}）</option>{ABILITIES.map(a=><option key={a} value={a}>{ABILITY_LABELS[a]}</option>)}</select></label>:<small>使用手写命中与伤害公式，计算属性不追加。</small>}</div>)}
   {weapons.attacks.map(attack=><details key={attack.key}><summary>{attack.name}：命中 {attack.attack_bonus}，伤害 {attack.damage}</summary><ul>{attack.trace.map((line,i)=><li key={i}>{line}</li>)}</ul></details>)}

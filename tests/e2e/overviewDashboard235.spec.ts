@@ -1,4 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
+test.beforeEach(async({page})=>{page.on('dialog',dialog=>void dialog.accept());});
 async function open(page:Page,baseURL:string|undefined){await page.goto('/tests/fixtures/overview-dashboard235/#suite=overview-dashboard235&bridge='+encodeURIComponent(new URL(baseURL!).origin));await expect(page.locator('[data-resource-target="hero"]')).toBeVisible();}
 const manage=(page:Page)=>page.getByRole('button',{name:'管理原创资源布局测试资源',exact:true});
 const dialog=(page:Page)=>page.getByRole('dialog',{name:'仪表盘',exact:true});
