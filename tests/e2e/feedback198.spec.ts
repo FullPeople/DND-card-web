@@ -1,7 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
-import {RELEASE_NOTES,SUITE_RELEASE_NOTES} from '../../src/platform/releaseNotes';
+import {RELEASE_NOTES,SUITE_RELEASE_NOTES,releaseHistoryFor} from '../../src/platform/releaseNotes';
 
 async function ready(page:Page){await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
 test('spell authoring offers field examples, saves without guessing JSON, and selected entries open as reading',async({page})=>{
@@ -51,8 +51,8 @@ test('drag state checks current edit permission and explains source or version r
  await page.evaluate(()=>(window as any).renderDrop({}));await page.locator('#drag-source').dragTo(page.locator('#drop-target'));await expect.poll(()=>page.evaluate(()=>(window as any).received.length)).toBe(1);expect(await page.evaluate(()=>(window as any).refusals)).toEqual([]);
 });
 test('release notes contain only the selected channel and preserve relevant shared changes',async({page,baseURL})=>{
- expect(RELEASE_NOTES.join('')).not.toMatch(/枭熊|Owner|光源|三龙|旧插件|地图血条/);expect(SUITE_RELEASE_NOTES.join('')).not.toContain('旧插件改用');
- await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=198-notice&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.announcement-current li')).toHaveCount(SUITE_RELEASE_NOTES.length);await expect(page.locator('.announcement-issues')).toContainText('修复了怪物图鉴加载出错的问题');await expect(page.locator('.announcement-issues')).not.toContainText('旧插件公告');
+ expect(RELEASE_NOTES.join('')).not.toMatch(/枭熊|Owner|光源|三龙|旧插件|地图血条/);expect(SUITE_RELEASE_NOTES.join('')).not.toContain('旧插件改用');expect(releaseHistoryFor('standalone')[0].sections.flatMap(section=>section.items).join('')).not.toMatch(/枭熊|Owner|光源|三龙|旧插件|地图血条/);
+ await mockSource(page,{suiteAnnouncement:true});const current=releaseHistoryFor('suite')[0].sections.flatMap(section=>section.items);const url=new URL(baseURL!);url.hash='suite=198-notice&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.announcement-current li')).toHaveCount(current.length);await expect(page.locator('.announcement-issues')).toContainText('修复了怪物图鉴加载出错的问题');await expect(page.locator('.announcement-issues')).not.toContainText('旧插件公告');
 });
 
 test('monster permissions and HP visibility locks explain and send separate actions',async({page,baseURL})=>{
