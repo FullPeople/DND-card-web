@@ -1,0 +1,45 @@
+name: Profile post-logo tail 241
+# Read-only public pages only: /card/ and /suite-dev/workbench/ without any
+# room/session fragment. Every sample uses a fresh Playwright context, no saved
+# cookies, login, user browser profile, private character or room access.
+# Product baseline: 9e8cf1fdafcb29d5573a8467418ea32b9ad41f70 (241).
+# Historical comparison: 4e398a39a5cb37e5e632ae377fdf2488cdc3924c (230).
+on:
+  push:
+    branches: [fix/startup-tail-241-20261003]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Verify the diagnostic branch has no product changes
+        run: git diff --exit-code 9e8cf1fdafcb29d5573a8467418ea32b9ad41f70 HEAD -- src public index.html vite.config.ts tools/startupPreload.ts tools/startupChunks.ts tools/offlineShell.ts
+      - run: npm run build:standalone
+      - name: Build released 230 with identical dependency versions
+        run: |
+          git worktree add --detach /tmp/startup-230 4e398a39a5cb37e5e632ae377fdf2488cdc3924c
+          ln -s "$GITHUB_WORKSPACE/node_modules" /tmp/startup-230/node_modules
+          cd /tmp/startup-230
+          npm run build:standalone
+      - run: npx playwright install --with-deps chromium
+      - run: node tools/profileStartupTail241.mjs
+        env:
+          STARTUP_BASELINE_DIR: /tmp/startup-230
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: startup-tail241-profile
+          include-hidden-files: true
+          path: .local-evidence/startup-tail241/
+          retention-days: 7
