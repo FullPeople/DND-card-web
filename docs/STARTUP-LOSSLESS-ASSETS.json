@@ -1,0 +1,67 @@
+{
+  "codec": "WebP lossless, Pillow method=6 exact=True",
+  "assets": [
+    {
+      "layer": 1,
+      "original": "public/startup-logo/1.PNG",
+      "delivery": "public/startup-logo/1.webp",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 64702,
+      "webpBytes": 26898,
+      "pngSha256": "40d81d05690b0fae1bb39c3bfe404aeadf35a7bffc28627bb7fe3685a0e67d26",
+      "webpSha256": "b81bbebd8ea102001a03d098e6aa2dab59e79cfa388243177c9f76642a9f4f20",
+      "decodedRgbaSha256": "9c128f72db23eb197b6903dab87b04bf78e0a2fb264f329d8dfc3f3835f0eae5",
+      "rgbaExact": true
+    },
+    {
+      "layer": 2,
+      "original": "public/startup-logo/2.PNG",
+      "delivery": "public/startup-logo/2.webp",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 33922,
+      "webpBytes": 18606,
+      "pngSha256": "d876c79b17189f092fb0519479e06109542e2fc84b9315b5212def431140134a",
+      "webpSha256": "2d556ccbc03479e1bddea2b78f5dcb2fa0e68c761138addedcb90142fd0f6391",
+      "decodedRgbaSha256": "818e17c8becba0543e5300c89b0474084356ec668d73eb1eea653b890abca867",
+      "rgbaExact": true
+    },
+    {
+      "layer": 3,
+      "original": "public/startup-logo/3.PNG",
+      "delivery": "public/startup-logo/3.webp",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 37259,
+      "webpBytes": 21266,
+      "pngSha256": "d4094577e2154933d41d43278a05ba899ee27186676f3d5e1ac0aa75454dee41",
+      "webpSha256": "4a33b332510c16d274529f7c27221a084817c2c5b00bce8218bef19b34b97290",
+      "decodedRgbaSha256": "95da2b90283004dfb575827f988477fcabe1e13f56d8438e1fa6edaad05dfb1e",
+      "rgbaExact": true
+    },
+    {
+      "layer": 4,
+      "original": "public/startup-logo/4.PNG",
+      "delivery": "public/startup-logo/4.webp",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 105276,
+      "webpBytes": 47794,
+      "pngSha256": "3b11e47126df35825dc2af8a6f4bfd9cd3000555a0c0d8ae87e1df4d0ad42fee",
+      "webpSha256": "eb383f588b8b947d583f8d57d92c146421d84cd3314d01ad1706b9c9a1a6645a",
+      "decodedRgbaSha256": "cee01ad5ee415ab3b63cfcda760fc3c8d52d29e19ec12bff8560ef01e9874a0f",
+      "rgbaExact": true
+    }
+  ],
+  "pngBytes": 241159,
+  "webpBytes": 114564
+}

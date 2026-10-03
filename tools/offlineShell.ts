@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 export function offlineShell(): Plugin {
   return { name: 'offline-app-shell', apply: 'build', generateBundle:{order:'post',handler(_, bundle) {
     const assets = Object.keys(bundle).filter(name => !name.endsWith('.map'));
-    const startupAssets = ['startup-logo/1.PNG','startup-logo/2.PNG','startup-logo/3.PNG','startup-logo/4.PNG'];
+    const startupAssets = ['startup-logo/1.webp','startup-logo/2.webp','startup-logo/3.webp','startup-logo/4.webp'];
     const first = new Set<string>(['index.html','favicon.svg',...startupAssets]);
     const visit = (name:string) => {
       if(first.has(name))return;

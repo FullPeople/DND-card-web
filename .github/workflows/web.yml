@@ -58,6 +58,7 @@ jobs:
           - group: startup-order
             commands: |
               npx playwright test --config playwright.startup-order.config.ts
+              npx playwright test --config playwright.startup-latency.config.ts
               npx playwright test tests/e2e/threeDragonFullscreen.spec.ts --project=chromium
           - group: startup-integration
             commands: |
@@ -147,6 +148,7 @@ jobs:
             .local-evidence/armor-offsets/
             .local-evidence/feature-armor/
             .local-evidence/startup-order/
+            .local-evidence/startup-latency/
             .local-evidence/integration230-browser/
             .local-evidence/followup231-browser/
             .local-evidence/followup231-ui/
@@ -167,6 +169,7 @@ jobs:
             .local-evidence/armor-offsets/
             .local-evidence/feature-armor/
             .local-evidence/startup-order/
+            .local-evidence/startup-latency/
             .local-evidence/integration230-browser/
             .local-evidence/wiki232/
             .local-evidence/edit-perf232/

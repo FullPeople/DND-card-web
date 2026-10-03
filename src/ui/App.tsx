@@ -98,7 +98,7 @@ import { EXAMPLE_PACK, importOwlbear, parseFile, readCharacter, validateCharacte
 import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
 import type {LoadProgress} from '../data/catalog';
 import {DEFAULT_SOURCE} from '../data/catalogSource';
-import {afterPaint} from '../platform/afterPaint';
+import {afterStartupPaint} from '../platform/afterPaint';
 import { download,saveRecovery,loadRecoveries, loadWorkspace, pickFile, restoreBackup, saveWorkspace, type Workspace } from '../platform/storage';
 import { ContentBoundary, Entries } from './Entries';
 import { EntryFacts } from './EntryFacts';
@@ -282,7 +282,7 @@ export default function App() {
   const [editingLoadError,setEditingLoadError]=useState('');
   const [editingReloadPending,setEditingReloadPending]=useState(false);
   const editingReloadInProgress=useRef(false);
-  useEffect(()=>{if(!workspace)return;let alive=true;const cancel=afterPaint(()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});});return()=>{alive=false;cancel();};},[!!workspace]);
+  useEffect(()=>{if(!workspace)return;let alive=true;const cancel=afterStartupPaint(()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});});return()=>{alive=false;cancel();};},[!!workspace]);
   const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
   const editing=editingRequested&&!!automationRuntime;
   useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editingRequested));}catch{/* A session still keeps the global editing preference. */}},[editingRequested]);
@@ -369,6 +369,7 @@ export default function App() {
     }finally{editingReloadInProgress.current=false;setEditingReloadPending(false);}
   }
   function acceptWorkspace(value: Workspace,fromBackup=false) {
+    performance.mark('dnd-card:workspace-validate-start');
     if (value.schemaVersion !== 1 || !Array.isArray(value.characters) || !value.characters.length || !Array.isArray(value.packs)) throw new Error('工作区结构不完整');
     const repaired: string[] = [];
     value = {...value, characters: value.characters.map(character => { const read = readCharacter(character); if (read.repaired.length) repaired.push(`${character.name || '未命名'}（${read.repaired.join('、')}）`); if(!inWorkbench)initializeAutomation(read.character);return read.character; })};
@@ -378,6 +379,7 @@ export default function App() {
     if (!value.characters.some(c => c.id === value.activeId)) value.activeId = value.characters[0].id;
     if(localSources)value=ensureSiteSources(value);
     restoredWorkspacePendingSave.current=fromBackup;
+    performance.mark('dnd-card:workspace-validated');
     workspaceRef.current = value; setWorkspace(value); setSaving(fromBackup?'备份已读取，尚未保存':'已保存到本机'); setStartupError('');
     if(repaired.length)setNotice(`这些角色的图片数据无法读取，已忽略并保留其余内容：${repaired.join('；')}。请重新设置后再保存。`);
   }
@@ -386,7 +388,9 @@ export default function App() {
     const initialize = async (canWrite: boolean) => {
       writable.current = canWrite; setReadOnly(!canWrite);
       try {
+        performance.mark('dnd-card:workspace-read-start');
         const value = await loadWorkspace(); if (!alive) return;
+        performance.mark('dnd-card:workspace-read-end');
         if (value) {acceptWorkspace(value);if(localSources&&canWrite&&(!value.siteSources||!sameValue(value.characters,workspaceRef.current!.characters)))persist(workspaceRef.current!);} else { const first = createLocalCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
       } catch (e) { if (alive) setStartupError(String(e)); }
     };
@@ -416,9 +420,9 @@ export default function App() {
   }
   const [wikiUiError,setWikiUiError]=useState('');
   const [wikiUi,setWikiUi]=useState<typeof import('./WikiUi')>();
-  useEffect(()=>{if(!workspace)return;const cancel=afterPaint(()=>{void import('./WikiUi').then(setWikiUi).catch(error=>setWikiUiError(String(error)));});return cancel;},[!!workspace]);
+  useEffect(()=>{if(!workspace)return;const cancel=afterStartupPaint(()=>{void import('./WikiUi').then(setWikiUi).catch(error=>setWikiUiError(String(error)));});return cancel;},[!!workspace]);
   useEffect(()=>{if(!wikiUi)return;void load();return()=>loadController.current?.abort();},[!!wikiUi]);
-  useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
+  useEffect(() => afterStartupPaint(()=>{void registerOffline(activate => setActivateUpdate(() => activate));}), []);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const d = useMemo(() => mechanics ? evaluate(mechanics) : undefined, [mechanics]);
   // Reveal the startup animation only once a usable workspace or recovery UI has committed.
