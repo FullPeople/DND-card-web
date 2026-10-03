@@ -52,6 +52,8 @@ export function automaticWeaponAttacks(c:Character,d:Derived):{attacks:Automatic
   for(const mode of modes){
    const dice=String(mode.dice??'').replace(/\s/g,'');
    if(!/^(?:\d+d\d+|\d+)(?:[+-]\d+)?$/i.test(dice)){issue(mode.id,`${mode.label}伤害格式未支持，未生成可掷骰攻击。`);continue;}
+   // XPHB p27: fixed damage is not a roll; the current model cannot bind roll-only riders to it.
+   if(entry.edition==='2024'&&!/d/i.test(dice)){issue('fixed-damage','固定伤害的属性与魔法加值规则尚未支持，请手动填写攻击。');continue;}
    attacks.push({key:`auto-weapon:${row.id}:${mode.id}`,name:`${entry.name} · ${mode.label}`,modeLabel:mode.label,entry,
     attack_bonus:attackBonus,damage:dice+(damageBonus?signed(damageBonus):''),damage_type:damageTypes[model.damageType||'']||model.damageType||'',
     origin:{selectionId:row.id,entryId:entry.id,source:entry.source,edition:entry.edition,revision:entry.revision,path:mode.id==='two-handed'?'automation.mechanics.equipmentModel.versatileDamage':'automation.mechanics.equipmentModel.damage'},
