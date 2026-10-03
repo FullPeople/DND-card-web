@@ -89,3 +89,19 @@ added 4 packages in 523ms
 尚未完成正式schema/automation.json/unsupported.json、派生器A+B、真实字段等价性、卡片协议3接线、覆盖标注、浏览器/CI、两次独立审计或kiwee演练。真实登录房间、实体手机、玩家旧卡及Node22执行未因此验收。
 
 执行计划§5的G1条件为“用户看过报告并确认继续”。建议审阅本报告后进入G2：建立严格schema、11类不变量与正式身份，保留全部未知缺口，不把它们判为automated；远端名称在创建前仍由用户决定。下一期仍不推送、合并、部署。
+
+
+## G0/G1补充真实资料基线
+
+在G1报告提交审阅后，用本轮锁定缓存补跑既有角色卡抽样；不作为IR派生等价性证据，不与完整基线或独立工具计数相加。
+
+命令：`npx vitest run tests/automation209-corpus.test.ts tests/automation-choices-resources.test.ts tests/class-spell-choices.test.ts`，退出0，原始输出：
+
+```text
+ Test Files  3 passed (3)
+      Tests  47 passed (47)
+```
+
+此配置通过47 / 跳过0 / 失败0。通过DND_AUTOMATION_CORE_DATA、DND_AUTOMATION_BASEITEMS、DND_AUTOMATION_FEATS指向本轮锁定的实际缓存，执行原先因缺数据跳过的21项抽样；只在忽略缓存建立既有测试要求的文件名链接，未修改测试代码、断言或skip条件。覆盖两版护甲/武器、来源赠送次数歧义、两版领域法术、实际职业资源与17组职业起始配额。其余3项外部条件用例未在此配置执行；完整基线仍引用G0的729/24。
+
+日志和命令/输入路径/退出码见角色卡忽略目录 `evidence/automation-ir/g0/real-data-followup.{log,command.json}`（实际文件名为real-data-followup.log与real-data-followup-command.json）。
