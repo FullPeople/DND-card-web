@@ -5,8 +5,8 @@ import {numericExpression} from '../core/numericExpression';
 const queues=mutationQueue();
 /** Serialize a card's vital edits; unrelated cards continue independently. */
 export function saveVital(entity:Target|CardChoice,field:string,expression:string|number,label:string,remember=true,expected?:number):Promise<number>{
- const cardId='cardId' in entity?entity.cardId:entity.kind!=='monster'?entity.id:undefined,itemId=cardId?`card:${cardId}`:entity.itemId,key=cardId||entity.itemId;
- const send=async(previous?:any)=>{const wb=getWorkbench(),live=cardId?wb.cards.find(c=>c.id===cardId):wb.monsters.find(c=>c.itemId===itemId);const selected=wb.target?.itemId===entity.itemId?wb.target:undefined;
+ const cardId='cardId' in entity?entity.cardId:entity.kind!=='monster'?entity.id:undefined,itemId=cardId?`card:${cardId}`:entity.targetId||entity.itemId,key=cardId?`card:${cardId}`:`monster:${entity.itemId}`;
+ const send=async(previous?:any)=>{const wb=getWorkbench(),live=cardId?wb.cards.find(c=>c.id===cardId):wb.monsters.find(c=>c.itemId===entity.itemId);const selected=wb.target?.itemId===entity.itemId&&!!wb.target.cardId===!!cardId?wb.target:undefined;
   const before=expected??live?.stats[field]??selected?.stats[field]??previous?.snapshot?.state.stats[field]??entity.stats[field];
   // Evaluate each queued intent against the latest authoritative value. Preserve
   // relative intent for the host's conflict-safe stat update protocol.

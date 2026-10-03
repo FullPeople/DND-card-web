@@ -1,7 +1,6 @@
 import {test,expect,type Locator,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
 import {releaseHistoryFor} from '../../src/platform/releaseNotes';
-const history=releaseHistoryFor('standalone'),RELEASE_DATE=history[0].title,RELEASE_SECTIONS=history[0].sections,RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 import {ANNOUNCEMENT_KEY,APP_VERSION} from '../../src/platform/announcement';
 
 const dialog=(page:Page)=>page.getByRole('dialog',{name:'欢迎使用这款开源禁商用车卡/Wiki网站！'});
@@ -23,14 +22,15 @@ test('首次打开单机站弹出公告，版本、问题清单与默认展开�
  await open(page);
  const updates=dialog(page).locator('.announcement-issues');await expect(updates.locator('> summary')).toHaveText('版本更新');expect(await updates.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);await expect(updates.locator('.announcement-current')).toBeHidden();await updates.locator('> summary').click();
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
- await expect(dialog(page).locator('.announcement-current>h3')).toHaveText(RELEASE_DATE);
- await expect(dialog(page).locator('.announcement-current li')).toHaveCount(RELEASE_NOTES.length);
- const histories=dialog(page).locator('.announcement-history');await expect(histories.locator('summary')).toHaveText(releaseHistoryFor('standalone').slice(1).map(batch=>batch.title));for(const item of await histories.all())expect(await item.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);const history=histories.first();
+ const releases=releaseHistoryFor('standalone'),current=releases[0];
+ await expect(dialog(page).locator('.announcement-current>h3')).toHaveText(current.title);
+ await expect(dialog(page).locator('.announcement-current li')).toHaveText(current.sections.flatMap(section=>section.items));
+ const histories=dialog(page).locator('.announcement-history');await expect(histories.locator('summary')).toHaveText(releases.slice(1).map(release=>release.title));for(const item of await histories.all())expect(await item.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);const history=histories.first();
  await expect(history.locator('li').first()).toBeHidden();await history.locator('summary').click();await expect(history.locator('li').first()).toBeVisible();await history.locator('summary').click();
  await expect(dialog(page).locator('.announcement-issues')).toContainText('导出指定角色或多卡备份');
  await expect(dialog(page).locator('.announcement-issues')).not.toContainText('枭熊');await expect(dialog(page).locator('.announcement-issues')).not.toContainText('三龙');
- await expect(dialog(page).locator('.announcement-current .announcement-section h4')).toHaveText(RELEASE_SECTIONS.map(section=>section.title));
- await expect(dialog(page).locator('.announcement-current hr')).toHaveCount(RELEASE_SECTIONS.length-1);
+ await expect(dialog(page).locator('.announcement-current .announcement-section h4')).toHaveText(current.sections.map(section=>section.title));
+ await expect(dialog(page).locator('.announcement-current hr')).toHaveCount(current.sections.length-1);
  await expect(dialog(page).locator('.announcement-issues')).not.toContainText('怪物编辑');
  const faq=dialog(page).locator('.announcement-faq').first();
  await expect(faq.locator('details')).toHaveCount(4);

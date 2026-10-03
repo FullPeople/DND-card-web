@@ -1,3 +1,4 @@
+import {MonsterRuntime,runtimeFrom} from '../core/workbenchRuntime';
 import {boundedDiceHistory} from './diceHistory';
 import {WorkbenchSnapshotCache,type CacheAccess} from './workbench-cache';
 import {previewInventory,overlayInventory} from '../core/inventory';
@@ -15,8 +16,8 @@ import type {ResourceWidgetLayout} from '../core/resourceWidgets';
 const protocol='full-suite-workbench/v1',params=new URLSearchParams(location.hash.slice(1));
 const session=params.get('suite'),origin=params.get('bridge');
 export const inWorkbench=!!session&&origin===location.origin;
-export type Target={tokenPortrait?:{url:string;width?:number;height?:number};projectionPending?:boolean;documentRevision?:number;key:string;itemId:string;name:string;cardId:string;slug:string;kind:'character'|'monster'|'token';stats:Record<string,number>;write:boolean;role:string;pinned:boolean;locked?:boolean;statsLocked?:boolean;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];resources?:any[]};
-export type CardChoice={resourceHidden?:string[];resourceWidgets?:Record<string,ResourceWidgetLayout>;resourceAttacks?:ResourceWidgetLayout;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
+export type Target={targetId?:string;tokenPortrait?:{url:string;width?:number;height?:number};projectionPending?:boolean;documentRevision?:number;key:string;itemId:string;name:string;cardId:string;slug:string;kind:'character'|'monster'|'token';stats:Record<string,number>;write:boolean;role:string;pinned:boolean;locked?:boolean;statsLocked?:boolean;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];resources?:any[]};
+export type CardChoice={targetId?:string;resourceHidden?:string[];resourceWidgets?:Record<string,ResourceWidgetLayout>;resourceAttacks?:ResourceWidgetLayout;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
 export type SharedRules={edition:Edition;sourceMode:'full'|'short'|'both';profile:RuleProfile;packs:RulePack[];customEntries:Entry[]};
 export type SharedDocument={key:string;scope:'room'|'scene';revision:number;rules:SharedRules};
 type State={access?:CacheAccess;inventory?:InventoryState;shared?:SharedDocument;settings?:Record<string,any>;visibility?:{wiki:boolean;monsters:boolean};console?:{timeStop:boolean;portalEffects:boolean;players:{id:string;name:string}[]};cards:CardChoice[];monsters:CardChoice[];role?:string;enabled:Record<string,boolean>;online:boolean;target?:Target;document?:any;loading?:boolean;message:string;rolls:any[];compose?:{id:string;expression:string;label?:string}};
@@ -77,11 +78,24 @@ let relay:Relay|undefined,selectionSequence=0,catalogSequence=0,hostStarted=0,fo
 let handshakeReady=false,handshakeCatalog=false,lastHello:number|undefined,helloAttempts=0;
 function resetGroup(disconnected=false){if(hostStarted)window.dispatchEvent(new CustomEvent('workbench-group-roll-reset',{detail:{hostStarted,disconnected}}));}
 function resetHandshake(restartRetries=true,disconnected=true){if(disconnected){resetGroup(true);snapshotCache.suspend();}handshakeReady=false;handshakeCatalog=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
-const monsterRuntimeSequence=new Map<string,number>();
-const runtimeFrom=(value:any)=>({stats:value.stats,resources:value.resources,conditions:value.conditions,documentRevision:value.documentRevision,...Object.fromEntries(['resourceWidgets','resourceAttacks','resourceHidden','classSummary'].filter(key=>value[key]!==undefined).map(key=>[key,value[key]]))});
+const monsterRuntime=new MonsterRuntime();
+function normalizeSnapshot(m:any){
+ if(!m.state)return m;
+ const previous=state.target?.key===m.state.key?state.target:m.state.cardId?state.cards.find(card=>card.id===m.state.cardId):state.monsters.find(card=>card.itemId===m.state.itemId);
+ const normalized=m.state.cardId?{...m,state:{...m.state,...runtimeFrom(m.state,previous)}}:monsterRuntime.snapshot(m);
+ const access=snapshotCache.currentAccess,grant=access?(m.state.cardId?access.cards.find(card=>card.id===m.state.cardId):access.monsters.find(card=>card.itemId===m.state.itemId)):m.sequence&&m.sequence<catalogSequence?previous:undefined;
+ if(grant)normalized.state={...normalized.state,write:grant.write,locked:grant.locked,...(access?{role:access.role}:{}),...(grant.targetId?{targetId:grant.targetId}:{})};
+ return normalized;
+}
+function catalogCards(cards:any){return (Array.isArray(cards)?cards:[]).filter(card=>card&&typeof card.id==='string').map(card=>{const grant=snapshotCache.currentAccess?.cards.find(g=>g.id===card.id);return revisions.card({...card,...runtimeFrom(card,state.cards.find(old=>old.id===card.id)),...(grant?{write:grant.write,locked:grant.locked}:{})});});}
+function catalogMonsters(cards:any,sequence=0){return (Array.isArray(cards)?cards:[]).filter(card=>card&&typeof card.itemId==='string').map(card=>{const grant=snapshotCache.currentAccess?.monsters.find(g=>g.itemId===card.itemId);return {...monsterRuntime.catalog(card,sequence),kind:'monster',...(grant?{write:grant.write,locked:grant.locked,...(grant.targetId?{targetId:grant.targetId}:{})}:{})};});}
+function applySnapshotRuntime(snap:any,currentPermissions=false){
+ update({cards:state.cards.map(card=>snap.state.cardId&&card.id===snap.state.cardId?revisions.card({...card,...runtimeFrom(snap.state,card),...(currentPermissions?{locked:snap.state.locked??card.locked}:{})}):card),
+  monsters:state.monsters.map(card=>!snap.state.cardId&&card.itemId===snap.state.itemId?{...card,...runtimeFrom(snap.state,card),...(currentPermissions?{locked:snap.state.locked??card.locked}:{})}:card)});
+}
 function acceptSnapshot(m:any){
  if(m.access&&!acceptAccess(m.access)||snapshotCache.currentAccess&&!snapshotCache.permits(m.state))return;
- m=revisions.snapshot(m);rememberDocument(m);if(!m.state)return;
+ m=revisions.snapshot(normalizeSnapshot(m));rememberDocument(m);if(!m.state)return;applySnapshotRuntime(m);
  const same=state.target?.key===m.state.key;
  if(m.sequence&&m.sequence<selectionSequence){
   // The durable card revision outranks message timing, but an older receipt
@@ -111,8 +125,9 @@ function acceptAccess(access:CacheAccess){
  const previous=snapshotCache.currentAccess;if(!snapshotCache.acceptAccess(access))return false;
  if(previous?.epoch===access.epoch&&previous.scope===access.scope)return true;
  const scopeChanged=previous&&(previous.scope!==access.scope||previous.room!==access.room||previous.role!==access.role);
- if(scopeChanged){resetGroup();revisions=new WorkbenchRevisions();observedDocuments.clear();wantedSelection=undefined;authoritativeInventory=undefined;update({target:undefined,document:undefined,inventory:undefined,shared:undefined,loading:false});}
- update({access,cards:state.cards.filter(card=>access.enabled.characterCards!==false&&access.cards.some(grant=>grant.id===card.id)).map(card=>({...card,...access.cards.find(grant=>grant.id===card.id)})),monsters:state.monsters.filter(card=>access.monsters.some(grant=>grant.itemId===card.itemId)).map(card=>({...card,...access.monsters.find(grant=>grant.itemId===card.itemId)})),role:access.role,enabled:access.enabled});
+ if(scopeChanged){resetGroup();revisions=new WorkbenchRevisions();monsterRuntime.reset();observedDocuments.clear();wantedSelection=undefined;authoritativeInventory=undefined;update({target:undefined,document:undefined,inventory:undefined,shared:undefined,loading:false});}
+ monsterRuntime.restrict(access.monsters);
+ update({access,cards:state.cards.filter(card=>access.enabled.characterCards!==false&&access.cards.some(grant=>grant.id===card.id)).map(card=>({...card,...access.cards.find(grant=>grant.id===card.id)})),monsters:state.monsters.filter(card=>access.monsters.some(grant=>grant.itemId===card.itemId)).map(card=>({...card,...access.monsters.find(grant=>grant.itemId===card.itemId),kind:'monster' as const})),role:access.role,enabled:access.enabled});
  if(state.target){if(!snapshotCache.permits(state.target))update({target:undefined,document:undefined,loading:false,message:'当前角色的查看权限或场景已改变'});else{const grant=state.target.cardId?access.cards.find(card=>card.id===state.target!.cardId):access.monsters.find(card=>card.itemId===state.target!.itemId);if(grant&&(grant.write!==state.target.write||grant.locked!==state.target.locked||access.role!==state.target.role))update({target:{...state.target,write:grant.write,locked:grant.locked,role:access.role}});}}
  return true;
 }
@@ -129,16 +144,16 @@ function requestHello(){
 }
 if(inWorkbench){
  startWorkbenchSound();
- function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;followRevision=0;monsterRuntimeSequence.clear();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;clientSelection=0;update({access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
+ function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;followRevision=0;monsterRuntime.reset();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;clientSelection=0;update({access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
   if(!state.online)update({online:true,message:''});
   const accessAccepted=!m.access||acceptAccess(m.access);
   if(m.type==='access'||!accessAccepted&&m.type!=='ack')return;
-  if(m.type==='cacheSnapshot'){if(accessAccepted){const snap=revisions.snapshot(m);rememberDocument(snap);if(snap.state?.key===state.target?.key)acceptSnapshot(snap);}return;}
+  if(m.type==='cacheSnapshot'){if(accessAccepted&&m.state&&(!snapshotCache.currentAccess||snapshotCache.permits(m.state))){const snap=revisions.snapshot(normalizeSnapshot(m));rememberDocument(snap);if(snap.state)applySnapshotRuntime(snap);if(snap.state?.key===state.target?.key)acceptSnapshot(snap);}return;}
   if(m.type==='ready')handshakeReady=true;
   if(m.type==='groupRollState'||m.type==='ready')window.dispatchEvent(new CustomEvent('workbench-group-roll-state',{detail:{group:m.type==='ready'?m.groupRoll??null:m.group,groupRevision:m.groupRevision??0,hostStarted:m.hostStarted||hostStarted,snapshot:m.type==='ready'}}));
   if(m.type==='ready'||m.type==='rolls')update({rolls:boundedDiceHistory(m.rolls)});
-  if(m.type==='directory'&&(!m.sequence||m.sequence>=catalogSequence)){catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:m.monsters||[],role:m.role,enabled:m.enabled||{}});}
-  if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){handshakeCatalog=true;catalogSequence=m.sequence||catalogSequence;update({cards:(m.cards||[]).map((card:CardChoice)=>revisions.card(card)),monsters:(m.monsters||[]).map((card:CardChoice)=>{const previous=state.monsters.find(c=>c.itemId===card.itemId);if(previous&&(monsterRuntimeSequence.get(card.itemId)||0)>(m.sequence||0))return {...card,...runtimeFrom(previous)};monsterRuntimeSequence.set(card.itemId,m.sequence||0);return card;}),role:m.role,enabled:m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
+  if(m.type==='directory'&&(!m.sequence||m.sequence>=catalogSequence)){catalogSequence=m.sequence||catalogSequence;update({cards:catalogCards(m.cards),monsters:catalogMonsters(m.monsters,m.sequence),role:m.role,enabled:m.enabled||{}});}
+  if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){handshakeCatalog=true;catalogSequence=m.sequence||catalogSequence;update({cards:catalogCards(m.cards),monsters:catalogMonsters(m.monsters,m.sequence),role:m.role,enabled:m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
   if(m.type==='catalog'&&state.target){const card=state.target.cardId?state.cards.find(c=>c.id===state.target!.cardId):state.monsters.find(c=>c.itemId===state.target!.itemId);if(card&&card.write!==state.target.write)update({target:{...state.target,write:card.write,locked:card.locked}});}
   if(m.type==='showWiki')window.dispatchEvent(new CustomEvent('workbench-open-entry',{detail:m.entry}));
   if(['navigate','followSelection','followEnd','selection'].includes(m.type)&&Number.isSafeInteger(m.followRevision)){if(m.followRevision<followRevision)return;followRevision=m.followRevision;}
@@ -152,7 +167,7 @@ if(inWorkbench){
   if(m.type==='compose')update({compose:m.compose});
   if(m.type==='selection'){
    if(!accessAccepted||m.clientInstance&&m.clientInstance!==clientInstance&&wantedSelection||(!m.clientInstance||m.clientInstance===clientInstance)&&m.clientSelection!==undefined&&m.clientSelection<clientSelection)return;
-   if(wantedSelection&&m.clientSelection===undefined&&m.state&&wantedSelection!==(m.state.cardId?'card:'+m.state.cardId:m.state.itemId)&&wantedSelection!==m.state.itemId)return;
+   if(wantedSelection&&m.clientSelection===undefined&&m.state&&wantedSelection!==(m.state.targetId||(m.state.cardId?'card:'+m.state.cardId:m.state.itemId))&&wantedSelection!==m.state.itemId)return;
    wantedSelection=undefined;
    if(!m.state){update({target:undefined,document:undefined,loading:false,message:m.message||''});return;}
    acceptSnapshot(m);
@@ -160,9 +175,9 @@ if(inWorkbench){
   if(m.type==='ack'){
    if(m.ok&&Array.isArray(m.result?.snapshots)){
     const catalog=m.result.catalog;
-    if(catalog&&catalog.sequence>=catalogSequence){catalogSequence=catalog.sequence;update({cards:catalog.cards.filter((card:CardChoice)=>!snapshotCache.currentAccess||snapshotCache.currentAccess.cards.some(grant=>grant.id===card.id)).map((card:CardChoice)=>revisions.card(card)),monsters:catalog.monsters.filter((card:CardChoice)=>!snapshotCache.currentAccess||snapshotCache.currentAccess.monsters.some(grant=>grant.itemId===card.itemId))});}
-    for(const input of m.result.snapshots){if(!input?.state||input.access&&!acceptAccess(input.access)||snapshotCache.currentAccess&&!snapshotCache.permits(input.state))continue;const snap=revisions.snapshot(input);rememberDocument(snap);
-     update({cards:state.cards.map(card=>card.id===snap.state.cardId?revisions.card({...card,...runtimeFrom(snap.state)}):card),monsters:state.monsters.map(card=>{if(card.itemId!==snap.state.itemId||(snap.sequence||0)<(monsterRuntimeSequence.get(card.itemId)||0))return card;monsterRuntimeSequence.set(card.itemId,snap.sequence||0);return {...card,...runtimeFrom(snap.state)};})});
+    if(catalog&&catalog.sequence>=catalogSequence){catalogSequence=catalog.sequence;update({cards:catalogCards(catalog.cards).filter((card:CardChoice)=>!snapshotCache.currentAccess||snapshotCache.currentAccess.cards.some(grant=>grant.id===card.id)),monsters:catalogMonsters(catalog.monsters,catalog.sequence).filter((card:CardChoice)=>!snapshotCache.currentAccess||snapshotCache.currentAccess.monsters.some(grant=>grant.itemId===card.itemId))});}
+    for(const input of m.result.snapshots){if(!input?.state||input.access&&!acceptAccess(input.access)||snapshotCache.currentAccess&&!snapshotCache.permits(input.state))continue;const snap=revisions.snapshot(normalizeSnapshot(input));rememberDocument(snap);
+     applySnapshotRuntime(snap);
      if(snap.state.key===state.target?.key)acceptSnapshot(snap);
     }
    }
@@ -170,11 +185,8 @@ if(inWorkbench){
    // Includes late terminal receipts after a lost-response timeout. App keeps
    // uncertain local edits until a real receipt or explicit reconciliation.
   }
-  if(m.type==='ack'){if(m.result?.warning)window.dispatchEvent(new CustomEvent('workbench-error',{detail:{message:m.result.warning,diagnostic:JSON.stringify({product:'Full Suite',at:new Date().toISOString(),message:m.result.warning,diagnostic:m.result.diagnostic,connection:workbenchDiagnostics()},null,2)}}));if(m.result?.historyId)stockDrafts.delete(m.result.historyId);if(m.ok&&m.result?.inventory){acceptInventoryReceipt(m.result.inventory);}if(m.ok&&m.result?.shared&&(!state.shared||m.result.shared.key!==state.shared.key||m.result.shared.revision>=state.shared.revision)){update({shared:m.result.shared});}if(m.ok&&m.result?.consolePatch&&m.result.sequence>=catalogSequence){update({console:{...state.console!,...m.result.consolePatch}});}if(m.ok&&m.result?.snapshot&&(!m.result.snapshot.access||acceptAccess(m.result.snapshot.access))&&(!snapshotCache.currentAccess||snapshotCache.permits(m.result.snapshot.state))){const snap=revisions.snapshot(m.result.snapshot);m.result.snapshot=snap;rememberDocument(snap);const currentPermissions=!snap.sequence||snap.sequence>=catalogSequence;
-    update({monsters:state.monsters.map(card=>{
-     if(card.itemId!==snap.state.itemId||(snap.sequence||0)<(monsterRuntimeSequence.get(card.itemId)||0))return card;
-     monsterRuntimeSequence.set(card.itemId,snap.sequence||0);return {...card,stats:snap.state.stats,resources:snap.state.resources||card.resources,...(currentPermissions?{locked:snap.state.locked??card.locked}:{})};
-    }),cards:state.cards.map(card=>card.id===snap.state.cardId?revisions.card({...card,...runtimeFrom(snap.state),...(currentPermissions?{locked:snap.state.locked??card.locked}:{})}):card)});
+  if(m.type==='ack'){if(m.result?.warning)window.dispatchEvent(new CustomEvent('workbench-error',{detail:{message:m.result.warning,diagnostic:JSON.stringify({product:'Full Suite',at:new Date().toISOString(),message:m.result.warning,diagnostic:m.result.diagnostic,connection:workbenchDiagnostics()},null,2)}}));if(m.result?.historyId)stockDrafts.delete(m.result.historyId);if(m.ok&&m.result?.inventory){acceptInventoryReceipt(m.result.inventory);}if(m.ok&&m.result?.shared&&(!state.shared||m.result.shared.key!==state.shared.key||m.result.shared.revision>=state.shared.revision)){update({shared:m.result.shared});}if(m.ok&&m.result?.consolePatch&&m.result.sequence>=catalogSequence){update({console:{...state.console!,...m.result.consolePatch}});}if(m.ok&&m.result?.snapshot&&(!m.result.snapshot.access||acceptAccess(m.result.snapshot.access))&&(!snapshotCache.currentAccess||snapshotCache.permits(m.result.snapshot.state))){const snap=revisions.snapshot(normalizeSnapshot(m.result.snapshot));m.result.snapshot=snap;rememberDocument(snap);const currentPermissions=!snap.sequence||snap.sequence>=catalogSequence;
+    applySnapshotRuntime(snap,currentPermissions);
     if(snap.state.key===state.target?.key)acceptSnapshot(snap);}const p=pending.get(m.requestId);if(p){operationTimings.push({requestId:m.requestId,type:p.type,ok:m.ok,totalMs:Math.round(performance.now()-p.started),...m.timing});if(operationTimings.length>24)operationTimings.shift();clearTimeout(p.timer);pending.delete(m.requestId);m.ok?p.resolve(m.result):p.reject(Object.assign(Error(m.message||'操作失败'),{diagnostic:{...m.diagnostic,timing:m.timing,connection:workbenchDiagnostics()},requestId:m.requestId,uncertain:!!m.uncertain}));}}
   if(m.type==='ack')window.dispatchEvent(new CustomEvent('workbench-operation-result',{detail:{requestId:m.requestId,ok:m.ok,uncertain:!!m.uncertain,result:m.result,message:m.message}}));
   if(handshakeReady&&handshakeCatalog){lastHello=undefined;helloAttempts=0;}
@@ -192,7 +204,7 @@ if(inWorkbench){
  connect();setInterval(connect,1000);window.addEventListener('focus',connect);window.addEventListener('pageshow',connect);
 }
 export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},()=>state);}
-export function pinWorkbench(pinned:boolean){if(!state.online||!state.target)return;const target=state.target;update({target:{...target,pinned}});send('pin',{pinned,itemId:target.itemId});}
+export function pinWorkbench(pinned:boolean){if(!state.online||!state.target)return;const target=state.target;update({target:{...target,pinned}});send('pin',{pinned,itemId:target.targetId||target.itemId});}
 export function workbenchRequest(type:string,extra:Record<string,unknown>={}){
  if(!state.online||!host&&!relay)return Promise.reject(Error('枭熊未连接'));
  const requestId=crypto.randomUUID(),target=state.target;
@@ -201,7 +213,7 @@ export function workbenchRequest(type:string,extra:Record<string,unknown>={}){
   const timer=setTimeout(check,15000);pending.set(requestId,{resolve,reject,timer,started:performance.now(),type});let body=extra;
   if(type==='inventory'&&(extra.operation as any)?.operationId)inventoryRequests.set(requestId,(extra.operation as any).operationId);
   if(type==='save'&&(extra.observed as any)?.dnd_card_web){const {previous,native,observed,previousData,data,...rest}=extra;body={...rest,delta:{native:documentChanges(previous,native,(observed as any).dnd_card_web),legacy:documentChanges(previousData,data,observed)}};}
-  const payload={requestId,expiresAt:Date.now()+30000,key:target?.key,itemId:target?.itemId,...body};
+  const payload={requestId,expiresAt:Date.now()+30000,key:target?.key,itemId:target?.targetId||target?.itemId,...body};
   // A POST transport timeout cannot tell whether the server committed. Query the
   // request receipt, never replay the mutation or roll back an optimistic draft.
   if(host&&!host.closed){send('ping');send(type,payload);}else if(relay)void relay.send({protocol,type,session,...payload}).catch(error=>{if(error?.status&&error.status<500){clearTimeout(timer);pending.delete(requestId);reject(error);}else send('requestStatus',{requestId});});
