@@ -137,6 +137,14 @@ export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle,co
  // Small artwork may claim genuinely smaller cells; large artwork stays bounded.
  return {w:Math.max(1,Math.min(WIDGET_COLS,Math.ceil(size.w*scale))),h:Math.max(1,Math.min(WIDGET_ROWS,Math.ceil(size.h*scale)))};
 }
+/** Compensate only deliberately reduced artwork in a compact outer box.
+ * Template previews may use smaller nominal geometry; never enlarge them. */
+export function resourceModuleContentScale(module:ResourceModule,style:WidgetStyle,layout?:Partial<ResourceWidgetLayout>){
+ const scale=Math.max(.25,Math.min(2,Number.isFinite(layout?.contentScale)?layout!.contentScale!:1));
+ if(scale>=1)return scale;
+ const baseline=resourceModuleMinimum(module,style);
+ return Math.min(1,scale*Math.max(1,Math.min(baseline.w/(layout?.w||baseline.w),baseline.h/(layout?.h||baseline.h))));
+}
 /** Changes only this module when growing resource data requires more room.
  * Any resulting collision remains visible for the user to resolve. */
 export function normalizeModuleWidget(module:ResourceModule,input?:Partial<ResourceWidgetLayout>):ResourceWidgetLayout{

@@ -191,12 +191,12 @@ describe('manual sheet content ownership', () => {
     bg.entry.raw.feats = [{ '旅行笔记；自选流派|XPHB': true }]; syncFeatures(c, [feat]);
     expect(c.selections.filter(s => s.parentId === bg.id).map(s => s.entry.name)).toEqual(['旅行笔记；自选流派']);
   });
-  it('allows unrestricted manual proficiency, overrides fixed grants and validates persisted controls', () => {
+  it('allows unrestricted manual proficiency, retains fixed grants and validates persisted controls', () => {
     const c = newCharacter(); add(c, entry('background', { skillProficiencies: [{ history: true }] }));
     c.proficiencies = { history: false, arcana: true, nature: true, religion: true, 'save:str': true };
     c.training = { tools: '自定义工具' };
     const restored = validateCharacter(exportCharacter(c)), d = evaluate(restored);
-    expect(d.skills.history.proficient).toBe(false); expect(d.skills.arcana.proficient).toBe(true); expect(d.saves.str.proficient).toBe(true);
+    expect(d.skills.history.proficient).toBe(true); expect(d.skills.arcana.proficient).toBe(true); expect(d.saves.str.proficient).toBe(true);
     expect(restored.training?.tools).toBe('自定义工具'); expect(() => validateCharacter({ ...c, proficiencies: { invalid: true } })).toThrow('熟练记录');
   });
 });

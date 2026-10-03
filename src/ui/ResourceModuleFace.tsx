@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode} from 'react';
-import {romanLevel,canonicalWidgetStyle,countableResource,resourceModuleMinimum, type ResourceModule, type ResourceWidgetLayout} from '../core/resourceWidgets';
+import {romanLevel,canonicalWidgetStyle,countableResource,resourceModuleContentScale, type ResourceModule, type ResourceWidgetLayout} from '../core/resourceWidgets';
 import './resourceDashboardFaces.css';
 
 const iconPaths = {
@@ -64,7 +64,7 @@ export function ResourceModuleFace({module,style,layout}:{module:ResourceModule;
  else content=<>{name}{readout}</>;
  const digits=Math.max(String(r.current).length,r.unlimited?0:String(r.max).length),ringWidth=String(r.current).length*.62+(r.unlimited?0:String(r.max).length*.4+.45);
  const contentScale=Number.isFinite(layout?.contentScale)?Math.max(.25,Math.min(2,layout!.contentScale!)):1;
- const baseline=resourceModuleMinimum(module,style),fittedScale=contentScale*Math.max(1,Math.min(baseline.w/(layout?.w||baseline.w),baseline.h/(layout?.h||baseline.h)));
+ const fittedScale=resourceModuleContentScale(module,style,layout);
  return <span className={`resource-module-art rm-${face} ${value.length>8?'rm-large-number':''} ${multiple?'rm-group':''}`} data-module-style={face} data-module-unlimited={!multiple&&r.unlimited||undefined} data-content-scale={contentScale} style={{'--rm-icon-tone':layout?.color||'#527880','--rm-background':layout?.background||'transparent','--rm-border-width':`${layout?.borderWidth??0}px`,'--rm-radius':`${layout?.borderRadius??0}px`,'--rm-padding':`${layout?.padding??0}px`,'--rm-gap':`${layout?.gap??0}px`,'--rm-ratio':ratio(r),'--rm-content-scale':fittedScale,'--rm-value-fit':`${Math.min(30,62/(digits*.65))}cqw`,'--rm-ring-fit':`${76/ringWidth}cqw`,'--rm-pool-digits':Math.max(...module.rows.map(([,row])=>String(row.current).length+String(row.max).length))} as CSSProperties} title={multiple?module.rows.map(([key,resource])=>`${resource.name||key}：${summary(resource)}`).join('\n'):`${module.name}：${value}`}>
   <span className="rm-content">{content}</span>{!multiple&&r.locked&&<span className="rm-lock" aria-label="已锁定">▣</span>}
  </span>;

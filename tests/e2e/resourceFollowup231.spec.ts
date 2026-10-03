@@ -101,5 +101,6 @@ test('an empty dashboard adjusts its divider without creating resources or recov
 test('discarding an icon draft preserves every live balance and saved presentation',async({page})=>{
  const dialog=await open(page),before=await read(page),surge=dialog.locator('[data-resource-id="surge"]');
  await surge.locator('.resource-widget-face').click();await dialog.getByRole('button',{name:'色调 #a36d61',exact:true}).click();await expect(dialog.getByRole('button',{name:/短休|长休/})).toHaveCount(0);
- await dialog.getByRole('button',{name:'放弃修改',exact:true}).click();expect(await read(page)).toEqual(before);await expect(surge.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#527880');
+ page.once('dialog',async confirmation=>{expect(confirmation.message()).toContain('未保存');await confirmation.dismiss();});await dialog.getByRole('button',{name:'放弃修改',exact:true}).click();expect(await read(page)).toEqual(before);await expect(surge.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#a36d61');await expect(dialog.locator('.resource-dashboard')).toHaveAttribute('data-dirty','true');
+ page.once('dialog',async confirmation=>{expect(confirmation.message()).toContain('未保存');await confirmation.accept();});await dialog.getByRole('button',{name:'放弃修改',exact:true}).click();expect(await read(page)).toEqual(before);await expect(surge.locator('.resource-module-art')).toHaveCSS('--rm-icon-tone','#527880');await expect(dialog.locator('.resource-dashboard')).toHaveAttribute('data-dirty','false');
 });

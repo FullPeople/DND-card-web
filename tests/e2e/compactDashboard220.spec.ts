@@ -49,7 +49,11 @@ for(const width of [1100,390])test.describe(`compact dashboard ${width}`,()=>{
   await expect(pips.locator('.compact-resource-popover')).toBeHidden();
   await editor.getByLabel('资源上限',{exact:true}).fill('100');await expect(buttons).toHaveCount(7);for(const name of ['图标','图标矩阵','断环','分段槽'])await expect(buttons.filter({hasText:name})).toHaveCount(0);await expect(editor.locator('.resource-editor-preview .resource-module-art')).toHaveAttribute('data-module-style','diamond');
   await page.screenshot({path:testInfo.outputPath(`compact-editor-${width}.png`),fullPage:true});
-  await editor.getByRole('button',{name:'取消',exact:true}).click();await pips.locator('.resource-widget-face').click();
+  const beforeDiscard=JSON.parse(await page.locator('#fixture-data').textContent()||'{}');
+  page.once('dialog',async confirmation=>{expect(confirmation.type()).toBe('confirm');expect(confirmation.message()).toContain('未保存');await confirmation.dismiss();});
+  await editor.getByRole('button',{name:'取消',exact:true}).click();await expect(editor).toBeVisible();await expect(editor.getByLabel('资源上限',{exact:true})).toHaveValue('100');expect(JSON.parse(await page.locator('#fixture-data').textContent()||'{}')).toEqual(beforeDiscard);
+  page.once('dialog',async confirmation=>{expect(confirmation.message()).toContain('未保存');await confirmation.accept();});
+  await editor.getByRole('button',{name:'取消',exact:true}).click();await expect(editor).toBeHidden();expect(JSON.parse(await page.locator('#fixture-data').textContent()||'{}')).toEqual(beforeDiscard);await pips.locator('.resource-widget-face').click();
   await expect(pips.locator('.compact-resource-popover')).toBeVisible();await expect(pips).toHaveAttribute('data-resource-current','2');expect(JSON.parse(await page.locator('#fixture-data').textContent()||'{}').resources.find((r:any)=>r.id==='pips').max).toBe(4);
  });
 });

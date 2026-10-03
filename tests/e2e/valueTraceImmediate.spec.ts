@@ -37,3 +37,12 @@ test('rapid switching remounts the correct base and blur/Enter commit once; Esca
 test('readonly fields retain calculation inspection in an enabled provider without granting editing',async({page})=>{
  await ready(page);const field=page.getByLabel('体质基础值',{exact:true});await expect(field).toHaveValue('9');await field.click();const trace=page.getByLabel('体质追溯输入',{exact:true});await expect(trace).toBeFocused();await expect(trace).toHaveValue('8');await expect(trace).not.toBeEditable();await expect(page.locator('.trace-result strong')).toHaveText('9');await trace.press('ArrowUp');await trace.press('Enter');expect((await data(page)).abilities.con).toBe(8);expect((await data(page)).edits).toBe(0);await expect(field).toHaveValue('9');
 });
+
+test('refocusing the covered base preserves the trace draft and commits once instead of restoring a stale base',async({page})=>{
+ await ready(page);const base=page.getByLabel('力量基础值',{exact:true}),trace=page.getByLabel('力量追溯输入',{exact:true});
+ // Existing integrations can focus the original field for both fill and Enter.
+ await base.fill('13');await expect(trace).toHaveValue('13');await base.press('Enter');
+ await expect(page.locator('.value-trace-panel')).toHaveCount(0);await expect(base).toHaveValue('15');expect((await data(page)).abilities.str).toBe(13);expect((await data(page)).edits).toBe(1);
+ await base.click();await trace.fill('14');await base.focus();await expect(trace).toBeFocused();await expect(trace).toHaveValue('14');
+ await page.keyboard.press('Enter');await expect(page.locator('.value-trace-panel')).toHaveCount(0);await expect(base).toHaveValue('16');expect((await data(page)).abilities.str).toBe(14);expect((await data(page)).edits).toBe(2);
+});

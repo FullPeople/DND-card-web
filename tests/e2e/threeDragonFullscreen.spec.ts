@@ -23,9 +23,10 @@ for(const width of [1440,390])test(`Three Dragon covers ${width}px Suite viewpor
  await page.setViewportSize({width,height:width===390?844:960});
  // Preserve the card tab and an existing Wiki query; opening never selects Wiki.
  await page.getByRole('tab',{name:'法术',exact:true}).click();
- const launcher=page.locator('.header-tools').getByRole('button',{name:'三龙牌',exact:true});
+ const launcher=page.locator('.header-tools').getByRole('button',{name:'三龙牌',exact:true}),openedInstances:string[]=[];
+ const rememberInstance=async()=>{const src=await page.locator('.three-dragon-fullscreen iframe').getAttribute('src');expect(src).toBeTruthy();const instance=new URL(src!).searchParams.get('instance');expect(instance).toBeTruthy();openedInstances.push(instance!);};
  for(const how of ['button','escape','repeat']){
-  await launcher.click();const fullscreen=page.getByRole('region',{name:'三龙牌全屏工作区'});await expect(fullscreen).toBeVisible();
+  await launcher.click();const fullscreen=page.getByRole('region',{name:'三龙牌全屏工作区'});await expect(fullscreen).toBeVisible();await rememberInstance();
   const dimensions=await fullscreen.evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,parent:el.parentElement?.tagName,fullscreen:!!document.fullscreenElement};});
   expect(dimensions).toEqual({x:0,y:0,width,height:width===390?844:960,parent:'BODY',fullscreen:false});
   expect(await page.locator('.app-shell').evaluate((el:HTMLElement)=>el.inert)).toBe(true);
@@ -40,7 +41,16 @@ for(const width of [1440,390])test(`Three Dragon covers ${width}px Suite viewpor
   await expect(page.getByRole('tab',{name:'法术',exact:true})).toHaveAttribute('aria-selected','true');await expect(page.locator('.app-shell')).toHaveAttribute('data-workbench-page','sheet');
   await expect(page.locator('.category-search-control input')).toHaveValue('保留的查询');
  }
- await launcher.click();await page.screenshot({path:info.outputPath(`three-dragon-fullscreen-${width}.png`)});await page.frameLocator('.three-dragon-fullscreen iframe').locator('#close').click();
- const requests=await host.evaluate(()=>(window as any).requests);expect(requests.filter((r:any)=>r.type==='panelRpc'&&r.method==='dispose')).toHaveLength(4);
+ await launcher.click();await rememberInstance();await page.screenshot({path:info.outputPath(`three-dragon-fullscreen-${width}.png`)});await page.frameLocator('.three-dragon-fullscreen iframe').locator('#close').click();
+ // The iframe click posts to the parent; React then unmounts the panel and its
+ // cleanup posts Dispose to the host. Wait for both real boundaries rather than
+ // sampling the host in the interval between those asynchronous messages.
+ await expect(page.getByRole('region',{name:'三龙牌全屏工作区'})).toHaveCount(0);
+ await expect(launcher).toBeFocused();expect(await page.locator('.app-shell').evaluate((el:HTMLElement)=>el.inert)).toBe(false);
+ await expect.poll(()=>host.evaluate(()=>(window as any).requests.filter((r:any)=>r.type==='panelRpc'&&r.panel==='table'&&r.method==='dispose').map((r:any)=>r.instance))).toHaveLength(4);
+ const requests=await host.evaluate(()=>(window as any).requests),disposes=requests.filter((r:any)=>r.type==='panelRpc'&&r.panel==='table'&&r.method==='dispose');
+ expect(openedInstances).toHaveLength(4);expect(new Set(openedInstances).size).toBe(4);
+ expect(disposes).toHaveLength(4);expect(disposes.map((r:any)=>r.instance).sort()).toEqual([...openedInstances].sort());
+ await info.attach('fullscreen-instance-disposals',{body:JSON.stringify({openedInstances,disposes},null,2),contentType:'application/json'});
  expect(requests.filter((r:any)=>['stats','createCard','delete','save'].includes(r.type))).toHaveLength(0);expect(errors).toEqual([]);
 });

@@ -67,7 +67,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   }
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
     if (key.startsWith('save:')) { if (value) proficientSaves.add(key.slice(5)); else proficientSaves.delete(key.slice(5)); }
-    else if (SKILLS[key]) { skillSources[key] = value ? ['手动记录'] : []; }
+    // Manual skill choices supplement source grants; clearing one cannot revoke a rule.
+    else if (SKILLS[key] && value) grantSkill(key, '手动记录');
   }
   const modifiers = Object.fromEntries(ABILITIES.map(a => [a, Math.floor((abilities[a] - 10) / 2)])) as Record<Ability, number>;
   const skills = Object.fromEntries(Object.entries(SKILLS).map(([key, s]) => {

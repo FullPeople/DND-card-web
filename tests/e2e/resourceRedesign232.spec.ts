@@ -27,7 +27,7 @@ for(const max of [1,2,5,10,11,99999])test(`capacity ${max} matches units, filled
 });
 test('large values and 12 independently counted pools remain inside their modules at narrow width',async({page})=>{
  const dialog=await open(page);await dialog.getByRole('button',{name:'多模块',exact:true}).click();for(let i=2;i<12;i++)await dialog.getByRole('button',{name:'添加子项',exact:true}).click();for(let i=1;i<=12;i++){await dialog.getByLabel(`子项 ${i} 上限`,{exact:true}).fill('99999');await dialog.getByLabel(`子项 ${i} 当前值`,{exact:true}).fill('88888');}
- for(const style of ['pool','poolchips','poolbars'])expect(await clips(dialog.locator(`[data-template-id=${style}]`))).toEqual([]);await expect(dialog.locator('[data-template-id=poolpips]')).toHaveCount(0);
+ for(const style of ['pool','poolchips','poolbars']){const preview=dialog.locator(`[data-template-id=${style}]`);await expect(preview.locator('.resource-module-art')).toHaveCSS('--rm-content-scale','1');expect(await clips(preview)).toEqual([]);}await expect(dialog.locator('[data-template-id=poolpips]')).toHaveCount(0);
  await dialog.locator('[data-template-id=poolbars]').click();const group=dialog.locator('.resource-widget[data-selected=true]');await expect(group.locator('[data-subresource-id]')).toHaveCount(12);expect(await clips(group)).toEqual([]);
  await dialog.getByRole('separator').focus();await page.keyboard.press('End');await dialog.getByRole('button',{name:'保存布局',exact:true}).click();await page.setViewportSize({width:390,height:844});expect(await clips(group)).toEqual([]);expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
  await dialog.screenshot({path:test.info().outputPath('twelve-large-pools-narrow.png')});

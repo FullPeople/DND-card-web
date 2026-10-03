@@ -3,7 +3,7 @@ import {applyPatch} from '../src/core/merge';
 import {describe,it,expect,vi} from 'vitest';
 import {newCharacter} from '../src/core/model';
 import {createDashboardDraft,commitDashboardDraft,settleDashboardSave} from '../src/core/dashboardDraft';
-import {normalizeWidget,validWidget,resourceModuleMinimum,normalizeModuleWidget,freeDashboardLayout,resourceModules} from '../src/core/resourceWidgets';
+import {normalizeWidget,validWidget,resourceModuleMinimum,resourceModuleContentScale,normalizeModuleWidget,freeDashboardLayout,resourceModules} from '../src/core/resourceWidgets';
 import {readCharacter,importOwlbear,validateCharacter} from '../src/core/validation';
 import {exportCharacter,exportLinkedOwlbear,exportOwlbear} from '../src/core/export';
 import {evaluate} from '../src/core/engine';
@@ -28,4 +28,9 @@ describe('237 resource form and acknowledgement boundaries',()=>{
  it('preserves absent defaults on unchanged legacy resource forms',()=>{const base={name:'旧资源',current:2,max:3};expect(resourceEditorDraft(base,{name:base.name,current:'2',max:'3',unlimited:false,locked:false,type:'count'})).toEqual(base);});
  it('does not turn a remotely updated source maximum into a manual override',()=>{const base={name:'来源资源',current:2,max:3,featureGrant:{source:'authored',manualMax:false}} as any,remote={...base,current:1,max:4};const next=resourceEditorDraft(base,{name:base.name,current:'2',max:'3',unlimited:false,locked:false,type:'count'});expect(applyPatch(remote,base,next)).toEqual(remote);expect(next.featureGrant?.manualMax).toBe(false);});
  it('waits for a delayed remote acknowledgement after local rejection before reporting failure',async()=>{let acknowledge!:()=>void,finished=false;const remote=new Promise<void>(resolve=>acknowledge=resolve),error=Error('quota');const operation=settleDashboardSave([Promise.reject(error),remote]).catch(reason=>{finished=true;expect(reason).toBe(error);});await Promise.resolve();await Promise.resolve();expect(finished).toBe(false);acknowledge();await operation;expect(finished).toBe(true);});
+});
+
+describe('compact artwork scale is not a thumbnail enlargement',()=>{
+ it('leaves normal 12-pool template previews at 100 percent even below module minimum geometry',()=>{const module={id:'pool',name:'大额资源组',slots:false,rows:Array.from({length:12},(_,i)=>[String(i),{name:`子项 ${i+1}`,current:88888,max:99999}] as [string,{name:string;current:number;max:number}])};for(const style of ['pool','poolchips','poolbars'] as const){expect(resourceModuleMinimum(module,style)).toEqual({w:8,h:6});expect(resourceModuleContentScale(module,style,{w:6,h:3})).toBe(1);}});
+ it('compensates genuinely compact reduced artwork while bounding it to its outer box',()=>{const module={id:'a',name:'A',slots:false,rows:[['a',{current:3,max:3}]] as [string,{current:number;max:number}][]};expect(resourceModuleContentScale(module,'ring',{w:1,h:1,contentScale:.25})).toBe(.75);expect(resourceModuleContentScale(module,'ring',{w:1,h:1,contentScale:.5})).toBe(1);expect(resourceModuleContentScale(module,'ring',{w:3,h:3,contentScale:.5})).toBe(.5);});
 });

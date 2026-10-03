@@ -17,19 +17,22 @@ export function traceForInput(context:Context,label:string,value:number,change:(
  return undefined;
 }
 export function ValueTraceProvider({c,d,enabled=true,children}:{c:Character;d:Derived;enabled?:boolean;children:ReactNode}){
- const [opened,setOpened]=useState<{element:HTMLElement;model:TraceModel;id:number}>(),serial=useRef(0);
+ const [opened,setOpened]=useState<{element:HTMLElement;model:TraceModel;id:number;focusRequest:number}>(),serial=useRef(0);
  useLayoutEffect(()=>setOpened(undefined),[c.id,enabled]);
- return <ValueTraceContext.Provider value={enabled?{c,d,open:(element,model)=>setOpened(previous=>previous?.element===element?previous:{element,model,id:++serial.current})}:undefined}>{children}{opened&&enabled&&<TracePanel key={opened.id} element={opened.element} model={opened.model} c={c} d={d} close={()=>setOpened(undefined)}/>}</ValueTraceContext.Provider>;
+ return <ValueTraceContext.Provider value={enabled?{c,d,open:(element,model)=>setOpened(previous=>previous?.element===element?{...previous,focusRequest:previous.focusRequest+1}:{element,model,id:++serial.current,focusRequest:0})}:undefined}>{children}{opened&&enabled&&<TracePanel key={opened.id} element={opened.element} model={opened.model} focusRequest={opened.focusRequest} c={c} d={d} close={()=>setOpened(undefined)}/>}</ValueTraceContext.Provider>;
 }
 export function TraceValue({target,label,value,children}:{target:string;label:string;value:number;children:ReactNode}){
  const context=useContext(ValueTraceContext);
  return <span className="trace-value" role={context?'button':undefined} tabIndex={context?0:undefined} aria-label={context?`${label}数据追溯`:undefined} onClick={e=>context?.open(e.currentTarget,{title:label,value,result:value,rows:context.d.trace[target]||[]})} onKeyDown={e=>{if(context&&['Enter',' '].includes(e.key)){e.preventDefault();context.open(e.currentTarget,{title:label,value,result:value,rows:context.d.trace[target]||[]});}}}>{children}</span>;
 }
-function TracePanel({element,model,c,d:current,close}:{element:HTMLElement;model:TraceModel;c:Character;d:Derived;close:()=>void}){
+function TracePanel({element,model,focusRequest,c,d:current,close}:{element:HTMLElement;model:TraceModel;focusRequest:number;c:Character;d:Derived;close:()=>void}){
  const panel=useRef<HTMLDivElement>(null),field=useRef<HTMLInputElement>(null),[anchor,setAnchor]=useState(()=>element.getBoundingClientRect()),[draft,setDraft]=useState(String(model.value)),cancel=useRef(false),commitRef=useRef(()=>{}),committed=useRef(model.value);
  // Existing field remains the layout anchor; the overlay matches screen dimensions at any A4 zoom.
  useLayoutEffect(()=>{const update=()=>{if(!element.isConnected){close();return;}setAnchor(element.getBoundingClientRect());};const observer=new ResizeObserver(update);observer.observe(element);window.addEventListener('resize',update);window.addEventListener('scroll',update,true);return()=>{observer.disconnect();window.removeEventListener('resize',update);window.removeEventListener('scroll',update,true);};},[element]);
- useLayoutEffect(()=>{field.current?.focus({preventScroll:true});field.current?.select();const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){cancel.current=true;close();}};const down=(e:PointerEvent)=>{if(!panel.current?.contains(e.target as Node)&&e.target!==element){commitRef.current();close();}};window.addEventListener('keydown',key);window.addEventListener('pointerdown',down,true);return()=>{window.removeEventListener('keydown',key);window.removeEventListener('pointerdown',down,true);};},[element]);
+ // An accessibility/programmatic focus request can land on the covered anchor.
+ // Return focus to this same editor without remounting or discarding its draft.
+ useLayoutEffect(()=>{field.current?.focus({preventScroll:true});field.current?.select();},[element,focusRequest]);
+ useLayoutEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){cancel.current=true;close();}};const down=(e:PointerEvent)=>{if(!panel.current?.contains(e.target as Node)&&e.target!==element){commitRef.current();close();}};window.addEventListener('keydown',key);window.addEventListener('pointerdown',down,true);return()=>{window.removeEventListener('keydown',key);window.removeEventListener('pointerdown',down,true);};},[element]);
  const key=Object.entries(labels).find(([,v])=>v===model.title)?.[0] as SheetBonus|undefined;
  let preview=c,d=current;const number=Number(draft),ability=Object.entries(ABILITY_LABELS).find(([,name])=>name===model.title)?.[0] as Ability|undefined;
  if(model.change&&draft.trim()&&Number.isInteger(number)&&Number.isFinite(number)&&number!==model.value){preview=structuredClone(c);const value=Math.max(model.min??-9999,Math.min(model.max??9999,number));

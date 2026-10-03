@@ -10,6 +10,7 @@ const canvas=(page:Page)=>editor(page).locator('.resource-widget-canvas');
 const widget=(page:Page,id:string)=>editor(page).locator(`[data-resource-id="${id}"]`);
 const save=(page:Page)=>editor(page).getByRole('button',{name:'保存布局',exact:true});
 const discard=(page:Page)=>editor(page).getByRole('button',{name:'放弃修改',exact:true});
+const attackBox=(page:Page)=>editor(page).locator('.resource-fixed-attacks').boundingBox();
 const edits=async(page:Page)=>Number(await page.locator('#fixture-edits').textContent());
 async function open(page:Page){await page.getByTestId('dashboard-open').click();await expect(editor(page)).toBeVisible();await expect(editor(page).locator('.resource-dashboard')).toHaveAttribute('data-overlap-count','0');}
 async function visit(page:Page){await page.goto(fixture);await expect(page.locator('#fixture-data')).toHaveText(/dashboard220-original-fixture/);await open(page);}
@@ -100,4 +101,11 @@ test('moving a gallery ghost does not deep-clone the character until a module is
  for(let step=0;step<6;step++){await page.mouse.move(rect.x+rect.width*(6+step/3)/12,rect.y+rect.height*4/6,{steps:3});await page.evaluate(()=>new Promise(requestAnimationFrame));}
  await expect(ghost).toHaveAttribute('data-over-canvas','true');expect(await ghost.boundingBox()).not.toEqual(first);expect(await page.evaluate(()=>(window as any).__ghostPointerMoves)).toBeGreaterThanOrEqual(18);expect(await page.evaluate(()=>(window as any).__characterClones)).toBe(0);expect(await read(page)).toEqual(initial);expect(await edits(page)).toBe(0);
  await page.mouse.up();await expect(ghost).toHaveCount(0);expect(await page.evaluate(()=>(window as any).__characterClones)).toBeGreaterThan(0);expect(await read(page)).toEqual(initial);await expect(save(page)).toBeEnabled();await save(page).click();expect(await edits(page)).toBe(1);expect(Object.keys((await read(page)).runtime.resources)).toHaveLength(Object.keys(initial.runtime.resources).length+1);
+});
+
+
+test('237 switching configuration panels never shifts the drag canvas or fixed attacks',async({page})=>{
+ await visit(page);const initial=await read(page),before=await attackBox(page),canvasBefore=await canvas(page).boundingBox();
+ for(const id of ['alpha','beta']){await widget(page,id).locator('.resource-widget-face').click();expect(await attackBox(page)).toEqual(before);expect(await canvas(page).boundingBox()).toEqual(canvasBefore);}
+ await editor(page).getByRole('button',{name:'新模块',exact:true}).click();expect(await attackBox(page)).toEqual(before);expect(await canvas(page).boundingBox()).toEqual(canvasBefore);expect(await read(page)).toEqual(initial);expect(await edits(page)).toBe(0);
 });

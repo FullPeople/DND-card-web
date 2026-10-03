@@ -41,12 +41,12 @@ it('completed buttons wait for descendant choices, disappear together and can be
  setBuiltinOptionsVisible(c,'class-owner',true);const restored=validateCharacter(exportCharacter(c));expect(builtinOptionsVisible(restored,'class-owner',sheetChoices(restored,fixtureEntries))).toBe(true);for(let i=0;i<3;i++)syncFeatures(restored,fixtureEntries);expect(restored.inventory!.coins.gp).toBe(4);setSheetChoiceSlot(restored,skill.id,1,undefined,fixtureEntries);setSheetChoiceSlot(restored,skill.id,1,'perception',fixtureEntries);expect(builtinOptionsVisible(restored,'class-owner',sheetChoices(restored,fixtureEntries))).toBe(false);
  const invalid=structuredClone(c);invalid.featureLayout!.optionsVisible={'class-owner':'yes' as any};expect(()=>validateCharacter(invalid)).toThrow(/自带选项/);
 });
-it('choices attach only selected content, reselection retracts effects and preserves manual proficiency overrides',()=>{
+it('choices attach only selected content, reselection retracts effects and retains source grants beside manual proficiency',()=>{
  const c=fixtureCharacter();const choices=sheetChoices(c,fixtureEntries);expect(choices.map(r=>[r.label,r.count])).toEqual([['起始熟练项',2],['起始装备',1],['测试圣职',1]]);
  const skill=choices[0];chooseSheetOption(c,skill.id,'athletics',fixtureEntries);chooseSheetOption(c,skill.id,'perception',fixtureEntries);expect(()=>chooseSheetOption(c,skill.id,'history',fixtureEntries)).toThrow();expect(evaluate(c).skills.athletics.proficient).toBe(true);
  const content=choices[2];chooseSheetOption(c,content.id,content.options[0].value,fixtureEntries);syncFeatures(c,fixtureEntries);expect(evaluate(c).ac).toBe(12);
  chooseSheetOption(c,content.id,content.options[1].value,fixtureEntries);syncFeatures(c,fixtureEntries);expect(evaluate(c).ac).toBe(10);expect(c.selections.filter(s=>s.grantKey?.startsWith('choice:'))).toHaveLength(1);
- c.proficiencies={athletics:false};expect(evaluate(c).skills.athletics.proficient).toBe(false);
+ c.proficiencies={athletics:false};expect(evaluate(c).skills.athletics.proficient).toBe(true);
  c.automation!.enabled=false;expect(sheetChoices(c)).toEqual([]);
 });
 it('starting equipment is granted once, can be replaced, and import/refresh do not duplicate money or choices',()=>{

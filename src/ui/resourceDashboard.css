@@ -166,3 +166,7 @@
 .dashboard-appearance button{font-size:11px;padding:3px 6px}
 
 .resource-template-label{position:absolute;left:4px;right:20px;bottom:3px;font-size:10px;text-align:left;color:#64666b}.dashboard-library .resource-template-option{padding-bottom:17px!important}
+
+/* Configuration panels have different heights. Keep the drag surface anchored
+   instead of allowing native dialog centering to move it during pointer-down. */
+.dialog:has(.resource-dashboard){margin-block-start:12px;margin-block-end:auto}

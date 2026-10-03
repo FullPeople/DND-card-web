@@ -8,7 +8,7 @@ test('derived skill markers, card-wide additions, bounded removal, sizes, chains
   await page.route('**/data/languages.json', r => r.fulfill({json:{language:[{name:'测试语',source:'XPHB',entries:['测试语言正文。']}]}}));
   await page.goto('/'); await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
   const category = (name:string) => page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name,exact:true});
-  await expect(page.getByRole('checkbox',{name:/^察觉熟练状态：/})).toHaveCount(0);
+  await expect(page.getByRole('checkbox',{name:/^察觉手动熟练$/})).toHaveCount(0);
   await expect(page.getByRole('checkbox',{name:'万事通',exact:true})).toHaveCount(0);
   await expect(page.locator('.dice-cell')).not.toContainText('资源记录');
   await category('种族').click(); await page.locator('.catalog-row').first().dragTo(page.locator('.identity-race'));
@@ -16,8 +16,8 @@ test('derived skill markers, card-wide additions, bounded removal, sizes, chains
   await category('体型').click(); await page.locator('.catalog-row').filter({hasText:'大型 Large'}).dragTo(page.locator('.size-cell'));
   await expect(page.locator('.size-value')).toHaveText('大型');
   await page.getByRole('switch',{name:'编辑模式'}).click();
-  await expect(page.getByRole('checkbox',{name:'察觉熟练状态：无熟练',exact:true})).toBeDisabled(); await page.getByRole('spinbutton',{name:'察觉额外调整值',exact:true}).fill('4'); await page.getByRole('spinbutton',{name:'察觉额外调整值',exact:true}).press('Tab'); await page.getByRole('checkbox',{name:'万事通',exact:true}).check();
-  await expect(page.getByRole('checkbox',{name:'察觉熟练状态：无熟练',exact:true})).not.toBeChecked();
+  await expect(page.getByRole('checkbox',{name:'察觉手动熟练',exact:true})).toBeEnabled(); await page.getByRole('spinbutton',{name:'察觉额外调整值',exact:true}).fill('4'); await page.getByRole('spinbutton',{name:'察觉额外调整值',exact:true}).press('Tab'); await page.getByRole('checkbox',{name:'万事通',exact:true}).check();
+  await expect(page.getByRole('checkbox',{name:'察觉手动熟练',exact:true})).not.toBeChecked();
   await page.getByRole('switch',{name:'编辑模式'}).click();
   await expect(page.locator('[aria-label="察觉无熟练"]')).toBeVisible(); await expect(page.locator('.ability-skill').filter({hasText:'察觉'}).locator('b')).toHaveText('+5'); await expect(page.getByRole('checkbox',{name:'万事通',exact:true})).toBeChecked();
   await expect(page.locator('.ability-dex .cell-content')).toBeVisible();
