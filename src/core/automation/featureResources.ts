@@ -1,22 +1,23 @@
 import {parseFormula} from '../../data/automation/formula';
 import {irMechanics,reviewedRecord,irParentClass,irAbilityScores,irAmount,irRollFormula} from './ir';
 import {type Character,type Selection,type Issue,type RuntimeResource} from '../model';
-import {automationEnabled} from './state';
+import {automationEnabled,supportedAutomation} from './state';
 import {selectionActive} from './choices';
 import {sourceOwnerIdentity,rememberSourceSpellUses,sourceSpellResourceEnabled} from './sourceSpellState';
 import {specialSpellResource} from '../spellResourceKeys';
 
 type Recovery={short?:number|'all';long?:number|'all'};
-type ResourceClaim={key:string;ownerId:string;legacyKey:string;legacyClass?:[string,string,string,string];previousKey?:string;instance?:boolean;orphanPathTail?:string;canonicalIdentity:string;slot:string};
+type ResourceClaim={key:string;ownerId:string;legacyKey:string;legacyClass?:[string,string,string,string];legacyItem?:[string,string];previousKey?:string;instance?:boolean;orphanPathTail?:string;canonicalIdentity:string;slot:string};
 export type ResourceGrant=ResourceClaim&{name:string;max:number;formula?:string;recovery:Recovery;origin:string};
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 function resourceClaim(c:Character,row:Selection,specKey:string):ResourceClaim{
  const cls=irParentClass(c,row),raw=row.entry.raw,record=row.entry.automation!,slot=/^resource:(\d+)$/.exec(specKey)?.[1]||specKey;
  const instance=row.entry.kind==='item',root=instance?JSON.stringify([row.id]):cls?.id||sourceOwnerIdentity(c,row);
  const legacyIdentity=cls&&raw.className?JSON.stringify([cls.id,row.entry.source,raw.classSource,raw.subclassShortName||'',row.entry.english]):sourceOwnerIdentity(c,row);
- return {key:`feature-resource:ir-v1:${JSON.stringify([root,record.identity.key])}:${slot}`,ownerId:row.id,legacyKey:`feature-resource:${legacyIdentity}:${slot}`,canonicalIdentity:record.identity.key,slot,...(instance?{instance:true,...(!row.parentId&&row.grantKey?{orphanPathTail:row.grantKey}:{}),previousKey:`feature-resource:ir-v1:${JSON.stringify([cls?.id||sourceOwnerIdentity(c,row),record.identity.key])}:${slot}`} :{}),...(cls&&record.identity.classEngName?{legacyClass:[cls.id,record.identity.source,record.identity.classSource||'',record.identity.engName] as [string,string,string,string]}:{})};
+ return {key:`feature-resource:ir-v1:${JSON.stringify([root,record.identity.key])}:${slot}`,ownerId:row.id,legacyKey:`feature-resource:${legacyIdentity}:${slot}`,canonicalIdentity:record.identity.key,slot,...(instance?{instance:true,legacyItem:[record.identity.source,record.identity.engName] as [string,string],...(!row.parentId&&row.grantKey?{orphanPathTail:row.grantKey}:{}),previousKey:`feature-resource:ir-v1:${JSON.stringify([cls?.id||sourceOwnerIdentity(c,row),record.identity.key])}:${slot}`} :{}),...(cls&&record.identity.classEngName?{legacyClass:[cls.id,record.identity.source,record.identity.classSource||'',record.identity.engName] as [string,string,string,string]}:{})};
 }
 function ownedResourceClaims(c:Character):ResourceClaim[]{
+ if(!supportedAutomation(c))return [];
  // Ownership does not disappear when effects, equipment or attunement pause.
  const claims=c.selections.flatMap(row=>(irMechanics(row.entry)?.resources||[]).map(spec=>resourceClaim(c,row,spec.key)));
  return [...new Map(claims.map(claim=>[claim.key,claim])).values()];
@@ -84,7 +85,7 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
  return {grants:grants.filter(grant=>!blocked.has(grant.key)),issues,...(pendingKeys.length?{pendingKeys}:{})};
 }
 export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}rememberPendingOwnership(c);}
-const normalized=(value:unknown)=>String(value??'').normalize('NFKC').trim().toLowerCase();
+const normalized=(value:unknown)=>String(value??'').normalize('NFKC').trim().replace(/\s+/g,' ').toLowerCase();
 function legacyResourceMatches(key:string,resource:RuntimeResource,grant:ResourceClaim){
  if(!resource.featureGrant||!key.startsWith('feature-resource:')||!key.endsWith(`:${grant.slot}`))return false;
  if(key===grant.key)return false;
@@ -92,6 +93,9 @@ function legacyResourceMatches(key:string,resource:RuntimeResource,grant:Resourc
  if(key.startsWith('feature-resource:ir-v1:'))return false;
  if(key===grant.legacyKey||resource.featureGrant.ownerId===grant.ownerId)return true;
  if(grant.orphanPathTail&&legacyInstanceScope(key,grant)){try{if(JSON.parse(key.slice(17,-grant.slot.length-1)).at(-1)===grant.orphanPathTail)return true;}catch{}}
+ // Older five-part class keys retain entry source/name even after the owner
+ // and parent are gone. They establish a candidate, never unique ownership.
+ if(grant.legacyItem&&legacyInstanceScope(key,grant)){try{const parts=JSON.parse(key.slice(17,-grant.slot.length-1));if(parts.length===5&&normalized(parts[1])===normalized(grant.legacyItem[0])&&normalized(parts[4])===normalized(grant.legacyItem[1]))return true;}catch{}}
  if(!grant.legacyClass)return false;
  try{const parts=JSON.parse(key.slice(17,-grant.slot.length-1));return Array.isArray(parts)&&parts.length===5&&parts[0]===grant.legacyClass[0]&&[parts[1],parts[2],parts[4]].every((value,index)=>normalized(value)===normalized(grant.legacyClass![index+1]));}catch{return false;}
 }
