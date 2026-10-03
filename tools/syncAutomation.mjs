@@ -4,12 +4,14 @@ import {resolve,join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 const args=process.argv.slice(2),option=(name,fallback)=>{const at=args.indexOf(name);return at<0?fallback:args[at+1];};
 const dataRepo=resolve(option('--data-repo','../dnd5e-automation-data'));
-const share=join(dataRepo,'.cache/browser-share'),artifact=resolve(option('--artifact',join(dataRepo,'.cache/g4-final/automation.json')));
+const share=resolve(option('--share',join(dataRepo,'.cache/browser-share'))),artifact=resolve(option('--artifact',join(dataRepo,'.cache/g4-final/automation.json')));
 const target=resolve('src/data/automation'),assets=resolve('public/automation');
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const manifest=JSON.parse(await readFile(join(share,'shared-files.json'),'utf8'));
 const bytes=await readFile(artifact);if(bytes.length>33554432)throw Error('Automation artifact exceeds the import size limit');
-const {publicArtifact}=await import(pathToFileURL(join(share,'validate.ts')).href);
+if(Object.keys(manifest.files).length!==1||!manifest.files['identity.ts'])throw Error('Expected exactly one shared identity module');
+const moduleBytes=await readFile(join(share,'identity.ts'));if(digest(moduleBytes)!==manifest.files['identity.ts'])throw Error('Shared identity module mismatch');
+const {publicArtifact}=await import(pathToFileURL(join(share,'identity.ts')).href);
 const envelope=publicArtifact(JSON.parse(bytes.toString('utf8')));
 await mkdir(target,{recursive:true});await mkdir(assets,{recursive:true});
 for(const [file,sha]of Object.entries(manifest.files)){

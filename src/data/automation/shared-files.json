@@ -1,16 +1,7 @@
 {
   "sourceRepository": "FullPeople/dnd5e-automation-data",
-  "sourceCommit": "5f24e49380777d189fc4aefda712c780ac9bbc0f",
+  "sourceCommit": "efe11dd94805331ff0ed9f67ba4328413649aa15",
   "files": {
-    "identity.ts": "011676d56801e0193c89fa903e698d59bdebe6d19a40cd232956d54e5928291b",
-    "protocol.ts": "3eab5dc8a6fff17646623e2ebb798c8f43e0f7a6e9fd236415c577980122a663",
-    "formula.ts": "2723f73e55bb5c3b6abf6301865d6065c13168d8f874af2acaf6dd04415d9393",
-    "validate.ts": "76abf92b58c2385dffeb84d0502bb007efafc4ff8ab0fb2087dec87bb30a70b2",
-    "schema-validation.js": "b3a5756849e378ebb86541ba0c892580c6bed6dda0e019334885e8ca2f43d9f4",
-    "schema-validation.d.ts": "215c058bffe6ef389698a33826bccbba16ef60fa9ddcea5e544c00f891082c8d",
-    "identity.fixture.json": "289fa13d05186360ccc3ce119f3529a55e96beda2e33d54d0a1df5b9b043a532",
-    "record-schema.js": "0d8c726ebb3bf88793d867410ae048a74e431809310d705d895645e9de0dd45d",
-    "record-schema.d.ts": "1084b2ef9490616a0b0f013792ec569218228436b730718416efc151314f2d50",
-    "record-validation.ts": "717aa47734ef9991be7b0dae38b23f8b96c51205aa9b71b5e19fefb8832f4ce5"
+    "identity.ts": "3f064750991f50392de1324f0bb0ec9e0595bca5cc09ee6ed0e6983a412448ab"
   }
 }
