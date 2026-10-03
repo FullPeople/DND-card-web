@@ -4,6 +4,9 @@ import {resolve,extname,sep} from 'node:path';
 import {gzipSync} from 'node:zlib';
 const root=resolve(process.argv[2]||'dist-standalone'),port=Number(process.argv[3]||5292),cache=new Map();
 createServer((req,res)=>{
+ // A normal loopback-origin parent keeps the iframe fixture same-origin.
+ // Never disable Chromium local-network checks for an opaque about:blank host.
+ if(process.env.DND_STARTUP_HTTP_CACHE==='1'&&req.url==='/__startup-benchmark-host.html'){res.writeHead(200,{'Content-Type':'text/html','Cache-Control':'no-cache'});res.end('<!doctype html><html><head><title>Startup benchmark host</title></head><body></body></html>');return;}
  const path=resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
  if(!path.startsWith(root+sep)&&path!==root){res.writeHead(403);res.end();return;}
  const file=path===root?resolve(root,'index.html'):existsSync(path)&&statSync(path).isDirectory()?resolve(path,'index.html'):path;

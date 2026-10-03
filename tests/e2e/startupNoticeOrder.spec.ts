@@ -1,7 +1,7 @@
 import {test,expect,type Page,type TestInfo} from '@playwright/test';
 import {mockSource} from './fixtures';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
-const phase=(page:Page,value:string)=>page.waitForFunction(value=>document.documentElement.dataset.cardStartup===value,value);
+const phase=(page:Page,value:string)=>page.waitForFunction(value=>document.documentElement?.dataset.cardStartup===value,value);
 const key=(info:TestInfo)=>ANNOUNCEMENT_KEY+(info.project.name==='suite'?':suite':'');
 function url(info:TestInfo){return info.project.name==='suite'?`/#suite=startup-test&bridge=${encodeURIComponent(info.project.use.baseURL!)}`:'/';}
 async function prepare(page:Page){
@@ -69,19 +69,34 @@ test('a stalled card stylesheet does not hold the yellow shell or logo hostage',
  await page.route('**/assets/card-core-*.css',async route=>{await blocked;await route.continue();});
  await page.goto(url(info),{waitUntil:'commit'});await phase(page,'playing');await expect(page.locator('#startup-intro')).toBeVisible();
  await phase(page,'waiting');await assertBeforeComplete(page);await page.screenshot({path:info.outputPath('logo-with-css-stalled.png')});
- release();await phase(page,'fading');await assertBeforeComplete(page,true);await page.screenshot({path:info.outputPath('transparent-card-reveal.png')});await assertAfterComplete(page);
+ release();await phase(page,'fading');
+ const opacity=await page.locator('#startup-intro').evaluate(el=>{const animation=el.getAnimations()[0];if(!animation)throw Error('missing fade transition');animation.pause();animation.currentTime=225;return Number(getComputedStyle(el).opacity);});
+ expect(opacity).toBeGreaterThan(0);expect(opacity).toBeLessThan(1);await assertBeforeComplete(page,true);await page.screenshot({path:info.outputPath('transparent-card-reveal.png')});await page.locator('#startup-intro').evaluate(el=>el.getAnimations().forEach(animation=>animation.play()));await assertAfterComplete(page);
 });
 test('a failed card stylesheet preserves recovery and never exposes an unstyled card',async({page},info)=>{
  await prepare(page);await page.route('**/assets/card-core-*.css',route=>route.abort('failed'));
  await page.goto(url(info),{waitUntil:'commit'});await phase(page,'failed');await expect(page.locator('#startup-help')).toBeVisible();await expect(page.locator('dialog[open]')).toHaveCount(0);await expect(page.locator('#root')).toHaveCSS('display','none');
  expect(await page.evaluate(()=>(window as any).startupEvents.some((row:any)=>row.phase==='complete'))).toBe(false);
 });
-test('delivery layers decode to every original RGBA pixel and preserve the approved choreography',async({page},info)=>{
+test('lossless layers retain alpha and opaque pixels with bounded compositor rounding',async({page},info)=>{
  await prepare(page);await page.goto(url(info),{waitUntil:'commit'});await phase(page,'playing');
  const animation=await page.locator('.startup-piece').evaluateAll(nodes=>nodes.map(node=>{const style=getComputedStyle(node);return {duration:style.animationDuration,delay:style.animationDelay,animation:style.animationName};}));
  expect(animation.map(row=>row.duration)).toEqual(['1.9s','1.9s','1.9s','1.9s']);expect(animation.map(row=>row.delay)).toEqual(['0s','0.14s','0.28s','0.42s']);
  const pixels=await page.evaluate(async()=>{
-  async function rgba(url:string){const image=new Image();image.src=url;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d')!;ctx.drawImage(image,0,0);return ctx.getImageData(0,0,image.width,image.height).data;}
-  return Promise.all([1,2,3,4].map(async n=>{const [a,b]=await Promise.all([rgba(`./startup-logo/${n}.PNG`),rgba(`./startup-logo/${n}.webp`)]);return a.length===b.length&&a.every((value,i)=>value===b[i]);}));
- });expect(pixels).toEqual([true,true,true,true]);
+  async function load(url:string){const image=new Image();image.src=url;await image.decode();return image;}
+  function rgba(image:HTMLImageElement,background?:string){const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d')!;if(background){ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);}ctx.drawImage(image,0,0);return ctx.getImageData(0,0,image.width,image.height).data;}
+  return Promise.all([1,2,3,4].map(async layer=>{
+   const [png,webp]=await Promise.all([load(`./startup-logo/${layer}.PNG`),load(`./startup-logo/${layer}.webp`)]),a=rgba(png),b=rgba(webp);
+   let alphaChanges=0,opaqueChanges=0,rawChangedPixels=0,maxRawDelta=0;const positions:{x:number;y:number;alpha:number;delta:number}[]=[];
+   for(let i=0;i<a.length;i+=4){if(a[i+3]!==b[i+3])alphaChanges++;let delta=0;for(let k=0;k<3;k++)delta=Math.max(delta,Math.abs(a[i+k]-b[i+k]));if(delta){rawChangedPixels++;maxRawDelta=Math.max(maxRawDelta,delta);if(a[i+3]===255)opaqueChanges++;if(positions.length<12)positions.push({x:(i/4)%png.width,y:Math.floor(i/4/png.width),alpha:a[i+3],delta});}}
+   const composite=['#ffff56','#50525b','#ffffff'].map(background=>{const x=rgba(png,background),y=rgba(webp,background);let changed=0,maxDelta=0;for(let i=0;i<x.length;i+=4){let delta=0;for(let k=0;k<4;k++)delta=Math.max(delta,Math.abs(x[i+k]-y[i+k]));if(delta)changed++;maxDelta=Math.max(maxDelta,delta);}return {background,changed,maxDelta};});
+   return {layer,width:png.width,height:png.height,alphaChanges,opaqueChanges,rawChangedPixels,maxRawDelta,positions,composite};
+  }));
+ });
+ await info.attach('browser-logo-pixels.json',{body:JSON.stringify(pixels,null,2),contentType:'application/json'});
+ // PNG and lossless WebP decoder paths can round translucent premultiplication
+ // differently. Original/delivery raw RGBA hashes are independently pinned;
+ // here verify identical alpha/opaque pixels and <=1/255 displayed-channel
+ // error on the actual yellow, card gray and white compositing backgrounds.
+ for(const layer of pixels){expect(layer.width).toBe(500);expect(layer.height).toBe(500);expect(layer.alphaChanges).toBe(0);expect(layer.opaqueChanges).toBe(0);for(const row of layer.composite)expect(row.maxDelta,JSON.stringify(layer)).toBeLessThanOrEqual(1);}
 });

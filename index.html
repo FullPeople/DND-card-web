@@ -17,7 +17,7 @@
  var styles=Array.from(document.querySelectorAll('[data-card-style]')),stylesReady=styles.every(function(link){return link.dataset.cardStyle==='ready';});if(stylesReady)mark('styles-ready');
  // The persistent snapshot lets late React mounts/host handshakes observe the
  // same lifecycle. A modal must not enter the top layer until complete.
- function finish(){if(disposed||failed||document.documentElement.dataset.cardStartup==='complete')return;intro.hidden=true;panel.hidden=true;clearInterval(timer);phase('complete');}
+ function finish(){if(disposed||failed||document.documentElement.dataset.cardStartup==='complete')return;intro.hidden=true;panel.hidden=true;clearInterval(timer);phase('complete');var icon=document.querySelector('[data-app-icon]');if(icon)icon.href=icon.getAttribute('data-app-icon');}
  function animations(element){return element.getAnimations?element.getAnimations():[];}
  function settled(values){return Promise.all(values.map(function(animation){return animation.finished.catch(function(){});}));}
  function reveal(){
@@ -48,7 +48,7 @@
  window.addEventListener('dnd-card-failed',function(){if(disposed)return;failed=true;document.documentElement.dataset.cardStartupFailure='app';clearInterval(timer);intro.hidden=true;panel.hidden=true;phase('failed');});
  window.addEventListener('dnd-card-stage',function(event){stage=String(event.detail||stage);progress();});
  document.getElementById('startup-retry').onclick=function(){location.reload();};
- window.addEventListener('dnd-card-ready',function(){if(failed||disposed)return;ready=true;mark('card-ready');reveal();var icon=document.querySelector('[data-app-icon]');if(icon)icon.href=icon.getAttribute('data-app-icon');});
+ window.addEventListener('dnd-card-ready',function(){if(failed||disposed)return;ready=true;mark('card-ready');reveal();});
  window.addEventListener('error',function(event){var target=event.target;if(target&&target!==window&&(target.tagName==='SCRIPT'||target.tagName==='LINK'&&target.as!=='image'))show('程序文件加载失败',target.src||target.href);else if(event.message)show('程序启动失败',event.message);},true);
  window.addEventListener('unhandledrejection',function(event){show('程序启动失败',event.reason&&event.reason.message||event.reason);});
  window.addEventListener('pagehide',function(event){if(event.persisted)return;disposed=true;clearInterval(timer);phase('cancelled');});

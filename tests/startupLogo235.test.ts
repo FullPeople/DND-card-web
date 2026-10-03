@@ -18,14 +18,14 @@ function boot({reduced=false,images=true,motion=true,styles=true}:{reduced?:bool
  const emit=(name:string,event:any={})=>listeners.get(name)?.forEach(fn=>fn(event));
  const window={addEventListener:(name:string,fn:Function)=>{listeners.set(name,[...(listeners.get(name)||[]),fn]);},dispatchEvent:(event:any)=>{if(event.type==='dnd-card-startup')trace.push(event.detail);emit(event.type,event);}};
  runInNewContext(html.match(/<script>\s*([\s\S]*?)<\/script>/)![1],{document,window,CustomEvent:class{constructor(public type:string,public options:any){}get detail(){return this.options.detail;}},Date:{now:()=>now},navigator:{userAgent:'test'},location:{reload(){}},matchMedia:()=>({matches:reduced}),setTimeout:(fn:Function,delay:number)=>{const id=++nextId;timeouts.set(id,{fn,delay});return id;},setInterval:(fn:Function)=>{const id=++nextId;intervals.set(id,fn);return id;},clearInterval:(id:number)=>intervals.delete(id)});
- return {style,nodes,pieces,movements,fade,trace,document,timeouts,emit,phase:()=>document.documentElement.dataset.cardStartup,advance:(ms:number)=>{now+=ms;intervals.forEach(fn=>fn());},hold:async()=>{await flush();const hold=[...timeouts].find(([,row])=>row.delay===(reduced?0:330));expect(hold).toBeDefined();timeouts.delete(hold![0]);hold![1].fn();await flush();},animate:async()=>{movements.forEach(animation=>animation.resolve());await flush();}};
+ return {icon,style,nodes,pieces,movements,fade,trace,document,timeouts,emit,phase:()=>document.documentElement.dataset.cardStartup,advance:(ms:number)=>{now+=ms;intervals.forEach(fn=>fn());},hold:async()=>{await flush();const hold=[...timeouts].find(([,row])=>row.delay===(reduced?0:330));expect(hold).toBeDefined();timeouts.delete(hold![0]);hold![1].fn();await flush();},animate:async()=>{movements.forEach(animation=>animation.resolve());await flush();}};
 }
 describe('approved logo startup lifecycle',()=>{
  it('fast/cached card waits for all four actual animations, final pose and fade-out',async()=>{
   const b=boot();b.emit('dnd-card-ready');await flush();expect(b.phase()).toBe('playing');
   b.movements.slice(0,3).forEach(a=>a.resolve());await flush();expect(b.timeouts.size).toBe(0);
-  b.movements[3].resolve();await b.hold();expect(b.phase()).toBe('fading');expect(b.nodes.get('startup-intro').hidden).toBe(false);
-  b.fade.resolve();await flush();expect(b.phase()).toBe('complete');expect(b.nodes.get('startup-intro').hidden).toBe(true);
+  b.movements[3].resolve();await b.hold();expect(b.phase()).toBe('fading');expect(b.nodes.get('startup-intro').hidden).toBe(false);expect(b.icon.href).toBe('');
+  b.fade.resolve();await flush();expect(b.phase()).toBe('complete');expect(b.nodes.get('startup-intro').hidden).toBe(true);expect(b.icon.href).toBe('./exe_icon.png');
   expect(b.trace).toEqual(['loading','playing','waiting','fading','complete']);
  });
  it('finishing the intro first waits for the slow app and only then fades',async()=>{const b=boot();await flush();await b.animate();await b.hold();expect(b.phase()).toBe('waiting');b.emit('dnd-card-ready');expect(b.phase()).toBe('fading');b.fade.resolve();await flush();expect(b.phase()).toBe('complete');});
