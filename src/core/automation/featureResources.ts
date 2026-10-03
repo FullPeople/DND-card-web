@@ -7,14 +7,14 @@ import {sourceOwnerIdentity,rememberSourceSpellUses,sourceSpellResourceEnabled} 
 import {specialSpellResource} from '../spellResourceKeys';
 
 type Recovery={short?:number|'all';long?:number|'all'};
-type ResourceClaim={key:string;ownerId:string;legacyKey:string;legacyClass?:[string,string,string,string];previousKey?:string;instance?:boolean;canonicalIdentity:string;slot:string};
+type ResourceClaim={key:string;ownerId:string;legacyKey:string;legacyClass?:[string,string,string,string];previousKey?:string;instance?:boolean;orphanPathTail?:string;canonicalIdentity:string;slot:string};
 export type ResourceGrant=ResourceClaim&{name:string;max:number;formula?:string;recovery:Recovery;origin:string};
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 function resourceClaim(c:Character,row:Selection,specKey:string):ResourceClaim{
  const cls=irParentClass(c,row),raw=row.entry.raw,record=row.entry.automation!,slot=/^resource:(\d+)$/.exec(specKey)?.[1]||specKey;
  const instance=row.entry.kind==='item',root=instance?JSON.stringify([row.id]):cls?.id||sourceOwnerIdentity(c,row);
  const legacyIdentity=cls&&raw.className?JSON.stringify([cls.id,row.entry.source,raw.classSource,raw.subclassShortName||'',row.entry.english]):sourceOwnerIdentity(c,row);
- return {key:`feature-resource:ir-v1:${JSON.stringify([root,record.identity.key])}:${slot}`,ownerId:row.id,legacyKey:`feature-resource:${legacyIdentity}:${slot}`,canonicalIdentity:record.identity.key,slot,...(instance?{instance:true,previousKey:`feature-resource:ir-v1:${JSON.stringify([cls?.id||sourceOwnerIdentity(c,row),record.identity.key])}:${slot}`} :{}),...(cls&&record.identity.classEngName?{legacyClass:[cls.id,record.identity.source,record.identity.classSource||'',record.identity.engName] as [string,string,string,string]}:{})};
+ return {key:`feature-resource:ir-v1:${JSON.stringify([root,record.identity.key])}:${slot}`,ownerId:row.id,legacyKey:`feature-resource:${legacyIdentity}:${slot}`,canonicalIdentity:record.identity.key,slot,...(instance?{instance:true,...(!row.parentId&&row.grantKey?{orphanPathTail:row.grantKey}:{}),previousKey:`feature-resource:ir-v1:${JSON.stringify([cls?.id||sourceOwnerIdentity(c,row),record.identity.key])}:${slot}`} :{}),...(cls&&record.identity.classEngName?{legacyClass:[cls.id,record.identity.source,record.identity.classSource||'',record.identity.engName] as [string,string,string,string]}:{})};
 }
 function ownedResourceClaims(c:Character):ResourceClaim[]{
  // Ownership does not disappear when effects, equipment or attunement pause.
@@ -29,6 +29,28 @@ function previousInstanceScope(key:string,claim:ResourceClaim){
   try{const root=JSON.parse(parts[0]);if(Array.isArray(root)&&root.length===1&&typeof root[0]==='string')return false;}catch{}
   return true;
  }catch{return false;}
+}
+function legacyInstanceScope(key:string,claim:ResourceClaim){
+ if(!claim.instance||!key.startsWith('feature-resource:')||key.startsWith('feature-resource:ir-v1:')||!key.endsWith(`:${claim.slot}`))return false;
+ try{const path=JSON.parse(key.slice(17,-claim.slot.length-1));return Array.isArray(path)&&path.length>1&&path.every(part=>typeof part==='string');}catch{return false;}
+}
+function resourceOwnershipHistory(c:Character){
+ const blocked=new Set<string>(),pending:Record<string,string[]>={},claims=ownedResourceClaims(c);
+ for(const [key,r]of Object.entries({...c.runtime.featureResourceArchive,...c.runtime.resources})){
+  if(!r.featureGrant)continue;
+  const matches=claims.filter(claim=>r.featureGrant!.reviewKeys?.includes(claim.key)||claim.key===key||legacyResourceMatches(key,r,claim));
+  const unresolved=r.featureGrant.requiresReview||matches.length>1||matches.some(claim=>previousInstanceScope(key,claim)||legacyInstanceScope(key,claim)||claim.instance&&key===claim.previousKey&&key!==claim.key);
+  if(!unresolved||!matches.length)continue;
+  pending[key]=matches.map(claim=>claim.key);for(const claim of matches)blocked.add(claim.key);
+ }
+ return {blocked,pending};
+}
+function rememberPendingOwnership(c:Character){
+ for(const [key,keys]of Object.entries(resourceOwnershipHistory(c).pending)){
+  const r=c.runtime.resources[key]||c.runtime.featureResourceArchive?.[key];if(!r?.featureGrant)continue;
+  r.featureGrant.requiresReview=true;r.featureGrant.reviewKeys=[...new Set([...(r.featureGrant.reviewKeys||[]),...keys])];
+  (c.runtime.featureResourceArchive||={})[key]=structuredClone(r);
+ }
 }
 /** Only versioned declarative resources participate; never infer from source prose. */
 export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues:Issue[];pendingKeys?:string[]}{
@@ -56,20 +78,12 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
    const existing=grants.findIndex(g=>g.key===grant.key);if(existing<0)grants.push(grant);else if(grant.max>=grants[existing].max)grants[existing]=grant;
   }catch(error){issues.push({id:`resource:${row.id}:${index}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${error instanceof Error?error.message:String(error)}，未执行资源规则。`});}
  }
- const blocked=new Set<string>(),pendingKeys:string[]=[],claims=ownedResourceClaims(c);
- for(const [key,r]of Object.entries({...c.runtime.featureResourceArchive,...c.runtime.resources})){
-  if(!r.featureGrant)continue;
-  const matches=claims.filter(claim=>claim.key===key||legacyResourceMatches(key,r,claim));
-  // Class/path-scoped item receipts cannot prove historical instance ownership,
-  // even if only one instance is currently present or enabled.
-  const unresolved=r.featureGrant.requiresReview||matches.length>1||matches.some(claim=>previousInstanceScope(key,claim)||claim.instance&&key===claim.previousKey&&key!==claim.key);
-  if(!unresolved||!matches.length)continue;
-  pendingKeys.push(key);
-  for(const claim of matches){blocked.add(claim.key);const grant=grants.find(grant=>grant.key===claim.key);if(grant)issues.push({id:`resource-ledger:${grant.ownerId}:${grant.slot}`,selectionId:grant.ownerId,severity:'warning',message:`${grant.name}：旧消费记录无法唯一关联，未重新授予次数，请手动核对。`});}
- }
+ // Keep historical candidate bindings when current parent/source paths change.
+ const {blocked,pending}=resourceOwnershipHistory(c),pendingKeys=Object.keys(pending);
+ for(const grant of grants)if(blocked.has(grant.key))issues.push({id:`resource-ledger:${grant.ownerId}:${grant.slot}`,selectionId:grant.ownerId,severity:'warning',message:`${grant.name}：旧消费记录无法唯一关联，未重新授予次数，请手动核对。`});
  return {grants:grants.filter(grant=>!blocked.has(grant.key)),issues,...(pendingKeys.length?{pendingKeys}:{})};
 }
-export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
+export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}rememberPendingOwnership(c);}
 const normalized=(value:unknown)=>String(value??'').normalize('NFKC').trim().toLowerCase();
 function legacyResourceMatches(key:string,resource:RuntimeResource,grant:ResourceClaim){
  if(!resource.featureGrant||!key.startsWith('feature-resource:')||!key.endsWith(`:${grant.slot}`))return false;
@@ -77,6 +91,7 @@ function legacyResourceMatches(key:string,resource:RuntimeResource,grant:Resourc
  if(key===grant.previousKey||previousInstanceScope(key,grant))return true;
  if(key.startsWith('feature-resource:ir-v1:'))return false;
  if(key===grant.legacyKey||resource.featureGrant.ownerId===grant.ownerId)return true;
+ if(grant.orphanPathTail&&legacyInstanceScope(key,grant)){try{if(JSON.parse(key.slice(17,-grant.slot.length-1)).at(-1)===grant.orphanPathTail)return true;}catch{}}
  if(!grant.legacyClass)return false;
  try{const parts=JSON.parse(key.slice(17,-grant.slot.length-1));return Array.isArray(parts)&&parts.length===5&&parts[0]===grant.legacyClass[0]&&[parts[1],parts[2],parts[4]].every((value,index)=>normalized(value)===normalized(grant.legacyClass![index+1]));}catch{return false;}
 }
@@ -101,7 +116,6 @@ export function syncFeatureResources(c:Character){
  if(!automationEnabled(c))return false;
  const before=JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);rememberFeatureResources(c);
  const needed=new Set<string>(),plan=planFeatureResources(c),grants=plan.grants;
- for(const key of plan.pendingKeys||[]){const r=c.runtime.resources[key]||c.runtime.featureResourceArchive?.[key];if(r?.featureGrant){r.featureGrant.requiresReview=true;(c.runtime.featureResourceArchive||={})[key]=structuredClone(r);}}
  for(const grant of grants){needed.add(grant.key);
   const history={...c.runtime.featureResourceArchive,...c.runtime.resources};
   // A legacy key without a canonical identity is adopted only by one unique
@@ -138,7 +152,7 @@ export function restResources(c:Character,kind:'short'|'long'){
  rememberFeatureResources(c);rememberSourceSpellUses(c);
 }
 export function validateFeatureResourceState(runtime:Character['runtime']){
- const valid=(r:RuntimeResource)=>plain(r)&&Number.isSafeInteger(r.max)&&r.max>=0&&r.max<=99999&&Number.isSafeInteger(r.current)&&r.current>=0&&r.current<=r.max&&plain(r.featureGrant)&&typeof r.featureGrant.ownerId==='string'&&(r.featureGrant.requiresReview===undefined||r.featureGrant.requiresReview===true)&&(r.featureGrant.manualMax===undefined||typeof r.featureGrant.manualMax==='boolean')&&(r.featureGrant.spent===undefined||Number.isSafeInteger(r.featureGrant.spent)&&r.featureGrant.spent>=0&&r.featureGrant.spent<=99999)&&(r.featureGrant.formula===undefined||typeof r.featureGrant.formula==='string'&&r.featureGrant.formula.length<=160)&&Number.isSafeInteger(r.featureGrant.ruleMax)&&r.featureGrant.ruleMax>=0&&r.featureGrant.ruleMax<=10000&&plain(r.featureGrant.recovery)&&Object.entries(r.featureGrant.recovery).every(([k,n])=>['short','long'].includes(k)&&(n==='all'||Number.isSafeInteger(n)&&Number(n)>=0&&Number(n)<=10000));
+ const valid=(r:RuntimeResource)=>plain(r)&&Number.isSafeInteger(r.max)&&r.max>=0&&r.max<=99999&&Number.isSafeInteger(r.current)&&r.current>=0&&r.current<=r.max&&plain(r.featureGrant)&&typeof r.featureGrant.ownerId==='string'&&(r.featureGrant.requiresReview===undefined||r.featureGrant.requiresReview===true)&&(r.featureGrant.reviewKeys===undefined||r.featureGrant.requiresReview===true&&Array.isArray(r.featureGrant.reviewKeys)&&r.featureGrant.reviewKeys.length<=10000&&new Set(r.featureGrant.reviewKeys).size===r.featureGrant.reviewKeys.length&&r.featureGrant.reviewKeys.every(key=>typeof key==='string'&&key.startsWith('feature-resource:ir-v1:')&&key.length<=12000))&&(r.featureGrant.manualMax===undefined||typeof r.featureGrant.manualMax==='boolean')&&(r.featureGrant.spent===undefined||Number.isSafeInteger(r.featureGrant.spent)&&r.featureGrant.spent>=0&&r.featureGrant.spent<=99999)&&(r.featureGrant.formula===undefined||typeof r.featureGrant.formula==='string'&&r.featureGrant.formula.length<=160)&&Number.isSafeInteger(r.featureGrant.ruleMax)&&r.featureGrant.ruleMax>=0&&r.featureGrant.ruleMax<=10000&&plain(r.featureGrant.recovery)&&Object.entries(r.featureGrant.recovery).every(([k,n])=>['short','long'].includes(k)&&(n==='all'||Number.isSafeInteger(n)&&Number(n)>=0&&Number(n)<=10000));
  if(runtime.featureResourceArchive!==undefined&&(!plain(runtime.featureResourceArchive)||Object.keys(runtime.featureResourceArchive).length>10000||Object.values(runtime.featureResourceArchive).some(r=>!valid(r))))throw Error('职业资源历史记录无效。');
  for(const r of Object.values(runtime.resources))if(r.featureGrant&&!valid(r))throw Error('职业资源归属记录无效。');
 }
