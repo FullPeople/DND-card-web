@@ -228,17 +228,20 @@ const SUITE_RELEASE_234_SECTIONS:ReleaseSection[]=[...RELEASE_234_SECTIONS,
  {title:'骰子历史与左上角窗口',items:['左上角 Action 窗口缩窄为 210 像素；隐藏滚动条，保留纵向滚动、长文字换行和历史查看。','查看历史头顶结果时 Action 保持打开；快速切换历史不会被迟到的取消覆盖。','关闭群体区域后，改变选择再选同一组棋子，可以重新开始投掷；不改变选择时保持关闭。','已在房主与玩家端验证先攻投骰、群体豁免和历史重放；跨窗口骰子置顶仍在排查。']},
  {title:'三龙牌与公告',items:['旧大厅主持离线且旧座位无人在线时，保留宽限时间与在线座位优先，由符合条件的当前 GM 接管。','新版可打开房间内已有的历史牌局；旧稳定版设置增加“恢复此房间的旧版牌局”。缺少原主持浏览器私有存档时只提示恢复，不重建或清桌。','测试房间已验证新旧入口、双方入座及旧稳定牌局刷新恢复；真实断网和多个 GM 同时争抢的操作仍待验证，现有自动检查分别记录。','新旧公告与已读状态分开，保留原重要权限图文和完整折叠历史；反馈邮箱已校对。','更新后请先关闭附加窗口，刷新枭熊房间，再右键以拆分视图重新打开。']},
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_238_SECTIONS:ReleaseSection[]=[
  {title:'开屏与技能',items:['开屏动画完成并退出后再显示角色卡与自动公告；重新加载和失败重试保留。','编辑模式可勾选技能熟练和专精，来源授予的熟练继续保留；A4 下技能名称完整显示，豁免沿用原有操作。']},
  {title:'仪表盘与保存',items:['放弃尚未保存的仪表盘修改前会提示确认；保存完成后再退出，失败时保留草稿。','可调整背景、边框、圆角和紧凑间距；缩小模块、多项资源预览及已有资源余额保留。']},
  {title:'护甲与属性',items:['护甲按规则结果叠加明确的调整值；旧绝对护甲值可在设置中核对并恢复计算。','已支持的来源特性护甲加值只在穿着护甲时生效，移除来源后重新计算；其他未支持规则继续提示。','属性编辑先显示已保存的基础值，普通模式仍显示最终值。']},
  {title:'支持者弹幕',items:['弹幕流速加快，颜色更鲜艳，基础字号增大；出现位置和节奏错开，按赞助金额放大字号的规则保留。','新增支持者“洛伦兹力”，赞助金额100元。']},
  {title:'验证范围',items:['玩家原设备、实体手机与具体旧卡仍待现场复验；本批保留此前角色卡修复。']},
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_238_SECTIONS:ReleaseSection[]=[...RELEASE_238_SECTIONS,
  {title:'三龙牌与房间公告',items:['三龙牌座位姓名按完整座位位置排列，窄屏结束操作避开手牌区。','结束对局后离开会返回本机主界面，其他参与者和历史牌局保留；进行中的正常离开仍可移交主持。','服务端拒绝属于旧对局的延迟离开指令，避免影响新对局；关闭三龙牌窗口后恢复原工作区。','房间公告在开屏结束后按当前版本显示，新旧频道已读记录独立。更新后请关闭附加窗口、刷新枭熊房间并重新打开。']},
  {title:'联机验证范围',items:['本批保留此前怪物卡与骰子修复；真实枭熊双账号房间仍待现场复验。']},
 ];
+const currentSections=(sections:ReleaseSection[]):ReleaseSection[]=>sections.map(section=>section.title==='支持者弹幕'?{...section,items:['赞助弹幕更密集，仍以较快流速、不等间隔自然出现；颜色适度柔和，增加黑色阴影提高可读性。','基础字号增大，仍按赞助金额显示字号；新增支持者“洛伦兹力”，金额100元。']}:section);
+export const RELEASE_SECTIONS=currentSections(RELEASE_238_SECTIONS);
+export const SUITE_RELEASE_SECTIONS=currentSections(SUITE_RELEASE_238_SECTIONS);
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
@@ -276,6 +279,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_238_SECTIONS:RELEASE_238_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?[
   {title:'怪物卡与角色卡',items:['同一棋子同时绑定角色与怪物时，两张卡分别选择和操作，生命值、资源和状态不再串用。','收到部分状态回执时保留未改动的资源；迟到的旧消息不再恢复已删除状态或已消耗资源。','怪物原生所属玩家和主持人可按权限查看；解绑或关闭对应组件后，不再沿用旧怪物资料。']},
   {title:'权限与跟随选择',items:['所属玩家、锁定状态或组件改变后重新核对显示权限；异步读取及写入时再次确认权限和关联。','保留同一卡绑定多个棋子时当前选中的棋子，后台更新不再跳到首个绑定对象。']},
