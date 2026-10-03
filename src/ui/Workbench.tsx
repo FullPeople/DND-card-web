@@ -1,7 +1,7 @@
 import {saveVital} from '../platform/stats';
 import {Vitals} from './Vitals';
 import {SheetCell} from './SheetCell';
-import {LockIcon} from './ResourceEditor';
+import {LockIcon} from './LockIcon';
 import {reportWorkbenchError} from './CopyDiagnostic';
 import {SheetDisplayButton} from './SheetDisplayButton';
 import {PaperFrame,type SheetPage} from './PaperFrame';

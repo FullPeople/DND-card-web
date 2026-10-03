@@ -4,7 +4,7 @@ export function afterPaint(action:()=>void):()=>void {
  const schedule=()=>{
   if(cancelled||scheduled)return;
   const phase=document.documentElement.dataset.cardStartup;
-  if(phase&&phase!=='complete')return;
+  if(phase&&phase!=='complete'&&phase!=='failed')return;
   scheduled=true;window.removeEventListener('dnd-card-startup',schedule);
   frame=requestAnimationFrame(()=>{timer=setTimeout(()=>{if(!cancelled)action();},0);});
  };

@@ -15,3 +15,5 @@ it('navigation cancels a pending opening listener and a queued paint',async()=>{
  const env=environment(),action=vi.fn(),cancel=afterPaint(action);cancel();env.finish();await vi.runAllTimersAsync();expect(action).not.toHaveBeenCalled();
  const queued=afterPaint(action);queued();await vi.runAllTimersAsync();expect(action).not.toHaveBeenCalled();
 });
+
+it('recovering from a failed opening still starts deferred tools without waiting for impossible completion',async()=>{const env=environment(),action=vi.fn();afterPaint(action);env.phase('failed');await vi.runAllTimersAsync();expect(action).toHaveBeenCalledOnce();const recovered=vi.fn();afterPaint(recovered);await vi.runAllTimersAsync();expect(recovered).toHaveBeenCalledOnce();});

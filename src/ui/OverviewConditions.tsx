@@ -2,7 +2,7 @@ import {useEntryMenu} from './EntrySharing';
 import {useContext,type PointerEvent} from 'react';
 import {landingWithin,pointerDrag} from './pointerDrag';
 import {ReferenceContext} from './Reference';
-import {overviewConditionEntry,type OverviewCondition} from './OverviewVisuals';
+import {overviewConditionEntry,type OverviewCondition} from './overviewConditionEntry';
 
 export function OverviewConditions({conditions,editable,source,change}:{conditions:OverviewCondition[];editable:boolean;source:string;change:(action:'remove'|'transfer',condition:OverviewCondition,to?:string)=>void}){
  const preview=useContext(ReferenceContext),menu=useEntryMenu();

@@ -2,7 +2,7 @@ import {useId,useMemo,useRef,useState} from 'react';
 import {KIND_LABELS,selectionAllowed,uid,type Character,type Entry,type Kind,type Selection} from '../core/model';
 import {MIGRATION_ROOTS,migrationCandidates,migrationOptions,retainedProficiencies} from '../core/cardMigration';
 import {planBatchCardMigration,suggestedBatchRoots} from '../core/batchCardMigration';
-import {migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigration';
+import {migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigrationQuery';
 import {MigrationEntry} from './MigrationEntry';
 import {useSources} from './SourceName';
 import {ClearableSearch} from './ClearableSearch';

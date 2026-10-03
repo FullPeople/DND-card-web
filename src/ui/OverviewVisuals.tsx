@@ -3,10 +3,8 @@ import {newCharacter,type Entry} from '../core/model';
 import {CardVisualContext,visualConditions} from './cardVisualState';
 import {AdaptiveCardAtmosphere,AdaptiveFrameArt,adaptiveConditionClasses} from './AdaptiveCardAtmosphere';
 
-export type OverviewCondition={id:string;name:string;entry?:Entry;level?:number};
-export function overviewConditionEntry(condition:OverviewCondition):Entry{
- return condition.entry||{id:`overview-condition:${condition.id}`,name:condition.name,english:condition.id,kind:'condition',source:'IMPORTED',packId:'imported',edition:'both',revision:'1',entries:[],raw:{_suiteStatusId:condition.id}};
-}
+import {overviewConditionEntry,type OverviewCondition} from './overviewConditionEntry';
+export {overviewConditionEntry,type OverviewCondition} from './overviewConditionEntry';
 /** Reuse condition identity only; this model never enters saved rule data. */
 export function useOverviewVisuals(conditions:OverviewCondition[]){
  const key=JSON.stringify(conditions);

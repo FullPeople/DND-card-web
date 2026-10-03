@@ -1,0 +1,1 @@
+export function LockIcon({locked}:{locked:boolean}){return <svg data-locked={locked} width="13" height="15" viewBox="0 0 16 18" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="2" y="7" width="12" height="9" rx="1"/><path d={locked?'M5 7V4a3 3 0 016 0V7':'M5 7V4a3 3 0 016 0'}/>{locked&&<path d="M8 10v3"/>}</svg>;}
