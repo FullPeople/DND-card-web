@@ -60,7 +60,13 @@ export function irCondition(c:Character,row:Selection,condition?:Condition):bool
 export function irFormulaValues(c:Character,row:Selection,scores:Record<Ability,number>=c.abilities):Record<string,number> {
  const active=c.selections.filter(s=>irSelectionActive(c,s)),classes=active.filter(s=>s.entry.kind==='class'),level=classes.reduce((n,s)=>n+s.level,0),parent=irParentClass(c,row),values:Record<string,number>={'@class.level':parent?.level||row.level,'@details.level':level,'@prof':2+Math.floor((Math.max(1,level)-1)/4)+(c.sheetBonuses?.proficiency||0)};
  for(const a of ABILITIES)values[`@abilities.${a}.mod`]=Math.floor((scores[a]-10)/2);
- for(const cls of classes)for(const name of new Set([cls.entry.automation?.identity.engName,cls.entry.english].filter(Boolean).map(normalize)))for(const id of new Set([name.replace(/\s+/g,'-'),name.replace(/[^a-z0-9_-]/g,'_')]))values[`@classes.${id}.levels`]=cls.level;
+ const classAliases=new Map<string,Set<Selection>>();
+ for(const cls of classes)for(const name of new Set([cls.entry.automation?.identity.engName,cls.entry.english].filter(Boolean).map(normalize)))for(const id of new Set([name.replace(/\s+/g,'-'),name.replace(/[^a-z0-9_-]/g,'_')])){
+  const key=`@classes.${id}.levels`,owners=classAliases.get(key)||new Set<Selection>();owners.add(cls);classAliases.set(key,owners);
+ }
+ // A source-bound feature uses its actual parent even when another edition
+ // shares the alias. Without a parent, an ambiguous alias remains unbound.
+ for(const [key,owners]of classAliases){const owner=parent&&owners.has(parent)?parent:owners.size===1?[...owners][0]:undefined;if(owner)values[key]=owner.level;}
  const unqualified=new Map<string,number[]>(),qualified=new Map<string,number[]>();
  for(const source of active){const cls=irParentClass(c,source),at=cls?.level||source.level;for(const scale of irMechanics(source.entry)?.scales||[]){const point=scale.values.filter(p=>p.level<=at).at(-1);if(!point||!('value'in point))continue;
   const own=normalize(source.entry.automation?.identity.engName||source.entry.english).replace(/[^a-z0-9_]/g,'_');if(own)values[`@scale.${own}.${scale.key}`]=point.value;

@@ -57,3 +57,33 @@ it('validates embedded IR again when copying protocol 2, and never trusts a cust
 it('keeps pact consumption across spell-level changes, source toggles, imports, and an explicit rest',()=>{
  const c=character([entry('class','Synthetic pact',{classModel:{hitDie:8,casterProgression:'pact'}})],[3]);syncAutoResources(c);setResource(c,'pact-slot:2',0);c.selections[0].level=5;syncAutoResources(c);expect(c.runtime.resources['pact-slot:3']).toMatchObject({max:2,current:0,automaticSpent:2});c.selections[0].level=1;syncAutoResources(c);expect(c.runtime.resources['pact-slot:1'].current).toBe(0);const restored=validateCharacter(JSON.parse(JSON.stringify(c)));restored.selections[0].level=5;syncAutoResources(restored);expect(restored.runtime.resources['pact-slot:3'].current).toBe(0);restored.profile.enabledSources=[];syncAutoResources(restored);restored.profile.enabledSources=['XPHB'];syncAutoResources(restored);expect(restored.runtime.resources['pact-slot:3'].current).toBe(0);restResources(restored,'short');restored.selections[0].level=3;syncAutoResources(restored);expect(restored.runtime.resources['pact-slot:2'].current).toBe(2);
 });
+
+it('binds a feature class formula to its actual parent across same-name editions, ordering and resource debt',()=>{
+ const current=entry('class','Fighter',{classModel:{hitDie:10}}),legacy=entry('class','Fighter',{classModel:{hitDie:10}});
+ legacy.id+=':legacy';legacy.source='PHB';legacy.edition='2014';legacy.automation!.identity=createIdentity({kind:'class',source:'PHB',engName:'Fighter'});
+ const feature=entry('feature','Synthetic parent-bound counter',{resources:[{key:'uses',max:{formula:'min(1, floor(@classes.fighter.levels / 2)) + min(1, floor(@classes.fighter.levels / 17))'},recovery:[{period:'short',amount:'all'}]}]});
+ feature.automation!.identity=createIdentity({kind:'classFeature',source:'XPHB',engName:feature.english,classEngName:'Fighter',classSource:'XPHB',level:2});
+ const c=character([current,legacy,feature],[2,17,2]),own=c.selections[0],other=c.selections[1],child=c.selections[2];child.parentId=own.id;
+ expect(planFeatureResources(c).grants.map(grant=>grant.max)).toEqual([1]);
+ c.selections=[other,child,own];expect(planFeatureResources(c).grants.map(grant=>grant.max)).toEqual([1]);
+ c.selections=[own,child,other];other.level=20;expect(planFeatureResources(c).grants.map(grant=>grant.max)).toEqual([1]);
+ syncAutoResources(c);const key=planFeatureResources(c).grants[0].key;setResource(c,key,0);
+ own.level=17;syncAutoResources(c);expect(c.runtime.resources[key]).toMatchObject({max:2,current:1});
+ own.level=2;syncAutoResources(c);expect(c.runtime.resources[key]).toMatchObject({max:1,current:0});
+ c.selections=[child,other];syncAutoResources(c);expect(planFeatureResources(c).grants).toEqual([]);expect(c.runtime.resources[key]).toBeUndefined();
+ c.selections=[own,child,other];syncAutoResources(c);expect(c.runtime.resources[key]).toMatchObject({max:1,current:0});
+ c.profile.enabledSources=['PHB'];syncAutoResources(c);expect(planFeatureResources(c).grants).toEqual([]);
+ c.profile.enabledSources=['PHB','XPHB'];syncAutoResources(c);expect(c.runtime.resources[key]).toMatchObject({max:1,current:0});
+});
+
+it('keeps an unowned class alias visibly unbound when ambiguous and preserves debt when a unique binding returns',()=>{
+ const current=entry('class','Fighter',{classModel:{hitDie:10}}),legacy=entry('class','Fighter',{classModel:{hitDie:10}});
+ legacy.id+=':legacy';legacy.source='PHB';legacy.edition='2014';legacy.automation!.identity=createIdentity({kind:'class',source:'PHB',engName:'Fighter'});
+ const item=entry('item','Synthetic unowned class counter',{equipmentModel:{category:'wondrous'},resources:[{key:'uses',max:{formula:'@classes.fighter.levels'},recovery:[{period:'short',amount:'all'}]}]});
+ const c=character([current,legacy,item],[3,17]),own=c.selections[0],other=c.selections[1],held=c.selections[2];held.equipped=true;
+ const ambiguous=planFeatureResources(c);expect(ambiguous.grants).toEqual([]);expect(ambiguous.issues).toEqual(expect.arrayContaining([expect.objectContaining({id:`resource:${held.id}:0`,severity:'warning',message:expect.stringContaining('未执行资源规则')})]));
+ syncAutoResources(c);expect(Object.values(c.runtime.resources).filter(resource=>resource.featureGrant)).toEqual([]);
+ c.selections=[own,held];syncAutoResources(c);const key=planFeatureResources(c).grants[0].key;expect(c.runtime.resources[key]).toMatchObject({max:3,current:3});setResource(c,key,0);
+ c.selections=[own,other,held];syncAutoResources(c);expect(c.runtime.resources[key]).toBeUndefined();restResources(c,'short');
+ c.selections=[own,held];syncAutoResources(c);expect(c.runtime.resources[key]).toMatchObject({max:3,current:0});
+});
