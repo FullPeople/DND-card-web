@@ -1,3 +1,4 @@
+import {captureWriteIntent} from './workbenchWriteIntent';
 import type {Character} from '../core/model';
 import {evaluate} from '../core/engine';
 import {exportOwlbear} from '../core/export';
@@ -25,10 +26,12 @@ export async function readResourceDashboard(card:CardChoice){
 /** Read and merge at save time. Only explicit draft changes enter the native
  * delta; a concurrent resource spend, HP edit or unrelated text stays intact. */
 export function saveResourceDashboard(card:CardChoice,base:Character,draft:Character){
+ const validate=captureWriteIntent(`card:${card.id}`);
  return queue.run(card.id,async()=>{
+  validate();
   writable(card);
   const {document}=await workbenchRequest('readCard',{key:undefined,itemId:`card:${card.id}`});
-  writable(card);
+  validate();writable(card);
   const before=character(document),next=commitDashboardDraft(before,base,draft,{gm:getWorkbench().role==='GM'});
   next.revision=before.revision+1;next.updatedAt=new Date().toISOString();
   const result=await workbenchRequest('save',{key:undefined,itemId:`card:${card.id}`,observed:document,previous:before,native:next,previousData:exportOwlbear(before,evaluate(before)),data:exportOwlbear(next,evaluate(next)),statPatch:{}});
