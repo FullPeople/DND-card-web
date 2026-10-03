@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
+    branches: [fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -21,6 +21,7 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run build:standalone
+      - run: node tools/checkStartupBoundary241.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: verified-web-builds
@@ -58,6 +59,7 @@ jobs:
           - group: startup-order
             commands: |
               npx playwright test --config playwright.startup-order.config.ts
+              npx playwright test --config playwright.startup-tail.config.ts
               npx playwright test tests/e2e/threeDragonFullscreen.spec.ts --project=chromium
           - group: startup-integration
             commands: |

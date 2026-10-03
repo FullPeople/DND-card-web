@@ -1,5 +1,5 @@
 import type {ReactNode,CSSProperties} from 'react';
-import {LockIcon} from './ResourceEditor';
+import {LockIcon} from './LockIcon';
 import './vitals.css';
 /** Shared compact health controls for monsters and the resource overview. */
 export function Vitals({stats,input,locked,lock,lockLabel,lockHelp,disabled=false}:{stats:Record<string,number>;input:(key:string,label:string)=>ReactNode;locked:boolean;lock?:()=>void;lockLabel:string;lockHelp?:string;disabled?:boolean}){

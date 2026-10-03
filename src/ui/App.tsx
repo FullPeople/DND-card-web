@@ -11,12 +11,12 @@ import {ToolBoundary} from './ToolBoundary';
 import './classCompatibility.css';
 import './editingRecovery.css';
 import {ownedTrainingReference} from './entryMenuEntries';
-import {overviewConditionEntry} from './OverviewVisuals';
+import {overviewConditionEntry} from './overviewConditionEntry';
 import {useGroupRoll,getGroupRoll} from '../platform/groupRoll';
 const CardMigration=lazy(()=>import('./CardMigration').then(module=>({default:module.CardMigration})));
 import {cardMigrationIssues} from '../core/cardMigrationIssues';
 import {ClearableSearch} from './ClearableSearch';
-import {classCompatibilityIssues,migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigration';
+import {classCompatibilityIssues,migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigrationQuery';
 const RuleOptions=lazy(()=>import('./RuleOptions').then(m=>({default:m.RuleOptions})));
 import {rulesSetupComplete,rememberRulesSetup} from '../platform/rulesSetup';
 import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
@@ -428,8 +428,10 @@ export default function App() {
   useEffect(() => {if(startupComplete)void registerOffline(activate => setActivateUpdate(() => activate));}, [startupComplete]);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const d = useMemo(() => mechanics ? evaluate(mechanics) : undefined, [mechanics]);
-  // Reveal the startup animation only once a usable workspace or recovery UI has committed.
-  useEffect(()=>{if(startupError)window.dispatchEvent(new Event('dnd-card-failed'));else if(workspace&&c&&d&&(!editingRequested||automationRuntime||editingLoadError))window.dispatchEvent(new Event('dnd-card-ready'));},[!!workspace,!!c,!!d,startupError,editingRequested,!!automationRuntime,editingLoadError]);
+  // Reveal a fully validated/evaluated read-only card independently of editing.
+  // A saved editing preference is restored by loadEditor; its network download
+  // must not keep the whole card behind a finished logo.
+  useEffect(()=>{if(startupError)window.dispatchEvent(new Event('dnd-card-failed'));else if(workspace&&c&&d)window.dispatchEvent(new Event('dnd-card-ready'));},[!!workspace,!!c,!!d,startupError]);
   /** 一张坏图片只丢弃它自己：头像或立绘读不出来时仍然打开整张角色卡。 */
   function readDocument(document: unknown): Character {
     const { character, repaired } = readCharacter(document);
@@ -801,7 +803,7 @@ export default function App() {
       <section data-inventory-recipient={inWorkbench&&workbenchPage==='sheet'&&wb.target?wb.target.cardId?`card:${wb.target.cardId}`:`monster:${wb.target.itemId}`:undefined} className={`sheet-pane ${tab === 'sheet' ? 'mobile-active' : ''} ${editing&&(!inWorkbench||workbenchPage==='sheet'&&wb.target?.write)&&!exportView?'sheet-editing':''}`} aria-label={t('cardWorkspace')}>
         {inWorkbench&&workbenchPage==='music'?<MusicWorkspace close={()=>setWorkbenchPage('console')}/>:inWorkbench&&['settings','features'].includes(workbenchPage)?<WorkbenchPanel key={workbenchPage} panel="settings" section={workbenchPage==='features'?'features':undefined} close={()=>setWorkbenchPage('console')}/>:inWorkbench&&workbenchPage==='notes'&&wb.role==='GM'?<DmNotes/>:inWorkbench&&workbenchPage==='dice'?<DicePage online={wb.online} target={wb.target} rolls={wb.rolls} compose={wb.compose}/>:inWorkbench&&workbenchPage==='console'?<DMConsole navigate={setWorkbenchPage}/>:inWorkbench&&(!wb.target||wb.target.kind==='character'&&(!wb.document||c.id!==workbenchCharacterId(wb.target)||workbenchReadError?.key===wb.target.key))?<div className="workbench-monster">{workbenchReadError&&workbenchReadError.key===wb.target?.key?<p role="alert">{workbenchReadError?.message}。原始资料保留，请选择其他角色或重新读取角色簿。</p>:<p role="status">{wb.loading||wb.document?'读取角色资料…':'从上方选择角色卡'}</p>}</div>:inWorkbench&&(wb.target?.kind==='monster'||wb.target?.kind==='token')?<WorkbenchMonster editing={editing} setEditing={setEditing} key={wb.target.key} target={wb.target} raw={wb.document} online={wb.online} onLink={link}/>:<>
         <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span>{!inWorkbench&&<CharacterTabs characters={workspace.characters} activeId={c.id} warnings={classWarnings} label={t('currentCharacter')} select={id=>{if(confirmResourceDraftDiscard())persist({...workspace,activeId:id});}}/>}</div>
-          <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><SheetDisplayButton/><button disabled={!automationRuntime||inWorkbench&&!wb.target?.write} className="edit-mode-toggle" role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
+          <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} onClick={()=>setModal('automation')}>{t('automation')} · {t(automationEnabled(c)?'on':'manual')}</button>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}>↶</button><button aria-label={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}>↷</button><SheetDisplayButton/><button disabled={!automationRuntime||inWorkbench&&!wb.target?.write} className="edit-mode-toggle" aria-busy={editingRequested&&!automationRuntime&&!editingLoadError} title={editingRequested&&!automationRuntime&&!editingLoadError?'正在恢复编辑模式，当前卡面仍可查阅':undefined} role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
         </div>
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {showClassReview&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
