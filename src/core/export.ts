@@ -4,7 +4,7 @@ import {inlineLabel} from './inlineTags';
 import {weaponAttacks} from './weaponAttacks';
 import {spellState,spellValues,inventoryState,carriedWeight} from './characterDetails';
 import {belongsToClass} from './sheet';
-import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SIZE_LABELS, SKILLS, selectionAllowed, signed, type Character, type Derived, type RulePack } from './model';
+import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SIZE_LABELS, SKILLS, selectionAllowed, selectionEffectsAllowed, signed, type Character, type Derived, type RulePack } from './model';
 import { choiceLabel } from './engine';
 export const exportCharacter = (c: Character) => ({ format: 'dnd-card-web', version: 1, exportedAt: new Date().toISOString(), character: c });
 // File exchange retains native identities; the live legacy projection stays small.
@@ -61,7 +61,7 @@ export function exportReview(c: Character, d: Derived, sourceName: (id:string)=>
     `<h2>启用规则</h2><p>${c.profile.enabledSources.map(sourceName).map(esc).join('、')}</p><p>专长：${c.profile.optional.feats ? '开' : '关'}；兼职：${c.profile.optional.multiclass ? '开' : '关'}；旧版兼容：${c.profile.optional.legacy ? '开' : '关'}</p>`,
     '<h2>人工裁定与数值修正</h2>', `<ul>${Object.entries(c.profile.exceptions).map(([id, reason]) => `<li>条目特许 · ${esc(c.selections.find(s => s.entry.id === id)?.entry.name || id)}：${esc(reason)}</li>`).join('')}${(c.adjustments || []).map(a => `<li>${esc(a.target)} → ${a.value}：${esc(a.reason)}</li>`).join('')}${Object.entries(c.sheetBonuses || {}).map(([key, value]) => `<li>${esc(key)} ${signed(value)}（卡面调整）</li>`).join('')}</ul>`,
     '<h2>当前资源</h2>', table(['资源', '剩余', '上限'], Object.entries(c.runtime.resources).map(([name, v]) => [name, v.current, v.max])),
-    '<h2>角色条目与固定来源</h2>', ...c.selections.map(s => `<article><h3>${esc(s.entry.name)} <small>${esc(KIND_LABELS[s.entry.kind])}</small></h3><p class="muted">${esc(sourceName(s.entry.source))} · ${esc(s.entry.edition)} · 资料修订 ${esc(s.entry.revision)}${s.entry.page ? ` · 第 ${s.entry.page} 页` : ''}</p><p>${s.entry.kind === 'class' ? `${s.level} 级 · ` : ''}${s.entry.kind === 'item' ? `数量 ${s.quantity} · ${s.equipped ? '已装备' : '未装备'} · ` : ''}${selectionAllowed(c, s.entry) ? '来源已启用' : '来源或规则未启用，效果暂停'}${s.parentId ? ` · 来自：${esc(c.selections.find(p => p.id === s.parentId)?.entry.name || '已移除来源')}` : ''}${c.reviewed.includes(s.id) ? ' · 特殊效果已人工核对' : ''}</p><pre>${esc(plainText(s.entry.entries))}</pre></article>`),
+    '<h2>角色条目与固定来源</h2>', ...c.selections.map(s => `<article><h3>${esc(s.entry.name)} <small>${esc(KIND_LABELS[s.entry.kind])}</small></h3><p class="muted">${esc(sourceName(s.entry.source))} · ${esc(s.entry.edition)} · 资料修订 ${esc(s.entry.revision)}${s.entry.page ? ` · 第 ${s.entry.page} 页` : ''}</p><p>${s.entry.kind === 'class' ? `${s.level} 级 · ` : ''}${s.entry.kind === 'item' ? `数量 ${s.quantity} · ${s.equipped ? '已装备' : '未装备'} · ` : ''}${selectionEffectsAllowed(c, s.entry) ? '来源已启用' : '来源或规则未启用，效果暂停'}${s.parentId ? ` · 来自：${esc(c.selections.find(p => p.id === s.parentId)?.entry.name || '已移除来源')}` : ''}${c.reviewed.includes(s.id) ? ' · 特殊效果已人工核对' : ''}</p><pre>${esc(plainText(s.entry.entries))}</pre></article>`),
     `<h2>人物印象与笔记</h2><pre>${esc(c.identity.description)}\n${esc(c.biography?.story??c.notes)}</pre>`,
     '<h2>数值依据</h2>', ...Object.entries(d.trace).map(([key, values]) => `<p>${esc(choiceLabel(key))}：${values.map(esc).join('；')}</p>`),
   ];

@@ -1,12 +1,12 @@
 import {evaluate} from './engine';
 import {spellState,spellValues,carriedWeight} from './characterDetails';
-import {selectionAllowed,type Character,type Selection} from './model';
+import {selectionEffectsAllowed,type Character,type Selection} from './model';
 
 /** Read-only review projection. No quota assumptions or resource mutations. */
 export function characterReview(c:Character){
  const d=evaluate(c),spells=spellState(c),stats=spellValues(c,d),weight=carriedWeight(c);
  const selected=new Map(c.selections.map(s=>[s.id,s]));
- const allowed=(s:Selection)=>{const seen=new Set<string>();let row:Selection|undefined=s;while(row&&!seen.has(row.id)){if(!selectionAllowed(c,row.entry))return false;seen.add(row.id);row=row.parentId?selected.get(row.parentId):undefined;}return true;};
+ const allowed=(s:Selection)=>{const seen=new Set<string>();let row:Selection|undefined=s;while(row&&!seen.has(row.id)){if(!selectionEffectsAllowed(c,row.entry))return false;seen.add(row.id);row=row.parentId?selected.get(row.parentId):undefined;}return true;};
  const restricted=c.selections.filter(s=>!allowed(s));
  const classes=c.selections.filter(s=>s.entry.kind==='class');
  const recordedLevel=classes.reduce((total,s)=>total+s.level,0);

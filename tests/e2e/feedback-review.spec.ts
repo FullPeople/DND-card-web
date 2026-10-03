@@ -8,7 +8,7 @@ async function harness(page:Page,module:string,component:string,value:any){
  await page.goto('/__feedback-harness');await page.waitForFunction(()=>typeof(window as any).mount==='function');await page.evaluate(({value,component})=>{(window as any).saved=[];(window as any).mount(component==='MonsterEditor'?{value,busy:false,save:async(next:any)=>{(window as any).saved.push(next);}}:{c:value});},{value,component});
 }
 test('DM review groups disabled levels and manual adjustments without editing the character',async({page})=>{
- await harness(page,'/src/ui/CharacterReview.tsx','CharacterReview',card());
+ const c=card();c.profile.enabledSources=c.profile.enabledSources.filter(source=>source!=='PHB');await harness(page,'/src/ui/CharacterReview.tsx','CharacterReview',c);
  await expect(page.getByText('记录等级 3 与当前规则下生效等级 0 不一致，请核对职业来源与版本。')).toBeVisible();
  await page.getByRole('button',{name:'查看 1 项受限条目'}).click();await expect(page.locator('.review-selection')).toHaveCount(1);await page.locator('.review-selection summary').click();await expect(page.getByText('测试规则正文。')).toBeVisible();
  await page.getByRole('button',{name:'裁定与依据',exact:true}).click();await expect(page.getByRole('cell',{name:'+2',exact:true})).toBeVisible();await page.getByRole('button',{name:'概况与风险',exact:true}).click();await page.screenshot({path:test.info().outputPath('dm-review.png')});

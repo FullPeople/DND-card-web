@@ -1,12 +1,9 @@
-/* A separate, compact read-only projection of the existing book allocation. */
-.paper .book-ritual-cell{flex:0 1 auto;min-height:85px;max-height:180px}
-.book-ritual-cell .cell-content{display:block;overflow:auto;padding:4px}
+/* Inline projection inside prepared spells; never consumes a preparation slot. */
 .book-ritual-source{display:block;margin:2px 4px;font-size:9px;opacity:.75}
 .book-ritual-group>h4{margin:3px 4px;font-size:11px}
 .book-ritual-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
 .book-ritual-row{min-width:0;border-bottom:1px solid var(--paper-frame,#555);display:flex;align-items:center;gap:3px}
 .book-ritual-row>.feature-caption{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font-size:10px}
 .book-ritual-cast{flex:none;padding:3px;font:inherit;font-size:9px;color:inherit;border:1px solid var(--paper-frame,#555);background:transparent}
-.sheet-viewport.screen-mode .paper .book-ritual-cell{max-height:none;height:auto;min-height:0}
 @media(max-width:560px){.book-ritual-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media print{.book-ritual-cast{display:none}}

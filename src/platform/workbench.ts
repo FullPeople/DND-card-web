@@ -16,7 +16,7 @@ const protocol='full-suite-workbench/v1',params=new URLSearchParams(location.has
 const session=params.get('suite'),origin=params.get('bridge');
 export const inWorkbench=!!session&&origin===location.origin;
 export type Target={tokenPortrait?:{url:string;width?:number;height?:number};projectionPending?:boolean;documentRevision?:number;key:string;itemId:string;name:string;cardId:string;slug:string;kind:'character'|'monster'|'token';stats:Record<string,number>;write:boolean;role:string;pinned:boolean;locked?:boolean;statsLocked?:boolean;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];resources?:any[]};
-export type CardChoice={resourceWidgets?:Record<string,ResourceWidgetLayout>;resourceAttacks?:ResourceWidgetLayout;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
+export type CardChoice={resourceHidden?:string[];resourceWidgets?:Record<string,ResourceWidgetLayout>;resourceAttacks?:ResourceWidgetLayout;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
 export type SharedRules={edition:Edition;sourceMode:'full'|'short'|'both';profile:RuleProfile;packs:RulePack[];customEntries:Entry[]};
 export type SharedDocument={key:string;scope:'room'|'scene';revision:number;rules:SharedRules};
 type State={access?:CacheAccess;inventory?:InventoryState;shared?:SharedDocument;settings?:Record<string,any>;visibility?:{wiki:boolean;monsters:boolean};console?:{timeStop:boolean;portalEffects:boolean;players:{id:string;name:string}[]};cards:CardChoice[];monsters:CardChoice[];role?:string;enabled:Record<string,boolean>;online:boolean;target?:Target;document?:any;loading?:boolean;message:string;rolls:any[];compose?:{id:string;expression:string;label?:string}};
@@ -78,7 +78,7 @@ let handshakeReady=false,handshakeCatalog=false,lastHello:number|undefined,hello
 function resetGroup(disconnected=false){if(hostStarted)window.dispatchEvent(new CustomEvent('workbench-group-roll-reset',{detail:{hostStarted,disconnected}}));}
 function resetHandshake(restartRetries=true,disconnected=true){if(disconnected){resetGroup(true);snapshotCache.suspend();}handshakeReady=false;handshakeCatalog=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
 const monsterRuntimeSequence=new Map<string,number>();
-const runtimeFrom=(value:any)=>({stats:value.stats,resources:value.resources,conditions:value.conditions,documentRevision:value.documentRevision});
+const runtimeFrom=(value:any)=>({stats:value.stats,resources:value.resources,conditions:value.conditions,documentRevision:value.documentRevision,...Object.fromEntries(['resourceWidgets','resourceAttacks','resourceHidden','classSummary'].filter(key=>value[key]!==undefined).map(key=>[key,value[key]]))});
 function acceptSnapshot(m:any){
  if(m.access&&!acceptAccess(m.access)||snapshotCache.currentAccess&&!snapshotCache.permits(m.state))return;
  m=revisions.snapshot(m);rememberDocument(m);if(!m.state)return;

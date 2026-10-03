@@ -67,9 +67,9 @@ describe('independent identity and source constraints', () => {
     c.profile.enabledSources = []; expect(evaluate(c).abilities.int).toBe(10);
     c.profile.exceptions[e.id] = 'DM 同意'; expect(evaluate(c).abilities.int).toBe(12);
   });
-  it('keeps legacy ability declarations readable without silently changing player-entered scores', () => {
+  it('applies source racial increases without rewriting stored bases or requiring a card-version marker', () => {
     const c = newCharacter(); delete c.racialAbilityMode; c.profile.optional.legacy = true; add(c, entry('race', { ability: [{ str: 2 }] }, '2014'));
-    expect(evaluate(c).abilities.str).toBe(10); c.edition = '2014'; expect(evaluate(c).abilities.str).toBe(10); c.abilities.str = 12; expect(evaluate(c).abilities.str).toBe(12);
+    expect(evaluate(c).abilities.str).toBe(12); expect(c.abilities.str).toBe(10); c.edition = '2014'; expect(evaluate(c).abilities.str).toBe(12); c.abilities.str = 12; expect(evaluate(c).abilities.str).toBe(14); expect(c.abilities.str).toBe(12);
   });
 });
 

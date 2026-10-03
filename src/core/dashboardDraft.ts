@@ -7,7 +7,7 @@ import {validateCharacter} from './validation';
  * spending resources, choosing random appearances or repacking neighbours. */
 export function createDashboardDraft(character:Character):Character{
  const draft=structuredClone(character),layout=draft.quickbarLayout||={order:[],hidden:[]};
- const visible=freeDashboardLayout(resourceModules(resourceCanvasRows(draft),layout.widgets),layout.widgets,layout.attacks);
+ const visible=freeDashboardLayout(resourceModules(resourceCanvasRows(draft),layout.widgets,draft.selections),layout.widgets,layout.attacks);
  layout.widgets={...migrateDashboardWidgets(layout.widgets,layout.attacks),...visible.widgets};layout.attacks=visible.attacks;
  return draft;
 }
@@ -30,7 +30,7 @@ export function commitDashboardDraft(live:Character,base:Character,draft:Charact
  const merged:Character=applyPatch(remote,previous,draft);
  merged.revision=live.revision;merged.updatedAt=live.updatedAt;
  const result=validateCharacter(merged),layout=result.quickbarLayout!;
- const visible=freeDashboardLayout(resourceModules(resourceCanvasRows(result),layout.widgets),layout.widgets,layout.attacks);
+ const visible=freeDashboardLayout(resourceModules(resourceCanvasRows(result),layout.widgets,result.selections),layout.widgets,layout.attacks);
  if(dashboardOverlaps(visible).count)throw Error('模块有重叠，请调整位置后再保存');
  layout.widgets={...layout.widgets,...visible.widgets};layout.attacks=visible.attacks;
  return result;

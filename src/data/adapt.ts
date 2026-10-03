@@ -38,7 +38,7 @@ export function readableEntries(raw: Raw, category: string): unknown[] {
   if (category === 'psionic') entries.push(...(raw.modes || []));
   if (category === 'class' || category === 'subclass') {
     const proficiencies=startingProficiencyEntries(raw);
-    if(proficiencies.length)starting.push({type:'entries',name:'起始熟练项',_startingSection:true,entries:proficiencies});
+    if(proficiencies.length)starting.push({type:'entries',name:'起始熟练项',_startingSection:true,_trainingSection:true,entries:proficiencies});
     const refs = raw.classFeatures || raw.subclassFeatures || [];
     if (refs.length) entries.push({ type: 'entries', name: '等级特性', entries: [{ type: 'list', items: refs.map((v: any) => {
       const ref = typeof v === 'string' ? v : v.classFeature || v.subclassFeature;

@@ -4,7 +4,7 @@ import {useContext} from 'react';
 import {entryLabel} from '../core/entryLabel';
 import {NumberInput} from './NumberInput';
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
-import { type Character, type Entry, type Selection, selectionAllowed } from '../core/model';
+import { type Character, type Entry, type Selection, selectionEffectsAllowed } from '../core/model';
 import { removeSelection } from '../core/sheet';
 import { pointerDrag } from './pointerDrag';
 import { Reference } from './Reference';
@@ -28,7 +28,7 @@ export function IdentityToken({ row, c, edit, inspect, children }: { row: Select
     return()=>{active=false;observer.disconnect();cancelAnimationFrame(frame);};
   },[row.entry.name,row.level,children]);
   const remove = () => edit(draft => removeSelection(draft, row.id));
-  return <div ref={root} className={`identity-token ${selectionAllowed(c, row.entry) ? '' : 'restricted'}`} data-drag-enabled={editing} data-entry-id={row.entry.id} data-selection-id={row.id} onPointerDown={event => {
+  return <div ref={root} className={`identity-token ${selectionEffectsAllowed(c, row.entry) ? '' : 'restricted'}`} data-drag-enabled={editing} data-entry-id={row.entry.id} data-selection-id={row.id} onPointerDown={event => {
     if (!editing || (event.target as Element).closest('input')) return;
     const token=event.currentTarget;const area = event.currentTarget.closest('.identity-field') || event.currentTarget;
     cancel.current = pointerDrag(event, { title: `${row.entry.name}${row.entry.kind === 'class' ? ` Lv.${row.level}` : ''}`, outside: hit => !hit || !area.contains(hit),

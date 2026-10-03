@@ -86,7 +86,7 @@ import type {SheetCaptureOptions} from '../platform/sheetImage';
 
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
+import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionEffectsAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
 import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
@@ -137,7 +137,7 @@ function Dialog({ title, children, close }: { title: string; children: ReactNode
   return <dialog className="dialog" ref={ref} onCancel={e=>{if(e.target===e.currentTarget){e.preventDefault();close();}}} onClick={e => { if (e.target === ref.current) close(); }} aria-labelledby="dialog-title"><div className="dialog-head"><h2 id="dialog-title">{title}</h2><button onClick={close} aria-label="关闭弹窗">×</button></div><div className="dialog-body">{children}</div></dialog>;
 }
 function Selected({ s, c, edit, inspect }: { s: Selection; c: Character; edit: Edit; inspect: (e: Entry) => void }) {
-  const allowed = selectionAllowed(c, s.entry);
+  const allowed = selectionEffectsAllowed(c, s.entry);
   if (['class', 'subclass', 'race', 'background'].includes(s.entry.kind)) return <IdentityToken row={s} c={c} edit={edit} inspect={inspect}/>;
   return <div className={`selected-entry ${allowed ? '' : 'restricted'}`}>
     <div className="selected-title"><span className="class-title"><Reference className="text-link" reference={`entry:${s.entry.id}`} kind={s.entry.kind} onClick={() => inspect(s.entry)}>{s.entry.name}</Reference></span><button className="remove" aria-label={`移除${s.entry.name}`} title="移除，可撤销" onClick={() => edit(d => { removeSelection(d, s.id); })}>×</button></div>
@@ -410,6 +410,8 @@ export default function App() {
   useEffect(() => { void registerOffline(activate => setActivateUpdate(() => activate)); }, []);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const d = useMemo(() => mechanics ? evaluate(mechanics) : undefined, [mechanics]);
+  // Reveal the startup animation only once a usable workspace or recovery UI has committed.
+  useEffect(()=>{if(workspace&&c&&d||startupError)window.dispatchEvent(new Event('dnd-card-ready'));},[!!workspace,!!c,!!d,startupError]);
   /** 一张坏图片只丢弃它自己：头像或立绘读不出来时仍然打开整张角色卡。 */
   function readDocument(document: unknown): Character {
     const { character, repaired } = readCharacter(document);
@@ -579,7 +581,7 @@ export default function App() {
     }
     return {entry};
   }
-  function inspect(entry: Entry, push = true) { exitSheetFullscreen(); if(detail && !library.hover && detailPane.current)library.savePosition(detail.id,detailPane.current.scrollTop);const target=readingTarget(entry);if(library.hover){previewCommit.current={id:target.entry.id,top:detailPane.current?.scrollTop||0};setReadingFlash(n=>n+1);}else setReadingFlash(0);library.navigate(target.entry,target.focus,push);setTab('wiki'); }
+  function inspect(entry: Entry, push = true, from?:keyof typeof LIBRARY_TABS) { exitSheetFullscreen(); if(detail && !library.hover && detailPane.current)library.savePosition(detail.id,detailPane.current.scrollTop);const target=readingTarget(entry);if(library.hover){previewCommit.current={id:target.entry.id,top:detailPane.current?.scrollTop||0};setReadingFlash(n=>n+1);}else setReadingFlash(0);library.navigate(target.entry,target.focus,push,from);setTab('wiki'); }
   useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){setTableOpen(false);inspect(allEntries.find(e=>e.id===entry.id)||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
   function resolveReference(reference: string, tag?: string) {
     if (reference.startsWith('entry:')) return c?.selections.find(s => s.entry.id === reference.slice(6)&&librarySourceEnabled(c,s.entry))?.entry || sourceEntries.find(e => e.id === reference.slice(6));
@@ -780,7 +782,7 @@ export default function App() {
         <div className="catalog-status"><span>{loading || progress.paused ? `${progress.done}/${progress.total} 份资料${progress.paused?' · 已暂停':''}` : `${libraryEntries.length.toLocaleString()} 条资料`}{progress.cached > 0 ? ` · ${progress.cached} 份缓存` : ''}</span><span role={searchStatus?"status":undefined}>{searchStatus||`${filtered.length} 条符合筛选`}</span></div>
         {progress.paused && <p className="load-paused" role="status">{progress.paused}尚有资料未读。</p>}
         {(progress.failed.length > 0 || progress.paused) && <details className="load-errors"><summary>{progress.failed.length} 份资料读取异常 · 可重试</summary>{progress.failed.map((e, i) => <p key={i}>{e}</p>)}<button disabled={loading} onClick={() => load(false,progress.retry)}>重试加载</button></details>}
-        <div className={`library-body ${detail ? 'has-detail' : ''}`}><CatalogList entries={filtered} columns={columns} kind={kind} character={c} selected={detail} inspect={inspect} sort={sort} descending={descending} onSort={key=>library.patch({sort:key,descending:sort===key?!descending:false})} resetKey={JSON.stringify([kind,filters,editionFilter,sort,descending,categoryQuery])} loading={loading} onSettings={()=>setModal('rules')} pulse={fillPulse}/>
+        <div className={`library-body ${detail ? 'has-detail' : ''}`} data-library-tab={kind}><CatalogList entries={filtered} columns={columns} kind={kind} character={c} selected={detail} inspect={entry=>inspect(entry,true,kind)} sort={sort} descending={descending} onSort={key=>library.patch({sort:key,descending:sort===key?!descending:false})} resetKey={JSON.stringify([kind,filters,editionFilter,sort,descending,categoryQuery])} loading={loading} onSettings={()=>setModal('rules')} pulse={fillPulse}/>
         <WikiSplitter/>{kind==='custom'&&canAuthor&&<><CustomEntryEditor newEntry={()=>setDetail(undefined)} entry={detail?.raw._workbenchCustom?detail:undefined} busy={rulesBusy} save={entry=>changeCustom(entry)} remove={entry=>changeCustom(entry,true)}/></>}
         {detail && <article key={`${detail.kind}:${detail.id}`} className={`entry-detail ${explicitlyExcluded(c,detail)?'entry-disabled':''} ${library.hover?'is-sheet-preview':readingFlash?'sheet-preview-committed':''} ${library.focus?'has-reading-focus':''}`} data-described-entry={detail.id} data-entry-kind={detail.kind} ref={detailPane} onScroll={e => { if(!library.hover)library.savePosition(detail.id, e.currentTarget.scrollTop); }}><div className="detail-frozen"><div className="detail-navigation"><button disabled={!library.canGoBack} onClick={library.back}>← 上一条</button><button aria-label="收起正文" onClick={() => { setDetail(undefined); }}>×</button></div><div className="detail-heading">{detail.kind==='monster'&&<MonsterPortrait entry={detail}/>}<EntryBadges entry={detail}/><span className="eyebrow">{KIND_LABELS[detail.kind]} · {entryEdition(detail) === 'both' ? '通用资料' : entryEdition(detail)}</span><h1><EntryDraggable className="detail-title" entry={detail} >{uiEntryLabel(detail,language)}{detail.english !== detail.name && <small className="english-name"> {language==='en'?detail.name:detail.english}</small>}</EntryDraggable></h1><small>{detail.raw._authoredBy ? `${detail.raw._authoredBy} · ` : ''}<SourceName id={detail.source}/>{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div><ClassNavigation subclassesOpen={!!libraryState.subclassesOpen} onToggleSubclasses={()=>library.patch({subclassesOpen:!libraryState.subclassesOpen})} entry={detail} entries={libraryEntries} character={c} navigate={(entry,focus)=>library.navigate(entry,focus)}/></div>
           {detail.kind==='monster'?<ContentBoundary key={detail.id}><MonsterDocument entry={detail} onLink={link}/></ContentBoundary>:<><ContentBoundary key={`facts:${detail.id}`}><EntryFacts entry={detail} onLink={link}/></ContentBoundary>

@@ -6,6 +6,7 @@ import {DMConsole} from '../../src/ui/WorkbenchConsole';
 import {EntryDragProvider} from '../../src/ui/DragEntry';
 import {newCharacter} from '../../src/core/model';
 import {evaluate} from '../../src/core/engine';
+import {createDashboardDraft} from '../../src/core/dashboardDraft';
 import {syncAutoResources} from '../../src/core/resources';
 import {exportOwlbear} from '../../src/core/export';
 import {expandChanges} from '../../src/platform/document-delta';
@@ -40,7 +41,7 @@ const inventory={revision:1,publicId:'public:room',access:'room',silent:false,co
 const fixture=window.resource182={requests:[],pending:[],delayedAcks:[],notices:[],errors:[],history:[],samples:[],wireEvents:[]};
 const send=(type,rest={})=>window.dispatchEvent(new MessageEvent('message',{source:window,origin:location.origin,data:{protocol,session,hostStarted:182,type,...rest}}));
 function snapshot(){const document={...clone(legacyDocument),dnd_card_web:clone(native),_suiteRevision:revision};return {sequence:++sequence,state:{...target,...(!monster?{documentRevision:revision}:{}),resources:clone(Object.values(native.runtime.resources)),conditions:[],stats:{health:native.runtime.hp,'max health':30,'temporary health':0,'armor class':10}},...(!monster?{document}:{}),...(mode==='public'?{inventory:clone(inventory)}:{})};}
-function choice(snap){return {...snap.state,id:monster?'goblin':'hero',inScene:true,player:'玩家',passive:12,coins:{gp:2}};}
+function choice(snap){return {...snap.state,resourceWidgets:snap.document?.dnd_card_web?.quickbarLayout?.widgets,resourceAttacks:snap.document?.dnd_card_web?.quickbarLayout?.attacks,resourceHidden:snap.document?.dnd_card_web?.quickbarLayout?.hidden,id:monster?'goblin':'hero',inScene:true,player:'玩家',passive:12,coins:{gp:2}};}
 function catalog(snap=snapshot(),stale=false){send('catalog',{sequence:stale?snap.sequence:++sequence,role:'GM',cards:mode==='public'||monster?[]:[choice(snap)],monsters:monster?[choice(snap)]:[],enabled:{inventory:mode==='public',resourceTracker:true},visibility:{wiki:true,monsters:true},...(mode==='public'?{inventory:clone(snap.inventory||inventory)}:{})});}
 fixture.authority=()=>clone(native.runtime.resources);
 fixture.slotState=()=>({resource:clone(native.runtime.resources['spell-slot:1']),settings:clone(native.spellSettings?.slots?.['1']),legacy:clone(legacyDocument.spellcasting.spell_slots['1'])});
@@ -87,7 +88,7 @@ window.addEventListener('message',event=>{
 });
 fixture.dense=()=>{
  for(let i=0;i<10;i++)native.runtime.resources['dense'+i]={id:'dense'+i,name:i===0?'1环法术位':`银色黎明传承的第${i+1}项长名称资源`,type:i===0?'count':'number',max:i===0?4:12345,current:i===0?2:i===2?3.5:2345,locked:i===3,unlimited:i===4};
- const snap=snapshot(),base=choice(snap),styles=['bar','ring','square','icon'];base.resourceWidgets=Object.fromEntries(base.resources.map((r,i)=>[r.id,{style:styles[i%4],x:i%3*4,y:Math.floor(i/3)%3*2,w:4,h:2,page:Math.floor(i/9)}]));
+ const styles=['bar','ring','square','icon'];native.quickbarLayout={order:[],hidden:[],widgets:Object.fromEntries(Object.values(native.runtime.resources).map((r,i)=>[r.id,{style:styles[i%4],x:i%3*4,y:Math.floor(i/3)%3*2,w:4,h:2,page:Math.floor(i/9)}]))};native=createDashboardDraft(native);const snap=snapshot(),base=choice(snap);
  send('catalog',{sequence:++sequence,role:'PLAYER',cards:[base,{...clone(base),id:'second',itemId:'second-token',name:'原创同伴乙',write:false},{...clone(base),id:'third',itemId:'third-token',name:'原创同伴丙',write:false}],monsters:[],enabled:{inventory:false,resourceTracker:true},visibility:{wiki:true,monsters:true}});
 };
 const initial=snapshot();fixture.history.push(clone(initial));send('ready');catalog(initial);send('selection',initial);
