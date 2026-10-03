@@ -31,5 +31,8 @@ window.addEventListener('message',event=>{
  window.emit('ack',{requestId:request.requestId,ok:true,result:{}});
 });
 const root=createRoot(document.getElementById('test-root'));
-window.renderMode=mode=>{window.harnessMode=mode;root.render(<EntryDragProvider character={newCharacter()} receive={()=>{}} editing><div className="drag180-sources"><EntryDraggable id="wiki-condition" entry={condition}>中毒条目</EntryDraggable><EntryDraggable id="wiki-item" entry={item}>绳索条目</EntryDraggable></div>{mode==='monster'?<section className="sheet-pane mobile-active" style={{height:'900px'}}><WorkbenchMonster target={{...window.monsters[0],key:'beast',role:'GM',slug:'beast'}} raw={{name:'试验怪物',source:'CUSTOM',str:12,dex:10,con:10,int:6,wis:10,cha:5}} online onLink={()=>{}}/></section>:<DMConsole navigate={()=>{}}/>}</EntryDragProvider>);};
+window.renderMode=mode=>{window.harnessMode=mode;
+ // Production lock actions use the workbench's selected target, not only component props.
+ if(mode==='monster')window.emit('selection',{sequence:++sequence,state:{...window.monsters[0],key:'beast',role:'GM',slug:'beast'}});
+ root.render(<EntryDragProvider character={newCharacter()} receive={()=>{}} editing><div className="drag180-sources"><EntryDraggable id="wiki-condition" entry={condition}>中毒条目</EntryDraggable><EntryDraggable id="wiki-item" entry={item}>绳索条目</EntryDraggable></div>{mode==='monster'?<section className="sheet-pane mobile-active" style={{height:'900px'}}><WorkbenchMonster target={{...window.monsters[0],key:'beast',role:'GM',slug:'beast'}} raw={{name:'试验怪物',source:'CUSTOM',str:12,dex:10,con:10,int:6,wis:10,cha:5}} online onLink={()=>{}}/></section>:<DMConsole navigate={()=>{}}/>}</EntryDragProvider>);};
 window.renderMode('overview');window.emit('ready');window.refresh();

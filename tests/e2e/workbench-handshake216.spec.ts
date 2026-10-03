@@ -32,7 +32,7 @@ test('real relay recovers its initial catalog while heartbeat traffic continues,
 });
 
 test('ambiguous write transport failure recovers the handshake and queries the same receipt without replay',async({page,baseURL})=>{
- const f=await fixture(page,String(baseURL),true);await f.ready();
+ const f=await fixture(page,String(baseURL),true);await f.ready();await f.deliver([envelope('selection',{sequence:2,state:{key:'room:card:synthetic-handshake',cardId:'synthetic-handshake',itemId:'fixture',kind:'character',write:true,stats:{}}})]);
  await page.evaluate(()=>{(window as any).completion='pending';void (window as any).workbenchRequest('stats',{statPatch:{hp:4}}).then(()=>(window as any).completion='ack',()=>(window as any).completion='rejected');});
  await expect.poll(()=>f.posts.filter(m=>m.type==='stats').length).toBe(1);const mutation=f.posts.find(m=>m.type==='stats');
  await f.heartbeat(20000);expect(f.posts.filter(m=>m.type==='stats')).toHaveLength(1);

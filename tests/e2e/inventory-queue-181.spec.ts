@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 
 test('rapid stock moves keep the latest gesture while remote quantities and late receipts remain live',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
- await page.route('**/inventory-queue181',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><div id="root"></div><script type="module" src="/tests/e2e/inventoryQueue181.harness.jsx"></script>`}));
+ await page.route('**/inventory-queue181',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><div id="root"></div><script type="module">import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$=()=>{};window.$RefreshSig$=()=>type=>type;window.__vite_plugin_react_preamble_installed__=true;</script><script type="module" src="/tests/e2e/inventoryQueue181.harness.jsx"></script>`}));
  await page.goto('/inventory-queue181#suite=inventory-queue181&bridge='+encodeURIComponent(String(test.info().project.use.baseURL)));await expect.poll(()=>page.evaluate(()=>(window as any).ready||false),{timeout:8000,message:'harness must load'}).toBe(true).catch(e=>{throw Error(errors.join('\n')||String(e));});
  const result=await page.evaluate(()=>(window as any).run());
  expect(result.containers['card:one'].items.find((r:any)=>r.id==='rope')).toMatchObject({slot:9,quantity:37});

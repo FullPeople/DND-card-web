@@ -1,3 +1,4 @@
+import {captureWriteIntent} from './workbenchWriteIntent';
 import type {ResourceWidgetLayout} from '../core/resourceWidgets';
 type Presentation=Pick<ResourceWidgetLayout,'style'>&Partial<ResourceWidgetLayout>;
 import {recordAction} from './actionHistory';
@@ -17,16 +18,16 @@ const resourceKey=(card:CardChoice,id:string)=>`${card.kind||'character'}:${card
  * A -> B -> A must enqueue both changes even while the confirmed value is A.
  * Merge at execution so unrelated remote settings are never copied backward. */
 export function patchResource(card:CardChoice,id:string,patch:Partial<ResourceValue>){
- const intent=structuredClone(patch);
- return resourceQueues.run(resourceKey(card,id),()=>{
+ const intent=structuredClone(patch),validate=captureWriteIntent(`${card.kind==='monster'?'monster':'card'}:${card.kind==='monster'?card.itemId:card.id}`);
+ return resourceQueues.run(resourceKey(card,id),()=>{validate();
   const live=latestResourceCard(card).resources.find(r=>r.id===id);
   if(!live)throw Error('该资源已被移除，请刷新后再操作');
   return commitResource(card,id,{...live,...intent,id});
  });
 }
 export function saveResource(card:CardChoice,id:string,resource:ResourceValue|null,remember=true,expected?:ResourceValue|null,presentation?:Presentation){
- const key=resourceKey(card,id),previous=latestResourceCard(card).resources.find(r=>r.id===id)||null;
+ const validate=captureWriteIntent(`${card.kind==='monster'?'monster':'card'}:${card.kind==='monster'?card.itemId:card.id}`),key=resourceKey(card,id),previous=latestResourceCard(card).resources.find(r=>r.id===id)||null;
  const changed=resource&&previous?Object.fromEntries(Object.entries(resource).filter(([k,v])=>JSON.stringify(v)!==JSON.stringify(previous[k]))):null;
- const send=()=>{const live=latestResourceCard(card).resources.find(r=>r.id===id);const next=expected===undefined&&resource&&live&&changed?{...live,...changed}:resource;return commitResource(card,id,next,remember,expected,presentation);};
+ const send=()=>{validate();const live=latestResourceCard(card).resources.find(r=>r.id===id);const next=expected===undefined&&resource&&live&&changed?{...live,...changed}:resource;return commitResource(card,id,next,remember,expected,presentation);};
  return resourceQueues.run(key,send);
 }

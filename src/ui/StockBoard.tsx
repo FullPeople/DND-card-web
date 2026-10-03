@@ -12,7 +12,7 @@ import './stockBoard.css';
 import {CardIdentityContext,CardVisualContext} from './cardVisualState';
 import {useCardGravity} from './useCardGravity';
 import {StockFrameArt} from './StockFrameArt';
-import {LockIcon} from './ResourceEditor';
+import {LockIcon} from './LockIcon';
 import {reportWorkbenchError} from './CopyDiagnostic';
 import {ItemTransferMenu} from './ItemTransferMenu';
 export const inventoryRequest=requestInventory;

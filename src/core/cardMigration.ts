@@ -9,7 +9,7 @@ import {syncSourceSpells} from './automation/sourceSpells';
 import {evaluate} from './engine';
 import {spellState} from './characterDetails';
 import {validateCharacter} from './validation';
-import {classCompatibilityIssues,type ClassMigrationPlan} from './classMigration';
+import {classCompatibilityIssues,type ClassMigrationPlan} from './classMigrationQuery';
 
 const stable=(v:unknown):string=>JSON.stringify(v,(_,value)=>value&&typeof value==='object'&&!Array.isArray(value)?Object.fromEntries(Object.keys(value).sort().map(k=>[k,value[k]])):value);
 const nameKey=(v:unknown)=>String(v??'').normalize('NFKC').trim().toLocaleLowerCase().replace(/[\s·•’']/g,'');
