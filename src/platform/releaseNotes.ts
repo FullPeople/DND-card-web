@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-03';
+export const RELEASE_DATE='2026-10-04';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -246,10 +246,11 @@ const RELEASE_240_SECTIONS:ReleaseSection[]=[
  {title:'开屏动画',items:['开场图层在动画前半段完成淡入，后半段保持完全显现。','移动轨迹、整体节奏和动画结束后再显示公告的顺序保留。']}
 ];
 const SUITE_RELEASE_240_SECTIONS:ReleaseSection[]=RELEASE_240_SECTIONS;
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_241_SECTIONS:ReleaseSection[]=[
  {title:'初次打开',items:['开屏不再等待整套卡面样式，徽标图层随页面一起加载，减少黄色界面停留。','资料库、装饰和离线缓存在开屏结束后加载，减少同时下载带来的等待。']},
  {title:'开屏退出',items:['黄色开屏淡出为透明，直接显露下方已经准备好的角色卡。','公告仍在开屏完全退出后显示；已有角色、资源余额和显示偏好保留。']}
 ];
+export const RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_241_SECTIONS,{title:'加载失败恢复',items:['程序或样式下载失败时会显示重新加载入口，避免一直停在黄色开屏。']}];
 export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=RELEASE_SECTIONS;
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -288,6 +289,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-03',sections:RELEASE_241_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_240_SECTIONS:RELEASE_240_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_239_SECTIONS:RELEASE_239_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_238_SECTIONS:RELEASE_238_SECTIONS},
@@ -306,7 +308,7 @@ export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
    '3D 通信版本已更新。所有参与者请先关闭附加窗口，刷新枭熊页面，再右键以拆分视图重新打开。'
   ]}
  ]}]:[]),
- {title:RELEASE_DATE,sections:mode==='suite'?SUITE_RELEASE_234_SECTIONS:RELEASE_234_SECTIONS},
+ {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_234_SECTIONS:RELEASE_234_SECTIONS},
  {title:mode==='suite'?'2026-10-02':'2026-10-02-二',sections:mode==='suite'?SUITE_RELEASE_230_SECTIONS:RELEASE_232_SECTIONS},
  ...(mode==='standalone'?[{title:'2026-10-02',sections:RELEASE_230_SECTIONS}]:[]),
  {title:'2026-10-01-六',sections:RELEASE_227_SECTIONS},

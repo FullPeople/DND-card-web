@@ -1,7 +1,7 @@
 import {test,expect,type Page,type TestInfo} from '@playwright/test';
 import {mockSource} from './fixtures';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
-const phase=(page:Page,value:string)=>page.waitForFunction(value=>document.documentElement.dataset.cardStartup===value,value);
+const phase=(page:Page,value:string)=>page.waitForFunction(value=>document.documentElement?.dataset.cardStartup===value,value);
 const key=(info:TestInfo)=>ANNOUNCEMENT_KEY+(info.project.name==='suite'?':suite':'');
 function url(info:TestInfo){return info.project.name==='suite'?`/#suite=startup-test&bridge=${encodeURIComponent(info.project.use.baseURL!)}`:'/';}
 async function prepare(page:Page){
@@ -74,6 +74,23 @@ test('slow card CSS cannot block the opening; transparent exit reveals the style
 test('failed card CSS provides recovery instead of a permanent yellow wait',async({page},info)=>{
  await prepare(page);await page.route('**/assets/card-core-*.css',route=>route.abort('failed'));await page.goto(url(info),{waitUntil:'commit'});await phase(page,'failed');
  await expect(page.locator('#startup-help')).toBeVisible();await expect(page.locator('dialog[open]')).toHaveCount(0);expect(await page.evaluate(key=>localStorage.getItem(key),key(info))).toBeNull();
+});
+
+test('a stylesheet error before the streamed body arrives still offers recovery',async({page},info)=>{
+ await prepare(page);
+ const {createServer}=await import('node:http');
+ const base=String(info.project.use.baseURL).replace(/\/$/,'')+'/';
+ const html=(await (await fetch(base)).text()).replace('<head>',`<head><base href="${base}">`),cut=html.indexOf('</head>')+7;
+ let failedBeforeBody=false,bodySent=false;
+ page.on('requestfailed',request=>{if(/card-core-.*\.css/.test(request.url())&&!bodySent)failedBeforeBody=true;});
+ const server=createServer((_request,response)=>{response.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});response.write(html.slice(0,cut));setTimeout(()=>{bodySent=true;response.end(html.slice(cut));},750);});
+ await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  await page.route('**/assets/card-core-*.css',route=>route.abort('failed'));
+  await page.goto(`http://127.0.0.1:${(server.address() as {port:number}).port}/`,{waitUntil:'commit'});
+  await phase(page,'failed');expect(failedBeforeBody).toBe(true);
+  await expect(page.locator('#startup-title')).toHaveText('程序文件加载失败');await expect(page.locator('#startup-help')).toBeVisible();await expect(page.locator('dialog[open]')).toHaveCount(0);
+ }finally{await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
 });
 test('reduced motion still ends its shortened fade before opening the modal',async({page},info)=>{
  await page.emulateMedia({reducedMotion:'reduce'});await prepare(page);await page.goto(url(info),{waitUntil:'commit'});await assertAfterComplete(page);
