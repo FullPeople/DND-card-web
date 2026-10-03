@@ -1,9 +1,10 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
 import {newCharacter,type Character,type Entry} from '../../src/core/model';
-const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id:`test:${kind}:${name}`,kind,name,english:name,source:'XPHB',edition:'2024',packId:'test',revision:'1',raw,entries:['测试正文']});
+const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id:`test:${kind}:${encodeURIComponent(name)}`,kind,name,english:name,source:'XPHB',edition:'2024',packId:'test',revision:'1',raw,entries:['测试正文']});
 const add=(c:Character,e:Entry,level=1)=>{const row={id:e.id,entry:e,quantity:1,level,equipped:false};c.selections.push(row);return row;};
-async function load(page:Page,c:Character){await mockSource(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();}
+async function load(page:Page,c:Character){await mockSource(page);await installCardAutomation(page,c,[],false);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();}
 test('prepared limit, overview projection, retained known spells and independent stat adjustments',async({page})=>{
  const c=newCharacter();add(c,entry('class','测试施法者',{casterProgression:'full',spellcastingAbility:'int',preparedSpellsProgression:[2,3],preparedSpellsChange:'restLong',spellsKnownProgressionFixed:[6,2]}));
  for(let i=0;i<3;i++)add(c,entry('spell','法术'+i,{level:1,meta:{ritual:i===0},duration:[{concentration:i===1}]}));

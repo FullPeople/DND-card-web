@@ -1,9 +1,11 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation,installBrowserAutomation} from './automationFixtures';
+import {normalizeData} from '../../src/data/catalog';
 import {newCharacter,type Character,type Entry} from '../../src/core/model';
-const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id:`test:${kind}:${name}`,kind,name,english:name,source:'XPHB',edition:'2024',packId:'test',revision:'1',raw,entries:['用于验证的法术正文。']});
+const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id:`test:${kind}:${encodeURIComponent(name)}`,kind,name,english:name,source:'XPHB',edition:'2024',packId:'test',revision:'1',raw,entries:['用于验证的法术正文。']});
 const add=(c:Character,e:Entry,level=3)=>c.selections.push({id:e.id,entry:e,quantity:1,level,equipped:false});
-async function load(page:Page,c:Character,setup?:()=>Promise<unknown>){await mockSource(page);await suppressAnnouncement(page);await setup?.();await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('tab',{name:'法术',exact:true}).click();}
+async function load(page:Page,c:Character,setup?:()=>Promise<unknown>){await mockSource(page);await suppressAnnouncement(page);await setup?.();await installCardAutomation(page,c,[],false);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('tab',{name:'法术',exact:true}).click();}
 
 test('prepared spell remains marked in the known list, context menus and fullscreen previews still work',async({page})=>{
  const c=newCharacter();add(c,entry('class','测试法师',{casterProgression:'full',spellcastingAbility:'int',preparedSpellsProgression:[4,5,6],spellsKnownProgressionFixed:[6,2,2]}));add(c,entry('spell','星光矢',{level:1}));
@@ -25,6 +27,8 @@ test('daily full-list caster shows eligible known spells with preparation marks 
  const c=newCharacter();add(c,entry('class','测试牧师',{casterProgression:'full',cantripProgression:[3,3,3],preparedSpellsProgression:[4,5,6],preparedSpellsChange:'restLong'}));
  await load(page,c,async()=>{
   const values=[{name:'一环祈祷',source:'XPHB',level:1,entries:['测试祈祷']},{name:'二环祈祷',source:'XPHB',level:2,entries:['测试祈祷']},{name:'高环祈祷',source:'XPHB',level:3,entries:['测试祈祷']}];
+  for(const value of values)Object.assign(value,{classes:{fromClassList:[{name:'测试牧师',source:'XPHB'}]}});
+  await installBrowserAutomation(page,normalizeData({spell:values},'fixture-1'),false);
   await page.route('https://5e.kiwee.top/data/spells/spells-test.json',r=>r.fulfill({json:{spell:values}}));
   await page.route('https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json',r=>r.fulfill({json:{xphb:Object.fromEntries(values.map(v=>[v.name,{class:{XPHB:{测试牧师:true}}}]))}}));
  });

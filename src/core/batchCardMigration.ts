@@ -39,7 +39,7 @@ export function planBatchCardMigration(original:Character,entries:Entry[],roots:
  // Inventory is included in the batch without turning every stack into a separate step.
  for(const row of original.selections.filter(s=>s.entry.kind==='item'))choices.roots[row.id]??=automaticTarget(original,row,entries);
  const first=migrationDraft(original,entries,choices,1),mapped=new Set(Object.entries(choices.roots).filter(([,id])=>!!id).map(([id])=>id));
- const oldTemplate=structuredClone(original);oldTemplate.selections=oldTemplate.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind));oldTemplate.dismissedFeatures=[];
+ const oldTemplate=structuredClone(original);oldTemplate.selections=oldTemplate.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind));oldTemplate.dismissedFeatures=[];if(supportedAutomation(oldTemplate))oldTemplate.automation!.enabled=true;
  syncFeatures(oldTemplate,[...original.selections.map(s=>s.entry),...entries],{owners:mapped,refresh:false,equipmentPreview:true});
  const oldDeclarations=oldTemplate.selections.filter(s=>s.parentId&&mapped.has(s.parentId)&&s.grantKey&&bubbles.includes(s.entry.kind)&&!s.grantKey.startsWith('choice:'));
  const taken=new Set<string>(),protectedRows=new Set<string>(),ambiguousRows=new Set<string>(),batchWarnings:string[]=[];
@@ -74,7 +74,7 @@ export function planBatchCardMigration(original:Character,entries:Entry[],roots:
   if(declaration&&!row.grantKey?.startsWith('choice:')){
    const owner=card.selections.find(s=>s.id===row.parentId),refs=owner?.entry.raw[owner.entry.kind==='subclass'?'subclassFeatures':'classFeatures'];
    const missing=owner&&['class','subclass'].includes(owner.entry.kind)&&(!Array.isArray(refs)||refs.some(block=>{const ref=typeof block==='string'?block:block?.classFeature||block?.subclassFeature;return typeof ref==='string'&&names(row.entry).includes(ref.split('|')[0].normalize('NFKC').toLocaleLowerCase().replace(/[\s·•’']/g,''))&&!first.grants.some(g=>g.owner.id===owner.id&&g.row.grantKey==='ref:'+ref);}));
-   if(missing)retain(row,'目标来源声明尚未完整载入，保留旧记录');else removed.add(row.id);continue;
+   if(missing){const ambiguous=Array.isArray(refs)&&refs.some(block=>{const ref=typeof block==='string'?block:block?.classFeature||block?.subclassFeature;return typeof ref==='string'&&sameName(row.entry,{...row.entry,name:ref.split('|')[0],english:ref.split('|')[0]})&&new Set(entries.filter(entry=>matchesReference(entry,ref)).map(entry=>entry.id)).size>1;});if(ambiguous)batchWarnings.push('「'+row.entry.name+'」存在多个来源，未自动任选或新增。');retain(row,'目标来源声明尚未完整载入，保留旧记录');}else removed.add(row.id);continue;
   }
   // A source choice remains the player's choice. Preserve its association and answer.
   const kinds=unlinkedEntry(row.entry)&&bubbles.includes(row.entry.kind)?['feat','feature','rule','spell','item'] as Kind[]:[row.entry.kind];

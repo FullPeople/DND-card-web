@@ -1,10 +1,13 @@
 import React from 'react';
+import {irFixture} from '../helpers/irFixture';
+import {resourceBurstCaster} from './resourceBurst182.caster';
 import {createRoot} from 'react-dom/client';
 import App from '../../src/ui/App';
 import {SourceProvider} from '../../src/ui/SourceName';
 import {DMConsole} from '../../src/ui/WorkbenchConsole';
 import {EntryDragProvider} from '../../src/ui/DragEntry';
 import {newCharacter} from '../../src/core/model';
+import {initializeAutomation} from '../../src/core/automation/state';
 import {evaluate} from '../../src/core/engine';
 import {createDashboardDraft} from '../../src/core/dashboardDraft';
 import {syncAutoResources} from '../../src/core/resources';
@@ -30,7 +33,8 @@ let sequence=0,revision=1;
 let native=newCharacter();native.id=workbenchCharacterId(target);native.name=target.name;native.baseHp=30;native.runtime.hp=20;
 native.runtime.resources={rage:{id:'rage',name:'怒气',type:'count',current:Number(new URLSearchParams(location.search).get('rage')||5),max:5},focus:{id:'focus',name:'战术点',type:'count',current:3,max:5}};
 if(new URLSearchParams(location.search).has('caster')){
- native.selections.push({id:'class:mage',level:3,quantity:1,equipped:false,entry:{id:'class:mage',name:'测试法师',english:'Test Mage',kind:'class',source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:['自动法术位同步测试职业。'],raw:{casterProgression:'full',spellcastingAbility:'int',hd:{faces:6},classTableGroups:[{rowsSpellProgression:[[2],[3],[4,2]]}]}}});
+ initializeAutomation(native);
+ native.selections.push({id:'class:mage',level:3,quantity:1,equipped:false,entry:irFixture(resourceBurstCaster)});
  syncAutoResources(native);
 }
 const clone=v=>structuredClone(v);

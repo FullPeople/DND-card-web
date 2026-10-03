@@ -1,10 +1,13 @@
+import {irMechanics} from './ir';
+import {automationEnabled} from './state';
 import {selectionAllowed,uid,type Character,type Entry,type Selection,type SourceEquipmentReceipt} from '../model';
 import {inventoryState} from '../characterDetails';
 import {resolveEntryReference} from '../entryReferences';
 
-export const equipmentBlocks=(entry:Entry):any[]=>{const value=Array.isArray(entry.raw.startingEquipment)?entry.raw.startingEquipment:entry.raw.startingEquipment?.defaultData;return Array.isArray(value)?value:[];};
+export const equipmentBlocks=(entry:Entry):any[]=> (irMechanics(entry)?.startingEquipment?.blocks||[]).map(block=>Object.fromEntries(block.options.map(option=>[option.key,option.items.map(part=>({...(part.identity?{item:part.identity}:{}),...(part.category?{equipmentType:part.category}:{}),...(part.quantity?{quantity:part.quantity}:{}),...(part.copper!==undefined?{value:part.copper}:{}),...(part.unresolved?{unresolved:true}:{})}))])));
+export const resolveEquipmentReference=(ref:string,catalog:Entry[])=>catalog.find(entry=>entry.kind==='item'&&entry.automation?.identity.key===ref)||resolveEntryReference(ref,catalog,'item');
 export const sourceEquipmentKey=(entry:Entry)=>JSON.stringify([entry.kind,entry.packId,entry.id,entry.source,entry.edition]);
-export const sourceEquipmentShapeSupported=(entry:Entry)=>equipmentBlocks(entry).every(block=>block&&typeof block==='object'&&!Array.isArray(block)&&Object.values(block).every(Array.isArray));
+export const sourceEquipmentShapeSupported=(entry:Entry)=>!entry.automation?.unsupported.some(gap=>gap.family==='startingEquipment')&&equipmentBlocks(entry).every(block=>block&&typeof block==='object'&&!Array.isArray(block)&&Object.values(block).every(Array.isArray));
 const supportedOwner=(row:Selection)=>['background','race'].includes(row.entry.kind);
 const keys=(block:any)=>Object.keys(block||{}).filter(key=>key!=='_');
 const list=(value:any):any[]=>Array.isArray(value)?value:[];
@@ -41,6 +44,7 @@ export function rememberSourceEquipment(c:Character,owners=c.selections):boolean
 /** Imported declarations are untrusted. Validate their scalar types before any
  * reference lookup or inventory mutation, shared by automatic and explicit grants. */
 export function validateEquipmentItem(item:any):void{
+ if(item?.unresolved)throw Error('此装备方案含尚未解析的条目，未发放任何物品或金币。');
  if(typeof item==='string'){if(!item.trim()||item.split('|')[0].length>300)throw Error('起始装备引用无效。');return;}
  if(!item||typeof item!=='object'||Array.isArray(item))throw Error('起始装备结构尚未支持，请查阅来源资料。');
  for(const field of ['item','special','equipmentType'])if(item[field]!==undefined&&(typeof item[field]!=='string'||!item[field].trim()||(field==='item'?item[field].split('|')[0].length:item[field].length)>300))throw Error('起始装备名称或引用无效。');
@@ -59,7 +63,7 @@ function grantParts(c:Character,owner:Selection,parts:EquipmentPart[],catalog:En
   const quantity=Number(item.quantity??1);if(!Number.isSafeInteger(quantity)||quantity<1||quantity>3000)throw Error('装备数量无效。');
   if(item.equipmentType)throw Error('此装备类别需要先在选择工作区指定具体装备。');
   const ref=typeof item==='string'?item:item.item;
-  if(ref||item.special){const found=ref?resolveEntryReference(ref,[...c.selections.map(row=>row.entry),...catalog],'item'):undefined;const name=item.special||String(ref).split('|')[0];const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||name}`,kind:'item' as const,name,english:name,entries:[`起始装备记录：${ref||name}`],raw:ref?{_equipmentRef:ref}:{},effects:undefined,choices:undefined};grants.push({entry,quantity});}
+  if(ref||item.special){const found=ref?resolveEquipmentReference(ref,[...c.selections.map(row=>row.entry),...catalog]):undefined;if(ref&&!found&&ref.includes(':'))throw Error('装备引用尚未绑定，未发放任何物品或金币。');const name=item.special||String(ref).split('|')[0];const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||name}`,kind:'item' as const,name,english:name,entries:[`起始装备记录：${ref||name}`],raw:ref?{_equipmentRef:ref}:{},effects:undefined,choices:undefined};grants.push({entry,quantity});}
   if(item.value!==undefined||item.containsValue!==undefined){const amount=Number(item.value??item.containsValue)/100;if(!Number.isFinite(amount)||amount<0||amount>1000000)throw Error('起始金币数值无效。');money+=amount;}
   else if(!ref&&!item.special)throw Error('起始装备结构尚未支持，请查阅来源资料。');
  }
@@ -70,6 +74,7 @@ function grantParts(c:Character,owner:Selection,parts:EquipmentPart[],catalog:En
  const inv=c.inventory||=structuredClone(inventoryState(c));inv.coins.gp+=money;saveReceipt(c,owner,next);
 }
 export function syncSourceEquipment(c:Character,catalog:Entry[],owners=c.selections):boolean{
+ if(!automationEnabled(c))return false;
  let changed=rememberSourceEquipment(c,owners);
  for(const owner of owners){if(!supportedOwner(owner)||!selectionAllowed(c,owner.entry)||!sourceEquipmentShapeSupported(owner.entry))continue;const data=equipmentBlocks(owner.entry);if(!data.length)continue;
   let receipt=sourceEquipmentReceipt(c,owner)||{received:[],choices:{},itemIds:[],ownerIds:[owner.id],completed:false};if(receipt.completed)continue;

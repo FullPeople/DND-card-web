@@ -1,4 +1,6 @@
 import {validWidget,validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
+import {convertRulePack} from './automation/rulePack';
+import {snapshotRecordErrors} from '../data/automation/record-validation';
 import {legacyTraining} from './legacyTraining';
 import {validateRestState} from './automation/rest';
 import {correctSourceData} from './sourceCorrections';
@@ -81,6 +83,12 @@ function validateEffects(effects: unknown): asserts effects is Effect[] {
     }
   }
 }
+function validateOwnedEntry(entry:Entry,ir:boolean,records:NonNullable<Entry['automation']>[]){
+  if(entry.manualSpellLevel!==undefined)assert(entry.kind==='spell'&&Number.isInteger(entry.manualSpellLevel)&&entry.manualSpellLevel>=0&&entry.manualSpellLevel<=9,'手动法术环阶无效。');
+  if(entry.manualWeapon!==undefined){const w=entry.manualWeapon;assert(entry.kind==='item'&&plain(w)&&typeof w.damage==='string'&&w.damage.length<=160&&(w.attack===undefined||typeof w.attack==='string'&&w.attack.length<=160||typeof w.attack==='number'&&Number.isFinite(w.attack)&&Math.abs(w.attack)<=1000),'手动武器公式无效。');}
+  if(entry.automationOptions!==undefined)assert(plain(entry.automationOptions)&&Object.keys(entry.automationOptions).length<=1000&&Object.entries(entry.automationOptions).every(([key,choice])=>key.length<=2000&&plain(choice)&&typeof choice.label==='string'&&choice.label.length<=1000&&plain(choice.options)&&Object.keys(choice.options).length<=3000&&Object.entries(choice.options).every(([id,option])=>id.length<=3000&&plain(option)&&typeof option.label==='string'&&option.label.length<=1000&&(option.reference===undefined||typeof option.reference==='string'&&option.reference.length<=3000))),'规则选择显示信息无效。');
+  if(ir&&entry.automation!==undefined){assert(typeof entry.automationVersion==='string'&&entry.automationVersion.length<=160,'规则记录缺少版本绑定。');assert(snapshotRecordErrors(entry.automation,records).length===0,'角色中有未通过身份、结构或公式校验的 IR 规则记录。');}
+}
 export function validateCharacter(value: unknown): Character {
   assert(plain(value), '角色文件应为一个对象。');
   const c = value.character ?? value;
@@ -92,6 +100,7 @@ export function validateCharacter(value: unknown): Character {
   assert(c.racialAbilityMode === undefined || c.racialAbilityMode === 'separate-v1', '种族属性计算版本无效；请保留原文件。');
   assert(Array.isArray(c.selections) && c.selections.length <= 3000, '角色条目数量或格式不正确。');
   const selectionIds = new Set();
+  const automationRecords=[...c.selections,...(Array.isArray(c.quickbarCopies)?c.quickbarCopies:[])].flatMap(row=>row?.entry?.automation?[row.entry.automation]:[]);
   for (const s of c.selections) {
     assert(plain(s) && typeof s.id === 'string' && !selectionIds.has(s.id) && validEntry(s.entry), '角色中有无效或重复的条目身份。');
     selectionIds.add(s.id);
@@ -101,6 +110,7 @@ export function validateCharacter(value: unknown): Character {
     assert(s.weaponAbility===undefined||s.entry.kind==='item'&&ABILITIES.includes(s.weaponAbility),'武器计算属性无效。');
     assert(['parentId', 'grantKey'].every(key => s[key] === undefined || typeof s[key] === 'string' && s[key].length <= 2000), '条目来源关联无效。');
     assert(s.section === undefined || ['features', 'heritage'].includes(s.section), '条目放置区域无效。');
+    validateOwnedEntry(s.entry,c.automation?.protocol===3,automationRecords);
     if (s.entry.effects) validateEffects(s.entry.effects);
     if (s.entry.choices) validateChoices(s.entry.choices);
     validateEntryContent(s.entry.entries);
@@ -120,7 +130,7 @@ export function validateCharacter(value: unknown): Character {
   if(c.quickbarLayout!==undefined)assert(validWidgets(c.quickbarLayout.widgets),'资源模块布局无效。');
   if(c.quickbarLayout?.attacks!==undefined)assert(validWidget(c.quickbarLayout.attacks)&&c.quickbarLayout.attacks.members===undefined,'攻击模块布局无效。');
   assert(c.quickbar === undefined || Array.isArray(c.quickbar) && c.quickbar.length <= 100 && c.quickbar.every((id: unknown) => typeof id === 'string') && new Set(c.quickbar).size === c.quickbar.length, '快捷栏需要最多 100 个互不重复的条目身份。');
-  if(c.quickbarCopies!==undefined){assert(Array.isArray(c.quickbarCopies)&&c.quickbarCopies.length<=100&&c.quickbarCopies.every((row:any)=>plain(row)&&typeof row.id==='string'&&validEntry(row.entry))&&new Set(c.quickbarCopies.map((row:any)=>row.id)).size===c.quickbarCopies.length,'快捷栏副本无效。');for(const row of c.quickbarCopies)validateEntryContent(row.entry.entries);}
+  if(c.quickbarCopies!==undefined){assert(Array.isArray(c.quickbarCopies)&&c.quickbarCopies.length<=100&&c.quickbarCopies.every((row:any)=>plain(row)&&typeof row.id==='string'&&validEntry(row.entry))&&new Set(c.quickbarCopies.map((row:any)=>row.id)).size===c.quickbarCopies.length,'快捷栏副本无效。');for(const row of c.quickbarCopies){validateOwnedEntry(row.entry,c.automation?.protocol===3,automationRecords);if(row.entry.effects)validateEffects(row.entry.effects);if(row.entry.choices)validateChoices(row.entry.choices);validateEntryContent(row.entry.entries);}}
   if(c.quickbarActions!==undefined)assert(Array.isArray(c.quickbarActions)&&c.quickbarActions.length<=100&&c.quickbarActions.every((row:any)=>plain(row)&&['id','name','attack','damage'].every(k=>typeof row[k]==='string'&&row[k].length<=160))&&new Set(c.quickbarActions.map((row:any)=>row.id)).size===c.quickbarActions.length,'自定义快捷动作无效。');
   if (c.featureLayout !== undefined) assert(plain(c.featureLayout) && ['order', 'expanded'].every(key => Array.isArray(c.featureLayout[key]) && c.featureLayout[key].length <= 10000 && c.featureLayout[key].every((id: unknown) => typeof id === 'string' && id.length <= 2000) && new Set(c.featureLayout[key]).size === c.featureLayout[key].length), '特性显示设置需要合法且不重复的条目身份。');
   assert(plain(c.profile) && Array.isArray(c.profile.enabledSources) && c.profile.enabledSources.every((v: unknown) => typeof v === 'string') && plain(c.profile.optional) && ['feats', 'multiclass', 'legacy'].every(k => typeof c.profile.optional[k] === 'boolean') && plain(c.profile.exceptions) && Object.values(c.profile.exceptions).every(v => typeof v === 'string'), '角色规则配置不正确。');
@@ -130,6 +140,9 @@ export function validateCharacter(value: unknown): Character {
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   validateActionState(c.runtime.automationActions);
   validateFeatureResourceState(c.runtime as Character['runtime']);
+  const automaticResource=(r:unknown)=>plain(r)&&r.automatic===true&&Number.isSafeInteger(r.max)&&r.max>=0&&r.max<=99999&&Number.isSafeInteger(r.current)&&r.current>=0&&r.current<=r.max&&(r.automaticSpent===undefined||Number.isSafeInteger(r.automaticSpent)&&r.automaticSpent>=0&&r.automaticSpent<=99999);
+  if(c.runtime.automaticResourceArchive!==undefined)assert(plain(c.runtime.automaticResourceArchive)&&Object.keys(c.runtime.automaticResourceArchive).length<=10000&&Object.values(c.runtime.automaticResourceArchive).every(automaticResource),'自动资源消耗历史无效。');
+  for(const r of Object.values(c.runtime.resources))if(r.automaticSpent!==undefined)assert(automaticResource(r),'自动资源消耗记录无效。');
   validateRestState(c.runtime.rests);
   if(c.spellSettings?.cantrips!==undefined){const groups=c.spellSettings.cantrips;assert(plain(groups)&&Object.keys(groups).length<=100&&Object.values(groups).every(ids=>Array.isArray(ids)&&ids.length<=3000&&ids.every(id=>typeof id==='string')&&new Set(ids.filter(Boolean)).size===ids.filter(Boolean).length),'职业戏法格记录无效。');}
   for(const [name,values] of Object.entries({cantripCapacityAdjustments:c.spellSettings?.cantripCapacityAdjustments,sourceCantripCapacities:c.spellSettings?.sourceCantripCapacities,sourceCapacityAdjustments:c.spellSettings?.sourceCapacityAdjustments})){if(values!==undefined)assert(plain(values)&&Object.keys(values).length<=3000&&Object.values(values).every(v=>Number.isInteger(v)&&Math.abs(v)<=100&&(name!=='sourceCantripCapacities'||v>=0)),'戏法数量调整记录无效。');}
@@ -189,7 +202,7 @@ export function validatePack(value: unknown, installed: RulePack[]): RulePack {
     if (item.effects) validateEffects(item.effects);
     if (item.choices) validateChoices(item.choices);
     const dependencies = [...new Set<string>(value.requires.flatMap((dep: any) => [dep.id, ...(others.find(p => p.id === dep.id)?.entries[0].dependencies || [])]))];
-    return { id: `${value.id}:${item.id}`, name: item.name, english: item.english || item.name, kind: item.kind, source: value.id, edition: value.editions.length > 1 ? 'both' : value.editions[0], packId: value.id, revision: value.version, entries: item.entries, raw: plain(item.raw) ? item.raw : {}, effects: item.effects || [], choices: item.choices || [], dependencies };
+    return convertRulePack({ id: `${value.id}:${item.id}`, name: item.name, english: item.english || item.name, kind: item.kind, source: value.id, edition: value.editions.length > 1 ? 'both' : value.editions[0], packId: value.id, revision: value.version, entries: item.entries, raw: plain(item.raw) ? item.raw : {}, effects: item.effects || [], choices: item.choices || [], dependencies });
   });
   for (const entry of entries) { const sample = newCharacter(value.editions[0]); sample.profile.enabledSources = [value.id, ...(entry.dependencies || [])]; sample.selections = [{ id: 'check', entry, level: 1, quantity: 1, equipped: false }]; validateCharacter(sample); }
   return { schemaVersion: 1, id: value.id, name: value.name, version: value.version, author: value.author, editions: value.editions, requires: value.requires, conflicts: value.conflicts, entries };
@@ -218,7 +231,7 @@ export function importOwlbear(value: unknown): Character {
   const seenSpells = new Set<string>();
   for (const key of ['cantrips_known', 'prepared', 'always_known']) {
     const list = value.spellcasting?.[key] || []; assert(Array.isArray(list), '枭熊法术列表格式无效。');
-    for (const item of list) if (item?.name && !seenSpells.has(item.name)) { seenSpells.add(item.name); add('spell', String(item.name), 1, String(item.description || ''), { level: Number(item.level || 0) }); }
+    for (const item of list) if (item?.name && !seenSpells.has(item.name)) { seenSpells.add(item.name); add('spell', String(item.name), 1, String(item.description || ''), { level: Number(item.level || 0) });c.selections.at(-1)!.entry.manualSpellLevel=Number(item.level||0); }
   }
   for (const item of value.inventory?.items || []) if (item?.name) {add('item', String(item.name), 1, String(item.description || ''), { weight: Number(item.weight || 0) }, Number(item.quantity || 1), !!item.equipped);c.selections.at(-1)!.attuned=!!item.attuned;}
   if(value.inventory?.coins!=null||value.inventory?.currency!=null){c.inventory=inventoryState(c);const coins=normalizeCurrency(value.inventory.coins??value.inventory.currency);for(const key of ['cp','sp','ep','gp','pp'] as const)c.inventory.coins[key]=coins[key]??0;}

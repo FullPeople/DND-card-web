@@ -1,10 +1,12 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Entry} from '../src/core/model';
+import {type Character,type Entry} from '../src/core/model';
 import {spellState} from '../src/core/characterDetails';
 import {availableClassSpells,casterProfiles,spellUsesPreparation} from '../src/core/spellcastingRules';
 import {spellLibrary,prepareSpellEntry,setPreparedSpell} from '../src/core/spells';
 import {validateCharacter} from '../src/core/validation';
-const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={},source='XPHB'):Entry=>({id:`${source}:${kind}:${name}`,name,english:name,kind,raw,source,edition:'both',packId:'test',revision:'1',entries:['正文']});
+const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={},source='XPHB'):Entry=>(irFixture({id:`${source}:${kind}:${name}`,name,english:name,kind,raw,source,edition:'both',packId:'test',revision:'1',entries:['正文']}));
 const add=(c:Character,e:Entry,level=3)=>{const row={id:e.id,entry:e,level,quantity:1,equipped:false};c.selections.push(row);return row;};
 const caster=(c:Character,name:string,raw:Entry['raw'],source='XPHB')=>add(c,entry('class',name,{spellcastingAbility:'wis',casterProgression:'full',...raw},source));
 const spell=(name:string,level:number,cls:string,source='XPHB')=>entry('spell',name,{level,_spellClasses:{[source]:{[cls]:true}}},source);

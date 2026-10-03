@@ -1,5 +1,7 @@
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation,installBrowserAutomation} from './automationFixtures';
+import {normalizeData} from '../../src/data/catalog';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {spellState} from '../../src/core/characterDetails';
 import {newAutomationState} from '../../src/core/automation/state';
@@ -18,7 +20,7 @@ async function closeImportedCard(page:Page,name:string){
  const dialog=page.getByRole('dialog',{name:'导入与导出',exact:true});await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
 }
 async function load(page:Page,c=card(),prepare?:()=>Promise<void>){
- await mockSource(page);await suppressAnnouncement(page);await prepare?.();await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();
+ await mockSource(page);await suppressAnnouncement(page);await prepare?.();await installCardAutomation(page,c,[],false);await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
  const editing=page.getByRole('switch',{name:'编辑模式',exact:true});if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await page.getByRole('tab',{name:'法术',exact:true}).click();
 }
@@ -111,7 +113,8 @@ test('explicit class cantrip adjustment persists and lowering the limit retains 
  await input.fill('-1');await input.press('Enter');await expect(group.locator('h4')).toContainText('3 / 1');await expect(group.locator('.spell-overflow summary')).toContainText('2 项已保留原记录');await expect(group.locator('[data-spell-id]')).toHaveCount(1);await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
 });
 test('a declared feat grants its cantrip after a real Wiki drop even when class cantrips are full',async({page})=>{
- await load(page,card(),async()=>{await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:[{name:'明确赠送验收专长',ENG_name:'Declared Gift',source:'XPHB',additionalSpells:[{known:{'_':['Mist|XPHB#c']}}],entries:['原创资料，明确赠送引用仅用于软件验收。']}]},headers:{'access-control-allow-origin':'*',etag:'declared-gift'}}));});
+ const featData={feat:[{name:'明确赠送验收专长',ENG_name:'Declared Gift',source:'XPHB',additionalSpells:[{known:{'_':['Mist|XPHB#c']}}],entries:['原创资料，明确赠送引用仅用于软件验收。']}]};
+ await load(page,card(),async()=>{await installBrowserAutomation(page,normalizeData(featData,'declared-gift'),false);await page.route('**/data/feats.json',route=>route.fulfill({json:featData,headers:{'access-control-allow-origin':'*',etag:'declared-gift'}}));});
  const ordinary=page.locator('[data-cantrip-group="Source Mage"]');await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await page.getByRole('tab',{name:'主要',exact:true}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'专长',exact:true}).click();
  const feat=page.locator('.catalog-row').filter({hasText:'明确赠送验收专长'});await expect(feat).toBeVisible();await drag(page,feat,page.locator('.heritage-features'));
@@ -145,7 +148,7 @@ test('an unlearned cantrip from the loaded class list can fill a slot without gr
  const catalogSpell={name:'目录星火',ENG_name:'Catalog Spark',source:'XPHB',level:0,school:'V',classes:{fromClassList:[{name:'Source Mage',source:'XPHB'}]},entries:['原创目录验收戏法。']};
  await page.route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:[catalogSpell]},headers:{'access-control-allow-origin':'*'}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();
- const c=card();c.spellSettings!.cantrips={'Source Mage':['','Frost']};await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'catalog.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
+ const c=card();c.spellSettings!.cantrips={'Source Mage':['','Frost']};await installCardAutomation(page,c,normalizeData({spell:[catalogSpell]},'fixture-1'));await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'catalog.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
  const editing=page.getByRole('switch',{name:'编辑模式',exact:true});if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await page.getByRole('tab',{name:'法术',exact:true}).click();
  await page.locator('.wiki-pane').getByRole('button',{name:'法术',exact:true}).click();
  const known=page.locator('.spell-library').getByRole('button',{name:'目录星火',exact:true});await expect(known).toBeVisible();await page.getByRole('button',{name:'验收法师戏法空位1',exact:true}).click();await known.click();

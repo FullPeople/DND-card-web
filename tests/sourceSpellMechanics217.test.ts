@@ -1,11 +1,13 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {expect,it} from 'vitest';
-import {newCharacter,type Entry} from '../src/core/model';
+import {type Entry} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
 import {planSourceSpells,syncSourceSpells,setSourceSpellChoices} from '../src/core/automation/sourceSpells';
 import {sourceSpellRestPlan,sourceSpellRestRequest,performSpellAction,spellActionRequest} from '../src/core/automation/actions';
 import {changeSpecialSpellUses,specialSpellResource} from '../src/core/specialSpells';
 import {readCharacter} from '../src/core/validation';
-const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>({id,name:id,english:id,kind,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创测试'],raw});
+const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>(irFixture({id,name:id,english:id,kind,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创测试'],raw}));
 const catalog=[entry('alpha','spell',{level:1}),entry('beta','spell',{level:1})];
 function setup(count='pbe',schedule='daily'){
  const c=newCharacter();c.automation=newAutomationState();c.selections=[{id:'owner',entry:entry('owner','class',{additionalSpells:[{innate:{'_':{[schedule]:{[count]:['alpha|XPHB','beta|XPHB']}}}}]}),level:5,quantity:1,equipped:false}];
@@ -41,7 +43,7 @@ it('explicit rest resets overflow debt while unsupported dynamic declarations st
 
 it('explicit choose.from persists partial free choice, rejects outside identities, and never refills on choice switching',()=>{
  const c=setup();c.selections=c.selections.filter(x=>x.entry.kind!=='spell');c.runtime.resources={};c.spellSettings!.special={};
- c.selections[0].entry.raw.additionalSpells=[{innate:{'_':{daily:{pbe:[{choose:{from:['alpha|XPHB','beta|XPHB'],count:2}}]}}}}];
+ c.selections[0].entry.raw.additionalSpells=[{innate:{'_':{daily:{pbe:[{choose:{from:['alpha|XPHB','beta|XPHB'],count:2}}]}}}}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));
  const choice=planSourceSpells(c,catalog).choices.find(x=>x.spells)!;expect(choice.count).toBe(2);expect(grant(c)).toBeUndefined();
  const before=JSON.stringify(c);expect(()=>setSourceSpellChoices(c,choice.key,['alpha|PHB'],catalog)).toThrow();expect(JSON.stringify(c)).toBe(before);
  setSourceSpellChoices(c,choice.key,['alpha|XPHB'],catalog);syncSourceSpells(c,catalog);changeSpecialSpellUses(c,grant(c).id,0);
@@ -50,10 +52,10 @@ it('explicit choose.from persists partial free choice, rejects outside identitie
  expect(planSourceSpells(restored,catalog).issues.some(x=>x.message.includes('尚有 1 项未选'))).toBe(true);
 });
 it('choose.from keeps ambiguous usage ownership explicit and unsupported filters do not broaden grants',()=>{
- const c=setup();c.selections=c.selections.filter(x=>x.entry.kind!=='spell');c.selections[0].entry.raw.additionalSpells=[{innate:{'_':{daily:{pb:[{choose:{from:['alpha|XPHB','beta|XPHB'],count:2}}]}}}}];
+ const c=setup();c.selections=c.selections.filter(x=>x.entry.kind!=='spell');c.selections[0].entry.raw.additionalSpells=[{innate:{'_':{daily:{pb:[{choose:{from:['alpha|XPHB','beta|XPHB'],count:2}}]}}}}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));
  const usage=planSourceSpells(c,catalog).choices.find(x=>x.usageModes)!;expect(usage).toBeDefined();c.automation!.spellUsageModes={[usage.key]:'shared'};
  const choice=planSourceSpells(c,catalog).choices.find(x=>x.spells)!;setSourceSpellChoices(c,choice.key,['alpha|XPHB','beta|XPHB'],catalog);syncSourceSpells(c,catalog);const active=c.selections.filter(x=>x.entry.kind==='spell');expect(specialSpellResource(active[0].id,c)).toBe(specialSpellResource(active[1].id,c));
- c.selections[0].entry.raw.additionalSpells=[{known:{'_':[{choose:'level=0|class=Wizard'},{all:'level=0'}]}}];expect(planSourceSpells(c,catalog).grants).toHaveLength(0);expect(planSourceSpells(c,catalog).issues.length).toBeGreaterThan(0);
+ c.selections[0].entry.raw.additionalSpells=[{known:{'_':[{choose:'level=0|class=Wizard'},{all:'level=0'}]}}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));expect(planSourceSpells(c,catalog).grants).toHaveLength(0);expect(planSourceSpells(c,catalog).issues.length).toBeGreaterThan(0);
 });
 
 it('casting another spell while PB is lowered cannot erase the depleted pool overflow debt',()=>{
@@ -65,8 +67,8 @@ it('casting another spell while PB is lowered cannot erase the depleted pool ove
 it('a reduced choice limit retains invalid intent but disables grants until the player clears and reselects without refilling',()=>{
  const c=setup();c.selections=c.selections.filter(x=>x.entry.kind!=='spell');c.runtime.resources={};c.spellSettings!.special={};
  const declaration={choose:{from:['alpha|XPHB','beta|XPHB'],count:2}};
- c.selections[0].entry.raw.additionalSpells=[{innate:{'_':{daily:{pbe:[declaration]}}}}];
+ c.selections[0].entry.raw.additionalSpells=[{innate:{'_':{daily:{pbe:[declaration]}}}}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));
  const key=planSourceSpells(c,catalog).choices.find(x=>x.spells)!.key;setSourceSpellChoices(c,key,['alpha|XPHB','beta|XPHB'],catalog);syncSourceSpells(c,catalog);const id=grant(c).id;changeSpecialSpellUses(c,id,0);
- declaration.choose.count=1;syncSourceSpells(c,catalog);expect(c.automation!.spellChoices![key]).toHaveLength(2);expect(c.spellSettings!.special![id].sourceGrant!.active).toBe(false);expect(planSourceSpells(c,catalog).issues.some(x=>x.message.includes('当前声明不符'))).toBe(true);
+ declaration.choose.count=1;Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));syncSourceSpells(c,catalog);expect(c.automation!.spellChoices![key]).toHaveLength(2);expect(c.spellSettings!.special![id].sourceGrant!.active).toBe(false);expect(planSourceSpells(c,catalog).issues.some(x=>x.message.includes('当前声明不符'))).toBe(true);
  const restored=readCharacter(JSON.parse(JSON.stringify(c))).character;setSourceSpellChoices(restored,key,[],catalog);syncSourceSpells(restored,catalog);setSourceSpellChoices(restored,key,['alpha|XPHB'],catalog);syncSourceSpells(restored,catalog);expect(restored.runtime.resources[specialSpellResource(id,restored)].current).toBe(0);
 });

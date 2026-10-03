@@ -1,9 +1,12 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
+import {installBrowserAutomation} from './automationFixtures';
+import {resourceBurstCaster} from './resourceBurst182.caster';
 import {writeFileSync} from 'node:fs';
 
 async function open(page:Page,mode='overview',rage=5,extra=''){
  await mockSource(page);
+ if(extra.includes('caster=1'))await installBrowserAutomation(page,[resourceBurstCaster],false);
  await page.route('**/resource-burst182?*',r=>r.fulfill({contentType:'text/html; charset=utf-8',body:`<!doctype html><meta charset="utf-8"><div id="test-root"></div><script type="module">import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$=()=>{};window.$RefreshSig$=()=>type=>type;window.__vite_plugin_react_preamble_installed__=true;</script><script type="module" src="/tests/e2e/resourceBurst182.harness.jsx"></script>`}));
  await page.goto('/resource-burst182?mode='+mode+'&rage='+rage+extra+'#suite=resource-burst182&bridge='+encodeURIComponent(String(test.info().project.use.baseURL)));
  await page.waitForFunction(()=>(window as any).resource182?.ready);

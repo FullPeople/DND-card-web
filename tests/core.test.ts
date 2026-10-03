@@ -1,12 +1,14 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter,normalizeFixtureData as normalizeData} from './helpers/irFixture';
 import {spellState} from '../src/core/characterDetails';
 import { describe, expect, it } from 'vitest';
-import { newCharacter, uid, type Entry, type Character } from '../src/core/model';
+import {uid,type Entry,type Character} from '../src/core/model';
 import { syncFeatures, removeSelection } from '../src/core/sheet';
 import { candidateReason, evaluate, requirementMismatch } from '../src/core/engine';
 import { EXAMPLE_PACK, importOwlbear, parseFile, validateCharacter, validatePack } from '../src/core/validation';
 import { exportCharacter, exportOwlbear, exportReview, exportRulePack } from '../src/core/export';
 import { expandCopies, prepareBody, specificMagicItems } from '../src/data/expand';
-import { normalizeData } from '../src/data/catalog';
+
 import { compactLevelRows, tableSpans } from '../src/ui/tableSpans';
 
 it('compacts consecutive level rows without losing changed values or changing non-level tables', () => {
@@ -41,7 +43,7 @@ it('tables merge adjacent identical cells without merging separated groups or di
   expect(tableSpans([[1, 2], [2]])).toEqual([[1, 1], [1]]);
 });
 
-const entry = (kind: Entry['kind'], raw: Record<string, any> = {}, edition: Entry['edition'] = '2024'): Entry => ({ id: uid(), name: raw.name || '自制测试条目', english: raw.ENG_name || 'Test', kind, edition, source: edition === '2014' ? 'PHB' : 'XPHB', packId: 'test', revision: 'test-1', raw, entries: ['测试内容。'] });
+const entry = (kind: Entry['kind'], raw: Record<string, any> = {}, edition: Entry['edition'] = '2024'): Entry => (irFixture({ id: uid(), name: raw.name || '自制测试条目', english: raw.ENG_name || raw.name || 'Test', kind, edition, source: edition === '2014' ? 'PHB' : 'XPHB', packId: 'test', revision: 'test-1', raw, entries: ['测试内容。'] }));
 const add = (c: Character, e: Entry, requirementId?: string, level = 1) => { const s = { id: uid(), entry: e, level, quantity: 1, equipped: false, requirementId }; c.selections.push(s); return s; };
 
 it('preserves optional quickbar references in backups and rejects malformed pin lists', () => {
@@ -58,7 +60,7 @@ describe('independent identity and source constraints', () => {
     expect(new Set(entries.map(e => e.id)).size).toBe(4);
   });
   it('preserves a disabled selection while suspending its effects and restores without granting resources', () => {
-    const c = newCharacter(); const e = entry('feat'); e.effects = [{ op: 'add', target: 'int', value: 2 }]; add(c, e);
+    const c = newCharacter(); const e = entry('feat'); e.effects = [{ op: 'add', target: 'int', value: 2 }];Object.assign(e,irFixture(e)); add(c, e);
     c.runtime.resources.uses = { current: 0, max: 2 };
     expect(evaluate(c).abilities.int).toBe(12);
     c.profile.optional.feats = false;
@@ -75,10 +77,10 @@ describe('independent identity and source constraints', () => {
 
 describe('requirements and transitions', () => {
   it('applies speed bonuses independently of race selection order, supports set HP and minimum HP per level', () => {
-    const c = newCharacter(); const feat = entry('feat'); feat.effects = [{ op: 'add', target: 'speed', value: 10 }]; add(c, feat); add(c, entry('race', { speed: 25 }));
+    const c = newCharacter(); const feat = entry('feat'); feat.effects = [{ op: 'add', target: 'speed', value: 10 }];Object.assign(feat,irFixture(feat)); add(c, feat); add(c, entry('race', { speed: 25 }));
     expect(evaluate(c).speed).toBe(35);
     c.abilities.con = 1; add(c, entry('class', { hd: { faces: 6 } }), undefined, 10); expect(evaluate(c).maxHp).toBe(10);
-    feat.effects.push({ op: 'set', target: 'hp', value: 25 }); expect(evaluate(c).maxHp).toBe(25);
+    feat.effects.push({ op: 'set', target: 'hp', value: 25 });Object.assign(feat,irFixture(feat)); expect(evaluate(c).maxHp).toBe(25);
   });
   it('retains legacy skill answers without generating quotas, and accepts manual overrides', () => {
     const pack = validatePack(EXAMPLE_PACK, []); const c = newCharacter(); c.profile.enabledSources.push(pack.id);
@@ -94,7 +96,7 @@ describe('requirements and transitions', () => {
   });
   it('reconciles declared level features and removes their effects when the parent is downgraded', () => {
     const c = newCharacter(); const cls = add(c, entry('class', { name: '测试法师', hd: { faces: 6 }, classFeatures: ['成长|测试法师|XPHB|4'] }), undefined, 4);
-    const feature = entry('feature', { name: '成长', className: '测试法师', classSource: 'XPHB', level: 4 }); feature.effects = [{ op: 'add', target: 'str', value: 2 }];
+    const feature = entry('feature', { name: '成长', className: '测试法师', classSource: 'XPHB', level: 4 }); feature.effects = [{ op: 'add', target: 'str', value: 2 }];Object.assign(feature,irFixture(feature));
     add(c, feature, `${cls.id}:feature:成长|测试法师|XPHB|4`);
     syncFeatures(c, [feature]); expect(evaluate(c).abilities.str).toBe(12); cls.level = 1; syncFeatures(c, [feature]);
     expect(evaluate(c).abilities.str).toBe(10); expect(c.selections).toHaveLength(1);
@@ -129,7 +131,7 @@ describe('safe import and extension contracts', () => {
     expect(() => parseFile('{"__proto__":{"polluted":1}}')).toThrow();
     const pack = structuredClone(EXAMPLE_PACK) as any; pack.entries[0].effects[0].op = 'eval'; expect(() => validatePack(pack, [])).toThrow();
     pack.entries[0].effects = []; pack.entries[0].choices[0].count = -1; expect(() => validatePack(pack, [])).toThrow();
-    const c = newCharacter(); add(c, entry('race', { size: 123 })); expect(() => validateCharacter(c)).toThrow();
+    const c = newCharacter(); const malformed=entry('race');malformed.automation!.verdict='automated';delete malformed.automation!.reasonCode;malformed.automation!.mechanics={modifiers:[{target:'size',op:'set',value:123}]};add(c,malformed); expect(() => validateCharacter(c)).toThrow();
   });
   it('checks exact dependencies, conflict symmetry and cycles before installing', () => {
     const a = validatePack(EXAMPLE_PACK, []);
@@ -188,7 +190,7 @@ describe('manual sheet content ownership', () => {
     expect(syncFeatures(c, [])).toBe(false); const feat = entry('feat', { name: '旅行笔记' });
     syncFeatures(c, [feat]); expect(c.selections.filter(s => s.parentId === bg.id).map(s => s.entry.name)).toEqual(['旅行笔记']);
     expect(evaluate(c).requirements).toEqual([]);
-    bg.entry.raw.feats = [{ '旅行笔记；自选流派|XPHB': true }]; syncFeatures(c, [feat]);
+    bg.entry.raw.feats = [{ '旅行笔记；自选流派|XPHB': true }];Object.assign(bg.entry,irFixture(bg.entry)); const qualified=entry('feat',{name:'旅行笔记；自选流派'});syncFeatures(c, [feat,qualified]);
     expect(c.selections.filter(s => s.parentId === bg.id).map(s => s.entry.name)).toEqual(['旅行笔记；自选流派']);
   });
   it('allows unrestricted manual proficiency, overrides fixed grants and validates persisted controls', () => {

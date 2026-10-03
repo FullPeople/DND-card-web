@@ -1,13 +1,14 @@
+import {irCharacter as newCharacter,irFixture} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
 import {capacityFormula,carrying} from '../src/core/carrying';
-import {newCharacter,type Entry} from '../src/core/model';
+import {type Entry} from '../src/core/model';
 import {evaluate} from '../src/core/engine';
 import {sameStock,previewInventory,overlayInventory,applyInventory,type InventoryState} from '../src/core/inventory';
-const entry:Entry={id:'item:a',name:'测试盔甲',english:'Armor',kind:'item',source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:[],raw:{ac:18,type:'HA',weight:2}};
+const entry:Entry=irFixture({id:'item:a',name:'测试盔甲',english:'Armor',kind:'item',source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:[],raw:{ac:18,type:'HA',weight:2}});
 function inventory():InventoryState{return {revision:1,publicId:'public',silent:false,containers:{public:{id:'public',kind:'public',name:'公共',write:true,revision:1,capacity:20,columns:4,items:[{id:'a',name:'测试',kind:'item',entry,quantity:6,slot:0,revision:1}]},hero:{id:'hero',kind:'card',name:'角色',write:true,revision:1,capacity:24,columns:4,items:[]}}};}
 describe('capacity and display markers',()=>{
  it('uses size/Strength, supports shorthand and arithmetic without executable input',()=>{const c=newCharacter();c.abilities.str=12;c.size='L';expect(carrying(c,evaluate(c)).max).toBe(360);expect(capacityFormula('*2+力量',360,12)).toBe(732);expect(capacityFormula('(基础+30)/2',150,10)).toBe(90);expect(capacityFormula('-20',150,10)).toBe(130);for(const bad of ['1/0','window.alert(1)','基础.constructor','1e20','2**3','-500'])expect(()=>capacityFormula(bad,150,10)).toThrow();});
- it('equipment and attunement references do not change armor calculations',()=>{const c=newCharacter(),before=evaluate(c);c.selections.push({id:'a',entry,level:1,quantity:1,equipped:true,attuned:true});expect(evaluate(c).ac).toBe(before.ac);});
+ it('equipment and attunement references do not change armor calculations',()=>{const c=newCharacter();c.automation!.enabled=false;const before=evaluate(c);c.selections.push({id:'a',entry,level:1,quantity:1,equipped:true,attuned:true});expect(evaluate(c).ac).toBe(before.ac);});
 });
 describe('optimistic stock projection',()=>{
  it('shows transfer immediately and reconciles the same operation without applying it twice',()=>{const before=inventory(),after=previewInventory(before,{action:'transfer',from:'public',to:'hero',rows:[{id:'a',quantity:3,newId:'received'}]});expect(after.containers.public.items[0].quantity).toBe(3);expect(after.containers.hero.items[0].quantity).toBe(3);expect(overlayInventory(after,before,after).containers).toEqual(after.containers);const server=structuredClone(before);server.containers.public.items.push({id:'b',name:'其他玩家物品',kind:'item',entry,quantity:1,revision:1,slot:1});expect(overlayInventory(server,before,after).containers.public.items.some(r=>r.id==='b')).toBe(true);});
@@ -25,7 +26,7 @@ import {initializeAutomation} from '../src/core/automation/state';
 import {sheetChoices,builtinOptionsVisible} from '../src/core/automation/choices';
 import {sourceEquipmentReceipt} from '../src/core/automation/sourceEquipment';
 function backgroundGift(){
- const c=newCharacter();const background:Entry={...entry,id:'background:test',kind:'background',name:'原创赠品背景',raw:{startingEquipment:[{_:['测试盔甲|XPHB']}]}};
+ const c=newCharacter();const background:Entry=irFixture({...entry,id:'background:test',kind:'background',name:'原创赠品背景',raw:{startingEquipment:[{_:['测试盔甲|XPHB']}]}},undefined,[entry]);
  c.selections=[{id:'background',entry:background,level:1,quantity:1,equipped:false}];syncFeatures(c,[entry]);return c;
 }
 it.each(['remove','update'])('explicit gift %s remains dismissed through inventory projection, repeated sync and restore',action=>{
@@ -46,7 +47,7 @@ it.each([false,true])('default automation preserves legacy background gifts and 
  // Simulate a pre-receipt backup with its original linked grant provenance.
  delete c.inventory!.sourceEquipment;gift.parentId='background';gift.grantKey='equipment:0:_:0';
  c.selections[0].entry=structuredClone(c.selections[0].entry);
- c.selections[0].entry.raw.startingEquipment[0]._.push({value:500});
+ c.selections[0].entry.raw.startingEquipment[0]._.push({value:500});Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));
  syncFeatures(c,[entry]);c.inventory!.coins.gp=2;gift.quantity=3;
  if(dismissed){c.dismissedFeatures=[`${gift.parentId}|${gift.grantKey}`];c.selections=c.selections.filter(s=>s.id!==gift.id);}
  const restored=readCharacter(JSON.parse(JSON.stringify(c))).character;

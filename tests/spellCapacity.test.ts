@@ -1,5 +1,6 @@
+import {irCharacter as newCharacter,irFixture} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Entry} from '../src/core/model';
+import {type Entry} from '../src/core/model';
 import {spellState} from '../src/core/characterDetails';
 import {capacitySlots,knownSpellCapacity,sourceCapacity} from '../src/core/spellCapacity';
 import {cantripGroups,spellIsReady,chooseKnownSpell,chooseCantrip,clearCantrip} from '../src/core/spellWorkspace';
@@ -7,12 +8,12 @@ import {prepareSpellEntry,setPreparedSpell} from '../src/core/spells';
 import {chooseSourceSpell} from '../src/core/sourceCantrips';
 import {exportCharacter} from '../src/core/export';
 import {validateCharacter} from '../src/core/validation';
-const spell=(id:string,level=1):Entry=>({id,kind:'spell',name:id,english:id,source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:[],raw:{level}});
+const spell=(id:string,level=1):Entry=>(irFixture({id,kind:'spell',name:id,english:id,source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:[],raw:{level}}));
 describe('spell capacities and retained overflow',()=>{
  it('refuses an overflow selection at full capacity and moves it into a real vacancy after clearing a slot',()=>{
   const c=newCharacter();c.spellSettings={...spellState(c),capacityAdjustment:2};const a=prepareSpellEntry(c,spell('a'))!,b=prepareSpellEntry(c,spell('b'))!;c.spellSettings.capacityAdjustment=1;
   expect(prepareSpellEntry(c,spell('b'))).toBeUndefined();setPreparedSpell(c,a,false);expect(prepareSpellEntry(c,spell('b'))).toBe(b);expect(c.spellSettings.prepared).toEqual([b,'']);
-  const caster={...spell('caster'),kind:'class' as const,raw:{spellcastingAbility:'int',cantripProgression:[2]}};c.selections.push({id:'caster',entry:caster,level:1,quantity:1,equipped:false});const x=chooseCantrip(c,spell('x',0),'caster').id!,y=chooseCantrip(c,spell('y',0),'caster').id!;c.spellSettings.cantripCapacityAdjustments={caster:-1};expect(chooseCantrip(c,spell('y',0),'caster').error).toContain('已满');clearCantrip(c,'caster',0);expect(chooseCantrip(c,spell('y',0),'caster').id).toBe(y);expect(cantripGroups(c)[0].slots).toEqual([y,'']);expect(c.selections.some(s=>s.id===x)).toBe(true);
+  const caster=irFixture({...spell('caster'),kind:'class' as const,raw:{spellcastingAbility:'int',cantripProgression:[2]}});c.selections.push({id:'caster',entry:caster,level:1,quantity:1,equipped:false});const x=chooseCantrip(c,spell('x',0),'caster').id!,y=chooseCantrip(c,spell('y',0),'caster').id!;c.spellSettings.cantripCapacityAdjustments={caster:-1};expect(chooseCantrip(c,spell('y',0),'caster').error).toContain('已满');clearCantrip(c,'caster',0);expect(chooseCantrip(c,spell('y',0),'caster').id).toBe(y);expect(cantripGroups(c)[0].slots).toEqual([y,'']);expect(c.selections.some(s=>s.id===x)).toBe(true);
  });
 
  it('has no blank-card groups, uses one explicit preparation allowance for both cantrips and levelled spells',()=>{

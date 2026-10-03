@@ -1,5 +1,7 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Entry} from '../src/core/model';
+import {type Entry} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
 import {planSourceSpells,syncSourceSpells} from '../src/core/automation/sourceSpells';
 import {sourceSpellResourceEnabled} from '../src/core/automation/sourceSpellState';
@@ -8,7 +10,7 @@ import {specialSpellResource,changeSpecialSpellUses} from '../src/core/specialSp
 import {readCharacter} from '../src/core/validation';
 import {removeSelection} from '../src/core/sheet';
 
-const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']):Entry=>({id,kind,name:id,english:id,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',raw,entries:['原创软件验收条目。']});
+const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']):Entry=>(irFixture({id,kind,name:id,english:id,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',raw,entries:['原创软件验收条目。']}));
 const catalog=[entry('spell-a','spell',{level:1}),entry('spell-b','spell',{level:2})];
 function setup({each=false,kind='prepared',known=true}:{each?:boolean;kind?:'prepared'|'innate';known?:boolean}={}){
  const c=newCharacter();c.automation=newAutomationState();c.selections=[{id:'owner',entry:entry('owner','race',{additionalSpells:[{ability:'cha',[kind]:{'_':{daily:{[each?'2e':'2']:['spell-a|XPHB','spell-b|XPHB']}}}}]}),quantity:1,level:1,equipped:false}];const choice=planSourceSpells(c,catalog).choices.find(choice=>choice.usageModes);if(choice)c.automation.spellUsageModes={[choice.key]:'shared'};syncSourceSpells(c,known?catalog:[catalog[0]]);return c;

@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
+    branches: [main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003, codex/automation-ir-20261003]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -70,6 +70,9 @@ jobs:
             commands: |
               DND_AUTOMATION_TEST_MODE=standalone npx playwright test --config playwright.automation209.config.ts
               npx playwright test --config playwright.unified191.config.ts
+          - group: automation-ir
+            commands: |
+              npx playwright test --config playwright.automation-ir.config.ts
           - group: direct-232
             commands: |
               npx playwright test --config playwright.direct232.config.ts

@@ -36,9 +36,9 @@ test('known spell levels fold independently and signed preparation reductions pr
 test('legacy class review saves a synchronized copy and preserves the complete original through refresh',async({page})=>{
  const c=newCharacter();c.name='旧职业验收';c.notes='保留测试笔记';c.runtime.hp=7;c.runtime.resources.manual={name:'已消耗测试资源',current:1,max:3};const old:Entry={id:'legacy-mage',kind:'class',name:'旧职业法师',english:'旧职业法师',packId:'imported',source:'IMPORTED',edition:'both',revision:'0.3',entries:[],raw:{hd:{faces:6}}};c.selections=[{id:'legacy-class',entry:old,level:1,quantity:1,equipped:false}];
  await load(page,c);await expect(page.getByRole('button',{name:'核对并同步旧卡',exact:true})).toBeVisible();
- // Import initializes automatic hit dice asynchronously. Capture the complete saved
- // card after that existing initialization, before opening the migration preview.
- await expect.poll(async()=>{const w=await workspace(page);return w.characters.find((x:Character)=>x.id===w.activeId).runtime.resources['hit-die:6'];}).toBeDefined();
+ // Unreviewed imported class fields do not create automatic hit dice.
+ // The explicit synchronized copy below owns the reviewed rules.
+ const initial=await workspace(page);expect(initial.characters.find((x:Character)=>x.id===initial.activeId).runtime.resources['hit-die:6']).toBeUndefined();
  await expect(page.locator('.save-status')).toContainText('已保存到本机');const before=await workspace(page),original=before.characters.find((x:Character)=>x.id===before.activeId);
  await page.getByRole('button',{name:'核对并同步旧卡',exact:true}).click();const review=page.getByRole('dialog',{name:'旧卡资料同步',exact:true});const choices=review.getByRole('radiogroup',{name:'旧职业法师同步目标',exact:true});await expect(choices.getByRole('radio',{name:'旧职业法师同步目标：自定义',exact:true})).toBeChecked();await choices.getByRole('radio',{name:'旧职业法师同步目标：自定义',exact:true}).click();await review.getByLabel('旧职业法师查找资料').fill('测试法师');await review.getByRole('radio',{name:'旧职业法师同步目标：测试法师（XPHB）',exact:true}).click();await expect(review.locator('.migration-manual-selected')).toContainText('测试法师');await review.getByRole('button',{name:'确认并继续',exact:true}).click();await expect(review.locator('.migration-preview')).toContainText('初始特性');
  const unchanged=await workspace(page);expect(unchanged.characters).toEqual(before.characters);await page.screenshot({path:test.info().outputPath('class-sync-preview.png')});await review.getByRole('button',{name:'创建同步副本',exact:true}).click();await expect(review).toHaveCount(0);await expect(page.locator('.suite-toast')).toContainText('同步副本已保存');await expect(page.locator('.save-status')).toContainText('已保存到本机');
@@ -48,9 +48,9 @@ test('legacy class review saves a synchronized copy and preserves the complete o
 
 test('a failed migration save leaves the original active and allows a reviewed retry without duplicates',async({page})=>{
  const c=newCharacter();c.name='保存失败验收';c.selections=[{id:'old',entry:{id:'old',name:'旧法师',english:'Test Mage',kind:'class',source:'IMPORTED',packId:'imported',revision:'0.3',edition:'both',entries:[],raw:{}},level:1,quantity:1,equipped:false}];await load(page,c);
- // This fixture also has pre-existing import hydration: its explicit English
- // identity supplies casting slots. Wait for that save before injecting failure.
- await expect.poll(async()=>{const w=await workspace(page);return w.characters.find((x:Character)=>x.id===w.activeId).runtime.resources['spell-slot:1'];}).toBeDefined();
+ // English identity alone does not execute an unreviewed class.
+ // Save-failure injection applies to the explicitly reviewed copy below.
+ const initial=await workspace(page);expect(initial.characters.find((x:Character)=>x.id===initial.activeId).runtime.resources['spell-slot:1']).toBeUndefined();
  await expect(page.locator('.save-status')).toContainText('已保存到本机');const before=await workspace(page);await page.getByRole('button',{name:'核对并同步旧卡',exact:true}).click();const review=page.getByRole('dialog',{name:'旧卡资料同步',exact:true});await review.getByRole('button',{name:'确认并继续',exact:true}).click();
  await page.evaluate(()=>{const original=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(value:any,key?:IDBValidKey){if(key==='workspace'&&value.characters?.some((c:any)=>c.name.endsWith('（资料同步副本）'))){IDBObjectStore.prototype.put=original;this.transaction.abort();throw new DOMException('验收模拟：本机空间不足','QuotaExceededError');}return original.call(this,value,key);};});
  await review.getByRole('button',{name:'创建同步副本',exact:true}).click();await expect(review.getByRole('alert')).toContainText('同步副本保存失败');expect(await workspace(page)).toEqual(before);await expect(page.locator('.startup-panel[role="alert"]')).toHaveCount(0);

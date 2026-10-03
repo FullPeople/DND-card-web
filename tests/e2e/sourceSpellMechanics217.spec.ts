@@ -1,5 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {irFixture} from '../helpers/irFixture';
+import {installCardAutomation} from './automationFixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {planSourceSpells,setSourceSpellChoices,syncSourceSpells} from '../../src/core/automation/sourceSpells';
@@ -10,7 +12,9 @@ test('actual App saves optional source choices and exposes no rest recovery cont
  const c=newCharacter();c.name='原创来源次数验收';c.automation=newAutomationState();
  const a=entry('test dawn','晨光印记','spell',{level:1}),b=entry('test tide','潮汐印记','spell',{level:1});
  c.selections=[{id:'origin',entry:entry('origin','星辉传承','race',{additionalSpells:[{innate:{'_':{daily:{pbe:[{choose:{from:['test dawn|XPHB','test tide|XPHB'],count:2}}]}}}}]}),quantity:1,level:1,equipped:false},...[a,b].map(e=>({id:'learned-'+e.id,entry:e,quantity:1,level:1,equipped:false}))];
+ c.selections=c.selections.map(row=>({...row,entry:irFixture(row.entry,undefined,c.selections.map(row=>row.entry))}));Object.assign(a,irFixture(a));Object.assign(b,irFixture(b));
  const choice=planSourceSpells(c,[a,b]).choices.find(x=>x.spells)!;setSourceSpellChoices(c,choice.key,['test dawn|XPHB'],[a,b]);syncSourceSpells(c,[a,b]);const grant=c.selections.find(s=>s.grantKey?.startsWith('source-spell:'))!;changeSpecialSpellUses(c,grant.id,0);c.runtime.resources.manual={name:'手工次数',max:5,current:1};
+ await installCardAutomation(page,c);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'source-original.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('button',{name:'自动化设置'}).click();
  const chooser=page.locator('.source-spell-choice');await expect(chooser).toContainText('可以少选');await expect(chooser).toContainText('玩家手册');await expect(chooser.getByRole('checkbox',{name:/晨光印记/})).toBeChecked();await chooser.getByRole('checkbox',{name:/潮汐印记/}).check();await expect(chooser).toContainText('已选 2 项');await chooser.getByRole('checkbox',{name:/潮汐印记/}).uncheck();
  await expect(page.locator('.source-spell-rest')).toHaveCount(0);await expect(page.getByRole('button',{name:/短休|长休|恢复以上/})).toHaveCount(0);

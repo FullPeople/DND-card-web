@@ -1,7 +1,9 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter,normalizeFixtureData as normalizeData} from './helpers/irFixture';
 import {it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
-import {newCharacter,type Entry,type Character} from '../src/core/model';
-import {normalizeData} from '../src/data/catalog';
+import {type Entry,type Character} from '../src/core/model';
+
 import {sheetChoices,chooseSheetOption,setSheetChoiceSlot} from '../src/core/automation/choices';
 import {newAutomationState} from '../src/core/automation/state';
 import {cantripGroups,clearCantrip,spellIsReady} from '../src/core/spellWorkspace';
@@ -12,7 +14,7 @@ import {spellState} from '../src/core/characterDetails';
 import {setSpecialSpell,changeSpecialSpellUses,specialSpellResource} from '../src/core/specialSpells';
 import {validateCharacter} from '../src/core/validation';
 
-const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>({id,name:id,english:id,kind,raw,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创法术选择验收。']});
+const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>(irFixture({id,name:id,english:id,kind,raw,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创法术选择验收。']}));
 const spells=(cls='Renamed book caster')=>Array.from({length:12},(_,i)=>entry(`法术 ${i}`,'spell',{level:i<4?0:1,classes:{fromClassList:[{name:cls,source:'XPHB'}]}}));
 function setup(raw:Entry['raw']={casterProgression:'full',spellcastingAbility:'int',cantripProgression:[3],spellsKnownProgressionFixed:[6],preparedSpellsProgression:[4]},name='Renamed book caster'){
  const c=newCharacter();c.automation=newAutomationState();c.selections=[{id:'owner',entry:entry(name,'class',raw),level:1,quantity:1,equipped:false}];return c;
@@ -72,17 +74,17 @@ it('does not count source-granted spells as ordinary choices or restore their fr
 });
 it('removes only preparation tasks and preserves old selections, holes, answers and consumed slots',()=>{
  const c=setup(),catalog=spells(),raw=c.selections[0].entry.raw;
- raw.startingProficiencies={skills:[{choose:{from:['arcana','history'],count:1}}]};raw.startingEquipment={defaultData:[{A:[{special:'原创测试装备'}]}]};
+ raw.startingProficiencies={skills:[{choose:{from:['arcana','history'],count:1}}]};raw.startingEquipment={defaultData:[{A:[{special:'原创测试装备'}]}]};c.selections[0].entry=irFixture(c.selections[0].entry);
  expect(sheetChoices(c,catalog).map(r=>r.channel==='spells'?r.spellKind:r.channel)).toEqual(['skills','equipment','cantrips','book']);
  chooseSheetOption(c,choice(c,'book',catalog).id,catalog[4].id,catalog);prepareSpellEntry(c,catalog[4],2,'owner');syncAutoResources(c);c.runtime.resources['spell-slot:1'].current=0;c.answers['owner:spells:prepared']=[catalog[4].id];
  const before=JSON.stringify(c);for(let i=0;i<3;i++)expect(sheetChoices(c,catalog).some(r=>r.spellKind==='prepared')).toBe(false);expect(JSON.stringify(c)).toBe(before);
  const restored=validateCharacter(JSON.parse(before));expect(restored.spellSettings).toEqual(c.spellSettings);expect(restored.answers).toEqual(c.answers);expect(restored.selections).toEqual(c.selections);expect(restored.runtime.resources['spell-slot:1'].current).toBe(0);
  c.automation!.enabled=false;const off=JSON.stringify(c);expect(sheetChoices(c,catalog)).toEqual([]);expect(JSON.stringify(c)).toBe(off);c.automation!.enabled=true;expect(sheetChoices(c,catalog).map(r=>r.channel==='spells'?r.spellKind:r.channel)).toEqual(['skills','equipment','cantrips','book']);
 });
-it('applies explicit extra-cantrip clauses from selected features and ignores unselected branches',()=>{
+it('applies reviewed IR extra-cantrip grants independently of prose and unselected branches',()=>{
  const c=setup(),catalog=spells(),f=entry('Original extra choice','feature');f.entries=['你从{@filter 职业法术|spells|class=Renamed book caster}中额外学会一道戏法。'];
- c.selections.push({id:'extra',entry:f,quantity:1,level:1,equipped:false,parentId:'owner'});expect(choice(c,'cantrips',catalog).count).toBe(4);
- f.entries=[{type:'options',entries:[{entries:['你学会一个额外的{@filter 法术|spells|class=Renamed book caster}中的戏法。']}]}];expect(choice(c,'cantrips',catalog).count).toBe(3);
+ f.automation!.verdict='automated';f.automation!.mechanics={modifiers:[{target:'cantrips',op:'add',value:1}]};c.selections.push({id:'extra',entry:f,quantity:1,level:1,equipped:false,parentId:'owner'});expect(choice(c,'cantrips',catalog).count).toBe(4);
+ f.entries=[{type:'options',entries:[{entries:['你学会一个额外的{@filter 法术|spells|class=Renamed book caster}中的戏法。']}]}];f.automation!.verdict='noMechanics';f.automation!.reasonCode='choiceOfOtherEntry';delete f.automation!.mechanics;expect(choice(c,'cantrips',catalog).count).toBe(3);
 });
 
 const external=process.env.DND_AUTOMATION_CORE_DATA;

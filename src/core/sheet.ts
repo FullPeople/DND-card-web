@@ -1,4 +1,6 @@
-import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEquipment';
+import {irMechanics,irGrantValues,irSelectionActive} from './automation/ir';
+import {automationEnabled} from './automation/state';
+import {rememberSourceEquipment,syncSourceEquipment,resolveEquipmentReference} from './automation/sourceEquipment';
 import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
 import {resolveEntryReference} from './entryReferences';
@@ -42,8 +44,9 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
 
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
-export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean;equipmentPreview?:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
-  let changed = review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id)));
+export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean;equipmentPreview?:boolean;suppressEquipment?:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
+  if(!automationEnabled(c))return false;
+  let changed = review?.equipmentPreview||review?.suppressEquipment?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id)));
   for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
   const selectedNames=entryNameIndex(c.selections.map(s=>s.entry)),publishedNames=catalogNames||entryNameIndex(catalog);
   const named=(name:string)=>review?.refresh?[...(publishedNames.get(name)||[]),...(selectedNames.get(name)||[])]:[...(selectedNames.get(name)||[]),...(publishedNames.get(name)||[])];
@@ -57,19 +60,24 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
     const entry = named(base.toLowerCase()).find(e => e.kind === kind && !requirementMismatch(e, { refs: [`${base}|${source || ''}`] }));
     return entry ? { ...entry, id: `${entry.id}#grant:${name}`, name, raw: { ...entry.raw, _grantReference: ref } } : undefined;
   }
+  const canonical=(key:string):Entry|undefined=>{
+    const selected=c.selections.map(row=>row.entry).filter(entry=>entry.automation?.identity.key===key),published=catalog.filter(entry=>entry.automation?.identity.key===key);
+    const candidates=review?.refresh&&published.length?published:selected.length?selected:published;
+    const distinct=new Map(candidates.map(entry=>[entry.id,entry]));return distinct.size===1?[...distinct.values()][0]:undefined;
+  };
   const roots = c.selections.filter(s => ['class', 'subclass', 'race', 'background'].includes(s.entry.kind)&&(!review||review.owners.has(s.id)));
   for (const owner of roots) {
-    const raw = owner.entry.raw, grants: Grant[] = [];
+    const raw = owner.entry.raw, model=irMechanics(owner.entry)|| (owner.entry.automation?.verdict==='noMechanics'?{}:undefined),grants: Grant[] = [];
+    if(!model||!irSelectionActive(c,owner))continue;
     const parent = c.selections.find(s => belongsToClass(owner, s));
     if (parent && !owner.parentId) { owner.parentId = parent.id; changed = true; }
     if (parent && owner.level !== parent.level) { owner.level = parent.level; changed = true; }
-    const refs = owner.entry.kind === 'class' ? raw.classFeatures : owner.entry.kind === 'subclass' ? raw.subclassFeatures : undefined;
-    for (const block of Array.isArray(refs) ? refs : []) {
-      const ref = typeof block === 'string' ? block : block?.classFeature || block?.subclassFeature;
-      if (typeof ref !== 'string') continue;
-      const level = Number(ref.split('|')[owner.entry.kind === 'subclass' ? 5 : 3]);
-      if (level > (parent?.level || owner.level)) continue;
-      grants.push({ key: `ref:${ref}`, entry: resolve(ref, 'feature') });
+    const refs=owner.entry.kind==='class'?model.classModel?.classFeatures:owner.entry.kind==='subclass'?model.classModel?.subclassFeatures:undefined;
+    for(const key of refs||[]){
+      const entry=canonical(key),alias=model.classModel?.referenceAliases?.[key],legacy=alias?`ref:${decodeURIComponent(alias)}`:undefined;
+      const existing=c.selections.find(row=>row.parentId===owner.id&&(row.entry.automation?.identity.key===key||legacy&&row.grantKey===legacy)&&row.grantKey);
+      const level=Number(decodeURIComponent(key.split(':')[8]||''));if(level>(parent?.level||owner.level))continue;
+      grants.push({key:existing?.grantKey||legacy||`ir-feature:${key}`,entry:entry||existing?.entry});
     }
     // Named inline blocks are content sections, not separately invented rules.
     const blocks = raw.entries || (['race', 'background', 'feat'].includes(owner.entry.kind) ? owner.entry.entries : undefined);
@@ -77,10 +85,12 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       if (!block || typeof block !== 'object' || !block.name || block.type === 'options') return;
       if(owner.entry.kind==='background'&&!block.data?.isFeature)return;
       if (grants.some(g => g.entry?.name === block.name)) return;
-      grants.push({ key: `inline:${index}`, entry: { ...owner.entry, id: `${owner.entry.id}#trait:${index}`, kind: 'feature', name: block.name, english: block.ENG_name || block.name, entries: block.entries || [block.entry].filter(Boolean), raw: {}, effects: undefined, choices: undefined } });
+      grants.push({ key: `inline:${index}`, entry: { ...owner.entry, id: `${owner.entry.id}#trait:${index}`, kind: 'feature', name: block.name, english: block.ENG_name || block.name, entries: block.entries || [block.entry].filter(Boolean), raw: {_contentOnly:true},automation:undefined,automationOptions:undefined,automationVersion:undefined,effects: undefined, choices: undefined } });
     });
-    for (const block of Array.isArray(raw.feats) ? raw.feats : []) for (const [ref, granted] of Object.entries(block || {})) {
-      if (granted === true) grants.push({ key: `feat:${ref}`, entry: resolve(ref, 'feat') });
+    for(const spec of model.grants||[])if(spec.type==='feat'&&spec.fixed)for(const key of irGrantValues(c,owner,spec)){
+      const alias=spec.referenceAliases?.[key],legacy=alias?`feat:${decodeURIComponent(alias)}`:undefined,entry=canonical(key);
+      const old=c.selections.find(row=>row.parentId===owner.id&&(row.entry.automation?.identity.key===key||legacy&&row.grantKey===legacy)&&row.grantKey);
+      grants.push({key:old?.grantKey||legacy||`ir-feat:${key}`,entry:entry||old?.entry});
     }
     // The old-card review builds a disposable linked-grant template. Runtime
     // hydration uses sourceEquipment receipts and never executes this preview path.
@@ -92,8 +102,8 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       let money=0;
       equipment.forEach(({item,key}:{item:any;key:string})=>{
         const ref=typeof item==='string'?item:item.item;
-        let entry=typeof ref==='string'?resolve(ref,'item'):undefined;
-        if(!entry&&(item.special||ref))entry={...owner.entry,id:`${owner.entry.id}#${key}`,kind:'item',name:item.special||ref.split('|')[0],english:item.special||ref.split('|')[0],entries:[],raw:ref?{_equipmentRef:ref}:{},effects:undefined,choices:undefined};
+        let entry=typeof ref==='string'?resolveEquipmentReference(ref,catalog):undefined;
+        if(!entry&&(item.special||ref))entry={...owner.entry,id:`${owner.entry.id}#${key}`,kind:'item',name:item.special||ref.split('|')[0],english:item.special||ref.split('|')[0],entries:[],raw:ref?{_equipmentRef:ref}:{},automation:undefined,automationVersion:undefined,automationOptions:undefined,effects:undefined,choices:undefined};
         if(entry)grants.push({key,entry,quantity:Math.max(1,Math.trunc(item.quantity||1))});
         money+=Number(item.value||item.containsValue||0)/100;
       });

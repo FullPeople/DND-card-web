@@ -1,6 +1,8 @@
 import {test,expect,type Page} from '@playwright/test';
 import {writeFileSync} from 'node:fs';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
+import {normalizeData} from '../../src/data/catalog';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {customEntryExample} from '../../src/core/customEntrySchema';
 test.beforeEach(async({page})=>{await suppressAnnouncement(page);});
@@ -8,6 +10,7 @@ const spell:Entry={id:'fixture:spell',kind:'spell',name:'星海光束',english:'
 async function start(page:Page){await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
 test('ordinary spell clicks read only; editing prepares, fixed spells and limited resources persist',async({page})=>{
  await start(page);const c=newCharacter();c.name='预备与天生法术';c.selections=[{id:'s',entry:spell,level:1,quantity:1,equipped:false}];c.spellSettings={mode:'prepared',modeOverride:true,ability:'int',capacity:2,capacityAdjustment:2,attackBonus:0,dcBonus:0,prepared:[],slots:{}};
+ await installCardAutomation(page,c);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'spell.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();
  await page.getByRole('tab',{name:'法术',exact:true}).click();const tile=page.locator('.spell-library .spell-stock-tile');await tile.click();await expect(page.locator('.prepared-cell .spell-stock-tile')).toHaveCount(0);await expect(page.locator('.detail-title')).toContainText('星海光束');await tile.click({button:'right'});await expect(page.getByRole('menuitem',{name:'预备法术',exact:true})).toHaveCount(0);await page.keyboard.press('Escape');
  await page.getByRole('switch',{name:'编辑模式'}).click();await tile.click();await expect(page.locator('.prepared-cell .spell-stock-tile')).toHaveCount(1);await page.getByRole('tab',{name:'主要',exact:true}).click();await expect(page.locator('.overview-spells')).toContainText('星海光束');await page.getByRole('tab',{name:'法术',exact:true}).click();await page.locator('.prepared-cell .spell-stock-tile').click({button:'right'});await page.getByRole('menuitem',{name:'设置免费施放次数'}).click();await expect(page.locator('.source-spell-group')).toContainText('星海光束');await expect(page.locator('.ordinary-prepared-group .spell-stock-tile')).toHaveCount(0);

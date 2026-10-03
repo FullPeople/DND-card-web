@@ -1,9 +1,12 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter,normalizeFixtureData as normalizeData} from './helpers/irFixture';
+import {reviewCoreSamples,readReviewedClass} from './helpers/reviewedCoreSamples';
 import {correctSourceData} from '../src/core/sourceCorrections';
 import {syncSourceSpells} from '../src/core/automation/sourceSpells';
 import {specialSpellResource,changeSpecialSpellUses} from '../src/core/specialSpells';
 import {it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
-import {newCharacter,type Entry,type Character} from '../src/core/model';
+import {type Entry,type Character} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
 import {sheetChoices,chooseSheetOption,claimStartingEquipment,setSheetChoiceSlot,builtinOptionsVisible,setBuiltinOptionsVisible} from '../src/core/automation/choices';
 import {performRest,longRestHitDiceBudget} from '../src/core/automation/rest';
@@ -11,7 +14,7 @@ import {syncFeatures,removeSelection} from '../src/core/sheet';
 import {syncAutoResources,setResource} from '../src/core/resources';
 import {planFeatureResources,restResources} from '../src/core/automation/featureResources';
 import {evaluate} from '../src/core/engine';
-import {normalizeData} from '../src/data/catalog';
+
 import {validateCharacter} from '../src/core/validation';
 import {exportCharacter} from '../src/core/export';
 
@@ -29,12 +32,12 @@ it('repeated slot assignments are no-ops and ordinary choices preserve unrelated
  expect(()=>setSheetChoiceSlot(c,r.id,3,'athletics',fixtureEntries)).toThrow();expect(JSON.stringify(c)).toBe(before);
 });
 it('custom non-skill choices remain content choices and quota growth reveals new pending options',()=>{
- const c=fixtureCharacter(),owner=c.selections[0];owner.entry=structuredClone(owner.entry);owner.entry.choices=[{id:'macro',label:'宏选择',count:1,options:['custom-action','custom-dice'],optionLabels:{'custom-action':'动作宏','custom-dice':'骰子宏'}}];const custom=sheetChoices(c,fixtureEntries).find(r=>r.label==='宏选择')!;expect(custom.channel).toBe('content');chooseSheetOption(c,custom.id,'custom-action',fixtureEntries);expect(c.answers[custom.id]).toEqual(['custom-action']);
+ const c=fixtureCharacter(),owner=c.selections[0];owner.entry=structuredClone(owner.entry);owner.entry.choices=[{id:'macro',label:'宏选择',count:1,options:['custom-action','custom-dice'],optionLabels:{'custom-action':'动作宏','custom-dice':'骰子宏'}}];Object.assign(owner.entry,irFixture(owner.entry));const custom=sheetChoices(c,fixtureEntries).find(r=>r.label==='宏选择')!;expect(custom.channel).toBe('content');chooseSheetOption(c,custom.id,'custom-action',fixtureEntries);expect(c.answers[custom.id]).toEqual(['custom-action']);
  const rows=sheetChoices(c,fixtureEntries),skill=rows.find(r=>r.channel==='skills')!,equip=rows.find(r=>r.channel==='equipment')!,content=rows.find(r=>r.label==='测试圣职')!;chooseSheetOption(c,skill.id,'athletics',fixtureEntries);chooseSheetOption(c,skill.id,'history',fixtureEntries);claimStartingEquipment(c,equip.id,'A',fixtureEntries);chooseSheetOption(c,content.id,content.options[0].value,fixtureEntries);expect(builtinOptionsVisible(c,owner.id,sheetChoices(c,fixtureEntries))).toBe(false);
- owner.entry.raw.startingProficiencies.skills[0].choose.count=3;expect(builtinOptionsVisible(c,owner.id,sheetChoices(c,fixtureEntries))).toBe(true);setBuiltinOptionsVisible(c,owner.id,false);expect(builtinOptionsVisible(c,owner.id,sheetChoices(c,fixtureEntries))).toBe(false);removeSelection(c,owner.id);expect(c.featureLayout?.optionsVisible?.[owner.id]).toBeUndefined();
+ owner.entry.raw.startingProficiencies.skills[0].choose.count=3;Object.assign(owner.entry,irFixture(owner.entry));expect(builtinOptionsVisible(c,owner.id,sheetChoices(c,fixtureEntries))).toBe(true);setBuiltinOptionsVisible(c,owner.id,false);expect(builtinOptionsVisible(c,owner.id,sheetChoices(c,fixtureEntries))).toBe(false);removeSelection(c,owner.id);expect(c.featureLayout?.optionsVisible?.[owner.id]).toBeUndefined();
 });
 it('nested source headings share their root source toggle and pending completion state',()=>{
- const c=fixtureCharacter(),entry=structuredClone(c.selections[0].entry);entry.id='nested-source';entry.kind='subclass';entry.raw={};entry.entries=[];entry.choices=[{id:'nested',label:'子职选择',count:1,options:['one','two']}];c.selections.push({id:'nested-owner',parentId:'class-owner',entry,quantity:1,level:1,equipped:false});expect(builtinOptionsVisible(c,'nested-owner',sheetChoices(c,fixtureEntries))).toBe(true);setBuiltinOptionsVisible(c,'class-owner',false);expect(builtinOptionsVisible(c,'nested-owner',sheetChoices(c,fixtureEntries))).toBe(false);setBuiltinOptionsVisible(c,'nested-owner',true);expect(c.featureLayout!.optionsVisible).toEqual({'class-owner':true});
+ const c=fixtureCharacter(),entry=structuredClone(c.selections[0].entry);entry.id='nested-source';entry.kind='subclass';entry.raw={};Object.assign(entry,irFixture(entry));entry.entries=[];entry.choices=[{id:'nested',label:'子职选择',count:1,options:['one','two']}];Object.assign(entry,irFixture(entry));c.selections.push({id:'nested-owner',parentId:'class-owner',entry,quantity:1,level:1,equipped:false});expect(builtinOptionsVisible(c,'nested-owner',sheetChoices(c,fixtureEntries))).toBe(true);setBuiltinOptionsVisible(c,'class-owner',false);expect(builtinOptionsVisible(c,'nested-owner',sheetChoices(c,fixtureEntries))).toBe(false);setBuiltinOptionsVisible(c,'nested-owner',true);expect(c.featureLayout!.optionsVisible).toEqual({'class-owner':true});
 });
 it('completed buttons wait for descendant choices, disappear together and can be restored without repeating grants',()=>{
  const c=fixtureCharacter(),rows=sheetChoices(c,fixtureEntries),skill=rows[0],equipment=rows[1],content=rows[2];setSheetChoiceSlot(c,skill.id,0,'athletics',fixtureEntries);setSheetChoiceSlot(c,skill.id,1,'history',fixtureEntries);expect(builtinOptionsVisible(c,'class-owner',sheetChoices(c,fixtureEntries))).toBe(true);claimStartingEquipment(c,equipment.id,'A',fixtureEntries);expect(builtinOptionsVisible(c,'class-owner',sheetChoices(c,fixtureEntries))).toBe(true);chooseSheetOption(c,content.id,content.options[1].value,fixtureEntries);syncFeatures(c,fixtureEntries);expect(builtinOptionsVisible(c,'class-owner',sheetChoices(c,fixtureEntries))).toBe(false);expect(c.selections.some(s=>s.grantKey?.startsWith('choice:'))).toBe(true);
@@ -55,13 +58,13 @@ it('starting equipment is granted once, can be replaced, and import/refresh do n
  const restored=validateCharacter(exportCharacter(c));expect(restored.backgroundChoices).toEqual(c.backgroundChoices);
  claimStartingEquipment(c,r.id,'B',fixtureEntries);syncFeatures(c,fixtureEntries);expect(c.inventory!.coins.gp).toBe(154);expect(c.selections.filter(s=>s.entry.kind==='item')).toHaveLength(1);removeSelection(c,'class-owner');syncFeatures(c,fixtureEntries);expect(c.selections.filter(s=>s.entry.kind==='item')).toHaveLength(1);expect(c.inventory!.coins.gp).toBe(154);
 });
-it('grouped equipment claims include fixed items, refuse partial choices before mutation, and compare explicit coin text',()=>{
- const c=fixtureCharacter(),owner=c.selections[0];owner.entry=structuredClone(owner.entry);owner.entry.raw.startingEquipment.defaultData=[{a:[{item:'测试剑|XPHB'}],b:[{value:500}]},{_:[{special:'固定装备'}]}];const r=sheetChoices(c,fixtureEntries).find(r=>r.channel==='equipment')!;
- const before=JSON.stringify(c);expect(()=>claimStartingEquipment(c,r.id,'default',fixtureEntries)).toThrow();expect(JSON.stringify(c)).toBe(before);claimStartingEquipment(c,r.id,'default',fixtureEntries,{'group:0':'a'});expect(c.selections.filter(s=>s.entry.kind==='item').map(s=>s.entry.name)).toEqual(['测试剑','固定装备']);
- owner.entry.raw.startingEquipment={defaultData:[{A:[{value:7000}],B:[{value:11000}]}],entries:['(A) 装备与 7 GP; 或 (B) 110 GP']};const corrected=correctSourceData(owner.entry.raw);expect(corrected.startingEquipment.defaultData[0].A[0].value).toBe(700);expect(owner.entry.raw.startingEquipment.defaultData[0].A[0].value).toBe(7000);expect(correctSourceData(corrected)).toBe(corrected);expect(validateCharacter(exportCharacter(c)).selections[0].entry.raw.startingEquipment.defaultData[0].A[0].value).toBe(700);
+it('grouped equipment claims are atomic and generic prose never corrects declared copper amounts',()=>{
+ const c=fixtureCharacter(),owner=c.selections[0];owner.entry=structuredClone(owner.entry);const fixed=irFixture({...fixtureEntries.find(e=>e.kind==='item')!,id:'fixed-equipment',name:'固定装备',english:'Fixed Equipment',raw:{}});owner.entry.raw.startingEquipment.defaultData=[{a:[{item:'测试剑|XPHB'}],b:[{value:500}]},{_:[{item:'固定装备|XPHB'}]}];Object.assign(owner.entry,irFixture(owner.entry,undefined,[owner.entry,...fixtureEntries,fixed]));const r=sheetChoices(c,fixtureEntries).find(r=>r.channel==='equipment')!;
+ const before=JSON.stringify(c);expect(()=>claimStartingEquipment(c,r.id,'default',fixtureEntries)).toThrow();expect(JSON.stringify(c)).toBe(before);claimStartingEquipment(c,r.id,'default',[...fixtureEntries,fixed],{'group:0':'a'});expect(c.selections.filter(s=>s.entry.kind==='item').map(s=>s.entry.name)).toEqual(['测试剑','固定装备']);
+ owner.entry.raw.startingEquipment={defaultData:[{A:[{value:7000}],B:[{value:11000}]}],entries:['(A) 装备与 7 GP; 或 (B) 110 GP']};Object.assign(owner.entry,irFixture(owner.entry));const corrected=correctSourceData(owner.entry.raw);expect(corrected.startingEquipment.defaultData[0].A[0].value).toBe(7000);expect(owner.entry.raw.startingEquipment.defaultData[0].A[0].value).toBe(7000);expect(correctSourceData(corrected)).toBe(corrected);expect(validateCharacter(exportCharacter(c)).selections[0].entry.raw.startingEquipment.defaultData[0].A[0].value).toBe(7000);
 });
-it('late equipment data fills a claimed placeholder without adding possessions or linking their lifetime',()=>{
- const c=fixtureCharacter(),r=sheetChoices(c).find(r=>r.channel==='equipment')!;claimStartingEquipment(c,r.id,'A',[]);const item=c.selections.find(s=>s.entry.kind==='item')!,id=item.id;expect(item.entry.raw._equipmentRef).toBeTruthy();item.equipped=true;
+it('missing equipment data blocks claims until catalogue arrival and later refresh preserves possessions',()=>{
+ const c=fixtureCharacter(),r=sheetChoices(c).find(r=>r.channel==='equipment')!;const before=structuredClone(c);expect(()=>claimStartingEquipment(c,r.id,'A',[])).toThrow(/未发放/);expect(c).toEqual(before);claimStartingEquipment(c,r.id,'A',fixtureEntries);const item=c.selections.find(s=>s.entry.kind==='item')!,id=item.id;expect(item.entry.raw._equipmentRef).toBeUndefined();item.equipped=true;
  syncFeatures(c,fixtureEntries);expect(c.selections.filter(s=>s.entry.kind==='item')).toHaveLength(1);expect(c.selections.find(s=>s.id===id)?.entry.raw._equipmentRef).toBeUndefined();expect(c.selections.find(s=>s.id===id)?.equipped).toBe(true);expect(c.selections.find(s=>s.id===id)?.parentId).toBeUndefined();expect(c.inventory!.coins.gp).toBe(4);
 });
 it('resource lifecycle retains spend, supports partial rest, level changes, player maximum and presentation',()=>{
@@ -77,7 +80,7 @@ it('level down and up preserve spent uses beyond the temporarily smaller maximum
  const restored=validateCharacter(exportCharacter(c));restored.selections[0].level=4;syncAutoResources(restored);expect(restored.runtime.resources[id].current).toBe(1);
 });
 it('multiclass skills follow each class entry declaration and equipment belongs only to the starting class',()=>{
- const c=fixtureCharacter(),entry=structuredClone(fixtureEntries.find(e=>e.kind==='class')!);entry.id+=':second';entry.raw.multiclassing={proficienciesGained:{skills:[{choose:{from:['history','perception'],count:1}}]}};
+ const c=fixtureCharacter(),entry=structuredClone(fixtureEntries.find(e=>e.kind==='class')!);entry.id+=':second';entry.raw.multiclassing={proficienciesGained:{skills:[{choose:{from:['history','perception'],count:1}}]}};Object.assign(entry,irFixture(entry));
  c.selections.push({id:'second-owner',entry,level:1,quantity:1,equipped:false});syncFeatures(c,[...fixtureEntries,entry]);
  expect(sheetChoices(c,[...fixtureEntries,entry]).filter(r=>r.ownerId==='second-owner'&&r.channel==='skills').map(r=>r.count)).toEqual([1]);expect(sheetChoices(c).filter(r=>r.ownerId==='second-owner'&&r.channel==='equipment')).toHaveLength(0);
 });
@@ -87,15 +90,15 @@ it('disabled sources park choices and resources without restoring spent uses whe
  c.profile.enabledSources=['XPHB'];syncFeatures(c,fixtureEntries);syncAutoResources(c);expect(evaluate(c).ac).toBe(12);expect(c.runtime.resources[id].current).toBe(0);
 });
 it('explicit rest recovery of a source spell updates its spent ledger and survives reconciliation',()=>{
- const c=fixtureCharacter(),entry=structuredClone(fixtureEntries[0]);entry.id='rest-origin';entry.kind='race';entry.name='休息来源';entry.english='Rest Origin';entry.entries=[];entry.raw={additionalSpells:[{ability:'wis',innate:{'1':{rest:{'1':['休息法术|XPHB']}}}}]};c.selections.push({id:'rest-origin',entry,level:1,quantity:1,equipped:false});
- const spell={...entry,id:'rest-spell',kind:'spell' as const,name:'休息法术',english:'Rest Spell',raw:{level:1}};syncSourceSpells(c,[spell]);const grant=c.selections.find(s=>s.grantKey?.startsWith('source-spell:'))!,key=specialSpellResource(grant.id,c);changeSpecialSpellUses(c,grant.id,0);restResources(c,'short');expect(c.runtime.resources[key].current).toBe(1);syncSourceSpells(c,[spell]);expect(c.runtime.resources[key].current).toBe(1);
+ const c=fixtureCharacter(),entry=structuredClone(fixtureEntries[0]);entry.id='rest-origin';entry.kind='race';entry.name='休息来源';entry.english='Rest Origin';entry.entries=[];entry.raw={additionalSpells:[{ability:'wis',innate:{'1':{rest:{'1':['休息法术|XPHB']}}}}]};Object.assign(entry,irFixture(entry));c.selections.push({id:'rest-origin',entry,level:1,quantity:1,equipped:false});
+ const spell=irFixture({...entry,id:'rest-spell',kind:'spell' as const,name:'休息法术',english:'Rest Spell',raw:{level:1}});Object.assign(entry,irFixture(entry,undefined,[entry,spell]));syncSourceSpells(c,[spell]);const grant=c.selections.find(s=>s.grantKey?.startsWith('source-spell:'))!,key=specialSpellResource(grant.id,c);changeSpecialSpellUses(c,grant.id,0);restResources(c,'short');expect(c.runtime.resources[key].current).toBe(1);syncSourceSpells(c,[spell]);expect(c.runtime.resources[key].current).toBe(1);
 });
 it('unknown resource formulas produce visible issues and pure evaluation leaves the character untouched',()=>{
- const c=fixtureCharacter();c.selections.find(s=>s.entry.name==='测试回气')!.entry.raw.resources[0].max='@untrusted + 1';expect(planFeatureResources(c).issues[0].message).toContain('未执行');const before=JSON.stringify(c);for(let i=0;i<100;i++)evaluate(c);expect(JSON.stringify(c)).toBe(before);
+ const c=fixtureCharacter();c.selections.find(s=>s.entry.name==='测试回气')!.entry.raw.resources[0].max='@untrusted + 1';Object.assign(c.selections.find(s=>s.entry.name==='测试回气')!.entry,irFixture(c.selections.find(s=>s.entry.name==='测试回气')!.entry));expect(planFeatureResources(c).issues[0].message).toContain('未执行');const before=JSON.stringify(c);for(let i=0;i<100;i++)evaluate(c);expect(JSON.stringify(c)).toBe(before);
  const invalid=fixtureCharacter();Object.values(invalid.runtime.resources).find(r=>r.featureGrant)!.featureGrant!.recovery.short=-1;expect(()=>validateCharacter(invalid)).toThrow();
 });
 it('resource formulas use active attribute effects and passive provenance follows the final perception value',()=>{
- const c=fixtureCharacter();c.abilities.wis=14;const feature=c.selections.find(s=>s.entry.name==='测试回气')!;feature.entry=structuredClone(feature.entry);feature.entry.raw.resources[0].max='@abilities.wis.mod + 1';feature.entry.effects=[{op:'add',target:'wis',value:2}];expect(planFeatureResources(c).grants[0].max).toBe(evaluate(c).modifiers.wis+1);
+ const c=fixtureCharacter();c.abilities.wis=14;const feature=c.selections.find(s=>s.entry.name==='测试回气')!;feature.entry=structuredClone(feature.entry);feature.entry.raw.resources[0].max='@abilities.wis.mod + 1';Object.assign(feature.entry,irFixture(feature.entry));feature.entry.effects=[{op:'add',target:'wis',value:2}];Object.assign(feature.entry,irFixture(feature.entry));expect(planFeatureResources(c).grants[0].max).toBe(evaluate(c).modifiers.wis+1);
  c.adjustments=[{id:'perception-override',target:'skill:perception',value:7,reason:'原创验收修正'}];const d=evaluate(c);expect(d.passive).toBe(17);expect(d.trace.passive[0]).toBe('基础 10 + 察觉 7');
 });
 const directory=process.env.DND_AUTOMATION_CORE_DATA;
@@ -109,7 +112,7 @@ it('explicit rest rolls and healing are atomic, bounded, persistent and refuse s
 });
 it.skipIf(!directory)('external 2014/2024 snapshots resolve real choice references and second-wind resources without name branches',()=>{
  for(const cls of ['fighter','cleric']){
-  const entries=normalizeData(JSON.parse(readFileSync(`${directory}/data_class_class-${cls}.json`,'utf8').replace(/^\uFEFF/,'')),'external');
+  const entries=reviewCoreSamples(normalizeData(readReviewedClass(`${directory}/data_class_class-${cls}.json`),'external'));
   for(const edition of ['2014','2024'] as const){const c=newCharacter(edition);c.automation=newAutomationState();const entry=entries.find(e=>e.kind==='class'&&e.source===(edition==='2024'?'XPHB':'PHB'))!;c.selections=[{id:'owner',entry,quantity:1,level:1,equipped:false}];syncFeatures(c,entries);const choices=sheetChoices(c,entries);expect(choices.find(r=>r.channel==='skills')?.count).toBe(2);
    if(cls==='cleric'&&edition==='2024'){const r=choices.find(r=>r.label==='圣职')!;expect(r.options.map(o=>o.label)).toEqual(['保护者','奇术使']);expect(r.options.every(o=>o.grant)).toBe(true);}
    if(cls==='fighter'){const r=planFeatureResources(c).grants.find(r=>r.name==='回气')!;expect(r).toBeDefined();expect(r.max).toBe(edition==='2024'?2:1);expect(r.formula).toBe('1d10 + 1');expect(r.recovery).toEqual(edition==='2024'?{short:1,long:'all'}:{short:'all',long:'all'});

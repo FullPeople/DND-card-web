@@ -46,3 +46,6 @@ test-results-choices/
 test-results-screen/
 
 __pycache__/
+test-results-automation-ir/
+test-results-feedback217/
+test-results-source-feedback/

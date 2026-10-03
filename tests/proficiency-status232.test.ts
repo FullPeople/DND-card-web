@@ -1,9 +1,10 @@
+import {irCharacter as newCharacter,irFixture} from './helpers/irFixture';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe,expect,it} from 'vitest';
 import {ProficiencyStatus} from '../src/ui/ProficiencyStatus';
 import {evaluate} from '../src/core/engine';
-import {newCharacter,type Entry} from '../src/core/model';
+import {type Entry} from '../src/core/model';
 import {validateCharacter} from '../src/core/validation';
 import {exportCharacter} from '../src/core/export';
 
@@ -18,7 +19,7 @@ describe('232 derived-only skill and saving-throw proficiency presentation',()=>
   const html=render(proficient,false,true,'save');expect(html).toContain('disabled=""');expect(html.includes('checked=""')).toBe(proficient);expect(html).toContain('豁免熟练由规则和已选能力自动计算');expect(html).not.toContain('expert');
  });
  it('follows source grant/revoke without mutating overrides, adjustments, resources or backups',()=>{
-  const c=newCharacter();const entry:Entry={id:'status-grant',name:'原创熟练授予',english:'Authored Grant',kind:'class',edition:'2024',source:'XPHB',packId:'fixture',revision:'1',raw:{proficiency:['str'],startingProficiencies:{skills:[{perception:true}]}},entries:['原创的软件验收资料。']};
+  const c=newCharacter();const entry:Entry=irFixture({id:'status-grant',name:'原创熟练授予',english:'Authored Grant',kind:'class',edition:'2024',source:'XPHB',packId:'fixture',revision:'1',raw:{proficiency:['str'],startingProficiencies:{skills:[{perception:true}]}},entries:['原创的软件验收资料。']});
   c.selections=[{id:'grant',entry,level:1,quantity:1,equipped:false}];c.expertise={stealth:true};c.proficiencies={arcana:true,'save:con':true};c.skillBonuses={perception:3,stealth:-2};c.runtime.resources={focus:{name:'专注',current:1,max:4}};
   const before=structuredClone(c),derived=evaluate(c);expect(derived.skills.perception).toMatchObject({proficient:true,value:5});expect(derived.saves.str.proficient).toBe(true);expect(render(derived.skills.perception.proficient)).toContain('checked=""');expect(c).toEqual(before);
   c.profile.disabledEntries=[entry.id];const revoked=evaluate(c);expect(revoked.skills.perception).toMatchObject({proficient:false,value:3});expect(revoked.saves.str.proficient).toBe(false);expect(render(revoked.skills.perception.proficient)).not.toContain('checked=""');expect(revoked.skills.stealth.expertise).toBe(true);expect(revoked.saves.con.proficient).toBe(true);

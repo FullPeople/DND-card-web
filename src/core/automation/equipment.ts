@@ -2,25 +2,25 @@ import type {Character,Entry,Selection,Issue} from '../model';
 import {equipmentTraining} from '../proficiencyText';
 import {automationEnabled,supportedAutomation} from './state';
 import {trainingDeclarations} from './training';
+import {irMechanics,irModifierValue,applyIrNumber} from './ir';
 
 export type ArmorType='LA'|'MA'|'HA'|'S';
 export interface EquipmentOrigin {selectionId:string;entryId:string;source:string;edition:Entry['edition'];revision:string;path:string}
 export interface ArmorRule {origin:EquipmentOrigin;slot:'armor'|'shield';type:ArmorType;base:number;dexCap?:number;usesDex:boolean;bonus:number;attunementRequired:boolean}
 export interface ArmorReport {base:number;bonus:number;trace:string[];issues:Issue[];rules:ArmorRule[]}
-const finite=(value:unknown)=>typeof value==='number'&&Number.isFinite(value)?value:typeof value==='string'&&/^[+-]?\d+(?:\.\d+)?$/.test(value.trim())?Number(value):undefined;
 export function armorType(entry:Entry):ArmorType|undefined{
  if(entry.kind!=='item')return;
- const type=String(entry.raw.type||'').split('|')[0].toUpperCase();
- return ['LA','MA','HA','S'].includes(type)?type as ArmorType:undefined;
+ return ({lightArmor:'LA',mediumArmor:'MA',heavyArmor:'HA',shield:'S'} as Record<string,ArmorType>)[irMechanics(entry)?.equipmentModel?.category||''];
 }
 /** Structured fields define a rule family. Display names never select behavior. */
 export function armorRule(row:Selection):{rule?:ArmorRule;issues:Issue[]}{
  const type=armorType(row.entry);if(!type)return {issues:[]};
- const raw=row.entry.raw,base=finite(raw.ac),bonus=raw.bonusAc===undefined?0:finite(raw.bonusAc),issues:Issue[]=[];
+ const model=irMechanics(row.entry)?.equipmentModel,base=model?.ac,bonus=0,issues:Issue[]=[];
  const issue=(message:string)=>issues.push({id:'armor-data:'+row.id,message:row.entry.name+'：'+message,severity:'warning',selectionId:row.id});
  if(base===undefined||base<0||base>100){issue('护甲基础数值未支持，请人工核对。');return {issues};}
+ if(row.entry.automation?.unsupported.some(gap=>gap.code==='equipment-bonus'&&gap.ref==='bonusAc'))issue('魔法 AC 加值未支持，未自动应用这部分。');
  if(bonus===undefined||Math.abs(bonus)>100){issue('魔法 AC 加值未支持，未自动应用这部分。');}
- return {issues,rule:{origin:{selectionId:row.id,entryId:row.entry.id,source:row.entry.source,edition:row.entry.edition,revision:row.entry.revision,path:'raw.ac'},slot:type==='S'?'shield':'armor',type,base,usesDex:type==='LA'||type==='MA',...(type==='MA'?{dexCap:2}:{}),bonus:bonus!==undefined&&Math.abs(bonus)<=100?bonus:0,attunementRequired:!!raw.reqAttune}};
+ return {issues,rule:{origin:{selectionId:row.id,entryId:row.entry.id,source:row.entry.source,edition:row.entry.edition,revision:row.entry.revision,path:'automation.mechanics.equipmentModel.ac'},slot:type==='S'?'shield':'armor',type,base,usesDex:type==='LA'||type==='MA',...(model?.dexCap!==undefined?{dexCap:model.dexCap}:{}),bonus,attunementRequired:!!model?.requiresAttunement}};
 }
 export function armorTraining(c:Character,active:Selection[]):Set<string>{
  return new Set(trainingDeclarations(c,active,'armor').map(s=>equipmentTraining(s)?.[0]).filter((s):s is NonNullable<typeof s>=>!!s));
@@ -51,6 +51,7 @@ export function evaluateArmor(c:Character,active:Selection[],dex:number):ArmorRe
   const row=rows[0];if(!row)continue;
   const converted=armorRule(row);result.issues.push(...converted.issues);if(!converted.rule)continue;
   const rule=converted.rule;result.rules.push(rule);
+  for(const modifier of irMechanics(row.entry)?.modifiers||[])if(modifier.target==='ac')try{const value=irModifierValue(c,row,modifier);if(typeof value==='number')rule.bonus=applyIrNumber(rule.bonus,modifier,value);}catch{result.issues.push({id:'armor-formula:'+row.id,selectionId:row.id,severity:'warning',message:row.entry.name+'：护甲加值公式尚未绑定。'});}
   const trained=trainings.has(({LA:'light',MA:'medium',HA:'heavy',S:'shield'} as const)[rule.type]);
   if(!trained){result.issues.push({id:'armor-training:'+row.id,selectionId:row.id,severity:'warning',message:row.entry.name+(slot==='shield'&&c.edition==='2024'?'：未记录盾牌训练，2024 规则下不计盾牌 AC。':'：未记录对应训练，相关检定和施法限制请人工核对。')});}
   if(slot==='shield'&&c.edition==='2024'&&!trained){result.trace.push(`${row.entry.name}：未训练，盾牌加值未生效`);continue;}

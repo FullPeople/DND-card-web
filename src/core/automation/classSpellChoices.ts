@@ -1,3 +1,4 @@
+import {irMechanics} from './ir';
 import {editionAllows,selectionAllowed,type Character,type Entry} from '../model';
 import {cantripCapacity,casterProfiles,spellOnClassList} from '../spellcastingRules';
 import {assignClassSpell,cantripGroups,chooseCantrip,clearCantrip,classSpellGroups,learnActiveSpell} from '../spellWorkspace';
@@ -15,22 +16,21 @@ export function classSpellChoices(c:Character,catalog:Entry[]):SheetChoice[]{
  if(!profiles.length)return [];
  const entries=[...new Map([...catalog,...c.selections.map(s=>s.entry)].filter(e=>e.kind==='spell').map(e=>[e.id,e])).values()],out:SheetChoice[]=[],groups=classSpellGroups(c),cantrips=cantripGroups(c);
  for(const p of profiles){
-  const raw=p.casting.entry.raw,ids=groups.find(g=>g.profile.owner.id===p.owner.id)?.ids||[];
+  const model=irMechanics(p.casting.entry)?.classModel||{},ids=groups.find(g=>g.profile.owner.id===p.owner.id)?.ids||[];
   const add=(kind:ClassSpellChoiceKind,label:string,capacity:number,selectedIds:string[],hint:string)=>{
    if(!capacity)return;
    const slots=selectedIds.map(id=>c.selections.find(s=>s.id===id)?.entry.id||'');
    const selected=[...new Set(slots.filter(Boolean))];
-   const options=entries.filter(e=>(kind==='cantrips'?Number(e.raw.level)===0:Number(e.raw.level)>0&&Number(e.raw.level)<=p.maxLevel)&&editionAllows(e,c.edition)&&spellOnClassList(e,p)).filter(e=>kind!=='prepared'||p.pool!=='book'||ids.some(id=>c.selections.find(s=>s.id===id)?.entry.id===e.id)).sort((a,b)=>Number(a.raw.level)-Number(b.raw.level)||a.name.localeCompare(b.name,'zh-CN')).map(entry=>({value:entry.id,label:entry.name,entry,unavailable:selectionAllowed(c,entry)?undefined:'此法术来源尚未启用。'}));
+   const options=entries.filter(e=>(kind==='cantrips'?(irMechanics(e)?.spellModel?.level??-1)===0:(irMechanics(e)?.spellModel?.level??-1)>0&&(irMechanics(e)?.spellModel?.level??-1)<=p.maxLevel)&&editionAllows(e,c.edition)&&spellOnClassList(e,p)).filter(e=>kind!=='prepared'||p.pool!=='book'||ids.some(id=>c.selections.find(s=>s.id===id)?.entry.id===e.id)).sort((a,b)=>(irMechanics(a)?.spellModel?.level??-1)-(irMechanics(b)?.spellModel?.level??-1)||a.name.localeCompare(b.name,'zh-CN')).map(entry=>({value:entry.id,label:entry.name,entry,unavailable:selectionAllowed(c,entry)?undefined:'此法术来源尚未启用。'}));
    out.push({id:`${p.owner.id}:spells:${kind}`,ownerId:p.owner.id,label,count:capacity,options,selected,slots,complete:selected.length>=capacity,restricted:!!c.spellSettings?.modeOverride,channel:'spells',spellKind:kind,hint:c.spellSettings?.modeOverride?'施法模式已手动覆盖，请在法术页恢复“跟随职业”后选择。':hint});
   };
   add('cantrips','戏法',cantripCapacity(p,c),cantrips.find(g=>g.id===p.owner.id)?.slots||[],'戏法单独计数；选择会直接填入法术页的该职业戏法格。');
   if(p.maxLevel<1)continue;
   if(p.pool==='book'){
-   const fixed=raw.spellsKnownProgressionFixed;
-   const capacity=Array.isArray(fixed)&&fixed.slice(0,p.owner.level).every(n=>typeof n==='number'&&Number.isSafeInteger(n)&&n>=0)?count(fixed.slice(0,p.owner.level).reduce((n,v)=>n+v,0)):0;
+   const capacity=count(model.bookProgression?.[p.owner.level-1]);
    add('book','法术书',capacity,ids,'选择职业授予的法术书法术。额外抄录仍可在法术页记录；预备法术只能从书中选择。');
   }
-  if(p.mode==='known')add('learned','职业法术',count(raw.spellsKnownProgression?.[p.owner.level-1]??raw.preparedSpellsProgression?.[p.owner.level-1]),ids,'按该职业的等级数量表选择。更换时机请按该职业原文；赠送法术另计。');
+  if(p.mode==='known')add('learned','职业法术',count(model.knownProgression?.[p.owner.level-1]??model.preparedProgression?.[p.owner.level-1]),ids,'按该职业的等级数量表选择。更换时机请按该职业原文；赠送法术另计。');
   // Daily preparation belongs to the spell page, not opening character choices.
   // Merely listing these tasks must not clear or migrate saved prepared spells.
  }

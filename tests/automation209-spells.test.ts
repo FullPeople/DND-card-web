@@ -1,5 +1,7 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Entry,type Selection} from '../src/core/model';
+import {type Character,type Entry,type Selection} from '../src/core/model';
 import {newAutomationState,setAutomationEnabled} from '../src/core/automation/state';
 import {planSourceSpells,syncSourceSpells} from '../src/core/automation/sourceSpells';
 import {changeSpecialSpellUses,setSpecialSpell,specialSpellResource} from '../src/core/specialSpells';
@@ -11,7 +13,7 @@ import {readCharacter} from '../src/core/validation';
 import {exportOwlbear} from '../src/core/export';
 import {evaluate} from '../src/core/engine';
 
-function entry(id:string,kind:Entry['kind'],raw:Entry['raw']={},source='XPHB'):Entry{return {id,kind,name:id,english:id,source,edition:source==='XPHB'?'2024':'2014',packId:'fixture',revision:'1',entries:['原创软件验收条目。'],raw};}
+function entry(id:string,kind:Entry['kind'],raw:Entry['raw']={},source='XPHB'):Entry{return irFixture({id,kind,name:id,english:id,source,edition:source==='XPHB'?'2024':'2014',packId:'fixture',revision:'1',entries:['原创软件验收条目。'],raw});}
 const spells=[entry('测试光', 'spell',{level:0}),entry('测试盾','spell',{level:1}),entry('测试门','spell',{level:2})];
 function setup(){const c=newCharacter();c.automation=newAutomationState();c.spellSettings={...spellState(c),mode:'prepared',modeOverride:true,capacity:5,capacityAdjustment:5};return c;}
 function source(c:Character,raw:Entry['raw'],kind:Entry['kind']='race',id='来源'):Selection{const row={id,entry:entry(id,kind,raw),quantity:1,level:1,equipped:false};c.selections.push(row);return row;}
@@ -49,7 +51,7 @@ describe('source-owned fixed spell grants',()=>{
   const c=setup();source(c,{additionalSpells:[{innate:{'_':{daily:{'1':['测试盾|XPHB']}}}}]});syncSourceSpells(c,spells);const id=grant(c).id;delete c.runtime.resources[specialSpellResource(id)];syncFeatures(c,spells);syncSourceSpells(c,spells);expect(grant(c).id).toBe(id);expect(resource(c).current).toBe(0);
  });
  it('resolves default PHB sources without merging 2014 and 2024 or ambiguous identities',()=>{
-  const c=setup();source(c,{additionalSpells:[{known:{'_':['测试盾']}}]});const old=entry('测试盾','spell',{level:1},'PHB');old.id='old';syncSourceSpells(c,[old,...spells]);expect(grant(c)).toBeUndefined();c.profile.optional.legacy=true;syncSourceSpells(c,[old,...spells]);expect(grant(c).entry.source).toBe('PHB');
+  const c=setup(),owner=source(c,{additionalSpells:[{known:{'_':['测试盾']}}]});owner.entry=irFixture({...owner.entry,source:'PHB',edition:'2014'});const old=entry('测试盾','spell',{level:1},'PHB');old.id='old';syncSourceSpells(c,[old,...spells]);expect(grant(c)).toBeUndefined();c.profile.optional.legacy=true;syncSourceSpells(c,[old,...spells]);expect(grant(c).entry.source).toBe('PHB');
   const other=setup();source(other,{additionalSpells:[{known:{'_':['测试盾|XPHB']}}]});const duplicate={...spells[1],id:'another-identity'};expect(planSourceSpells(other,[...spells,duplicate]).issues.some(i=>i.message.includes('多个身份'))).toBe(true);syncSourceSpells(other,[...spells,duplicate]);expect(grant(other)).toBeUndefined();
  });
  it('records explicit set and ability choices without guessing or resetting resources when switched',()=>{

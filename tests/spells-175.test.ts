@@ -1,5 +1,7 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,expect,it} from 'vitest';
-import {newCharacter,type Character,type Entry,type Selection} from '../src/core/model';
+import {type Character,type Entry,type Selection} from '../src/core/model';
 import {syncAutoResources,setResource} from '../src/core/resources';
 import {spellState} from '../src/core/characterDetails';
 import {togglePreparedSpell} from '../src/core/spells';
@@ -8,7 +10,7 @@ import {syncFeatures} from '../src/core/sheet';
 import {exportCharacter} from '../src/core/export';
 import {validateCharacter} from '../src/core/validation';
 
-const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={},source='XPHB'):Entry=>({id:`${source}:${kind}:${name}`,name,english:raw.ENG_name||name,kind,raw,source,edition:'both',packId:'test',revision:'1',entries:['规则正文']});
+const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={},source='XPHB'):Entry=>(irFixture({id:`${source}:${kind}:${name}`,name,english:raw.ENG_name||name,kind,raw,source,edition:'both',packId:'test',revision:'1',entries:['规则正文']}));
 const add=(c:Character,e:Entry,level=1):Selection=>{const s={id:e.id,entry:e,level,quantity:1,equipped:false};c.selections.push(s);return s;};
 describe('spell page state and source-qualified subclass ownership',()=>{
  it('initializes spell-page slots on the first caster edit and updates levels without restoring used slots',()=>{
@@ -29,8 +31,8 @@ describe('spell page state and source-qualified subclass ownership',()=>{
  it('follows the subclass main class level, with declared feature attribution across class and source collisions',()=>{
   const c=newCharacter();c.profile.optional.legacy=true;
   const a=add(c,entry('class','甲',{ENG_name:'Alpha'}),7),b=add(c,entry('class','乙'),4);
-  const sa=add(c,entry('subclass','甲的新学派',{shortName:'学派',className:'甲',classSource:'XPHB',subclassFeatures:['能力|Alpha|XPHB|学派|XPHB|6']}));sa.parentId=a.id;
-  const sb=add(c,entry('subclass','乙的新学派',{shortName:'学派',className:'乙',classSource:'XPHB'}));sb.parentId=b.id;
+  const sa=add(c,entry('subclass','甲的新学派',{shortName:'学派',className:'甲',classSource:'XPHB',subclassFeatures:['能力|Alpha|XPHB|学派|XPHB|6']}));sa.parentId=a.id;sa.entry=irFixture(sa.entry,undefined,[a.entry,sa.entry]);
+  const sb=add(c,entry('subclass','乙的新学派',{shortName:'学派',className:'乙',classSource:'XPHB'}));sb.parentId=b.id;sb.entry=irFixture(sb.entry,undefined,[b.entry,sb.entry]);
   const old=add(c,entry('subclass','旧学派',{shortName:'学派',className:'甲',classSource:'PHB'},'PHB'));
   const f=entry('feature','能力',{className:'Alpha',classSource:'XPHB',subclassShortName:'学派',subclassSource:'XPHB',level:6});const child=add(c,f);syncFeatures(c,[f]);
   expect([sa.level,sb.level]).toEqual([7,4]);expect(featureOwner(c,child)?.id).toBe(sa.id);expect(child.parentId).toBe(sa.id);expect(selectionLevel(c,sa)).toBe(7);expect(featureOwner(c,child)?.id).not.toBe(old.id);

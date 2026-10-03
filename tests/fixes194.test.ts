@@ -1,5 +1,9 @@
+import {planClassMigration} from '../src/core/classMigration';
+import {copyWithIrAutomation} from '../src/core/automation/upgrade';
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Entry} from '../src/core/model';
+import {type Character,type Entry} from '../src/core/model';
 import {candidateReason,evaluate} from '../src/core/engine';
 import {inlineLabel} from '../src/core/inlineTags';
 import {plainText,exportCharacter,exportOwlbear} from '../src/core/export';
@@ -9,7 +13,7 @@ import {spellState} from '../src/core/characterDetails';
 import {setPreparedSpell} from '../src/core/spells';
 import {reviewImport} from '../src/core/importReview';
 import {createCustomEntry} from '../src/core/customEntries';
-const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id:`fixture:${kind}:${name}`,kind,name,english:name,raw,source:'PHB',edition:'2014',packId:'fixture',revision:'1',entries:['软件验收自制正文。']});
+const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>(irFixture({id:`fixture:${kind}:${name}`,kind,name,english:name,raw,source:'PHB',edition:'2014',packId:'fixture',revision:'1',entries:['软件验收自制正文。']}));
 function add(c:Character,e:Entry,level=1){const s={id:e.id,entry:e,level,quantity:1,equipped:false};c.selections.push(s);return s;}
 describe('194 reported regressions',()=>{
  it('does not export every known spell as prepared when an old backup has no spellSettings',()=>{
@@ -33,10 +37,10 @@ describe('194 reported regressions',()=>{
   restored.abilities.con=16;expect(evaluate(restored).maxHp).toBe(39);restored.baseHp=50;expect(evaluate(restored).maxHp).toBe(50);
   restored.baseHp=0;restored.hpProgression!.mode='average';expect(evaluate(restored).maxHp).toBe(41);
  });
- it('restores imported spellbook casting declarations without forcing custom classes or duplicates',()=>{
+ it('explicit review copies an imported spellbook without forcing custom classes or duplicates',()=>{
   const legacy={schema_version:'0.3',meta:{ruleset:'2014'},identity:{character_name:'导入法术书'},abilities:Object.fromEntries(['str','dex','con','int','wis','cha'].map(a=>[a,{total:a==='int'?16:10}])),classes:[{name:'测试书法师',level:4}],spellcasting:{prepared:[],always_known:[{name:'一环测试',level:1}]}};
   const c=importOwlbear(legacy),book=entry('class','测试书法师',{casterProgression:'full',spellcastingAbility:'int',preparedSpells:'<$level$> + <$int_mod$>',spellsKnownProgressionFixed:[6,2,2,2]});
-  expect(c.spellSettings?.mode).toBe('known');expect(hydrateImportedCasting(c,[book])).toBe(true);expect(spellState(c).mode).toBe('prepared');expect(spellState(c).capacity).toBe(7);
+  expect(c.spellSettings?.mode).toBe('known');const before=structuredClone(c);expect(hydrateImportedCasting(c,[book])).toBe(false);expect(c).toEqual(before);const approved=copyWithIrAutomation(c,[]),owner=approved.selections.find(row=>row.entry.kind==='class')!;Object.assign(c,planClassMigration(approved,[book],{[owner.id]:book.id},{id:'reviewed-book',now:'2026-10-03T00:00:00Z'}).card);expect(spellState(c).mode).toBe('prepared');expect(spellState(c).capacity).toBe(7);
   const spell=c.selections.find(s=>s.entry.kind==='spell')!;expect(setPreparedSpell(c,spell.id,true)).toBe(true);expect(setPreparedSpell(c,spell.id,false)).toBe(true);expect(c.selections.filter(s=>s.entry.kind==='spell')).toHaveLength(1);
   expect(hydrateImportedCasting(c,[book])).toBe(false);
   const ambiguous=importOwlbear(legacy);expect(hydrateImportedCasting(ambiguous,[book,{...book,id:'second'}])).toBe(false);

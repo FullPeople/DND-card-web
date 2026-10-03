@@ -1,5 +1,7 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,selectionAllowed,selectionEffectsAllowed,type Entry} from '../src/core/model';
+import {selectionAllowed,selectionEffectsAllowed,type Entry} from '../src/core/model';
 import {evaluate} from '../src/core/engine';
 import {selectionActive} from '../src/core/automation/choices';
 import {planFeatureResources,syncFeatureResources} from '../src/core/automation/featureResources';
@@ -12,12 +14,12 @@ import {characterReview} from '../src/core/characterReview';
 import {exportCharacter} from '../src/core/export';
 import {validateCharacter} from '../src/core/validation';
 
-const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>({id,name:id,english:id,kind,source:'PHB',edition:'2014',packId:'fixture',revision:'original',entries:[],raw});
+const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>(irFixture({id,name:id,english:id,kind,source:'PHB',edition:'2014',packId:'fixture',revision:'original',entries:[],raw}));
 function card(){
  const c=newCharacter('2014');c.automation=newAutomationState();c.abilities.con=14;
  c.selections=[
   {id:'class',entry:entry('Original Scholar','class',{hd:{faces:6},casterProgression:'full',spellcastingAbility:'int',preparedSpellsProgression:[2],cantripProgression:[1]}),level:1,quantity:1,equipped:false},
-  {id:'feature',parentId:'class',entry:{...entry('Original Feature','feature',{className:'Original Scholar',classSource:'PHB',level:1,cantripBonus:1,resources:[{name:'耐力次数',max:'@abilities.con.mod',recovery:'long'}],additionalSpells:[{ability:'int',innate:{'1':{daily:{'1':['Gift|PHB']}}}}]}),effects:[{op:'proficiency',skill:'arcana'},{op:'add',target:'int',value:2}]},level:1,quantity:1,equipped:false},
+  {id:'feature',parentId:'class',entry:irFixture({...entry('Original Feature','feature',{className:'Original Scholar',classSource:'PHB',level:1,cantripBonus:1,resources:[{name:'耐力次数',max:'@abilities.con.mod',recovery:'long'}],additionalSpells:[{ability:'int',innate:{'1':{daily:{'1':['Gift|PHB']}}}}]}),effects:[{op:'proficiency',skill:'arcana'},{op:'add',target:'int',value:2}]}),level:1,quantity:1,equipped:false},
   {id:'race',entry:entry('Original Race','race',{ability:[{con:2}],speed:25}),level:1,quantity:1,equipped:false},
  ];
  const spell=entry('Gift','spell',{level:1});syncSourceSpells(c,[spell]);syncFeatureResources(c);
@@ -49,7 +51,7 @@ describe('owned source effects across card editions',()=>{
   expect(evaluate(c).abilities.int).toBe(12);expect(c.runtime.resources[grant.key]).toMatchObject({max:3,current:1});expect(sourceSpellEnabled(c,gift.id)).toBe(false);
  });
  it('retains feat opt-outs, exceptions and explicit disabled-entry priority',()=>{
-  const c=newCharacter('2024'),feat:Entry={...entry('Original Feat','feat'),effects:[{op:'add' as const,target:'str',value:2}]};c.selections=[{id:'feat',entry:feat,level:1,quantity:1,equipped:false}];
+  const c=newCharacter('2024'),feat:Entry=irFixture({...entry('Original Feat','feat'),effects:[{op:'add' as const,target:'str',value:2}]});c.selections=[{id:'feat',entry:feat,level:1,quantity:1,equipped:false}];
   expect(evaluate(c).abilities.str).toBe(12);c.profile.optional.feats=false;expect(evaluate(c).abilities.str).toBe(10);
   c.profile.exceptions[feat.id]='DM批准';expect(evaluate(c).abilities.str).toBe(12);c.profile.disabledEntries=[feat.id];expect(evaluate(c).abilities.str).toBe(10);expect(selectionAllowed(c,feat)).toBe(false);
  });

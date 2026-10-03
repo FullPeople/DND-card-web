@@ -1,7 +1,9 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter,normalizeFixtureData as normalizeData} from './helpers/irFixture';
 import {planFeatureResources} from '../src/core/automation/featureResources';
 import {describe,expect,it} from 'vitest';
-import {newCharacter,type Character,type Entry} from '../src/core/model';
-import {normalizeData} from '../src/data/catalog';
+import {type Character,type Entry} from '../src/core/model';
+
 import {newAutomationState} from '../src/core/automation/state';
 import {backgroundAbilityOptions} from '../src/core/automation/backgroundAbilities';
 import {sourceEquipmentKey,sourceEquipmentReceipt} from '../src/core/automation/sourceEquipment';
@@ -29,11 +31,11 @@ describe('source choice bubbles and saved background allocations',()=>{
   const c=card();c.backgroundChoices={'background-owner':{abilities:{int:2,cha:1},equipment:{'0':'B'}}};
   const before=structuredClone(c);expect(sheetChoices(c,catalog).find(choice=>choice.channel==='abilities')?.complete).toBe(true);expect(c).toEqual(before);
   c.backgroundChoices['background-owner'].abilities={int:5};const manual=structuredClone(c);expect(sheetChoices(c,catalog).find(choice=>choice.channel==='abilities')?.complete).toBe(false);expect(c).toEqual(manual);
-  c.selections[0].entry.raw.ability=[{unsupported:true}];const unknown=sheetChoices(c,catalog).find(choice=>choice.channel==='abilities')!;expect(unknown.options).toEqual([]);expect(unknown.hint).toContain('尚未支持');expect(c.backgroundChoices['background-owner'].abilities).toEqual({int:5});
+  c.selections[0].entry.raw.ability=[{unsupported:true}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));const unknown=sheetChoices(c,catalog).find(choice=>choice.channel==='abilities')!;expect(unknown.options).toEqual([]);expect(unknown.hint).toContain('尚未支持');expect(c.backgroundChoices['background-owner'].abilities).toEqual({int:5});
  });
  it('enumerates equal-weight allocations once and rejects unsupported or invalid declarations',()=>{
-  const entry=structuredClone(catalog[0]);entry.raw.ability=[{choose:{from:['str','dex','con'],count:2,amount:1}}];expect(backgroundAbilityOptions(entry)).toHaveLength(3);
-  for(const ability of [[{choose:{from:['str'],count:2}}],[{choose:{weighted:{from:['str','dex'],weights:[-1,2]}}}],[{unknown:2}]]){entry.raw.ability=ability;expect(backgroundAbilityOptions(entry)).toEqual([]);}
+  const entry=structuredClone(catalog[0]);entry.raw.ability=[{choose:{from:['str','dex','con'],count:2,amount:1}}];Object.assign(entry,irFixture(entry));expect(backgroundAbilityOptions(entry)).toHaveLength(3);
+  for(const ability of [[{choose:{from:['str'],count:2}}],[{choose:{weighted:{from:['str','dex'],weights:[-1,2]}}}],[{unknown:2}]]){entry.raw.ability=ability;Object.assign(entry,irFixture(entry));expect(backgroundAbilityOptions(entry)).toEqual([]);}
  });
 });
 
@@ -62,31 +64,31 @@ describe('background equipment receipts and explicit claims',()=>{
   const c=card(),fixed=catalog.find(e=>e.name==='固定用品')!;c.inventory={view:'grid',order:[],attunementLimit:3,coins:{cp:0,sp:0,ep:0,gp:2,pp:0},grantedCoins:{'background-owner|equipment:0':5}};c.selections.push({id:'old-fixed',entry:fixed,parentId:'background-owner',grantKey:'equipment:0:_:0',quantity:2,level:1,equipped:false});
   syncFeatures(c,catalog);expect(equipment(c).complete).toBe(false);claimStartingEquipment(c,equipment(c).id,'A',catalog);expect(c.inventory.coins.gp).toBe(5);expect(c.selections.filter(row=>row.entry.name==='固定用品')).toHaveLength(1);expect(c.selections.find(row=>row.id==='old-fixed')?.quantity).toBe(2);
  });
- it('late catalog hydration fills fixed and chosen placeholders without changing quantities or regranting coins',()=>{
-  const c=card();syncFeatures(c,[]);claimStartingEquipment(c,equipment(c).id,'A',[]);const goods=c.selections.filter(row=>row.entry.kind==='item');expect(goods.every(row=>row.entry.raw._equipmentRef)).toBe(true);goods[0].quantity=4;goods[0].equipped=true;const retained=goods[0].id,removed=goods[1].id;removeSelection(c,removed);c.inventory!.coins.gp=2;
+ it('late catalogue arrival enables an atomic claim and later hydration never restores spent goods',()=>{
+  const c=card();syncFeatures(c,[]);const before=structuredClone(c);expect(()=>claimStartingEquipment(c,equipment(c).id,'A',[])).toThrow(/未发放/);expect(c).toEqual(before);syncFeatures(c,catalog);claimStartingEquipment(c,equipment(c).id,'A',catalog);const goods=c.selections.filter(row=>row.entry.kind==='item');expect(goods.every(row=>!row.entry.raw._equipmentRef)).toBe(true);goods[0].quantity=4;goods[0].equipped=true;const retained=goods[0].id,removed=goods[1].id;removeSelection(c,removed);c.inventory!.coins.gp=2;
   for(let n=0;n<4;n++)syncFeatures(c,catalog);expect(c.selections.filter(row=>row.entry.kind==='item')).toHaveLength(1);expect(c.selections.find(row=>row.id===retained)).toMatchObject({quantity:4,equipped:true});expect(c.selections.find(row=>row.id===retained)?.entry.raw._equipmentRef).toBeUndefined();expect(c.inventory!.coins.gp).toBe(2);
  });
  it('fixed-only sources auto-grant once and invalid shapes remain pending without partial inventory writes',()=>{
-  const entry=structuredClone(catalog[0]);entry.raw.startingEquipment=[{_:[{special:'固定纪念品'},{value:200}]}];const c=card(entry);syncFeatures(c,[]);expect(equipment(c).complete).toBe(true);expect(c.inventory?.coins.gp).toBe(2);removeSelection(c,c.selections.find(row=>row.entry.kind==='item')!.id);syncFeatures(c,[]);expect(c.selections.filter(row=>row.entry.kind==='item')).toHaveLength(0);
-  const invalid=card();invalid.selections[0].entry.raw.startingEquipment=[{A:{unknown:true}}];const before=structuredClone(invalid);syncFeatures(invalid,[]);expect(invalid).toEqual(before);expect(()=>claimStartingEquipment(invalid,equipment(invalid).id,'A',[])).toThrow(/尚未支持/);expect(invalid).toEqual(before);
-  invalid.selections[0].entry.raw.startingEquipment=[{A:[{unknown:true}]}];const unknown=structuredClone(invalid);syncFeatures(invalid,[]);expect(invalid).toEqual(unknown);expect(()=>claimStartingEquipment(invalid,equipment(invalid).id,'A',[])).toThrow(/尚未支持/);expect(invalid).toEqual(unknown);
+  const entry=structuredClone(catalog[0]);const token=irFixture({...catalog.find(e=>e.kind==='item')!,id:'fixed-token',name:'固定纪念品',english:'Fixed Token',raw:{}});entry.raw.startingEquipment=[{_:[{item:'固定纪念品|XPHB'},{value:200}]}];Object.assign(entry,irFixture(entry,undefined,[entry,token]));const c=card(entry);syncFeatures(c,[token]);expect(equipment(c).complete).toBe(true);expect(c.inventory?.coins.gp).toBe(2);removeSelection(c,c.selections.find(row=>row.entry.kind==='item')!.id);syncFeatures(c,[]);expect(c.selections.filter(row=>row.entry.kind==='item')).toHaveLength(0);
+  const invalid=card();invalid.selections[0].entry.raw.startingEquipment=[{A:{unknown:true}}];Object.assign(invalid.selections[0].entry,irFixture(invalid.selections[0].entry));const before=structuredClone(invalid);syncFeatures(invalid,[]);expect(invalid).toEqual(before);expect(()=>claimStartingEquipment(invalid,equipment(invalid).id,'A',[])).toThrow(/尚未支持/);expect(invalid).toEqual(before);
+  invalid.selections[0].entry.raw.startingEquipment=[{A:[{unknown:true}]}];Object.assign(invalid.selections[0].entry,irFixture(invalid.selections[0].entry));const unknown=structuredClone(invalid);syncFeatures(invalid,[]);expect(invalid).toEqual(unknown);expect(()=>claimStartingEquipment(invalid,equipment(invalid).id,'A',[])).toThrow(/尚未支持/);expect(invalid).toEqual(unknown);
  });
  it('rejects malformed packages and excessive balances atomically, keeping unsupported choices pending',()=>{
   for(const packageItems of [[{unknown:true}],[null],[{item:'选装用品|XPHB',quantity:0}],[{item:'选装用品|XPHB'},{value:-100}]]){
-   const c=card();c.selections[0].entry.raw.startingEquipment=[{A:packageItems,B:[{value:100}]}];
+   const c=card();c.selections[0].entry.raw.startingEquipment=[{A:packageItems,B:[{value:100}]}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));
    const before=structuredClone(c);const choice=equipment(c);expect(choice.complete).toBe(false);expect(()=>claimStartingEquipment(c,choice.id,'A',catalog)).toThrow();expect(c).toEqual(before);
   }
   const c=card();syncFeatures(c,catalog);c.inventory!.coins.gp=999999;const before=structuredClone(c);expect(()=>claimStartingEquipment(c,equipment(c).id,'A',catalog)).toThrow(/上限/);expect(c).toEqual(before);
  });
  it('shows malformed source equipment as pending instead of throwing while reading the card',()=>{
   for(const declaration of [[null],[{A:null}]]){
-   const c=card();c.selections[0].entry.raw.startingEquipment=declaration;c.backgroundChoices={'background-owner':{equipment:{'0':'A'}}};const before=structuredClone(c);
+   const c=card();c.selections[0].entry.raw.startingEquipment=declaration;Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));c.backgroundChoices={'background-owner':{equipment:{'0':'A'}}};const before=structuredClone(c);
    expect(()=>sheetChoices(c,catalog)).not.toThrow();expect(equipment(c).complete).toBe(false);expect(equipment(c).hint).toContain('尚未支持');expect(()=>syncFeatures(c,catalog)).not.toThrow();expect(c).toEqual(before);
   }
  });
  it('rejects malformed imported scalar names and money before any inventory writes',()=>{
   for(const invalid of [{special:{oops:true}},{special:42},{item:{ref:'rope|XPHB'}},{item:42},{value:true},{containsValue:'100'},{quantity:'2',special:'token'},{special:'x'.repeat(301)},{item:'x'.repeat(301)+'|XPHB'},'x'.repeat(301)+'|XPHB']){
-   const c=card();c.selections[0].entry.raw.startingEquipment=[{A:[{item:'固定用品|XPHB'},invalid]}];const before=structuredClone(c);expect(()=>syncFeatures(c,catalog)).not.toThrow();expect(c).toEqual(before);expect(()=>claimStartingEquipment(c,equipment(c).id,'A',catalog)).toThrow();expect(c).toEqual(before);
+   const c=card();c.selections[0].entry.raw.startingEquipment=[{A:[{item:'固定用品|XPHB'},invalid]}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));const before=structuredClone(c);expect(()=>syncFeatures(c,catalog)).not.toThrow();expect(c).toEqual(before);expect(()=>claimStartingEquipment(c,equipment(c).id,'A',catalog)).toThrow();expect(c).toEqual(before);
   }
  });
  it('validates receipt input on import rather than accepting malformed persistent grant history',()=>{
@@ -113,13 +115,13 @@ describe('source-owned racial ability scores',()=>{
   const d=evaluate(restored);expect(restored.abilities.con).toBe(16);expect(d.abilities.con).toBe(18);expect(d.trace.con).toEqual(['基础 16','种族：验收矮人 · PHB +2']);expect(d.issues.some(issue=>issue.id==='racial-ability:legacy:race-owner')).toBe(false);expect(restored.racialAbilityMode).toBeUndefined();expect(c).toEqual(before);
  });
  it('uses the same racial total in ability-linked resource formulas',()=>{
-  const c=dwarf();c.automation=newAutomationState();c.selections[0].entry.raw.resources=[{name:'体质次数',max:'@abilities.con.mod',recovery:'long'}];expect(planFeatureResources(c).grants[0].max).toBe(evaluate(c).modifiers.con);expect(planFeatureResources(c).grants[0].max).toBe(3);
-  c.selections[0].entry.effects=[{op:'add',target:'con',value:2}];expect(planFeatureResources(c).grants[0].max).toBe(3);delete c.selections[0].entry.effects;
+  const c=dwarf();c.automation=newAutomationState();c.selections[0].entry.raw.resources=[{name:'体质次数',max:'@abilities.con.mod',recovery:'long'}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));expect(planFeatureResources(c).grants[0].max).toBe(evaluate(c).modifiers.con);expect(planFeatureResources(c).grants[0].max).toBe(3);
+  c.selections[0].entry.effects=[{op:'add',target:'con',value:2}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));expect(planFeatureResources(c).grants[0].max).toBe(3);delete c.selections[0].entry.effects;
   delete c.racialAbilityMode;expect(planFeatureResources(c).grants[0].max).toBe(3);c.racialAbilityMode='separate-v1';c.edition='2024';c.profile.optional.legacy=false;expect(planFeatureResources(c).grants[0].max).toBe(3);
  });
  it('does not duplicate existing explicit rule effects or silently resolve optional racial allocations',()=>{
-  const c=dwarf();c.selections[0].entry.effects=[{op:'add',target:'con',value:2}];expect(evaluate(c).abilities.con).toBe(16);
-  delete c.selections[0].entry.effects;c.selections[0].entry.raw.ability=[{choose:{from:['con','str'],count:1,amount:2}}];expect(evaluate(c).abilities.con).toBe(14);expect(evaluate(c).issues.some(issue=>issue.id==='racial-ability:unsupported:race-owner')).toBe(true);
+  const c=dwarf();c.selections[0].entry.effects=[{op:'add',target:'con',value:2}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));expect(evaluate(c).abilities.con).toBe(16);
+  delete c.selections[0].entry.effects;c.selections[0].entry.raw.ability=[{choose:{from:['con','str'],count:1,amount:2}}];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));expect(evaluate(c).abilities.con).toBe(14);expect(evaluate(c).issues.some(issue=>issue.id==='racial-ability:unsupported:race-owner')).toBe(true);
   c.racialAbilityMode='unknown' as any;expect(()=>validateCharacter(c)).toThrow(/种族属性计算版本/);
  });
 });

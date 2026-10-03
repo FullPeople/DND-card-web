@@ -1,0 +1,16 @@
+{
+  "same": [
+    [{"kind":"classFeature","source":"phb","engName":"  Second   Wind ","classSource":"phb","classEngName":"Ｆｉｇｈｔｅｒ","level":1},{"kind":"classFeature","source":"PHB","engName":"Second Wind","classSource":"PHB","classEngName":"Fighter","level":1}],
+    [{"kind":"spell","source":"XPHB","engName":"Magic Missile"},{"packId":"kiwee","kind":"spell","source":"xphb","engName":"magic missile"}]
+  ],
+  "different": [
+    [{"kind":"spell","source":"PHB","engName":"Magic Missile"},{"kind":"spell","source":"XPHB","engName":"Magic Missile"}],
+    [{"kind":"classFeature","source":"PHB","engName":"Spellcasting","classSource":"PHB","classEngName":"Cleric","level":1},{"kind":"classFeature","source":"PHB","engName":"Spellcasting","classSource":"PHB","classEngName":"Wizard","level":1}],
+    [{"kind":"feat","source":"PHB","engName":"Synthetic","packId":"kiwee"},{"kind":"feat","source":"PHB","engName":"Synthetic","packId":"kiwee-homebrew"}]
+  ],
+  "invalid": [
+    {"kind":"feat","source":"PHB","engName":"原创中文身份"},
+    {"kind":"classFeature","source":"PHB","engName":"Synthetic","classSource":"PHB","level":1},
+    {"kind":"classFeature","source":"PHB","engName":"Synthetic","classSource":"PHB","classEngName":"Fighter","level":21}
+  ]
+}

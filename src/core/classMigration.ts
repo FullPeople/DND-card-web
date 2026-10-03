@@ -12,7 +12,7 @@ const stable=(value:unknown):string=>JSON.stringify(value,(_,v)=>v&&typeof v==='
 export const sameClassSnapshot=(a:Entry,b:Entry)=>stable(a)===stable(b);
 // Cache revisions, translated prose and display metadata do not change rules.
 const classRuleKeys=['hd','proficiency','savingThrows','startingProficiencies','multiclassing','classFeatures','casterProgression','spellcastingAbility','preparedSpells','preparedSpellsProgression','preparedSpellsChange','spellsKnownProgression','spellsKnownProgressionFixed','cantripProgression','cantripChange','optionalfeatureProgression'] as const;
-export const classRuleSnapshot=(e:Entry)=>({effects:e.effects,choices:e.choices,raw:Object.fromEntries(classRuleKeys.filter(k=>e.raw[k]!==undefined).map(k=>[k,e.raw[k]]))});
+export const classRuleSnapshot=(e:Entry)=>e.automation?{automation:{identity:e.automation.identity,verdict:e.automation.verdict,mechanics:e.automation.mechanics,unsupported:e.automation.unsupported}}:({effects:e.effects,choices:e.choices,raw:Object.fromEntries(classRuleKeys.filter(k=>e.raw[k]!==undefined).map(k=>[k,e.raw[k]]))});
 export const sameClassRules=(a:Entry,b:Entry)=>stable(classRuleSnapshot(a))===stable(classRuleSnapshot(b));
 export type ClassReview={row:Selection;status:'current'|'updated'|'unlinked'|'edition'|'unavailable'|'custom';suggested?:Entry;message:string};
 

@@ -1,7 +1,7 @@
 import {it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {newCharacter,type Selection} from '../src/core/model';
-import {normalizeData} from '../src/data/catalog';
+import {normalizeFixtureData as normalizeData} from './helpers/irFixture';
 import {evaluate} from '../src/core/engine';
 import {newAutomationState} from '../src/core/automation/state';
 import {automaticWeaponAttacks} from '../src/core/automation/weapons';
@@ -28,8 +28,8 @@ it.skipIf(!path)('real base equipment in both editions follows the independently
 
 const featsFile=process.env.DND_AUTOMATION_FEATS;
 it.skipIf(!directory||!featsFile)('real multi-spell daily data requires clarification instead of mistaking per-spell grants for a shared pool',()=>{
- const feats=normalizeData(JSON.parse(readFileSync(featsFile!,'utf8').replace(/^\uFEFF/,'')),'external-corpus');
- const catalog=normalizeData(JSON.parse(readFileSync(`${directory}/data_spells_spells-xphb.json`,'utf8').replace(/^\uFEFF/,'')),'external-corpus');
+ const combined=normalizeData({...JSON.parse(readFileSync(featsFile!,'utf8').replace(/^\uFEFF/,'')),spell:JSON.parse(readFileSync(`${directory}/data_spells_spells-xphb.json`,'utf8').replace(/^\uFEFF/,'')).spell},'external-corpus');
+ const feats=combined.filter(e=>e.kind==='feat'),catalog=combined.filter(e=>e.kind==='spell');
  // This real snapshot's prose says each spell has a use, while its key omits "e".
  const feat=feats.find(e=>e.english==='Mark of Handling'&&e.raw.additionalSpells?.[0]?.prepared?._?.daily?.['1']?.length===2)!;expect(feat).toBeDefined();
  const c=newCharacter();c.automation=newAutomationState();c.profile.enabledSources.push(feat.source);c.selections=[{id:'feat',entry:feat,level:1,quantity:1,equipped:false}];
@@ -39,8 +39,9 @@ it.skipIf(!directory||!featsFile)('real multi-spell daily data requires clarific
 });
 
 it.skipIf(!directory)('real 2014 and 2024 domain spell grants resolve translated UIDs to their own edition and remain source owned',()=>{
- const load=(name:string)=>normalizeData(JSON.parse(readFileSync(`${directory}/${name}`,'utf8').replace(/^\uFEFF/,'')),'external-corpus');
- const classes=load('data_class_class-cleric.json'),catalog=[...load('data_spells_spells-phb.json'),...load('data_spells_spells-xphb.json')];
+ const load=(name:string)=>JSON.parse(readFileSync(`${directory}/${name}`,'utf8').replace(/^\uFEFF/,''));
+ const combined=normalizeData({...load('data_class_class-cleric.json'),spell:[...load('data_spells_spells-phb.json').spell,...load('data_spells_spells-xphb.json').spell]},'external-corpus');
+ const classes=combined.filter(e=>e.kind!=='spell'),catalog=combined.filter(e=>e.kind==='spell');
  for(const [edition,source,expected] of [['2014','PHB',5],['2024','XPHB',4]] as const){
   const c=newCharacter(edition);c.automation=newAutomationState();
   const cls=classes.find(e=>e.kind==='class'&&e.source===source)!;

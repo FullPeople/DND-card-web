@@ -1,2 +1,3 @@
-export const automationDevelopment=import.meta.env.MODE==='automation-standalone';
-export const standalone=import.meta.env.MODE==='standalone'||automationDevelopment;
+const mode=import.meta.env?.MODE;
+export const automationDevelopment=mode==='automation-standalone';
+export const standalone=mode==='standalone'||automationDevelopment;

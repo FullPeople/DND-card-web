@@ -1,5 +1,8 @@
+import {planClassMigration} from '../src/core/classMigration';
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Entry} from '../src/core/model';
+import {type Character,type Entry} from '../src/core/model';
 import {spellState} from '../src/core/characterDetails';
 import {prepareSpellEntry,spellLibrary} from '../src/core/spells';
 import {cantripGroups,chooseCantrip,clearCantrip,spellIsReady,ordinaryPrepared} from '../src/core/spellWorkspace';
@@ -9,7 +12,7 @@ import {validateCharacter} from '../src/core/validation';
 import {exportOwlbear} from '../src/core/export';
 import {evaluate} from '../src/core/engine';
 import {hydrateImportedCasting} from '../src/core/castingSnapshot';
-const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>({id,name:id,english:id,kind,raw,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创软件验收资料。']});
+const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>(irFixture({id,name:id,english:id,kind,raw,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创软件验收资料。']}));
 const spell=(id:string,level=1,cls='Source Mage')=>entry(id,'spell',{level,_spellClasses:{XPHB:{[cls]:true}}});
 const add=(c:Character,e:Entry,id=e.id)=>{const row={id,entry:e,quantity:1,level:1,equipped:false};c.selections.push(row);return row;};
 function setup(){const c=newCharacter();add(c,entry('Source Mage','class',{casterProgression:'full',spellcastingAbility:'int',cantripProgression:[2],preparedSpellsProgression:[2],spellsKnownProgressionFixed:[6]}));c.spellSettings=spellState(c);return c;}
@@ -55,15 +58,15 @@ describe('one prepared workspace with independent source, cantrip and ordinary g
  it('shows a source-shaped artificer library and hides a learned-only caster library without name branching',()=>{
   const c=newCharacter();add(c,entry('Renamed crafter','class',{casterProgression:'artificer',spellcastingAbility:'int',cantripProgression:[2],preparedSpellsProgression:[2],preparedSpellsChange:'restLong'}));
   expect(hasKnownLibrary(casterProfiles(c)[0])).toBe(true);expect(spellLibrary(c,[spell('Tool spark',0,'Renamed crafter')])).toHaveLength(1);
-  c.selections[0].entry.raw={casterProgression:'full',spellcastingAbility:'cha',cantripProgression:[2],spellsKnownProgression:[2]};expect(hasKnownLibrary(casterProfiles(c)[0])).toBe(false);
+  c.selections[0].entry.raw={casterProgression:'full',spellcastingAbility:'cha',cantripProgression:[2],spellsKnownProgression:[2]};Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));expect(hasKnownLibrary(casterProfiles(c)[0])).toBe(false);
  });
  it('validates cantrip allocations and retains legacy selections until an explicit edit',()=>{
   const c=setup();const row=add(c,spell('Legacy cantrip',0));const before=JSON.stringify(c);expect(cantripGroups(c)[0].slots).toEqual([row.id]);expect(JSON.stringify(c)).toBe(before);
   c.spellSettings!.cantrips={'Source Mage':[row.id,row.id]};expect(()=>validateCharacter(c)).toThrow(/戏法格/);
  });
- it('backfills newly supported cantrip declarations on a previously linked legacy class without changing existing fields',()=>{
-  const c=setup(),source=structuredClone(c.selections[0].entry),imported=c.selections[0].entry;imported.packId='imported';imported.source='IMPORTED';delete imported.raw.cantripProgression;imported.raw._castingSource={id:source.id,source:source.source};imported.raw.spellcastingAbility='cha';
-  expect(hydrateImportedCasting(c,[source])).toBe(true);expect(cantripGroups(c)[0].capacity).toBe(2);expect(imported.raw.spellcastingAbility).toBe('cha');expect(hydrateImportedCasting(c,[source])).toBe(false);
+ it('explicit review adopts cantrip IR while retaining an independently recorded casting override',()=>{
+  const c=setup(),source=structuredClone(c.selections[0].entry),imported=c.selections[0].entry;imported.packId='imported';imported.source='IMPORTED';delete imported.raw.cantripProgression;imported.raw._castingSource={id:source.id,source:source.source};Object.assign(imported,irFixture(imported));imported.raw.spellcastingAbility='cha';Object.assign(imported,irFixture(imported));
+  const before=structuredClone(c);expect(hydrateImportedCasting(c,[source])).toBe(false);expect(c).toEqual(before);c.spellSettings={...spellState(c),ability:'cha',abilityOverride:true};Object.assign(c,planClassMigration(c,[source],{[c.selections[0].id]:source.id},{id:'reviewed-cantrips',now:'2026-10-03T00:00:00Z'}).card);expect(cantripGroups(c)[0].capacity).toBe(2);expect(spellState(c).ability).toBe('cha');expect(hydrateImportedCasting(c,[source])).toBe(false);
   delete imported.raw.cantripProgression;expect(hydrateImportedCasting(c,[{...source,id:'different-identity'}])).toBe(false);
  });
 });

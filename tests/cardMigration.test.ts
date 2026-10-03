@@ -1,12 +1,14 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Entry,type Kind} from '../src/core/model';
+import {type Character,type Entry,type Kind} from '../src/core/model';
 import {cardMigrationIssues,migrationCandidates,migrationDraft,planCardMigration,emptyMigrationChoices,retainedProficiencies} from '../src/core/cardMigration';
 import {readCharacterTransfer} from '../src/core/transfers';
 import {readCharacter,validateCharacter} from '../src/core/validation';
 import {syncFeatures,removeSelection} from '../src/core/sheet';
 import {syncAutoResources} from '../src/core/resources';
 import {spellState} from '../src/core/characterDetails';
-const e=(id:string,kind:Kind,raw:Entry['raw']={}):Entry=>({id,name:id,english:id,kind,raw,entries:['原创验收资料'],source:'XPHB',packId:'fixture',revision:'1',edition:'2024'});
+const e=(id:string,kind:Kind,raw:Entry['raw']={}):Entry=>(irFixture({id,name:id,english:id,kind,raw,entries:['原创验收资料'],source:'XPHB',packId:'fixture',revision:'1',edition:'2024'}));
 const add=(c:Character,entry:Entry,id=entry.id)=>{const row={id,entry:structuredClone(entry),level:1,quantity:1,equipped:false};c.selections.push(row);return row;};
 const legacy=(entry:Entry):Entry=>({...entry,id:'old:'+entry.id,packId:'imported',source:'IMPORTED',edition:'both',raw:{}});
 const identity={id:'copy',now:'2026-10-01T00:00:00.000Z'};

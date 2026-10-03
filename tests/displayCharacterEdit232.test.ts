@@ -1,12 +1,14 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Entry} from '../src/core/model';
+import {type Character,type Entry} from '../src/core/model';
 import {displayCharacterEdit,applyDisplayCharacterEdit,sameCharacterMechanics} from '../src/core/displayCharacterEdit';
 import {entryNameIndex} from '../src/core/entryNameIndex';
 import {syncFeatures} from '../src/core/sheet';
 import {syncAutoResources} from '../src/core/resources';
 import {automationNeedsInitialization,initializeAutomation,newAutomationState} from '../src/core/automation/state';
 import {evaluate} from '../src/core/engine';
-const entry=(name:string,kind:Entry['kind']='feature',raw:Record<string,unknown>={}):Entry=>({id:`entry:${name}`,kind,name,english:name,edition:'2024',source:'XPHB',packId:'authored',revision:'1',entries:['Original regression fixture.'],raw});
+const entry=(name:string,kind:Entry['kind']='feature',raw:Record<string,unknown>={}):Entry=>(irFixture({id:`entry:${name}`,kind,name,english:name,edition:'2024',source:'XPHB',packId:'authored',revision:'1',entries:['Original regression fixture.'],raw}));
 describe('explicit display edits',()=>{
  it('only marked name and player setters share mechanics and never mutate old history snapshots',()=>{
   const c=newCharacter();c.automation=newAutomationState();c.runtime.resources.spent={name:'Spent',current:1,max:5};c.selections=[{id:'feature',entry:entry('Feature'),level:1,equipped:false,quantity:1}];
@@ -32,7 +34,7 @@ describe('catalog snapshot name index',()=>{
  });
  it('new catalog snapshots expose a previously missing grant and default calls tolerate in-place array edits',()=>{
   const owner=entry('Class','class',{classFeatures:['Gift|Class|XPHB|1']}),gift=entry('Gift','feature',{className:'Class',classSource:'XPHB',level:1});const c=newCharacter();c.selections=[{id:'owner',entry:owner,level:1,equipped:false,quantity:1}];const empty:Entry[]=[];syncFeatures(c,empty,undefined,entryNameIndex(empty));expect(c.selections).toHaveLength(1);
-  const catalog=[gift];syncFeatures(c,catalog,undefined,entryNameIndex(catalog));expect(c.selections).toHaveLength(2);const other=newCharacter();other.selections=[{...c.selections[0],entry:{...owner,raw:{classFeatures:['Later|Class|XPHB|1']}}}];catalog.push({...gift,id:'later',name:'Later',english:'Later'});syncFeatures(other,catalog);expect(other.selections[1].entry.name).toBe('Later');
+  const catalog=[gift];syncFeatures(c,catalog,undefined,entryNameIndex(catalog));expect(c.selections).toHaveLength(2);const other=newCharacter();other.selections=[{...c.selections[0],entry:irFixture({...owner,raw:{classFeatures:['Later|Class|XPHB|1']}})}];catalog.push(irFixture({...gift,id:'later',name:'Later',english:'Later'}));syncFeatures(other,catalog);expect(other.selections[1].entry.name).toBe('Later');
  });
  it('class and level changes still grant declared features and preserve spent resources',()=>{
   const gift=entry('Gift','feature',{className:'Class',classSource:'XPHB',level:2}),owner=entry('Class','class',{classFeatures:['Gift|Class|XPHB|2'],hd:{faces:8}});const c=newCharacter();c.automation=newAutomationState();c.selections=[{id:'owner',entry:owner,level:1,equipped:false,quantity:1}];c.runtime.resources.manual={name:'Manual',current:2,max:7};const catalog=[gift],index=entryNameIndex(catalog);syncFeatures(c,catalog,undefined,index);expect(c.selections).toHaveLength(1);c.selections[0].level=2;syncFeatures(c,catalog,undefined,index);syncAutoResources(c);expect(c.selections).toHaveLength(2);expect(c.runtime.resources.manual.current).toBe(2);

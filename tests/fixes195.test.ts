@@ -1,7 +1,9 @@
+import {irFixture} from './helpers/irFixture';
+import {normalizeFixtureData as normalizeData,irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {normalizeData,resolveReference} from '../src/data/catalog';
+import {resolveReference} from '../src/data/catalog';
 import {candidateReason,requirementMismatch} from '../src/core/engine';
-import {newCharacter} from '../src/core/model';
+
 import {syncFeatures} from '../src/core/sheet';
 import {spellState} from '../src/core/characterDetails';
 import {ownsSubclassFeature} from '../src/core/entryReferences';
@@ -28,7 +30,7 @@ describe('195 source identities and casting',()=>{
  });
  it('derives ability on every read, supports explicit override and subclass casting',()=>{
   const c=newCharacter(),entry=catalog.find(e=>e.kind==='class')!;c.selections=[{id:'class',entry,level:3,quantity:1,equipped:false}];c.spellSettings={mode:'prepared',ability:'int',capacity:0,attackBonus:0,dcBonus:0,prepared:[],slots:{}};expect(spellState(c).ability).toBe('wis');c.spellSettings.abilityOverride=true;expect(spellState(c).ability).toBe('int');c.spellSettings.abilityOverride=false;
-  const sub=catalog.find(e=>e.kind==='subclass'&&e.source==='XPHB')!;c.selections.push({id:'sub',entry:{...sub,raw:{...sub.raw,casterProgression:'third',spellcastingAbility:'cha'}},level:3,quantity:1,equipped:false});expect(spellState(c).ability).toBe('cha');
+  const sub=catalog.find(e=>e.kind==='subclass'&&e.source==='XPHB')!;c.selections.push({id:'sub',entry:irFixture({...sub,raw:{...sub.raw,casterProgression:'third',spellcastingAbility:'cha'}},undefined,catalog),level:3,quantity:1,equipped:false});expect(spellState(c).ability).toBe('cha');
  });
 });
 

@@ -1,6 +1,8 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter,normalizeFixtureData as normalizeData} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Selection} from '../src/core/model';
-import {normalizeData} from '../src/data/catalog';
+import {type Character,type Selection} from '../src/core/model';
+
 import {evaluate} from '../src/core/engine';
 import {automaticWeaponAttacks} from '../src/core/automation/weapons';
 import {newAutomationState} from '../src/core/automation/state';
@@ -60,13 +62,13 @@ describe('equipped weapon action projection',()=>{
  it('reads source-qualified named training and base-item identity without changing rules for names',()=>{
   const c=character();c.training!.weapons='{@item Fixture Weapon|XPHB|显示名}';const row=weapon(c,{property:[]});expect(report(c).attacks[0].attack_bonus).toBe(6);
   c.training!.weapons='Fixture Weapon|PHB';expect(report(c).attacks[0].attack_bonus).toBe(4);
-  row.entry.raw.baseItem='basic fixture|XPHB';c.training!.weapons='basic fixture|XPHB';expect(report(c).attacks[0].attack_bonus).toBe(6);
+  row.entry.raw.baseItem='basic fixture|XPHB';Object.assign(row.entry,irFixture(row.entry));c.training!.weapons='basic fixture|XPHB';expect(report(c).attacks[0].attack_bonus).toBe(6);
  });
  it('tracks magic bonuses and attunement without adding proficiency to damage',()=>{
   const c=character(),row=weapon(c,{property:[],reqAttune:true,bonusWeapon:'+1',bonusWeaponAttack:2,bonusWeaponDamage:3});
   expect(report(c).attacks[0]).toMatchObject({attack_bonus:6,damage:'1d6+4'});row.attuned=true;
   expect(report(c).attacks[0]).toMatchObject({attack_bonus:9,damage:'1d6+8'});
-  row.entry.raw.bonusWeapon='level/2';expect(report(c).attacks).toHaveLength(0);expect(report(c).issues.some(i=>i.message.includes('未支持'))).toBe(true);
+  row.entry.raw.bonusWeapon='level/2';Object.assign(row.entry,irFixture(row.entry));expect(report(c).attacks).toHaveLength(0);expect(report(c).issues.some(i=>i.message.includes('未支持'))).toBe(true);
  });
  it('withdraws actions on unequip, source disable, parent disable and deletion',()=>{
   const c=character(),row=weapon(c);expect(report(c).attacks).toHaveLength(3);row.equipped=false;expect(report(c).attacks).toHaveLength(0);row.equipped=true;
@@ -90,7 +92,7 @@ describe('equipped weapon action projection',()=>{
   const c=character();delete c.training;const row=weapon(c,{property:[]});
   const [first,second]=normalizeData({class:[{name:'原创甲',source:'XPHB',startingProficiencies:{weapons:[{choose:{from:['simple','martial'],count:1}}]}},{name:'原创乙',source:'XPHB',startingProficiencies:{weapons:['simple']},multiclassing:{proficienciesGained:{weapons:[]}}}]},'authored-test');
   c.selections.unshift({id:'first',entry:first,quantity:1,level:1,equipped:false},{id:'second',entry:second,quantity:1,level:1,equipped:false});
-  c.profile.disabledEntries=[first.id];expect(report(c).attacks[0].attack_bonus).toBe(4);second.raw.multiclassing.proficienciesGained.weapons=['simple'];expect(report(c).attacks[0].attack_bonus).toBe(6);expect(row.equipped).toBe(true);
+  c.profile.disabledEntries=[first.id];expect(report(c).attacks[0].attack_bonus).toBe(4);second.raw.multiclassing.proficienciesGained.weapons=['simple'];Object.assign(second,irFixture(second));expect(report(c).attacks[0].attack_bonus).toBe(6);expect(row.equipped).toBe(true);
  });
 });
 

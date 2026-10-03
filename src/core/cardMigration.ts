@@ -5,6 +5,7 @@ import {legacyTraining} from './legacyTraining';
 import {trainingCategory} from './training';
 import {syncAutoResources,setResource} from './resources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
+import {supportedAutomation} from './automation/state';
 import {syncSourceSpells} from './automation/sourceSpells';
 import {evaluate} from './engine';
 import {spellState} from './characterDetails';
@@ -92,7 +93,7 @@ export function migrationDraft(original:Character,entries:Entry[],choices:Migrat
   else if(choices.roots[sub.id])throw Error('子职「'+sub.entry.name+'」与所选职业不匹配，请返回选择正确职业或保留原记录。');
  }
  // Generate declarations separately; generating new content never deletes old bubbles.
- const template=structuredClone(card);template.selections=template.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind));
+ const template=structuredClone(card);template.selections=template.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind));if(supportedAutomation(template))template.automation!.enabled=true;
  syncFeatures(template,entries,{owners,refresh:true,equipmentPreview:true});
  const grants:GrantReview[]=template.selections.filter(s=>s.parentId&&owners.has(s.parentId)&&s.grantKey&&!s.grantKey.startsWith('source-spell:')&&bubbles.includes(s.entry.kind)).map(row=>{
   const key=row.parentId+'|'+row.grantKey,owner=card.selections.find(s=>s.id===row.parentId)!;

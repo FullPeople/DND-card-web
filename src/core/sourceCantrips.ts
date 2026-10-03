@@ -1,3 +1,4 @@
+import {ownedSpellLevel,irMechanics} from './automation/ir';
 import {selectionAllowed,uid,type Character,type Entry,type Selection} from './model';
 import {spellState} from './characterDetails';
 import {sourceCapacity} from './spellCapacity';
@@ -5,11 +6,11 @@ import {sourceCapacity} from './spellCapacity';
 export const cantripSourceKinds=['feat','race','background','feature','subclass'];
 export const cantripSources=(c:Character)=>c.selections.filter(s=>cantripSourceKinds.includes(s.entry.kind));
 export function sourceCantripRows(c:Character,ownerId:string):Selection[]{
- return c.selections.filter(s=>s.entry.kind==='spell'&&Number(s.entry.raw.level)===0&&c.spellSettings?.special?.[s.id]?.manualSource?.ownerId===ownerId);
+ return c.selections.filter(s=>s.entry.kind==='spell'&&(ownedSpellLevel(s.entry)??-1)===0&&c.spellSettings?.special?.[s.id]?.manualSource?.ownerId===ownerId);
 }
 /** The player records the allowance from the source text; never infer it from a name. */
 export function chooseSourceCantrip(c:Character,entry:Entry,ownerId:string):{id?:string;error?:string}{
- if(entry.kind!=='spell'||Number(entry.raw.level)!==0)return {error:'来源赠送戏法栏只接受戏法，不是法术位或免费施放次数。'};
+ if(entry.kind!=='spell'||(ownedSpellLevel(entry)??-1)!==0)return {error:'来源赠送戏法栏只接受戏法，不是法术位或免费施放次数。'};
  return chooseSourceSpell(c,entry,ownerId);
 }
 export function chooseSourceSpell(c:Character,entry:Entry,ownerId:string):{id?:string;error?:string}{

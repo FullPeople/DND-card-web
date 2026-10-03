@@ -1,7 +1,6 @@
-import {planRacialAbilities} from '../racialAbilities';
-import {numericExpression} from '../numericExpression';
-import {type Character,type Selection,type Issue,type RuntimeResource,type Ability} from '../model';
-import {parentClass} from '../featureOwnership';
+import {parseFormula} from '../../data/automation/formula';
+import {irMechanics,reviewedRecord,irParentClass,irAbilityScores,irAmount,irRollFormula} from './ir';
+import {type Character,type Selection,type Issue,type RuntimeResource} from '../model';
 import {automationEnabled} from './state';
 import {selectionActive} from './choices';
 import {sourceOwnerIdentity,rememberSourceSpellUses,sourceSpellResourceEnabled} from './sourceSpellState';
@@ -9,57 +8,34 @@ import {specialSpellResource} from '../spellResourceKeys';
 
 type Recovery={short?:number|'all';long?:number|'all'};
 export type ResourceGrant={key:string;ownerId:string;name:string;max:number;formula?:string;recovery:Recovery;origin:string};
-const words:Record<string,number>={'一':1,'二':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
-const count=(v:string)=>/^\d+$/.test(v)?Number(v):words[v];
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
-const strings=(v:unknown,depth=0):string[]=>depth>12?[]:typeof v==='string'?[v]:Array.isArray(v)?v.flatMap(n=>strings(n,depth+1)):plain(v)?[...strings(v.entries,depth+1),...strings(v.items,depth+1)]:[];
-const clean=(v:unknown)=>String(v??'').replace(/\{@\w+ ([^|}]+)(?:[^}]*)}/g,'$1').replace(/<[^>]*>/g,'').replace(/\s/g,'');
-function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
-function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();return {cls,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0))-1)/4)+(c.sheetBonuses?.proficiency||0)};}
-function formulaText(c:Character,row:Selection,formula:string):string{
- const {level,prof}=context(c,row);
- return formula.replace(/@(?:class\.level|classes\.[\w-]+\.levels|details\.level|level|prof|abilities\.(str|dex|con|int|wis|cha)\.mod)/g,(v,a)=>a?String(abilityModifier(c,a)):v==='@prof'?String(prof):String(v==='@details.level'?c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0):level));
-}
-function numericMax(c:Character,row:Selection,value:unknown){if(typeof value==='number')return value;if(typeof value==='string')return numericExpression(`=${formulaText(c,row,value)}`,0).value;throw Error('次数上限没有可计算的数值或公式');}
+/** Only versioned declarative resources participate; never infer from source prose. */
 export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues:Issue[]}{
  const grants:ResourceGrant[]=[],issues:Issue[]=[];if(!automationEnabled(c))return {grants,issues};
  for(const row of c.selections){
-  if(!['feature','feat','race','background','class','subclass'].includes(row.entry.kind)||!selectionActive(c,row))continue;
-  const raw=row.entry.raw,text=strings(row.entry.entries).join(' '),{cls,level}=context(c,row);
-  const explicit=Array.isArray(raw.resources)?raw.resources:plain(raw.resource)?[raw.resource]:plain(raw.uses)?[{...raw.uses,name:row.entry.name,recovery:raw.uses.recovery||raw.uses.per}]:plain(raw.system?.uses)&&raw.system.uses.max?[{...raw.system.uses,name:row.entry.name}]:[];
-  let specs:any[]=explicit;
-  if(!specs.length){
-   const escaped=row.entry.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-   const use=text.match(new RegExp(`(?:可以|能够|能)(?:使用|施用)(?:(?:此|本|这项|该)(?:特性|能力)?|${escaped})(?:共计|总计|总共)?([一二两三四五六七八九十\\d]+)次`));
-   const once=/(?:使用|施用)(?:本|此|该)特性后.*?(?:短|长)(?:暂)?(?:休|歇)|必须完成一次(?:短|长)/.test(text);
-   if(use||once){
-    const recovery:Recovery={};
-    for(const [key,word] of [['short','短'],['long','长']] as const){
-     const match=text.match(new RegExp(`${word}(?:暂)?(?:休|歇)[^。；，,]{0,90}?(?:恢复|重获|重新获得|再次使用|再度使用|重置)([^。；，,]*)`));
-     if(match){const n=match[1].match(/([一二两三四五六七八九十\d]+)次/);recovery[key]=/所有|全部/.test(match[1])?'all':n?count(n[1]):'all';}
-    }
-    if(once){recovery.short='all';recovery.long='all';}
-    if(recovery.short&&!recovery.long)recovery.long='all';
-    let max=use?count(use[1]):1;
-    for(const upgrade of text.matchAll(/第(\d+)级[^。；]{0,45}?(?:使用|施用)([一二两三四五六七八九十\d]+)次/g))if(level>=Number(upgrade[1]))max=Math.max(max,count(upgrade[2])||0);
-    for(const group of [...(cls?.entry.raw.classTableGroups||[]),...(cls?.entry.raw.subclassTableGroups||[])]){
-     const i=(group.colLabels||[]).findIndex((label:unknown)=>[row.entry.name,row.entry.english].some(name=>clean(label)===clean(name)));
-     const cell=group.rows?.[level-1]?.[i];if(i>=0&&(typeof cell==='number'||typeof cell==='string'&&/^\d+$/.test(cell)))max=Number(cell);
-    }
-    const die=text.match(/\{@dice ([\dd+\- ]+)}/)?.[1];
-    const formula=die&&cls&&(text.includes(`${cls.entry.name}职业等级`)||text.includes(`${cls.entry.name}等级`))?`${die} + @class.level`:undefined;
-    specs=[{name:row.entry.name,max,recovery,formula}];
-   }else if(/(?:恢复|重获).*(?:使用次数|次数)|(?:每|每次)(?:短|长)休/.test(text)&&row.entry.kind==='feature')issues.push({id:`resource-unadapted:${row.id}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：次数或恢复格式待适配，未生成资源。`});
-  }
-  for(const [index,spec] of specs.entries())try{
-   const max=numericMax(c,row,spec.max??spec.value);if(!Number.isSafeInteger(max)||max<0||max>10000)throw Error('资源上限超出支持范围');
-   let recovery:Recovery=plain(spec.recovery)?spec.recovery:{};
-   if(['sr','short'].includes(spec.recovery))recovery={short:'all',long:'all'};else if(['lr','long'].includes(spec.recovery))recovery={long:'all'};
-   else if(typeof spec.recovery==='string'&&spec.recovery!=='manual')throw Error('恢复周期尚未适配');
-   if(Array.isArray(spec.recovery))for(const rule of spec.recovery){if(!['sr','lr'].includes(rule.period))throw Error('恢复周期尚未适配');const amount=rule.type==='recoverAll'?'all':numericMax(c,row,rule.formula);recovery[rule.period==='sr'?'short':'long']=amount;}
-   for(const [key,value] of Object.entries(recovery))if(!['short','long'].includes(key)||value!=='all'&&(!Number.isSafeInteger(value)||Number(value)<0||Number(value)>10000))throw Error('恢复次数或周期无效');
+  if(!selectionActive(c,row))continue;
+  for(const gap of row.entry.automation?.unsupported||[])if(['resources','resource','uses','charges'].includes(gap.family))issues.push({id:`resource-gap:${row.id}:${gap.code}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：资源声明未支持，未执行（${gap.code}）。`});
+  const model=irMechanics(row.entry);if(!model)continue;
+  if(row.entry.kind==='item'&&(!row.equipped||row.quantity<=0||model.equipmentModel?.requiresAttunement&&!row.attuned))continue;
+  const cls=irParentClass(c,row),level=cls?.level||row.level,scores=irAbilityScores(c);
+  for(const [index,spec] of (model.resources||[]).entries())try{
+   const scaled=spec.scaling?.filter(point=>point.level<=level).at(-1)?.max??spec.max;
+   const max=irAmount(c,row,scaled,scores);if(!Number.isSafeInteger(max)||max<0||max>10000)throw Error('资源上限超出支持范围');
+   const recovery:Recovery={};
+   for(const rule of spec.recovery){
+    if(!['short','long'].includes(rule.period)){if(rule.period==='dawn')issues.push({id:`resource-recovery:${row.id}:${index}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：黎明恢复由玩家明确操作，休息不会触发。`});continue;}
+    if(typeof rule.amount==='string'&&rule.amount!=='all'&&parseFormula(rule.amount).dice){issues.push({id:`resource-recovery:${row.id}:${index}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：恢复需要掷骰并手动记入，休息不会自动代掷。`});continue;}
+    const value=rule.amount==='all'?'all':typeof rule.amount==='number'?rule.amount:irAmount(c,row,{formula:rule.amount},scores);
+    if(value!=='all'&&(!Number.isSafeInteger(value)||value<0||value>10000))throw Error('恢复次数超出支持范围');recovery[rule.period as 'short'|'long']=value;
+   }
+   const raw=row.entry.raw;
+   // Keep the existing source identity codec solely for receipt compatibility.
    const identity=cls&&raw.className?JSON.stringify([cls.id,row.entry.source,raw.classSource,raw.subclassShortName||'',row.entry.english]):sourceOwnerIdentity(c,row);
-   const grant={key:`feature-resource:${identity}:${index}`,ownerId:row.id,name:spec.name||row.entry.name,max,formula:typeof spec.formula==='string'?formulaText(c,row,spec.formula):undefined,recovery,origin:`${row.entry.name} · ${row.entry.source}`};
+   const legacy=/^resource:(\d+)$/.exec(spec.key),key=legacy?legacy[1]:spec.key;
+   // Only the display label comes from the retained source snapshot. Maximum,
+   // formula, recovery and resource identity above are exclusively IR values.
+   const label=/^resource:\d+$/.test(spec.key)&&Array.isArray(row.entry.raw.resources)?row.entry.raw.resources[Number(spec.key.slice(9))]?.name:undefined;
+   const grant:ResourceGrant={key:`feature-resource:${identity}:${key}`,ownerId:row.id,name:typeof label==='string'&&label.length<=160?label:row.entry.name,max,...(spec.formula?{formula:irRollFormula(c,row,spec.formula)}:{}),recovery,origin:`${row.entry.name} · ${row.entry.source}`};
    const existing=grants.findIndex(g=>g.key===grant.key);if(existing<0)grants.push(grant);else if(grant.max>=grants[existing].max)grants[existing]=grant;
   }catch(error){issues.push({id:`resource:${row.id}:${index}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${error instanceof Error?error.message:String(error)}，未执行资源规则。`});}
  }
@@ -68,6 +44,7 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
 export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
 /** Own lifecycle and recovery only; preserve player-owned presentation and overrides. */
 export function syncFeatureResources(c:Character){
+ if(!automationEnabled(c))return false;
  const before=JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);rememberFeatureResources(c);
  const needed=new Set<string>();
  for(const grant of planFeatureResources(c).grants){needed.add(grant.key);const old=c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key];
@@ -75,13 +52,14 @@ export function syncFeatureResources(c:Character){
   const max=manual?old!.max:grant.max,spent=old?old.featureGrant?.spent??Math.max(0,old.max-old.current):0;
   c.runtime.resources[grant.key]={...old,name:grant.name,type:old?.type||'count',icon:old?.icon||'gem',max,current:Math.max(0,max-spent),featureGrant:{ownerId:grant.ownerId,ruleMax:grant.max,manualMax:manual,spent,recovery:grant.recovery,formula:grant.formula,origin:grant.origin}};
  }
- for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key))delete c.runtime.resources[key];
+ for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key)&&(!c.selections.some(row=>row.id===r.featureGrant!.ownerId)||c.selections.some(row=>row.id===r.featureGrant!.ownerId&&reviewedRecord(row.entry))))delete c.runtime.resources[key];
  for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant)(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);
 }
 export function resourceRestRecovery(c:Character,key:string,kind:'short'|'long'):number|'all'|undefined{
  const r=c.runtime.resources[key];if(!r)return undefined;
+  if(r.featureGrant&&!planFeatureResources(c).grants.some(grant=>grant.key===key))return undefined;
   let recovery:number|'all'|undefined=r.featureGrant?.recovery[kind];
-  if(!r.featureGrant){if(key.startsWith('pact-slot:')||kind==='long'&&key.startsWith('spell-slot:'))recovery='all';
+  if(!r.featureGrant){if(r.automatic&&!automationEnabled(c))return undefined;if(key.startsWith('pact-slot:')||kind==='long'&&key.startsWith('spell-slot:'))recovery='all';
    for(const [id,config] of Object.entries(c.spellSettings?.special||{}))if(config.mode==='uses'&&(config.recovery===kind||kind==='long'&&config.recovery==='short')&&key===specialSpellResource(id,c)&&sourceSpellResourceEnabled(c,key))recovery='all';}
  return recovery;
 }
@@ -93,7 +71,7 @@ export function restedResourceValue(c:Character,key:string,kind:'short'|'long'){
 export function restResources(c:Character,kind:'short'|'long'){
  for(const [key,r] of Object.entries(c.runtime.resources)){
   const recovery=resourceRestRecovery(c,key,kind);
-  if(recovery!==undefined){const spent=r.featureGrant?.spent??r.max-r.current;r.current=restedResourceValue(c,key,kind);if(r.featureGrant)r.featureGrant.spent=recovery==='all'?0:Math.max(0,spent-recovery);if(key.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[key.split(':')[1]]={max:r.max,used:r.max-r.current};}
+  if(recovery!==undefined){const spent=r.featureGrant?.spent??r.max-r.current;r.current=restedResourceValue(c,key,kind);if(r.featureGrant)r.featureGrant.spent=recovery==='all'?0:Math.max(0,spent-recovery);if(r.automatic){r.automaticSpent=recovery==='all'?0:Math.max(0,(r.automaticSpent??spent)-recovery);(c.runtime.automaticResourceArchive||={})[key]=structuredClone(r);if(/^pact-slot:[1-5]$/.test(key))c.runtime.automaticResourceArchive!['pact-slot:pool']=structuredClone(r);}if(key.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[key.split(':')[1]]={max:r.max,used:r.max-r.current};}
  }
  rememberFeatureResources(c);rememberSourceSpellUses(c);
 }

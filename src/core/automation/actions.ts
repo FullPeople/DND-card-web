@@ -1,3 +1,4 @@
+import {irMechanics} from './ir';
 import type {Character} from '../model';
 import {specialSpellResource} from '../spellResourceKeys';
 import {setResource} from '../resources';
@@ -17,10 +18,11 @@ export function spellPayments(c:Character,id:string):{options:SpellPayment[];rea
  if(!row||!automationEnabled(c))return {options:[],reason:'此来源法术当前不可用。'};
  if(!grant){
   const groups=config?[]:bookRitualGroups(c).filter(group=>group.spells.some(spell=>spell.id===id));
-  return {options:groups.map(group=>({id:bookRitualPaymentId(group.owner.id),label:`书内仪式施法（${group.owner.entry.name}；${BOOK_RITUAL_TIME}）`,level:Number(row.entry.raw.level),cost:0,available:true})),...(!groups.length?{reason:'此法术没有已核实的书内仪式资格；普通施法仍须按预备与法术位规则处理。'}:{})};
+  return {options:groups.map(group=>({id:bookRitualPaymentId(group.owner.id),label:`书内仪式施法（${group.owner.entry.name}；${BOOK_RITUAL_TIME}）`,level:(irMechanics(row.entry)?.spellModel?.level??-1),cost:0,available:true})),...(!groups.length?{reason:'此法术没有已核实的书内仪式资格；普通施法仍须按预备与法术位规则处理。'}:{})};
  }
  if(!sourceSpellEnabled(c,id))return {options:[],reason:'此来源法术当前不可用。'};
- const base=Number(row.entry.raw.level),level=grant.castLevel??base;
+ if(!irMechanics(row.entry)?.spellModel)return {options:[],reason:'此法术的 IR 环阶尚未审阅，不能自动付款。'};
+ const base=(irMechanics(row.entry)?.spellModel?.level??-1),level=grant.castLevel??base;
  if(!Number.isInteger(base)||base<0||base>9||level<base)return {options:[],reason:'法术环阶未支持，请人工核对。'};
  const options:SpellPayment[]=[];
  if(config.mode==='uses'){
@@ -94,7 +96,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest):Spell
   const resourceId=specialSpellResource(request.selectionId,c),r=c.runtime.resources[resourceId];
   if(!r||!Number.isSafeInteger(r.max)||r.max<1||!Number.isSafeInteger(r.current))return reject('次数记录无效，未恢复。');
   if(r.current>=r.max)return reject('次数已经充足。');
-  payment={id:'source',label:'恢复来源次数',level:config.sourceGrant.castLevel??Number(c.selections.find(s=>s.id===request.selectionId)!.entry.raw.level),resourceId,cost:r.current-r.max,available:true};
+  payment={id:'source',label:'恢复来源次数',level:config.sourceGrant.castLevel??(irMechanics(c.selections.find(s=>s.id===request.selectionId)!.entry)?.spellModel?.level??-1),resourceId,cost:r.current-r.max,available:true};
  }else{
   const offer=spellPayments(c,request.selectionId);payment=offer.options.find(p=>p.id===request.paymentId);
   if(!payment)return reject(offer.reason||'此来源不允许所选的施法方式。');

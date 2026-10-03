@@ -1,5 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
 import {newCharacter} from '../../src/core/model';
 import {exportCharacter} from '../../src/core/export';
 import {newAutomationState} from '../../src/core/automation/state';
@@ -11,7 +12,7 @@ function manual(){
 async function readWorkspace(page:Page){return page.evaluate(async(dbName)=>{
  const request=indexedDB.open(dbName);const db=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
  try{return await new Promise<any>((resolve,reject)=>{const get=db.transaction('documents').objectStore('documents').get('workspace');get.onsuccess=()=>resolve(get.result);get.onerror=()=>reject(get.error);});}finally{db.close();}
-},process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-209');}
+},process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-choices-20261001');}
 async function ready(page:Page){await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');}
 async function finishCharacterImport(page:Page,name:string){
  const label=new RegExp('^'+name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\s*旧卡资料需要核对)?$');
@@ -19,7 +20,7 @@ async function finishCharacterImport(page:Page,name:string){
  const dialog=page.getByRole('dialog',{name:'导入与导出',exact:true});
  await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
 }
-async function importManual(page:Page){await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'manual.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(manual())))});await finishCharacterImport(page,'自动化迁移验收（导入）');}
+async function importManual(page:Page){const c=manual();await installCardAutomation(page,c);await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'manual.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await finishCharacterImport(page,'自动化迁移验收（导入）');}
 
 // The compact attack block paginates independently of resource modules.
 async function attackPages(page:Page){
@@ -64,7 +65,7 @@ test('imported manual card automatically enables automation; armor replaces, shi
 });
 test('narrow screen keeps settings readable and uses isolated storage',async({page})=>{
  await page.setViewportSize({width:390,height:844});await ready(page);await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('dialog',{name:'基础自动化',exact:true})).toBeVisible();
- expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);const names=await page.evaluate(async()=>(await indexedDB.databases()).map(d=>d.name));expect(names).toContain(process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-209');expect(names).not.toContain('dnd-card-workspace');await page.screenshot({path:test.info().outputPath('automation-mobile.png')});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);const names=await page.evaluate(async()=>(await indexedDB.databases()).map(d=>d.name));expect(names).toContain(process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-choices-20261001');expect(names).not.toContain('dnd-card-workspace');await page.screenshot({path:test.info().outputPath('automation-mobile.png')});
 });
 test('failed equipment save preserves the previous database and the current draft, then a later save commits both actions once',async({page})=>{
  await ready(page);await importManual(page);await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('checkbox',{name:'启用自动计算',exact:true})).toBeChecked();await page.keyboard.press('Escape');await expect(page.locator('.save-status')).toContainText('已保存到本机');
@@ -80,6 +81,7 @@ test('equipped weapon has separate clickable thrown and two-handed formulas, sur
  await ready(page);const c=manual();c.name='武器自动化验收';c.automation=newAutomationState();c.abilities.str=18;c.training!.weapons='简易武器';
  c.quickbarActions=[{id:'manual',name:'保留手写攻击',attack:'+9',damage:'2d8+7'}];
  c.selections.push({id:'weapon-fixture',entry:{...c.selections[0].entry,id:'fixture:weapon',name:'验收长兵器',english:'Fixture Spear',raw:{type:'M',weaponCategory:'simple',dmg1:'1d6',dmg2:'1d8',dmgType:'P',property:['T','V']}},quantity:4,level:1,equipped:false});
+ await installCardAutomation(page,c);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'weapon.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await finishCharacterImport(page,'武器自动化验收（导入）');
  await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('checkbox',{name:'装备 验收长兵器'}).check();await page.keyboard.press('Escape');
  const thrown='auto-weapon:weapon-fixture:thrown',twohanded='auto-weapon:weapon-fixture:two-handed';
@@ -98,6 +100,7 @@ test('weapon instances independently choose calculation attributes and retain ch
  await ready(page);const c=manual();c.name='武器属性覆盖验收';c.automation=newAutomationState();c.abilities.str=18;c.abilities.wis=16;c.training!.weapons='简易武器';
  const entry={...c.selections[0].entry,id:'fixture:ability-weapon',name:'验收同名武器',english:'Ability weapon',raw:{type:'M',weaponCategory:'simple',dmg1:'1d6',dmg2:'1d8',dmgType:'P',property:['T','V'],bonusWeapon:1,bonusWeaponAttack:2,bonusWeaponDamage:3}};
  c.selections.push(...['ability-first','ability-second'].map(id=>({id,entry:structuredClone(entry),quantity:1,level:1,equipped:true})));c.quickbarActions=[{id:'manual-override',name:'保留手填加值',attack:'+9',damage:'2d8+7'}];
+ await installCardAutomation(page,c);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'weapon-ability.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await finishCharacterImport(page,'武器属性覆盖验收（导入）');
  await page.getByRole('button',{name:'自动化设置'}).click();
  const first=page.locator('[data-weapon-selection="ability-first"]'),second=page.locator('[data-weapon-selection="ability-second"]');
@@ -108,7 +111,7 @@ test('weapon instances independently choose calculation attributes and retain ch
  await expectAttack(page,a,'+10','1d6+9');await expectAttack(page,b,'1d6+8');
  await expectAttack(page,'custom:manual-override','2d8+7');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const saved=await readWorkspace(page),current=saved.characters.find((x:any)=>x.id===saved.activeId);expect(current.selections.find((s:any)=>s.id==='ability-first').weaponAbility).toBe('wis');expect(current.selections.find((s:any)=>s.id==='ability-second').weaponAbility).toBeUndefined();expect(current.runtime.resources.fixture.current).toBe(1);
- await page.reload();await expectAttack(page,a,'1d6+9');await page.getByRole('button',{name:'自动化设置'}).click();await expect(first.getByRole('combobox')).toHaveValue('wis');await expect(second.getByRole('combobox')).toHaveValue('');await page.locator('.automation-panel details').first().locator('summary').click();await expect(page.locator('.automation-panel details').first()).toContainText('感知 +5（手动选择');await page.screenshot({path:test.info().outputPath('weapon-ability-choice.png')});
+ await page.reload();await expectAttack(page,a,'1d6+9');await page.getByRole('button',{name:'自动化设置'}).click();await expect(first.getByRole('combobox')).toHaveValue('wis');await expect(second.getByRole('combobox')).toHaveValue('');await page.locator('.automation-panel details').filter({hasText:/验收同名武器.*命中/}).first().locator('summary').click();await expect(page.locator('.automation-panel details').filter({hasText:/验收同名武器.*命中/}).first()).toContainText('感知 +5（手动选择');await page.screenshot({path:test.info().outputPath('weapon-ability-choice.png')});
  await page.setViewportSize({width:390,height:844});await first.scrollIntoViewIfNeeded();expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await page.screenshot({path:test.info().outputPath('weapon-ability-choice-mobile.png')});await page.setViewportSize({width:1512,height:982});await page.keyboard.press('Escape');
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByRole('button',{name:'生成并复制 JSON',exact:true}).click();const text=await page.getByRole('textbox',{name:'角色 JSON 文本',exact:true}).inputValue();const exported=JSON.parse(text);expect(exported.character.selections.find((s:any)=>s.id==='ability-first').weaponAbility).toBe('wis');expect(exported.character.selections.find((s:any)=>s.id==='ability-second').weaponAbility).toBeUndefined();
  await page.getByTestId('character-file').setInputFiles({name:'roundtrip-weapon.json',mimeType:'application/json',buffer:Buffer.from(text)});
@@ -122,6 +125,7 @@ test('source spells stay fixed, use their own casting ability and keep spent cha
  const base=c.selections[0].entry;
  const spell={...base,id:'fixture:source-spell',kind:'spell' as const,name:'验收护幕',english:'Fixture Ward',raw:{level:1,school:'A',entries:['原创软件验收法术。']}};
  c.selections=[{id:'own-spell',entry:spell,quantity:1,level:1,equipped:false},{id:'gift-race',entry:{...base,id:'fixture:race',kind:'race',name:'验收种族',raw:{additionalSpells:[{ability:{choose:['int','cha']},innate:{'_':{daily:{'2':['Fixture Ward|XPHB']}}}}]}},quantity:1,level:1,equipped:false},{id:'gift-class',entry:{...base,id:'fixture:class',kind:'class',name:'验收职业',raw:{hd:{faces:8},spellcastingAbility:'wis',additionalSpells:[{prepared:{'1':['Fixture Ward|XPHB']}}]}},quantity:1,level:1,equipped:false}];
+ await installCardAutomation(page,c);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'source-spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await finishCharacterImport(page,'来源法术验收（导入）');
  await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('combobox',{name:'验收种族的施法属性'}).selectOption('cha');await page.keyboard.press('Escape');await page.getByRole('tab',{name:'法术',exact:true}).click();
  const race=page.locator('.source-spell-group').filter({hasText:'来自验收种族'}).locator('.source-spell-row'),cls=page.locator('.source-spell-group').filter({hasText:'来自验收职业'}).locator('.source-spell-row');
@@ -142,6 +146,7 @@ async function importSharedSpells(page:Page){
  const first={...base,id:'fixture:shared-a',kind:'spell' as const,name:'共享甲',english:'Shared A',raw:{level:1,school:'A'}},second={...first,id:'fixture:shared-b',name:'共享乙',english:'Shared B',raw:{level:2,school:'A'}};
  c.selections=[{id:'manual-a',entry:first,quantity:1,level:1,equipped:false},{id:'manual-b',entry:second,quantity:1,level:1,equipped:false},{id:'shared-owner',entry:{...base,id:'fixture:shared-source',kind:'race',name:'共用来源',raw:{additionalSpells:[{ability:'cha',prepared:{'_':{daily:{'2':['Shared A|XPHB','Shared B|XPHB']}}}}]}},quantity:1,level:1,equipped:false}];
  c.runtime.resources['spell-slot:1']={current:2,max:2};c.runtime.resources['spell-slot:3']={current:1,max:2};
+ await installCardAutomation(page,c);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'shared-spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await finishCharacterImport(page,'共享施法验收（导入）');await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(page.locator('.spell-source-notices')).toContainText('来源法术需要核对');await page.getByRole('button',{name:'自动化设置'}).click();await page.getByRole('combobox',{name:'共用来源的次数归属：Shared A、Shared B'}).selectOption('shared');await page.keyboard.press('Escape');await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(page.locator('.source-spell-row')).toHaveCount(2);await expect(page.locator('.save-status')).toContainText('已保存到本机');
  return {first:page.locator('.source-spell-row').filter({hasText:'共享甲'}),second:page.locator('.source-spell-row').filter({hasText:'共享乙'})};
 }
@@ -171,7 +176,7 @@ test('a failed spell-action save retains the prior counter and receipt on disk, 
 
 test('old stored cards enable without a click and later explicit opt-out survives reload without restoring resources',async({page})=>{
  await ready(page);const old=manual();old.inventory={view:'grid',order:[],attunementLimit:3,coins:{gp:7,cp:0,sp:0,ep:0,pp:0}};
- await page.evaluate(async({card,dbName})=>{const req=indexedDB.open(dbName),db=await new Promise<IDBDatabase>((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});try{await new Promise<void>((resolve,reject)=>{const tx=db.transaction('documents','readwrite');tx.objectStore('documents').put({schemaVersion:1,characters:[card],activeId:card.id,packs:[]},'workspace');tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}finally{db.close();}},{card:old,dbName:process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-209'});
+ await page.evaluate(async({card,dbName})=>{const req=indexedDB.open(dbName),db=await new Promise<IDBDatabase>((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});try{await new Promise<void>((resolve,reject)=>{const tx=db.transaction('documents','readwrite');tx.objectStore('documents').put({schemaVersion:1,characters:[card],activeId:card.id,packs:[]},'workspace');tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}finally{db.close();}},{card:old,dbName:process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-choices-20261001'});
  await page.reload();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('checkbox',{name:'启用自动计算',exact:true})).toBeChecked();await expect.poll(async()=>{const w=await readWorkspace(page);return w.characters[0].automation?.enabled;}).toBe(true);let w=await readWorkspace(page);expect(w.characters[0].runtime.resources.fixture.current).toBe(1);expect(w.characters[0].inventory.coins.gp).toBe(7);expect(w.characters[0].selections).toHaveLength(3);
  await page.getByRole('checkbox',{name:'启用自动计算',exact:true}).uncheck();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('checkbox',{name:'启用自动计算',exact:true})).not.toBeChecked();w=await readWorkspace(page);expect(w.characters[0].runtime.resources.fixture.current).toBe(1);expect(w.characters[0].inventory.coins.gp).toBe(7);
 });

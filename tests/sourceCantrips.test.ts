@@ -1,5 +1,7 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Entry} from '../src/core/model';
+import {type Character,type Entry} from '../src/core/model';
 import {chooseCantrip,cantripGroups,spellIsReady} from '../src/core/spellWorkspace';
 import {chooseSourceCantrip,sourceCantripRows} from '../src/core/sourceCantrips';
 import {newAutomationState,setAutomationEnabled} from '../src/core/automation/state';
@@ -7,7 +9,7 @@ import {syncSourceSpells} from '../src/core/automation/sourceSpells';
 import {removeSelection} from '../src/core/sheet';
 import {validateCharacter} from '../src/core/validation';
 import {setSpecialSpell} from '../src/core/specialSpells';
-const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>({id,name:id,english:id,kind,raw,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创软件验收资料。']});
+const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>(irFixture({id,name:id,english:id,kind,raw,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['原创软件验收资料。']}));
 const spell=(id:string)=>entry(id,'spell',{level:0,_spellClasses:{XPHB:{Mage:true}}});
 const add=(c:Character,e:Entry)=>{c.selections.push({id:e.id,entry:e,quantity:1,level:1,equipped:false});};
 function setup(){const c=newCharacter();add(c,entry('Mage','class',{casterProgression:'full',cantripProgression:[2],spellcastingAbility:'int'}));chooseCantrip(c,spell('One'));chooseCantrip(c,spell('Two'));add(c,entry('Feat','feat',{additionalSpells:[{known:{'_':[{choose:'level=0',count:1}]}}]}));return c;}

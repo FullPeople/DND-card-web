@@ -1,5 +1,6 @@
 import type {Plugin} from 'vite';
 import {createHash} from 'node:crypto';
+import automationSource from '../src/data/automation/default-source.json';
 export function offlineShell(): Plugin {
   return { name: 'offline-app-shell', apply: 'build', generateBundle:{order:'post',handler(_, bundle) {
     const assets = Object.keys(bundle).filter(name => !name.endsWith('.map'));
@@ -16,12 +17,13 @@ export function offlineShell(): Plugin {
     for(const chunk of Object.values(bundle))if(chunk.type==='chunk'&&(chunk.isEntry||/\/ui\/(App|PlayerViewer)\.tsx$/.test(chunk.facadeModuleId?.replaceAll('\\','/')||'')))visit(chunk.fileName);
     const files=[...first];
     const html=bundle['index.html'];
-    const revision = createHash('sha256').update('on-demand-shell-v4:'+JSON.stringify(assets)).update(html?.type==='asset'?html.source:'').digest('hex').slice(0, 12);
+    const automationAssets=[automationSource.path];
+    const revision = createHash('sha256').update('on-demand-shell-v5:'+JSON.stringify([...assets,...automationAssets])).update(html?.type==='asset'?html.source:'').digest('hex').slice(0, 12);
     this.emitFile({ type: 'asset', fileName: 'sw.js', source: `
 const PREFIX = 'dnd-card-shell:' + new URL('./', self.location.href).pathname + ':';
 const CACHE = PREFIX + ${JSON.stringify(revision)};
 const FILES = ${JSON.stringify(files)};
-const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png',...startupAssets])}.map(file=>new URL(file,self.location.href).href));
+const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png',...startupAssets,...automationAssets])}.map(file=>new URL(file,self.location.href).href));
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(file => new URL(file, self.location.href).href)))));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('message', event => {

@@ -1,5 +1,7 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Entry,type Character} from '../src/core/model';
+import {type Entry,type Character} from '../src/core/model';
 import {reviewClasses,planClassMigration} from '../src/core/classMigration';
 import {syncFeatures} from '../src/core/sheet';
 import {syncAutoResources} from '../src/core/resources';
@@ -8,7 +10,7 @@ import {newAutomationState} from '../src/core/automation/state';
 import {validateCharacter,importOwlbear} from '../src/core/validation';
 import {exportCharacter,exportOwlbear} from '../src/core/export';
 import {evaluate} from '../src/core/engine';
-const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>({id,kind,name:id,english:id,source:'XPHB',edition:'2024',revision:'2',packId:'test',entries:['原创迁移验收资料。'],raw});
+const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>(irFixture({id,kind,name:id,english:id,source:'XPHB',edition:'2024',revision:'2',packId:'test',entries:['原创迁移验收资料。'],raw}));
 const mage=entry('Test Mage','class',{hd:{faces:6},casterProgression:'full',spellcastingAbility:'int',preparedSpellsProgression:[2],classFeatures:['New Feature|Test Mage|XPHB|1']});
 const feature=entry('New Feature','feature',{className:'Test Mage',classSource:'XPHB',level:1,additionalSpells:[{innate:{'_':{daily:{'1':['Gift|XPHB']}}}}]});
 const gift=entry('Gift','spell',{level:1});
@@ -19,7 +21,7 @@ describe('class migration review and durable copy',()=>{
   const c=newCharacter(),old={...mage,id:'imported:class:法师',name:'同名',english:'同名',packId:'imported',source:'IMPORTED',raw:{_castingSource:{id:mage.id,source:'XPHB'}}};add(c,old);
   expect(reviewClasses(c,[{...mage,name:'同名'}])[0].suggested).toBeUndefined();
   c.selections[0].entry.english='Test Mage';expect(reviewClasses(c,[mage])[0].suggested?.id).toBe(mage.id);
-  c.selections[0].entry.raw._custom=true;expect(reviewClasses(c,[mage])[0].status).toBe('custom');expect(reviewClasses(c,[mage])[0].suggested).toBeUndefined();
+  c.selections[0].entry.raw._custom=true;Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));expect(reviewClasses(c,[mage])[0].status).toBe('custom');expect(reviewClasses(c,[mage])[0].suggested).toBeUndefined();
  });
  it('keeps 2014 and 2024 source identities separate and rejects ambiguous English matches',()=>{
   const c=newCharacter();add(c,{...mage,id:'old',source:'IMPORTED',packId:'imported'});

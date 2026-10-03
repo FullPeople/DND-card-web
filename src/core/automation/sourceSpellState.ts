@@ -1,10 +1,11 @@
+import {irMechanics,irSelectionActive} from './ir';
 import {specialSpellResource} from '../spellResourceKeys';
 import {selectionAllowed,type Character,type Selection} from '../model';
 import {automationEnabled} from './state';
 
 export function sourceSpellEnabled(c:Character,id:string):boolean{
  const config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;if(!grant&&!config?.manualSource)return true;
- if(grant&&(!automationEnabled(c)||!grant.active))return false;
+ if(grant&&(!automationEnabled(c)||!grant.active||!c.selections.some(owner=>owner.id===grant.ownerId&&irMechanics(owner.entry)&&irSelectionActive(c,owner))))return false;
  let row=c.selections.find(s=>s.id===id);const seen=new Set<string>();
  while(row){if(seen.has(row.id)||!selectionAllowed(c,row.entry))return false;seen.add(row.id);if(!row.parentId)return true;row=c.selections.find(s=>s.id===row!.parentId);}
  return false;

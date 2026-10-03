@@ -1,6 +1,8 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter,normalizeFixtureData as normalizeData} from './helpers/irFixture';
 import {describe,it,expect} from 'vitest';
-import {newCharacter,type Character,type Selection} from '../src/core/model';
-import {normalizeData} from '../src/data/catalog';
+import {type Character,type Selection} from '../src/core/model';
+
 import {evaluate} from '../src/core/engine';
 import {newAutomationState,setAutomationEnabled} from '../src/core/automation/state';
 import {equipSelection,reconcileEquipping} from '../src/core/automation/equipment';
@@ -47,7 +49,7 @@ describe('generic equipment automation on the 208 baseline',()=>{
  });
  it('keeps base armor without attunement, suspends magic bonuses, and explains unknown formulas',()=>{
   const c=character();const row=item(c,'magic','MA',14,{bonusAc:'+1',reqAttune:true});equipSelection(c,row.id,true);expect(evaluate(c).ac).toBe(16);
-  row.attuned=true;expect(evaluate(c).ac).toBe(17);row.entry.raw.bonusAc='@unsupported';expect(evaluate(c).ac).toBe(16);expect(evaluate(c).issues.some(i=>i.id==='armor-data:magic')).toBe(true);
+  row.attuned=true;expect(evaluate(c).ac).toBe(17);row.entry.raw.bonusAc='@unsupported';Object.assign(row.entry,irFixture(row.entry));expect(evaluate(c).ac).toBe(16);expect(evaluate(c).issues.some(i=>i.id==='armor-data:magic')).toBe(true);
  });
  it('disabling the first class never upgrades multiclass training to another class starting training',()=>{
   const c=character();delete c.training;c.profile.optional.multiclass=true;

@@ -1,9 +1,10 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
 import {newCharacter,type Character,type Entry} from '../../src/core/model';
-const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id:`refine186:${kind}:${name}`,kind,name,english:name,source:'XPHB',edition:'2024',packId:'test',revision:'1',raw,entries:['原创验收正文。']});
+const entry=(kind:Entry['kind'],name:string,raw:Entry['raw']={}):Entry=>({id:`refine186:${kind}:${encodeURIComponent(name)}`,kind,name,english:name,source:'XPHB',edition:'2024',packId:'test',revision:'1',raw,entries:['原创验收正文。']});
 const add=(c:Character,e:Entry,level=1)=>c.selections.push({id:e.id,entry:e,quantity:1,level,equipped:false});
-async function load(page:Page,c:Character){await mockSource(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();}
+async function load(page:Page,c:Character){await mockSource(page);await installCardAutomation(page,c,[],false);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();}
 
 test('hit dice keep their existing resource state through repeated clicks, type changes, undo and reload',async({page})=>{
  const c=newCharacter();c.name='生命骰操作验收';add(c,entry('class','奥术旅人',{hd:{faces:6}}),6);add(c,entry('class','持盾者',{hd:{faces:10}}),4);

@@ -1,3 +1,6 @@
+import {irFixture} from './helpers/irFixture';
+import {irCharacter as newCharacter,normalizeFixtureData as normalizeData} from './helpers/irFixture';
+import {reviewCoreSamples,readReviewedClass} from './helpers/reviewedCoreSamples';
 import {it,expect,vi} from 'vitest';
 // Rendering is read-only; isolate the live room transport from this Node test.
 vi.mock('../src/platform/workbench',()=>({inWorkbench:false,workbenchRequest:vi.fn()}));
@@ -8,7 +11,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {SpellsPage} from '../src/ui/SpellsPage';
 import {evaluate} from '../src/core/engine';
 import {readFileSync} from 'node:fs';
-import {newCharacter,type Character,type Edition,type Entry} from '../src/core/model';
+import {type Character,type Edition,type Entry} from '../src/core/model';
 import {bookRitualGroups,bookRitualPaymentId} from '../src/core/bookRituals';
 import {newAutomationState} from '../src/core/automation/state';
 import {spellPayments,spellActionRequest,performSpellAction} from '../src/core/automation/actions';
@@ -17,18 +20,18 @@ import {spellState} from '../src/core/characterDetails';
 import {setPreparedSpell} from '../src/core/spells';
 import {syncFeatures} from '../src/core/sheet';
 import {syncAutoResources} from '../src/core/resources';
-import {normalizeData} from '../src/data/catalog';
+
 import {readCharacter} from '../src/core/validation';
 
 const clause='你可以施展自己法术书里标记为仪式的法术。这个仪式用法不需要准备该法术。';
-const entry=(id:string,source:string,kind:Entry['kind'],raw:Entry['raw']={},entries:unknown[]=[]):Entry=>({id,name:id,english:id,kind,source,edition:source==='PHB'?'2014':'2024',packId:'fixture',revision:'1',raw,entries});
+const entry=(id:string,source:string,kind:Entry['kind'],raw:Entry['raw']={},entries:unknown[]=[]):Entry=>(irFixture({id,name:id,english:id,kind,source,edition:source==='PHB'?'2014':'2024',packId:'fixture',revision:'1',raw,entries}));
 function setup(edition:Edition='2024'){
  const c=newCharacter(edition),source=edition==='2014'?'PHB':'XPHB';c.automation=newAutomationState();
- const feature=entry('原创书内仪式资格',source,'feature',{className:'Renamed Scholar',classSource:source,level:1},edition==='2014'?[{type:'entries',name:'原创嵌套规则',entries:[clause]}]:[clause]);
+ const feature=irFixture(entry('原创书内仪式资格',source,'feature',{className:'Renamed Scholar',classSource:source,level:1},edition==='2014'?[{type:'entries',name:'原创嵌套规则',entries:[clause]}]:[clause]),{classModel:{ritualAccess:'book'}});
  const owner=entry('Renamed Scholar',source,'class',{hd:{faces:6},casterProgression:'full',spellcastingAbility:'int',spellsKnownProgressionFixed:[6],preparedSpellsProgression:[4],classFeatures:[`${feature.name}|Renamed Scholar|${source}|1|${source}`]});
  c.selections=[{id:'owner',entry:owner,level:1,quantity:1,equipped:false},{id:'feature',entry:feature,parentId:'owner',level:1,quantity:1,equipped:false}];
  const ritual=entry('原创书内法术',source,'spell',{level:1,meta:{ritual:true},classes:{fromClassList:[{name:owner.name,source}]}},['原创测试法术。']);
- const ordinary={...ritual,id:'ordinary',name:'原创非仪式',raw:{...ritual.raw,meta:{}}},outside={...ritual,id:'outside',name:'原创书外仪式'};
+ const ordinary=irFixture({...ritual,id:'ordinary',name:'原创非仪式',english:'Original Ordinary',raw:{...ritual.raw,meta:{}}}),outside={...ritual,id:'outside',name:'原创书外仪式'};
  const learned=learnActiveSpell(c,ritual,'owner'),normal=learnActiveSpell(c,ordinary,'owner');syncAutoResources(c);
  return {c,ritual,ordinary,outside,id:learned.id!,normal:normal.id!};
 }
@@ -47,14 +50,14 @@ it('rejects book-external, non-ritual, wrong-class and no-longer-allocated recor
  for(const target of [normal,'outside','missing'])expect(spellPayments(c,target).options).toEqual([]);
  c.spellSettings!.classSpells!.owner=[];expect(bookRitualGroups(c)[0].spells).toEqual([]);expect(spellPayments(c,id).options).toEqual([]);
 });
-it.each(['absent','missing-text','unknown-custom','unknown-source','source-disabled','not-declared','not-owned','options','mention-only','book-only','prepared-required','negated','split-sections','split-strings','unrelated-cantrip'] as const)('fails closed with a needs-review result for %s ritual capability',variant=>{
+it.each(['absent','missing-text','unknown-custom','unknown-source','source-disabled','not-declared','not-owned','options','mention-only','book-only','prepared-required','negated','split-sections','split-strings','unrelated-cantrip'] as const)('requires a reviewed IR declaration for %s ritual capability',variant=>{
  const {c,id}=setup(),feature=c.selections[1];
  if(variant==='absent')c.selections.splice(1,1);
  if(variant==='missing-text')feature.entry.entries=[];
- if(variant==='unknown-custom')c.selections[0].entry.raw._custom=true;
+ if(variant==='unknown-custom')c.selections[0].entry.raw._custom=true;Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));
  if(variant==='unknown-source'){c.selections[0].entry.source='HOME';c.profile.enabledSources.push('HOME');}
  if(variant==='source-disabled')c.profile.disabledEntries=[feature.entry.id];
- if(variant==='not-declared')c.selections[0].entry.raw.classFeatures=[];
+ if(variant==='not-declared')c.selections[0].entry.raw.classFeatures=[];Object.assign(c.selections[0].entry,irFixture(c.selections[0].entry));
  if(variant==='not-owned')feature.parentId='missing-owner';
  if(variant==='options')feature.entry.entries=[{type:'options',entries:[{type:'entries',entries:[clause]}]}];
  if(variant==='mention-only')feature.entry.entries=['本规则提及法术书、仪式与准备。'];
@@ -64,15 +67,17 @@ it.each(['absent','missing-text','unknown-custom','unknown-source','source-disab
  if(variant==='split-strings')feature.entry.entries=['你可以从法术书施展仪式。','戏法无需预备。'];
  if(variant==='unrelated-cantrip')feature.entry.entries=['你可以从法术书施展仪式。戏法不需要准备。'];
  if(variant==='split-sections')feature.entry.entries=[{type:'entries',entries:['你可以从法术书施展仪式。']},{type:'entries',entries:['戏法不需要准备。']}];
+ if(['unknown-custom','unknown-source'].includes(variant))feature.entry=irFixture(feature.entry);
+ if(!['absent','source-disabled','not-declared','not-owned','unknown-custom','unknown-source'].includes(variant))feature.entry=irFixture(feature.entry);
  expect(bookRitualGroups(c)[0]).toMatchObject({spells:[],reason:expect.stringContaining('需核对')});expect(spellPayments(c,id).options).toEqual([]);const before=JSON.stringify(c);expect(performSpellAction(c,spellActionRequest(c,id,bookRitualPaymentId('owner'),'invalid')).status).toBe('rejected');expect(JSON.stringify(c)).toBe(before);
 });
 it('does not borrow a ritual exception from another owned class or an inactive automation',()=>{
- const {c,id}=setup(),other=structuredClone(c.selections[0]);other.id='other';other.entry.id='other-class';other.entry.name=other.entry.english='Other Scholar';c.selections.push(other);c.selections[1].parentId='other';expect(bookRitualGroups(c)[0].spells).toEqual([]);expect(spellPayments(c,id).options).toEqual([]);
+ const {c,id}=setup(),other=structuredClone(c.selections[0]);other.id='other';other.entry.id='other-class';other.entry.name=other.entry.english='Other Scholar';other.entry=irFixture(other.entry);c.selections.push(other);c.selections[1].parentId='other';expect(bookRitualGroups(c)[0].spells).toEqual([]);expect(spellPayments(c,id).options).toEqual([]);
  const ready=setup();ready.c.automation!.enabled=false;expect(spellPayments(ready.c,ready.id).options).toEqual([]);
 });
 const external=process.env.DND_BOOK_RITUAL_DATA;
 it.skipIf(!external)('recognizes both actual publicly served class snapshots without publishing them',()=>{
- const catalog=normalizeData(JSON.parse(readFileSync(external!,'utf8').replace(/^\uFEFF/,'')),'external');
+ const catalog=reviewCoreSamples(normalizeData(readReviewedClass(external!),'external'));
  for(const edition of ['2014','2024'] as const){const c:Character=newCharacter(edition),source=edition==='2014'?'PHB':'XPHB',owner=catalog.find(e=>e.kind==='class'&&e.source===source)!;c.automation=newAutomationState();c.selections=[{id:'owner',entry:owner,level:1,quantity:1,equipped:false}];syncFeatures(c,catalog);expect(bookRitualGroups(c)[0].source?.entry.source).toBe(source);}
 });
 
@@ -87,3 +92,5 @@ it('renders the ritual projection as a prepared-spell subsection rather than a s
  expect(html).toContain('prepared-spell-group book-ritual-grouping');expect(html).toContain('aria-label="来自仪式施法"');expect(html).not.toContain('book-ritual-cell');
  expect(html.indexOf('预备法术')).toBeLessThan(html.indexOf('来自仪式施法'));expect(html.indexOf('来自仪式施法')).toBeLessThan(html.indexOf('已知法术'));expect(JSON.stringify(c)).toBe(before);
 });
+
+it('uses reviewed ritual IR even if translated prose changes or is absent',()=>{const {c,id}=setup();c.selections[1].entry.entries=[];expect(bookRitualGroups(c)[0].spells.map(row=>row.id)).toEqual([id]);c.selections[1].entry.entries=['你不能施展任何仪式。'];expect(bookRitualGroups(c)[0].spells.map(row=>row.id)).toEqual([id]);});

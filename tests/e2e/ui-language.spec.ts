@@ -1,5 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
@@ -23,7 +24,8 @@ async function checkFeedback(link:ReturnType<Page['getByRole']>){await expect(li
 test('temporarily hides language options and ignores an old English preference without changing the character',async({page})=>{
  await page.addInitScript(key=>localStorage.setItem(key,'en'),languageKey);await ready(page);
  await expect(page.getByTestId('ui-language')).toHaveCount(0);await expect(page.locator('html')).toHaveAttribute('lang','zh-CN');await expect(page.getByRole('tab',{name:'主要',exact:true})).toBeVisible();
- await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'language-card.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(card())))});await expect(page.getByRole('tab',{name:'语言验收角色（导入）',exact:true})).toHaveAttribute('aria-selected','true');await expect(page.locator('.save-status')).toContainText('已保存到本机');const imported=page.getByRole('dialog',{name:'导入与导出',exact:true});await imported.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(imported).toHaveCount(0);
+ const c=card();await installCardAutomation(page,c);
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'language-card.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:'语言验收角色（导入）',exact:true})).toHaveAttribute('aria-selected','true');await expect(page.locator('.save-status')).toContainText('已保存到本机');const imported=page.getByRole('dialog',{name:'导入与导出',exact:true});await imported.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(imported).toHaveCount(0);
  const before=await workspace(page),attack=page.locator('[data-quick-id="auto-weapon:language-selection-0:main"]');await expect(attack).toContainText('1d6+4');const formula=await attack.textContent();
  await page.reload();await expect(page.getByTestId('ui-language')).toHaveCount(0);await expect(page.getByRole('tab',{name:'主要',exact:true})).toBeVisible();expect(await workspace(page)).toEqual(before);expect(await attack.textContent()).toBe(formula);
 });

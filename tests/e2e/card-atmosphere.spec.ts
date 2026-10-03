@@ -6,7 +6,7 @@ import { mockSource } from './fixtures';
 test.setTimeout(90000);
 const makeEntry=(id:string,kind:Entry['kind'],name:string,english:string):Entry=>({id,kind,name,english,source:'XPHB',edition:'2024',packId:'test',revision:'1',raw:kind==='class'?{hd:{faces:8}}:{},entries:['自制显示测试资料。']});
 const row=(entry:Entry,level=1)=>({id:entry.id,entry,level,quantity:1,equipped:false});
-async function openCard(page:Page,c:Character){await mockSource(page);await page.goto('/');await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'atmosphere.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
+async function openCard(page:Page,c:Character){await mockSource(page);await page.goto('/');await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'atmosphere.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
 
 test('highest class watermark follows levels, tie order, removal, page changes and refresh',async({page})=>{
  const c=newCharacter();c.profile.optional.multiclass=true;c.selections=[row(makeEntry('wizard','class','法师','Wizard'),2),row(makeEntry('fighter','class','战士','Fighter'),1)];

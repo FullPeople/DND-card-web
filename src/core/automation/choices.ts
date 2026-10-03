@@ -1,15 +1,16 @@
+import {irMechanics,irGrantSelected,irAnswerPath,irGrantCount,irSelectionActive} from './ir';
 import {SKILLS,skillKey,selectionAllowed,selectionEffectsAllowed,uid,type Character,type Entry,type Selection} from '../model';
 import {inventoryState} from '../characterDetails';
 import {resolveEntryReference} from '../entryReferences';
 import {selectionLevel} from '../featureOwnership';
 import {automationEnabled} from './state';
 import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbilities';
-import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
+import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem,resolveEquipmentReference} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
-export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;hint?:string};
+export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;hint?:string;inline?:boolean};
 export const equipmentTypeLabel=(type:string)=>({weaponMartial:'军用武器',weaponSimple:'简易武器',focusSpellcastingHoly:'圣徽',focusSpellcastingArcane:'奥术法器',focusSpellcastingDruidic:'德鲁伊法器'} as Record<string,string>)[type]||'尚未适配的装备类别';
 const blocks=(v:unknown):any[]=>Array.isArray(v)?v:[];
 export function equipmentOptionConcept(entry:Entry,index:number,value:string):Entry{return concept(entry,`equipment:${index}:${value}`,`起始装备 · 方案 ${value}`,blocks(equipmentBlocks(entry)[index]?.[value]).map(item=>typeof item==='string'?`{@item ${item}}`:item?.item?`${item.quantity||1} × {@item ${item.item}}`:item?.special||(item?.equipmentType?equipmentTypeLabel(item.equipmentType):undefined)||(item?.value!==undefined||item?.containsValue!==undefined?`${(item.value??item.containsValue)/100} GP`:'尚未支持的装备条目')));}
@@ -17,12 +18,8 @@ export function equipmentPackage(entry:Entry,index:number,value:string,picks:Rec
  const data=equipmentBlocks(entry);if(!sourceEquipmentShapeSupported(entry))throw Error('此起始装备结构尚未支持，请查阅来源资料。');if(index>=0){const block=data[index];if(!block||!Object.hasOwn(block,value))throw Error('起始装备方案不存在。');return [...blocks(block._),...blocks(block[value])];}
  return data.flatMap((block,i)=>{const keys=Object.keys(block).filter(k=>k!=='_'),chosen=keys.length===1?keys[0]:picks[`group:${i}`];if(keys.length&&!keys.includes(chosen)){if(strict)throw Error(`请先完成第 ${i+1} 组装备选择。`);return blocks(block._);}return [...blocks(block._),...blocks(block[chosen])];});
 }
-export function selectionActive(c:Character,row:Selection):boolean{
- const seen=new Set<string>();let current:Selection|undefined=row;
- while(current){if(seen.has(current.id)||!selectionEffectsAllowed(c,current.entry))return false;seen.add(current.id);if(!current.parentId)return true;current=c.selections.find(s=>s.id===current!.parentId);}
- return false;
-}
-function concept(owner:Entry,value:string,label:string,entries:unknown[]):Entry{return {...owner,id:`${owner.id}#choice:${value}`,kind:'rule',name:label,english:label,entries,raw:{_choiceConcept:true},effects:undefined,choices:undefined};}
+export const selectionActive=irSelectionActive;
+function concept(owner:Entry,value:string,label:string,entries:unknown[]):Entry{return {...owner,id:`${owner.id}#choice:${value}`,kind:'rule',name:label,english:label,entries,raw:{_choiceConcept:true},automation:undefined,automationVersion:undefined,automationOptions:undefined,effects:undefined,choices:undefined};}
 function resolve(c:Character,owner:Entry,ref:string,kind:string,catalog:Entry[]){
  const source=ref.includes('|')?ref:`${ref}|${owner.source}`;
  return resolveEntryReference(source,catalog,kind as any)||resolveEntryReference(ref,catalog,kind as any);
@@ -31,64 +28,40 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
  if(!automationEnabled(c))return [];
  const out:SheetChoice[]=[],known=[...c.selections.map(s=>s.entry),...catalog];
  for(const row of c.selections){
-  const raw=row.entry.raw,restricted=!selectionActive(c,row);
+  const model=irMechanics(row.entry),restricted=!selectionActive(c,row);
   const push=(path:string,label:string,count:number,options:ChoiceOption[],channel:SheetChoice['channel'],equipmentIndex?:number)=>{
    if(!Number.isSafeInteger(count)||count<1||count>100)return;
    const id=`${row.id}:${path}`,saved=channel==='equipment'?[sourceEquipmentChoices(c,row)[String(equipmentIndex)]].filter(Boolean) as string[]:channel==='abilities'?[backgroundAbilityValue(c.backgroundChoices?.[row.id]?.abilities)].filter(Boolean):c.answers[id]||[];
-   const selected=[...new Set(saved)].filter(v=>options.some(o=>o.value===v)).slice(0,count);
-   const slots=Array.from({length:count},(_,i)=>options.some(o=>o.value===saved[i])?saved[i]:'');
+   const mapped=saved.map(value=>options.find(option=>option.value===value||option.entry.id===value||option.entry.automation?.identity.key===value)?.value||value);
+   const selected=[...new Set(mapped)].filter(v=>options.some(o=>o.value===v)).slice(0,count);
+   const slots=Array.from({length:count},(_,i)=>options.some(o=>o.value===mapped[i])?mapped[i]:'');
    out.push({id,ownerId:row.id,label,count,options,selected,slots,complete:selected.length===count,restricted,channel,equipmentIndex});
   };
-  if(row.entry.kind==='background'&&Array.isArray(raw.ability)&&raw.ability.length){
+  if(row.entry.kind==='background'&&(model?.grants?.some(grant=>grant.type==='abilityScore')||model?.modifiers?.some(modifier=>['str','dex','con','int','wis','cha'].includes(modifier.target))||row.entry.automation?.unsupported.some(gap=>gap.family==='ability'))){
    const options=backgroundAbilityOptions(row.entry).map(option=>({...option,entry:concept(row.entry,`abilities:${option.value}`,option.label,['背景属性分配记录；不会重复改写卡面的基础属性。'])}));
    push('abilities','背景属性',1,options,'abilities');
    const choice=out.at(-1);if(choice?.channel==='abilities')choice.hint=options.length?'保存背景声明的分配方案，不会再次叠加到已填写的基础属性。':'此背景属性结构尚未支持，原有记录保留；请查阅来源资料。';
   }
   const first=c.selections.find(s=>s.entry.kind==='class');
-  const start=row.entry.kind==='class'?(first?.id===row.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;
-  for(const [field,channel,label] of [['skills','skills','熟练项'],['tools','tools','工具熟练'],['languages','languages','语言']] as const){
-   const data=start?.[field]??raw[({skills:'skillProficiencies',tools:'toolProficiencies',languages:'languageProficiencies'})[field]];
-   blocks(data).forEach((block,index)=>{
-    const choose=block?.choose,count=choose?.count??block?.any;if(!count)return;
-    const values=choose?.from??(field==='skills'?Object.keys(SKILLS):known.filter(e=>field==='languages'?e.raw._category==='language':e.raw.tool).map(e=>e.id));
-    const options=(values||[]).map((v:string)=>{
-     const value=field==='skills'?skillKey(v):v,label=SKILLS[value]?.name||known.find(e=>e.id===v)?.name||v;
-     const found=field==='skills'?known.find(e=>e.kind==='rule'&&e.raw._category==='skill'&&e.source===(c.edition==='2024'?'XPHB':'PHB')&&[e.name,e.english,e.raw.ENG_name].some(n=>typeof n==='string'&&skillKey(n)===value)):known.find(e=>e.id===v)||known.find(e=>e.source===row.entry.source&&[e.name,e.english].some(n=>n.toLowerCase()===label.toLowerCase()));
-     return {value,label,entry:found||concept(row.entry,value,label,[`${label}熟练：相关检定加入熟练加值；专精及其他修正另行计算。`])};
-    });
-    push(`${channel}:${index}`,`${row.entry.kind==='class'?'起始':''}${label}`,count,options,channel);
-   });
+  const alternatives=new Map<string,number[]>();for(const grant of model?.grants||[])if(grant.setKey&&grant.setKey!=='additionalSpells'&&grant.setOption!==undefined&&!(row.entry.kind==='background'&&grant.type==='abilityScore'))alternatives.set(grant.setKey,[...new Set([...(alternatives.get(grant.setKey)||[]),grant.setOption])]);
+  for(const [key,values]of alternatives)push(`ir-set:${key}`,`${row.entry.name} · 方案`,1,values.map(value=>({value:String(value),label:`方案 ${value+1}`,entry:concept(row.entry,`set:${key}:${value}`,`方案 ${value+1}`,[])})),'content');
+  for(const grant of model?.grants||[]){
+   if(!grant.choose||!irGrantSelected(c,row,grant)||grant.type==='spell'||row.entry.kind==='background'&&grant.type==='abilityScore')continue;
+   const metadata=row.entry.automationOptions?.[grant.key||''];
+   const channel=({skillProficiency:'skills',expertise:'skills',toolProficiency:'tools',languageProficiency:'languages'} as Record<string,SheetChoice['channel']>)[grant.type]||'content';
+   const resolveValue=(value:string)=>known.find(entry=>entry.automation?.identity.key===value||entry.id===value)||(channel==='skills'?known.find(entry=>entry.kind==='rule'&&entry.raw._category==='skill'&&entry.source===(c.edition==='2024'?'XPHB':'PHB')&&[entry.name,entry.english,entry.raw.ENG_name].some(name=>typeof name==='string'&&skillKey(name)===skillKey(value))):resolve(c,row.entry,metadata?.options[value]?.reference||value,grant.type==='feat'?'feat':grant.type==='item'?'item':'feature',known));
+   let values=grant.choose.from||[];
+   if(grant.choose.filter){const filter=grant.choose.filter;values=known.filter(entry=>{const record=entry.automation;if(!record||!(entry.edition==='both'||entry.edition===row.entry.edition))return false;return (!filter.kind||record.identity.kind===filter.kind||entry.kind===filter.kind)&&(!filter.source||(Array.isArray(filter.source)?filter.source:[filter.source]).includes(entry.source))&&(!filter.featureType||(Array.isArray(filter.featureType)?filter.featureType:[filter.featureType]).some(type=>record.tags?.featureTypes?.includes(String(type))));}).map(entry=>entry.automation!.identity.key);}
+   const options=values.map(value=>{const found=resolveValue(value),label=metadata?.options[value]?.label||SKILLS[skillKey(value)]?.name||found?.name||value,content=['feat','feature','item'].includes(grant.type)&&!grant.origin?.endsWith(':option');return {value:content&&found?found.id:value,label,entry:found||concept(row.entry,value,label,[metadata?.label||row.entry.name]),...(content?{grant:found,unavailable:found?selectionAllowed(c,found)?undefined:'此选项来源尚未启用。':'引用资料尚未加载，不能确认此项。'}:{})};});
+   push(irAnswerPath(grant),metadata?.label||({skills:grant.scope==='firstClass'?'起始熟练项':'熟练项',tools:'工具熟练',languages:'语言'} as Record<string,string>)[channel]||row.entry.name,irGrantCount(c,row,grant),options,channel);
+   if(grant.origin==='inlineChoice'&&out.at(-1)?.ownerId===row.id)out.at(-1)!.inline=true;
   }
   if(row.entry.kind==='class'&&row.id===first?.id||['background','race'].includes(row.entry.kind)){const data=equipmentBlocks(row.entry);
-   if(data.length&&!sourceEquipmentShapeSupported(row.entry)){push('equipment:unsupported','起始装备',1,[],'equipment',-1);out.at(-1)!.hint='此起始装备结构尚未支持，原有记录保留；请查阅来源资料。';}
-   else if(data.length===1){const keys=Object.keys(data[0]).filter(k=>k!=='_');push('equipment:0','起始装备',1,keys.length?keys.map(value=>({value,label:`方案 ${value}`,entry:equipmentOptionConcept(row.entry,0,value)})):[{value:'default',label:'固定起始装备',entry:concept(row.entry,'equipment:default','固定起始装备',row.entry.raw.startingEquipment?.entries||[])}],'equipment',keys.length?0:-1);}
-   else if(data.length>1)push('equipment:bundle','起始装备',1,[{value:'default',label:'选择起始装备',entry:concept(row.entry,'equipment:bundle','起始装备',row.entry.raw.startingEquipment?.default||row.entry.raw.startingEquipment?.entries||[])}],'equipment',-1);
+   if(!sourceEquipmentShapeSupported(row.entry)){push('equipment:unsupported','起始装备',1,[],'equipment',-1);out.at(-1)!.hint='此起始装备结构尚未支持，原有记录保留；请查阅来源资料。';}
+   else if(data.length===1){const keys=Object.keys(data[0]).filter(k=>k!=='_');push('equipment:0','起始装备',1,keys.length?keys.map(value=>({value,label:`方案 ${value}`,entry:equipmentOptionConcept(row.entry,0,value)})):[{value:'default',label:'固定起始装备',entry:concept(row.entry,'equipment:default','固定起始装备',[])}],'equipment',keys.length?0:-1);}
+   else if(data.length>1)push('equipment:bundle','起始装备',1,[{value:'default',label:'选择起始装备',entry:concept(row.entry,'equipment:bundle','起始装备',[])}],'equipment',-1);
   }
-  const contentOption=(node:any,index:number,path:string):ChoiceOption=>{
-   const ref=node?.classFeature||node?.subclassFeature||node?.optionalfeature;
-   const found=typeof ref==='string'?resolve(c,row.entry,ref,'feature',known):undefined;
-   const entry=found||(typeof node==='object'&&node?.name?{...row.entry,id:`${row.entry.id}#${path}:${index}`,kind:'feature' as const,name:node.name,english:node.ENG_name||node.name,entries:node.entries||[node.entry].filter(Boolean),raw:{...node,_category:'inlineChoice'},effects:node.effects,choices:undefined}:undefined);
-   const label=entry?.name||String(ref||node?.name||node);
-   return {value:entry?.id||`${path}:${index}`,label,entry:entry||concept(row.entry,`${path}:${index}`,label,[`引用尚未加载：${ref||label}`]),grant:entry,unavailable:entry?(selectionAllowed(c,entry)?undefined:'此选项来源尚未启用。'):'引用资料尚未加载，不能确认此项。'};
-  };
-  const walk=(nodes:unknown,path:string,depth=0)=>{
-   if(depth>12)return;blocks(nodes).forEach((node,index)=>{
-    const here=`${path}:${index}`;
-    if(node?.type==='options'){push(`text-option:${here}`,row.entry.name,Number(node.count)||1,blocks(node.entries).map((v,i)=>contentOption(v,i,here)),'content');return;}
-    if(node?.entries)walk(node.entries,here,depth+1);if(node?.items)walk(node.items,`${here}:items`,depth+1);
-   });
-  };
-  walk(row.entry.entries,'entries');
-  // A declared filter is an explicit candidate set, even when its wrapper is prose.
-  for(const [index,text] of row.entry.entries.entries())if(typeof text==='string'&&/(?:获得|选择).*(?:一项|一个|1)/.test(text)){
-   const match=text.match(/\{@filter ([^|}]+)\|feats\|category=([^|}]+)/);if(!match)continue;
-   const options=known.filter(e=>e.kind==='feat'&&e.raw.category===match[2]&&(e.edition==='both'||e.edition===c.edition)).map(e=>({value:e.id,label:e.name,entry:e,grant:e}));
-   push(`filter:${index}`,row.entry.name,1,options,'content');
-  }
-  for(const choice of row.entry.choices||[]){
-   const options=(choice.options||choice.refs||[]).map(value=>{const entry=known.find(e=>e.id===value)||resolve(c,row.entry,value,choice.kind||'feature',known),label=choice.optionLabels?.[value]||entry?.name||SKILLS[skillKey(value)]?.name||value;return {value,label,entry:entry||concept(row.entry,value,label,[choice.label]),grant:choice.kind?entry:undefined};});
-   push(`custom:${choice.id}`,choice.label,choice.count,options,!choice.kind&&options.length>0&&options.every(o=>!!SKILLS[skillKey(o.value)])?'skills':'content');
-  }
+
  }
  return [...out,...classSpellChoices(c,catalog)];
 }
@@ -149,7 +122,7 @@ export function syncChoiceContent(c:Character,catalog:Entry[]){
   for(const choice of sheetChoices(c,catalog))if(choice.channel==='content')for(const value of choice.selected){const option=choice.options.find(o=>o.value===value);if(option?.grant){const key=`choice:${choice.id}:${value}`;desired.set(key,{owner:choice.ownerId,entry:option.grant,requirementId:choice.id});if(!c.selections.some(s=>s.grantKey===key)){const hash=(text:string)=>{let a=2166136261,b=5381;for(const ch of text){a=Math.imul(a^ch.charCodeAt(0),16777619);b=Math.imul(b,33)^ch.charCodeAt(0);}return `${a>>>0}-${b>>>0}`;};const id=`chosen:${hash(key)}`;if(c.selections.some(s=>s.id===id))throw Error('选择条目身份冲突，请保留角色备份。');c.selections.push({id,entry:structuredClone(option.grant),level:1,quantity:1,equipped:false,parentId:choice.ownerId,grantKey:key,requirementId:choice.id});changed=added=true;}}}
   if(!added)break;
  }
- const removed=new Set(c.selections.filter(s=>s.grantKey?.startsWith('choice:')&&!desired.has(s.grantKey)).map(s=>s.id));
+ const removed=new Set(c.selections.filter(s=>s.grantKey?.startsWith('choice:')&&!desired.has(s.grantKey)&&c.selections.some(owner=>owner.id===s.parentId&&(irMechanics(owner.entry)||owner.entry.automation?.verdict==='noMechanics')&&selectionActive(c,owner))).map(s=>s.id));
  for(let pass=0;pass<12;pass++)for(const row of c.selections)if(row.parentId&&removed.has(row.parentId))removed.add(row.id);
  if(removed.size){c.selections=c.selections.filter(s=>!removed.has(s.id));changed=true;}
  return changed;
@@ -157,9 +130,9 @@ export function syncChoiceContent(c:Character,catalog:Entry[]){
 
 export function equipmentCandidates(type:string,owner:Entry,catalog:Entry[]){
  return catalog.filter(e=>e.kind==='item'&&(e.edition==='both'||e.edition===owner.edition)&&(
-  type==='weaponMartial'?e.raw.weaponCategory==='martial':type==='weaponSimple'?e.raw.weaponCategory==='simple':
-  type==='focusSpellcastingHoly'?e.raw.scfType==='holy':type==='focusSpellcastingArcane'?e.raw.scfType==='arcane':
-  type==='focusSpellcastingDruidic'?e.raw.scfType==='druid':false));
+  type==='weaponMartial'?irMechanics(e)?.equipmentModel?.weaponCategory==='martial':type==='weaponSimple'?irMechanics(e)?.equipmentModel?.weaponCategory==='simple':
+  type==='focusSpellcastingHoly'?irMechanics(e)?.equipmentModel?.spellFocus==='holy':type==='focusSpellcastingArcane'?irMechanics(e)?.equipmentModel?.spellFocus==='arcane':
+  type==='focusSpellcastingDruidic'?irMechanics(e)?.equipmentModel?.spellFocus==='druid':false));
 }
 /** An explicit one-time claim. Claimed items have no modifier/source lifetime. */
 export function claimStartingEquipment(c:Character,id:string,value:string,catalog:Entry[],picks:Record<string,string>={}){
@@ -176,7 +149,7 @@ export function claimStartingEquipment(c:Character,id:string,value:string,catalo
   const quantity=Number(item.quantity??1);if(!Number.isSafeInteger(quantity)||quantity<1||quantity>3000)throw Error('装备数量无效。');
   if(item.equipmentType){for(let n=0;n<quantity;n++){const entry=equipmentCandidates(item.equipmentType,owner.entry,catalog).find(e=>e.id===picks[`${index}:${n}`]);if(!entry)throw Error(`请先选择 ${equipmentTypeLabel(item.equipmentType)} 的具体装备。`);grants.push({entry,quantity:1});}continue;}
   const ref=typeof item==='string'?item:item.item;
-  if(ref||item.special){const found=ref?resolveEntryReference(ref,[...c.selections.map(s=>s.entry),...catalog],'item'):undefined;const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||item.special}`,kind:'item' as const,name:item.special||String(ref).split('|')[0],english:item.special||String(ref).split('|')[0],entries:[`起始装备记录：${ref||item.special}`],raw:{_equipmentRef:ref},effects:undefined,choices:undefined};grants.push({entry,quantity});}
+  if(ref||item.special){const found=ref?resolveEquipmentReference(ref,[...c.selections.map(s=>s.entry),...catalog]):undefined;if(ref&&!found&&ref.includes(':'))throw Error('装备引用尚未绑定，未发放任何物品或金币。');const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||item.special}`,kind:'item' as const,name:item.special||String(ref).split('|')[0],english:item.special||String(ref).split('|')[0],entries:[`起始装备记录：${ref||item.special}`],raw:{_equipmentRef:ref},effects:undefined,choices:undefined};grants.push({entry,quantity});}
   if(item.value!==undefined||item.containsValue!==undefined){const coins=Number(item.value??item.containsValue??0)/100;if(!Number.isFinite(coins)||coins<0||coins>1000000)throw Error('起始金币数值无效。');money+=coins;}
   else if(!ref&&!item.special)throw Error('起始装备结构尚未支持，请查阅来源资料。');
  }

@@ -1,9 +1,10 @@
+import {ownedSpellLevel,irMechanics} from './automation/ir';
 import type {Character} from './model';
 import {casterProfiles} from './spellcastingRules';
 
 export const boundedCapacity=(value:number)=>Math.max(0,Math.min(100,Math.trunc(value)||0));
 export function knownSpellCapacity(c:Character){
- const base=casterProfiles(c).filter(p=>p.mode==='known').reduce((sum,p)=>sum+Number(p.casting.entry.raw.spellsKnownProgression?.[p.owner.level-1]??p.casting.entry.raw.preparedSpellsProgression?.[p.owner.level-1]??0),0);
+ const base=casterProfiles(c).filter(p=>p.mode==='known').reduce((sum,p)=>sum+Number(irMechanics(p.casting.entry)?.classModel?.knownProgression?.[p.owner.level-1]??irMechanics(p.casting.entry)?.classModel?.preparedProgression?.[p.owner.level-1]??0),0);
  return boundedCapacity(base+(c.spellSettings?.knownCapacityAdjustment||0));
 }
 /** Render exactly the allowance; retain overflow separately without erasing choices. */
