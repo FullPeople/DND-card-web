@@ -1,5 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
 import {newCharacter,type Character,type Entry} from '../../src/core/model';
 import {exportCharacter} from '../../src/core/export';
 
@@ -14,7 +15,7 @@ async function saved(page:Page):Promise<Character>{return page.evaluate(async()=
  try{return await new Promise<Character>((resolve,reject)=>{const r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>resolve(r.result.characters.find((c:Character)=>c.id===r.result.activeId));r.onerror=()=>reject(r.error);});}finally{db.close();}
 });}
 async function load(page:Page,mode:'a4'|'screen'='a4',c=fixture()){
- await mockSource(page,{displayMode:mode});await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'controls232.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:/^熟练与攻击原创验收（导入）(?:\s*旧卡资料需要核对)?$/})).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect.poll(async()=>(await saved(page)).name).toBe(c.name+'（导入）');
+ await mockSource(page,{displayMode:mode});await suppressAnnouncement(page);await installCardAutomation(page,c,[],false);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'controls232.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:/^熟练与攻击原创验收（导入）(?:\s*旧卡资料需要核对)?$/})).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect.poll(async()=>(await saved(page)).name).toBe(c.name+'（导入）');
 }
 async function editMode(page:Page,enabled=true){const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!==String(enabled))await toggle.click();}
 

@@ -1,5 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 async function saved(page:Page){return page.evaluate(()=>new Promise<any>((resolve,reject)=>{const request=indexedDB.open('dnd-card-standalone');request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,read=db.transaction('documents').objectStore('documents').get('workspace');read.onsuccess=()=>{resolve(read.result);db.close();};read.onerror=()=>{reject(read.error);db.close();};};}));}
@@ -11,6 +12,7 @@ for(const mode of ['a4','screen'] as const)test(`${mode} choice projection survi
  const characters=Array.from({length:12},(_,i)=>{const c=newCharacter();c.name=`原创标签 ${i}`;c.automation=newAutomationState();c.runtime.resources.spent={name:'已消耗资源',current:1,max:7};return c;});
  const active=characters.at(-1)!;const owner:Entry={id:'authored-choice-owner',kind:'class',name:'测试法师',english:'Test Mage',edition:'2024',source:'XPHB',packId:'authored',revision:'1',entries:['原创选择投影验收。'],raw:{name:'测试法师',ENG_name:'Test Mage',cantripProgression:[1],classTableGroups:[{rowsSpellProgression:[[2]]}]}};
  active.selections=[{id:'owner',entry:owner,level:1,quantity:1,equipped:false}];
+ await installCardAutomation(page,active,[],false);
  await page.addInitScript(characters=>{localStorage.setItem('dnd-card:editing','true');const r=indexedDB.open('dnd-card-standalone',1);r.onupgradeneeded=()=>{r.result.createObjectStore('documents');r.result.createObjectStore('cache');};r.onsuccess=()=>{const db=r.result,t=db.transaction('documents','readwrite'),s=t.objectStore('documents'),read=s.get('workspace');read.onsuccess=()=>{if(!read.result)s.put({schemaVersion:1,characters,activeId:characters.at(-1)!.id,packs:[]},'workspace');};t.oncomplete=()=>db.close();};},characters);
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');
  const tabs=page.getByRole('tablist',{name:'当前角色'}),name=page.getByRole('textbox',{name:'角色姓名',exact:true}),player=page.getByRole('textbox',{name:'玩家姓名',exact:true});

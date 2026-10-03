@@ -44,3 +44,21 @@
 
 远端主线新增三个浏览器组，当前为 17 个浏览器 CI 组加 verify。
 保留全部现有组并新增 IR 组；按真实矩阵验收全部 success，不削减为历史 14 组。
+
+完整 CI 的旧反馈夹具补充：`equipment-followup`、`direct232SkillsAttacks`、
+`choiceProjection233`、`sourceChoices232`、`wikiMotion232` 在作者边界
+提供同一自创规则的完整 IR。来源 ID 使用正常目录 codec / URI 编码；
+原命中 4→6、护甲 10→12、种族 +2、六维、金币与资源债务断言保持。
+
+夹具适配器曾误将目录生成的显示段落写回 `raw.entries`，使重复标准化后
+出现三个多余的特性。已保留原输入 `raw.entries`，显示段落仅留在显示层；
+不修改“只有两个实际职业特性”的既有浏览器断言。
+
+独立性能脚本 strict/noEmit 类型检查增加 `allowImportingTsExtensions`，
+与主 tsconfig 相同，以加载 SHA 锁定的共享 TypeScript 模块；strict、
+noEmit 和原浏览器性能采样均保留。
+
+六维跨版本回归的保存快照现在增加经过资料 SHA 验证的 automation /
+automationVersion。原种族条目的全部原字段继续用 toEqual 精确比较；
+新增独立验证绑定 SHA、2014 身份和六项 +2。原基础 14、显示 16、
+取消输入及资源保留断言未变，不忽略任意原字段。

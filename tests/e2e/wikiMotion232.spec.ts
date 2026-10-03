@@ -1,8 +1,10 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement,fillFromDetail} from './fixtures';
+import {authorBrowserCatalogue,installBrowserAutomation} from './automationFixtures';
 async function ready(page:Page){
  await mockSource(page);await suppressAnnouncement(page);
- await page.route('**/data/races.json',route=>route.fulfill({json:{race:[{name:'原创矮人',source:'XPHB',speed:25,size:['M'],entries:['原创预览验收。',...['年龄','体型','速度'].map((name,i)=>({type:'entries',name,entries:Array.from({length:i+1},()=>`${name}原创说明。`)}))]}]}}));
+ const data={race:[{name:'原创矮人',source:'XPHB',speed:25,size:['M'],entries:['原创预览验收。',...['年龄','体型','速度'].map((name,i)=>({type:'entries',name,entries:Array.from({length:i+1},()=>`${name}原创说明。`)}))]}]};const authored=authorBrowserCatalogue(data);await installBrowserAutomation(page,authored.entries,false);
+ await page.route('**/data/races.json',route=>route.fulfill({json:authored.body}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'种族',exact:true}).click();await page.locator('.catalog-row').filter({hasText:'原创矮人'}).click();const editing=page.getByRole('switch',{name:'编辑模式',exact:true});await editing.click();await expect(editing).toHaveAttribute('aria-checked','true');await fillFromDetail(page);
  // A drag completing is not evidence that a readonly sheet accepted the race.
  await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(page.locator('.identity-race')).toContainText('原创矮人');

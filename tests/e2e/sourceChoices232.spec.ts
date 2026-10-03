@@ -3,14 +3,16 @@ import {newCharacter,type Character,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
+import {normalizeData} from '../../src/data/catalog';
 
 const data={background:[{name:'气泡背景验收',source:'XPHB',ability:[{choose:{weighted:{from:['int','wis','cha'],weights:[2,1]}}}],startingEquipment:[{_:[{item:'固定旅行包|XPHB'},{value:500}],A:[{item:'可选旅行杖|XPHB'},{value:300}],B:[{value:1200}]}],entries:['原创来源选择验收。']}],item:[{name:'固定旅行包',source:'XPHB',weight:1},{name:'可选旅行杖',source:'XPHB',weight:2}]};
-const entries:Entry[]=Object.entries(data).flatMap(([kind,rows])=>rows.map(raw=>({id:`fixture:${kind}:${raw.source}:${raw.name}`,kind:kind as Entry['kind'],name:raw.name,english:raw.name,source:raw.source,edition:'2024',packId:'test',revision:'1',entries:'entries' in raw?raw.entries:[],raw}))),background=entries.find(entry=>entry.kind==='background')!;
-function dwarfEntry(name:string):Entry{return {id:`fixture:race:PHB:${name}`,kind:'race',name,english:name,source:'PHB',edition:'2014',packId:'test',revision:'1',entries:['原创矮人体质来源验收。'],raw:{ability:[{con:2}],speed:25}};}
+const entries=normalizeData(data,'fixture-1'),background=entries.find(entry=>entry.kind==='background')!;
+function dwarfEntry(name:string):Entry{return {id:`fixture:race:PHB:${encodeURIComponent(name)}`,kind:'race',name,english:name,source:'PHB',edition:'2014',packId:'test',revision:'1',entries:['原创矮人体质来源验收。'],raw:{ability:[{con:2}],speed:25}};}
 const possessions=(c:Character)=>c.selections.filter(row=>row.entry.kind==='item').map(({id,quantity,equipped,attuned})=>({id,quantity,equipped,attuned}));
 function character(){const c=newCharacter();c.name='背景气泡卡';c.automation=newAutomationState();c.selections=[{id:'bubble-background',entry:background,quantity:1,level:1,equipped:false}];return c;}
 async function ready(page:Page,c=character()){
- await mockSource(page);await suppressAnnouncement(page);await page.route('**/data/backgrounds.json',route=>route.fulfill({json:{background:data.background}}));await page.route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));
+ await mockSource(page);await suppressAnnouncement(page);const installed=await installCardAutomation(page,c,entries,false);await page.route('**/data/backgrounds.json',route=>route.fulfill({json:{background:data.background}}));await page.route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
  await page.getByTestId('character-file').setInputFiles({name:'source-choice.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  if(c.edition==='2014'){
@@ -21,6 +23,7 @@ async function ready(page:Page,c=character()){
  const selected=page.locator('.character-tabs [role="tab"]').filter({hasText:c.name});await expect(selected).toHaveAttribute('title',c.name+'（导入）');await expect(selected).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
  await expect(page.locator('.save-status')).toContainText('已保存到本机');const persisted=await saved(page);expect(persisted.name).toBe(c.name+'（导入）');expect(persisted.edition).toBe(c.edition);expect(persisted.racialAbilityMode).toBe(c.racialAbilityMode);
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ return installed.source;
 }
 /** This spec is served by playwright.wiki232 in standalone mode. Reject an
  * absent database/store explicitly: opening the integrated DB would create an
@@ -64,7 +67,7 @@ test('legacy dwarf displays the owned racial total without a version-guard warni
 
 test('all six large scores display totals, edit only bases, cancel cleanly and persist across edition changes',async({page},info)=>{
  const c=character();c.edition='2014';const race=dwarfEntry('六维固定加值');race.raw.ability=[{str:2,dex:2,con:2,int:2,wis:2,cha:2}];c.selections=[{id:'six-ability-source',entry:race,quantity:1,level:1,equipped:false}];
- await ready(page,c);const labels=['力量','敏捷','体质','智力','感知','魅力'];
+ const verifiedSource=await ready(page,c);const labels=['力量','敏捷','体质','智力','感知','魅力'];
  for(const label of labels){
   const field=page.getByRole('spinbutton',{name:`${label}基础值`,exact:true});await expect(field).toHaveValue('12');await field.click();
   const trace=page.getByRole('dialog',{name:`${label}数据追溯`,exact:true}),input=trace.getByRole('spinbutton',{name:`${label}追溯输入`,exact:true});await expect(input).toHaveValue('10');await input.fill('15');await expect(trace.locator('.trace-result strong')).toHaveText('17');await page.keyboard.press('Escape');await expect(field).toHaveValue('12');
@@ -74,5 +77,5 @@ test('all six large scores display totals, edit only bases, cancel cleanly and p
  await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await page.getByRole('radiogroup',{name:'角色规则版本',exact:true}).getByRole('radio',{name:'2024',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
  for(const label of labels)await expect(page.getByRole('spinbutton',{name:`${label}基础值`,exact:true})).toHaveValue('16');
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();const readonly=page.getByRole('spinbutton',{name:'力量基础值',exact:true});await readonly.click();await expect(readonly).toHaveValue('16');await expect(page.getByRole('dialog',{name:'力量数据追溯',exact:true})).toHaveCount(0);
- await page.reload();for(const label of labels)await expect(page.getByRole('spinbutton',{name:`${label}基础值`,exact:true})).toHaveValue('16');const restored=await saved(page);expect(restored.edition).toBe('2024');expect(restored.selections[0].entry).toEqual(race);expect(restored.abilities).toEqual({str:14,dex:14,con:14,int:14,wis:14,cha:14});await page.screenshot({path:info.outputPath('six-ability-totals.png')});
+ await page.reload();for(const label of labels)await expect(page.getByRole('spinbutton',{name:`${label}基础值`,exact:true})).toHaveValue('16');const restored=await saved(page);expect(restored.edition).toBe('2024');const {automation,automationVersion,...originalEntry}=restored.selections[0].entry;expect(originalEntry).toEqual(race);expect(automationVersion).toBe(verifiedSource.sha256);expect(automation).toMatchObject({edition:'2014',verdict:'automated',identity:{kind:'race',source:'PHB'}});expect(automation!.mechanics!.modifiers!.filter(modifier=>['str','dex','con','int','wis','cha'].includes(modifier.target))).toEqual(['str','dex','con','int','wis','cha'].map(target=>({target,op:'add',value:2})));expect(restored.abilities).toEqual({str:14,dex:14,con:14,int:14,wis:14,cha:14});await page.screenshot({path:info.outputPath('six-ability-totals.png')});
 });

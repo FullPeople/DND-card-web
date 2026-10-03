@@ -1,5 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
+import {installCardAutomation} from './automationFixtures';
+import {normalizeData} from '../../src/data/catalog';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter,exportOwlbear} from '../../src/core/export';
@@ -64,6 +66,7 @@ test('dragged shield and martial training affect equipped automation once and su
  await mockSource(page);const c=newCharacter();c.name='拖入熟练验收';c.abilities.str=18;c.automation=newAutomationState();c.training={armor:'',weapons:''};
  const entries:Entry[]=[{name:'训练盾牌',type:'S',ac:2},{name:'训练军用剑',type:'M',weaponCategory:'martial',dmg1:'1d8',dmgType:'S'}].map((raw,i)=>({id:'training-item:'+i,kind:'item',name:raw.name,english:raw.name,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:[],raw}));
  c.selections=entries.map(entry=>({id:entry.id,entry,quantity:1,level:1,equipped:true}));
+ await installCardAutomation(page,c,[],false);
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'training.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
  await page.getByRole('button',{name:'自动化设置',exact:true}).click();await expect(page.getByTestId('automation-ac')).toHaveText('10');await expect(page.locator('.automation-panel summary').filter({hasText:'训练军用剑'})).toContainText('命中 4');await page.keyboard.press('Escape');
@@ -80,6 +83,7 @@ for(const action of ['remove','zero'] as const)test(`background gift ${action} s
  await mockSource(page);const c=newCharacter();c.name='赠品移除验收';
  const background:Entry={id:'gift-background',kind:'background',name:'原创赠品背景',english:'Gift Background',source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:['用于赠品生命周期验收。'],raw:{startingEquipment:[{_:['测试皮甲|XPHB']}]}};
  c.selections=[{id:'background-gift-owner',entry:background,quantity:1,level:1,equipped:false}];
+ await installCardAutomation(page,c,normalizeData({baseitem:[{name:'测试皮甲',ENG_name:'Test Armor',source:'XPHB',ac:11,type:'LA',entries:['测试护甲。']}]},'fixture-1'),false);
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'gift.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);await page.getByRole('tab',{name:'背包',exact:true}).click();
  const gift=page.locator('.paper .stock-item').filter({hasText:'测试皮甲'});await expect(gift).toHaveCount(1);
  if(action==='remove'){await gift.locator('.stock-name').click({button:'right'});await page.getByRole('menuitem',{name:'移除',exact:true}).click();}

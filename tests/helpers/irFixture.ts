@@ -61,7 +61,7 @@ export function normalizeFixtureData(...args:Parameters<typeof normalizeCatalogu
   })};
   return {...node,...(Array.isArray(node.entries)?{entries:walk(owner,node.entries,here)}:{})};
  });
- const authored=entries.map(entry=>({...entry,raw:{...entry.raw,entries:walk(entry,entry.entries,'entries')}}));
+ const authored=entries.map(entry=>({...entry,raw:{...entry.raw,...(Array.isArray(entry.raw.entries)?{entries:walk(entry,entry.raw.entries,'entries')}:{})}}));
  const all=[...authored,...inline],contexts=new Map<string,ReturnType<typeof fixtureContext>>();return all.map(entry=>{const key=JSON.stringify([entry.packId,entry.edition]);if(!contexts.has(key))contexts.set(key,fixtureContext(entry,all));return irFixture(entry,undefined,all,contexts.get(key));});
 }
 export function irCharacter(edition:Edition='2024'):Character{const c=blankCharacter(edition);initializeAutomation(c);return c;}

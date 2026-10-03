@@ -93,7 +93,7 @@ jobs:
               node tools/profileCharacterEdits232.mjs
           - group: class-drop-profile-232
             commands: |
-              node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --target ES2022 --lib ES2022,DOM,DOM.Iterable --module ESNext --moduleResolution Bundler --jsx react-jsx --strict --skipLibCheck --esModuleInterop --resolveJsonModule --types vite/client,node tools/profileClassDrops232.spec.ts
+              node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --allowImportingTsExtensions --target ES2022 --lib ES2022,DOM,DOM.Iterable --module ESNext --moduleResolution Bundler --jsx react-jsx --strict --skipLibCheck --esModuleInterop --resolveJsonModule --types vite/client,node tools/profileClassDrops232.spec.ts
               node tools/profileClassDrops232.mjs
           - group: followup-230
             commands: |

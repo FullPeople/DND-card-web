@@ -49,6 +49,6 @@ export function authorBrowserCatalogue(input:Record<string,any>,revision='fixtur
  for(const entry of entries){const raw=(input[entry.raw._category||entry.kind]||[]).find((row:any)=>row.name===entry.name&&row.source===entry.source);if(raw?.choices||raw?._authoredMechanics){entry.choices=raw.choices;Object.assign(entry,irFixture(entry,{...entry.automation!.mechanics,...raw._authoredMechanics},entries));}}
  const inlineKeys=new Set(entries.filter(entry=>entry.id.includes('#option:')).map(entry=>entry.automation!.identity.key));
  for(const entry of entries)for(const grant of entry.automation?.mechanics?.grants||[])if(grant.key?.startsWith('text-option:')&&grant.choose?.from?.every(key=>inlineKeys.has(key)))grant.origin='inlineChoice';
- for(const entry of entries){const kind=entry.raw._category||entry.kind;(body[kind]||=[]).push({...entry.raw,name:entry.name,ENG_name:entry.automation!.identity.engName,source:entry.source,entries:entry.raw.entries||entry.entries});}
+ for(const entry of entries){const kind=entry.raw._category||entry.kind;(body[kind]||=[]).push({...entry.raw,name:entry.name,ENG_name:entry.automation!.identity.engName,source:entry.source});}
  return {entries,body};
 }
