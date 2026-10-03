@@ -36,11 +36,11 @@ describe('legacy upload bridge',()=>{
  it('rejects arbitrary data rather than creating a default character',()=>{expect(()=>normalizeLegacyUpload({name:'invalid'})).toThrow();});
 });
 describe('DM review projection',()=>{
- it('keeps disabled class levels and inherited restrictions visible without changing the card',()=>{
+ it('retains cross-edition class effects while keeping actual disabled sources and inherited restrictions visible',()=>{
   const c=newCharacter('2024');const entry:Entry={id:'class:phb',kind:'class',name:'职业',english:'Class',source:'PHB',edition:'2014',packId:'source',revision:'1',entries:[],raw:{hd:{faces:8}}};
   c.selections=[{id:'c',entry,level:4,quantity:1,equipped:false},{id:'f',parentId:'c',entry:{...entry,id:'feature:xphb',kind:'feature',source:'XPHB',edition:'2024'},level:1,quantity:1,equipped:false}];
   c.sheetBonuses={ac:2,speed:0};const original=JSON.stringify(c),review=characterReview(c);
-  expect(review.recordedLevel).toBe(4);expect(review.d.level).toBe(0);expect(review.restricted.map(s=>s.id)).toEqual(['c','f']);expect(review.manual).toHaveLength(1);expect(JSON.stringify(c)).toBe(original);
-  c.profile.optional.legacy=true;expect(characterReview(c).restricted).toHaveLength(0);
+  expect(review.recordedLevel).toBe(4);expect(review.d.level).toBe(4);expect(review.restricted).toEqual([]);expect(review.manual).toHaveLength(1);expect(JSON.stringify(c)).toBe(original);
+  c.profile.enabledSources=c.profile.enabledSources.filter(source=>source!=='PHB');const disabled=characterReview(c);expect(disabled.d.level).toBe(0);expect(disabled.restricted.map(s=>s.id)).toEqual(['c','f']);c.profile.enabledSources.push('PHB');expect(characterReview(c).restricted).toHaveLength(0);
  });
 });

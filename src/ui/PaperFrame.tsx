@@ -10,6 +10,7 @@ import {CardIdentityContext,CardVisualContext,visualConditions,adaptiveCondition
 import { SheetEditContext } from './SheetEdit';
 
 import { DragContext } from './DragEntry';
+import {entryDragIntent,entryDragPage} from './entryDragIntent';
 
 
 
@@ -38,7 +39,7 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const viewport = useRef<HTMLDivElement>(null);
   const {view:zoom,reset:resetZoom}=useSheetZoom(viewport,`${character.id}:${mode}`,!compact);
   const drag = useContext(DragContext);
-  useEffect(()=>{const lift=(event:Event)=>{const detail=(event as CustomEvent).detail;if(detail?.preservePage)return;const entry=detail?.entry;const next=entry?.kind==='spell'?'法术':entry?.kind==='item'?'背包':undefined;if(next&&pages.includes(next)&&next!==page)changePage(next);};window.addEventListener('entry-drag-start',lift);return()=>window.removeEventListener('entry-drag-start',lift);},[page,pages,changePage]);
+  useEffect(()=>{const lift=(event:Event)=>{const detail=(event as CustomEvent).detail;if(detail?.preservePage)return;const entry=detail?.entry;const next=entry&&entryDragPage(entry,detail.intent||entryDragIntent(entry));if(next&&pages.includes(next)&&next!==page)changePage(next);};window.addEventListener('entry-drag-start',lift);return()=>window.removeEventListener('entry-drag-start',lift);},[page,pages,changePage]);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => { if (!drag?.preservePage && drag?.entry && drag.hoverTab && drag.hoverTab !== page) hoverTimer.current = setTimeout(() => changePage(drag.hoverTab as SheetPage), 400); return () => clearTimeout(hoverTimer.current); }, [drag?.entry, drag?.hoverTab,drag?.preservePage, page]);
   useLayoutEffect(()=>{if(compact&&viewport.current)viewport.current.scrollTop=0;},[page,character.id,compact]);

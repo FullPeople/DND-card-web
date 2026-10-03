@@ -231,7 +231,40 @@ export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
+const RELEASE_236_SECTIONS:ReleaseSection[]=[
+ {
+  "title": "启动与卡面操作",
+  "items": [
+   "启动改用黄色背景的四层动画，角色卡准备好后进入；慢加载和失败重试入口保留。",
+   "六维属性平时显示最终值，编辑时显示基础值，避免把加值重复写入基础属性。",
+   "已填入角色的数值加值和特性资源不因切换规则版本而停用；主动关闭的来源和选项仍保持关闭。"
+  ]
+ },
+ {
+  "title": "头像与法术",
+  "items": [
+   "使用棋子图片作为头像时，也可以调整位置与缩放；眼睛开关紧邻标题。",
+   "编辑模式可隐藏主要页的法术框，其他内容会利用空出的空间；法术页仍可查看。",
+   "法术书仪式归入预备法术框中的“来自仪式施法”，不占预备格。"
+  ]
+ },
+ {
+  "title": "资源与熟练项",
+  "items": [
+   "只有兼职角色的普通法术位标记“共用”。",
+   "总览按保存的仪表盘布局显示资源，可打开仪表盘调整，隐藏资源和已消耗次数保留。",
+   "从熟练类别拖入工具时加入装备训练；从实际装备库拖入时仍作为背包物品。"
+  ]
+ },
+ {
+  "title": "验证范围",
+  "items": [
+   "本批合入八项修复，并保留上一批骰子等待与补传修复。实体手机、玩家原设备及真实房间组合效果仍需现场验证。"
+  ]
+ }
+];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:'2026-10-03',sections:RELEASE_236_SECTIONS},
  ...(mode==='suite'?[{title:'2026-10-03',sections:[
   {title:'3D 骰子紧急修复',items:[
    '开播确认与时钟消息优先发送，丢失轨迹分片的补传不再挡住其他投骰消息。',

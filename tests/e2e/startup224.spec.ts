@@ -20,7 +20,11 @@ test('application preload starts before a delayed entry and slow loading remains
  page.on('request',request=>{if(request.url().endsWith('/exe_icon.png'))largeIconRequested=true;if(/\/assets\/App-.*\.js/.test(request.url()))appRequested=true;});
  await page.route('**/assets/index-*.js',async route=>{await gate;await route.continue();});
  await page.goto('/',{waitUntil:'commit'});
- await expect(page.locator('#startup-title')).toBeVisible();
+ await expect(page.locator('#startup-intro')).toBeVisible();
+ await expect(page.locator('#startup')).toBeHidden();
+ await expect(page.locator('#startup-intro')).toHaveCSS('background-color','rgb(255, 255, 86)');
+ await expect(page.locator('#startup-intro')).toHaveText('');
+ await expect(page.locator('#startup-intro img')).toHaveCount(4);
  await expect.poll(()=>appRequested).toBe(true);expect(largeIconRequested).toBe(false);
  await expect(page.locator('#startup-message')).toContainText('秒');
  await page.clock.fastForward(21000);
@@ -56,4 +60,24 @@ test('category pinyin updates in the existing status row without displacing the 
  const during=await page.locator('.catalog-shell').boundingBox();expect(Math.abs(during!.width-before!.width)).toBeLessThan(2);expect(Math.abs(during!.x-before!.x)).toBeLessThan(2);
  release();await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
  await expect(page.locator('.catalog-status')).not.toContainText('正在加载拼音搜索');
+});
+
+
+test('approved four-layer yellow opening fades into the real card without lobby content',async({page})=>{
+ await mockSource(page);await suppressAnnouncement(page);
+ await page.goto('/',{waitUntil:'domcontentloaded'});
+ const intro=page.locator('#startup-intro');
+ await expect(intro).toHaveCSS('background-color','rgb(255, 255, 86)');
+ await expect(intro).toHaveText('');
+ await expect(intro.locator('img')).toHaveCount(4);
+ await expect.poll(()=>intro.locator('img').evaluateAll(nodes=>nodes.every(node=>(node as HTMLImageElement).complete&&(node as HTMLImageElement).naturalWidth===500))).toBe(true);
+ const layers=await intro.locator('img').evaluateAll(nodes=>nodes.map(node=>({src:node.getAttribute('src'),delay:getComputedStyle(node).animationDelay})));
+ expect(layers.map(row=>row.src)).toEqual(['./startup-logo/4.PNG','./startup-logo/1.PNG','./startup-logo/2.PNG','./startup-logo/3.PNG']);
+ expect(layers.map(row=>row.delay)).toEqual(['0s','0.14s','0.28s','0.42s']);
+ await page.screenshot({path:test.info().outputPath('yellow-logo-entrance.png')});
+ await expect(intro).toBeHidden();
+ await expect(page.locator('.paper')).toBeVisible();
+ await expect(page.locator('#startup')).toBeHidden();
+ await expect(page.getByText('CHARACTER LOBBY',{exact:true})).toHaveCount(0);
+ await page.screenshot({path:test.info().outputPath('card-after-logo.png')});
 });

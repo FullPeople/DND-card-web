@@ -1,6 +1,6 @@
 # Monster lifecycle repair candidate — 2026-10-03
 
-This candidate starts at Web main `35a00a6774476616520d248b4c3f3adaba3cfdbc` and pairs with an independent Suite dev candidate based on `c8397b04192ac26c4e954de813501c67acfdd783`. It does not merge or deploy either repository. The separately proposed card-presentation changes are not silently included.
+Initial investigation used Web main `35a00a6774476616520d248b4c3f3adaba3cfdbc` and Suite dev `c8397b04192ac26c4e954de813501c67acfdd783`. While validation ran, the official branches advanced to release 236. This candidate now includes Web main `4ef1eb37c4c8ea34291b06d39a21c586ff5e6866` and pairs with Suite dev `e12a6ab9320b7257979021a51c05c9bf8972b071`, preserving their eight card-presentation fixes and release notices. Only the independent candidate branches are advanced; official branches and deployments are untouched. Earlier green runs are historical evidence, not validation of this integration.
 
 ## Corrected behavior
 

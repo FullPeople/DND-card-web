@@ -28,9 +28,10 @@ export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'
 export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; classSpells?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface RuntimeResource {current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string}}
+export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number}
 export interface Character {
   automation?:import('./automation/state').AutomationState;
-  /** Present only when abilities exclude source-declared racial increases. */
+  /** Legacy score-ownership marker retained for backup compatibility. */
   racialAbilityMode?:'separate-v1';
   locked?:boolean;
   schemaVersion: 1; id: string; revision: number; name: string; player: string; edition: Edition;
@@ -39,6 +40,10 @@ export interface Character {
   biography?: Partial<Record<'hometown'|'height'|'weight'|'traits'|'ideals'|'bonds'|'flaws'|'story'|'backgroundDescription'|'portraitNotes',string>>;
   /** Hide only the avatar frame; omitted on older cards means visible. */
   portraitFrameHidden?: boolean;
+  /** Framing for the current bound token fallback; never stores its live URL. */
+  tokenPortraitTransform?: PortraitFraming;
+  /** Hide only the main-page spell summary; the spell page stays available. */
+  overviewSpellsHidden?: boolean;
   portrait?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
   illustration?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
   palette?: Partial<Record<'paper'|'surface'|'frame'|'heading'|'ink'|'badge',string>>;
@@ -94,14 +99,20 @@ export function entryEdition(e:Entry):Edition|'both' {
   return owner||published||(['class','subclass','feature'].includes(e.kind)?e.edition:'both');
 }
 export function editionAllows(e:Entry,edition:Edition,legacy=false){const required=entryEdition(e);return required==='both'||required===edition||edition==='2024'&&legacy;}
-export function selectionAllowed(c: Character, e: Entry): boolean {
+/** Saved sources keep their declared mechanics when the card edition changes.
+ * Availability, dependencies and explicit opt-outs still govern their effects. */
+export function selectionEffectsAllowed(c: Character, e: Entry): boolean {
   if (c.profile.disabledEntries?.includes(e.id)) return false;
   if (c.profile.exceptions[e.id]?.trim()) return true;
   // Unmapped external card records have no publisher source to enable. Keep
   // their manually supplied values until the player replaces the snapshot.
   if (e.source === 'IMPORTED' && e.packId === 'imported') return true;
   if(e.source==='CUSTOM'&&e.raw._custom&&!e.raw._workbenchCustom)return e.kind!=='feat'||c.profile.optional.feats;
-  return c.profile.enabledSources.includes(e.source) && (e.kind !== 'feat' || c.profile.optional.feats) && (e.dependencies || []).every(id => c.profile.enabledSources.includes(id)) && editionAllows(e,c.edition,c.profile.optional.legacy);
+  return c.profile.enabledSources.includes(e.source) && (e.kind !== 'feat' || c.profile.optional.feats) && (e.dependencies || []).every(id => c.profile.enabledSources.includes(id));
+}
+/** New catalog selections still follow the card's edition filter. */
+export function selectionAllowed(c: Character, e: Entry): boolean {
+  return selectionEffectsAllowed(c,e) && (!!c.profile.exceptions[e.id]?.trim() || e.source==='IMPORTED'&&e.packId==='imported' || e.source==='CUSTOM'&&e.raw._custom&&!e.raw._workbenchCustom || editionAllows(e,c.edition,c.profile.optional.legacy));
 }
 export const signed = (n: number) => n >= 0 ? `+${n}` : String(n);
 export function classMatches(child:Entry,parent:Entry){const key=(v:unknown)=>String(v||'').trim().toLowerCase();const names=[child.raw.className,child.raw.classEnglish,child.raw.classENG_name].map(key).filter(Boolean);const source=parent.source==='IMPORTED'?parent.raw._castingSource?.source||parent.source:parent.source;return parent.kind==='class'&&[parent.name,parent.english,parent.raw.name,parent.raw.ENG_name,parent.raw._castingSource?.name,parent.raw._castingSource?.english].map(key).some(n=>names.includes(n))&&[source,parent.source].map(key).includes(key(child.raw.classSource||'PHB'));}

@@ -90,3 +90,16 @@ it('keeps HP-only token overview identity when typed permission grants update it
 it('uses current access permissions instead of stale catalog flags',async()=>{
  const api=await ready(),next=access(2);next.monsters[0].write=false;next.monsters[0].locked=true;receive('access',{access:next});receive('catalog',{sequence:3,cards:[character()],monsters:[monster()],enabled:access().enabled});expect(api.getWorkbench().monsters[0].write).toBe(false);expect(api.getWorkbench().monsters[0].locked).toBe(true);
 });
+it('keeps overview dashboard presentation through partial runtime normalization and explicit clears',()=>{
+ const presentation={resourceWidgets:{breath:{x:2,y:1,w:3,h:3,page:1,style:'ring'}},resourceAttacks:{x:0,y:0,w:3,h:4,page:0},resourceHidden:['resource:breath'],classSummary:[{id:'class-fixture'}]};
+ const before={...monster(),...presentation},partial=runtimeFrom({conditions:[invisible]},before);expect(partial).toMatchObject(presentation);expect(partial.resources).toEqual([resource]);
+ expect(runtimeFrom({resourceWidgets:{},resourceHidden:[],classSummary:[]},before)).toMatchObject({resourceWidgets:{},resourceHidden:[],classSummary:[],resourceAttacks:presentation.resourceAttacks});
+});
+it('projects updated character dashboard layouts without cross-writing dual-bound monster runtime',async()=>{
+ const api=await ready(),widgets={ink:{x:4,y:1,w:3,h:3,page:1,style:'ring'}},attacks={x:0,y:0,w:4,h:6,page:0},hidden=['resource:ink'];
+ ack({sequence:3,state:{...character(),key:'room:card:c',documentRevision:2,resources:undefined},document:{_suiteRevision:2,dnd_card_web:{quickbarLayout:{widgets,attacks,hidden},selections:[]}}},false);
+ expect(api.getWorkbench().cards[0]).toMatchObject({resourceWidgets:widgets,resourceAttacks:attacks,resourceHidden:hidden});expect(api.getWorkbench().cards[0].resources[0].id).toBe('ink');
+ ack(snapshot(4,{conditions:[invisible],resources:undefined}));receive('catalog',{sequence:5,cards:[{...character(),documentRevision:2,resources:undefined}],monsters:[monster({resources:undefined,conditions:undefined})],enabled:access().enabled});
+ expect(api.getWorkbench().cards[0]).toMatchObject({resourceWidgets:widgets,resourceAttacks:attacks,resourceHidden:hidden});expect(api.getWorkbench().monsters[0].resources).toEqual([resource]);expect(api.getWorkbench().monsters[0].conditions).toEqual([invisible]);
+ ack({sequence:6,state:{...character(),key:'room:card:c',documentRevision:3},document:{_suiteRevision:3,dnd_card_web:{quickbarLayout:{widgets:{},hidden:[]},selections:[]}}});expect(api.getWorkbench().cards[0].resourceWidgets).toEqual({});expect(api.getWorkbench().cards[0].resourceHidden).toEqual([]);
+});

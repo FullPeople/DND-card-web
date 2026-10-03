@@ -12,7 +12,8 @@ export function runtimeFrom(value:any,previous:any={}){
  const resources=resourceRows(value?.resources,previous.resources);
  const conditions=conditionRows(value?.conditions,previous.conditions);
  const revision=value?.documentRevision??previous.documentRevision;
- return {stats,resources,conditions,...(Number.isSafeInteger(revision)&&revision>=0?{documentRevision:revision}:{})};
+ const presentation=Object.fromEntries(['resourceWidgets','resourceAttacks','resourceHidden','classSummary'].filter(key=>value?.[key]!==undefined||previous?.[key]!==undefined).map(key=>[key,value?.[key]!==undefined?value[key]:previous[key]]));
+ return {stats,resources,conditions,...presentation,...(Number.isSafeInteger(revision)&&revision>=0?{documentRevision:revision}:{})};
 }
 function resourceRows(value:any,previous:any){
  if(!Array.isArray(value)&&!record(value))return Array.isArray(previous)?previous:[];

@@ -3,7 +3,6 @@ import type {Character,Entry} from '../core/model';
 import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../core/bookRituals';
 import {automationEnabled} from '../core/automation/state';
 import {performSpellAction,spellActionRequest,type SpellActionResult} from '../core/automation/actions';
-import {SheetCell} from './SheetCell';
 import {Reference} from './Reference';
 import './bookRituals.css';
 
@@ -18,7 +17,7 @@ export function BookRituals({c,edit,inspect,readOnly=false}:{c:Character;edit:(a
   edit(draft=>{result=performSpellAction(draft,request);});
   if(result)setMessage(result.message);
  }
- return <SheetCell label="书内仪式" className="book-ritual-cell">
+ return <section className="prepared-spell-group book-ritual-grouping" aria-label="来自仪式施法"><h4><span>来自仪式施法</span></h4>
   <p className="spell-group-hint">无需预备，不占预备格。{BOOK_RITUAL_TIME}施法时须阅读法术书。</p>
   {groups.map(group=><section key={group.owner.id} className="book-ritual-group" data-ritual-owner={group.owner.id}>
    {groups.length>1&&<h4>{group.owner.entry.name}</h4>}
@@ -32,5 +31,5 @@ export function BookRituals({c,edit,inspect,readOnly=false}:{c:Character;edit:(a
   </section>)}
   {!automationEnabled(c)&&<p className="spell-group-hint">自动化已关闭，仪式资格仅供查阅。</p>}
   {message&&<p className="spell-group-hint" role="status">{message}</p>}
- </SheetCell>;
+ </section>;
 }

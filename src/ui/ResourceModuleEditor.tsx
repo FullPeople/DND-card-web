@@ -4,7 +4,7 @@ import {resourceModules} from '../core/resourceWidgets';
 import {setResource} from '../core/resources';
 import {ResourceEditor} from './ResourceEditor';
 export function ResourceModuleEditor({c,id,edit,close,disabled,gm}:{c:Character;id:string;edit:(f:(c:Character)=>void)=>void;close:()=>void;disabled:boolean;gm:boolean}){
- const module=resourceModules(Object.entries(c.runtime.resources),c.quickbarLayout?.widgets).find(m=>m.id===id||m.rows.some(([key])=>key===id))||resourceModules(c.runtime.resources[id]?[[id,c.runtime.resources[id]]]:[],c.quickbarLayout?.widgets)[0];
+ const module=resourceModules(Object.entries(c.runtime.resources),c.quickbarLayout?.widgets,c.selections).find(m=>m.id===id||m.rows.some(([key])=>key===id))||resourceModules(c.runtime.resources[id]?[[id,c.runtime.resources[id]]]:[],c.quickbarLayout?.widgets,c.selections)[0];
  const [selected,setSelected]=useState(id),[message,setMessage]=useState(''),active=module?.rows.some(([key])=>key===selected)?selected:module?.rows[0]?.[0],value=active&&c.runtime.resources[active];
  if(!value)return <p role="status">{disabled?'当前角色权限或连接状态已变化，无法继续编辑此资源。关闭窗口并重新选择角色卡后再试。':'此资源已移除。'}</p>;
  function change(fn:(draft:Character)=>void){if(disabled)throw Error('当前角色不可编辑');let applied=false;edit(draft=>{fn(draft);applied=true;});if(!applied)throw Error('修改未提交，请检查角色权限和同步状态');}

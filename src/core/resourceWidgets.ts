@@ -94,12 +94,12 @@ export type ResourceModule={id:string;name:string;rows:[string,ResourceValue][];
 export const isWidgetSpellSlot=(id:string)=>/^(spell|pact)-slot:[1-9]$/.test(id);
 export const romanLevel=(id:string)=>['','I','II','III','IV','V','VI','VII','VIII','IX'][Number(id.split(':').at(-1))]||'';
 /** A group is a projection over supplied visible rows; it never grants or totals runtime pools. */
-export function resourceModules(rows:ResourceModule['rows'],saved:Record<string,ResourceWidgetLayout>={}):ResourceModule[]{
+export function resourceModules(rows:ResourceModule['rows'],saved:Record<string,ResourceWidgetLayout>={},selections:Character['selections']=[]):ResourceModule[]{
  const modules:ResourceModule[]=[],used=new Set<string>(),byId=new Map(rows),anchors=new Map<string,string>();
  const slots=rows.filter(([id])=>isWidgetSpellSlot(id)).sort(([a],[b])=>Number(a.startsWith('pact'))-Number(b.startsWith('pact'))||Number(a.split(':')[1])-Number(b.split(':')[1]));
  for(const [anchor,layout] of Object.entries(saved)){if(!byId.has(anchor)||isWidgetSpellSlot(anchor)||!layout.members?.includes(anchor)||layout.members.some(id=>anchors.has(id)))continue;for(const id of layout.members)if(byId.has(id)&&!isWidgetSpellSlot(id)&&!anchors.has(id))anchors.set(id,anchor);}
  for(const [key,value] of rows){if(used.has(key))continue;
-  if(isWidgetSpellSlot(key)){const pact=key.startsWith('pact-'),pool=slots.filter(([id])=>id.startsWith('pact-')===pact);pool.forEach(([id])=>used.add(id));modules.push({id:pool[0][0],name:pact?'契约法术位':'法术位（共用）',rows:pool,slots:true});continue;}
+  if(isWidgetSpellSlot(key)){const pact=key.startsWith('pact-'),pool=slots.filter(([id])=>id.startsWith('pact-')===pact);pool.forEach(([id])=>used.add(id));modules.push({id:pool[0][0],name:pact?'契约法术位':selections.filter(row=>row.entry.kind==='class').length>1?'法术位（共用）':'法术位',rows:pool,slots:true});continue;}
   const id=anchors.get(key)||key,r=byId.get(id)||value;
   const children=rows.filter(([key])=>anchors.get(key)===id&&!used.has(key));
   const members=children.length>1?children:[[id,r] as ResourceModule['rows'][number]];members.forEach(([id])=>used.add(id));modules.push({id,name:members.length>1?saved[id].label||r.name||'组合资源':r.name||id,rows:members,slots:false});
@@ -187,7 +187,7 @@ export function dashboardOverlaps(layout:DashboardLayout):{resources:string[];at
 }
 export function setResourceWidgetStyle(c:Character,id:string,style:WidgetStyle){
  const layout=c.quickbarLayout||={order:[],hidden:[]};
- const modules=resourceModules(resourceCanvasRows(c),layout.widgets),current=freeDashboardLayout(modules,layout.widgets,layout.attacks);
+ const modules=resourceModules(resourceCanvasRows(c),layout.widgets,c.selections),current=freeDashboardLayout(modules,layout.widgets,layout.attacks);
  if(!current.widgets[id])return;
  const next=freeDashboardLayout(modules,{...current.widgets,[id]:normalizeWidget({...current.widgets[id],style})},current.attacks);
  layout.widgets={...Object.fromEntries(Object.entries(migrateDashboardWidgets(layout.widgets,layout.attacks)).filter(([key])=>Object.hasOwn(c.runtime.resources,key))),...next.widgets};layout.attacks=next.attacks;
@@ -197,7 +197,7 @@ export function ensureResourceWidget(c:Character,id:string,rng:()=>number=Math.r
  if(!Object.hasOwn(c.runtime.resources,id))return;
  const layout=c.quickbarLayout||={order:[],hidden:[]};
  if(Object.hasOwn(layout.widgets||{},id))return;
- const modules=resourceModules(resourceCanvasRows(c),layout.widgets),module=modules.find(m=>m.rows.some(([key])=>key===id));
+ const modules=resourceModules(resourceCanvasRows(c),layout.widgets,c.selections),module=modules.find(m=>m.rows.some(([key])=>key===id));
  if(!module||Object.hasOwn(layout.widgets||{},module.id))return;
  const style=module.slots?'poolpips':chooseDefaultWidgetStyle(c.runtime.resources[id],rng),template=RESOURCE_TEMPLATES.find(t=>t.id===style)!;
  const current=freeDashboardLayout(modules.filter(m=>m.id!==module.id),layout.widgets,layout.attacks);
@@ -214,7 +214,7 @@ export function addResourceModule(c:Character,template:ResourceTemplate|undefine
  const childValues=chosen.multi?values?.children:undefined;
  if(childValues&&(childValues.length<2||childValues.length>12||childValues.some(v=>!v.name.trim()||v.name.trim().length>100||!Number.isInteger(v.current)||v.current<0||v.current>999999999||!Number.isInteger(v.max)||v.max<0||v.max>99999||!v.unlimited&&v.current>v.max)))throw Error('检查子资源名称、当前值与上限');
  const ids=Array.from({length:chosen.multi?childValues?.length??values?.count??3:1},()=>newId());if(new Set(ids).size!==ids.length||ids.some(id=>!id||id.length>2000||Object.hasOwn(c.runtime.resources,id)))throw Error('资源标识重复');
- const layout=c.quickbarLayout||={order:[],hidden:[]},saved=layout.widgets||={},before=resourceModules(resourceCanvasRows(c),saved),current=freeDashboardLayout(before,saved,layout.attacks),occupied=Object.values(current.widgets);
+ const layout=c.quickbarLayout||={order:[],hidden:[]},saved=layout.widgets||={},before=resourceModules(resourceCanvasRows(c),saved,c.selections),current=freeDashboardLayout(before,saved,layout.attacks),occupied=Object.values(current.widgets);
  const sample=values??{name:'新资源',current:chosen.id==='ready'?1:3,max:chosen.id==='ready'?1:3,unlimited:false},module:ResourceModule={id:ids[0],name:sample.name,rows:ids.map((id,i)=>[id,childValues?.[i]??sample]),slots:false};
  if(!supportsWidgetStyle(chosen.style,module.rows,chosen.multi))throw Error('当前资源不能使用此样式');
  const initial=normalizeModuleWidget(module,{style:chosen.style,w:chosen.w,h:chosen.h,page,...placement,...(ids.length>1?{members:ids,label:values?.name.trim()||'组合资源'}:{})});

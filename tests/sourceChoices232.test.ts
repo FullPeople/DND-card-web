@@ -95,27 +95,27 @@ describe('background equipment receipts and explicit claims',()=>{
  });
 });
 
-describe('2014 source-owned racial ability scores',()=>{
+describe('source-owned racial ability scores',()=>{
  const races=normalizeData({race:[{name:'验收矮人',source:'PHB',ability:[{con:2}],speed:25},{name:'验收精灵',source:'PHB',ability:[{dex:2}],speed:30}]},'fixture');
  const dwarf=()=>{const c=newCharacter('2014');c.abilities.con=14;c.selections=[{id:'race-owner',entry:structuredClone(races[0]),quantity:1,level:1,equipped:false}];return c;};
  it('adds CON +2 to base 14 exactly once with a visible source trace and persistence',()=>{
   const c=dwarf();for(let i=0;i<8;i++){syncFeatures(c,races);const d=evaluate(c);expect(d.abilities.con).toBe(16);expect(d.modifiers.con).toBe(3);expect(d.trace.con).toEqual(['基础 14','种族：验收矮人 · PHB +2']);}expect(c.abilities.con).toBe(14);
   const restored=validateCharacter(exportCharacter(c));expect(restored.racialAbilityMode).toBe('separate-v1');expect(evaluate(restored).abilities.con).toBe(16);
  });
- it('removes the old increase when changing or disabling race and ignores legacy increases in 2024',()=>{
+ it('removes replaced or disabled racial increases and retains owned increases when switching editions',()=>{
   const c=dwarf();c.selections[0].entry=structuredClone(races[1]);expect(evaluate(c).abilities.con).toBe(14);expect(evaluate(c).abilities.dex).toBe(12);
   c.profile.enabledSources=[];expect(evaluate(c).abilities.dex).toBe(10);c.profile.enabledSources=['PHB'];expect(evaluate(c).abilities.dex).toBe(12);
-  c.edition='2024';c.profile.optional.legacy=true;expect(evaluate(c).abilities.dex).toBe(10);expect(evaluate(c).trace.dex).toEqual(['基础 10']);
+  c.edition='2024';c.profile.optional.legacy=false;expect(evaluate(c).abilities.dex).toBe(12);expect(evaluate(c).trace.dex).toEqual(['基础 10','种族：验收精灵 · PHB +2']);
   removeSelection(c,'race-owner');expect(evaluate(c).abilities.con).toBe(14);
  });
- it('preserves old manually adjusted cards and warns instead of silently converting their base scores',()=>{
+ it('uses legacy stored scores as bases without suppressing the owned racial increase or rewriting the card',()=>{
   const c=dwarf();delete c.racialAbilityMode;c.abilities.con=16;const before=structuredClone(c);const restored=validateCharacter(exportCharacter(c));syncFeatures(restored,races);
-  const d=evaluate(restored);expect(restored.abilities.con).toBe(16);expect(d.abilities.con).toBe(16);expect(d.trace.con.join(' ')).toContain('尚未确认');expect(d.issues.some(issue=>issue.id==='racial-ability:legacy:race-owner')).toBe(true);expect(restored.racialAbilityMode).toBeUndefined();expect(c).toEqual(before);
+  const d=evaluate(restored);expect(restored.abilities.con).toBe(16);expect(d.abilities.con).toBe(18);expect(d.trace.con).toEqual(['基础 16','种族：验收矮人 · PHB +2']);expect(d.issues.some(issue=>issue.id==='racial-ability:legacy:race-owner')).toBe(false);expect(restored.racialAbilityMode).toBeUndefined();expect(c).toEqual(before);
  });
  it('uses the same racial total in ability-linked resource formulas',()=>{
   const c=dwarf();c.automation=newAutomationState();c.selections[0].entry.raw.resources=[{name:'体质次数',max:'@abilities.con.mod',recovery:'long'}];expect(planFeatureResources(c).grants[0].max).toBe(evaluate(c).modifiers.con);expect(planFeatureResources(c).grants[0].max).toBe(3);
   c.selections[0].entry.effects=[{op:'add',target:'con',value:2}];expect(planFeatureResources(c).grants[0].max).toBe(3);delete c.selections[0].entry.effects;
-  delete c.racialAbilityMode;expect(planFeatureResources(c).grants[0].max).toBe(2);c.racialAbilityMode='separate-v1';c.edition='2024';c.profile.optional.legacy=true;expect(planFeatureResources(c).grants[0].max).toBe(2);
+  delete c.racialAbilityMode;expect(planFeatureResources(c).grants[0].max).toBe(3);c.racialAbilityMode='separate-v1';c.edition='2024';c.profile.optional.legacy=false;expect(planFeatureResources(c).grants[0].max).toBe(3);
  });
  it('does not duplicate existing explicit rule effects or silently resolve optional racial allocations',()=>{
   const c=dwarf();c.selections[0].entry.effects=[{op:'add',target:'con',value:2}];expect(evaluate(c).abilities.con).toBe(16);

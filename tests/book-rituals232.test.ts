@@ -1,4 +1,12 @@
-import {it,expect} from 'vitest';
+import {it,expect,vi} from 'vitest';
+// Rendering is read-only; isolate the live room transport from this Node test.
+vi.mock('../src/platform/workbench',()=>({inWorkbench:false,workbenchRequest:vi.fn()}));
+vi.mock('../src/ui/pointerDrag',()=>({pointerDrag:vi.fn(),landingWithin:vi.fn()}));
+vi.mock('../src/ui/sheetDisplay',()=>({useSheetRenderMode:()=> 'a4'}));
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {SpellsPage} from '../src/ui/SpellsPage';
+import {evaluate} from '../src/core/engine';
 import {readFileSync} from 'node:fs';
 import {newCharacter,type Character,type Edition,type Entry} from '../src/core/model';
 import {bookRitualGroups,bookRitualPaymentId} from '../src/core/bookRituals';
@@ -66,4 +74,16 @@ const external=process.env.DND_BOOK_RITUAL_DATA;
 it.skipIf(!external)('recognizes both actual publicly served class snapshots without publishing them',()=>{
  const catalog=normalizeData(JSON.parse(readFileSync(external!,'utf8').replace(/^\uFEFF/,'')),'external');
  for(const edition of ['2014','2024'] as const){const c:Character=newCharacter(edition),source=edition==='2014'?'PHB':'XPHB',owner=catalog.find(e=>e.kind==='class'&&e.source===source)!;c.automation=newAutomationState();c.selections=[{id:'owner',entry:owner,level:1,quantity:1,equipped:false}];syncFeatures(c,catalog);expect(bookRitualGroups(c)[0].source?.entry.source).toBe(source);}
+});
+
+
+it('projects legacy known ritual rows without creating stored preparation or allocation records',()=>{
+ const {c,id}=setup();delete c.spellSettings!.classSpells;const before=JSON.stringify(c);
+ expect(bookRitualGroups(c)[0].spells.map(row=>row.id)).toEqual([id]);expect(c.spellSettings!.prepared).toEqual([]);expect(JSON.stringify(c)).toBe(before);
+});
+
+it('renders the ritual projection as a prepared-spell subsection rather than a separate sheet frame',()=>{
+ const {c}=setup(),before=JSON.stringify(c);const html=renderToStaticMarkup(createElement(SpellsPage,{c,d:evaluate(c),edit:()=>{},browse:()=>{},inspect:()=>{},onLink:()=>{},add:()=>{}}));
+ expect(html).toContain('prepared-spell-group book-ritual-grouping');expect(html).toContain('aria-label="来自仪式施法"');expect(html).not.toContain('book-ritual-cell');
+ expect(html.indexOf('预备法术')).toBeLessThan(html.indexOf('来自仪式施法'));expect(html.indexOf('来自仪式施法')).toBeLessThan(html.indexOf('已知法术'));expect(JSON.stringify(c)).toBe(before);
 });

@@ -13,7 +13,7 @@ import {entryLabel} from '../core/entryLabel';
 import {NumberInput} from './NumberInput';
 import { useSources } from './SourceName';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { KIND_LABELS, selectionAllowed, type Character, type Entry, type Selection, type Kind } from '../core/model';
+import { KIND_LABELS, selectionEffectsAllowed, type Character, type Entry, type Selection, type Kind } from '../core/model';
 import { ContentBoundary, Entries } from './Entries';
 import { Reference } from './Reference';
 import { pointerDrag } from './pointerDrag';
@@ -25,9 +25,9 @@ import {featureOwner,selectionLevel} from '../core/featureOwnership';
 import {expandedFeatureIds,saveFeatureLayout} from '../core/featureLayout';
 
 type Feature = { id: string; group: string; origin: string; name: string; entry: Entry; body: unknown; restricted: boolean };
-type Props = { catalog?:Entry[]; owners?:Selection[]; detailed?:boolean; inline?: boolean; grouped?: boolean; c: Character; rows: Selection[]; receive?: (entry: Entry) => void; label?: string; className?: string; kinds?: Kind[]; edit: (action: (draft: Character) => void) => void; browse: () => void; onLink: (reference: string, kind?: string) => void; children?: ReactNode };
+type Props = { headingInline?:ReactNode; catalog?:Entry[]; owners?:Selection[]; detailed?:boolean; inline?: boolean; grouped?: boolean; c: Character; rows: Selection[]; receive?: (entry: Entry) => void; label?: string; className?: string; kinds?: Kind[]; edit: (action: (draft: Character) => void) => void; browse: () => void; onLink: (reference: string, kind?: string) => void; children?: ReactNode };
 
-export function FeaturePanel({ catalog=[], owners=[], detailed = false, inline = false, c, rows, receive, edit, browse, onLink, children, label = '特性', className = 'class-features', kinds = ['feature', 'rule'], grouped = true }: Props) {
+export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = false, inline = false, c, rows, receive, edit, browse, onLink, children, label = '特性', className = 'class-features', kinds = ['feature', 'rule'], grouped = true }: Props) {
   const {format}=useSources(); const editing=useContext(SheetEditContext);
   const screen=useSheetRenderMode()==='screen';
   const menu=useEntryMenu();
@@ -37,7 +37,7 @@ export function FeaturePanel({ catalog=[], owners=[], detailed = false, inline =
   const spells = kinds.length === 1 && kinds[0] === 'spell';
   const features: Feature[] = rows.filter(s=>!s.grantKey?.startsWith('choice:')).map(s => {
     const owner = featureOwner(c,s);
-    return { id: s.id, group: spells ? String(s.entry.raw.level ?? 0) : grouped ? owner?.id || 'other' : 'all', origin: owner ? `${KIND_LABELS[owner.entry.kind]} ${owner.entry.name}${['class', 'subclass'].includes(owner.entry.kind) ? ` Lv.${selectionLevel(c,owner)}` : ''}` : '其他特性', name: entryLabel(s.entry), entry: s.entry, body: s.entry.entries, restricted: !selectionAllowed(c, s.entry) || !!owner && !selectionAllowed(c, owner.entry) };
+    return { id: s.id, group: spells ? String(s.entry.raw.level ?? 0) : grouped ? owner?.id || 'other' : 'all', origin: owner ? `${KIND_LABELS[owner.entry.kind]} ${owner.entry.name}${['class', 'subclass'].includes(owner.entry.kind) ? ` Lv.${selectionLevel(c,owner)}` : ''}` : '其他特性', name: entryLabel(s.entry), entry: s.entry, body: s.entry.entries, restricted: !selectionEffectsAllowed(c, s.entry) || !!owner && !selectionEffectsAllowed(c, owner.entry) };
   });
   for(const f of features){const selected=choicesFor(f.id).filter(r=>r.complete&&r.channel==='content').flatMap(r=>r.selected.map(v=>r.options.find(o=>o.value===v)?.label));if(selected.length)f.name+=`：${selected.join('、')}`;}
   const saved = c.featureLayout;
@@ -129,5 +129,5 @@ export function FeaturePanel({ catalog=[], owners=[], detailed = false, inline =
     </article>)}</div></section>)}
     </div>{children}{!inline && !screen && <button className="feature-browse" onClick={browse}>＋ 查阅{label}</button>}</>;
   if (inline) return <DropZone className="status-strip" kinds={kinds} onReceive={receive} wholePaper>{contents}</DropZone>;
-  return <SheetCell label={label} trailing={screen?<button className="feature-browse-heading" aria-label={`查阅${label}`} title={`查阅${label}`} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();browse();}}>＋</button>:undefined} className={`${className} traits-box feature-panel`} dropKinds={kinds} onReceive={receive} wholePaper={kinds.length === 1 && kinds[0] === 'condition'} onHeadingClick={() => saveLayout(ordered.map(f => f.id), allOpen ? [] : ordered.map(f => f.id))} headingExpanded={allOpen} headingActionLabel={`${allOpen ? '折叠' : '展开'}全部${label}`}>{contents}</SheetCell>;
+  return <SheetCell label={label} headingInline={headingInline} trailing={screen?<button className="feature-browse-heading" aria-label={`查阅${label}`} title={`查阅${label}`} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();browse();}}>＋</button>:undefined} className={`${className} traits-box feature-panel`} dropKinds={kinds} onReceive={receive} wholePaper={kinds.length === 1 && kinds[0] === 'condition'} onHeadingClick={() => saveLayout(ordered.map(f => f.id), allOpen ? [] : ordered.map(f => f.id))} headingExpanded={allOpen} headingActionLabel={`${allOpen ? '折叠' : '展开'}全部${label}`}>{contents}</SheetCell>;
 }

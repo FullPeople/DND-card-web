@@ -35,7 +35,7 @@ test('棋子图片回退只用于显示，不会当成头像数据写进角色',
   await page.mouse.wheel(0,-300);
   await page.waitForTimeout(400);
   expect(JSON.stringify(await page.evaluate(()=>(window as any).saves))).not.toContain(tokenUrl);
-  await expect(page.locator('.portrait-move')).toHaveCount(0);
+  await expect(page.locator('.portrait-move')).toHaveCount(1);
   await page.screenshot({path:test.info().outputPath('196-fallback-only.png')});
 });
 test('无法读取的头像不再让整张角色卡打不开',async({page,baseURL})=>{

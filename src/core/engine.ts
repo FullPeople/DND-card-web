@@ -5,7 +5,7 @@ import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
 import {automationEnabled} from './automation/state';
 import {evaluateArmor,automationCompatibilityIssue} from './automation/equipment';
-import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, editionAllows, entryEdition, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
+import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, selectionEffectsAllowed, editionAllows, entryEdition, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
   const abilities = { ...c.abilities }; const trace: Record<string, string[]> = {};
@@ -16,8 +16,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     if(s.grantKey?.startsWith('choice:')&&!automationEnabled(c))return false;
     if (excluded.has(s.id)) return false;
     let owner = s; const seen = new Set<string>();
-    while (owner.parentId && !seen.has(owner.id)) { seen.add(owner.id); const parent = c.selections.find(p => p.id === owner.parentId); if (!parent || !selectionAllowed(c, parent.entry)) return false; owner = parent; }
-    if (selectionAllowed(c, s.entry)) return true;
+    while (owner.parentId && !seen.has(owner.id)) { seen.add(owner.id); const parent = c.selections.find(p => p.id === owner.parentId); if (!parent || !selectionEffectsAllowed(c, parent.entry)) return false; owner = parent; }
+    if (selectionEffectsAllowed(c, s.entry)) return true;
     issues.push({ id: `disabled:${s.id}`, message: `${s.entry.name} 的来源、依赖或规则选项未启用，保留内容但不计效果。`, selectionId: s.id, severity: 'error' }); return false;
   });
   const classes = active.filter(s => s.entry.kind === 'class');

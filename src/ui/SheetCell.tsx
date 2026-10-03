@@ -6,8 +6,8 @@ import { DropZone } from './DragEntry';
 import {CardIdentityContext} from './cardVisualState';
 
 /** The inner surface clips both the title band and contents to the same cut corners. */
-export function SheetCell({ label, children, style, className = '', missing = false, dashed = false, onFill, requirementId, hint, trailing, dropKinds, dropRequirement, onReceive, allowExisting, flashKey, onHeadingClick, headingActionLabel, headingExpanded, headingPressed, settingsIcon, accepts, wholePaper }: {
-  style?:CSSProperties; settingsIcon?:boolean; accepts?: (entry: Entry) => boolean; wholePaper?: boolean;
+export function SheetCell({ label, children, style, className = '', missing = false, dashed = false, onFill, requirementId, hint, trailing, headingInline, dropKinds, dropRequirement, onReceive, allowExisting, flashKey, onHeadingClick, headingActionLabel, headingExpanded, headingPressed, settingsIcon, accepts, wholePaper, training }: {
+  headingInline?:ReactNode; style?:CSSProperties; settingsIcon?:boolean; accepts?: (entry: Entry) => boolean; wholePaper?: boolean; training?:boolean;
   onHeadingClick?: () => void; headingActionLabel?: string; headingExpanded?: boolean; headingPressed?: boolean;
   flashKey?: string; label: string; children?: ReactNode; className?: string; missing?: boolean; dashed?: boolean; onFill?: () => void; requirementId?: string; hint?: string; trailing?: ReactNode;
   dropKinds?: Kind[]; dropRequirement?: Requirement; onReceive?: (entry: Entry) => void; allowExisting?: boolean;
@@ -28,13 +28,13 @@ export function SheetCell({ label, children, style, className = '', missing = fa
     return () => observer.disconnect();
   }, []);
   const { width: w, height: h } = size;
-  const content = <><header className={`cell-heading ${onHeadingClick ? 'heading-action' : ''}`} role={onHeadingClick ? 'button' : undefined} tabIndex={onHeadingClick ? 0 : undefined} aria-label={onHeadingClick ? headingActionLabel || label : undefined} aria-expanded={headingExpanded} aria-pressed={headingPressed} onClick={onHeadingClick ? event => { event.stopPropagation(); onHeadingClick(); } : undefined} onKeyDown={onHeadingClick ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); onHeadingClick(); } } : undefined}><h3>{label}{settingsIcon&&onHeadingClick&&<SettingsMark/>}</h3>{trailing}</header><div className="cell-content">{children}{outlined && onFill && <button className="cell-fill choose-button" onClick={event => { event.stopPropagation(); onFill(); }}>点击并拖拽填写</button>}</div></>;
+  const content = <><header className={`cell-heading ${onHeadingClick ? 'heading-action' : ''}`} role={onHeadingClick ? 'button' : undefined} tabIndex={onHeadingClick ? 0 : undefined} aria-label={onHeadingClick ? headingActionLabel || label : undefined} aria-expanded={headingExpanded} aria-pressed={headingPressed} onClick={onHeadingClick ? event => { event.stopPropagation(); onHeadingClick(); } : undefined} onKeyDown={onHeadingClick ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); onHeadingClick(); } } : undefined}><h3>{label}{settingsIcon&&onHeadingClick&&<SettingsMark/>}</h3>{headingInline}{trailing}</header><div className="cell-content">{children}{outlined && onFill && <button className="cell-fill choose-button" onClick={event => { event.stopPropagation(); onFill(); }}>点击并拖拽填写</button>}</div></>;
   return <section ref={ref} style={style} className={`sheet-cell ${className} ${missing ? 'cell-incomplete' : ''} ${outlined ? 'cell-missing' : ''}`} aria-label={label} data-requirement={requirementId} title={hint} onClick={event => {
     if (missing && onFill && !(event.target as HTMLElement).closest('button,input,select,textarea,a,summary,label')) onFill();
   }}>
     <div className="cell-face">
     {!!flash && <span key={flash} className="cell-sheen" aria-hidden="true"/>}
     {outlined && w > 0 && <svg className="cell-perimeter" aria-hidden="true"><path d={`M 8.6 1.5 H ${w - 8.6} L ${w - 1.5} 8.6 V ${h - 8.6} L ${w - 8.6} ${h - 1.5} H 8.6 L 1.5 ${h - 8.6} V 8.6 Z`}/></svg>}
-    <div className="cell-surface">{dropKinds ? <DropZone className="cell-drop-surface" kinds={dropKinds} requirement={dropRequirement} onReceive={onReceive} allowExisting={allowExisting} accepts={accepts} wholePaper={wholePaper}>{content}</DropZone> : content}</div><CellArt width={w} height={h} missing={outlined}/></div>{className.includes('portrait-cell') && <CellHalo kind="portrait"/>}{className.includes('initiative-cell') && <CellHalo kind="initiative"/>}
+    <div className="cell-surface">{dropKinds ? <DropZone className="cell-drop-surface" kinds={dropKinds} requirement={dropRequirement} onReceive={onReceive} allowExisting={allowExisting} accepts={accepts} wholePaper={wholePaper} training={training}>{content}</DropZone> : content}</div><CellArt width={w} height={h} missing={outlined}/></div>{className.includes('portrait-cell') && <CellHalo kind="portrait"/>}{className.includes('initiative-cell') && <CellHalo kind="initiative"/>}
   </section>;
 }

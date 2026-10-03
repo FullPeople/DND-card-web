@@ -53,10 +53,26 @@ test('legacy chosen background preserves possessions and spent balance, while ex
 test('new 2014 dwarf shows base 14 plus racial 2 and preserves the calculation after reload',async({page},info)=>{
  const c=character();c.edition='2014';c.abilities.con=14;c.selections=[{id:'racial-source',entry:dwarfEntry('验收矮人'),quantity:1,level:1,equipped:false}];
  await ready(page,c);await page.getByRole('spinbutton',{name:'体质基础值',exact:true}).click();const trace=page.getByRole('dialog',{name:'体质数据追溯',exact:true});await expect(trace).toContainText('基础 14');await expect(trace).toContainText('种族：验收矮人 · PHB +2');await expect(trace.locator('.trace-result strong')).toHaveText('16');await expect(page.locator('.ability-con .ability-modifier')).toHaveText('+3');await page.screenshot({path:info.outputPath('dwarf-constitution-14-plus-2.png')});await page.keyboard.press('Escape');
- await page.reload();await expect(page.getByRole('spinbutton',{name:'体质基础值',exact:true})).toHaveValue('14');await expect(page.locator('.ability-con .ability-modifier')).toHaveText('+3');expect((await saved(page)).racialAbilityMode).toBe('separate-v1');
+ await page.reload();await expect(page.getByRole('spinbutton',{name:'体质基础值',exact:true})).toHaveValue('16');await expect(page.locator('.ability-con .ability-modifier')).toHaveText('+3');expect((await saved(page)).racialAbilityMode).toBe('separate-v1');
 });
 
-test('legacy manually adjusted dwarf retains its total and displays the unconfirmed migration warning',async({page})=>{
+test('legacy dwarf displays the owned racial total without a version-guard warning',async({page})=>{
  const c=character();c.edition='2014';delete c.racialAbilityMode;c.abilities.con=16;c.selections=[{id:'legacy-racial-source',entry:dwarfEntry('验收旧矮人'),quantity:1,level:1,equipped:false}];
- await ready(page,c);await page.getByRole('spinbutton',{name:'体质基础值',exact:true}).click();const trace=page.getByRole('dialog',{name:'体质数据追溯',exact:true});await expect(trace).toContainText('尚未确认');await expect(trace.locator('.trace-result strong')).toHaveText('16');await expect(page.locator('.ability-con .ability-modifier')).toHaveText('+3');expect((await saved(page)).racialAbilityMode).toBeUndefined();
+ await ready(page,c);await page.getByRole('spinbutton',{name:'体质基础值',exact:true}).click();const trace=page.getByRole('dialog',{name:'体质数据追溯',exact:true});await expect(trace).not.toContainText('尚未确认');await expect(trace.getByRole('spinbutton',{name:'体质追溯输入',exact:true})).toHaveValue('16');await expect(trace.locator('.trace-result strong')).toHaveText('18');await expect(page.locator('.ability-con .ability-modifier')).toHaveText('+4');expect((await saved(page)).racialAbilityMode).toBeUndefined();
+});
+
+
+test('all six large scores display totals, edit only bases, cancel cleanly and persist across edition changes',async({page},info)=>{
+ const c=character();c.edition='2014';const race=dwarfEntry('六维固定加值');race.raw.ability=[{str:2,dex:2,con:2,int:2,wis:2,cha:2}];c.selections=[{id:'six-ability-source',entry:race,quantity:1,level:1,equipped:false}];
+ await ready(page,c);const labels=['力量','敏捷','体质','智力','感知','魅力'];
+ for(const label of labels){
+  const field=page.getByRole('spinbutton',{name:`${label}基础值`,exact:true});await expect(field).toHaveValue('12');await field.click();
+  const trace=page.getByRole('dialog',{name:`${label}数据追溯`,exact:true}),input=trace.getByRole('spinbutton',{name:`${label}追溯输入`,exact:true});await expect(input).toHaveValue('10');await input.fill('15');await expect(trace.locator('.trace-result strong')).toHaveText('17');await page.keyboard.press('Escape');await expect(field).toHaveValue('12');
+  await field.click();await input.fill('14');await input.press('Enter');await expect(trace).toHaveCount(0);await expect(field).toHaveValue('16');
+ }
+ await expect.poll(async()=>Object.values((await saved(page)).abilities)).toEqual([14,14,14,14,14,14]);
+ await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await page.getByRole('radiogroup',{name:'角色规则版本',exact:true}).getByRole('radio',{name:'2024',exact:true}).click();await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ for(const label of labels)await expect(page.getByRole('spinbutton',{name:`${label}基础值`,exact:true})).toHaveValue('16');
+ await page.getByRole('switch',{name:'编辑模式',exact:true}).click();const readonly=page.getByRole('spinbutton',{name:'力量基础值',exact:true});await readonly.click();await expect(readonly).toHaveValue('16');await expect(page.getByRole('dialog',{name:'力量数据追溯',exact:true})).toHaveCount(0);
+ await page.reload();for(const label of labels)await expect(page.getByRole('spinbutton',{name:`${label}基础值`,exact:true})).toHaveValue('16');const restored=await saved(page);expect(restored.edition).toBe('2024');expect(restored.selections[0].entry).toEqual(race);expect(restored.abilities).toEqual({str:14,dex:14,con:14,int:14,wis:14,cha:14});await page.screenshot({path:info.outputPath('six-ability-totals.png')});
 });
