@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-03';
+export const RELEASE_DATE='2026-10-04';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -246,11 +246,19 @@ const RELEASE_240_SECTIONS:ReleaseSection[]=[
  {title:'开屏动画',items:['开场图层在动画前半段完成淡入，后半段保持完全显现。','移动轨迹、整体节奏和动画结束后再显示公告的顺序保留。']}
 ];
 const SUITE_RELEASE_240_SECTIONS:ReleaseSection[]=RELEASE_240_SECTIONS;
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_241_SECTIONS:ReleaseSection[]=[
  {title:'初次打开',items:['开屏不再等待整套卡面样式，徽标图层随页面一起加载，减少黄色界面停留。','资料库、装饰和离线缓存在开屏结束后加载，减少同时下载带来的等待。']},
  {title:'开屏退出',items:['黄色开屏淡出为透明，直接显露下方已经准备好的角色卡。','公告仍在开屏完全退出后显示；已有角色、资源余额和显示偏好保留。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=RELEASE_SECTIONS;
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'配套更新',items:['与新版枭熊工作台同步更新；已有角色、资源余额和显示偏好保留。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'玩家加载恢复',items:['修复了首次打开时角色资料已经收到、卡面仍停在读取中的情况。','首次消息未送达时可重新获取当前角色，切换角色后旧回复不会抢回上一张卡。']},
+ {title:'角色权限',items:['撤回原生 Owner 后立即停止编辑；排队中的旧修改在重新授权后也不会自动补写。','迟到的保存回执和旧缓存不会重新授予编辑权限。']},
+ {title:'权限说明',items:['主持人的“音乐板”右侧新增红色“关于玩家分配卡和权限”入口。','滚动读到底并点击“我真的知道了”后记为已读，关闭说明不会标记已读。']},
+ {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。真实玩家原设备与实体手机仍待现场复验。']}
+];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
@@ -288,6 +296,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-03',sections:RELEASE_241_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_240_SECTIONS:RELEASE_240_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_239_SECTIONS:RELEASE_239_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_238_SECTIONS:RELEASE_238_SECTIONS},

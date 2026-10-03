@@ -1,0 +1,67 @@
+{
+  "codec": "PNG lossless RGBA, Pillow optimize=True compress_level=9",
+  "assets": [
+    {
+      "layer": 1,
+      "original": "public/startup-logo/1.PNG",
+      "delivery": "public/startup-logo/1.optimized.png",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 64702,
+      "deliveryBytes": 52895,
+      "pngSha256": "40d81d05690b0fae1bb39c3bfe404aeadf35a7bffc28627bb7fe3685a0e67d26",
+      "deliverySha256": "f5470dcfaa1cc096fd87eb66b6c2330ff0a16f796c74f76c2076d3d10d2b5902",
+      "decodedRgbaSha256": "9c128f72db23eb197b6903dab87b04bf78e0a2fb264f329d8dfc3f3835f0eae5",
+      "rgbaExact": true
+    },
+    {
+      "layer": 2,
+      "original": "public/startup-logo/2.PNG",
+      "delivery": "public/startup-logo/2.optimized.png",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 33922,
+      "deliveryBytes": 30756,
+      "pngSha256": "d876c79b17189f092fb0519479e06109542e2fc84b9315b5212def431140134a",
+      "deliverySha256": "1992905f05d9aae8a72f7058dbff6a6c133a825c2e4f47bb44ab7d7c91c5e9c9",
+      "decodedRgbaSha256": "818e17c8becba0543e5300c89b0474084356ec668d73eb1eea653b890abca867",
+      "rgbaExact": true
+    },
+    {
+      "layer": 3,
+      "original": "public/startup-logo/3.PNG",
+      "delivery": "public/startup-logo/3.optimized.png",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 37259,
+      "deliveryBytes": 32306,
+      "pngSha256": "d4094577e2154933d41d43278a05ba899ee27186676f3d5e1ac0aa75454dee41",
+      "deliverySha256": "a70348465ed83c2b988c93874d42f1ae2a3b3a71f4bb5b8c8eee2f05bbef389b",
+      "decodedRgbaSha256": "95da2b90283004dfb575827f988477fcabe1e13f56d8438e1fa6edaad05dfb1e",
+      "rgbaExact": true
+    },
+    {
+      "layer": 4,
+      "original": "public/startup-logo/4.PNG",
+      "delivery": "public/startup-logo/4.optimized.png",
+      "size": [
+        500,
+        500
+      ],
+      "pngBytes": 105276,
+      "deliveryBytes": 88919,
+      "pngSha256": "3b11e47126df35825dc2af8a6f4bfd9cd3000555a0c0d8ae87e1df4d0ad42fee",
+      "deliverySha256": "d089f3b64add0a6ba5ae83dfe66209f67d4652a90e4fd6a86795d45c43a64069",
+      "decodedRgbaSha256": "cee01ad5ee415ab3b63cfcda760fc3c8d52d29e19ec12bff8560ef01e9874a0f",
+      "rgbaExact": true
+    }
+  ],
+  "pngBytes": 241159,
+  "deliveryBytes": 204876
+}
