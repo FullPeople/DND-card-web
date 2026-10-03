@@ -6,6 +6,12 @@ export const AUTOMATION_PROTOCOL=3;
 export const RULES_VERSION='ir.1';
 export const supportedAutomation=(c:Character)=>c.automation?.protocol===AUTOMATION_PROTOCOL&&c.automation.rulesVersion===RULES_VERSION;
 export const automationEnabled=(c:Character)=>supportedAutomation(c)&&c.automation?.enabled===true;
+/** Explicit synchronization seeds reviewed counters without changing saved intent. */
+export function withMigrationAutomation(c:Character,apply:()=>void){
+ const paused=supportedAutomation(c)&&c.automation!.enabled===false;
+ if(paused)c.automation!.enabled=true;
+ try{apply();}finally{if(paused)c.automation!.enabled=false;}
+}
 export function newAutomationState():AutomationState{return {protocol:AUTOMATION_PROTOCOL,enabled:true,defaultsVersion:1,rulesVersion:RULES_VERSION};}
 /** Apply the default once at a validated loading boundary, preserving later manual opt-outs. */
 export const automationNeedsInitialization=(c:Character)=>!c.automation||supportedAutomation(c)&&c.automation.defaultsVersion!==1;

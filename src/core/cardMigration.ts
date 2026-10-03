@@ -5,7 +5,7 @@ import {legacyTraining} from './legacyTraining';
 import {trainingCategory} from './training';
 import {syncAutoResources,preserveMigrationResources} from './resources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
-import {supportedAutomation} from './automation/state';
+import {supportedAutomation,withMigrationAutomation} from './automation/state';
 import {syncSourceSpells} from './automation/sourceSpells';
 import {evaluate} from './engine';
 import {spellState} from './characterDetails';
@@ -155,9 +155,11 @@ export function planCardMigration(original:Character,entries:Entry[],choices:Mig
 /** Shared transaction finalizer: previews keep the original fingerprint and spent balances. */
 export function finalizeCardMigration(original:Character,entries:Entry[],card:Character,changed:string[],warnings:string[],identity:{id:string;now:string}):ClassMigrationPlan{
  for(const row of card.selections)if(unlinkedEntry(row.entry))markKept(row,card);
- rememberSourceSpellUses(card);syncAutoResources(card,original);syncSourceSpells(card,entries);
- preserveMigrationResources(card,original);
  rememberSourceSpellUses(card);
+ withMigrationAutomation(card,()=>{
+  syncAutoResources(card,original);syncSourceSpells(card,entries);
+  preserveMigrationResources(card,original);rememberSourceSpellUses(card);
+ });
  const old=new Map(original.selections.map(s=>[s.id,s])),current=new Map(card.selections.map(s=>[s.id,s]));
  const added=card.selections.filter(s=>!old.has(s.id)).map(s=>s.entry.name+' · '+KIND_LABELS[s.entry.kind]),removed=original.selections.filter(s=>!current.has(s.id)).map(s=>s.entry.name),refreshed=card.selections.filter(s=>old.has(s.id)&&stable(s.entry)!==stable(old.get(s.id)!.entry)).map(s=>s.entry.name);
  const resources=[...new Set([...Object.keys(original.runtime.resources),...Object.keys(card.runtime.resources)])].flatMap(id=>{const a=original.runtime.resources[id],b=card.runtime.resources[id];return stable(a)===stable(b)?[]:[(b?.name||a?.name||id)+'：'+(a?a.current+'/'+a.max:'无')+' → '+(b?b.current+'/'+b.max:'移除（原卡保留）')];});

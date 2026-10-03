@@ -2,6 +2,7 @@ import {editionAllows,selectionAllowed,classMatches,type Character,type Entry,ty
 import {syncFeatures} from './sheet';
 import {syncAutoResources,preserveMigrationResources} from './resources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
+import {withMigrationAutomation} from './automation/state';
 import {syncSourceSpells} from './automation/sourceSpells';
 import {evaluate} from './engine';
 import {spellState} from './characterDetails';
@@ -75,13 +76,14 @@ export function planClassMigration(original:Character,catalog:Entry[],choices:Re
   if(!classMatches(row.entry,parent.entry))warnings.push(`子职「${row.entry.name}」仍保留原记录，与目标职业的关联需手动核对。`);
  }
  rememberSourceSpellUses(card);
- syncFeatures(card,catalog,{owners,refresh:true});
- syncAutoResources(card,original);
- syncSourceSpells(card,catalog);
- // Migration is not a rest or a new grant of expendable resources. Preserve
- // the available count, clamp to a lower maximum, and start new counters at 0.
- preserveMigrationResources(card,original);
- rememberSourceSpellUses(card);
+ withMigrationAutomation(card,()=>{
+  syncFeatures(card,catalog,{owners,refresh:true});
+  syncAutoResources(card,original);
+  syncSourceSpells(card,catalog);
+  // A paused copy must also seed zero balances before it can be enabled later.
+  preserveMigrationResources(card,original);
+  rememberSourceSpellUses(card);
+ });
  const oldIds=new Set(original.selections.map(s=>s.id)),newIds=new Set(card.selections.map(s=>s.id));
  const added=card.selections.filter(s=>!oldIds.has(s.id)).map(s=>s.entry.name),removed=original.selections.filter(s=>!newIds.has(s.id)).map(s=>s.entry.name);
  const refreshed=card.selections.filter(s=>!owners.has(s.id)&&oldIds.has(s.id)&&!sameClassSnapshot(s.entry,original.selections.find(old=>old.id===s.id)!.entry)).map(s=>s.entry.name);

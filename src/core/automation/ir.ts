@@ -8,6 +8,7 @@ export function reviewedRecord(entry:Entry):AutomationRecord|undefined {
  return record&&record.verdict!=='needsAnnotation'&&record.verdict!=='noMechanics'?record:undefined;
 }
 export const ownedSpellLevel=(entry:Entry):number|undefined=>entry.manualSpellLevel??irMechanics(entry)?.spellModel?.level;
+export const ownedClassHitDie=(entry:Entry):number|undefined=>entry.manualHitDie??irMechanics(entry)?.classModel?.hitDie;
 export const irMechanics=(entry:Entry):Mechanics|undefined=>entry.raw._contentOnly?undefined:reviewedRecord(entry)?.mechanics;
 export function irSelectionActive(c:Character,row:Selection):boolean {
  const seen=new Set<string>();let current:Selection|undefined=row;

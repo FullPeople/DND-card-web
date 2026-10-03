@@ -4,11 +4,10 @@ import {supportedAutomation} from './automation/state';
 import {matchesReference} from './entryReferences';
 import {syncChoiceContent} from './automation/choices';
 import {rememberFeatureResources} from './automation/featureResources';
+import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import {rememberSourceEquipment} from './automation/sourceEquipment';
 import {removeSelection,syncFeatures} from './sheet';
-import {planSourceSpells,syncSourceSpells} from './automation/sourceSpells';
-import {syncAutoResources,preserveMigrationResources} from './resources';
-import {rememberSourceSpellUses} from './automation/sourceSpellState';
+import {planSourceSpells} from './automation/sourceSpells';
 
 const custom=(e:Entry)=>e.source==='CUSTOM'||!!e.raw._custom;
 const stable=(v:unknown):string=>JSON.stringify(v,(_,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.fromEntries(Object.keys(x).sort().map(k=>[k,x[k]])):x);
@@ -122,14 +121,7 @@ export function planBatchCardMigration(original:Character,entries:Entry[],roots:
  card.selections=survivors;
  draft.warnings.push(...batchWarnings,...sourcePlan.issues.map(issue=>issue.message));
  if(retained.length)draft.warnings.push(`自定义或未匹配内容 ${retained.length} 项，按下方勾选保留；未勾选项仅从同步副本移除。`);
- // Review all declared content even when automatic calculations are switched off.
- // Seed zero-use history before restoring that preference, so later enabling it
- // cannot turn this migration into a fresh resource/equipment grant.
- if(supportedAutomation(card)&&card.automation!.enabled===false){
-  card.automation!.enabled=true;syncAutoResources(card,original);syncSourceSpells(card,entries);
-  preserveMigrationResources(card,original);
-  rememberSourceSpellUses(card);rememberFeatureResources(card);card.automation!.enabled=false;
- }
+ // The shared finalizer also seeds zero balances when automation is paused.
  const plan=finalizeCardMigration(original,entries,card,draft.changed,draft.warnings,identity);
  return {plan,retained};
 }

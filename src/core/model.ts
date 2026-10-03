@@ -18,7 +18,7 @@ export type Size = keyof typeof SIZE_LABELS;
 export type Effect = { op: 'add' | 'set'; target: Ability | 'ac' | 'speed' | 'hp'; value: number } | { op: 'proficiency'; skill: string };
 export interface ChoiceDefinition { id: string; label: string; kind?: Kind; count: number; options?: string[]; optionLabels?: Record<string, string>; refs?: string[]; abilityBonus?: number; featureType?: string[]; spellLevel?: number; maxSpellLevel?: number; parentClass?: { name: string; source: string }; spellClass?: { name: string; source: string }; featCategory?: string }
 export interface Entry {
-  manualSpellLevel?:number;manualWeapon?:{attack?:string|number;damage:string};
+  manualSpellLevel?:number;manualItemWeight?:number;manualHitDie?:number;manualWeapon?:{attack?:string|number;damage:string};
   automationOptions?:Record<string,{label:string;options:Record<string,{label:string;reference:string}>}>;
   automation?: import('../data/automation/protocol').AutomationRecord;
   automationVersion?: string;
