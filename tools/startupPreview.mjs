@@ -14,5 +14,5 @@ createServer((req,res)=>{
  const type={'.js':'application/javascript','.css':'text/css','.html':'text/html','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.PNG':'image/png','.webp':'image/webp'}[extname(file)]||'application/octet-stream';
  const compress=/javascript|text\/|json|svg/.test(type)&&/gzip/.test(req.headers['accept-encoding']||'');
  const key=file+compress;let bytes=cache.get(key);if(!bytes){bytes=readFileSync(file);if(compress)bytes=gzipSync(bytes);cache.set(key,bytes);}
- res.writeHead(200,{'Content-Type':type,'Content-Length':bytes.length,'Cache-Control':process.env.DND_STARTUP_HTTP_CACHE==='1'&&/\.(js|css|webp)$/.test(file)?'public, max-age=3600':'no-cache',...(compress?{'Content-Encoding':'gzip','Vary':'Accept-Encoding'}:{})});res.end(bytes);
+ res.writeHead(200,{'Content-Type':type,'Content-Length':bytes.length,'Cache-Control':process.env.DND_STARTUP_HTTP_CACHE==='1'&&/\.(js|css|webp|png)$/.test(file)?'public, max-age=3600':'no-cache',...(compress?{'Content-Encoding':'gzip','Vary':'Accept-Encoding'}:{})});res.end(bytes);
 }).listen(port,'127.0.0.1',()=>console.log(`http://127.0.0.1:${port}/ ${root}`));

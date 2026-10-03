@@ -72,7 +72,7 @@ test('approved four-layer yellow opening fades into the real card without lobby 
  await expect(intro.locator('img')).toHaveCount(4);
  await expect.poll(()=>intro.locator('img').evaluateAll(nodes=>nodes.every(node=>(node as HTMLImageElement).complete&&(node as HTMLImageElement).naturalWidth===500))).toBe(true);
  const layers=await intro.locator('img').evaluateAll(nodes=>nodes.map(node=>({src:node.getAttribute('src'),delay:getComputedStyle(node).animationDelay})));
- expect(layers.map(row=>row.src)).toEqual(['./startup-logo/4.webp','./startup-logo/1.webp','./startup-logo/2.webp','./startup-logo/3.webp']);
+ expect(layers.map(row=>row.src)).toEqual(['./startup-logo/4.optimized.png','./startup-logo/1.optimized.png','./startup-logo/2.optimized.png','./startup-logo/3.optimized.png']);
  expect(layers.map(row=>row.delay)).toEqual(['0s','0.14s','0.28s','0.42s']);
  await page.screenshot({path:test.info().outputPath('yellow-logo-entrance.png')});
  await expect(intro).toBeHidden();
