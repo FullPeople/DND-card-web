@@ -2,7 +2,7 @@ import {ResourceDisplayContext} from './resourceDisplay';
 import {useState,useRef,useEffect,useContext} from 'react';
 import './resource179.css';
 import {StatInput} from './StatInput';
-import {LockIcon} from './ResourceEditor';
+import {LockIcon} from './LockIcon';
 import {pointerDrag} from './pointerDrag';
 import {usePresets,removePreset,type ResourceValue} from './resourcePresets';
 export function ResourceRow({resource:r,enabled,gm,change,configure,label='',lock,confirmedCurrent}:{resource:ResourceValue;enabled:boolean;gm:boolean;confirmedCurrent?:number;change:(n:number)=>Promise<unknown>;configure?:(()=>void);label?:string;lock?:()=>void}){

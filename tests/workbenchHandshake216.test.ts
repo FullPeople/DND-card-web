@@ -46,7 +46,7 @@ describe('real workbench module initial handshake under live heartbeat traffic',
   await heartbeat(15000,2);expect(hellos()).toHaveLength(completed);
  });
  it('recovers after a relay fault without repeating an in-flight mutation',async()=>{
-  const api=await connected();const saving=api.workbenchRequest('stats',{statPatch:{hp:5}});const saved=wire.sent.find(r=>r.message.type==='stats')!.message;
+  const api=await connected();receive('selection',{sequence:2,state:{key:'room:card:a',cardId:'a',itemId:'token-a',kind:'character',write:true,stats:{}}});const saving=api.workbenchRequest('stats',{statPatch:{hp:5}});const saved=wire.sent.find(r=>r.message.type==='stats')!.message;
   wire.changed!({status:503,message:'temporary transport fault',retryAt:Date.now()+1400});await heartbeat(20000);
   expect(hellos().some(r=>r.at>base)).toBe(true);expect(wire.sent.filter(r=>r.message.type==='stats')).toHaveLength(1);
   expect(wire.sent.some(r=>r.message.type==='requestStatus'&&r.message.requestId===saved.requestId)).toBe(true);
