@@ -279,11 +279,18 @@ export default function App() {
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
+  const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
   const [editingLoadError,setEditingLoadError]=useState('');
   const [editingReloadPending,setEditingReloadPending]=useState(false);
   const editingReloadInProgress=useRef(false);
-  useEffect(()=>{if(!workspace)return;let alive=true;const cancel=afterPaint(()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});});return()=>{alive=false;cancel();};},[!!workspace]);
-  const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
+  useEffect(()=>{
+    if(!workspace||automationRuntime)return;let alive=true;
+    const loadEditor=()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});};
+    // Restoring an explicitly saved editing mode requires its runtime before
+    // the card becomes interactive. Fresh browsing keeps it deferred.
+    const cancel=editingRequested?(loadEditor(),()=>{}):afterPaint(loadEditor);
+    return()=>{alive=false;cancel();};
+  },[!!workspace,editingRequested,!!automationRuntime]);
   const editing=editingRequested&&!!automationRuntime;
   useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editingRequested));}catch{/* A session still keeps the global editing preference. */}},[editingRequested]);
   const [sheetPage, setSheetPage] = useState<SheetPage>('主要');
@@ -422,7 +429,7 @@ export default function App() {
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
   const d = useMemo(() => mechanics ? evaluate(mechanics) : undefined, [mechanics]);
   // Reveal the startup animation only once a usable workspace or recovery UI has committed.
-  useEffect(()=>{if(startupError)window.dispatchEvent(new Event('dnd-card-failed'));else if(workspace&&c&&d)window.dispatchEvent(new Event('dnd-card-ready'));},[!!workspace,!!c,!!d,startupError]);
+  useEffect(()=>{if(startupError)window.dispatchEvent(new Event('dnd-card-failed'));else if(workspace&&c&&d&&(!editingRequested||automationRuntime||editingLoadError))window.dispatchEvent(new Event('dnd-card-ready'));},[!!workspace,!!c,!!d,startupError,editingRequested,!!automationRuntime,editingLoadError]);
   /** 一张坏图片只丢弃它自己：头像或立绘读不出来时仍然打开整张角色卡。 */
   function readDocument(document: unknown): Character {
     const { character, repaired } = readCharacter(document);

@@ -17,11 +17,13 @@ async function assertBeforeComplete(page:Page){
  await expect(page.locator('dialog[open]')).toHaveCount(0);
  const value=await page.evaluate(()=>document.documentElement.dataset.cardStartup);
  expect(await page.locator('#root').evaluate(el=>getComputedStyle(el).visibility)).toBe(value==='fading'?'visible':'hidden');
+ expect(await page.locator('#root').evaluate(el=>(el as HTMLElement).inert)).toBe(true);
  expect(await page.evaluate(()=>(window as any).modalStarts)).toEqual([]);
 }
 async function assertAfterComplete(page:Page){
  await phase(page,'complete');await expect(page.locator('.announcement[open]')).toBeVisible();
  expect(await page.locator('#startup-intro').evaluate(el=>(el as HTMLElement).hidden)).toBe(true);
+ expect(await page.locator('#root').evaluate(el=>(el as HTMLElement).inert)).toBe(false);
  expect(await page.evaluate(()=>(window as any).modalStarts.every((row:any)=>row.phase==='complete'))).toBe(true);
  expect(await page.evaluate(()=>(window as any).startupEvents.map((row:any)=>row.phase))).toEqual(['loading','playing','waiting','fading','complete']);
 }

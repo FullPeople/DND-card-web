@@ -9,7 +9,8 @@ function boot({reduced=false,images=true,motion=true,styles=true}:{reduced?:bool
  let now=0,nextId=0;const listeners=new Map<string,Function[]>(),timeouts=new Map<number,{fn:Function,delay:number}>(),intervals=new Map<number,Function>();
  const nodes=new Map<string,any>(),trace:string[]=[];
  function node(id:string){const events=new Map<string,Set<Function>>();const el:any={hidden:id==='startup'||id==='startup-help',textContent:'',classes:new Set(),offsetWidth:100,addEventListener:(name:string,fn:Function)=>{if(!events.has(name))events.set(name,new Set());events.get(name)!.add(fn);},removeEventListener:(name:string,fn:Function)=>events.get(name)?.delete(fn),emit:(name:string)=>events.get(name)?.forEach(fn=>fn()),classList:{add:(name:string)=>el.classes.add(name)}};nodes.set(id,el);return el;}
- for(const id of ['startup','startup-title','startup-message','startup-detail','startup-help','startup-retry','startup-intro'])node(id);
+ for(const id of ['root','startup','startup-title','startup-message','startup-detail','startup-help','startup-retry','startup-intro'])node(id);
+ nodes.get('root').inert=true;
  const movements=Array.from({length:4},()=>deferred()),fade=deferred();
  const pieces=movements.map((animation,i)=>Object.assign(node(`piece${i}`),{complete:images,naturalWidth:images?100:0,decode:()=>Promise.resolve(),getAnimations:()=>motion?[animation]:[]}));
  const intro=nodes.get('startup-intro');intro.querySelectorAll=()=>pieces;intro.getAnimations=()=>motion?[fade]:[];
@@ -23,8 +24,8 @@ describe('approved logo startup lifecycle',()=>{
  it('fast/cached card waits for all four actual animations, final pose and fade-out',async()=>{
   const b=boot();b.emit('dnd-card-ready');await flush();expect(b.phase()).toBe('playing');
   b.movements.slice(0,3).forEach(a=>a.resolve());await flush();expect(b.timeouts.size).toBe(0);
-  b.movements[3].resolve();await b.hold();expect(b.phase()).toBe('fading');expect(b.nodes.get('startup-intro').hidden).toBe(false);
-  b.fade.resolve();await flush();expect(b.phase()).toBe('complete');expect(b.nodes.get('startup-intro').hidden).toBe(true);
+  b.movements[3].resolve();await b.hold();expect(b.phase()).toBe('fading');expect(b.nodes.get('startup-intro').hidden).toBe(false);expect(b.nodes.get('root').inert).toBe(true);
+  b.fade.resolve();await flush();expect(b.phase()).toBe('complete');expect(b.nodes.get('startup-intro').hidden).toBe(true);expect(b.nodes.get('root').inert).toBe(false);
   expect(b.trace).toEqual(['loading','playing','waiting','fading','complete']);
  });
  it('finishing the intro first waits for the slow app and only then fades',async()=>{const b=boot();await flush();await b.animate();await b.hold();expect(b.phase()).toBe('waiting');b.emit('dnd-card-ready');expect(b.phase()).toBe('fading');b.fade.resolve();await flush();expect(b.phase()).toBe('complete');});

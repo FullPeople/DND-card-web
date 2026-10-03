@@ -14,7 +14,7 @@
  phase('loading');
  // The persistent snapshot lets late React mounts/host handshakes observe the
  // same lifecycle. A modal must not enter the top layer until complete.
- function finish(){if(disposed||failed||document.documentElement.dataset.cardStartup==='complete')return;intro.hidden=true;panel.hidden=true;clearInterval(timer);phase('complete');var icon=document.querySelector('[data-app-icon]');if(icon)icon.href=icon.getAttribute('data-app-icon');}
+ function finish(){if(disposed||failed||document.documentElement.dataset.cardStartup==='complete')return;intro.hidden=true;panel.hidden=true;document.getElementById('root').inert=false;clearInterval(timer);phase('complete');var icon=document.querySelector('[data-app-icon]');if(icon)icon.href=icon.getAttribute('data-app-icon');}
  function animations(element){return element.getAnimations?element.getAnimations():[];}
  function settled(values){return Promise.all(values.map(function(animation){return animation.finished.catch(function(){});}));}
  function reveal(){
@@ -38,9 +38,9 @@
    return new Promise(function(resolve){setTimeout(resolve,matchMedia('(prefers-reduced-motion: reduce)').matches?0:330);});
   }).then(function(){if(failed||disposed)return;animationDone=true;phase('waiting');reveal();});
  });
- function show(text,error){if(disposed||document.documentElement.dataset.cardStartup==='complete')return;failed=true;clearInterval(timer);intro.hidden=true;phase('failed');panel.hidden=false;title.textContent=text;message.textContent='程序文件未能正常加载。可以点击重新加载；已保存的角色不会被删除。';document.getElementById('startup-help').hidden=false;detail.textContent=String(error)+'\n阶段：'+stage+'\n'+navigator.userAgent;}
+ function show(text,error){if(disposed||document.documentElement.dataset.cardStartup==='complete')return;failed=true;clearInterval(timer);intro.hidden=true;document.getElementById('root').inert=false;phase('failed');panel.hidden=false;title.textContent=text;message.textContent='程序文件未能正常加载。可以点击重新加载；已保存的角色不会被删除。';document.getElementById('startup-help').hidden=false;detail.textContent=String(error)+'\n阶段：'+stage+'\n'+navigator.userAgent;}
  function progress(){if(failed||disposed||document.documentElement.dataset.cardStartup==='complete')return;var seconds=Math.floor((Date.now()-started)/1000);message.textContent=stage+' · 已等待 '+seconds+' 秒。';if(seconds>=20&&!fading&&document.documentElement.dataset.cardStartup!=='playing'){intro.hidden=true;panel.hidden=false;title.textContent='程序仍在加载';message.textContent+=' 网络较慢时可以继续等待，也可以重新加载。';document.getElementById('startup-help').hidden=false;detail.textContent='加载尚未完成；暂未收到文件加载错误。\n阶段：'+stage+'\n已等待：'+seconds+' 秒\n'+navigator.userAgent;}}
- window.addEventListener('dnd-card-failed',function(){if(disposed)return;failed=true;clearInterval(timer);intro.hidden=true;panel.hidden=true;phase('failed');});
+ window.addEventListener('dnd-card-failed',function(){if(disposed)return;failed=true;clearInterval(timer);intro.hidden=true;panel.hidden=true;document.getElementById('root').inert=false;phase('failed');});
  window.addEventListener('dnd-card-stage',function(event){stage=String(event.detail||stage);progress();});
  document.getElementById('startup-retry').onclick=function(){location.reload();};
  window.addEventListener('dnd-card-ready',function(){if(failed||disposed)return;ready=true;reveal();});
@@ -52,4 +52,4 @@
  if(!('noModule' in document.createElement('script'))){show('浏览器版本过旧','此浏览器不支持运行角色卡所需的 JavaScript 模块。');}
 })();
 </script>
-<div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<div id="root" inert></div><script type="module" src="/src/main.tsx"></script></body></html>
