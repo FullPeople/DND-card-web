@@ -37,8 +37,8 @@ function switchStage(stage:string,reused?:boolean){if(!switchMetric||!params.has
 export function markWorkbenchView(stage:'prepare'|'prepared'|'committed',key:string,reused?:boolean){if(switchMetric?.key!==key)return;switchStage(stage,reused);if(stage==='committed'){const current=switchMetric;requestAnimationFrame(()=>{if(switchMetric===current)switchStage('nextFrame');});}}
 const operationTimings:any[]=[];
 export function workbenchDiagnostics(){return {online:state.online,cache:snapshotCache.diagnostics(),relayState,transport:host&&!host.closed?'direct':relay?'relay':'offline',hostStarted,pending:[...pending].map(([id,p])=>({id,type:p.type,elapsedMs:Math.round(performance.now()-p.started)})),recent:operationTimings.slice(-24)};}
-const observedDocuments=new Map<string,{sequence:number;document:any}>();
-function rememberDocument(m:any){if(!m.state?.key||m.document===undefined||snapshotCache.currentAccess&&!snapshotCache.permits(m.state))return;snapshotCache.remember(m,snapshotCache.currentAccess);const old=observedDocuments.get(m.state.key),sequence=m.sequence||0;if(!old||documentRevision(m.document,m.state)>=documentRevision(old.document))observedDocuments.set(m.state.key,{sequence,document:m.document});}
+const observedDocuments=new Map<string,{sequence:number;document:any;target:Pick<Target,'key'|'cardId'|'itemId'|'kind'>}>();
+function rememberDocument(m:any){if(!m.state?.key||m.document===undefined||snapshotCache.currentAccess&&!snapshotCache.permits(m.state))return;snapshotCache.remember(m,snapshotCache.currentAccess);const old=observedDocuments.get(m.state.key),sequence=m.sequence||0;if(!old||documentRevision(m.document,m.state)>=documentRevision(old.document)){const {key,cardId,itemId,kind}=m.state;observedDocuments.set(key,{sequence,document:m.document,target:{key,cardId,itemId,kind}});}}
 const stockDrafts=new Map<string,{before:InventoryState;after:InventoryState}>();
 const inventoryRequests=new Map<string,string>();
 const inventoryCompletions=new Map<string,(result:any)=>void>();
@@ -91,6 +91,9 @@ function resetGroup(disconnected=false){if(hostStarted)window.dispatchEvent(new 
 function resetHandshake(restartRetries=true,disconnected=true){if(disconnected){resetGroup(true);snapshotCache.suspend();invalidateWrites(undefined,false);update({target:state.target?{...state.target,write:false}:undefined,cards:state.cards.map(card=>({...card,write:false})),monsters:state.monsters.map(card=>({...card,write:false})),inventory:authoritativeInventory},false);}handshakeReady=false;handshakeCatalog=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
 const monsterRuntime=new MonsterRuntime();
 function normalizeSnapshot(m:any,authority=true){
+ // Reject retired older bodies before MonsterRuntime can retain them or a
+ // directory's presentation fields can supply a different revision fallback.
+ if(!revisions.acceptsSnapshot(m))return;
  if(!m.state)return m;
  const previous=state.target?.key===m.state.key?state.target:m.state.cardId?state.cards.find(card=>card.id===m.state.cardId):state.monsters.find(card=>card.itemId===m.state.itemId);
  const normalized=m.state.cardId?{...m,state:{...m.state,...runtimeFrom(m.state,previous)}}:monsterRuntime.snapshot(m);
@@ -111,8 +114,8 @@ function applySnapshotRuntime(snap:any,currentPermissions=false){
 }
 function acceptsReceiptAccess(access:CacheAccess|undefined){const current=snapshotCache.currentAccess;return !access?!current||snapshotCache.accessConfirmed:!!current&&snapshotCache.accessConfirmed&&current.epoch===access.epoch&&current.room===access.room&&current.scope===access.scope&&current.role===access.role;}
 function acceptSnapshot(m:any,authority=true){
- if(m.access&&!(authority?acceptAccess(m.access):acceptsReceiptAccess(m.access))||snapshotCache.currentAccess&&!snapshotCache.permits(m.state))return;
- m=revisions.snapshot(normalizeSnapshot(m,authority));rememberDocument(m);if(!m.state)return;
+ if(m.access&&!(authority?acceptAccess(m.access):acceptsReceiptAccess(m.access))||snapshotCache.currentAccess&&!snapshotCache.permits(m.state))return false;
+ m=revisions.snapshot(normalizeSnapshot(m,authority));if(!m)return false;rememberDocument(m);if(!m.state)return true;
  if(authority&&!snapshotCache.currentAccess&&(!m.sequence||m.sequence>=catalogSequence))update({cards:state.cards.map(card=>m.state.cardId===card.id?{...card,write:m.state.write,locked:m.state.locked??card.locked}:card),monsters:state.monsters.map(card=>!m.state.cardId&&m.state.itemId===card.itemId?{...card,write:m.state.write,locked:m.state.locked??card.locked}:card)});
  applySnapshotRuntime(m);
  const same=state.target?.key===m.state.key;
@@ -120,9 +123,10 @@ function acceptSnapshot(m:any,authority=true){
   // The durable card revision outranks message timing, but an older receipt
   // must not restore an old selection, owner permission, or lock state.
   if(same&&m.state.cardId&&documentRevision(m.document,m.state)>documentRevision(state.document,state.target))update({target:{...state.target!,...runtimeFrom(m.state)},document:m.document});
-  return;
+  return true;
  }
  selectionSequence=m.sequence||selectionSequence;pendingSelection=undefined;update({readFailure:undefined,target:m.state,document:m.document!==undefined?m.document:same?state.document:undefined,loading:!!m.loading,message:m.error||''});
+ return true;
 }
 function send(type:string,extra:Record<string,unknown>={}){const m={protocol,type,session,clientInstance,clientStarted,...(['hello','ping'].includes(type)?{startupPhase:startupPhase()}:{}),...extra};if(host&&!host.closed)host.postMessage(m,origin!);else if(relay)void relay.send(m).catch(()=>{});}
 function previewSelection(itemId:string){
@@ -151,6 +155,11 @@ function acceptAccess(access:CacheAccess){
  const revoked=previous?[...previous.cards.filter(card=>card.write&&!access.cards.some(next=>next.id===card.id&&next.write&&next.grantVersion===card.grantVersion&&access.enabled.characterCards!==false)).map(card=>`card:${card.id}`),...previous.monsters.filter(card=>card.write&&!access.monsters.some(next=>next.itemId===card.itemId&&next.key===card.key&&next.write&&next.grantVersion===card.grantVersion)).map(card=>`monster:${card.itemId}`)]:[];
  if(scopeChanged)invalidateWrites();else if(revoked.length)invalidateWrites(revoked);
  if(scopeChanged){activeReadRetry=0;readRetry++;resetGroup();revisions=new WorkbenchRevisions();monsterRuntime.reset();observedDocuments.clear();wantedSelection=undefined;pendingSelection=undefined;authoritativeInventory=undefined;update({readFailure:undefined,target:undefined,document:undefined,inventory:undefined,shared:undefined,loading:false});}
+ // Write-only revocation still allows reading. Release bodies only after the
+ // current access directory has removed their reading grant. Queued saves own
+ // cloned baselines; App owns its unsaved/uncertain recovery drafts separately.
+ revisions.releaseUnreadable(target=>snapshotCache.permits(target));
+ for(const [key,observed] of observedDocuments)if(!snapshotCache.permits(observed.target))observedDocuments.delete(key);
  if(pendingSelection&&!access.cards.some(card=>access.enabled.characterCards!==false&&(pendingSelection===`card:${card.id}`||pendingSelection===card.itemId||card.itemIds?.includes(pendingSelection!)))&&!access.monsters.some(card=>pendingSelection===(card.targetId||card.itemId)||pendingSelection===card.itemId)){pendingSelection=undefined;wantedSelection=undefined;update({readFailure:undefined,loading:false,message:'当前角色的查看权限或场景已改变'});}
  monsterRuntime.restrict(access.monsters);
  update({access,inventory:authoritativeInventory,cards:state.cards.filter(card=>access.enabled.characterCards!==false&&access.cards.some(grant=>grant.id===card.id)).map(card=>({...card,...access.cards.find(grant=>grant.id===card.id)})),monsters:state.monsters.filter(card=>access.monsters.some(grant=>grant.itemId===card.itemId)).map(card=>({...card,...access.monsters.find(grant=>grant.itemId===card.itemId),kind:'monster' as const})),role:access.role,enabled:access.enabled});
@@ -176,7 +185,7 @@ if(inWorkbench){
   const cancelledReceipt=m.type==='ack'&&pending.get(m.requestId)?.cancelled;
   const accessAccepted=m.type==='selectionError'?(snapshotCache.currentAccess?!!m.access&&acceptsReceiptAccess(m.access):!m.access):!m.access||(['ack','cacheSnapshot'].includes(m.type)?acceptsReceiptAccess(m.access):acceptAccess(m.access));
   if(m.type==='access'||!accessAccepted&&m.type!=='ack')return;
-  if(m.type==='cacheSnapshot'){if(accessAccepted&&m.state&&(!snapshotCache.currentAccess||snapshotCache.permits(m.state))){const snap=revisions.snapshot(normalizeSnapshot(m,false));rememberDocument(snap);if(snap.state)applySnapshotRuntime(snap);if(snap.state?.key===state.target?.key)acceptSnapshot(snap,false);
+  if(m.type==='cacheSnapshot'){if(accessAccepted&&m.state&&(!snapshotCache.currentAccess||snapshotCache.permits(m.state))){const snap=revisions.snapshot(normalizeSnapshot(m,false));if(!snap)return;rememberDocument(snap);if(snap.state)applySnapshotRuntime(snap);if(snap.state?.key===state.target?.key)acceptSnapshot(snap,false);
     else if(pendingSelection&&snapshotCache.get(pendingSelection))previewSelection(pendingSelection);
    }return;}
   if(m.type==='ready')handshakeReady=true;
@@ -217,7 +226,7 @@ if(inWorkbench){
    if(m.ok&&Array.isArray(m.result?.snapshots)){
     const catalog=m.result.catalog;
     if(catalog&&catalog.sequence>=catalogSequence){catalogSequence=catalog.sequence;update({cards:catalogCards(receiptCards(catalog.cards)).filter((card:CardChoice)=>!snapshotCache.currentAccess||snapshotCache.currentAccess.cards.some(grant=>grant.id===card.id)),monsters:catalogMonsters(receiptCards(catalog.monsters,true),catalog.sequence).filter((card:CardChoice)=>!snapshotCache.currentAccess||snapshotCache.currentAccess.monsters.some(grant=>grant.itemId===card.itemId))});}
-    for(const input of m.result.snapshots){if(!input?.state||input.access&&!acceptsReceiptAccess(input.access)||snapshotCache.currentAccess&&!snapshotCache.permits(input.state))continue;const snap=revisions.snapshot(normalizeSnapshot(input,false));rememberDocument(snap);
+    for(const input of m.result.snapshots){if(!input?.state||input.access&&!acceptsReceiptAccess(input.access)||snapshotCache.currentAccess&&!snapshotCache.permits(input.state))continue;const snap=revisions.snapshot(normalizeSnapshot(input,false));if(!snap)continue;rememberDocument(snap);
      applySnapshotRuntime(snap);
      if(snap.state.key===state.target?.key)acceptSnapshot(snap,false);
     }
@@ -226,9 +235,9 @@ if(inWorkbench){
    // Includes late terminal receipts after a lost-response timeout. App keeps
    // uncertain local edits until a real receipt or explicit reconciliation.
   }
-  if(m.type==='ack'){if(m.result?.warning)window.dispatchEvent(new CustomEvent('workbench-error',{detail:{message:m.result.warning,diagnostic:JSON.stringify(safeWorkbenchDiagnostic({diagnostic:m.result.diagnostic,requestId:m.requestId},{connection:{...workbenchDiagnostics(),online:state.online}}),null,2)}}));if(m.result?.historyId)stockDrafts.delete(m.result.historyId);if(m.ok&&m.result?.inventory){acceptInventoryReceipt(m.result.inventory);}if(m.ok&&m.result?.shared&&(!state.shared||m.result.shared.key!==state.shared.key||m.result.shared.revision>=state.shared.revision)){update({shared:m.result.shared});}if(m.ok&&m.result?.consolePatch&&m.result.sequence>=catalogSequence){update({console:{...state.console!,...m.result.consolePatch}});}if(m.ok&&m.result?.snapshot&&acceptsReceiptAccess(m.result.snapshot.access)&&(!snapshotCache.currentAccess||snapshotCache.permits(m.result.snapshot.state))){const snap=revisions.snapshot(normalizeSnapshot(m.result.snapshot,false));m.result.snapshot=snap;rememberDocument(snap);const currentPermissions=!snap.sequence||snap.sequence>=catalogSequence;
+  if(m.type==='ack'){if(m.result?.warning)window.dispatchEvent(new CustomEvent('workbench-error',{detail:{message:m.result.warning,diagnostic:JSON.stringify(safeWorkbenchDiagnostic({diagnostic:m.result.diagnostic,requestId:m.requestId},{connection:{...workbenchDiagnostics(),online:state.online}}),null,2)}}));if(m.result?.historyId)stockDrafts.delete(m.result.historyId);if(m.ok&&m.result?.inventory){acceptInventoryReceipt(m.result.inventory);}if(m.ok&&m.result?.shared&&(!state.shared||m.result.shared.key!==state.shared.key||m.result.shared.revision>=state.shared.revision)){update({shared:m.result.shared});}if(m.ok&&m.result?.consolePatch&&m.result.sequence>=catalogSequence){update({console:{...state.console!,...m.result.consolePatch}});}if(m.ok&&m.result?.snapshot&&acceptsReceiptAccess(m.result.snapshot.access)&&(!snapshotCache.currentAccess||snapshotCache.permits(m.result.snapshot.state))){const snap=revisions.snapshot(normalizeSnapshot(m.result.snapshot,false));m.result.snapshot=snap;if(snap){rememberDocument(snap);const currentPermissions=!snap.sequence||snap.sequence>=catalogSequence;
     applySnapshotRuntime(snap,currentPermissions);
-    if(snap.state.key===state.target?.key)acceptSnapshot(snap,false);}const p=pending.get(m.requestId);if(p){operationTimings.push({requestId:m.requestId,type:p.type,ok:m.ok,totalMs:Math.round(performance.now()-p.started),...m.timing});if(operationTimings.length>24)operationTimings.shift();clearTimeout(p.timer);pending.delete(m.requestId);m.ok?p.resolve(m.result):p.reject(Object.assign(Error(m.message||'操作失败'),{diagnostic:{...m.diagnostic,timing:m.timing,connection:workbenchDiagnostics()},requestId:m.requestId,uncertain:!!m.uncertain}));}}
+    if(snap.state.key===state.target?.key)acceptSnapshot(snap,false);}}const p=pending.get(m.requestId);if(p){operationTimings.push({requestId:m.requestId,type:p.type,ok:m.ok,totalMs:Math.round(performance.now()-p.started),...m.timing});if(operationTimings.length>24)operationTimings.shift();clearTimeout(p.timer);pending.delete(m.requestId);m.ok?p.resolve(m.result):p.reject(Object.assign(Error(m.message||'操作失败'),{diagnostic:{...m.diagnostic,timing:m.timing,connection:workbenchDiagnostics()},requestId:m.requestId,uncertain:!!m.uncertain}));}}
   if(m.type==='ack'){const publishReceipt=()=>window.dispatchEvent(new CustomEvent('workbench-operation-result',{detail:{requestId:m.requestId,ok:m.ok,uncertain:!!m.uncertain,result:m.result,message:m.message}}));
    // A relay poll may contain revocation and its terminal ACK together. Let the
    // rejected promise's recovery handlers settle before reconciling that ACK.
@@ -267,8 +276,8 @@ export async function retryWorkbenchRead(){
  const current=()=>id===readRetry&&selection===clientSelection&&started===hostStarted&&scope===snapshotCache.currentAccess?.scope&&room===snapshotCache.currentAccess?.room&&(wantedSelection===failed.targetId||state.readFailure?.targetId===failed.targetId);
  update({loading:true,readFailure:undefined,message:'正在重新读取角色资料…'});
  try{const result=await workbenchRequest('refreshCard',{key:undefined,itemId:failed.targetId});if(!current())return;
-  const snap=result?.snapshot;const targetId=snap?.state?.targetId||(snap?.state?.cardId?'card:'+snap.state.cardId:snap?.state?.itemId);if(!snap?.state||(targetId!==failed.targetId&&snap.state.itemId!==failed.targetId)||!acceptsReceiptAccess(snap.access)||snapshotCache.currentAccess&&!snapshotCache.permits(snap.state))throw Error('当前角色的查看权限或连接已改变，请重新选择角色');
-  acceptSnapshot(snap,false);wantedSelection=undefined;
+  const snap=result?.snapshot;const targetId=snap?.state?.targetId||(snap?.state?.cardId?'card:'+snap.state.cardId:snap?.state?.itemId);if(!snap?.state||(targetId!==failed.targetId&&snap.state.itemId!==failed.targetId)||!acceptsReceiptAccess(snap.access)||snapshotCache.currentAccess&&!snapshotCache.permits(snap.state))throw Error('角色资料版本、查看权限或连接已改变，请重新选择角色');
+  if(!acceptSnapshot(snap,false))throw Error('收到的角色资料版本已过期，请重新读取');wantedSelection=undefined;
  }catch(error){if(current()){pendingSelection=undefined;update({loading:false,readFailure:readFailure(failed.targetId,error),message:'角色资料仍未读到'});}}
  finally{if(activeReadRetry===id)activeReadRetry=0;}
 }

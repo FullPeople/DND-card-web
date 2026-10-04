@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [codex/card-suite-combined-20261004, codex/fix-human-origin-feat-20261004,codex/card-ui-three-fixes-20261004,codex/restore-transition-rest-20261004, fix/workbench-recovery-online-safe-20261004, fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
+    branches: [codex/card-resource-repair-20261004, codex/card-suite-combined-20261004, codex/fix-human-origin-feat-20261004,codex/card-ui-three-fixes-20261004,codex/restore-transition-rest-20261004, fix/workbench-recovery-online-safe-20261004, fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
   pull_request:
   workflow_dispatch:
 permissions:

@@ -446,13 +446,13 @@ export default function App() {
     if(!inWorkbench||!wb.access||!workspaceRef.current)return;
     const access=wb.access,scope=JSON.stringify([access.scope,access.role]);
     const allowed=new Set(access.enabled.characterCards===false?[]:access.cards.map(card=>`suite:${access.room}:card:${card.id}`));
-    if(workbenchAccessScope.current!==scope){workbenchViews.current.clear();workbenchDocuments.current.clear();appliedWorkbench.current='';workbenchAccessScope.current=scope;}
+    if(workbenchAccessScope.current!==scope){workbenchViews.current.clear();workbenchDocuments.current.clear();appliedDocument.current=undefined;appliedWorkbench.current='';workbenchAccessScope.current=scope;}
     const current=workspaceRef.current,characters=current.characters.filter(row=>{
       if(!row.id.startsWith('suite:')||allowed.has(row.id))return true;
       // Keep unresolved local edits recoverable, but never expose them in the
       // sheet or library after the host has removed their reading permission.
       if(workbenchDirty.current.has(row.id)||workbenchUncertain.current.has(row.id)||workbenchFailed.current.has(row.id))workbenchQuarantined.current.set(row.id,row);
-      workbenchViews.current.delete(row.id);workbenchDocuments.current.delete(row.id);return false;
+      workbenchViews.current.delete(row.id);workbenchDocuments.current.delete(row.id);if(row.id===current.activeId)appliedDocument.current=undefined;return false;
     });
     for(const [id,row]of workbenchQuarantined.current)if(allowed.has(id)){if(!characters.some(c=>c.id===id))characters.push(row);workbenchQuarantined.current.delete(id);}
     if(characters.length===current.characters.length&&characters.every((row,i)=>row===current.characters[i]))return;
