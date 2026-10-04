@@ -260,13 +260,22 @@ const SUITE_RELEASE_243_SECTIONS:ReleaseSection[]=[
  {title:'权限说明',items:['主持人的“音乐板”右侧新增红色“关于玩家分配卡和权限”入口。','滚动读到底并点击“我真的知道了”后记为已读，关闭说明不会标记已读。']},
  {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。真实玩家原设备与实体手机仍待现场复验。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_244_SECTIONS:ReleaseSection[]=[
  {title:'角色管理',items:['删除失败时明确显示未删除的角色与原因，可重新选择处理；结果尚未确认时先核对，不重复提交。','保留已有角色、资源余额、显示偏好及启动优化。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+const SUITE_RELEASE_244_SECTIONS:ReleaseSection[]=[
  {title:'角色读取与管理',items:['角色资料读取失败时显示错误和重试入口，不再一直停在读取中；可以复制已脱敏的诊断。','删除失败时明确显示未删除的角色与原因；结果尚未确认时先核对，不重复提交。']},
  {title:'权限说明与三龙牌',items:['权限说明在当前工作台窗口内打开，读到底并明确确认后才记为已读。','三龙牌入口在新窗口打开已发布的线上网站，关闭牌桌后可继续使用工作台。']},
  {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。已有角色、资源余额和启动优化保留；真实房间和实体手机仍待现场复验。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色卡',items:['编辑模式下，六项豁免可以分别填写额外调整值，保存和导出保留最终结果。','2024 人类的多才多艺可以选择起源专长，已保存的选择与条目身份保留。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ ...RELEASE_SECTIONS,
+ {title:'转场与权限说明',items:['转场面板恢复短休、长休选项，仅播放转场，不恢复角色资源。','主持人尚未确认权限说明时，按钮持续柔和提醒；读到底并明确确认后停止。']},
+ {title:'骰子',items:['改进投骰消息时钟、轨迹派发与渲染，保留骰值、物理、画质和权限规则。','大量骰子的卡顿仍待真实设备验证，启动动画后的等待仍在排查。']},
+ {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -305,6 +314,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_244_SECTIONS:RELEASE_244_SECTIONS},
  {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_243_SECTIONS:RELEASE_243_SECTIONS},
  {title:'2026-10-04',sections:RELEASE_242_SECTIONS},
  {title:'2026-10-03',sections:RELEASE_241_SECTIONS},

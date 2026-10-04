@@ -129,7 +129,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: FullPeople/obr-suite
-          ref: 25380f346a3968f41fa54544ef39395ea48224e1
+          ref: 24a498d317d4f107fdb29e320a4647e3f50b0252
           path: .paired-suite
           persist-credentials: false
       - name: Build permission and settings panels for detached-window regression
