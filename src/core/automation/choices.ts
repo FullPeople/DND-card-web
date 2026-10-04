@@ -3,13 +3,14 @@ import {inventoryState} from '../characterDetails';
 import {resolveEntryReference} from '../entryReferences';
 import {selectionLevel} from '../featureOwnership';
 import {automationEnabled} from './state';
+import {candidateReason} from '../engine';
 import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbilities';
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
-export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;hint?:string};
+export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];hint?:string};
 export const equipmentTypeLabel=(type:string)=>({weaponMartial:'军用武器',weaponSimple:'简易武器',focusSpellcastingHoly:'圣徽',focusSpellcastingArcane:'奥术法器',focusSpellcastingDruidic:'德鲁伊法器'} as Record<string,string>)[type]||'尚未适配的装备类别';
 const blocks=(v:unknown):any[]=>Array.isArray(v)?v:[];
 export function equipmentOptionConcept(entry:Entry,index:number,value:string):Entry{return concept(entry,`equipment:${index}:${value}`,`起始装备 · 方案 ${value}`,blocks(equipmentBlocks(entry)[index]?.[value]).map(item=>typeof item==='string'?`{@item ${item}}`:item?.item?`${item.quantity||1} × {@item ${item.item}}`:item?.special||(item?.equipmentType?equipmentTypeLabel(item.equipmentType):undefined)||(item?.value!==undefined||item?.containsValue!==undefined?`${(item.value??item.containsValue)/100} GP`:'尚未支持的装备条目')));}
@@ -82,8 +83,15 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
   // A declared filter is an explicit candidate set, even when its wrapper is prose.
   for(const [index,text] of row.entry.entries.entries())if(typeof text==='string'&&/(?:获得|选择).*(?:一项|一个|1)/.test(text)){
    const match=text.match(/\{@filter ([^|}]+)\|feats\|category=([^|}]+)/);if(!match)continue;
-   const options=known.filter(e=>e.kind==='feat'&&e.raw.category===match[2]&&(e.edition==='both'||e.edition===c.edition)).map(e=>({value:e.id,label:e.name,entry:e,grant:e}));
+   // Filter values are case-insensitive metadata (the source uses category=o,
+   // while feat records use O). Preserve the exact source/edition identities.
+   const category=match[2].trim().toLowerCase(),id=`${row.id}:filter:${index}`;
+   const others={...c,selections:c.selections.filter(s=>s.requirementId!==id)};
+   const candidates=new Map<string,Entry>();
+   for(const e of known)if(!candidates.has(e.id)&&e.kind==='feat'&&typeof e.raw.category==='string'&&e.raw.category.trim().toLowerCase()===category&&(e.edition==='both'||e.edition===c.edition))candidates.set(e.id,e);
+   const options=[...candidates.values()].map(e=>({value:e.id,label:e.name,entry:e,grant:e,unavailable:candidateReason(others,e)}));
    push(`filter:${index}`,row.entry.name,1,options,'content');
+   out.at(-1)!.catalogKind='feat';
   }
   for(const choice of row.entry.choices||[]){
    const options=(choice.options||choice.refs||[]).map(value=>{const entry=known.find(e=>e.id===value)||resolve(c,row.entry,value,choice.kind||'feature',known),label=choice.optionLabels?.[value]||entry?.name||SKILLS[skillKey(value)]?.name||value;return {value,label,entry:entry||concept(row.entry,value,label,[choice.label]),grant:choice.kind?entry:undefined};});

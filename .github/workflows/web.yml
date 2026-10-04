@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
+    branches: [codex/fix-human-origin-feat-20261004, fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -37,6 +37,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - group: origin-feat
+            commands: |
+              npx playwright test --config playwright.origin-feat.config.ts
           - group: owner-sync
             commands: |
               npx playwright test --config playwright.owner-sync.config.ts
