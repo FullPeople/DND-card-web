@@ -67,12 +67,18 @@ test('read revocation keeps an in-flight App draft recoverable without replay or
  await regrant(host);
  await send(host,'cacheSnapshot',{sequence:11,...snapshot('a',5),access:access(3)});
  await expect(page.getByLabel('角色姓名',{exact:true})).toHaveValue('Recoverable in-flight draft');
- await expect(page.getByText('待核对 · 本地修改已保留',{exact:false})).toBeVisible();
+ // Compact chrome deliberately hides the legacy save-status footer. Keep its
+ // uncertainty assertion and exercise the current visible recovery entry.
+ await expect(page.locator('.save-status')).toContainText('待核对 · 本地修改已保留');
+ await expect(page.getByRole('button',{name:'同步核对',exact:true})).toBeVisible();
  await send(host,'ack',{requestId:pending.requestId,ok:true,result:{snapshot:{sequence:50,...snapshot('a',6,'Unrelated late owner body'),access:access()}}});
  await page.clock.runFor(150);
  await expect(page.getByLabel('角色姓名',{exact:true})).toHaveValue('Recoverable in-flight draft');
  expect((await requests(host,'save')).length).toBe(1);
  await expect.poll(()=>page.evaluate(async()=>{const modulePath='/src/platform/workbench.ts';return (await import(/* @vite-ignore */ modulePath)).workbenchDiagnostics().pending.length;})).toBe(0);
+ await page.getByRole('button',{name:'同步核对',exact:true}).click();
+ await expect(page.getByText('上一项修改尚未得到确认。本地修改已备份，核对期间不会重放未确认的操作。',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'导出本地修改',exact:true})).toBeVisible();
  await info.attach('read-regrant-quarantined-draft',{body:await page.screenshot(),contentType:'image/png'});
 });
 

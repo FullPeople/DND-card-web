@@ -22,3 +22,7 @@
 - Web权限/设置面板仍固定已发布245配套Suite `24a498d317d4f107fdb29e320a4647e3f50b0252`，避免无关依赖漂移。最终Suite组合应精确pin本分支Web提交并在Suite CI验证。Web独立矩阵不冒称已绑定尚未冻结的Suite新候选。
 
 独立审阅逐字节核对三处生产差量与原af9一致，并独立重跑13项lifetime回归全部通过；未发现静态阻断。新增浏览器场景特别是冻结时钟后的重新授权时序仍须CI首跑验证。发布SHA与远端终态CI需在实际完成后由最终回执说明。真实登录房间、用户原设备与实体手机尚未现场验证。
+
+## 首次CI与夹具修正
+
+首次精确SHA `fdfb6ce5ad411220f4de017dd0437e4790e1b6b3` 的[Web CI](https://github.com/FullPeople/DND-card-web/actions/runs/37230549746)中，owner-sync 17通过/1失败。失败是新增草稿用例把已在245紧凑布局中隐藏的旧`.save-status`当成可见UI；截图显示角色草稿保留且顶部“同步核对”入口可见。已改为保留状态文本断言并检查实际可见的“同步核对”入口与弹窗说明/导出按钮，原草稿、迟到ACK、不重复发送和pending清空断言全部保留。没有改生产样式或放宽权限恢复要求。首次[失败artifact](https://github.com/FullPeople/DND-card-web/actions/runs/37230549746/artifacts/11313935747)保留，修正后的完整CI仍以最终回执为准。
