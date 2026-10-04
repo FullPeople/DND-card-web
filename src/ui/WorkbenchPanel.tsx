@@ -1,7 +1,7 @@
 import {applyTone,applyNightMode} from '../platform/tone';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {workbenchRequest,useWorkbench} from '../platform/workbench';
-export function WorkbenchPanel({panel,close,section}:{section?:'features';panel:'settings'|'music'|'studio'|'table';close:()=>void}){
+export function WorkbenchPanel({panel,close,section}:{section?:'features';panel:'settings'|'music'|'studio'|'table'|'permissions';close:()=>void}){
  const [tableMode,setTableMode]=useState<'full'|'compact'>('full');
  const ref=useRef<HTMLIFrameElement>(null),instance=useMemo(()=>crypto.randomUUID(),[]),wb=useWorkbench(),latestClose=useRef(close);latestClose.current=close;
  useEffect(()=>{
@@ -18,8 +18,8 @@ export function WorkbenchPanel({panel,close,section}:{section?:'features';panel:
   return()=>{if(panel==='settings')window.dispatchEvent(new CustomEvent('suite-supporters',{detail:{visible:false}}));window.removeEventListener('message',receive);window.removeEventListener('workbench-panel-event',forward);void workbenchRequest('panelRpc',{panel,instance,method:'dispose',args:[]}).catch(()=>{});};
  },[panel,instance]);
  useEffect(()=>{if(!['music','studio'].includes(panel)||!wb.online)return;const tick=()=>void workbenchRequest('panelRpc',{panel,instance,method:'broadcast.sendMessage',args:['com.obr-suite/music-board:ready',{workbench:true},{destination:'LOCAL'}]}).catch(()=>{});tick();const timer=setInterval(tick,5000);return()=>clearInterval(timer);},[panel,instance,wb.online]);
- const title=({settings:section==='features'?'功能开关':'设置',music:'音乐',studio:'音乐工作室',table:'三龙牌'})[panel];
- const source=new URL(`../workbench-panels/${panel==='studio'?'studio/index':panel}.html`,location.href.split('#')[0]);source.searchParams.set('instance',instance);if(panel==='settings'){source.searchParams.set('workbench','1');if(section)source.searchParams.set('section',section);}if(panel==='table')source.searchParams.set('mode',tableMode);source.searchParams.set('v',import.meta.url.split('/').pop()||'');
+ const title=({settings:section==='features'?'功能开关':'设置',music:'音乐',studio:'音乐工作室',table:'三龙牌',permissions:'玩家分配卡和权限'})[panel];
+ const source=new URL(`../workbench-panels/${panel==='studio'?'studio/index':panel}.html`,location.href.split('#')[0]);source.searchParams.set('instance',instance);if(panel==='settings'){source.searchParams.set('workbench','1');if(section)source.searchParams.set('section',section);}if(panel==='permissions')source.searchParams.set('permissions','1');if(panel==='table')source.searchParams.set('mode',tableMode);source.searchParams.set('v',import.meta.url.split('/').pop()||'');
  return <section className="workbench-panel" aria-label={`${title}工作区`} data-offline={!wb.online}><iframe ref={ref} title={`Full Suite ${title}`} src={source.href}/></section>;
 }
 

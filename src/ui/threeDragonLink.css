@@ -1,0 +1,5 @@
+.header-tools .suite-website-link{display:inline-flex;align-items:center;justify-content:center;padding:5px 13px;border:1px solid #ffffff50;border-radius:3px;background:#ffffff12;color:#fff;font:inherit;text-decoration:none;white-space:nowrap}
+.header-tools .suite-website-link:hover{background:#ffffff28;border-color:#fff}
+.header-tools .suite-website-link:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:1100px){.header-tools .suite-website-link{padding:5px 8px;font-size:11px}}
+@media(max-width:650px){.header-tools .suite-website-link{padding:5px 6px;font-size:10px}}

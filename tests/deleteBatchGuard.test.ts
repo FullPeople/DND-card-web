@@ -1,0 +1,4 @@
+import {expect,it} from 'vitest';
+import {deleteBatchGuard} from '../src/platform/deleteBatchGuard';
+it('blocks a second manager instance while the first batch waits for its ACK',async()=>{const guard=deleteBatchGuard();let finish!:()=>void,count=0;const request=()=>{count++;return new Promise<void>(resolve=>finish=resolve);};const first=guard.run(request);await expect(guard.run(request)).rejects.toThrow('仍在处理中');expect(count).toBe(1);finish();await first;await guard.run(async()=>{count++;});expect(count).toBe(2);});
+it('releases the in-flight batch lock after failure without retrying that batch',async()=>{const guard=deleteBatchGuard();let calls=0;await expect(guard.run(async()=>{calls++;throw Error('unknown');})).rejects.toThrow('unknown');expect(calls).toBe(1);await guard.run(async()=>{calls++;});expect(calls).toBe(2);});

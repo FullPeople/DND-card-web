@@ -26,3 +26,13 @@ describe('DM permission notice read status',()=>{
   const entry=readFileSync(new URL('../src/ui/PlayerPermissionButton.tsx',import.meta.url),'utf8');expect(entry).toContain('关于玩家分配卡和权限');expect(entry).toContain('if(!gm||seen)return null');expect(entry).toContain("statusOnly:true");expect(entry).not.toContain('setItem');
  });
 });
+
+describe('permission notice stays in the detached workbench',()=>{
+ it('opens the original guide in a local permissions panel instead of an OBR scene modal',()=>{
+  const entry=readFileSync(new URL('../src/ui/PlayerPermissionButton.tsx',import.meta.url),'utf8');
+  expect(entry).toContain('panel="permissions"');
+  expect(entry).not.toContain("request('console',{action:'playerPermissions'})");
+  const panel=readFileSync(new URL('../src/ui/WorkbenchPanel.tsx',import.meta.url),'utf8');
+  expect(panel).toContain("source.searchParams.set('permissions','1')");
+ });
+});

@@ -1,0 +1,4 @@
+import {defineConfig} from '@playwright/test';
+if(process.env.CI&&(!process.env.SUITE_ROOT||!process.env.TDA_SUITE_SETTINGS_DIST))throw Error('Detached-window CI requires explicit SUITE_ROOT and TDA_SUITE_SETTINGS_DIST for the exact reviewed Suite panels.');
+const executablePath=process.env.CHROMIUM_PATH||process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+export default defineConfig({testDir:'./tests/e2e',testMatch:['threeDragonFullscreen.spec.ts','playerPermissionWindow.spec.ts'],timeout:60000,expect:{timeout:12000},workers:1,reporter:'list',outputDir:'.local-evidence/window-shell/results',use:{baseURL:'http://127.0.0.1:5764',launchOptions:executablePath?{executablePath}:undefined,trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5764 --strictPort',url:'http://127.0.0.1:5764',reuseExistingServer:false}});
