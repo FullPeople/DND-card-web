@@ -65,6 +65,7 @@ export interface Character {
   size?: Size;
   sheetBonuses?: Partial<Record<SheetBonus, number>>;
   skillBonuses?: Record<string, number>;
+  saveBonuses?: Partial<Record<Ability, number>>;
   dismissedFeatures?: string[];
   featureLayout?: { detailsExpanded?:string[]; optionsVisible?:Record<string,boolean>; order: string[]; expanded: string[] };
   adjustments?: { id: string; target: string; value: number; reason: string }[];

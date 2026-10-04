@@ -30,5 +30,5 @@ export function PlayerPermissionButton({gm,online,request}:{gm:boolean;online:bo
  useEffect(()=>{if(!gm)setOpening(false);},[gm]);
  if(!gm||seen)return null;
  const close=()=>{setOpening(false);refreshStatus.current();};
- return <><button type="button" className="workbench-mode player-permission-entry" disabled={!online} onClick={()=>{if(online&&!opening)setOpening(true);}}>关于玩家分配卡和权限</button>{opening&&<PermissionDialog close={close}/>}</>;
+ return <><button type="button" className="workbench-mode player-permission-entry" disabled={!online} onClick={()=>{if(online&&!opening)setOpening(true);}}><span className="player-permission-entry-surface">关于玩家分配卡和权限</span></button>{opening&&<PermissionDialog close={close}/>}</>;
 }

@@ -105,6 +105,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     const note=`技能额外调整 ${value >= 0 ? '+' : ''}${value}`;
     skills[key].sources.push(note);(trace['skill:'+key] ||= []).push(note);
   }
+  // Like skill offsets, saving-throw offsets supplement any retained legacy total.
+  for (const a of ABILITIES) saves[a].value += c.saveBonuses?.[a] || 0;
   if (!(c.adjustments || []).some(a => a.target === 'passive')) {passive = 10 + skills.perception.value;trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}`;}
   ac += c.sheetBonuses?.ac || 0;
   initiative += c.sheetBonuses?.initiative || 0;
@@ -114,7 +116,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for (const [target, value] of Object.entries(c.sheetBonuses || {})) if (value) (trace[target] ??= []).push(`卡面调整 ${value >= 0 ? '+' : ''}${value}`);
   issues.push(...planFeatureResources(c).issues);
   for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
-  for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`)];
+  for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
   return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive,
     skills, saves, requirements, issues, trace,

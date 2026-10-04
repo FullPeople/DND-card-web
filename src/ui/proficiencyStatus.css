@@ -6,18 +6,18 @@
 .proficiency-explanation{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 
 /* Saves and skills share three aligned columns in A4 and responsive layouts.
-   Editing only appends the independent skill-adjustment column. */
+   Editing appends the independent adjustment column for both kinds. */
 .paper .overview-sheet .ability-box .ability-proficiency-row{--check-status-width:10px;--check-value-width:24px;--check-adjustment-width:30px;display:grid;grid-template-columns:var(--check-status-width) var(--check-value-width) minmax(0,1fr);column-gap:2px;align-items:baseline;padding-inline:0;margin-inline:0}
-.paper .overview-sheet .ability-box .ability-proficiency-row.skill-editing:has(.skill-extra-adjustment){grid-template-columns:var(--check-status-width) var(--check-value-width) minmax(0,1fr) var(--check-adjustment-width);column-gap:2px}
+.paper .overview-sheet .ability-box .ability-proficiency-row:is(.skill-editing,.save-editing):has(:is(.skill-extra-adjustment,.save-extra-adjustment)){grid-template-columns:var(--check-status-width) var(--check-value-width) minmax(0,1fr) var(--check-adjustment-width);column-gap:2px}
 .paper .overview-sheet .ability-box .ability-proficiency-row>:first-child{grid-column:1;align-self:center;justify-self:center;box-sizing:border-box;width:var(--check-status-width);height:var(--check-status-width)}
 .paper .overview-sheet .ability-box .ability-proficiency-row>:nth-child(2){grid-column:2;min-width:0;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:inherit}
 .paper .overview-sheet .ability-box .ability-proficiency-row>:nth-child(2) b{min-width:0;font-size:inherit;text-align:right;line-height:inherit;font-variant-numeric:tabular-nums}
 .paper .overview-sheet .ability-box .ability-proficiency-row>:nth-child(3){grid-column:3;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:inherit}
-.paper .overview-sheet .ability-box .ability-proficiency-row>.skill-extra-adjustment{grid-column:4;align-self:center}
+.paper .overview-sheet .ability-box .ability-proficiency-row>:is(.skill-extra-adjustment,.save-extra-adjustment){grid-column:4;align-self:center}
 .sheet-viewport.screen-mode .paper .overview-sheet .ability-box .ability-proficiency-row{--check-value-width:30px;--check-adjustment-width:24px;column-gap:2px}
-.sheet-viewport.screen-mode .paper .overview-sheet .ability-box .ability-proficiency-row.skill-editing:has(.skill-extra-adjustment){column-gap:2px}
+.sheet-viewport.screen-mode .paper .overview-sheet .ability-box .ability-proficiency-row:is(.skill-editing,.save-editing):has(:is(.skill-extra-adjustment,.save-extra-adjustment)){column-gap:2px}
 .sheet-viewport.screen-mode .paper .overview-sheet .ability-box .ability-proficiency-row>span{font-size:14px}
-.sheet-viewport.screen-mode .paper .overview-sheet .ability-box .ability-proficiency-row input.skill-extra-adjustment{width:24px;max-width:24px}
+.sheet-viewport.screen-mode .paper .overview-sheet .ability-box .ability-proficiency-row input:is(.skill-extra-adjustment,.save-extra-adjustment){width:24px;max-width:24px}
 
 .paper .overview-sheet .ability-box:has(.proficiency-manual) .ability-proficiency-row{--check-status-width:24px}
 .paper .overview-sheet .ability-box .ability-proficiency-row>.proficiency-manual{display:flex;gap:3px;width:var(--check-status-width);height:12px;cursor:default}
@@ -28,4 +28,4 @@
    existing control sizes and row height; compact only the surrounding tracks. */
 .sheet-viewport.a4-mode .paper .overview-sheet .ability-box:has(.proficiency-manual) .ability-proficiency-row{--check-status-width:22px;--check-value-width:21px;--check-adjustment-width:24px;column-gap:1px}
 .sheet-viewport.a4-mode .paper .overview-sheet .ability-box .proficiency-manual{gap:2px}
-.sheet-viewport.a4-mode .paper .overview-sheet .ability-box .ability-proficiency-row input.skill-extra-adjustment{width:var(--check-adjustment-width);max-width:var(--check-adjustment-width)}
+.sheet-viewport.a4-mode .paper .overview-sheet .ability-box .ability-proficiency-row input:is(.skill-extra-adjustment,.save-extra-adjustment){width:var(--check-adjustment-width);max-width:var(--check-adjustment-width)}
