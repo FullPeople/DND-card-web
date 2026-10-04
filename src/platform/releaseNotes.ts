@@ -251,14 +251,22 @@ const RELEASE_241_SECTIONS:ReleaseSection[]=[
  {title:'开屏退出',items:['黄色开屏淡出为透明，直接显露下方已经准备好的角色卡。','公告仍在开屏完全退出后显示；已有角色、资源余额和显示偏好保留。']}
 ];
 const RELEASE_242_SECTIONS:ReleaseSection[]=[...RELEASE_241_SECTIONS,{title:'加载失败恢复',items:['程序或样式下载失败时会显示重新加载入口，避免一直停在黄色开屏。']}];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_243_SECTIONS:ReleaseSection[]=[
  {title:'维护更新',items:['角色卡网站同步更新；已有角色、资源余额和显示偏好保留。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+const SUITE_RELEASE_243_SECTIONS:ReleaseSection[]=[
  {title:'玩家加载恢复',items:['修复了首次打开时角色资料已经收到、卡面仍停在读取中的情况。','首次消息未送达时可重新获取当前角色，切换角色后旧回复不会抢回上一张卡。']},
  {title:'角色权限',items:['撤回原生 Owner 后立即停止编辑；排队中的旧修改在重新授权后也不会自动补写。','迟到的保存回执和旧缓存不会重新授予编辑权限。']},
  {title:'权限说明',items:['主持人的“音乐板”右侧新增红色“关于玩家分配卡和权限”入口。','滚动读到底并点击“我真的知道了”后记为已读，关闭说明不会标记已读。']},
  {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。真实玩家原设备与实体手机仍待现场复验。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色管理',items:['删除失败时明确显示未删除的角色与原因，可重新选择处理；结果尚未确认时先核对，不重复提交。','保留已有角色、资源余额、显示偏好及启动优化。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色读取与管理',items:['角色资料读取失败时显示错误和重试入口，不再一直停在读取中；可以复制已脱敏的诊断。','删除失败时明确显示未删除的角色与原因；结果尚未确认时先核对，不重复提交。']},
+ {title:'权限说明与三龙牌',items:['权限说明在当前工作台窗口内打开，读到底并明确确认后才记为已读。','三龙牌入口在新窗口打开已发布的线上网站，关闭牌桌后可继续使用工作台。']},
+ {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。已有角色、资源余额和启动优化保留；真实房间和实体手机仍待现场复验。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -297,6 +305,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_243_SECTIONS:RELEASE_243_SECTIONS},
  {title:'2026-10-04',sections:RELEASE_242_SECTIONS},
  {title:'2026-10-03',sections:RELEASE_241_SECTIONS},
  {title:'2026-10-03',sections:mode==='suite'?SUITE_RELEASE_240_SECTIONS:RELEASE_240_SECTIONS},
