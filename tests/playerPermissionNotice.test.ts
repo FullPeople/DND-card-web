@@ -36,3 +36,26 @@ describe('permission notice stays in the detached workbench',()=>{
   expect(panel).toContain("source.searchParams.set('permissions','1')");
  });
 });
+
+describe('permission entry attention without moving its hit area',()=>{
+ it('keeps the real button stationary and continuously animates only its visual surface',()=>{
+  const entry=readFileSync(new URL('../src/ui/PlayerPermissionButton.tsx',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../src/ui/playerPermissionNotice.css',import.meta.url),'utf8');
+  expect(entry).toContain('<span className="player-permission-entry-surface">关于玩家分配卡和权限</span>');
+  const buttonRule=css.match(/\.workbench-modes \.workbench-mode\.player-permission-entry\{([^}]+)\}/)![1];
+  expect(buttonRule).not.toMatch(/animation:|transform:/);
+  expect(buttonRule).toContain('padding:3px');expect(buttonRule).toContain('max-width:100%');
+  expect(css).toContain('animation:player-permission-nudge .8s ease-in-out infinite');
+  expect(css).toContain('pointer-events:none');
+  const motion=css.match(/@keyframes player-permission-nudge\{([^]*?)\n/)![1];
+  expect(motion).toContain('translateX(-2px)');expect(motion).toContain('translateX(2px)');
+  expect(motion).not.toMatch(/opacity|filter|color|width|height|margin/);
+ });
+ it('keeps a static red frame for reduced motion and permits toolbar wrapping',()=>{
+  const css=readFileSync(new URL('../src/ui/playerPermissionNotice.css',import.meta.url),'utf8');
+  expect(css).toContain('@media(prefers-reduced-motion:reduce){.player-permission-entry-surface{animation:none}}');
+  expect(css).toContain('border:2px solid #bd2525');expect(css).toContain('background:#fff0ed');
+  const responsive=readFileSync(new URL('../src/ui/responsive177.css',import.meta.url),'utf8');
+  expect(responsive).toMatch(/\.workbench-modes\{[^}]*flex-wrap:wrap/);
+ });
+});

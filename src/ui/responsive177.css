@@ -3,7 +3,7 @@
 .workbench-bar>span{flex:0 0 66px;width:66px;overflow:hidden;white-space:nowrap}
 .workbench-bar>strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .workbench-bar>label{flex:none;white-space:nowrap}
-.workbench-modes{display:flex;gap:5px;align-items:center;padding:4px 10px;background:var(--suite-surface,#ededf0);flex:none;border-bottom:1px solid var(--suite-line,#ccc)}
+.workbench-modes{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:4px 10px;background:var(--suite-surface,#ededf0);flex:none;border-bottom:1px solid var(--suite-line,#ccc)}
 .workbench-modes>button{display:flex;align-items:center;justify-content:center;min-height:28px;padding:4px 10px;font-size:12px;line-height:18px}
 .workbench-modes>button.active{background:var(--suite-tone,#50525b);color:white;border-color:var(--suite-tone,#50525b)}
 .character-tabs.workbench-cards{display:flex;flex-wrap:nowrap;gap:4px;padding:3px 10px;min-height:30px;max-height:30px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x;user-select:none;flex:none}

@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [fix/workbench-recovery-online-safe-20261004, fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
+    branches: [codex/card-ui-three-fixes-20261004,codex/restore-transition-rest-20261004, fix/workbench-recovery-online-safe-20261004, fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -37,6 +37,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - group: transition-rest
+            commands: |
+              npx playwright test tests/e2e/transitionRest.spec.ts --project=chromium
           - group: workbench-recovery
             commands: |
               npx playwright test --config playwright.manager-recovery.config.ts
@@ -94,6 +97,10 @@ jobs:
             commands: |
               npx playwright test --config playwright.direct232.config.ts
               npx playwright test --config playwright.wiki232.config.ts
+          - group: saving-throw-adjustments
+            commands: |
+              npx playwright test --config playwright.save-bonuses.config.ts
+              npx playwright test tests/e2e/valueTraceImmediate.spec.ts --project=chromium
           - group: edit-profile-232
             commands: |
               node tools/profileCharacterEdits232.mjs
@@ -183,9 +190,10 @@ jobs:
             .local-evidence/followup231-ui/
             .local-evidence/card-fixes235/
             .local-evidence/direct232-browser/
+            .local-evidence/save-bonuses-browser/
           retention-days: 7
       - uses: actions/upload-artifact@v4
-        if: always() && (matrix.group == 'workbench-recovery' || matrix.group == 'owner-sync' || matrix.group == 'direct-232' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release' || matrix.group == 'portrait-frame' || matrix.group == 'card-fixes-235' || matrix.group == 'startup-integration' || matrix.group == 'startup-order' || matrix.group == 'armor-feature-followup' || matrix.group == 'dashboard-appearance' || matrix.group == 'monster-lifecycle')
+        if: always() && (matrix.group == 'transition-rest' || matrix.group == 'workbench-recovery' || matrix.group == 'owner-sync' || matrix.group == 'direct-232' || matrix.group == 'saving-throw-adjustments' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release' || matrix.group == 'portrait-frame' || matrix.group == 'card-fixes-235' || matrix.group == 'startup-integration' || matrix.group == 'startup-order' || matrix.group == 'armor-feature-followup' || matrix.group == 'dashboard-appearance' || matrix.group == 'monster-lifecycle')
         with:
           name: direct232-evidence-${{ matrix.group }}
           include-hidden-files: true
@@ -193,6 +201,7 @@ jobs:
             test-results/
             .local-evidence/card-fixes235/
             .local-evidence/direct232-browser/
+            .local-evidence/save-bonuses-browser/
             .local-evidence/owner-sync/browser/
             .local-evidence/window-shell/results/
             .local-evidence/manager-recovery/

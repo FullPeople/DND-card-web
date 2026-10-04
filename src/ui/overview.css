@@ -270,5 +270,5 @@
    Reflow keeps its larger touch targets and full-width stacked panels. */
 .paper .overview-sheet .ability-box .cell-content{padding:2px}
 .paper .overview-sheet .ability-skill.skill-editing:has(.skill-extra-adjustment){grid-template-columns:10px 18px minmax(20px,1fr) 30px;gap:1px}
-.paper .overview-sheet .ability-skill input.skill-extra-adjustment{padding-inline:0}
+.paper .overview-sheet :is(.ability-skill,.ability-save) input:is(.skill-extra-adjustment,.save-extra-adjustment){padding-inline:0}
 .paper .training-chips input{width:100%;min-width:0}

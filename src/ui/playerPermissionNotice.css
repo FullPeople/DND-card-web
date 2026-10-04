@@ -1,3 +1,12 @@
+/* Animate only the visual surface: the button hit area and its neighbours stay put.
+   Three pixels of inset contain the two-pixel motion, including narrow windows. */
+.workbench-modes .workbench-mode.player-permission-entry{box-sizing:border-box;flex:0 0 auto;max-width:100%;min-width:0;padding:3px;border:0;background:transparent;color:#bd2525;font-weight:800;white-space:normal;text-align:left}
+.player-permission-entry-surface{box-sizing:border-box;display:block;max-width:100%;padding:3px 8px;border:2px solid #bd2525;border-radius:3px;background:#fff0ed;color:inherit;line-height:18px;overflow-wrap:anywhere;pointer-events:none;animation:player-permission-nudge .8s ease-in-out infinite}
+.player-permission-entry:hover .player-permission-entry-surface{background:#ffe0dc}
+.player-permission-entry:focus-visible{outline:2px solid #bd2525;outline-offset:1px}
+@keyframes player-permission-nudge{0%,100%{transform:translateX(-2px)}50%{transform:translateX(2px)}}
+@media(prefers-reduced-motion:reduce){.player-permission-entry-surface{animation:none}}
+
 .player-permission-dialog{width:min(660px,calc(100vw - 20px));height:min(760px,calc(100dvh - 24px));max-width:none;max-height:none;padding:0;border:3px solid var(--suite-tone,#50525b);background:var(--suite-paper,#f7f7fa);color:var(--suite-ink,#292a30);overflow:hidden}
 .player-permission-dialog[open]{display:flex;flex-direction:column}
 .player-permission-dialog::backdrop{background:#0007}
