@@ -1,5 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
-import {readFileSync,existsSync} from 'node:fs';
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {resolve,join,basename} from 'node:path';
 import {mockSource} from './fixtures';
 import {permissionPanelAssetRoute} from './permissionPanelAssetRoute';
@@ -50,6 +50,9 @@ test('players have no permission guide and role revocation dismisses an unread g
 test('continuous attention moves the red surface while hover, focus and the click target stay stable',async({page:host})=>{
  const page=await pair(host);await page.emulateMedia({reducedMotion:'no-preference'});
  const entry=page.getByRole('button',{name:'关于玩家分配卡和权限',exact:true}),surface=entry.locator('.player-permission-entry-surface');await expect(entry).toBeVisible();
+ // The app shell is visible beneath the real intro while root is still inert.
+ // Hit testing belongs after the startup boundary has released pointer input.
+ await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete');await expect(page.locator('#startup-intro')).toBeHidden();await entry.click({trial:true});
  const motion=await entry.evaluate(button=>{
   const surface=button.querySelector('.player-permission-entry-surface')!,animation=surface.getAnimations()[0];
   if(!animation)throw Error('Unread permission entry must continuously animate');
@@ -64,7 +67,8 @@ test('continuous attention moves the red surface while hover, focus and the clic
  expect(motion.start.button).toEqual(motion.middle.button);expect(motion.start.button).toEqual(motion.later.button);
  expect(motion.middle.surface.x-motion.start.surface.x).toBeCloseTo(4,1);expect(motion.later.surface.x).toBeCloseTo(motion.middle.surface.x,1);
  for(const sample of [motion.start,motion.middle,motion.later]){expect(sample.surface.x).toBeGreaterThanOrEqual(sample.button.x);expect(sample.surface.right).toBeLessThanOrEqual(sample.button.right);}
- expect(motion.hit).toBe(true);expect(motion.iterations).toBe('infinite');expect(motion.duration).toBe('0.8s');expect(motion.opacity).toBe('1');
+ const motionPath=test.info().outputPath('permission-motion.json');writeFileSync(motionPath,JSON.stringify(motion,null,2));await test.info().attach('permission-motion.json',{path:motionPath,contentType:'application/json'});
+ expect(motion.hit).toBe(true);expect(motion.iterations).toBe('infinite');expect(motion.duration).toBe('0.8s');expect(motion.opacity).toBe('1');await page.screenshot({path:test.info().outputPath('permission-unread-motion.png')});
  await entry.hover();await entry.focus();await expect(entry).toBeFocused();
  await expect.poll(()=>surface.evaluate(element=>Number(element.getAnimations()[0]?.currentTime||0))).toBeGreaterThan(1600);
  expect(await surface.evaluate(element=>element.getAnimations()[0].playState)).toBe('running');

@@ -43,7 +43,7 @@ for(const mode of ['a4','screen'] as const)test(`${mode} save adjustments align 
  for(const width of [1512,390]){await page.setViewportSize({width,height:982});await expect(page.locator('.save-extra-adjustment')).toHaveCount(6);
   const boxes=await page.locator('.ability-box').evaluateAll(elements=>elements.map(box=>{const save=box.querySelector<HTMLElement>('.ability-save')!,skill=box.querySelector<HTMLElement>('.ability-skill'),field=save.querySelector<HTMLElement>('.save-extra-adjustment')!,label=save.children[2] as HTMLElement;return {overflow:save.scrollWidth-save.clientWidth,labelOverflow:label.scrollWidth-label.clientWidth,visible:field.getBoundingClientRect().width>0,columns:[...save.children].map((el,i)=>skill?Math.abs(el.getBoundingClientRect().x-skill.children[i].getBoundingClientRect().x):0),height:field.offsetHeight};}));
   for(const box of boxes){expect(box.overflow).toBeLessThanOrEqual(1);expect(box.labelOverflow).toBe(0);expect(box.visible).toBe(true);expect(box.height).toBeGreaterThanOrEqual(17);for(const delta of box.columns)expect(delta).toBeLessThan(1.1);}expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
-  await input(page,'str').focus();await expect(input(page,'str')).toBeFocused();await page.screenshot({path:test.info().outputPath(`save-adjustments-${mode}-${width}.png`)});
+  await input(page,'str').focus();await expect(input(page,'str')).toBeFocused();await page.screenshot({path:test.info().outputPath(`save-adjustments-${mode}-${width}.png`)});if(mode==='screen')await page.locator('.screen-abilities').screenshot({path:test.info().outputPath(`save-adjustments-abilities-${width}.png`)});
  }
 });
 
