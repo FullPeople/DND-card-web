@@ -1,7 +1,7 @@
 name: Verify web
 on:
   push:
-    branches: [fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
+    branches: [fix/workbench-recovery-online-safe-20261004, fix/owner-startup-243-20261003, codex/owner-sync243-20261004, codex/owner-sync242-20261004, fix/obr-owner-sync-20261003, codex/intro-three-dragon-20261003, main, codex/direct232-followup-20261002, codex/seven-card-fixes-20261003, codex/monster-card-lifecycle-20261003, codex/merge-monster237-20261003]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -37,6 +37,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - group: workbench-recovery
+            commands: |
+              npx playwright test --config playwright.manager-recovery.config.ts
+              npx playwright test --config playwright.window-shell.config.ts
           - group: owner-sync
             commands: |
               npx playwright test --config playwright.owner-sync.config.ts
@@ -110,10 +114,33 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - name: Check out exact recovery Suite panels
+        if: matrix.group == 'workbench-recovery'
+        uses: actions/checkout@v6
+        with:
+          repository: FullPeople/obr-suite
+          ref: 029fcdb07e26d23623c86f6284873d43ae78c458
+          path: .paired-suite
+          persist-credentials: false
+      - name: Build permission and settings panels for detached-window regression
+        if: matrix.group == 'workbench-recovery'
+        working-directory: .paired-suite
+        run: |
+          npm ci
+          WORKBENCH_PANEL_ONLY=permissions node tools/build-workbench-panels.mjs
+          test -s dist-workbench-dev/workbench-panels/permissions.html
+          WORKBENCH_PANEL_ONLY=settings node tools/build-workbench-panels.mjs
+          test -s dist-workbench-dev/workbench-panels/settings.html
       - uses: actions/download-artifact@v4
         with:
           name: verified-web-builds
       - run: npx playwright install --with-deps chromium
+      - name: Bind the installed Chromium and exact paired Suite
+        if: matrix.group == 'workbench-recovery'
+        run: |
+          node --input-type=module -e "import {chromium} from '@playwright/test'; console.log('CHROMIUM_PATH='+chromium.executablePath()); console.log('PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH='+chromium.executablePath())" >> "$GITHUB_ENV"
+          echo "SUITE_ROOT=$GITHUB_WORKSPACE/.paired-suite" >> "$GITHUB_ENV"
+          echo "TDA_SUITE_SETTINGS_DIST=$GITHUB_WORKSPACE/.paired-suite/dist-workbench-dev/workbench-panels" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps firefox
         if: matrix.group == 'followup-230'
       - name: Run all checks in group
@@ -145,6 +172,8 @@ jobs:
             test-results/
             test-results-*/
             .local-evidence/owner-sync/browser/
+            .local-evidence/window-shell/results/
+            .local-evidence/manager-recovery/
             .local-evidence/dashboard237/
             .local-evidence/armor-offsets/
             .local-evidence/feature-armor/
@@ -156,7 +185,7 @@ jobs:
             .local-evidence/direct232-browser/
           retention-days: 7
       - uses: actions/upload-artifact@v4
-        if: always() && (matrix.group == 'owner-sync' || matrix.group == 'direct-232' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release' || matrix.group == 'portrait-frame' || matrix.group == 'card-fixes-235' || matrix.group == 'startup-integration' || matrix.group == 'startup-order' || matrix.group == 'armor-feature-followup' || matrix.group == 'dashboard-appearance' || matrix.group == 'monster-lifecycle')
+        if: always() && (matrix.group == 'workbench-recovery' || matrix.group == 'owner-sync' || matrix.group == 'direct-232' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release' || matrix.group == 'portrait-frame' || matrix.group == 'card-fixes-235' || matrix.group == 'startup-integration' || matrix.group == 'startup-order' || matrix.group == 'armor-feature-followup' || matrix.group == 'dashboard-appearance' || matrix.group == 'monster-lifecycle')
         with:
           name: direct232-evidence-${{ matrix.group }}
           include-hidden-files: true
@@ -165,6 +194,8 @@ jobs:
             .local-evidence/card-fixes235/
             .local-evidence/direct232-browser/
             .local-evidence/owner-sync/browser/
+            .local-evidence/window-shell/results/
+            .local-evidence/manager-recovery/
             .local-evidence/dashboard237/
             .local-evidence/armor-offsets/
             .local-evidence/feature-armor/

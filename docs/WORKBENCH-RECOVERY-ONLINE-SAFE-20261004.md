@@ -7,6 +7,7 @@
 - Web 起点：fresh main `04d8a8408ed7e2815dabb9c14617fd369ee11ebb`。
 - 404／角色管理／脱敏诊断／删除守卫／当前窗口权限公告：定向移植原候选 `c2bf5c8046db32eec27a1920553f57770e3cebac` 的非三龙部分；没有整提交或整 App 覆盖。
 - 已发布三龙新窗口入口的实物源码：公开部署归档 `three-dragon-link-source-b681f78dccad.zip`，ZIP comment 为 `b681f78dccad90ab407738074dedba62b13db470`，共 1042 项。
+- 公开来源：[已发布 Web 宿主源码](https://obr.dnd.center/suite-dev/workbench/three-dragon-link-source-b681f78dccad.zip)。
 - 归档 SHA-256：`c744021c0177bcf423321cd076d927e794faca618f86ecd67fde33d36c58bed8`，提取前已精确校验。
 - 该归档证明部署方提供的源码内容，不能据此证明该 SHA 存在于可获取的远端 Git 对象或是 main 的后代。没有伪造 Git 祖先关系。
 
