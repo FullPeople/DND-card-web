@@ -59,3 +59,15 @@ CI 必须显式传入 `SUITE_ROOT` 和 `TDA_SUITE_SETTINGS_DIST`。缺失权限�
 未执行：实际浏览器点击、宽窄截图、真实房间和实体手机。本环境先前已证实 Chromium 在页面创建前被 socket 权限阻止；本轮没有重复尝试升级或绕过。真实浏览器结果等待批准后的新配对 CI，发现／编译计数不能报为浏览器通过。
 
 日志与产物留在本树 `.local-evidence/online-safe/`：`check.log`、`unit.log`、`build.log`、`standalone.log`、`startup-boundary.log`、各 `*-discovery.log`、`source-and-build-boundaries.json`。旧候选的验证结果没有混作本次新候选的浏览器证据。
+
+## 首轮配对 CI 的公告测试路由修订
+
+[Web run 37176150026](https://github.com/FullPeople/DND-card-web/actions/runs/37176150026) 在 Web `a7d37b9f97065847bf50161df9be5a357988cc92`、Suite `029fcdb07e26d23623c86f6284873d43ae78c458` 上实际运行。恢复组角色管理 6 项及在线三龙入口 2 项通过，公告 3 项均在打开工作台时因测试端读取不存在的 `workbench-panels/sound.js` 报 ENOENT，尚未进入公告交互。
+
+三份失败 trace 均记录请求 `http://127.0.0.1:5764/workbench-panels/sound.js`。它来自正常工作台启动的可选声音加载，不是 Vite 源码模块。配套构建指定 `WORKBENCH_PANEL_ONLY=permissions/settings`，在生成共享声音模块前正常返回；公告测试原先把全部 `workbench-panels/*` 请求映射到配套产物，因此错误接管了该可选请求。
+
+本次仅修订测试路由为 permissions HTML 及其构建 JavaScript，保留可选声音原来的失败容错；真实权限面板缺失仍由 beforeAll 或 readFileSync 硬失败。真实 permissions/settings 产物、GM、滚底、图片、显式 ACK、宽窄及撤权断言保持不变，没有返回空 JavaScript、增加跳过或修改产品运行代码。
+
+路由回归先红后绿：保持旧范围时 3 项中 2 项失败，其中明确复现 sound.js 被接管；收窄后 3 项通过。最终完整单元 867 通过、25 条件跳过，TypeScript 和 diff 检查通过，窗口组仍发现 5 项。新增本地证据在 `.local-evidence/permission-ci-route/`（red、green、unit、typescript、discovery 日志及 trace 请求摘要）。修订后的真实浏览器结果须以下轮 CI 为准；本地没有重复尝试已被 socket 权限阻止的浏览器。
+
+同批为已在首轮 CI 通过的 1280／390px 合成角色读取恢复场景补充成功路径图：通过 info.outputPath 保存错误与脱敏诊断、重试请求待回复、恢复后生命值 12 三个阶段（read-error、read-retry、read-restored）。原断言与产品代码不变；新增截图产出等待下轮 CI，补充后 TypeScript 与 owner-sync 15 项发现检查通过。

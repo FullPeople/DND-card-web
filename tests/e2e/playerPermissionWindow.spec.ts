@@ -2,11 +2,12 @@ import {test,expect,type Page} from '@playwright/test';
 import {readFileSync,existsSync} from 'node:fs';
 import {resolve,join,basename} from 'node:path';
 import {mockSource} from './fixtures';
+import {permissionPanelAssetRoute} from './permissionPanelAssetRoute';
 const suite=resolve(process.env.SUITE_ROOT||'../suite-recovery-online-safe'),panels=join(suite,'dist-workbench-dev/workbench-panels');
 const protocol='full-suite-workbench/v1',session='permission-local-window',seenKey='obr-suite/workbench/player-permissions-seen';
 async function pair(host:Page,role='GM'){
  await mockSource(host);
- await host.context().route('**/workbench-panels/*',async route=>{const file=join(panels,basename(new URL(route.request().url()).pathname));await route.fulfill({body:readFileSync(file),contentType:file.endsWith('.html')?'text/html':'text/javascript'});});
+ await host.context().route(permissionPanelAssetRoute,async route=>{const file=join(panels,basename(new URL(route.request().url()).pathname));await route.fulfill({body:readFileSync(file),contentType:file.endsWith('.html')?'text/html':'text/javascript'});});
  await host.context().route('**/suite-dev/owner-step*.png',route=>route.fulfill({body:readFileSync(join(suite,'public',basename(new URL(route.request().url()).pathname))),contentType:'image/png'}));
  await host.route('**/permission-host',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Synthetic permission host</title>'}));await host.goto('/permission-host');
  await host.evaluate(({protocol,session,role,seenKey})=>{const fixture=(window as any).permissionHost={role,seen:false,requests:[] as any[]};window.addEventListener('message',event=>{const m=event.data;if(m?.protocol!==protocol||m.session!==session)return;fixture.requests.push(m);const send=(data:any)=>(event.source as Window).postMessage({protocol,session,hostStarted:1,...data},location.origin);if(m.type==='hello'||m.type==='ping'){send({type:m.type==='hello'?'ready':'pong'});return;}if(m.type==='console'&&m.statusOnly){send({type:'ack',requestId:m.requestId,ok:true,result:{seen:fixture.seen}});return;}if(m.type==='panelRpc'){if(m.method==='permissions.acknowledge')fixture.seen=true;const result=m.method==='init'?{roomId:'permission-room',playerId:'test-gm',preferences:{}}:m.method==='player.getRole'?fixture.role:{};send({type:'ack',requestId:m.requestId,ok:true,result});}});},{protocol,session,role,seenKey});
