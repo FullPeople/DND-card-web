@@ -20,7 +20,7 @@ async function settle(page:Page,scroller:Locator){let last=-1;for(let i=0;i<25;i
 
 test('首次打开单机站弹出公告，版本、问题清单与默认展开的 Q&A 完整',async({page})=>{
  await open(page);
- const updates=dialog(page).locator('.announcement-issues');await expect(updates.locator('> summary')).toHaveText('版本更新');expect(await updates.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);await expect(updates.locator('.announcement-current')).toBeHidden();await updates.locator('> summary').click();
+ const updates=dialog(page).locator('.announcement-issues');await expect(updates.locator('> summary')).toHaveText('版本更新');expect(await updates.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(true);await expect(updates.locator('.announcement-current')).toBeVisible();
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
  const releases=releaseHistoryFor('standalone'),current=releases[0];
  await expect(dialog(page).locator('.announcement-current>h3')).toHaveText(current.title);
