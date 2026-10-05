@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
+    "verify:automation-progress": "node tools/verifyAutomationProgress.mjs",
     "test:e2e": "playwright test",
     "check": "npm run test && npm run build",
     "dev:sync-prototype": "vite --config prototype/vite.config.ts",

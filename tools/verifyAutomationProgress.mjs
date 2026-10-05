@@ -1,0 +1,15 @@
+import {spawnSync} from 'node:child_process';
+import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import {resolve,relative,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {progressInputs,VERIFICATION_PATH} from './automationProgress.ts';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const {tests,fingerprint}=progressInputs(root),out=resolve(root,'.local-evidence/automation-progress/unit-report.json');
+mkdirSync(dirname(out),{recursive:true});
+const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...tests,'tests/automationProgress.test.ts','--reporter=json',`--outputFile=${out}`],{cwd:root,stdio:'inherit'});
+if(result.error)throw result.error;if(result.status!==0)process.exit(result.status??1);
+const report=JSON.parse(readFileSync(out,'utf8'));
+const passedFiles=report.testResults.filter(t=>t.status==='passed'&&t.assertionResults.some(a=>a.status==='passed')).map(t=>relative(root,t.name).replaceAll('\\','/')).sort();
+if(!report.success||tests.some(t=>!passedFiles.includes(t)))throw Error('Required automation tests have not all passed');
+writeFileSync(resolve(root,VERIFICATION_PATH),JSON.stringify({schemaVersion:1,fingerprint,success:true,testedAt:new Date().toISOString(),scope:'authored-unit-fixtures',passedFiles},null,2)+'\n');
+console.log(JSON.stringify({verifiedTestFiles:passedFiles.length,passed:report.numPassedTests,skipped:report.numPendingTests,fingerprint}));
