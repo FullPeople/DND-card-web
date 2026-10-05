@@ -3,6 +3,11 @@ export const PROGRESS_LIMIT=48*1024;
 export const PROGRESS_CATEGORIES={values:'角色数值',equipment:'装备与特性',training:'熟练项',spells:'法术',resources:'资源 / 休息'} as const;
 export type ProgressCategory=keyof typeof PROGRESS_CATEGORIES;
 export type ProgressCounts={total:number;reviewed:number;implementedVerified:number};
+export interface ProgressSnapshot {
+ repository:string;exportRevision:string;sourceRevision:string;artifactSha256:string;irSha256:string;
+ localMarkedComplete:number;noMechanics:number;acceptedIncomplete:number;unreviewed:number;partialPayloadRecords:number;historicalEvidenceRecords:number;sourceCount:number;reviewBatchCount:number;
+ byOrigin:Record<string,{total:number;reviewed:number;localMarkedComplete:number}>;
+}
 export interface ProgressCapability {
  id:string;title:string;category:ProgressCategory;state:'partial'|'unavailable'|'pending';playerAvailable:boolean;
  reviewed:boolean;verified:boolean;sampleSources:string[];does?:string;trigger?:string;conditions?:string;boundary?:string;status?:string;
@@ -11,7 +16,7 @@ export interface ProgressManifest {
  schemaVersion:1;updatedAt:string;build:{sourceCommit:string;fingerprint:string;packageVersion:string;mode:string;rulesVersion:string;protocol:number};
  notice:string;sourcesNotice:string;changes:{date:string;summary:string}[];
  capabilities:ProgressCapability[];verification:{testedAt:string|null;scope:string};
- audit:{scope:string|null;updatedAt:string|null;counts:ProgressCounts|null};missingEvidence:string[];
+ audit:{scope:string|null;updatedAt:string|null;counts:ProgressCounts|null;snapshot?:ProgressSnapshot};missingEvidence:string[];
  sources:{id:string;name:string;origin:'official'|'third-party'|'project';counts:Partial<Record<ProgressCategory,ProgressCounts>>|null}[];
 }
 export interface ProgressIdentity {sourceCommit:string;fingerprint:string;manifestSha256:string;mode:string}
@@ -26,6 +31,11 @@ export function validProgress(v:unknown):v is ProgressManifest {
  if(!bounded(v.notice)||!bounded(v.sourcesNotice)||!Array.isArray(v.changes)||v.changes.length>8||v.changes.some(c=>!object(c)||!bounded(c.date,30)||!bounded(c.summary)))return false;
  if(!object(v.verification)||!bounded(v.verification.scope,120)||v.verification.testedAt!==null&&(!bounded(v.verification.testedAt,50)||!Number.isFinite(Date.parse(v.verification.testedAt))))return false;
  if(!object(v.audit)||v.audit.scope!==null&&!bounded(v.audit.scope,80)||v.audit.updatedAt!==null&&!bounded(v.audit.updatedAt,50)||v.audit.counts!==null&&!counts(v.audit.counts))return false;
+ if(v.audit.snapshot!==undefined){const s=v.audit.snapshot,c=v.audit.counts;
+  if(!object(s)||!object(c)||s.repository!=='FullPeople/dnd5e-automation-data'||!sha(s.exportRevision)||!sha(s.sourceRevision)||!sha(s.artifactSha256,64)||!sha(s.irSha256,64)||!['localMarkedComplete','noMechanics','acceptedIncomplete','unreviewed','partialPayloadRecords','historicalEvidenceRecords','sourceCount','reviewBatchCount'].every(k=>Number.isSafeInteger(s[k])&&Number(s[k])>=0)||Number(s.localMarkedComplete)+Number(s.noMechanics)+Number(s.acceptedIncomplete)!==c.reviewed||Number(s.unreviewed)+Number(c.reviewed)!==c.total||Number(s.partialPayloadRecords)>Number(s.acceptedIncomplete)||Number(s.historicalEvidenceRecords)>Number(c.reviewed)||!object(s.byOrigin))return false;
+  const origins=Object.entries(s.byOrigin);if(origins.some(([o,n])=>!['official','third-party','project'].includes(o)||!object(n)||!['total','reviewed','localMarkedComplete'].every(k=>Number.isSafeInteger(n[k])&&Number(n[k])>=0)||Number(n.localMarkedComplete)>Number(n.reviewed)||Number(n.reviewed)>Number(n.total)))return false;
+  if(['total','reviewed','localMarkedComplete'].some(k=>origins.reduce((sum,[,n])=>sum+Number((n as Record<string,number>)[k]),0)!==Number(k==='localMarkedComplete'?s[k]:c[k])))return false;
+ }
  if(!Array.isArray(v.missingEvidence)||v.missingEvidence.length>16||v.missingEvidence.some(p=>!bounded(p,180)))return false;
  if(!Array.isArray(v.capabilities)||v.capabilities.length>80||!Array.isArray(v.sources)||v.sources.length>500)return false;
  const ids=new Set();for(const c of v.capabilities){

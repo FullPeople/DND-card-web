@@ -39,9 +39,10 @@ export default function AutomationProgress({release,mode}:{release:unknown;mode:
    <p role="status" className={publication.matched?'automation-progress-confirmed':'automation-progress-warning'}>{publication.reason}</p>
    <dl className="automation-progress-totals">
     <div><dt>规则条目已核对</dt><dd>{manifest.audit.counts?`${manifest.audit.counts.reviewed} / ${manifest.audit.counts.total}`:'待核实'}</dd></div>
-    <div><dt>整条已实现并验证</dt><dd>{manifest.audit.counts?manifest.audit.counts.implementedVerified:'待核实'}</dd></div>
+    <div><dt>整条已实现并验证</dt><dd>{manifest.audit.snapshot?`待核实（当前版本逐条证据 ${manifest.audit.counts!.implementedVerified} 条）`:manifest.audit.counts?manifest.audit.counts.implementedVerified:'待核实'}</dd></div>
     <div><dt>当前发布整条可用</dt><dd>{publication.ruleAuditVerified?manifest.audit.counts?.implementedVerified:'待核实'}</dd></div>
    </dl>
+   {manifest.audit.snapshot&&<p className="automation-progress-snapshot">取得的本地快照标记整条完成 {manifest.audit.snapshot.localMarkedComplete} 条、无需机制 {manifest.audit.snapshot.noMechanics} 条、已核对但未整条完成 {manifest.audit.snapshot.acceptedIncomplete} 条、待核对 {manifest.audit.snapshot.unreviewed} 条。{manifest.audit.snapshot.partialPayloadRecords} 条未完成记录含部分本地载荷；{manifest.audit.snapshot.historicalEvidenceRecords} 条关联历史本地测试。这些均不提升为当前版本整条已验证或线上可用。</p>}
    <p>“已核对”不等于已实现，“单元验证”不等于当前发布验证。{manifest.audit.scope==='local-snapshot'?'条目数字仅覆盖取得的本地快照，不能解释成全站完成率。':'机制项数不能当作规则条目完成率。'}{manifest.verification.testedAt&&` 开发验证时间：${new Date(manifest.verification.testedAt).toISOString().slice(0,19).replace('T',' ')} UTC。`}</p>
   </section>
   <section aria-label="来源书与功能筛选">
@@ -51,12 +52,12 @@ export default function AutomationProgress({release,mode}:{release:unknown;mode:
     <label>来源书<select aria-label="自动化来源书" value={source} onChange={e=>setSource(e.target.value)}><option value="all">全部来源书</option>{books.map(s=><option key={s.id} value={s.id}>{s.name}（{s.id}）</option>)}</select></label>
     <label>功能分类<select aria-label="自动化功能分类" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">全部功能</option>{Object.entries(PROGRESS_CATEGORIES).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
    </div>
-   {source!=='all'&&<p role="status">{selectedBook?.name}：{ruleCounts?`取得 ${ruleCounts.total} 条状态，已核对 ${ruleCounts.reviewed} 条，整条实现并验证 ${ruleCounts.implementedVerified} 条。`:'书目已识别；本书逐条核对、整条自动化和发布可用数量均待核实。所选分类未取得证据时也不按 0 条计算。'}</p>}
-   <p className="automation-progress-results" role="status">显示 {rows.length} 项机制说明{origin==='third-party'?'；第三方逐书证据待核实。':'。'}</p>
+   {source!=='all'&&<p role="status">{selectedBook?.name}：{ruleCounts?`取得 ${ruleCounts.total} 条状态，已核对 ${ruleCounts.reviewed} 条，${manifest.audit.snapshot?`整条实现并验证待核实（当前版本逐条证据 ${ruleCounts.implementedVerified} 条）`:`整条实现并验证 ${ruleCounts.implementedVerified} 条`}。`:'书目已识别；本书逐条核对、整条自动化和发布可用数量均待核实。所选分类未取得证据时也不按 0 条计算。'}</p>}
+   <p className="automation-progress-results" role="status">显示 {rows.length} 项机制说明{origin==='third-party'?(manifest.audit.snapshot?'；第三方本地逐条状态已接入，当前发布可用待核实。':'；第三方逐书证据待核实。'):'。'}</p>
   </section>
   {Object.entries(PROGRESS_CATEGORIES).map(([id,label])=>{const group=rows.filter(c=>c.category===id);return group.length?<section className="automation-progress-category" key={id}><h3>{label}</h3>{group.map(card)}</section>:null;})}
   {!rows.length&&<p className="automation-progress-warning">所选来源 / 分类没有已证实的机制记录。缺少证据不表示覆盖率为 0，也不会启用或补齐任何能力。</p>}
-  <details className="automation-progress-evidence"><summary>证据范围与待补资料</summary><p>{manifest.verification.scope}</p><p>以下证据未取得；不沿用未推送快照中的数字：</p><ul>{manifest.missingEvidence.map(path=><li key={path}>{path}</li>)}</ul></details>
+  <details className="automation-progress-evidence"><summary>证据范围与待补资料</summary><p>{manifest.verification.scope}</p>{manifest.audit.snapshot&&<p>逐条状态权威来源：{manifest.audit.snapshot.repository}，导出版本 <code>{manifest.audit.snapshot.exportRevision.slice(0,12)}</code>；原始规则版本 <code>{manifest.audit.snapshot.sourceRevision.slice(0,12)}</code>。本页只载入来源与分类汇总，逐条身份、部分支持边界和历史验证关联保留在版本锁定的精简产物中。</p>}<p>以下证据未取得，相关状态保持待核实：</p><ul>{manifest.missingEvidence.map(path=><li key={path}>{path}</li>)}</ul></details>
   <section className="automation-progress-changes"><h3>简短更新记录</h3><ul>{manifest.changes.map(change=><li key={`${change.date}:${change.summary}`}><time>{change.date}</time> · {change.summary}</li>)}</ul></section>
  </div>;
 }

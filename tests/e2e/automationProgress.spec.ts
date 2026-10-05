@@ -30,13 +30,22 @@ test('progress tabs, filtering, caching and character preservation',async({page}
  await tab(page).click();await expect(panel(page).getByText('现在自动到哪一步？',{exact:true})).toBeVisible();
  await expect(panel(page)).toContainText('当前发布可用仍待核实');await expect(panel(page).locator('.automation-progress-item')).toHaveCount(11);
  await expect(panel(page).locator('[data-current-available="true"]')).toHaveCount(0);
- await expect(panel(page)).not.toContainText('18789');await expect(panel(page)).not.toContainText('24.3%');
+ await expect(panel(page).locator('.automation-progress-totals')).toContainText(`${manifest.audit.counts!.reviewed} / ${manifest.audit.counts!.total}`);
+ await expect(panel(page).locator('.automation-progress-snapshot')).toContainText(`本地快照标记整条完成 ${manifest.audit.snapshot!.localMarkedComplete} 条`);
+ await expect(panel(page).locator('.automation-progress-totals')).toContainText('整条已实现并验证待核实（当前版本逐条证据 0 条）');
  await expect(panel(page).locator('[data-capability="rest"]')).toContainText('入口未开放');
  await expect(panel(page).locator('[data-capability="rest"] button,[data-capability="rest"] a,[data-capability="combat"] button,[data-capability="combat"] a')).toHaveCount(0);
  await panel(page).getByRole('combobox',{name:'自动化功能分类'}).selectOption('equipment');await expect(panel(page).locator('.automation-progress-item')).toHaveCount(3);
  await panel(page).locator('.automation-progress-item').first().scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('progress-equipment-desktop.png')});
- await panel(page).getByRole('combobox',{name:'自动化来源书'}).selectOption('COS');await expect(panel(page).locator('.automation-progress-item')).toHaveCount(0);await expect(panel(page)).toContainText('本书逐条核对');
- await panel(page).getByRole('combobox',{name:'自动化资料类型'}).selectOption('third-party');await expect(panel(page)).toContainText('第三方逐书证据待核实');
+ await panel(page).getByRole('combobox',{name:'自动化来源书'}).selectOption('COS');await expect(panel(page).locator('.automation-progress-item')).toHaveCount(0);
+ const cosEquipment=manifest.sources.find(s=>s.id==='COS')!.counts!.equipment!;
+ await expect(panel(page)).toContainText(`取得 ${cosEquipment.total} 条状态，已核对 ${cosEquipment.reviewed} 条`);
+ await panel(page).getByRole('combobox',{name:'自动化功能分类'}).selectOption('spells');await expect(panel(page)).toContainText('所选分类未取得证据时也不按 0 条计算');
+ await panel(page).getByRole('combobox',{name:'自动化功能分类'}).selectOption('equipment');
+ const unknownBook=manifest.sources.find(s=>!s.counts&&!manifest.capabilities.some(c=>c.sampleSources.includes(s.id)))!;
+ await panel(page).getByRole('combobox',{name:'自动化来源书'}).selectOption(unknownBook.id);await expect(panel(page)).toContainText('本书逐条核对');
+ await panel(page).getByRole('combobox',{name:'自动化资料类型'}).selectOption('third-party');await expect(panel(page)).toContainText('第三方本地逐条状态已接入');
+ await panel(page).getByRole('combobox',{name:'自动化来源书'}).selectOption('CROOKEDMOON24');await expect(panel(page)).toContainText('整条实现并验证待核实（当前版本逐条证据 0 条）');await expect(panel(page).locator('[data-current-available="true"]')).toHaveCount(0);
  await panel(page).getByRole('combobox',{name:'自动化资料类型'}).selectOption('all');await panel(page).getByRole('combobox',{name:'自动化功能分类'}).selectOption('all');
  await page.locator('.announcement-body').evaluate(node=>{node.scrollTop=0;});await page.screenshot({path:test.info().outputPath('progress-desktop.png')});
  await page.getByRole('tab',{name:'公告内容',exact:true}).click();await expect(panel(page)).toBeHidden();await expect(page.locator('.announcement-faq')).toBeVisible();await tab(page).click();
@@ -45,6 +54,7 @@ test('progress tabs, filtering, caching and character preservation',async({page}
  expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(1);
  // The completed baseline queue must stay idle throughout tab switching and reopening.
  expect(requests.filter(u=>/5e\.kiwee|homebrew\.kiwee|cardRuntime|sourceSpells|catalog|libraryData/i.test(u))).toEqual([]);
+ expect(requests.filter(u=>/automation-rule-status|automation-4561/i.test(u))).toEqual([]);
  expect(await readWorkspace(page)).toBe(before);expect(errors).toEqual([]);
 });
 

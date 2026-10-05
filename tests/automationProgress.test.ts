@@ -18,8 +18,9 @@ function proof(m=verified()){
 }
 describe('automation progress evidence boundary',()=>{
  it('generates allowlisted compact data with unknown counts when actual rule evidence is missing',()=>{
-  const m=manifest();expect(validProgress(m)).toBe(true);expect(m.audit.counts).toBeNull();expect(m.missingEvidence).toContain('docs/AUTOMATION-IR-WRAPUP-4561-20261005.md');expect(m.missingEvidence).toContain('docs/data/automation-rule-status.json');expect(Buffer.byteLength(JSON.stringify(m))).toBeLessThan(PROGRESS_LIMIT);
+  const path=fixture();try{rmSync(join(path,'docs/data/automation-rule-status.json'));const m=generateProgress(path,'standalone');expect(validProgress(m)).toBe(true);expect(m.audit.counts).toBeNull();expect(m.missingEvidence).toContain('docs/data/automation-rule-status.json');expect(Buffer.byteLength(JSON.stringify(m))).toBeLessThan(PROGRESS_LIMIT);
   expect(JSON.stringify(m)).not.toMatch(/18789|4561[^-]|24\.3%|0\.86%|"entries"|"raw"|"characters"|"modules"|"tests"/);
+  }finally{rmSync(path,{recursive:true,force:true});}
  });
  it('unverified or stale receipts cannot mark implemented mechanics as verified',()=>{
   const path=fixture();try{receipt(path);const value=JSON.parse(readFileSync(join(path,VERIFICATION_PATH),'utf8'));writeFileSync(join(path,VERIFICATION_PATH),JSON.stringify({...value,fingerprint:'stale'}));expect(generateProgress(path,'standalone').capabilities.every(c=>!c.verified)).toBe(true);

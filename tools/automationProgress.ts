@@ -3,6 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {existsSync,readFileSync,readdirSync} from 'node:fs';
 import {join,resolve,relative} from 'node:path';
 import type {ProgressManifest,ProgressCategory,ProgressCounts,ProgressCapability} from '../src/platform/automationProgress.ts';
+import {RULE_STATUS_LOCK,validateRuleSnapshot,validateSnapshotLock} from './automationRuleSnapshot.ts';
 export const PROGRESS_SOURCE='docs/data/automation-progress.json';
 export const VERIFICATION_PATH='.local-evidence/automation-progress/verification.json';
 export const VERIFICATION_SCHEMA=2;
@@ -20,6 +21,7 @@ export function progressInputs(root:string){
  for(const tree of ['src','tests','tools','prototype','.github/workflows'])visit(tree);
  for(const entry of readdirSync(root,{withFileTypes:true}))if(entry.isFile()&&(/\.config\.[cm]?[jt]s$/.test(entry.name)||/^tsconfig.*\.json$/.test(entry.name)||['.npmrc','.nvmrc','.node-version'].includes(entry.name)))files.push(entry.name);
  if(existsSync(safePath(root,input.auditPath)))files.push(input.auditPath);
+ if(existsSync(safePath(root,RULE_STATUS_LOCK)))files.push(RULE_STATUS_LOCK);
  const hash=createHash('sha256');for(const path of [...new Set(files)].sort())hash.update(path+'\0').update(readFileSync(safePath(root,path))).update('\0');
  return {input,tests,fingerprint:hash.digest('hex')};
 }
@@ -56,6 +58,26 @@ export function generateProgress(root:string,mode:string):ProgressManifest {
  if(!existsSync(safePath(root,input.auditPath)))missingEvidence.push(input.auditPath);
  else{
   const value=read(root,input.auditPath);
+  if(value.schemaVersion===2){
+   const snapshot=validateRuleSnapshot(value),bytes=readFileSync(safePath(root,input.auditPath));
+   const lock=validateSnapshotLock(read(root,RULE_STATUS_LOCK),bytes,snapshot);
+   for(const meta of snapshot.sources){const registered=sources.find(s=>s.id===meta.id);if(registered){if(registered.origin!==meta.origin)throw Error('Snapshot source origin conflicts with registered public metadata');}else sources.push({...meta,counts:null});}
+   sources.sort((a,b)=>a.id.localeCompare(b.id));
+   const total:ProgressCounts={total:0,reviewed:0,implementedVerified:0};
+   const byOrigin:Record<string,{total:number;reviewed:number;localMarkedComplete:number}>={};
+   for(const row of snapshot.records){
+    const source=sources.find(s=>s.id===row.source)!;source.counts??={};
+    const counts=source.counts[row.category]??={total:0,reviewed:0,implementedVerified:0};
+    for(const n of [total,counts]){n.total++;if(row.reviewed)n.reviewed++;}
+    const origin=byOrigin[source.origin]??={total:0,reviewed:0,localMarkedComplete:0};origin.total++;if(row.reviewed)origin.reviewed++;if(row.complete)origin.localMarkedComplete++;
+   }
+   // Historical source flags/receipts are preserved, but deliberately do not
+   // satisfy this consumer's authored-unit or production publication contract.
+   audit={scope:snapshot.scope,updatedAt:snapshot.updatedAt,counts:total,snapshot:{repository:lock.repository,exportRevision:lock.revision,sourceRevision:lock.sourceRevision,artifactSha256:lock.sha256,irSha256:lock.irSha256,
+    localMarkedComplete:snapshot.records.filter(r=>r.complete).length,noMechanics:snapshot.records.filter(r=>r.verdict==='noMechanics').length,acceptedIncomplete:snapshot.records.filter(r=>r.verdict==='unsupported').length,unreviewed:snapshot.records.filter(r=>!r.reviewed).length,
+    partialPayloadRecords:snapshot.records.filter(r=>r.boundary==='partial-payload').length,historicalEvidenceRecords:snapshot.records.filter(r=>r.validationRefs.length>0).length,sourceCount:snapshot.sources.length,reviewBatchCount:Object.keys(snapshot.reviews).length,byOrigin}};
+   missingEvidence.push('与当前角色卡提交绑定的逐条整条验证','逐条规则的当前发布加载及验证证明');
+  }else{
   const keys=(v:object,allowed:string[])=>{if(Object.keys(v).some(k=>!allowed.includes(k)))throw Error('Rule status contains non-public fields');};
   keys(value,['schemaVersion','scope','updatedAt','records']);if(value.schemaVersion!==1||!['local-snapshot','catalog'].includes(value.scope)||!Array.isArray(value.records)||!Number.isFinite(Date.parse(value.updatedAt)))throw Error('Invalid rule status');
   const seen=new Set(),total:ProgressCounts={total:0,reviewed:0,implementedVerified:0};
@@ -68,6 +90,7 @@ export function generateProgress(root:string,mode:string):ProgressManifest {
    for(const n of [total,counts]){n.total++;if(r.reviewed)n.reviewed++;if(verified)n.implementedVerified++;}
   }
   audit={scope:value.scope,updatedAt:value.updatedAt,counts:total};
+  }
  }
  const updatedAt=[...input.changes.map((c:any)=>c.date),...input.capabilities.map((c:any)=>c.reviewedAt).filter(Boolean),...(validReceipt?[receipt.testedAt]:[]),...(audit.updatedAt?[audit.updatedAt]:[])].sort().at(-1);
  const manifest:ProgressManifest={schemaVersion:1,updatedAt,build:{sourceCommit,fingerprint,packageVersion,mode,rulesVersion,protocol},notice:input.notice,sourcesNotice:input.sourcesNotice,changes:input.changes.slice(0,8).map((c:any)=>({date:c.date,summary:c.summary})),capabilities,verification:{testedAt:validReceipt?receipt.testedAt:null,scope:'原创单元夹具；不代表全库语义或真实玩家房间验收'},audit,missingEvidence,sources};
