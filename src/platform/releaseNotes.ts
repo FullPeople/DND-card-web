@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-04';
+export const RELEASE_DATE='2026-10-05';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -268,13 +268,21 @@ const SUITE_RELEASE_244_SECTIONS:ReleaseSection[]=[
  {title:'权限说明与三龙牌',items:['权限说明在当前工作台窗口内打开，读到底并明确确认后才记为已读。','三龙牌入口在新窗口打开已发布的线上网站，关闭牌桌后可继续使用工作台。']},
  {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。已有角色、资源余额和启动优化保留；真实房间和实体手机仍待现场复验。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_245_SECTIONS:ReleaseSection[]=[
  {title:'角色卡',items:['编辑模式下，六项豁免可以分别填写额外调整值，保存和导出保留最终结果。','2024 人类的多才多艺可以选择起源专长，已保存的选择与条目身份保留。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
- ...RELEASE_SECTIONS,
+const SUITE_RELEASE_245_SECTIONS:ReleaseSection[]=[
+ ...RELEASE_245_SECTIONS,
  {title:'转场与权限说明',items:['转场面板恢复短休、长休选项，仅播放转场，不恢复角色资源。','主持人尚未确认权限说明时，按钮持续柔和提醒；读到底并明确确认后停止。']},
  {title:'骰子',items:['改进投骰消息时钟、轨迹派发与渲染，保留骰值、物理、画质和权限规则。','大量骰子的卡顿仍待真实设备验证，启动动画后的等待仍在排查。']},
+ {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'配套维护',items:['角色卡网页与新版枭熊角色卡配套更新，已有角色、资源余额和显示偏好保留。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'角色卡权限与内存',items:['失去角色卡读取权限后，释放其完整资料；重新授权时保留版本检查和未确认的编辑草稿。']},
+ {title:'骰子显示与资源',items:['修复小屏幕中骰子提示与结果被裁切的问题。','相同骰面纹理共用资源，减少无用音频预载；暂停、重启和关闭后正确清理资源。','保留现行投骰传输、骰值、物理和权限规则；实际手机与玩家原设备仍待验证。']},
  {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -314,6 +322,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_245_SECTIONS:RELEASE_245_SECTIONS},
  {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_244_SECTIONS:RELEASE_244_SECTIONS},
  {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_243_SECTIONS:RELEASE_243_SECTIONS},
  {title:'2026-10-04',sections:RELEASE_242_SECTIONS},
