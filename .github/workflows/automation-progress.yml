@@ -30,6 +30,19 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Read pinned public Data export revision
+        id: data-export
+        run: node -e 'const fs=require("fs"),l=JSON.parse(fs.readFileSync("docs/data/automation-rule-status.lock.json"));if(!/^[a-f0-9]{40}$/.test(l.revision))throw Error("Invalid Data revision");fs.appendFileSync(process.env.GITHUB_OUTPUT,"revision="+l.revision+"\n")'
+      - uses: actions/checkout@v6
+        with:
+          repository: FullPeople/dnd5e-automation-data
+          ref: ${{ steps.data-export.outputs.revision }}
+          path: .local-evidence/data-authority
+          sparse-checkout: reports/progress/automation-rule-status.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Compare pinned Data commit blob with the Web copy
+        run: npm run verify:automation-source -- --data-repository .local-evidence/data-authority
       - run: npm ci
       - run: npm run verify:automation-progress
       - run: npm run check

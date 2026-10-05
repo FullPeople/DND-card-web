@@ -6,7 +6,7 @@ import {progressInputs,verificationFiles,VERIFICATION_PATH,VERIFICATION_SCHEMA} 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {tests,fingerprint}=progressInputs(root),out=resolve(root,'.local-evidence/automation-progress/unit-report.json');
 mkdirSync(dirname(out),{recursive:true});
-const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...tests,'tests/automationProgress.test.ts','tests/automationRuleSnapshot.test.ts','--reporter=json',`--outputFile=${out}`],{cwd:root,stdio:'inherit'});
+const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...tests,'tests/automationProgress.test.ts','tests/automationRuleSnapshot.test.ts','tests/automationRuleProvenance.test.ts','--reporter=json',`--outputFile=${out}`],{cwd:root,stdio:'inherit'});
 if(result.error)throw result.error;if(result.status!==0)process.exit(result.status??1);
 const report=JSON.parse(readFileSync(out,'utf8'));
 const {passedFiles,completePassedFiles}=verificationFiles(root,report);
