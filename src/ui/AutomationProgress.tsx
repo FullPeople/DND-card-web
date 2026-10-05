@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {identity,manifestUrl} from 'virtual:automation-progress';
-import {filterProgress,loadProgress,publicationFor,PROGRESS_CATEGORIES,type ProgressManifest,type ProgressCapability} from '../platform/automationProgress';
+import {filterProgress,sourceRuleCounts,loadProgress,publicationFor,PROGRESS_CATEGORIES,type ProgressManifest,type ProgressCapability} from '../platform/automationProgress';
 import type {AnnouncementMode} from '../platform/announcement';
 import './automationProgress.css';
 
@@ -19,7 +19,7 @@ export default function AutomationProgress({release,mode}:{release:unknown;mode:
  const books=manifest.sources.filter(s=>origin==='all'||s.origin===origin);
  const rows=filterProgress(manifest,category,source,origin);
  const selectedBook=manifest.sources.find(s=>s.id===source);
- const ruleCounts=selectedBook?(selectedBook.counts?Object.entries(selectedBook.counts).filter(([key])=>category==='all'||key===category).reduce((sum,[,c])=>({total:sum.total+c!.total,reviewed:sum.reviewed+c!.reviewed,implementedVerified:sum.implementedVerified+c!.implementedVerified}),{total:0,reviewed:0,implementedVerified:0}):null):manifest.audit.counts;
+ const ruleCounts=sourceRuleCounts(manifest,source,category);
  const card=(c:ProgressCapability)=><article className="automation-progress-item" key={c.id} data-capability={c.id}>
   <h4>{c.title}<small>{c.state==='partial'?(c.verified?'部分支持':'验证待核实'):c.state==='pending'?'待实现 / 待核实':'入口未开放'}</small></h4>
   <ul className="automation-progress-states" aria-label={`${c.title}证据状态`}>
@@ -51,7 +51,7 @@ export default function AutomationProgress({release,mode}:{release:unknown;mode:
     <label>来源书<select aria-label="自动化来源书" value={source} onChange={e=>setSource(e.target.value)}><option value="all">全部来源书</option>{books.map(s=><option key={s.id} value={s.id}>{s.name}（{s.id}）</option>)}</select></label>
     <label>功能分类<select aria-label="自动化功能分类" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">全部功能</option>{Object.entries(PROGRESS_CATEGORIES).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
    </div>
-   {source!=='all'&&<p role="status">{selectedBook?.name}：{ruleCounts?`取得 ${ruleCounts.total} 条状态，已核对 ${ruleCounts.reviewed} 条，整条实现并验证 ${ruleCounts.implementedVerified} 条。`:'书目已识别；本书逐条核对、整条自动化和发布可用数量均待核实。'}</p>}
+   {source!=='all'&&<p role="status">{selectedBook?.name}：{ruleCounts?`取得 ${ruleCounts.total} 条状态，已核对 ${ruleCounts.reviewed} 条，整条实现并验证 ${ruleCounts.implementedVerified} 条。`:'书目已识别；本书逐条核对、整条自动化和发布可用数量均待核实。所选分类未取得证据时也不按 0 条计算。'}</p>}
    <p className="automation-progress-results" role="status">显示 {rows.length} 项机制说明{origin==='third-party'?'；第三方逐书证据待核实。':'。'}</p>
   </section>
   {Object.entries(PROGRESS_CATEGORIES).map(([id,label])=>{const group=rows.filter(c=>c.category===id);return group.length?<section className="automation-progress-category" key={id}><h3>{label}</h3>{group.map(card)}</section>:null;})}

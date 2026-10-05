@@ -25,6 +25,7 @@ jobs:
       - run: npm ci
       - name: Verify candidate descends from the observed 241 source
         run: git merge-base --is-ancestor 9e8cf1fdafcb29d5573a8467418ea32b9ad41f70 HEAD
+      - run: npm run verify:automation-progress
       - run: npm run build
       - run: npm run build:standalone
       - run: node tools/checkStartupBoundary241.mjs

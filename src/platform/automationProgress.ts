@@ -45,12 +45,21 @@ export function publicationFor(manifest:ProgressManifest,identity:ProgressIdenti
  if(proof.schemaVersion!==1||proof.channel!==channel||source!==identity.sourceCommit||proof.sourceCommit!==source||proof.version!==release.version||proof.manifestSha256!==identity.manifestSha256||proof.fingerprint!==identity.fingerprint||proof.loadedAndVerified!==true||!bounded(proof.verifiedAt,50)||!Number.isFinite(Date.parse(proof.verifiedAt))||!Array.isArray(proof.capabilityIds)||new Set(proof.capabilityIds).size!==proof.capabilityIds.length||proof.capabilityIds.some(id=>typeof id!=='string'||!manifest.capabilities.some(c=>c.id===id&&c.verified&&c.playerAvailable)))return pending('发布证据与运行源码、清单或验证范围不一致；当前可用状态降为待核实。',release.version);
  // automation-standalone is always a development preview, even with a forged standalone receipt.
  if(identity.mode==='automation-standalone'||!/^(standalone-\d+\.\d+\.\d+|\d+\.\d+\.\d+-dev)$/.test(release.version))return pending('开发预览没有当前发布可用资格。',release.version);
- return {matched:true,availableIds:proof.capabilityIds as string[],version:release.version,reason:'运行源码与发布清单一致；只显示该发布证据逐项验证的能力。',ruleAuditVerified:proof.ruleAuditVerified===true&&manifest.audit.counts!==null};
+ // No per-rule publication receipt exists yet. A hand-written boolean cannot
+ // promote authored unit-fixture counts into whole-rule production evidence.
+ return {matched:true,availableIds:proof.capabilityIds as string[],version:release.version,reason:'运行源码与发布清单一致；只显示该发布证据逐项验证的能力。',ruleAuditVerified:false};
 }
 export function filterProgress(manifest:ProgressManifest,category:string,source:string,origin:string){
  const books=manifest.sources.filter(s=>origin==='all'||s.origin===origin);
  const allowed=new Set(books.map(s=>s.id));
  return manifest.capabilities.filter(c=>(category==='all'||c.category===category)&&(source==='all'?origin==='all'||c.sampleSources.some(s=>allowed.has(s)):c.sampleSources.includes(source)&&allowed.has(source)));
+}
+/** An absent category is unknown; only an explicit category count can prove zero. */
+export function sourceRuleCounts(manifest:ProgressManifest,source:string,category:string):ProgressCounts|null{
+ const book=manifest.sources.find(s=>s.id===source);if(!book?.counts)return null;
+ const selected=Object.entries(book.counts).filter(([key,c])=>c&&(category==='all'||key===category));
+ if(!selected.length)return null;
+ return selected.reduce((sum,[,c])=>({total:sum.total+c!.total,reviewed:sum.reviewed+c!.reviewed,implementedVerified:sum.implementedVerified+c!.implementedVerified}),{total:0,reviewed:0,implementedVerified:0});
 }
 // Successful reads are shared across tab switches and repeated dialog openings.
 // Failed reads can be retried by reopening; release identity itself is never cached here.

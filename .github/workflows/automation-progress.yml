@@ -6,14 +6,15 @@ on:
     paths:
       - 'src/**'
       - 'docs/data/automation*'
-      - 'tools/automationProgress*'
-      - 'tools/verifyAutomationProgress.mjs'
-      - 'tools/prepareAutomationRelease.mjs'
-      - 'tests/automationProgress.test.ts'
-      - 'tests/e2e/automationProgress.spec.ts'
-      - 'playwright.automation-progress.config.ts'
-      - 'vite.config.ts'
-      - '.github/workflows/automation-progress.yml'
+      - 'tools/**'
+      - 'tests/**'
+      - 'prototype/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '*.config.*'
+      - 'tsconfig*.json'
+      - 'index.html'
+      - '.github/workflows/**'
   workflow_dispatch:
 permissions:
   contents: read

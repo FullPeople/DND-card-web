@@ -32,15 +32,17 @@
 }
 ```
 
-`scope` 只接受 `local-snapshot` 或 `catalog`，不能由本地快照推断全站。每个来源与 ID 组合必须唯一；来源必须先有公开元数据。分类为 `values/equipment/training/spells/resources`。`reviewed` 是整条语义核对事实；`complete` 加匹配且实际通过的关联测试才计为整条实现并验证；部分机制不计入整条完成。额外字段（如 raw、entries、角色、私审笔记）拒绝构建；逐条 ID 与测试路径不进入浏览器清单，只输出分类和来源汇总。
+`scope` 只接受 `local-snapshot` 或 `catalog`，不能由本地快照推断全站。每个来源与 ID 组合必须唯一；来源必须先有公开元数据。分类为 `values/equipment/training/spells/resources`。`reviewed` 是整条语义核对事实；`complete` 加匹配且全部断言实际通过、没有跳过的关联测试文件才计为整条实现并验证；部分机制不计入整条完成。额外字段（如 raw、entries、角色、私审笔记）拒绝构建；逐条 ID 与测试路径不进入浏览器清单，只输出分类和来源汇总。某书所选分类没有状态证据时保留未知，不把其它分类证据推断成 0 条；只有明确的分类计数可以表示零。
 
 ## 三层证据
 
 - **已核对**：机制说明与存在的源码已人工查看；整条规则核对另由逐条状态计算，不能混用。
-- **已实现并验证**：`npm run verify:automation-progress` 实际运行关联单元测试，输出忽略目录 `.local-evidence/automation-progress/verification.json`。源码、维护数据、相关测试或生成工具改变，指纹失配即撤销该层验证。条件跳过不冒充真实资料语义通过。
+- **已实现并验证**：`npm run verify:automation-progress` 实际运行关联单元测试，输出忽略目录 `.local-evidence/automation-progress/verification.json`（schema 2）。保守哈希整个 `src/tests/tools/prototype` 输入树（包含传递导入、动态读取的原创夹具与辅助文件），以及依赖锁、package脚本、全部根配置、TypeScript配置、入口HTML和CI工作流；源码、维护数据或这些验证输入改变，指纹失配即撤销旧证据。执行前后指纹变化也拒绝签发回执。`passedFiles` 只支撑有边界的原创机制说明；`completePassedFiles` 要求文件所有断言通过、无跳过，只有后者可支撑整条规则计数。条件跳过不冒充真实资料语义通过。
 - **当前发布已加载且验证可用**：必须取得运行旁的 `release.json`，其 `automationProgress` 对象与当前源码 SHA、指纹、模式、版本、清单 SHA256、通过能力 ID 和验证时间全部匹配。不能以公告版本、主机版本、开发分支、旧发布说明或只有单元测试替代。协议不支持、清单损坏、网络失败、缺字段、跨频道和旧发布证据都保守降级。内部休息逻辑虽有测试，玩家入口未开放，永远不在可用 ID 中。
 
 清单成功读取按 URL + SHA256 缓存，重复切换和重新打开不重读；发布身份重新打开时用 `no-store` 再读。流式读取限制解压后的实际字节数，并检查 SHA256 / schema。进度组件没有角色对象、edit 回调或持久化 API；失败也保留原卡与公告操作。
+
+本轮没有逐条规则的生产发布QA回执结构，因此“当前发布整条可用”固定待核实，忽略单独手填的 `ruleAuditVerified: true`。精确绑定的机制级发布证明仍按所列能力ID核验。
 
 ## 下次发布的明确证据
 
@@ -80,6 +82,6 @@ node tools/prepareAutomationRelease.mjs \
 
 ## 验证与回滚
 
-具体结果、首次失败与复验见 `AUTOMATION-PROGRESS-20261005.md`。独立分支工作流 `Verify automation progress` 执行单元、类型检查、两种构建、加载边界与公告 / 进度浏览器回归；保存忽略目录内的原创测试、截图和体积证据，不运行部署。
+具体结果、首次失败与复验见 `AUTOMATION-PROGRESS-20261005.md`。既有主线 `Verify web` 自动在正常构建前执行关联验证，重算回执并随双构建上传；现有浏览器矩阵追加自动化进度回归，发布资格不会由CI成功自动填入。候选性能工作流也先重新验证。独立分支工作流 `Verify automation progress` 执行单元、类型检查、两种构建、加载边界与公告 / 进度浏览器回归；PR路径包含测试夹具、依赖锁和配置，保存忽略目录内的原创测试、截图和体积证据，不运行部署。本地仅运行build时仍自动重算清单；没有新回执则保守降级，不要求手改版本或数字。
 
 保留原始主目录，使用隔离工作树；禁止强推、reset 或整包覆盖他人改动。未部署时无需服务器回滚。需要撤销此功能的后续维护者应在最新远端建立新的回滚分支，查明本功能提交并执行 `git revert <功能提交SHA>`；保留撤销记录，不重写历史。精确提交和可复现命令见本轮报告及交付结果。
