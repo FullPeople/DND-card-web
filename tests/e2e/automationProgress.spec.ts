@@ -22,6 +22,10 @@ test('progress tabs, filtering, caching and character preservation',async({page}
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('dnd-card-standalone');r.onsuccess=()=>resolve(r.result);});const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),request=store.get('workspace');request.onsuccess=()=>{const workspace=request.result,c=workspace.characters[0];c.story='原创验收手工记录';c.runtime.resources.manualProbe={name:'原创已消耗资源',max:4,current:1};c.automation={protocol:2,rulesVersion:'equipment.1',defaultsVersion:1,enabled:false};store.put(workspace,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();});
  await page.reload();await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ // Measure after the existing Wiki queue has completed its warm-cache load.
+ // A visible card / announcement can precede background catalog readiness.
+ await expect(page.locator('.catalog-status > span').first()).toHaveText(/[\d,]+ 条资料 · \d+ 份缓存/);
+ await expect(page.locator('.wiki-header button')).toBeEnabled();
  const before=await readWorkspace(page);requests.length=0;
  await tab(page).click();await expect(panel(page).getByText('现在自动到哪一步？',{exact:true})).toBeVisible();
  await expect(panel(page)).toContainText('当前发布可用仍待核实');await expect(panel(page).locator('.automation-progress-item')).toHaveCount(11);
@@ -39,7 +43,7 @@ test('progress tabs, filtering, caching and character preservation',async({page}
  await tab(page).focus();await page.keyboard.press('ArrowLeft');await expect(page.getByRole('tab',{name:'公告内容',exact:true})).toBeFocused();await page.keyboard.press('End');await expect(tab(page)).toBeFocused();
  await page.getByRole('button',{name:'我知道了',exact:true}).click();await page.getByRole('button',{name:'公告',exact:true}).click();await tab(page).click();await expect(panel(page).locator('.automation-progress-item')).toHaveCount(11);
  expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(1);
- // Existing Wiki loading is suspended while proving the progress tab adds no library reads.
+ // The completed baseline queue must stay idle throughout tab switching and reopening.
  expect(requests.filter(u=>/5e\.kiwee|homebrew\.kiwee|cardRuntime|sourceSpells|catalog|libraryData/i.test(u))).toEqual([]);
  expect(await readWorkspace(page)).toBe(before);expect(errors).toEqual([]);
 });

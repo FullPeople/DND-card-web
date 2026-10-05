@@ -39,6 +39,8 @@
 
 最初新增两个证据测试的临时Git目录指向错误，后续复制缺少新配置；修正为真实Git目录和完整必要文件。首次新增依赖门禁把已经加载的公告共享CSS依赖算作新增，细化为扣除首卡与原公告已加载依赖后检查；规则加载限制保留。一次清单损坏用例的页面拦截被现有Service Worker缓存路径绕过（正常清单被返回）；网络故障夹具显式阻止worker后原拒绝断言通过，未修改生产worker或降低断言。
 
+首次远端CI[37315835490](https://github.com/FullPeople/DND-card-web/actions/runs/37315835490)单元/类型/双构建/边界成功，浏览器10通过/1失败：既有Wiki后台队列尚未结束时即开始请求计数，7个旧请求被错计为进度新增。修正测试为等待真实“条资料 / 缓存”完成状态及加载按钮可用后再划定测量起点，仍保留原先“无新增规则/编辑库请求”的空集合断言，不加固定睡眠、不改生产加载器。日志保留在 `remote-ci-first-failure.log`；首轮产物下载的GitHub跳转返回HTTP403，已停止该下载，不尝试绕过；本机报告/截图和授权CI日志完整保留。修正后的精确SHA重新跑本机及远端CI，以最终真实结果为准。
+
 第一次损坏失败的原报告 / 日志保留在 `.local-evidence/automation-progress/browser-first-corruption-failure.{json,log}`，重新执行原用例及完整11项通过。早期新增测试定位和修正记录见同目录 `diagnostics.json`；最终报告、截图、单元JSON、构建输出、加载边界、公开版本只读快照、体积比较与最终提交核验都保留该忽略目录。CI工作流上传这批原创证据保留14天，不上传上游规则或玩家材料。
 
 ## 复现与回滚
@@ -57,14 +59,14 @@ npx playwright test --config playwright.automation-progress.config.ts
 
 系统Chromium可用时指定 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium`。可选生产机制QA与发布证据生成见维护文档；本轮未运行全套未来发布机制QA，不因此标记当前发布可用。
 
-本功能以一个普通提交保存；精确SHA随最终交付结果提供。可在最新远端创建回滚分支，保留并行维护成果：
+本功能提交91b3201之后追加CI测量起点修正，生产实现保持不变；精确最终SHA随交付结果提供。可在最新远端创建回滚分支，保留并行维护成果：
 
 ```sh
 git fetch origin
 git switch -c rollback/automation-progress origin/main
-git log origin/codex/automation-progress-20261005 --format='%H %s' -1
-# 核实输出确为 feat: add evidence-bound automation progress tab
-git revert <上一步的功能提交SHA>
+git log origin/main..origin/codex/automation-progress-20261005 --format='%H %s'
+# 按最新在前的顺序，逐个核实并撤销本批两个提交（测试起点修正、功能实现）
+git revert <最终测试起点修正SHA> 91b32019022b0da2a6f903e4285fcf793d1a83c3
 # 如存在后续同文件修改，逐项解决冲突，然后重跑上述验证；不reset、不强推。
 ```
 
