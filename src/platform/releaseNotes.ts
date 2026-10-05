@@ -278,7 +278,7 @@ const SUITE_RELEASE_245_SECTIONS:ReleaseSection[]=[
  {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}
 ];
 export const RELEASE_SECTIONS:ReleaseSection[]=[
- {title:'配套维护',items:['角色卡网页与新版枭熊角色卡配套更新，已有角色、资源余额和显示偏好保留。']}
+ {title:'维护更新',items:['已有角色、资源余额和显示偏好保留。']}
 ];
 export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'角色卡权限与内存',items:['失去角色卡读取权限后，释放其完整资料；重新授权时保留版本检查和未确认的编辑草稿。']},
