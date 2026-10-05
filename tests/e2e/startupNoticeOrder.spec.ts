@@ -98,6 +98,10 @@ test('reduced motion still ends its shortened fade before opening the modal',asy
 test('failed program shows recovery and keeps notice unread',async({page},info)=>{
  await prepare(page);await page.route('**/assets/*.js',route=>route.abort('failed'));await page.goto(url(info),{waitUntil:'commit'});await phase(page,'failed');
  await expect(page.locator('#startup-help')).toBeVisible();await expect(page.locator('dialog[open]')).toHaveCount(0);expect(await page.evaluate(key=>localStorage.getItem(key),key(info))).toBeNull();
+ // Inline recovery can precede document load and the first compositor frame.
+ // Keep the immediate failure assertions above; capture evidence after paint.
+ await page.waitForLoadState('load');
+ await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
  await page.screenshot({path:info.outputPath('startup-failure-recovery.png')});
 });
 test('interrupted fade and fresh reentry cannot expose or acknowledge the cancelled notice',async({page},info)=>{
