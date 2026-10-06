@@ -1,0 +1,46 @@
+name: Verify directed equipment AC
+on:
+  push:
+    branches: ['codex/equipment-ac-directed-*']
+  pull_request:
+    paths: ['tests/equipment-ac-*.test.ts','tests/helpers/equipmentAc*.ts','tests/fixtures/equipment-ac-source.lock.json','tests/e2e/equipmentAcDirected.spec.ts','tools/fetchEquipmentAcSource.mjs','playwright.equipment-ac.config.ts','.github/workflows/equipment-ac.yml','src/core/automation/equipment.ts','src/core/engine.ts','src/data/catalog.ts']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: equipment-ac-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DND_EQUIPMENT_AC_SOURCE: .local-evidence/equipment-ac/upstream/items-base.json
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Fetch exactly one byte-locked source for six identities
+        run: node tools/fetchEquipmentAcSource.mjs --output "$DND_EQUIPMENT_AC_SOURCE"
+      - name: Directed policy, source-integrity and real structured-item tests
+        run: npx vitest run tests/equipment-ac-directed.test.ts tests/equipment-ac-corpus.test.ts
+      - run: npm run build
+      - run: npm run build:standalone
+      - run: node tools/checkStartupBoundary241.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.equipment-ac.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: directed-equipment-ac-evidence
+          include-hidden-files: true
+          path: |
+            .local-evidence/equipment-ac/browser/
+            .local-evidence/startup-tail241/boundaries.json
+          if-no-files-found: warn
+          retention-days: 7

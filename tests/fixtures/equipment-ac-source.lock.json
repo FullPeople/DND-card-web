@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "dataRepository": "FullPeople/dnd5e-automation-data",
+  "dataRevision": "9acd4d5e7c5bed9cf34150db4319a7aeec6751e8",
+  "manifestPath": "reports/g1/inputs-sha256.json",
+  "manifestBlob": "a074bc740ac5fd2641d000b7d40826e20c553cba",
+  "url": "https://5e.kiwee.top/data/items-base.json",
+  "bytes": 197272,
+  "sha256": "9f1346c69344d66088dbdb1c26ea5872102d318ac148805a8ae9b5fedc5fc94f",
+  "verifiedScope": ["stable identity", "edition", "structured type", "structured base AC"],
+  "missingRuleClauses": ["medium armor Dexterity limit", "heavy armor Dexterity exclusion", "2014 shield proficiency consequences", "2024 shield training requirement"],
+  "entries": [
+    {"id":"kiwee:item:phb:chain%20mail::::::","english":"Chain Mail","source":"PHB","edition":"2014","type":"HA","ac":16,"page":145},
+    {"id":"kiwee:item:phb:scale%20mail::::::","english":"Scale Mail","source":"PHB","edition":"2014","type":"MA","ac":14,"page":144},
+    {"id":"kiwee:item:phb:shield::::::","english":"Shield","source":"PHB","edition":"2014","type":"S","ac":2,"page":144},
+    {"id":"kiwee:item:xphb:chain%20mail::::::","english":"Chain Mail","source":"XPHB","edition":"2024","type":"HA|XPHB","ac":16,"page":219},
+    {"id":"kiwee:item:xphb:scale%20mail::::::","english":"Scale Mail","source":"XPHB","edition":"2024","type":"MA|XPHB","ac":14,"page":219},
+    {"id":"kiwee:item:xphb:shield::::::","english":"Shield","source":"XPHB","edition":"2024","type":"S|XPHB","ac":2,"page":219}
+  ]
+}

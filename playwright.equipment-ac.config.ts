@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:'equipmentAcDirected.spec.ts',workers:1,retries:0,timeout:60000,expect:{timeout:15000},reporter:'list',outputDir:'.local-evidence/equipment-ac/browser',use:{baseURL:'http://127.0.0.1:5439',viewport:{width:1440,height:1000},trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:'node node_modules/vite/bin/vite.js preview --mode standalone --host 127.0.0.1 --port 5439 --strictPort',url:'http://127.0.0.1:5439',reuseExistingServer:false}});
