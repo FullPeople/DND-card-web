@@ -3,7 +3,7 @@ on:
   push:
     branches: ['codex/equipment-ac-directed-*']
   pull_request:
-    paths: ['tests/equipment-ac-*.test.ts','tests/helpers/equipmentAc*.ts','tests/fixtures/equipment-ac-source.lock.json','tests/e2e/equipmentAcDirected.spec.ts','tools/fetchEquipmentAcSource.mjs','playwright.equipment-ac.config.ts','.github/workflows/equipment-ac.yml','src/core/automation/equipment.ts','src/core/engine.ts','src/data/catalog.ts']
+    paths: ['tests/equipment-ac-*.test.ts','tests/helpers/equipmentAc*.ts','tests/fixtures/equipment-ac-source.lock.json','tests/fixtures/equipment-ac-mechanisms.json','tests/e2e/equipmentAcDirected.spec.ts','tools/fetchEquipmentAcSource.mjs','playwright.equipment-ac.config.ts','.github/workflows/equipment-ac.yml','src/core/automation/equipment.ts','src/core/engine.ts','src/data/catalog.ts']
   workflow_dispatch:
 permissions:
   contents: read

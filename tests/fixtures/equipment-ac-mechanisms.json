@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-06",
+  "scope": "Ordinary Chain Mail, Scale Mail and Shield AC only; matching character/item edition and explicitly recorded training",
+  "identityEvidence": "equipment-ac-source.lock.json",
+  "evidenceBoundary": "Public Basic Rules/SRD support these mechanisms, not the six repository identities or paid PHB text. Links were reviewed; no official byte snapshot or full rule text is stored.",
+  "sources": [
+    {"id":"basic2014-equipment","url":"https://www.dndbeyond.com/sources/dnd/basic-rules-2014/equipment","locator":"Armor and Shields; Medium Armor; Heavy Armor; Shield","summary":"链甲固定16；鳞甲14加敏捷调整、上限+2，负值保留；盾牌+2不以熟练为AC门槛，仅一面生效。其他未熟练后果不属本批。"},
+    {"id":"basic2014-character","url":"https://www.dndbeyond.com/sources/dnd/basic-rules-2014/step-by-step-characters","locator":"5. Choose Equipment / Armor Class","summary":"角色创建示例的链甲与盾牌合计18；未熟练存在其他后果，不将其猜作AC门槛。"},
+    {"id":"srd51-equipment","url":"https://media.dndbeyond.com/compendium-images/srd/5.1/SRD_CC_v5.1.pdf#page=62","locator":"Printed pages 62–64, Armor and Shields / Armor table","summary":"公开2014机制交叉依据；重甲忽略正负敏捷，中甲只限制正敏捷上限，盾牌不叠加。"},
+    {"id":"basic2024-equipment","url":"https://www.dndbeyond.com/sources/dnd/br-2024/equipment","locator":"Armor / Armor Training / One at a Time","summary":"链甲16；鳞甲14加敏捷、上限+2；盾牌仅有训练才+2；一时只持一盾。"},
+    {"id":"basic2024-glossary","url":"https://www.dndbeyond.com/sources/dnd/br-2024/rules-glossary","locator":"Armor Training","summary":"未训练盾不获AC加值；身甲未训练的劣势与禁施法不自动套到盾牌。"},
+    {"id":"srd521-equipment","url":"https://media.dndbeyond.com/compendium-images/srd/5.2/SRD_CC_v5.2.1.pdf#page=92","locator":"Printed page 92, Armor / Armor Training / One at a Time","summary":"公开2024机制交叉依据；同页列明三项AC、盾训练要求与单盾限制。"},
+    {"id":"phb2024-errata","url":"https://media.dndbeyond.com/compendium-images/errata/PHB-24/PHB-2024_v1.pdf#page=1","locator":"Page 1, Chapter 6, Armor Table (p.219), version 1.0","summary":"盾牌穿卸为Utilize动作；此处只记录勘误边界，不自动执行动作或计时。"}
+  ],
+  "armorCases": [
+    {"id":"dex-minus-one","dexScore":8,"dexModifier":-1,"unarmored":9,"chain":16,"scale":13,"chainWithTrainedShield":18,"scaleWithTrainedShield":15},
+    {"id":"dex-zero","dexScore":10,"dexModifier":0,"unarmored":10,"chain":16,"scale":14,"chainWithTrainedShield":18,"scaleWithTrainedShield":16},
+    {"id":"dex-two","dexScore":14,"dexModifier":2,"unarmored":12,"chain":16,"scale":16,"chainWithTrainedShield":18,"scaleWithTrainedShield":18},
+    {"id":"dex-three","dexScore":16,"dexModifier":3,"unarmored":13,"chain":16,"scale":16,"chainWithTrainedShield":18,"scaleWithTrainedShield":18}
+  ],
+  "shieldCases": [
+    {"id":"2014-trained","edition":"2014","shieldTraining":true,"chainWithShield":18},
+    {"id":"2014-explicitly-untrained","edition":"2014","shieldTraining":false,"chainWithShield":18},
+    {"id":"2024-trained","edition":"2024","shieldTraining":true,"chainWithShield":18},
+    {"id":"2024-explicitly-untrained","edition":"2024","shieldTraining":false,"chainWithShield":16}
+  ],
+  "caseMapping": {
+    "armorCases": {"sources":["basic2014-equipment","srd51-equipment","basic2024-equipment","srd521-equipment"],"tests":["equipment-ac-directed.test.ts: hand-computed wear/remove matrix","equipment-ac-corpus.test.ts: official AC matrix on three locked identities per edition"]},
+    "shieldCases": {"sources":["basic2014-equipment","basic2014-character","basic2024-equipment","basic2024-glossary","srd521-equipment"],"tests":["equipment-ac-directed.test.ts: explicit shield training matrix","equipment-ac-corpus.test.ts: official AC matrix on three locked identities per edition"]},
+    "singleShield": {"sources":["basic2014-equipment","basic2024-equipment","srd521-equipment"],"tests":["equipment-ac-directed.test.ts: shield quantity/conflict","equipment-ac-corpus.test.ts: quantity/conflict and backup preservation"],"boundary":"Duplicate equipped rows remain an invalid product state: conservative exclusion plus a visible conflict is product policy, not a rules-mandated AC total."}
+  },
+  "remainingBoundaries": ["Cross-edition equipment policy and unknown training remain product decisions", "No complete paid PHB text or whole-entry automation proof", "No production release or availability proof", "No action timing, Strength/speed, Stealth, casting, hands, magic or attunement automation in this batch"]
+}

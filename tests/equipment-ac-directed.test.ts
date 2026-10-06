@@ -5,19 +5,24 @@ import {setAutomationEnabled} from '../src/core/automation/state';
 import {exportCharacter} from '../src/core/export';
 import {readCharacter} from '../src/core/validation';
 import {equipmentAcCard} from './helpers/equipmentAcFixture';
+import mechanisms from './fixtures/equipment-ac-mechanisms.json' with {type:'json'};
 
-for(const edition of ['2014','2024'] as const)describe(`${edition} authored AC product-policy transitions (not rule-clause evidence)`,()=>{
- it.each([[6,8,12,14],[10,10,14,16],[16,13,16,18],[30,20,16,18]])('hand-computed wear/remove results at Dexterity %i',(dex,naked,medium,mediumShield)=>{
-  const c=equipmentAcCard(edition);c.abilities.dex=dex;
-  expect(evaluate(c).ac).toBe(naked);equipSelection(c,'medium',true);expect(evaluate(c).ac).toBe(medium);
-  equipSelection(c,'shield',true);expect(evaluate(c).ac).toBe(mediumShield);
-  equipSelection(c,'heavy',true);expect(evaluate(c).ac).toBe(18);expect(c.selections.find(s=>s.id==='medium')!.equipped).toBe(false);
-  equipSelection(c,'shield',false);expect(evaluate(c).ac).toBe(16);equipSelection(c,'heavy',false);expect(evaluate(c).ac).toBe(naked);
+for(const edition of ['2014','2024'] as const)describe(`${edition} authored AC transitions with independently reviewed mechanism expectations`,()=>{
+ it.each(mechanisms.armorCases)('hand-computed wear/remove matrix: $id',row=>{
+  const c=equipmentAcCard(edition);c.abilities.dex=row.dexScore;
+  expect(evaluate(c).ac).toBe(row.unarmored);equipSelection(c,'medium',true);expect(evaluate(c).ac).toBe(row.scale);
+  equipSelection(c,'shield',true);expect(evaluate(c).ac).toBe(row.scaleWithTrainedShield);
+  equipSelection(c,'heavy',true);expect(evaluate(c).ac).toBe(row.chainWithTrainedShield);expect(c.selections.find(s=>s.id==='medium')!.equipped).toBe(false);
+  equipSelection(c,'shield',false);expect(evaluate(c).ac).toBe(row.chain);equipSelection(c,'heavy',false);expect(evaluate(c).ac).toBe(row.unarmored);
  });
- it('keeps the current edition-specific untrained shield policy explicit',()=>{
-  const c=equipmentAcCard(edition);c.training!.armor='';equipSelection(c,'shield',true);
-  expect(evaluate(c).ac).toBe(edition==='2014'?15:13);expect(evaluate(c).issues.some(i=>i.id==='armor-training:shield')).toBe(true);
-  c.training!.armor='盾牌';expect(evaluate(c).ac).toBe(15);expect(c.runtime.resources.manual.current).toBe(1);
+ it('matches the explicit shield training matrix without imposing body-armor restrictions on a 2024 shield',()=>{
+  for(const row of mechanisms.shieldCases.filter(row=>row.edition===edition)){
+   const c=equipmentAcCard(edition);c.training!.armor=row.shieldTraining?'中甲、重甲、盾牌':'中甲、重甲';equipSelection(c,'heavy',true);equipSelection(c,'shield',true);
+   const before=JSON.stringify(c),result=evaluate(c);expect(result.ac,row.id).toBe(row.chainWithShield);expect(JSON.stringify(c)).toBe(before);
+   const warning=result.issues.find(i=>i.id==='armor-training:shield');expect(!!warning).toBe(!row.shieldTraining);
+   if(edition==='2024'&&!row.shieldTraining)expect(warning!.message).not.toMatch(/劣势|施法/);
+   expect(c.runtime.resources.manual.current).toBe(1);
+  }
  });
  it('does not multiply a shield by quantity and refuses two equipped shield rows without mutating them',()=>{
   const c=equipmentAcCard(edition);equipSelection(c,'heavy',true);equipSelection(c,'shield',true);expect(evaluate(c).ac).toBe(18);
