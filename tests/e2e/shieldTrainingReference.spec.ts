@@ -64,3 +64,12 @@ test('mobile manual shield alias binds without mutating the saved record',async(
  await page.setViewportSize({width:390,height:844});await ready(page,'2024','SHIELD',true);await expect(page.locator('.armor-cell [data-stat="ac"]')).toHaveText('12');
  const shield=armor(page).getByRole('button',{name:'盾牌',exact:true});await shield.scrollIntoViewIfNeeded();await expect(shield).toBeVisible();await expect(shield).toHaveAttribute('data-reference','itemProperty:entry:dnd-card.weapon-training:2024:shield');expect((await savedCard(page)).training!.armor).toBe('SHIELD');await page.screenshot({path:test.info().outputPath('mobile-shield-training.png')});
 });
+test('the new supporter alias/50 record loads in the announcement without duplicate requests',async({page})=>{
+ await mockSource(page);await suppressAnnouncement(page);let requests=0;
+ // Select the real public record from the built response so random marquee
+ // order does not turn a data update check into a long probabilistic wait.
+ await page.route('**/support/supporters.json',async route=>{
+  requests++;const response=await route.fetch(),rows=await response.json();const added=rows.filter((row:{name:string})=>row.name==='别名');expect(added).toEqual([{name:'别名',amount:50}]);await route.fulfill({response,json:added});
+ });
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'公告',exact:true}).click();await expect(page.locator('.supporter-flight').filter({hasText:'别名'}).first()).toBeVisible();expect(requests).toBe(1);await page.screenshot({path:test.info().outputPath('supporter-alias-50.png')});
+});

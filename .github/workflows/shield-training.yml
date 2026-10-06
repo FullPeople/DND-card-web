@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'src/**'
+      - 'public/support/supporters.json'
       - 'tests/shield-training-reference.test.ts'
       - 'tests/fixtures/shield-training-sources.json'
       - 'tests/helpers/shieldTrainingFixture.ts'
