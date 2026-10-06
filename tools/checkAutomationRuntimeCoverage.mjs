@@ -1,0 +1,11 @@
+import {readFileSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {parseArgs} from 'node:util';
+import {runtimeCoverage} from './automationRuntimeCoverage.ts';
+import {verifyCommittedRuntimeCoverage,verifyRemoteRuntimeCoverage} from './automationRuntimeProvenance.ts';
+const {values}=parseArgs({options:{'data-repository':{type:'string'}}});
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),out=resolve(root,'.local-evidence/automation-progress/runtime-provenance.json');rmSync(out,{force:true});
+const r=runtimeCoverage(root,readFileSync(resolve(root,'docs/data/automation-rule-status.json')));mkdirSync(dirname(out),{recursive:true});
+const proof=values['data-repository']?verifyCommittedRuntimeCoverage(resolve(values['data-repository']),r.lock,r.bytes):verifyRemoteRuntimeCoverage(r.lock,r.bytes);
+writeFileSync(out,JSON.stringify({...proof,consumerRevision:r.summary.consumerRevision,implemented:r.summary.implemented,total:r.summary.total,verifiedAt:new Date().toISOString()},null,2)+'\n');console.log(JSON.stringify(proof));

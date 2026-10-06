@@ -17,7 +17,8 @@ export interface ProgressManifest {
  notice:string;sourcesNotice:string;changes:{date:string;summary:string}[];
  capabilities:ProgressCapability[];verification:{testedAt:string|null;scope:string};
  audit:{scope:string|null;updatedAt:string|null;counts:ProgressCounts|null;snapshot?:ProgressSnapshot};missingEvidence:string[];
- sources:{id:string;name:string;origin:'official'|'third-party'|'project';counts:Partial<Record<ProgressCategory,ProgressCounts>>|null}[];
+ runtimeAudit?:{revision:string;sha256:string;consumerRevision:string;updatedAt:string;total:number;implemented:number};
+ sources:{id:string;name:string;origin:'official'|'third-party'|'project';counts:Partial<Record<ProgressCategory,ProgressCounts>>|null;runtimeImplemented?:number|null}[];
 }
 export interface ProgressIdentity {sourceCommit:string;fingerprint:string;manifestSha256:string;mode:string}
 export interface ProgressPublication {matched:boolean;availableIds:string[];version:string;reason:string;ruleAuditVerified:boolean}
@@ -31,6 +32,7 @@ export function validProgress(v:unknown):v is ProgressManifest {
  if(!bounded(v.notice)||!bounded(v.sourcesNotice)||!Array.isArray(v.changes)||v.changes.length>8||v.changes.some(c=>!object(c)||!bounded(c.date,30)||!bounded(c.summary)))return false;
  if(!object(v.verification)||!bounded(v.verification.scope,120)||v.verification.testedAt!==null&&(!bounded(v.verification.testedAt,50)||!Number.isFinite(Date.parse(v.verification.testedAt))))return false;
  if(!object(v.audit)||v.audit.scope!==null&&!bounded(v.audit.scope,80)||v.audit.updatedAt!==null&&!bounded(v.audit.updatedAt,50)||v.audit.counts!==null&&!counts(v.audit.counts))return false;
+ if(v.runtimeAudit!==undefined){const r=v.runtimeAudit;if(!object(r)||!sha(r.revision)||!sha(r.sha256,64)||!sha(r.consumerRevision)||!bounded(r.updatedAt,50)||!Number.isFinite(Date.parse(r.updatedAt))||!Number.isSafeInteger(r.total)||!Number.isSafeInteger(r.implemented)||Number(r.implemented)<0||Number(r.implemented)>Number(r.total)||!object(v.audit.counts)||r.total!==v.audit.counts.total)return false;}
  if(v.audit.snapshot!==undefined){const s=v.audit.snapshot,c=v.audit.counts;
   if(!object(s)||!object(c)||s.repository!=='FullPeople/dnd5e-automation-data'||!sha(s.exportRevision)||!sha(s.sourceRevision)||!sha(s.artifactSha256,64)||!sha(s.irSha256,64)||!['localMarkedComplete','noMechanics','acceptedIncomplete','unreviewed','partialPayloadRecords','historicalEvidenceRecords','sourceCount','reviewBatchCount'].every(k=>Number.isSafeInteger(s[k])&&Number(s[k])>=0)||Number(s.localMarkedComplete)+Number(s.noMechanics)+Number(s.acceptedIncomplete)!==c.reviewed||Number(s.unreviewed)+Number(c.reviewed)!==c.total||Number(s.partialPayloadRecords)>Number(s.acceptedIncomplete)||Number(s.historicalEvidenceRecords)>Number(c.reviewed)||!object(s.byOrigin))return false;
   const origins=Object.entries(s.byOrigin);if(origins.some(([o,n])=>!['official','third-party','project'].includes(o)||!object(n)||!['total','reviewed','localMarkedComplete'].every(k=>Number.isSafeInteger(n[k])&&Number(n[k])>=0)||Number(n.localMarkedComplete)>Number(n.reviewed)||Number(n.reviewed)>Number(n.total)))return false;
@@ -43,6 +45,7 @@ export function validProgress(v:unknown):v is ProgressManifest {
   ids.add(c.id);if(c.playerAvailable){if(['does','trigger','conditions','boundary'].some(k=>!bounded(c[k])))return false;}else if(!bounded(c.status)||['does','trigger','conditions'].some(k=>c[k]!==undefined))return false;
  }
  const books=new Set();for(const s of v.sources){if(!object(s)||!bounded(s.id,80)||books.has(s.id)||!bounded(s.name,180)||!['official','third-party','project'].includes(String(s.origin))||s.counts!==null&&(!object(s.counts)||Object.entries(s.counts).some(([k,c])=>!Object.hasOwn(PROGRESS_CATEGORIES,k)||!counts(c))))return false;books.add(s.id);}
+ if(v.runtimeAudit!==undefined){let implemented=0,total=0;for(const s of v.sources as ProgressManifest['sources']){const count=s.counts?Object.values(s.counts).reduce((n,c)=>n+(c?.total||0),0):0;if(s.runtimeImplemented!==null&&s.runtimeImplemented!==undefined&&(!Number.isSafeInteger(s.runtimeImplemented)||s.runtimeImplemented<0||s.runtimeImplemented>count))return false;if(count&&s.runtimeImplemented===undefined)return false;total+=count;implemented+=s.runtimeImplemented||0;}if(total!==(v.runtimeAudit as any).total||implemented!==(v.runtimeAudit as any).implemented)return false;}
  return true;
 }
 export function publicationFor(manifest:ProgressManifest,identity:ProgressIdentity,release:unknown):ProgressPublication {

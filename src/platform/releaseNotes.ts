@@ -285,7 +285,7 @@ const SUITE_RELEASE_246_SECTIONS:ReleaseSection[]=[
  {title:'骰子显示与资源',items:['修复小屏幕中骰子提示与结果被裁切的问题。','相同骰面纹理共用资源，减少无用音频预载；暂停、重启和关闭后正确清理资源。','保留现行投骰传输、骰值、物理和权限规则；实际手机与玩家原设备仍待验证。']},
  {title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_248_SECTIONS:ReleaseSection[]=[
  {title:'自动化进度',items:[
   '公告上方增加了“自动化进度”入口，可按资料类型、来源书和功能查看核对状态。',
   '接入了逐条核对资料。162 条仅为原本地完整标记，当前版本整条自动化与线上整条可用仍待核实。',
@@ -293,7 +293,7 @@ export const RELEASE_SECTIONS:ReleaseSection[]=[
  ]},
  {title:'验证范围',items:['实体手机和玩家原设备仍待验证。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+const SUITE_RELEASE_248_SECTIONS:ReleaseSection[]=[
  {title:'自动化进度',items:[
   '角色卡公告上方增加了“自动化进度”入口，可按资料类型、来源书和功能查看核对状态。',
   '接入了逐条核对资料。162 条仅为原本地完整标记，当前版本整条自动化与线上整条可用仍待核实。',
@@ -301,6 +301,10 @@ export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
  ]},
  {title:'更新与验证',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。','实体手机、真实枭熊房间和玩家原设备仍待验证。']}
 ];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'自动化进度',items:['简化了自动化进度说明，直接列出核对数量、已有实际功能的条目数，以及各扩展的进度。','条目只要有实际自动计算或选择功能就计入，其他尚未实现的效果仍需手动处理。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,{title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
@@ -338,6 +342,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_248_SECTIONS:RELEASE_248_SECTIONS},
  {title:'2026-10-05',sections:mode==='suite'?SUITE_RELEASE_246_SECTIONS:RELEASE_246_SECTIONS},
  {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_245_SECTIONS:RELEASE_245_SECTIONS},
  {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_244_SECTIONS:RELEASE_244_SECTIONS},

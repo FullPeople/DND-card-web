@@ -4,6 +4,7 @@ import {existsSync,readFileSync,readdirSync} from 'node:fs';
 import {join,resolve,relative} from 'node:path';
 import type {ProgressManifest,ProgressCategory,ProgressCounts,ProgressCapability} from '../src/platform/automationProgress.ts';
 import {RULE_STATUS_LOCK,validateRuleSnapshot,validateSnapshotLock} from './automationRuleSnapshot.ts';
+import {RUNTIME_COVERAGE,RUNTIME_LOCK,runtimeCoverage} from './automationRuntimeCoverage.ts';
 export const PROGRESS_SOURCE='docs/data/automation-progress.json';
 export const VERIFICATION_PATH='.local-evidence/automation-progress/verification.json';
 export const VERIFICATION_SCHEMA=2;
@@ -22,6 +23,7 @@ export function progressInputs(root:string){
  for(const entry of readdirSync(root,{withFileTypes:true}))if(entry.isFile()&&(/\.config\.[cm]?[jt]s$/.test(entry.name)||/^tsconfig.*\.json$/.test(entry.name)||['.npmrc','.nvmrc','.node-version'].includes(entry.name)))files.push(entry.name);
  if(existsSync(safePath(root,input.auditPath)))files.push(input.auditPath);
  if(existsSync(safePath(root,RULE_STATUS_LOCK)))files.push(RULE_STATUS_LOCK);
+ for(const path of [RUNTIME_COVERAGE,RUNTIME_LOCK])if(existsSync(safePath(root,path)))files.push(path);
  const hash=createHash('sha256');for(const path of [...new Set(files)].sort())hash.update(path+'\0').update(readFileSync(safePath(root,path))).update('\0');
  return {input,tests,fingerprint:hash.digest('hex')};
 }
@@ -94,6 +96,14 @@ export function generateProgress(root:string,mode:string):ProgressManifest {
  }
  const updatedAt=[...input.changes.map((c:any)=>c.date),...input.capabilities.map((c:any)=>c.reviewedAt).filter(Boolean),...(validReceipt?[receipt.testedAt]:[]),...(audit.updatedAt?[audit.updatedAt]:[])].sort().at(-1);
  const manifest:ProgressManifest={schemaVersion:1,updatedAt,build:{sourceCommit,fingerprint,packageVersion,mode,rulesVersion,protocol},notice:input.notice,sourcesNotice:input.sourcesNotice,changes:input.changes.slice(0,8).map((c:any)=>({date:c.date,summary:c.summary})),capabilities,verification:{testedAt:validReceipt?receipt.testedAt:null,scope:'原创单元夹具；不代表全库语义或真实玩家房间验收'},audit,missingEvidence,sources};
+ if(audit.snapshot&&existsSync(safePath(root,RUNTIME_COVERAGE))){
+  const runtime=runtimeCoverage(root,readFileSync(safePath(root,input.auditPath)));manifest.runtimeAudit=runtime.summary;
+  for(const source of sources)source.runtimeImplemented=runtime.sources.get(source.id)??null;
+  // Mechanism details no longer appear on the player page. Preserve qualification
+  // metadata for receipts while keeping the lazy manifest below the existing limit.
+  for(const c of capabilities){if(c.playerAvailable){c.does='';c.trigger='';c.conditions='';c.boundary='';}else c.status='待核实';}
+  manifest.notice='';manifest.sourcesNotice='';manifest.changes=[];
+ }
  // Validate public output separately from maintained source so extra fields can never leak.
  return manifest;
 }
