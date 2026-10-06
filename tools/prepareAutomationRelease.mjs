@@ -1,0 +1,27 @@
+// Enrich a staged release manifest AFTER browser QA. Never deploys or edits character data.
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {validProgress,PROGRESS_LIMIT} from '../src/platform/automationProgress.ts';
+import {progressInputs} from './automationProgress.ts';
+const args=process.argv.slice(2),get=k=>args[args.indexOf(k)+1];
+if(!['--manifest','--release','--browser-report','--output'].every(k=>args.includes(k)&&get(k)&&!get(k).startsWith('--')))throw Error('Usage: --manifest BUILD/assets/automation-progress-HASH.json --release staged-release.json --browser-report Playwright-report.json --output new-release.json');
+const bytes=readFileSync(get('--manifest')),manifest=JSON.parse(bytes);if(bytes.length>PROGRESS_LIMIT||!validProgress(manifest))throw Error('Invalid public manifest');
+const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+if(manifest.build.sourceCommit!==sha||manifest.build.fingerprint!==progressInputs(process.cwd()).fingerprint||execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim())throw Error('Release must use a clean, exact tested commit and fingerprint');
+const {input}=progressInputs(process.cwd());
+const release=JSON.parse(readFileSync(get('--release'),'utf8')),channel=manifest.build.mode==='standalone'?'standalone':manifest.build.mode==='production'?'suite':undefined;
+if(!channel||release.sourceCommit!==sha||!new RegExp(channel==='standalone'?'^standalone-\\d+\\.\\d+\\.\\d+$':'^\\d+\\.\\d+\\.\\d+-dev$').test(release.version))throw Error('Release version/channel/source does not match this build');
+const report=JSON.parse(readFileSync(get('--browser-report'),'utf8'));
+const artifact=report.config?.metadata?.automationArtifact;
+if(!artifact||artifact.sourceCommit!==sha||artifact.fingerprint!==manifest.build.fingerprint||artifact.mode!==manifest.build.mode||artifact.manifestSha256!==createHash('sha256').update(bytes).digest('hex'))throw Error('Browser report is not bound to this exact production artifact');
+const required=['progress tabs, filtering, caching and character preservation','progress on a narrow touch viewport','publication evidence is exact and fails closed'];
+const passed=[],passedFiles=new Set();const walk=s=>{if(s.file&&s.specs?.length&&s.specs.every(spec=>spec.ok&&spec.tests.every(t=>t.status==='expected'&&t.results.length>0&&t.results.every(r=>r.status==='passed'))))passedFiles.add(s.file.replaceAll('\\','/')); for(const spec of s.specs||[])if(spec.file?.endsWith('automationProgress.spec.ts')&&spec.ok&&spec.tests.every(t=>t.status==='expected'&&t.results.length>0&&t.results.every(r=>r.status==='passed')))passed.push(spec.title);for(const child of s.suites||[])walk(child);};for(const suite of report.suites||[])walk(suite);
+if(report.stats?.unexpected!==0||report.stats?.skipped!==0||required.some(t=>!passed.includes(t)))throw Error('Required production progress browser QA has not all passed');
+if(!manifest.verification.testedAt)throw Error('No matching implementation verification receipt');
+const capabilityIds=manifest.capabilities.filter(c=>c.verified&&c.playerAvailable&&input.capabilities.find(row=>row.id===c.id)?.browserTests?.length&&input.capabilities.find(row=>row.id===c.id).browserTests.every(file=>[...passedFiles].some(p=>p.endsWith(file)))).map(c=>c.id);
+if(!capabilityIds.length)throw Error('Progress UI QA cannot prove player mechanisms usable: matching functional browser reports are required');
+if(existsSync(get('--output')))throw Error('Output already exists; refusing to overwrite staged evidence');
+release.automationProgress={schemaVersion:1,channel,version:release.version,sourceCommit:sha,fingerprint:manifest.build.fingerprint,manifestSha256:createHash('sha256').update(bytes).digest('hex'),loadedAndVerified:true,verifiedAt:new Date().toISOString(),capabilityIds,ruleAuditVerified:false};
+writeFileSync(get('--output'),JSON.stringify(release,null,2)+'\n');
+console.log('Staged release evidence written. Publication/hosting verification remains a separate release step.');

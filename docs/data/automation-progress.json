@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "auditPath": "docs/data/automation-rule-status.json",
+  "references": [
+    "docs/AUTOMATION-REVIEW-SYNC-20261005.md",
+    "docs/STATUS.md",
+    "docs/RULE-COVERAGE.md"
+  ],
+  "notice": "自动化只处理已经适配的结构和明确选择。资料能查阅，不代表整条规则会自动执行；遇到未知条件仍需玩家或 DM 核对。查看此页不会启用功能、补发能力或恢复资源。",
+  "sourcesNotice": "书目来自既有来源登记与版本锁定的本地逐条快照。快照包含主库（含官方与 UA）及第三方；书目、核对和本地载荷均不代表当前发布可用。机制来源标签仍只表示原创软件夹具覆盖的身份。",
+  "changes": [
+    {
+      "date": "2026-10-05",
+      "summary": "接入实际逐条核对快照并按来源／类别重算；保留本地完成标记和部分支持边界，历史测试不升级为当前发布可用。"
+    },
+    {
+      "date": "2026-10-05",
+      "summary": "新增只读进度清单：分别展示核对、实现验证与运行发布验证；缺少逐条证据时保留待核实。"
+    },
+    {
+      "date": "2026-10-04",
+      "summary": "转场短休 / 长休仅播放演出；资源休息执行入口仍未开放。"
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "values",
+      "title": "基础属性与衍生数值",
+      "category": "values",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "PHB",
+        "XPHB"
+      ],
+      "does": "从属性、等级、启用来源和已适配 effects 重算熟练加值、先攻、速度、被动察觉等，并显示数值依据。",
+      "trigger": "编辑属性、等级、已选来源或人工调整后重算。",
+      "conditions": "来源与版本允许，结构字段可解析；计算与资源余额分开。",
+      "boundary": "临时条件、特殊上限和未适配 effects 仍需人工裁定；不自动补齐未知规则，也不改写手工基础值。",
+      "modules": [
+        "src/core/engine.ts"
+      ],
+      "tests": [
+        "tests/core.test.ts",
+        "tests/feedback-stats.test.ts"
+      ],
+      "browserTests": []
+    },
+    {
+      "id": "hp",
+      "title": "生命上限与生命骰",
+      "category": "values",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "does": "按职业生命骰、等级和体质计算默认生命上限，保留人工调整与现有生命骰消耗。",
+      "trigger": "明确修改职业等级、生命取值或上限调整。",
+      "conditions": "职业提供有效生命骰与等级，使用当前卡的规则版本。",
+      "boundary": "不替玩家掷升级生命值；重算、查看或刷新不会治疗角色，也不会执行休息。",
+      "modules": [
+        "src/core/engine.ts",
+        "src/core/resources.ts"
+      ],
+      "tests": [
+        "tests/core.test.ts",
+        "tests/resources.test.ts"
+      ],
+      "browserTests": []
+    },
+    {
+      "id": "armor",
+      "title": "护甲、盾牌与有限护甲特性",
+      "category": "equipment",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "PHB",
+        "XPHB"
+      ],
+      "does": "支持轻 / 中 / 重甲、盾牌、数值加值和同槽换装；识别已适配的着甲 AC 加值，保留卡面修正。",
+      "trigger": "在已有装备中明确穿戴、卸下或选择已适配的护甲特性。",
+      "conditions": "自动计算已开启，来源有效；按结构检查训练、同调和装备冲突。",
+      "boundary": "自然护甲、额外条件与魔法物品其他正文效果未统一适配；未知条件显示提示，手部占用和资格仍需核对。",
+      "modules": [
+        "src/core/automation/equipment.ts",
+        "src/core/automation/featureArmor.ts"
+      ],
+      "tests": [
+        "tests/automation209-equipment.test.ts",
+        "tests/featureArmor.test.ts",
+        "tests/armorAdjustments.test.ts"
+      ],
+      "browserTests": [
+        "tests/e2e/automation209.spec.ts",
+        "tests/e2e/featureArmor.spec.ts"
+      ]
+    },
+    {
+      "id": "weapons",
+      "title": "装备武器与快捷攻击",
+      "category": "equipment",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "does": "按装备结构、属性、熟练与数值加值生成近战 / 远程 / 投掷 / 双手攻击；保留手写公式与动作。",
+      "trigger": "明确装备武器或修改该武器的计算属性；点骰使用现有攻击入口。",
+      "conditions": "自动计算开启，武器结构及来源有效；自定义计算属性需由玩家选择。",
+      "boundary": "不判定目标、命中、战场优势或完整伤害效果；不自动消耗弹药，不推断双持附赠攻击资格。",
+      "modules": [
+        "src/core/automation/weapons.ts"
+      ],
+      "tests": [
+        "tests/automation209-weapons.test.ts",
+        "tests/weapon-transfer208.test.ts"
+      ],
+      "browserTests": [
+        "tests/e2e/automation209.spec.ts"
+      ]
+    },
+    {
+      "id": "training",
+      "title": "技能、豁免与熟练项",
+      "category": "training",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "does": "计算明确来源授予的熟练与已保存的技能选择，叠加玩家手动熟练、专精和数值修正。",
+      "trigger": "选择声明的熟练选项、编辑手动熟练，或改变来源与等级。",
+      "conditions": "熟练声明和已选能力可解析；来源身份与 2014 / 2024 分开。",
+      "boundary": "重复熟练替代、条件优势及复杂训练资格需玩家 / DM 核对；关闭来源保留手工记录。",
+      "modules": [
+        "src/core/automation/training.ts",
+        "src/core/manualSkills.ts"
+      ],
+      "tests": [
+        "tests/manualSkills.test.ts",
+        "tests/proficiency-status232.test.ts",
+        "tests/automation-choices-resources.test.ts"
+      ],
+      "browserTests": []
+    },
+    {
+      "id": "choices",
+      "title": "来源特性、选择与一次性装备",
+      "category": "equipment",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "does": "按明确关联带入固定特性；玩家选择已声明选项后维护授予关系，确认起始装备后只领取一次。",
+      "trigger": "明确添加来源、选择特性选项或确认起始装备方案。",
+      "conditions": "关联、等级与具体选项可解析；装备领取必须有明确确认记录。",
+      "boundary": "不替玩家选未完成项，不从缺资料推断赠品；已移除特性与既有财物不因刷新重新发放。",
+      "modules": [
+        "src/core/sheet.ts",
+        "src/core/automation/choices.ts"
+      ],
+      "tests": [
+        "tests/automation-choices-resources.test.ts",
+        "tests/sourceChoices232.test.ts",
+        "tests/originFeatChoice.test.ts"
+      ],
+      "browserTests": [
+        "tests/e2e/sourceChoices232.spec.ts"
+      ]
+    },
+    {
+      "id": "source-spells",
+      "title": "明确来源赠送法术与次数",
+      "category": "spells",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "does": "支持明确 UID 的固定法术、choose.from 选择、方案 / 施法属性选择，以及固定数值或 PB 次数；来源法术与普通学会法术分开。",
+      "trigger": "明确选择来源方案和法术；有歧义的次数归属由玩家选择。施法时明确选择次数或法术位付费。",
+      "conditions": "来源、等级、法术身份和次数声明可解析，歧义已经确认；操作校验通过后才扣费。",
+      "boundary": "choose.filter / all、扩展法表、属性动态次数及外部职业资源尚未统一适配；次数耗尽不自动改用法术位。切换或刷新不补次数。",
+      "modules": [
+        "src/core/automation/sourceSpells.ts",
+        "src/core/automation/actions.ts"
+      ],
+      "tests": [
+        "tests/automation209-spells.test.ts",
+        "tests/automation209-actions.test.ts",
+        "tests/sourceSpellMechanics217.test.ts"
+      ],
+      "browserTests": [
+        "tests/e2e/automation209.spec.ts",
+        "tests/e2e/sourceSpellMechanics217.spec.ts"
+      ]
+    },
+    {
+      "id": "casting",
+      "title": "法术容量、施法数值与法术位",
+      "category": "spells",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "does": "从可适配的施法表和属性计算攻击 / DC、容量与法术位；普通预备与来源法术分组，保留超额记录。",
+      "trigger": "编辑施法属性、职业等级和容量调整；玩家在编辑模式选择预备法术。",
+      "conditions": "施法模式、进阶表和来源身份可解析；普通与契约位独立保存。",
+      "boundary": "资料能查阅或法术位存在不代表整条法术效果可执行；目标、专注、持续时间与复杂施法条件仍需人工处理。",
+      "modules": [
+        "src/core/spellcastingRules.ts",
+        "src/core/spellCapacity.ts"
+      ],
+      "tests": [
+        "tests/spellCapacity.test.ts",
+        "tests/class-spell-choices.test.ts",
+        "tests/spellWorkspace210.test.ts"
+      ],
+      "browserTests": [
+        "tests/e2e/spellWorkspace210.spec.ts"
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "已适配的次数资源与消耗保全",
+      "category": "resources",
+      "state": "partial",
+      "playerAvailable": true,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "does": "为可解析的显式资源声明计算上限，保存消耗与人工上限；等级或来源变化后保留已用次数。",
+      "trigger": "明确选中已适配特性，或用已有资源控件手动修改余额。",
+      "conditions": "资源字段与公式属于支持范围；未知公式会提示而不生成资源。",
+      "boundary": "刷新、重新开来源、布局编辑和方案切换不补满。未知次数、缺失规则与第三方自定义公式不默认执行。",
+      "modules": [
+        "src/core/automation/featureResources.ts",
+        "src/core/resources.ts"
+      ],
+      "tests": [
+        "tests/automation-choices-resources.test.ts",
+        "tests/sourceSpellMechanics217.test.ts",
+        "tests/resources.test.ts"
+      ],
+      "browserTests": []
+    },
+    {
+      "id": "rest",
+      "title": "短休 / 长休资源恢复",
+      "category": "resources",
+      "state": "unavailable",
+      "playerAvailable": false,
+      "reviewedAt": "2026-10-05",
+      "sampleSources": [
+        "XPHB"
+      ],
+      "status": "内部恢复逻辑有测试，但玩家执行入口按当前产品约定未开放。转场演出只显示动画，不恢复 HP、生命骰、法术位或资源。",
+      "modules": [
+        "src/core/automation/rest.ts"
+      ],
+      "tests": [
+        "tests/automation-choices-resources.test.ts",
+        "tests/transitionRest.test.ts"
+      ],
+      "browserTests": []
+    },
+    {
+      "id": "combat",
+      "title": "完整法术 / 战斗效果与复杂第三方规则",
+      "category": "spells",
+      "state": "pending",
+      "playerAvailable": false,
+      "reviewedAt": null,
+      "sampleSources": [],
+      "status": "待实现或待核实：完整目标、伤害结算、反应窗口与第三方逐条语义覆盖没有足够证据。此处不提供执行入口。",
+      "modules": [],
+      "tests": [],
+      "browserTests": []
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+import {spawnSync} from 'node:child_process';
+import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {progressInputs,verificationFiles,VERIFICATION_PATH,VERIFICATION_SCHEMA} from './automationProgress.ts';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const {tests,fingerprint}=progressInputs(root),out=resolve(root,'.local-evidence/automation-progress/unit-report.json');
+mkdirSync(dirname(out),{recursive:true});
+const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...tests,'tests/automationProgress.test.ts','tests/automationRuleSnapshot.test.ts','tests/automationRuleProvenance.test.ts','--reporter=json',`--outputFile=${out}`],{cwd:root,stdio:'inherit'});
+if(result.error)throw result.error;if(result.status!==0)process.exit(result.status??1);
+const report=JSON.parse(readFileSync(out,'utf8'));
+const {passedFiles,completePassedFiles}=verificationFiles(root,report);
+if(!report.success||tests.some(t=>!passedFiles.includes(t)))throw Error('Required automation tests have not all passed');
+if(progressInputs(root).fingerprint!==fingerprint)throw Error('Verification inputs changed during the test run; rerun before accepting evidence');
+writeFileSync(resolve(root,VERIFICATION_PATH),JSON.stringify({schemaVersion:VERIFICATION_SCHEMA,fingerprint,success:true,testedAt:new Date().toISOString(),scope:'authored-unit-fixtures',passedFiles,completePassedFiles},null,2)+'\n');
+console.log(JSON.stringify({verifiedTestFiles:passedFiles.length,completeTestFiles:completePassedFiles.length,passed:report.numPassedTests,skipped:report.numPendingTests,fingerprint}));

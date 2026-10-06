@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "repository": "FullPeople/dnd5e-automation-data",
+  "branch": "codex/automation-progress-export-20261005",
+  "revision": "52ddf4267ef8168f3904a418d1542dc63d9996e9",
+  "path": "reports/progress/automation-rule-status.json",
+  "sha256": "7ee119297b4a93c1193f52e35c3fa8dc5e819dabd71ee508de5747848c68759a",
+  "sourceRevision": "25ccc37e1584745a45f515c67d112d790db90ce9",
+  "irSha256": "043bbe7c809ea57a595aa2b533d644a04358b49bba9ed01f66133c9de4e0dd67"
+}

@@ -1,6 +1,6 @@
 {
   "name": "dnd-card-web",
-  "version": "0.1.37",
+  "version": "0.1.38",
   "private": true,
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -9,6 +9,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
+    "verify:automation-progress": "node tools/verifyAutomationProgress.mjs",
+    "verify:automation-source": "node tools/checkAutomationRuleStatus.mjs",
     "test:e2e": "playwright test",
     "check": "npm run test && npm run build",
     "dev:sync-prototype": "vite --config prototype/vite.config.ts",

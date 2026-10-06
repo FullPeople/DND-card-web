@@ -1,0 +1,64 @@
+name: Verify automation progress
+on:
+  push:
+    branches: ['codex/automation-progress-*']
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'docs/data/automation*'
+      - 'tools/**'
+      - 'tests/**'
+      - 'prototype/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '*.config.*'
+      - 'tsconfig*.json'
+      - 'index.html'
+      - '.github/workflows/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: automation-progress-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Read pinned public Data export revision
+        id: data-export
+        run: node -e 'const fs=require("fs"),l=JSON.parse(fs.readFileSync("docs/data/automation-rule-status.lock.json"));if(!/^[a-f0-9]{40}$/.test(l.revision))throw Error("Invalid Data revision");fs.appendFileSync(process.env.GITHUB_OUTPUT,"revision="+l.revision+"\n")'
+      - uses: actions/checkout@v6
+        with:
+          repository: FullPeople/dnd5e-automation-data
+          ref: ${{ steps.data-export.outputs.revision }}
+          path: .local-evidence/data-authority
+          sparse-checkout: reports/progress/automation-rule-status.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Compare pinned Data commit blob with the Web copy
+        run: npm run verify:automation-source -- --data-repository .local-evidence/data-authority
+      - run: npm ci
+      - run: npm run verify:automation-progress
+      - run: npm run check
+      - run: npm run build:standalone
+      - run: node tools/checkStartupBoundary241.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.automation-progress.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: automation-progress-evidence
+          include-hidden-files: true
+          path: |
+            .local-evidence/automation-progress/
+            .local-evidence/startup-tail241/boundaries.json
+            dist/assets/automation-progress.audit.json
+            dist-standalone/assets/automation-progress.audit.json
+          if-no-files-found: error
+          retention-days: 14
