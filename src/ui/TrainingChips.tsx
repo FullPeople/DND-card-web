@@ -5,7 +5,7 @@ import {trainingChipReference} from '../core/trainingChipReference';
 import { Inline } from './Entries';
 import { pointerDrag } from './pointerDrag';
 
-export function TrainingChips({ label, value, onChange, editAll = false }: { editAll?: boolean; label: string; value: string; onChange: (value: string) => void }) {
+export function TrainingChips({ label, value, onChange, editAll = false,group,source }: { editAll?: boolean; group?:string;source?:string;label: string; value: string; onChange: (value: string) => void }) {
   const allowed = useContext(SheetEditContext), preview = useContext(ReferenceContext);
   const [editing, setEditing] = useState(false), [text, setText] = useState(value), [order, setOrder] = useState<string[]>();
   const ref = useRef<HTMLDivElement>(null), cancel = useRef<(() => void) | undefined>(undefined);
@@ -17,8 +17,11 @@ export function TrainingChips({ label, value, onChange, editAll = false }: { edi
   return <div className="training-chips" ref={ref}>
     {allowed && (editing || editAll) ? <input autoFocus aria-label={`${label}熟练记录`} value={text} onChange={e => setText(e.target.value)} onBlur={save} onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setText(value); setEditing(false); } }}/>
       : <>{items.map((name, index) => {
-        const chip = trainingChipReference(name,label === '语言' ? 'language' : 'item',preview?.resolve);
-        return <span className="feature-bubble" data-training-index={index} key={`${name}:${index}`}><Reference className="feature-caption" menuOptions={{origin:'sheet',canRemove:allowed,remove:()=>onChange(items.filter((_,i)=>i!==index).join('、'))}} reference={chip.reference} kind={chip.kind} entry={chip.entry} onClick={() => { if (allowed) { setText(value); setEditing(true); } }} onPointerDown={event => {
+        const chip = trainingChipReference(name,label === '语言' ? 'language' : 'item',preview?.resolve,group&&source?{group,source}:undefined);
+        // Reading/commit consumers resolve again: keep that lookup on the typed
+        // category handle while leaving the user's editable token untouched.
+        const reference=chip.kind==='itemProperty'&&chip.entry?.raw._trainingCategory?`entry:${chip.entry.id}`:chip.reference;
+        return <span className="feature-bubble" data-training-index={index} key={`${name}:${index}`}><Reference className="feature-caption" menuOptions={{origin:'sheet',canRemove:allowed,remove:()=>onChange(items.filter((_,i)=>i!==index).join('、'))}} reference={reference} kind={chip.kind} entry={chip.entry} onClick={() => { if (allowed) { setText(value); setEditing(true); } }} onPointerDown={event => {
 
           if(!allowed)return;
           let current = index;
