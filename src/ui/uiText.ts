@@ -3,7 +3,7 @@ import {entryLabel} from '../core/entryLabel';
 export type UiLanguage='zh'|'en';
 export const UI_LANGUAGE_KEY='dnd-card:ui-language';
 const zh={
- fullscreen:'卡片全屏',exitFullscreen:'退出卡片全屏',
+ fullscreen:'卡片全屏',exitFullscreen:'退出卡片全屏',exportJson:'导出 JSON',
  language:'语言',cardBrand:'DND 角色卡',card:'角色卡',threeDragon:'三龙牌',featuresToggle:'功能开关',settings:'设置',announcements:'公告',characters:'角色簿',rules:'规则与扩展',transfer:'导入 / 导出',workspace:'工作区',functionalPage:'功能页',cardWorkspace:'角色卡工作区',currentCharacter:'当前角色',automationSettings:'自动化设置',automation:'自动化',on:'开启',manual:'手动',syncReview:'同步核对',entriesLevels:'条目 / 等级',adjust:'修正',adjustDetails:'数值依据与人工修正',undo:'撤销',redo:'重做',fitWindow:'A4 · 适应窗口',editMode:'编辑模式',room:'房间',cardTitle:'DND 五版角色卡',cardFooter:'{edition} · {level} 级 · 修订 {revision}',snapshotSaved:'资料快照随角色保存',sheetPages:'角色卡页面',pageMain:'主要',pageFeatures:'特性',pageBackground:'背景',pageSpells:'法术',pageInventory:'背包',resetZoom:'还原角色卡缩放',reset:'还原',
  feedbackTitle:'问题反馈',feedbackHelp:'请提供使用版本、复现步骤和截图。',
  readerMissing:'未提供角色 JSON。请从角色卡列表重新打开。',readerJsonOnly:'此阅读器只接受角色 JSON。请在角色卡网站制卡后导入 JSON。',readerHttp:'角色读取失败（HTTP {status}），请重试。',readerLarge:'角色文件超过 20 MB。',readerLoading:'正在读取角色资料…',retry:'重试',goToSite:'前往角色卡网站',readOnly:'只读角色卡',refreshData:'刷新资料',createOnSite:'前往网站制卡',entryDetails:'角色条目正文',closeEntry:'关闭角色条目',
@@ -14,7 +14,7 @@ const zh={
 } as const;
 export type UiTextKey=keyof typeof zh;
 const en:Record<UiTextKey,string>={
- fullscreen:'Fullscreen sheet',exitFullscreen:'Exit fullscreen sheet',
+ fullscreen:'Fullscreen sheet',exitFullscreen:'Exit fullscreen sheet',exportJson:'Export JSON',
  language:'Language',cardBrand:'DND Character Sheet',card:'Character sheet',threeDragon:'Three-Dragon Ante',featuresToggle:'Feature toggles',settings:'Settings',announcements:'Announcements',characters:'Characters',rules:'Rules & expansions',transfer:'Import / Export',workspace:'Workspace',functionalPage:'Tools',cardWorkspace:'Character workspace',currentCharacter:'Current character',automationSettings:'Automation settings',automation:'Automation',on:'On',manual:'Manual',syncReview:'Review sync',entriesLevels:'Entries / levels',adjust:'Adjust',adjustDetails:'Calculation details & manual adjustments',undo:'Undo',redo:'Redo',fitWindow:'A4 · Fit to window',editMode:'Edit mode',room:'Room',cardTitle:'DND 5e Character Sheet',cardFooter:'{edition} · Level {level} · Revision {revision}',snapshotSaved:'Source snapshots are saved with the character',sheetPages:'Character pages',pageMain:'Main',pageFeatures:'Features',pageBackground:'Background',pageSpells:'Spells',pageInventory:'Inventory',resetZoom:'Reset character zoom',reset:'Reset',
  feedbackTitle:'Report a problem',feedbackHelp:'Please include the version, steps to reproduce, and screenshots.',
  readerMissing:'No character JSON was provided. Please reopen the character from the list.',readerJsonOnly:'This reader accepts character JSON only. Create a character on the website, then import its JSON.',readerHttp:'Could not load the character (HTTP {status}). Please retry.',readerLarge:'The character file exceeds 20 MB.',readerLoading:'Loading character data…',retry:'Retry',goToSite:'Open character website',readOnly:'Read-only character',refreshData:'Refresh data',createOnSite:'Create on website',entryDetails:'Character entry details',closeEntry:'Close character entry',
