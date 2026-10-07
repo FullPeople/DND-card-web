@@ -6,7 +6,7 @@ export function offlineShell(): Plugin {
     // Opening layers are embedded in index.html; installation must not fetch
     // the original full-size PNGs that the page no longer requests.
     const startupAssets:string[] = [];
-    const first = new Set<string>(['index.html','favicon.svg',...startupAssets]);
+    const first = new Set<string>(['index.html','favicon.svg','dnd-center-logo.png',...startupAssets]);
     const visit = (name:string) => {
       if(first.has(name))return;
       const chunk=bundle[name];if(!chunk)return;first.add(name);
@@ -23,7 +23,7 @@ export function offlineShell(): Plugin {
 const PREFIX = 'dnd-card-shell:' + new URL('./', self.location.href).pathname + ':';
 const CACHE = PREFIX + ${JSON.stringify(revision)};
 const FILES = ${JSON.stringify(files)};
-const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png',...startupAssets])}.map(file=>new URL(file,self.location.href).href));
+const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png','dnd-center-logo.png',...startupAssets])}.map(file=>new URL(file,self.location.href).href));
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(file => new URL(file, self.location.href).href)))));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('message', event => {

@@ -40,3 +40,29 @@ export function pickFile(accept = '.json'): Promise<File | undefined> {
 /** A single recoverable draft per remote identity, separate from the character book. */
 export async function saveRecovery(character:Character){const database=await db();const key='recovery:'+character.id;const tx=database.transaction('documents','readwrite');const old=await tx.store.get(key);if(!old||old.revision<=character.revision)await tx.store.put(structuredClone(character),key);await tx.done;}
 export async function loadRecoveries():Promise<Character[]>{const database=await db();const keys=await database.getAllKeys('documents');return Promise.all(keys.filter(k=>String(k).startsWith('recovery:')).map(k=>database.get('documents',k)));}
+
+export interface CloudBinding {accountId:string;cloudId:string;revision:number}
+export async function loadCloudBindings():Promise<Record<string,CloudBinding>>{
+ const database=await db(),keys=await database.getAllKeys('documents');
+ const pairs=await Promise.all(keys.filter(key=>String(key).startsWith('cloud-binding:')).map(async key=>[String(key).slice(14),await database.get('documents',key)] as const));return Object.fromEntries(pairs);
+}
+export async function saveCloudBinding(localId:string,binding:CloudBinding){await (await db()).put('documents',binding,'cloud-binding:'+localId);}
+export async function stageCloudDraft(character:Character,binding:CloudBinding):Promise<string>{
+ const id='cloud:'+binding.accountId+':'+binding.cloudId,database=await db(),tx=database.transaction('documents','readwrite');
+ const workspace=await tx.store.get('workspace') as Workspace|undefined;
+ // Reopening a cloud card always keeps its existing local draft and baseline.
+ // A conflicting or revoked save must not be erased by opening the editor.
+ if(!workspace?.characters.some(card=>card.id===id)&&!await tx.store.get('cloud-staged:'+id)){
+  await tx.store.put({...structuredClone(character),id},'cloud-staged:'+id);await tx.store.put(binding,'cloud-binding:'+id);
+ }
+ await tx.done;return id;
+}
+export async function prepareCloudDraft(workspace:Workspace|undefined,canWrite:boolean):Promise<Workspace|undefined>{
+ const id=new URLSearchParams(location.search).get('cloudDraft');if(!standalone||!id)return workspace;
+ if(workspace?.characters.some(card=>card.id===id))return {...workspace,activeId:id};
+ const card=await (await db()).get('documents','cloud-staged:'+id) as Character|undefined;
+ if(!card)throw Error('没有找到待编辑的本机草稿，请从卡库重新打开。');
+ const packs=[...(workspace?.packs||[])];
+ for(const pack of card.rulePacks||[]){const old=packs.find(row=>row.id===pack.id);if(old&&JSON.stringify(old)!==JSON.stringify(pack))throw Error('云端卡的规则包与本机版本不同，请先导出备份并用完整 JSON 导入核对。');if(!old)packs.push(pack);}
+ return {...workspace,schemaVersion:1,characters:[...(workspace?.characters||[]),card],activeId:id,packs};
+}

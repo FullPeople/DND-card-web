@@ -1,6 +1,6 @@
 {
   "name": "dnd-card-web",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "private": true,
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -21,7 +21,10 @@
     "build:domestic": "node tools/buildDomestic.mjs",
     "dev:standalone": "vite --mode standalone --host 127.0.0.1 --port 5183",
     "test:release": "playwright test --config playwright.release.config.ts",
-    "test:standalone": "playwright test --config playwright.standalone.config.ts"
+    "test:standalone": "playwright test --config playwright.standalone.config.ts",
+    "build:cloud": "node tools/buildCloud.mjs",
+    "test:cloud": "vitest run tests/cloud.test.ts",
+    "test:cloud-browser": "playwright test --config playwright.cloud.config.ts"
   },
   "dependencies": {
     "html-to-image": "1.11.13",

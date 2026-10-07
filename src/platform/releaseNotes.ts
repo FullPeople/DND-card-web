@@ -356,6 +356,11 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
  }
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'?[{title:'2026-10-07',sections:[
+  {title:'独立网站与角色卡库',items:['独立角色卡迁至 dnd.center/card/，角色卡库位于 dnd.center/library/。保留完整五页、规则计算和本机保存。','右上角“云端存储”在新标签页打开卡库，只有明确确认后才上传。','QQ 登录申请中，云端登录与保存暂不可用；本机保存和 JSON 导入导出可正常使用。']},
+  {title:'旧站迁移与备份',items:['旧站 obr.dnd.center/card/ 继续提供存档读取和完整 JSON 导出，不强制跳转。','在旧站“导入 / 导出”选择“全部可见角色”并下载 JSON，再在新站批量导入；核对五页、背景与资源后保留备份。','不同域名不会自动共享浏览器存档。Wiki 缓存和界面偏好需在新站重新建立。']},
+  {title:'云端保存说明',items:['每账号最多免费保存 10 张自有云端卡；被授权编辑的卡不占编辑者槽位。按独立 ID 可以免登录查看完整角色卡，不公开全站目录。','卡主可以指定 QQ 号管理编辑授权，只有卡主能删除云端卡。并发冲突保留本机草稿。以上云端登录操作仍待真实 QQ 接入后开放。','额外永久槽位每个 2 元，付款暂不接入。这是一项非常不必要的开销，可以尝试多开账号。数量限制是为了避免服务器被大量角色卡占满。']}
+ ]}]:[]),
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
  {title:'2026-10-07',sections:mode==='suite'?SUITE_RELEASE_250_SECTIONS:RELEASE_250_SECTIONS},
  {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_249_SECTIONS:RELEASE_249_SECTIONS},

@@ -2,7 +2,7 @@
 
 左边是角色卡，右边是规则资料。卡片在需要填写的位置给出提示，玩家查阅并拖入条目，逐步完成角色。
 
-**[打开单机角色卡与 Wiki（国内地址）](https://obr.dnd.center/card/)** · [验收记录](docs/ACCEPTANCE.md) · [规则覆盖范围](docs/RULE-COVERAGE.md)
+**[打开单机角色卡与 Wiki（国内地址）](https://dnd.center/card/)** · [角色卡库](https://dnd.center/library/) · [迁移说明](docs/CLOUD-MIGRATION-252.md) · [验收记录](docs/ACCEPTANCE.md) · [规则覆盖范围](docs/RULE-COVERAGE.md)
 
 本项目维护浏览器中的角色卡与资料工作区。特殊规则的自动适配范围单独记录，不声称模拟所有 D&D 规则。
 
