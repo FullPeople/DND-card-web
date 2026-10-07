@@ -1,0 +1,2106 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "9dbbc384f8ae9b6d190c5d001602d42a44cd6820",
+  "publishedRuntimeSource": "ae6d213676d8eca71436e34c2400a5261479ecca",
+  "productionMode": "standalone",
+  "characterData": "authored software fixtures only",
+  "pixelMethod": "Compare RGB raster pixels before/after hiding inline SVG, count pixels with max channel difference > 10. The frame and layout stay identical.",
+  "baselineCssSha256": "4008d80fc09e7a437e364b38d0e6dc3be99b4a398c0f801aa9dc24b80b6e8a2c",
+  "candidateCssSha256": "7ed02de1d802a0c306a3fd7fc3d82446bc73a3dff7885f8ab4b10fe96932a903",
+  "redEdge": [
+    {
+      "viewportWidth": 390,
+      "profile": "custom-shared",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 54.6640625,
+          "groupHeight": 54.6640625,
+          "contentHeight": 42.1312255859375,
+          "svgCount": 11,
+          "svgMinWidth": 5.600006103515625,
+          "svgMinHeight": 5.5999755859375,
+          "paintedPixels": 170,
+          "grid": {
+            "x": "1",
+            "y": "1",
+            "w": "9",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 179.15625,
+          "groupHeight": 10,
+          "contentHeight": 4.800048828125,
+          "svgCount": 11,
+          "svgMinWidth": 11.199981689453125,
+          "svgMinHeight": 11.20001220703125,
+          "paintedPixels": 16,
+          "grid": {
+            "x": "1",
+            "y": "1",
+            "w": "9",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 54.6640625,
+          "groupHeight": 54.6640625,
+          "contentHeight": 42.1312255859375,
+          "svgCount": 11,
+          "svgMinWidth": 5.600006103515625,
+          "svgMinHeight": 5.5999755859375,
+          "paintedPixels": 170,
+          "grid": {
+            "x": "1",
+            "y": "1",
+            "w": "9",
+            "h": "5",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 390,
+      "profile": "pact-four",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 14,
+          "svgMinWidth": 4.78125,
+          "svgMinHeight": 7,
+          "paintedPixels": 180,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 14,
+          "svgMinWidth": 7.90625,
+          "svgMinHeight": 12,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 14,
+          "svgMinWidth": 4.78125,
+          "svgMinHeight": 7,
+          "paintedPixels": 180,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 390,
+      "profile": "pact-single",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 4,
+          "svgMinWidth": 7,
+          "svgMinHeight": 7,
+          "paintedPixels": 75,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 4,
+          "svgMinWidth": 14,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 4,
+          "svgMinWidth": 7,
+          "svgMinHeight": 7,
+          "paintedPixels": 75,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 390,
+      "profile": "shared-three",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 11,
+          "svgMinWidth": 7,
+          "svgMinHeight": 7,
+          "paintedPixels": 206,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 11,
+          "svgMinWidth": 14,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 11,
+          "svgMinWidth": 7,
+          "svgMinHeight": 7,
+          "paintedPixels": 206,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 390,
+      "profile": "spell-nine",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 54.6640625,
+          "groupHeight": 54.6640625,
+          "contentHeight": 54.6640625,
+          "svgCount": 32,
+          "svgMinWidth": 6.5,
+          "svgMinHeight": 7,
+          "paintedPixels": 561,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "8",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 179.15625,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 32,
+          "svgMinWidth": 10.78125,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "8",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 54.6640625,
+          "groupHeight": 54.6640625,
+          "contentHeight": 54.6640625,
+          "svgCount": 32,
+          "svgMinWidth": 6.5,
+          "svgMinHeight": 7,
+          "paintedPixels": 561,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "8",
+            "h": "5",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 390,
+      "profile": "spell-single",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 4,
+          "svgMinWidth": 7,
+          "svgMinHeight": 7,
+          "paintedPixels": 75,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 4,
+          "svgMinWidth": 14,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 43.734375,
+          "groupHeight": 43.734375,
+          "contentHeight": 43.734375,
+          "svgCount": 4,
+          "svgMinWidth": 7,
+          "svgMinHeight": 7,
+          "paintedPixels": 75,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 1320,
+      "profile": "custom-shared",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 81.3203125,
+          "groupHeight": 81.3203125,
+          "contentHeight": 62.67608642578125,
+          "svgCount": 11,
+          "svgMinWidth": 8.33074951171875,
+          "svgMinHeight": 8.33074951171875,
+          "paintedPixels": 330,
+          "grid": {
+            "x": "1",
+            "y": "1",
+            "w": "9",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 179.15625,
+          "groupHeight": 10,
+          "contentHeight": 4.800048828125,
+          "svgCount": 11,
+          "svgMinWidth": 11.199981689453125,
+          "svgMinHeight": 11.20001220703125,
+          "paintedPixels": 16,
+          "grid": {
+            "x": "1",
+            "y": "1",
+            "w": "9",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 81.3203125,
+          "groupHeight": 81.3203125,
+          "contentHeight": 62.67608642578125,
+          "svgCount": 11,
+          "svgMinWidth": 8.33074951171875,
+          "svgMinHeight": 8.33074951171875,
+          "paintedPixels": 330,
+          "grid": {
+            "x": "1",
+            "y": "1",
+            "w": "9",
+            "h": "5",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 1320,
+      "profile": "pact-four",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 14,
+          "svgMinWidth": 7.112762451171875,
+          "svgMinHeight": 10.413482666015625,
+          "paintedPixels": 332,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 14,
+          "svgMinWidth": 12.640625,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 14,
+          "svgMinWidth": 7.112762451171875,
+          "svgMinHeight": 10.413482666015625,
+          "paintedPixels": 332,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 1320,
+      "profile": "pact-single",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 4,
+          "svgMinWidth": 10.4134521484375,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 139,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 4,
+          "svgMinWidth": 14,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 4,
+          "svgMinWidth": 10.4134521484375,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 139,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 1320,
+      "profile": "shared-three",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 11,
+          "svgMinWidth": 10.4134521484375,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 379,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 11,
+          "svgMinWidth": 14,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 11,
+          "svgMinWidth": 10.4134521484375,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 379,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 1320,
+      "profile": "spell-nine",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 81.32034301757812,
+          "groupHeight": 81.32034301757812,
+          "contentHeight": 81.32034301757812,
+          "svgCount": 32,
+          "svgMinWidth": 9.669647216796875,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 1048,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "8",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 179.15625,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 32,
+          "svgMinWidth": 14,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "8",
+            "h": "5",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 81.32034301757812,
+          "groupHeight": 81.32034301757812,
+          "contentHeight": 81.32034301757812,
+          "svgCount": 32,
+          "svgMinWidth": 9.669647216796875,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 1048,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "8",
+            "h": "5",
+            "page": "0"
+          }
+        }
+      ]
+    },
+    {
+      "viewportWidth": 1320,
+      "profile": "spell-single",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "modes": [
+        {
+          "mode": "a4",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 4,
+          "svgMinWidth": 10.4134521484375,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 139,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "screen",
+          "buttonHeight": 143.328125,
+          "groupHeight": 0,
+          "contentHeight": 0,
+          "svgCount": 4,
+          "svgMinWidth": 14,
+          "svgMinHeight": 14,
+          "paintedPixels": 0,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        },
+        {
+          "mode": "a4-restored",
+          "buttonHeight": 65.0609130859375,
+          "groupHeight": 65.0609130859375,
+          "contentHeight": 65.0609130859375,
+          "svgCount": 4,
+          "svgMinWidth": 10.4134521484375,
+          "svgMinHeight": 10.4134521484375,
+          "paintedPixels": 139,
+          "grid": {
+            "x": "0",
+            "y": "0",
+            "w": "6",
+            "h": "4",
+            "page": "0"
+          }
+        }
+      ]
+    }
+  ],
+  "green": {
+    "edge": [
+      {
+        "viewportWidth": 390,
+        "profile": "custom-shared",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 42.1312255859375,
+            "svgCount": 11,
+            "svgMinWidth": 5.600006103515625,
+            "svgMinHeight": 5.5999755859375,
+            "paintedPixels": 170,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 140.125,
+            "svgCount": 11,
+            "svgMinWidth": 11.199981689453125,
+            "svgMinHeight": 11.20001220703125,
+            "paintedPixels": 545,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 42.1312255859375,
+            "svgCount": 11,
+            "svgMinWidth": 5.600006103515625,
+            "svgMinHeight": 5.5999755859375,
+            "paintedPixels": 170,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "pact-four",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 14,
+            "svgMinWidth": 4.78125,
+            "svgMinHeight": 7,
+            "paintedPixels": 180,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 14,
+            "svgMinWidth": 7.90625,
+            "svgMinHeight": 12,
+            "paintedPixels": 392,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 14,
+            "svgMinWidth": 4.78125,
+            "svgMinHeight": 7,
+            "paintedPixels": 180,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "pact-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "shared-three",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 11,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 206,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 11,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 590,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 11,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 206,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "spell-nine",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 54.6640625,
+            "svgCount": 32,
+            "svgMinWidth": 6.5,
+            "svgMinHeight": 7,
+            "paintedPixels": 561,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 179.15625,
+            "svgCount": 32,
+            "svgMinWidth": 10.78125,
+            "svgMinHeight": 14,
+            "paintedPixels": 1372,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 54.6640625,
+            "svgCount": 32,
+            "svgMinWidth": 6.5,
+            "svgMinHeight": 7,
+            "paintedPixels": 561,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "spell-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "custom-shared",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 81.3203125,
+            "groupHeight": 81.3203125,
+            "contentHeight": 62.67608642578125,
+            "svgCount": 11,
+            "svgMinWidth": 8.33074951171875,
+            "svgMinHeight": 8.33074951171875,
+            "paintedPixels": 330,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 140.125,
+            "svgCount": 11,
+            "svgMinWidth": 11.199981689453125,
+            "svgMinHeight": 11.20001220703125,
+            "paintedPixels": 539,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 81.3203125,
+            "groupHeight": 81.3203125,
+            "contentHeight": 62.67608642578125,
+            "svgCount": 11,
+            "svgMinWidth": 8.33074951171875,
+            "svgMinHeight": 8.33074951171875,
+            "paintedPixels": 330,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "pact-four",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 14,
+            "svgMinWidth": 7.112762451171875,
+            "svgMinHeight": 10.413482666015625,
+            "paintedPixels": 332,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 14,
+            "svgMinWidth": 12.640625,
+            "svgMinHeight": 14,
+            "paintedPixels": 697,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 14,
+            "svgMinWidth": 7.112762451171875,
+            "svgMinHeight": 10.413482666015625,
+            "paintedPixels": 332,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "pact-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "shared-three",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 11,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 379,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 11,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 590,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 11,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 379,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "spell-nine",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 81.32034301757812,
+            "groupHeight": 81.32034301757812,
+            "contentHeight": 81.32034301757812,
+            "svgCount": 32,
+            "svgMinWidth": 9.669647216796875,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 1048,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 179.15625,
+            "svgCount": 32,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 1712,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 81.32034301757812,
+            "groupHeight": 81.32034301757812,
+            "contentHeight": 81.32034301757812,
+            "svgCount": 32,
+            "svgMinWidth": 9.669647216796875,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 1048,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "spell-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      }
+    ],
+    "chromium": [
+      {
+        "viewportWidth": 390,
+        "profile": "custom-shared",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 42.1312255859375,
+            "svgCount": 11,
+            "svgMinWidth": 5.600006103515625,
+            "svgMinHeight": 5.5999755859375,
+            "paintedPixels": 170,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 140.125,
+            "svgCount": 11,
+            "svgMinWidth": 11.199981689453125,
+            "svgMinHeight": 11.20001220703125,
+            "paintedPixels": 545,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 42.1312255859375,
+            "svgCount": 11,
+            "svgMinWidth": 5.600006103515625,
+            "svgMinHeight": 5.5999755859375,
+            "paintedPixels": 170,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "pact-four",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 14,
+            "svgMinWidth": 4.78125,
+            "svgMinHeight": 7,
+            "paintedPixels": 180,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 14,
+            "svgMinWidth": 7.90625,
+            "svgMinHeight": 12,
+            "paintedPixels": 392,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 14,
+            "svgMinWidth": 4.78125,
+            "svgMinHeight": 7,
+            "paintedPixels": 180,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "pact-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "shared-three",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 11,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 206,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 11,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 590,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 11,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 206,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "spell-nine",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 54.6640625,
+            "svgCount": 32,
+            "svgMinWidth": 6.5,
+            "svgMinHeight": 7,
+            "paintedPixels": 561,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 179.15625,
+            "svgCount": 32,
+            "svgMinWidth": 10.78125,
+            "svgMinHeight": 14,
+            "paintedPixels": 1372,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 54.6640625,
+            "groupHeight": 54.6640625,
+            "contentHeight": 54.6640625,
+            "svgCount": 32,
+            "svgMinWidth": 6.5,
+            "svgMinHeight": 7,
+            "paintedPixels": 561,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 390,
+        "profile": "spell-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 43.734375,
+            "groupHeight": 43.734375,
+            "contentHeight": 43.734375,
+            "svgCount": 4,
+            "svgMinWidth": 7,
+            "svgMinHeight": 7,
+            "paintedPixels": 75,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "custom-shared",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 81.3203125,
+            "groupHeight": 81.3203125,
+            "contentHeight": 62.67608642578125,
+            "svgCount": 11,
+            "svgMinWidth": 8.33074951171875,
+            "svgMinHeight": 8.33074951171875,
+            "paintedPixels": 330,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 140.125,
+            "svgCount": 11,
+            "svgMinWidth": 11.199981689453125,
+            "svgMinHeight": 11.20001220703125,
+            "paintedPixels": 539,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 81.3203125,
+            "groupHeight": 81.3203125,
+            "contentHeight": 62.67608642578125,
+            "svgCount": 11,
+            "svgMinWidth": 8.33074951171875,
+            "svgMinHeight": 8.33074951171875,
+            "paintedPixels": 330,
+            "grid": {
+              "x": "1",
+              "y": "1",
+              "w": "9",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "pact-four",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 14,
+            "svgMinWidth": 7.112762451171875,
+            "svgMinHeight": 10.413482666015625,
+            "paintedPixels": 332,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 14,
+            "svgMinWidth": 12.640625,
+            "svgMinHeight": 14,
+            "paintedPixels": 697,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 14,
+            "svgMinWidth": 7.112762451171875,
+            "svgMinHeight": 10.413482666015625,
+            "paintedPixels": 332,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "pact-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "shared-three",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 11,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 379,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 11,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 590,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 11,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 379,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "spell-nine",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 81.32034301757812,
+            "groupHeight": 81.32034301757812,
+            "contentHeight": 81.32034301757812,
+            "svgCount": 32,
+            "svgMinWidth": 9.669647216796875,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 1048,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 179.15625,
+            "groupHeight": 179.15625,
+            "contentHeight": 179.15625,
+            "svgCount": 32,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 1712,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 81.32034301757812,
+            "groupHeight": 81.32034301757812,
+            "contentHeight": 81.32034301757812,
+            "svgCount": 32,
+            "svgMinWidth": 9.669647216796875,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 1048,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "8",
+              "h": "5",
+              "page": "0"
+            }
+          }
+        ]
+      },
+      {
+        "viewportWidth": 1320,
+        "profile": "spell-single",
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "modes": [
+          {
+            "mode": "a4",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "screen",
+            "buttonHeight": 143.328125,
+            "groupHeight": 143.328125,
+            "contentHeight": 143.328125,
+            "svgCount": 4,
+            "svgMinWidth": 14,
+            "svgMinHeight": 14,
+            "paintedPixels": 216,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          },
+          {
+            "mode": "a4-restored",
+            "buttonHeight": 65.0609130859375,
+            "groupHeight": 65.0609130859375,
+            "contentHeight": 65.0609130859375,
+            "svgCount": 4,
+            "svgMinWidth": 10.4134521484375,
+            "svgMinHeight": 10.4134521484375,
+            "paintedPixels": 139,
+            "grid": {
+              "x": "0",
+              "y": "0",
+              "w": "6",
+              "h": "4",
+              "page": "0"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

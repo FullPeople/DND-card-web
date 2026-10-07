@@ -1,0 +1,46 @@
+name: Verify responsive spell icon painting
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/production/responsiveSpellIcons.spec.ts'
+      - 'tests/e2e/fixtures.ts'
+      - 'playwright.responsive-spell-icons.config.ts'
+      - '.github/workflows/responsive-spell-icons.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tools/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: responsive-spell-icons-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  production-paint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, msedge]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:standalone
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright test --config playwright.responsive-spell-icons.config.ts
+        env:
+          DND_ICON_BROWSER_CHANNEL: ${{ matrix.browser }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: responsive-spell-icons-${{ matrix.browser }}
+          include-hidden-files: true
+          path: .local-evidence/responsive-spell-icons/playwright/
+          if-no-files-found: error
+          retention-days: 14
