@@ -51,7 +51,9 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
    const data=start?.[field]??raw[({skills:'skillProficiencies',tools:'toolProficiencies',languages:'languageProficiencies'})[field]];
    blocks(data).forEach((block,index)=>{
     const choose=block?.choose,count=choose?.count??block?.any;if(!count)return;
-    const values=choose?.from??(field==='skills'?Object.keys(SKILLS):known.filter(e=>field==='languages'?e.raw._category==='language':e.raw.tool).map(e=>e.id));
+    // Publisher tools use typed items, not a `tool` boolean. Only explicit
+    // tool categories qualify; vehicles, armor and unknown types stay out.
+    const values=choose?.from??(field==='skills'?Object.keys(SKILLS):[...new Set(known.filter(e=>field==='languages'?e.raw._category==='language':e.kind==='item'&&selectionAllowed(c,e)&&(e.raw.tool||['AT','T','INS','GS'].includes(String(e.raw.type||'').split('|')[0]))).map(e=>e.id))]);
     const options=(values||[]).map((v:string)=>{
      const value=field==='skills'?skillKey(v):v,label=SKILLS[value]?.name||known.find(e=>e.id===v)?.name||v;
      const found=field==='skills'?known.find(e=>e.kind==='rule'&&e.raw._category==='skill'&&e.source===(c.edition==='2024'?'XPHB':'PHB')&&[e.name,e.english,e.raw.ENG_name].some(n=>typeof n==='string'&&skillKey(n)===value)):known.find(e=>e.id===v)||known.find(e=>e.source===row.entry.source&&[e.name,e.english].some(n=>n.toLowerCase()===label.toLowerCase()));

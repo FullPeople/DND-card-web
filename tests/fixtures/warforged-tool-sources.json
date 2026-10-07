@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-06",
+  "dataRevision": "9acd4d5e7c5bed9cf34150db4319a7aeec6751e8",
+  "evidenceBoundary": "Two Warforged structured proficiency declarations and four real tool identities only; no rule prose or player data",
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/races.json",
+      "bytes": 603288,
+      "sha256": "d60b2cde3733e363aa4d1bd0bb8465d79213d247948ff46561d883fc55c00df7"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "bytes": 197272,
+      "sha256": "9f1346c69344d66088dbdb1c26ea5872102d318ac148805a8ae9b5fedc5fc94f"
+    }
+  ],
+  "projection": {
+    "race": [
+      {
+        "name": "战俑",
+        "ENG_name": "Warforged",
+        "source": "EFA",
+        "edition": "one",
+        "skillProficiencies": [
+          {
+            "any": 1
+          }
+        ],
+        "toolProficiencies": [
+          {
+            "any": 1
+          }
+        ],
+        "entries": []
+      },
+      {
+        "name": "战俑",
+        "ENG_name": "Warforged",
+        "source": "ERLW",
+        "skillProficiencies": [
+          {
+            "any": 1
+          }
+        ],
+        "toolProficiencies": [
+          {
+            "any": 1
+          }
+        ],
+        "entries": []
+      }
+    ],
+    "baseitem": [
+      {
+        "name": "炼金工具",
+        "ENG_name": "Alchemist's Supplies",
+        "source": "PHB",
+        "type": "AT"
+      },
+      {
+        "name": "风笛",
+        "ENG_name": "Bagpipes",
+        "source": "PHB",
+        "edition": "classic",
+        "type": "INS"
+      },
+      {
+        "name": "炼金工具",
+        "ENG_name": "Alchemist's Supplies",
+        "source": "XPHB",
+        "type": "AT|XPHB"
+      },
+      {
+        "name": "风笛",
+        "ENG_name": "Bagpipes",
+        "source": "XPHB",
+        "edition": "one",
+        "type": "INS|XPHB"
+      }
+    ]
+  }
+}
