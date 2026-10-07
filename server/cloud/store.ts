@@ -67,7 +67,7 @@ export class CloudStore {
     if(!character||typeof character!=='object'||(character as Character).schemaVersion!==1)throw new CloudError(422,'invalid_character','需要完整的原生角色文档。');
     try {validateCharacter(structuredClone(character));}
     catch(error){throw new CloudError(422,'invalid_character',error instanceof Error?error.message:String(error));}
-    if(Buffer.byteLength(JSON.stringify(character))>8_000_000)throw new CloudError(413,'too_large','单张云端卡不能超过 8 MB，请保留完整本机备份。');
+    if(Buffer.byteLength(JSON.stringify(character))>20_000_000)throw new CloudError(413,'too_large','单张云端卡不能超过 20 MB，请保留完整本机备份。');
   }
   read(id:string,account?:Account):CloudCard {
     const row=this.row(id),role=this.role(row,account);

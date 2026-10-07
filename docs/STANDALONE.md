@@ -6,9 +6,11 @@
 
 ## 使用
 
-- [在线单机网页（国内地址）](https://obr.dnd.center/card/)；[对应源码](https://obr.dnd.center/card/source.zip)。角色数据保存在当前浏览器，不会上传。
+- [在线单机网页（国内地址）](https://dnd.center/card/)；[对应源码](https://dnd.center/card/source.zip)。默认只保存在当前浏览器。卡库在明确确认后才上传；QQ 登录申请中，云端登录保存暂不可用。
 - 首次使用 Wiki 需要联网下载资料，此后读取本机缓存。尚未下载的资料、手动更新资料仍需联网。网页构建不附带上游资料快照。
 - 角色按浏览器和网址分别保存。更换浏览器、设备或地址时用“导入 / 导出 → 角色完整备份”搬迁；清理浏览器站点数据会删除该站点的本机存档，建议定期导出。
+
+旧站 https://obr.dnd.center/card/ 保留完整 JSON 导出，不强制跳转。新旧域名不会自动共享存档，搬迁步骤见 [252 迁移说明](CLOUD-MIGRATION-252.md)。
 
 ## 开发和构建
 
@@ -17,6 +19,10 @@ npm ci
 npm run dev:standalone
 npm run build:standalone
 npm run test:standalone
+# Node >=24.9：完整新站、卡库及同源后端
+npm run build:cloud
+npm run test:cloud
+npm run test:cloud-browser
 ```
 
 部署 `dist-standalone/` 至 HTTPS 静态站点，国内地址的发布流程见 [国内托管说明](DOMESTIC-HOSTING.md)。构建生成 `standalone-audit.json`，列出实际入包的源模块并拒绝包含联机传输模块的构建。常规 `npm run build` 仍供 Full Suite 集成版使用。

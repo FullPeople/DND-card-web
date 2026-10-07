@@ -11,7 +11,7 @@ const policy={freeSlots:10,permanentSlotPriceYuan:2,paymentAvailable:false,qqLog
 async function body(request:IncomingMessage):Promise<Record<string,unknown>> {
   if(!/^application\/json(?:;|$)/i.test(request.headers['content-type']||''))throw new CloudError(415,'json_required','请求必须使用 JSON。');
   let size=0;const parts:Buffer[]=[];
-  for await(const part of request){size+=part.length;if(size>8_100_000)throw new CloudError(413,'too_large','单次上传不能超过 8 MB。');parts.push(part);}
+  for await(const part of request){size+=part.length;if(size>20_100_000)throw new CloudError(413,'too_large','单次上传不能超过 20 MB。');parts.push(part);}
   try {const value=parseFile(Buffer.concat(parts).toString('utf8'));if(!value||typeof value!=='object'||Array.isArray(value))throw Error();return value as Record<string,unknown>;}
   catch {throw new CloudError(400,'invalid_json','JSON 格式不正确或包含不允许的字段。');}
 }
