@@ -1,4 +1,4 @@
-import evidence from './classChoiceEvidence.json';
+import evidence from './classChoiceEvidence.json' with {type:'json'};
 import {matchesReference} from '../entryReferences';
 import type {Entry} from '../model';
 

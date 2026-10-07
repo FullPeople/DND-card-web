@@ -13,6 +13,8 @@
 
 红绿诊断：`review-regressions-red.log`、`review-overlap-red.log`、`review-targeted.json`。初次红测试中的一项旧重复离线夹具遗漏 6 级授予快照，已修正夹具；初次类型检查发现新测试的 unknown 类型标注不符合 normalizeData 参数，也已修正，最终检查通过。这两项不是产品回归证明。实际来源身份与文件散列保留于 `review-source-overlap-evidence.json`，没有把来源正文、样本或玩家数据加入仓库。
 
+最终检查还发现 Node 22 的浏览器用例发现无法读取无 import attribute 的来源矩阵 JSON，已补显式 `with {type:'json'}`，不改变矩阵或机制。第一次全量命令误设只含职业文件的 `DND_AUTOMATION_CORE_DATA`，额外激活需要全库的 corpus 测试并失败；该目录只用于针对职业测试，全量恢复不带此环境变量。两次尝试各自保留日志，不用补规则全文、伪造完整缓存或把失败说成通过。
+
 远端 main 已从 `4a95a7d` 前进到 `949dbbd0fea5dac8a51089514fe402cdeb95baf5`。本分支仍基于原 `792e9a4`，没有 merge / rebase 迁移，也没有改 Data。迁移 owner 的另轮 review 提示 App 草稿写入与验证顺序、旧 cloud-staged 重开及 cloud workflow paths 缺 App / storage / PlayerViewer / package 覆盖，见 [PR16 讨论](https://github.com/FullPeople/DND-card-web/pull/16#discussion_r4206885126)。这些由原迁移 owner 处理；本轮未把“有恢复副本”说成已发生数据丢失，也未并行重写迁移。未来整合须明确执行 migration / cloud 场景，不能只依赖 paths 自动触发，且必须对组合消费者重新 producer。
 
 只回滚本节修复可用 `git revert <本节修复的实际提交 SHA>`；最终 SHA 见 PR。整批回滚还需按下文顺序撤去 c03c7d6 / f093b6c / 2077618，保留角色备份、手工记录和 Git 历史。
