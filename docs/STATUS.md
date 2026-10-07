@@ -2,6 +2,8 @@
 
 本轮获准仅合入三项已验证 Web 成果。PR11 保留原提交以 merge 合入 cd65ab8，PR12 改为 main 后仅含 7676dd8 一个查看器增量，并以 merge 合入 5c62e7e；两者实际合并树均与各自已检查头的树一致。PR10 合入上述 main 后，唯一冲突是本文件首部；双方历史记录全部保留，生产代码无冲突。冲突解决后的新头和实际最终 main 必须分别重新运行完整 CI，不能沿用 a277d7f 的绿灯；最终 SHA、job 结果、失败记录及恢复 bundle 保存于 U:/CodexWork/2026-10-07/web-pr-integration/evidence，并由同目录 RESULT.md 记录实际集成结果。
 
+首轮整合 7219ac8 的完整 CI 暴露两条公告测试就绪竞态：5 秒内等待公告时，失败快照仍有启动图层。用同 SHA 的真实 CI 构建将透明退出受控延长至 7 秒，复现卡面已可见但仍为 fading、公告未挂载；等待实际 complete 后公告正常显示。仅在 announcement.spec.ts 与 automationProgress.spec.ts 的打开/刷新入口补充 complete 等待，上限沿用既有启动测试的 12 秒；保留原公告、触摸、缓存与角色数据断言，不改产品启动或增加重试。原失败日志、artifact、受控前后截图、trace 与重跑结果均保留在上述 evidence 目录；修正后的精确 SHA 须重跑完整 CI。
+
 战俑工具选择不在三项 PR 内；旧插件仍缺 Suite 配套提交，Web 合并不代表旧插件更新或上线。本轮不部署，整批部署等待剩余项目补齐。初始 main 为 79a84b5565f571f491484d00a765d4505047df27；回滚使用各 PR 的实际 merge commit 按 10 → 12 → 11 执行 git revert -m 1，保留 main 后续历史，不 reset 或 force push。下方候选、未合并与未部署文字是原阶段记录，不覆盖本次授权与实际集成收据。
 
 # 2026-10-06 · 六条 AC 官方机制来源补齐，PR10 后续候选
