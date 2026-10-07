@@ -1,0 +1,55 @@
+name: Verify shield training binding
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'public/support/supporters.json'
+      - 'tests/shield-training-reference.test.ts'
+      - 'tests/fixtures/shield-training-sources.json'
+      - 'tests/helpers/shieldTrainingFixture.ts'
+      - 'tests/e2e/shieldTrainingReference.spec.ts'
+      - 'tests/e2e/fixtures.ts'
+      - 'tests/automation209-equipment.test.ts'
+      - 'tests/equipment-followup.test.ts'
+      - 'tests/training-chip-reference.test.ts'
+      - 'tools/verifyShieldTrainingSources.mjs'
+      - 'playwright.shield-training.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tsconfig*.json'
+      - '.github/workflows/shield-training.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: shield-training-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify real input hashes and minimal mechanical projection
+        run: node tools/verifyShieldTrainingSources.mjs
+      - run: npm ci
+      - run: npx vitest run tests/shield-training-reference.test.ts tests/training-chip-reference.test.ts tests/automation209-equipment.test.ts tests/equipment-followup.test.ts
+      - run: npm run build:standalone
+      - run: node tools/checkStartupBoundary241.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.shield-training.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shield-training-binding-evidence
+          include-hidden-files: true
+          path: |
+            .local-evidence/shield-training/source-verification.json
+            .local-evidence/shield-training/browser/
+            .local-evidence/startup-tail241/boundaries.json
+          if-no-files-found: error
+          retention-days: 14
