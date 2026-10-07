@@ -6,6 +6,18 @@ from pathlib import Path
 spec=importlib.util.spec_from_file_location('migration_publisher',Path(__file__).with_name('publish.py'));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 class PublisherTests(unittest.TestCase):
+    def test_preserved_external_release_requires_exact_before_after_and_scope(self):
+        with tempfile.TemporaryDirectory(prefix='dnd-publisher-') as folder:
+            root=Path(folder);live=root/'suite-dev';backup=root/'suite-dev-before-external-test';live.mkdir();backup.mkdir();(live/'index').write_text('new');(backup/'index').write_text('old')
+            original={'static:suite-dev':m.digest(m.tree(backup)),'service':'unchanged'};current={**original,'static:suite-dev':m.digest(m.tree(live))}
+            external={'release':'external-test','status':'published','writesPlayerData':False,'backendChanged':False,'targets':{'suite-dev':{'backup':str(backup),'published':True,'expectedFiles':m.tree(live)}}}
+            with patch.object(m,'OLD',root/'card'),patch.object(m,'protected',return_value=current):
+                self.assertEqual(m.resume_guard(original,original,external),current)
+                with self.assertRaises(RuntimeError):m.resume_guard(original,original)
+                (live/'unexpected').write_text('drift')
+                with self.assertRaises(RuntimeError):m.resume_guard(original,original,external)
+            with patch.object(m,'protected',return_value={**current,'service':'changed'}):
+                with self.assertRaises(RuntimeError):m.resume_guard(original,original,external)
     def test_resume_refuses_other_receipts_and_protected_drift_without_writes(self):
         with tempfile.TemporaryDirectory(prefix='dnd-publisher-') as folder:
             root=Path(folder);baseline={'protected':{'guard':'original'}};(root/'baseline.json').write_text(json.dumps(baseline))

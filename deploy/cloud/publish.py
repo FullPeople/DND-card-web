@@ -126,12 +126,28 @@ def verify_https(manifest):
     for path,file in [('/','index.html'),('/card/','card/index.html'),('/library/','library/index.html')]:
         wait_http('https://dnd.center'+path,resolve,manifest['frontendFiles'][file])
     require(json.loads(wait_http('https://dnd.center/api/health',resolve))['qqLogin']=='pending','API unhealthy after reload')
+def resume_guard(original,prior,external=None):
+    require(original==prior,'Original protection evidence differs')
+    current=protected()
+    if current==original:return original
+    require(external is not None,'Protected-state drift; stopped')
+    changed={key for key in set(current)|set(original) if current.get(key)!=original.get(key)}
+    require(changed=={'static:suite-dev'},'Changes extend beyond the separately published Suite')
+    require(external['status']=='published' and set(external['targets'])=={'suite-dev'} and external['writesPlayerData'] is False and external['backendChanged'] is False,'External release is not a completed static-only Suite publication')
+    target=external['targets']['suite-dev'];backup=OLD.parent/('suite-dev-before-'+external['release'])
+    require(Path(target['backup'])==backup and digest(tree(backup))==original['static:suite-dev'],'External release backup does not match the original protected Suite')
+    require(target['published'] is True and tree(OLD.parent/'suite-dev')==target['expectedFiles'],'External release live Suite does not match its receipt')
+    expected={**original,'static:suite-dev':digest(target['expectedFiles'])};require(current==expected,'External release does not explain all protected drift')
+    return expected
 def resume_restored(package,manifest_hash):
     require(sha(package/'manifest.json')==manifest_hash,'Manifest changed');manifest=json.loads((package/'manifest.json').read_text());baseline=json.loads((package/'baseline.json').read_text());record=json.loads(JOURNAL.read_text())
     require(manifest['release']==KEY and sha(package/'baseline.json')==manifest['baselineSha256'] and sha(Path(__file__))==manifest['publisherSha256'],'Package binding mismatch')
     for name,expected in manifest['packageFiles'].items(): require('/' not in name and sha(package/name)==expected,'Package file mismatch: '+name)
     require(record['release']==KEY and record['status']=='failed-restored','Only this restored first migration can resume')
-    require(protected()==baseline['protected']==record['protectedBefore'],'Protected-state drift; stopped')
+    external=None;preserved=manifest.get('preservedExternalRelease')
+    if preserved:
+        path=Path(preserved['path']);require(path.parent==JOURNAL.parent and path!=JOURNAL and sha(path)==preserved['sha256'],'External release receipt binding differs');external=json.loads(path.read_text())
+    guard=resume_guard(baseline['protected'],record['protectedBefore'],external)
     require(tree(OLD)==baseline['old']==record['oldBefore'] and sha(CONFIG)==baseline['retiredConfig']==record['oldConfigSha256'],'Original site/config is not exactly restored')
     require(not NEW.exists(),'New site unexpectedly exists')
     backup=package/'backup';require(Path(record['backup'])==backup and tree(backup/'card')==baseline['old'] and sha(backup/'dnd-center.conf')==baseline['retiredConfig'],'Original recovery backup differs')
@@ -151,17 +167,17 @@ def resume_restored(package,manifest_hash):
     require(shutil.disk_usage('/var/www').free>700_000_000,'Insufficient staging space')
     newstage=Path('/var/www/.dnd-center-resume-stage-'+KEY);unpack(package/'frontend.tar.gz',newstage,manifest['frontendFiles'])
     require(sha(oldstage/'migration-notice.js')==manifest['packageFiles']['migration-notice.js'],'Migration notice changed; stopped')
-    require(protected()==baseline['protected'] and tree(OLD)==baseline['old'] and sha(CONFIG)==baseline['retiredConfig'],'Drift during resume preparation')
-    previous={key:record[key] for key in ['sourceCommit','at','status','newFiles','newConfigSha256']};record.update(status='resume-prepared',sourceCommit=manifest['sourceCommit'],newFiles=manifest['frontendFiles'],newConfigSha256=sha(package/'nginx.conf'),previousAttempt=previous);journal(record)
+    require(protected()==guard and tree(OLD)==baseline['old'] and sha(CONFIG)==baseline['retiredConfig'],'Drift during resume preparation')
+    previous={key:record[key] for key in ['sourceCommit','at','status','newFiles','newConfigSha256']};record.update(status='resume-prepared',sourceCommit=manifest['sourceCommit'],newFiles=manifest['frontendFiles'],newConfigSha256=sha(package/'nginx.conf'),previousAttempt=previous,resumeProtectedBefore=guard,preservedExternalRelease=preserved,publisherRevision=manifest.get('publisherRevision'));journal(record)
     switched_old=False;switched_new=False;nginx_changed=False
     try:
         subprocess.run(['systemctl','enable','--now','dnd-card-cloud.service','dnd-card-cloud-backup.timer'],check=True)
         require(json.loads(wait_http('http://127.0.0.1:5014/api/health'))['qqLogin']=='pending','Prepared API unhealthy')
         subprocess.run(['systemctl','start','dnd-card-cloud-backup.service'],check=True)
-        require(protected()==baseline['protected'],'Protected state changed before resume switch')
+        require(protected()==guard,'Protected state changed before resume switch')
         newstage.rename(NEW);switched_new=True;exchange(OLD,oldstage);switched_old=True;shutil.copy2(package/'nginx.conf',CONFIG);nginx_changed=True
         subprocess.run(['nginx','-t'],check=True);subprocess.run(['systemctl','reload','nginx'],check=True);verify_https(manifest)
-        require(tree(NEW)==manifest['frontendFiles'] and tree(OLD)==record['oldFiles'] and protected()==baseline['protected'],'Resume post-switch verification failed')
+        require(tree(NEW)==manifest['frontendFiles'] and tree(OLD)==record['oldFiles'] and protected()==guard,'Resume post-switch verification failed')
         record.update(status='published',protectedAfter=protected(),finishedAt=datetime.now(timezone.utc).isoformat());journal(record)
         return {'status':'published','version':'standalone-1.0.252','receipt':str(JOURNAL),'backup':str(backup),'cloudLogin':'pending','protectedItems':len(baseline['protected']),'resumedRestoredAttempt':True}
     except Exception:
