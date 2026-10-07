@@ -46,3 +46,10 @@ test-results-choices/
 test-results-screen/
 
 __pycache__/
+dist-cloud/
+dist-cloud-server/
+dist-library/
+test-results-cloud/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","include":["server/cloud","src/cloud","vite.cloud.config.ts","vite.library.config.ts"]}

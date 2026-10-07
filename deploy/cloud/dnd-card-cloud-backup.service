@@ -1,0 +1,15 @@
+[Unit]
+Description=Verified backup of DND Center cloud cards
+After=dnd-card-cloud.service
+
+[Service]
+Type=oneshot
+Environment=DND_CLOUD_DB=/var/lib/dnd-card-cloud/cards.sqlite
+Environment=DND_CLOUD_BACKUPS=/var/backups/dnd-card-cloud
+ExecStart=/opt/dnd-card-cloud/runtime/bin/node /opt/dnd-card-cloud/current/backup.mjs
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/backups/dnd-card-cloud
