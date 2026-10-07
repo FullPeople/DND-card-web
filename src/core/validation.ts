@@ -3,7 +3,7 @@ import {legacyTraining} from './legacyTraining';
 import {validateRestState} from './automation/rest';
 import {correctSourceData} from './sourceCorrections';
 import {validateActionState} from './automation/actions';
-import { ABILITIES, KIND_LABELS, SKILLS, SHEET_BONUS_KEYS, SIZE_LABELS, skillKey, newCharacter, uid, type Character, type Effect, type Entry, type Raw, type RulePack } from './model';
+import { ABILITIES, KIND_LABELS, SKILLS, SHEET_BONUS_KEYS, SIZE_LABELS, skillKey, newCharacter, uid, type Character, type Effect, type Entry, type Raw, type RulePack, type Selection } from './model';
 import { evaluate } from './engine';
 import {inventoryState,spellState} from './characterDetails';
 import {normalizeCurrency} from './currency';
@@ -91,8 +91,24 @@ export function validateCharacter(value: unknown): Character {
   assert(plain(c.abilities) && ABILITIES.every(a => Number.isInteger(c.abilities[a]) && c.abilities[a] >= 1 && c.abilities[a] <= 100), '六项基础属性需要 1–100 的整数。');
   assert(c.racialAbilityMode === undefined || c.racialAbilityMode === 'separate-v1', '种族属性计算版本无效；请保留原文件。');
   assert(Array.isArray(c.selections) && c.selections.length <= 3000, '角色条目数量或格式不正确。');
+  const archivedSelections:Selection[]=[];
+  if(c.classChoiceArchive!==undefined){
+    assert(plain(c.classChoiceArchive)&&Object.keys(c.classChoiceArchive).length<=3000,'职业选择保留记录无效。');
+    for(const [id,archive] of Object.entries(c.classChoiceArchive) as [string,any][]){
+      assert(plain(archive)&&typeof archive.choiceId==='string'&&archive.choiceId.length<=2000&&Array.isArray(archive.selections)&&archive.selections.length>0&&archive.selections.length<=3000,'职业选择保留记录无效。');
+      const root=archive.selections[0];assert(plain(root)&&root.id===id&&root.entry?.kind==='feat'&&root.requirementId===archive.choiceId&&typeof root.grantKey==='string'&&root.grantKey.startsWith('choice:'),'职业选择保留身份无效。');
+      const linked=new Set([id]);for(let pass=0;pass<archive.selections.length;pass++){let added=false;for(const row of archive.selections)if(plain(row)&&linked.has(row.parentId)&&!linked.has(row.id)){linked.add(row.id);added=true;}if(!added)break;}
+      assert(archive.selections.every((row:any)=>plain(row)&&linked.has(row.id)),'职业选择保留子项关联无效。');
+      archivedSelections.push(...archive.selections);
+      if(archive.parent!==undefined){
+        const parent=archive.parent;assert(plain(parent)&&typeof parent.id==='string'&&root.parentId===parent.id&&validEntry(parent.entry)&&['class','feature'].includes(parent.entry.kind)&&typeof parent.equipped==='boolean'&&Number.isInteger(parent.level)&&parent.level>=1&&parent.level<=20&&Number.isInteger(parent.quantity)&&parent.quantity>=1&&parent.quantity<=100000&&['parentId','grantKey','requirementId'].every(key=>parent[key]===undefined||typeof parent[key]==='string'&&parent[key].length<=2000),'职业选择来源快照无效。');
+        validateEntryContent(parent.entry.entries);validateEntryContent(parent.entry.raw);if(parent.entry.effects)validateEffects(parent.entry.effects);if(parent.entry.choices)validateChoices(parent.entry.choices);
+      }
+    }
+    assert(c.selections.length+archivedSelections.length<=3000,'角色条目与职业保留记录数量超出限制。');
+  }
   const selectionIds = new Set();
-  for (const s of c.selections) {
+  for (const s of [...c.selections,...archivedSelections]) {
     assert(plain(s) && typeof s.id === 'string' && !selectionIds.has(s.id) && validEntry(s.entry), '角色中有无效或重复的条目身份。');
     selectionIds.add(s.id);
     if(s.catalogReview!==undefined)assert(plain(s.catalogReview)&&['2014','2024'].includes(s.catalogReview.edition)&&typeof s.catalogReview.entryId==='string'&&typeof s.catalogReview.source==='string'&&Object.hasOwn(KIND_LABELS,s.catalogReview.kind),'旧卡核对记录无效。');

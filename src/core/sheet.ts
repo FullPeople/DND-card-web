@@ -2,7 +2,7 @@ import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEq
 import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
 import {resolveEntryReference} from './entryReferences';
-import {equipmentBlocks,syncChoiceContent} from './automation/choices';
+import {equipmentBlocks,syncChoiceContent,preserveClassChoiceGrants} from './automation/choices';
 import {rememberFeatureResources} from './automation/featureResources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import { requirementMismatch } from './engine';
@@ -28,8 +28,12 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
   }
   rememberSourceSpellUses(c);
   const spellCounters=[...removed].map(id=>specialSpellResource(id,c));
+  // Automatic level removal parks a class-choice tree first. Keep saved UI
+  // references to its source snapshot so restoring the old ID restores pins.
+  const retainedParents=new Set(dismiss?[]:Object.values(c.classChoiceArchive||{}).flatMap(archive=>archive.parent?[archive.parent.id]:[]));
+  const removedReference=(key:string)=>removed.has(key)&&!retainedParents.has(key);
   c.selections = c.selections.filter(s => !removed.has(s.id));
-  c.quickbar = c.quickbar?.filter(key => !removed.has(key));
+  c.quickbar = c.quickbar?.filter(key => !removedReference(key));
   if(c.spellSettings){c.spellSettings.prepared=c.spellSettings.prepared.map(key=>removed.has(key)?'':key);for(const [owner,ids] of Object.entries(c.spellSettings.cantrips||{})){if(removed.has(owner))delete c.spellSettings.cantrips![owner];else c.spellSettings.cantrips![owner]=ids.map(id=>removed.has(id)?'':id);}}
   if(c.spellSettings?.classSpells)for(const [owner,ids] of Object.entries(c.spellSettings.classSpells)){if(removed.has(owner))delete c.spellSettings.classSpells[owner];else c.spellSettings.classSpells[owner]=ids.map(id=>removed.has(id)?'':id);}
   for(const key of removed)if(c.spellSettings?.special)delete c.spellSettings.special[key];
@@ -37,13 +41,14 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
   for(const key of spellCounters)if(!Object.keys(c.spellSettings?.special||{}).some(id=>specialSpellResource(id,c)===key))delete c.runtime.resources[key];
   if(c.inventory)c.inventory.order=c.inventory.order.filter(key=>!removed.has(key));
   if(c.backgroundChoices)for(const key of removed)delete c.backgroundChoices[key];
-  if (c.featureLayout) { c.featureLayout.order = c.featureLayout.order.filter(key => !removed.has(key)); c.featureLayout.expanded = c.featureLayout.expanded.filter(key => !removed.has(key)); c.featureLayout.detailsExpanded=c.featureLayout.detailsExpanded?.filter(key=>!removed.has(key));for(const id of removed)if(c.featureLayout.optionsVisible)delete c.featureLayout.optionsVisible[id]; }
+  if (c.featureLayout) { c.featureLayout.order = c.featureLayout.order.filter(key => !removedReference(key)); c.featureLayout.expanded = c.featureLayout.expanded.filter(key => !removedReference(key)); c.featureLayout.detailsExpanded=c.featureLayout.detailsExpanded?.filter(key=>!removedReference(key));for(const id of removed)if(removedReference(id)&&c.featureLayout.optionsVisible)delete c.featureLayout.optionsVisible[id]; }
 }
 
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
 export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean;equipmentPreview?:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
-  let changed = review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id)));
+  let changed = preserveClassChoiceGrants(c,catalog);
+  changed = (review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id))))||changed;
   for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
   const selectedNames=entryNameIndex(c.selections.map(s=>s.entry)),publishedNames=catalogNames||entryNameIndex(catalog);
   const named=(name:string)=>review?.refresh?[...(publishedNames.get(name)||[]),...(selectedNames.get(name)||[])]:[...(selectedNames.get(name)||[]),...(publishedNames.get(name)||[])];

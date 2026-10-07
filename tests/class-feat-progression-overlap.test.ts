@@ -24,7 +24,7 @@ it('offers one grant when a declared class progression and its exact owned featu
 it('retains historical filter answers as the same single grant without rewriting the saved answer records',()=>{
  const {c,entries}=setup(data,1),feature=c.selections.find(row=>row.entry.kind==='feature')!,oldId=`${feature.id}:filter:0`,feat=entries.find(entry=>entry.kind==='feat')!;
  c.answers[oldId]=[feat.id];const answers=JSON.stringify(c.answers),choices=sheetChoices(c,entries).filter(choice=>choice.catalogKind==='feat');
- expect(choices).toHaveLength(1);expect(choices[0].selected).toEqual([feat.id]);syncChoiceContent(c,entries);expect(c.selections.filter(row=>row.entry.kind==='feat')).toHaveLength(1);expect(JSON.stringify(c.answers)).toBe(answers);
+ expect(choices).toHaveLength(1);expect(choices[0].selected).toEqual([feat.id]);syncChoiceContent(c,entries);expect(c.selections.filter(row=>row.entry.kind==='feat')).toHaveLength(1);for(const [id,answer] of Object.entries(JSON.parse(answers)))expect(c.answers[id]).toEqual(answer);expect(c.answers[choices[0].id]).toEqual([feat.id]);
 });
 it('keeps the class grant identity stable when source features hydrate after the initial pick',()=>{
  const entries=normalizeData(data,'late-class-feature'),c=newCharacter();c.automation=newAutomationState();c.selections=[{id:'owner',entry:entries.find(entry=>entry.kind==='class')!,level:1,quantity:1,equipped:false}];
@@ -35,7 +35,7 @@ it('keeps the class grant identity stable when source features hydrate after the
 it('retains conflicting historical filter picks as overflow records instead of granting twice',()=>{
  const authored={...data,classFeature:[{...data.classFeature[0],entries:[...data.classFeature[0].entries,'获得职业等级后可选择另一个{@filter 原创风格|feats|category=FS}。']}]}, {c,entries}=setup(authored,1),feature=c.selections.find(row=>row.entry.kind==='feature')!,feats=entries.filter(entry=>entry.kind==='feat');
  c.answers[`${feature.id}:filter:0`]=[feats[0].id];c.answers[`${feature.id}:filter:1`]=[feats[1].id];const answers=JSON.stringify(c.answers),choices=sheetChoices(c,entries).filter(choice=>choice.catalogKind==='feat');
- expect(choices).toHaveLength(1);expect(choices[0].count).toBe(1);expect(choices[0].slots).toEqual(feats.map(entry=>entry.id));expect(choices[0].selected).toEqual([feats[0].id]);syncChoiceContent(c,entries);expect(c.selections.filter(row=>row.entry.kind==='feat')).toHaveLength(1);expect(JSON.stringify(c.answers)).toBe(answers);
+ expect(choices).toHaveLength(1);expect(choices[0].count).toBe(1);expect(choices[0].slots).toEqual(feats.map(entry=>entry.id));expect(choices[0].selected).toEqual([feats[0].id]);syncChoiceContent(c,entries);expect(c.selections.filter(row=>row.entry.kind==='feat')).toHaveLength(1);for(const [id,answer] of Object.entries(JSON.parse(answers)))expect(c.answers[id]).toEqual(answer);expect(c.answers[choices[0].id]).toEqual(feats.map(entry=>entry.id));
  setSheetChoiceSlot(c,choices[0].id,0,undefined,entries);syncChoiceContent(c,entries);expect(c.selections.filter(row=>row.entry.kind==='feat')).toHaveLength(0);expect(c.answers[`${feature.id}:filter:0`]).toEqual([feats[0].id]);expect(c.answers[`${feature.id}:filter:1`]).toEqual([feats[1].id]);
 });
 it('preserves independent same-category rewards from another owner or another declared feature',()=>{

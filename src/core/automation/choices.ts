@@ -107,6 +107,9 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
   }
  }
  const sourceChoices=sourceClassChoices(c,known),duplicates=new Set(sourceChoices.flatMap(choice=>choice.duplicateChoiceIds||[]));
+ for(const choice of sourceChoices)if(choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&choice.selected.includes(archive.selections[0].entry.id)&&!c.selections.some(row=>row.requirementId===choice.id&&row.entry.id===archive.selections[0].entry.id))){
+  choice.complete=false;choice.hint='原授予与子项记录已保留，关联恢复前不会生效；来源特性停用时请先恢复原来源。';
+ }
  return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...classSpellChoices(c,catalog)];
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
@@ -167,17 +170,77 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  }
  finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
 }
+const classFeatRequirement=(id:string|undefined)=>!!id&&/:(?:class-feat|class-typed-feat):/.test(id);
+function parkClassChoiceGrant(c:Character,root:Selection){
+ if(c.classChoiceArchive?.[root.id])throw Error('职业选择保留身份冲突，请保留角色备份。');
+ const children=new Map<string,Selection[]>();for(const row of c.selections)if(row.parentId)children.set(row.parentId,[...children.get(row.parentId)||[],row]);
+ const ids=new Set<string>(),tree:Selection[]=[],pending=[root];
+ while(pending.length){const row=pending.shift()!;if(ids.has(row.id))continue;ids.add(row.id);tree.push(row);pending.push(...children.get(row.id)||[]);}
+ const parent=c.selections.find(row=>row.id===root.parentId);
+ c.classChoiceArchive={...c.classChoiceArchive,[root.id]:{choiceId:root.requirementId!,parent:parent?structuredClone(parent):undefined,selections:structuredClone(tree)}};
+ c.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([root.entry,...(parent?.entry.kind==='feature'?[parent.entry]:[])].map(entry=>[entry.id,structuredClone(entry)]))};
+ c.selections=c.selections.filter(row=>!ids.has(row.id));
+}
+/** Normalize only proven aliases, before source-feature removal can cascade. */
+export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
+ if(!automationEnabled(c))return false;
+ let changed=false;
+ const choices=sheetChoices(c,catalog).filter(choice=>choice.sourceProgression==='feat');
+ for(const choice of choices)if(choice.duplicateChoiceIds?.length){
+  if(!Object.hasOwn(c.answers,choice.id)&&choice.slots?.some(Boolean)){c.answers={...c.answers,[choice.id]:[...choice.slots]};changed=true;}
+  for(const row of c.selections)if(row.entry.kind==='feat'&&choice.duplicateChoiceIds.some(alias=>row.requirementId===alias&&row.grantKey===`choice:${alias}:${row.entry.id}`)){
+   row.requirementId=choice.id; // Keep selection ID, grant key and source ancestry.
+   const parent=c.selections.find(parent=>parent.id===row.parentId);
+   c.classChoiceSnapshots={...c.classChoiceSnapshots,[row.entry.id]:structuredClone(row.entry),...(parent?.entry.kind==='feature'?{[parent.entry.id]:structuredClone(parent.entry)}:{})};changed=true;
+  }
+ }
+ for(const row of [...c.selections])if(row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)&&row.grantKey?.startsWith('choice:')){
+  const choice=choices.find(choice=>choice.id===row.requirementId);
+  if(!choice?.selected.includes(row.entry.id)){parkClassChoiceGrant(c,row);changed=true;}
+ }
+ for(const [id,archive] of Object.entries(c.classChoiceArchive||{})){
+  const root=archive.selections[0],choice=sheetChoices(c,catalog).find(choice=>choice.id===archive.choiceId&&choice.sourceProgression==='feat');
+  if(!choice?.selected.includes(root.entry.id)||!choice.options.find(option=>option.value===root.entry.id)?.grant)continue;
+  // Historical duplicate grants remain parked once a single identity is active.
+  if(c.selections.some(row=>row.entry.kind==='feat'&&row.requirementId===choice.id&&row.entry.id===root.entry.id))continue;
+  let parent=c.selections.find(row=>row.id===root.parentId),restoreParent:Selection|undefined;
+  if(parent&&archive.parent&&(parent.entry.id!==archive.parent.entry.id||parent.grantKey!==archive.parent.grantKey||parent.parentId!==archive.parent.parentId))continue;
+  if(!parent&&archive.parent){
+   const saved=archive.parent;
+   parent=c.selections.find(row=>row.parentId===saved.parentId&&row.entry.id===saved.entry.id&&row.grantKey===saved.grantKey);
+   if(!parent&&saved.entry.kind==='feature'&&saved.grantKey?.startsWith('ref:')){
+    const owner=c.selections.find(row=>row.id===saved.parentId&&row.id===choice.ownerId&&row.entry.kind==='class'),ref=saved.grantKey.slice(4),at=Number(ref.split('|')[3]);
+    const declared=blocks(owner?.entry.raw.classFeatures).some(raw=>(typeof raw==='string'?raw:raw?.classFeature)===ref);
+    if(owner&&declared&&Number.isSafeInteger(at)&&at>=1&&owner.level>=at&&selectionActive(c,owner)&&selectionEffectsAllowed(c,saved.entry)&&!c.dismissedFeatures?.includes(`${owner.id}|${saved.grantKey}`)&&resolveEntryReference(ref,[saved.entry,...catalog],'feature')?.id===saved.entry.id)restoreParent=structuredClone(saved);
+   }
+  }
+  if(!parent&&!restoreParent||parent&&!selectionActive(c,parent))continue;
+  const restored=structuredClone(archive.selections);restored[0].parentId=(parent||restoreParent)!.id;
+  const additions=[...(restoreParent?[restoreParent]:[]),...restored];
+  if(additions.some(row=>c.selections.some(current=>current.id===row.id)))throw Error('职业选择恢复身份冲突，请保留角色备份。');
+  c.selections.push(...additions);delete c.classChoiceArchive![id];if(!Object.keys(c.classChoiceArchive!).length)delete c.classChoiceArchive;changed=true;
+ }
+ return changed;
+}
 /** Reconcile content only at the existing explicit edit/hydration boundary. */
 export function syncChoiceContent(c:Character,catalog:Entry[]){
  if(!automationEnabled(c))return false;
- let changed=false;const desired=new Map<string,{owner:string;entry:Entry;requirementId:string}>();
+ let changed=preserveClassChoiceGrants(c,catalog);const desired=new Map<string,{owner:string;entry:Entry;requirementId:string}>();
  // Resolve newly granted nested options in bounded passes without inventing answers.
  for(let pass=0;pass<12;pass++){
   let added=false;
-  for(const choice of sheetChoices(c,catalog))if(choice.channel==='content')for(const value of choice.selected){const option=choice.options.find(o=>o.value===value);if(option?.grant){const key=`choice:${choice.id}:${value}`;desired.set(key,{owner:choice.ownerId,entry:option.grant,requirementId:choice.id});if(!c.selections.some(s=>s.grantKey===key)){const hash=(text:string)=>{let a=2166136261,b=5381;for(const ch of text){a=Math.imul(a^ch.charCodeAt(0),16777619);b=Math.imul(b,33)^ch.charCodeAt(0);}return `${a>>>0}-${b>>>0}`;};const id=`chosen:${hash(key)}`;if(c.selections.some(s=>s.id===id))throw Error('选择条目身份冲突，请保留角色备份。');c.selections.push({id,entry:structuredClone(option.grant),level:1,quantity:1,equipped:false,parentId:choice.ownerId,grantKey:key,requirementId:choice.id});changed=added=true;}}}
+  for(const choice of sheetChoices(c,catalog))if(choice.channel==='content')for(const value of choice.selected){
+   const option=choice.options.find(o=>o.value===value);if(!option?.grant)continue;
+   const retained=choice.sourceProgression==='feat'?c.selections.find(row=>row.requirementId===choice.id&&row.entry.id===option.entry.id&&row.grantKey?.startsWith('choice:')):undefined;
+   // An un-restorable saved tree must never be replaced by a fresh active grant.
+   if(!retained&&choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&archive.selections[0].entry.id===value))continue;
+   const key=retained?.grantKey||`choice:${choice.id}:${value}`;desired.set(key,{owner:choice.ownerId,entry:option.grant,requirementId:choice.id});
+   if(!c.selections.some(s=>s.grantKey===key)){const hash=(text:string)=>{let a=2166136261,b=5381;for(const ch of text){a=Math.imul(a^ch.charCodeAt(0),16777619);b=Math.imul(b,33)^ch.charCodeAt(0);}return `${a>>>0}-${b>>>0}`;};const id=`chosen:${hash(key)}`;if(c.selections.some(s=>s.id===id))throw Error('选择条目身份冲突，请保留角色备份。');c.selections.push({id,entry:structuredClone(option.grant),level:1,quantity:1,equipped:false,parentId:choice.ownerId,grantKey:key,requirementId:choice.id});changed=added=true;}
+  }
   if(!added)break;
  }
  const removed=new Set(c.selections.filter(s=>s.grantKey?.startsWith('choice:')&&!desired.has(s.grantKey)).map(s=>s.id));
+ for(const row of [...c.selections])if(removed.has(row.id)&&row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)){parkClassChoiceGrant(c,row);changed=true;}
  for(let pass=0;pass<12;pass++)for(const row of c.selections)if(row.parentId&&removed.has(row.parentId))removed.add(row.id);
  if(removed.size){c.selections=c.selections.filter(s=>!removed.has(s.id));changed=true;}
  return changed;
