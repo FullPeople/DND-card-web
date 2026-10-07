@@ -109,6 +109,15 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);
  if(!choice||choice.restricted||!option||option.unavailable&&!(choice.channel==='tools'&&choice.selected.includes(value)))throw Error(option?.unavailable||'此选择当前不可用。');
+ if(choice.channel==='tools'){
+  // Concept buttons must edit the recorded slots too, not their deduplicated
+  // display. Removing one value cannot erase unrelated legacy records.
+  const saved=c.answers[id]||[];
+  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];finishBuiltinChoices(c,before,catalog);return;}
+  const index=choice.count===1?0:choice.slots!.findIndex((v,i)=>i<choice.count&&!v);
+  if(index<0)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
+  setSheetChoiceSlot(c,id,index,value,catalog);return;
+ }
  if(choice.channel==='spells'){chooseClassSpell(c,choice,option.entry);finishBuiltinChoices(c,before,catalog);return;}
  const selected=choice.selected.includes(value)?choice.selected.filter(v=>v!==value):choice.count===1?[value]:[...choice.selected,value];
  if(selected.length>choice.count)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);

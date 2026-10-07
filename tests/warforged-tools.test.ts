@@ -100,6 +100,12 @@ it('missing legacy tool IDs and overflow records survive edits without invented 
  expect(tool.slots).toEqual(['legacy-unindexed-tool',b.id,'legacy-extra-tool']);expect(tool.options.some(o=>o.value==='legacy-unindexed-tool'||o.value==='legacy-extra-tool')).toBe(false);expect(tool.complete).toBe(false);expect(JSON.stringify(c)).toBe(before);
  setSheetChoiceSlot(c,id,1,next.id,catalog);expect(c.answers[id]).toEqual(['legacy-unindexed-tool',next.id,'legacy-extra-tool']);setSheetChoiceSlot(c,id,0,undefined,catalog);expect(c.answers[id]).toEqual(['',next.id,'legacy-extra-tool']);
 });
+it('concept clicks preserve untouched duplicate, missing and overflow tool records instead of rewriting from the deduplicated view',()=>{
+ const c=explicitTools(['Custom Tool A','Custom Tool B','Custom Tool C']);c.selections[0].entry.raw.toolProficiencies[0].choose.count=2;const id=sheetChoices(c,[]).find(r=>r.channel==='tools')!.id;
+ c.answers[id]=['Custom Tool A','Custom Tool A','Custom Tool B','legacy-missing'];chooseSheetOption(c,id,'Custom Tool B',[]);expect(c.answers[id]).toEqual(['Custom Tool A','Custom Tool A','','legacy-missing']);
+ const before=JSON.stringify(c);expect(()=>chooseSheetOption(c,id,'Custom Tool C',[])).toThrow();expect(JSON.stringify(c)).toBe(before);
+ setSheetChoiceSlot(c,id,0,undefined,[]);chooseSheetOption(c,id,'Custom Tool C',[]);expect(c.answers[id]).toEqual(['Custom Tool C','Custom Tool A','','legacy-missing']);
+});
 it('tool retention does not activate a disabled source skill or turn an unknown answer into a skill grant',()=>{
  const c=setup('EFA'),skill=sheetChoices(c,catalog).find(r=>r.channel==='skills')!;c.answers[skill.id]=['athletics'];expect(evaluate(c).skills.athletics.proficient).toBe(true);
  c.profile.enabledSources=c.profile.enabledSources.filter(s=>s!=='EFA');const before=JSON.stringify(c);expect(sheetChoices(c,catalog).find(r=>r.id===skill.id)!.restricted).toBe(true);expect(evaluate(c).skills.athletics.proficient).toBe(false);expect(JSON.stringify(c)).toBe(before);expect(c.answers[skill.id]).toEqual(['athletics']);
