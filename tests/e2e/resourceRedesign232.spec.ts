@@ -43,7 +43,7 @@ test('every numeric face fits large balances at its minimum size and an unbounde
  c.runtime.resources=Object.fromEntries(styles.map(style=>[style,{name:style,current:88888,max:99999}]));c.runtime.resources.unlimited={name:'无限制数值',current:999999999,max:0,unlimited:true};
  c.quickbarLayout={order:[],hidden:[],attacks:{x:0,y:0,w:4,h:6,page:0,style:'segments',resourceArea:true,split:.55},widgets:Object.fromEntries([...styles,'unlimited'].map((style,page)=>[style,{x:0,y:0,w:4,h:3,page,style:style==='unlimited'?'counter':style}])) as any};
  await page.evaluate(c=>localStorage.setItem('resource-dashboard220:empty',JSON.stringify(c)),c);await page.reload();await page.setViewportSize({width:390,height:844});const scope=page.locator('.fixture-quickbar');
- for(const style of [...styles,'unlimited']){const module=scope.locator(`[data-resource-id=${style}]`);await module.scrollIntoViewIfNeeded();await expect(module).toBeVisible();expect(await clips(module)).toEqual([]);if(style==='unlimited')await expect(module.locator('.rm-content > .rm-counter')).toHaveText('999999999');else await expect(module).toContainText('99999');await expect(scope.locator('.resource-page-nav')).toHaveCount(0);}
+ for(const style of [...styles,'unlimited']){const module=scope.locator(`[data-resource-id=${style}]`);await module.scrollIntoViewIfNeeded();await expect(module).toBeVisible();expect(await clips(module)).toEqual([]);if(style==='unlimited')await expect(module.locator('.rm-content .rm-counter')).toHaveText('999999999');else await expect(module).toContainText('99999');await expect(scope.locator('.resource-page-nav')).toHaveCount(0);}
  expect((await read(page)).runtime.resources).toEqual(c.runtime.resources);
 });
 

@@ -33,7 +33,7 @@ test('color changes only icons and explicit counts remain readable in the narrow
  await expect(icon).toHaveCSS('color','rgb(163, 109, 97)');expect((await icon.boundingBox())!.height).toBeGreaterThan(8);await expect(face.locator('.rm-icon-unit')).toHaveCount(5);await expect(face.locator('.rm-icon-unit.is-filled')).toHaveCount(3);
  await page.setViewportSize({width:390,height:844});await expect(dialog.getByRole('textbox',{name:'资源名称'})).toHaveValue('动作如潮');
  expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
- expect(await dialog.locator('.resource-template-option').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-template-id')))).toEqual(['ring','pips','half','orbit','square','segments','reservoir','matrix','fraction','counter','diamond']);
+ expect(await dialog.locator('.resource-template-option').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-template-id')))).toEqual(['segments','orbit','pips','matrix','ring','square','diamond','half','reservoir','fraction','counter']);
  await dialog.screenshot({path:test.info().outputPath('resource-gray-preview-narrow.png')});
 });
 

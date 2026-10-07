@@ -1,3 +1,11 @@
+# 2026-10-07 · PR16 合并与审阅处理，资源快捷栏与仪表盘整体重做（本地候选，未发布）
+
+**合并与审阅。** PR16（dnd.center 卡库、Node + SQLite API）54 项检查全绿、可合并，已合入 main（`4a95a7d`）。Codex 五条 P2 审阅逐条核实均成立：`api.ts` 的 `AbortSignal.timeout` 改用 `withRequestTimeout`、`buildCloud.mjs` 补复制 `backup.mjs`、`cloud-migration.yml` 扩展共享模块路径，三项随本分支提交并通过 `test:cloud` 15 项。`App.tsx` 先校验再保存暂存草稿、`storage.ts` 刷新陈旧 `cloud-staged:` 两项成立但触碰 Data 字节门禁（`automation-runtime-coverage.json` 固定了这两个文件的 SHA-256，改动后 17 项单元与 `npm run build` 以 `Runtime coverage is stale` 失败），按 Data → Web 串行流程留作补丁，见 [交接说明](handoffs/CLOUD-REVIEW-PINNED-FIXES-20261007.md)。PR7 为草稿且自述需权限审查后才能合并，未动；PR2（外部 Go 后端，14,598 行）与 main 历史无关（`refusing to merge unrelated histories`），且与 PR16 已选的后端方向重叠，未合并、未评论，由用户决定。
+
+**重做范围。** `ResourceModuleFace` 与 `resourceDashboardFaces.css` 重写：所有 16 种样式共用灰色标题带＋内容区构图，默认 1px 灰框、2px 圆角、浅灰底，用户外观项只在显式设置时覆盖；数值改为无衬线等宽数字，图形与数字按容器查询在 ≤32px、≤46px 高与 ≤40px 宽三级退化，计数牌按位数拟合，分组按项数自适应列数并加行间细线。`ResourceDashboard` 改为预览、保存栏、属性面板（色调、图标、占位步进、内部缩放、外观一行）、资源数值与右侧粘性样式库；`ResourceTemplatePicker` 按逐点／仪表／数值／分组分组并标出默认与当前样式；新增 `WIDGET_STYLE_GROUPS`、`defaultModuleStyle`、`isIconWidgetStyle`。`minimumWidgetSize` 放宽（单次 1×1，仪表类 2×2，数值类 2×1，图标／分段 3×1，分组不变），仅影响允许的最小占位，已存坐标不改写。画布选中轮廓、八点手柄、重叠标记与操作弹窗同步重绘。测试侧：`dashboardAppearance237`／`resourceModules218` 的旧最小尺寸与“默认无描边”断言按新约定更新，夹具新增 `sizes` 场景覆盖各样式最小占位。产品约定见 PRODUCT.md 顶部。
+
+**验证。** TypeScript、`npm run build`、`npm run build:standalone` 通过（既有大 chunk 提示保留）。单元 125 文件通过、1 条件跳过，1,051 项通过、32 条件跳过（外部资料目录未提供）。本机 Chromium（预装 1194 版，经未跟踪的 `playwright.local-exec.config.ts` 指定可执行文件；仓库 pin 的 1.63 浏览器未下载）：dashboard237 组（237／235／221 夹具与 220 真实 App）30 通过、2 条件跳过（生产诊断）、0 失败；followup-ui231 的 chromium-resources 组（231 跟进与 232 重做规格）20 通过、0 失败；feedback217 的 integrated 组（220 夹具／真实 App／兼容、221 交互、紧凑 220、来源法术 217、工作台即时 217、群体投骰、卡面氛围）49 项首轮 48 通过、1 项为旧样式库顺序断言，改为按容量过滤的无序比较后该规格 10／10 复跑通过。首轮 dashboard237 三项失败分别是收起的外观区让 `fill('模块描边粗细')` 等待可见、微型模块隐藏标题带让包围盒检查失败、子资源行缺少行间细线，均已修正源码或断言后复跑。截图：夹具 default／appearance／sizes 三场景 1280 与 390、真实独立站 A4 卡面与编辑器，见会话附件；Firefox、Edge、实体手机、真实房间与 Suite 总览投影未验证，不部署、不改版本号。
+
 # 2026-10-07 · dnd.center 252 迁移候选，已授权部署
 
 从最新 main 792e9a4 和实际线上 251 隔离实现网站、卡库及 Node + SQLite API，保留原混合工作区。用户新标志已用于首页、卡库、独立卡片和浏览器图标。QQ 登录申请中，公网无模拟登录、手填号码身份或付款入口。旧站保留完整读写和 JSON 导出，只增加可收起的迁移说明，不强制跳转。
