@@ -1,3 +1,4 @@
+import {customField} from './customCanvasHelpers';
 import {test,expect} from '@playwright/test';
 import {readFileSync,existsSync} from 'node:fs';
 import {newCharacter,type Entry} from '../../src/core/model';
@@ -34,5 +35,5 @@ test('actual candidate card keeps original status effects on wide and narrow pag
 
 test('custom status editor has no new visual template picker',async({page})=>{
  await page.route('**/release-custom-editor',route=>route.fulfill({contentType:'text/html; charset=utf-8',body:`<!doctype html><meta charset="utf-8"><div id="root"></div><script type="module">import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$=()=>{};window.$RefreshSig$=()=>type=>type;window.__vite_plugin_react_preamble_installed__=true;</script><script type="module" src="/tests/e2e/releaseCustom181.harness.jsx"></script>`}));
- await page.goto('/release-custom-editor');await page.getByLabel('自定义条目类型').selectOption('condition');await expect(page.getByLabel('自定义条目名称')).toBeVisible();await expect(page.getByLabel('自定义条目正文')).toBeVisible();await expect(page.locator('.custom-visual-picker,.custom-visual-options')).toHaveCount(0);await expect(page.getByRole('radiogroup',{name:'卡片特效'})).toHaveCount(0);await page.screenshot({path:out+'/candidate-custom-status-no-template.png'});
+ await page.goto('/release-custom-editor');await (await customField(page,'自定义条目类型')).selectOption('condition');await expect((await customField(page,'自定义条目名称'))).toBeVisible();await expect((await customField(page,'自定义条目正文'))).toBeVisible();await expect(page.locator('.custom-visual-picker,.custom-visual-options')).toHaveCount(0);await expect(page.getByRole('radiogroup',{name:'卡片特效'})).toHaveCount(0);await page.screenshot({path:out+'/candidate-custom-status-no-template.png'});
 });

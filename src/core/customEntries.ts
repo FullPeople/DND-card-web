@@ -2,7 +2,7 @@ import type {Entry,Kind} from './model';
 export const CUSTOM_TYPES:Record<string,{label:string;kind:Kind;category?:string;raw?:Record<string,unknown>}>={
  item:{label:'物品 · 背包',kind:'item'},weapon:{label:'武器 · 背包 / 武器训练',kind:'item',raw:{type:'M',weaponCategory:'simple'}},armor:{label:'护甲 · 背包 / 护甲训练',kind:'item',raw:{type:'LA'}},tool:{label:'工具 · 背包 / 工具训练',kind:'item',raw:{type:'AT'}},
  condition:{label:'状态',kind:'condition'},feature:{label:'特性',kind:'feature'},feat:{label:'专长',kind:'feat'},spell:{label:'法术',kind:'spell'},language:{label:'语言熟练',kind:'rule',category:'language'},weaponProperty:{label:'装备词条',kind:'rule',category:'itemProperty'},weaponMastery:{label:'武器精通',kind:'rule',category:'itemMastery'},
- background:{label:'背景',kind:'background'},race:{label:'种族',kind:'race'},class:{label:'职业',kind:'class'},subclass:{label:'子职',kind:'subclass'},rule:{label:'规则',kind:'rule',category:'variantrule'}
+ background:{label:'背景',kind:'background'},race:{label:'种族',kind:'race'},class:{label:'职业',kind:'class'},subclass:{label:'子职',kind:'subclass'},monster:{label:'怪物',kind:'monster'},rule:{label:'规则',kind:'rule',category:'variantrule'}
 };
 export function createCustomEntry(value:{id?:string;name:string;english?:string;type:string;body:string;entries?:unknown[];raw?:unknown;edition?:Entry['edition'];revision?:string}):Entry{
  const type=CUSTOM_TYPES[value.type];if(!type||!value.name.trim()||value.name.length>160||value.body.length>100000)throw Error('请填写条目名称和有效类型');
@@ -15,5 +15,18 @@ export function createCustomEntry(value:{id?:string;name:string;english?:string;
  Object.assign(raw,{name:value.name.trim(),ENG_name:english});
  const entries=value.entries||value.body.split(/\n\s*\n/).filter(s=>s.trim()).map(text=>{try{const node=JSON.parse(text);return node&&typeof node==='object'?node:text;}catch{return text;}});
  if(!Array.isArray(entries)||JSON.stringify(entries).length>100000)throw Error('正文结构过长或无效');
+ if(value.type==='monster')(raw as Record<string,unknown>).entries=structuredClone(entries);
  return {id:value.id||`custom:${crypto.randomUUID()}`,name:value.name.trim(),english,kind:type.kind,source:'CUSTOM',packId:'custom',edition:value.edition||'both',revision:value.revision||'1',entries,raw};
+}
+/** A new authoring draft owns its identity and cannot mutate the source snapshot. */
+export function customCopy(entry:Entry):Entry{
+ const category=entry.raw._category;
+ const type=entry.raw._customType&&CUSTOM_TYPES[entry.raw._customType]?entry.raw._customType:
+  category==='itemProperty'?'weaponProperty':category==='itemMastery'?'weaponMastery':category==='language'?'language':
+  entry.kind==='item'?entry.raw.weaponCategory||['M','R'].includes(entry.raw.type)?'weapon':['LA','MA','HA','S'].includes(entry.raw.type)?'armor':['AT','T','INS','GS'].includes(entry.raw.type)?'tool':'item':
+  CUSTOM_TYPES[entry.kind]?entry.kind:'rule';
+ const raw=structuredClone(entry.raw);
+ for(const key of Object.keys(raw))if(key.startsWith('_')&&key!=='_legendaryGroup')delete raw[key];
+ delete raw.source;delete raw.packId;
+ return createCustomEntry({name:`${entry.name}（自定义副本）`.slice(0,160),english:entry.english,type,body:'',entries:structuredClone(entry.kind==='monster'?Array.isArray(entry.raw.entries)?entry.raw.entries:[]:entry.entries),raw,edition:entry.edition});
 }

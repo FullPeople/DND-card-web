@@ -58,7 +58,7 @@ export function createCloudSync(deps:SyncDependencies){
      receipt={...receipt,pending};await deps.writeReceipt(id,receipt);
      let saved:CloudCard;
      try{saved=await deps.mutation<CloudCard>(account,receipt.binding?'cards/'+receipt.binding.cloudId:'cards',receipt.binding?'PUT':'POST',{character:snapshot,revision:receipt.binding?.revision,confirmUpload:true,confirmPublicTemporary:true});}
-     catch(error){if(error instanceof CloudRequestError){receipt={...receipt,pending:undefined};await deps.writeReceipt(id,receipt);}throw error;}
+     catch(error){if(error instanceof CloudRequestError&&error.status<500&&error.status!==408){receipt={...receipt,pending:undefined};await deps.writeReceipt(id,receipt);}throw error;}
      receipt={binding:{accountId:account,cloudId:saved.id,revision:saved.revision},hash};await deps.writeReceipt(id,receipt);
      // Edits made while the request was running are saved in the next revision.
      // The uploaded snapshot is never written back over the local character.
@@ -76,7 +76,7 @@ export function createCloudSync(deps:SyncDependencies){
 
 export async function characterHash(character:Character){
  const {id,revision,updatedAt,...content}=character;
- const stable=(value:unknown):unknown=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([key,row])=>[key,stable(row)])):value;
+ const stable=(value:unknown):unknown=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([key,row])=>[key,stable(row)])):value;
  const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(stable(content))));
  return Array.from(new Uint8Array(bytes),byte=>byte.toString(16).padStart(2,'0')).join('');
 }
@@ -92,7 +92,8 @@ export async function writeSyncReceipt(id:string,receipt:SyncReceipt){
   if(receipt.binding)await tx.store.put(receipt.binding,'cloud-binding:'+id);
   await tx.store.put(receipt,'cloud-sync:'+id);await tx.done;
  }finally{db.close();}
- window.dispatchEvent(new Event('cloud-binding-changed'));
- if(typeof BroadcastChannel!=='undefined'){const channel=new BroadcastChannel('dnd-card-cloud');channel.postMessage(id);channel.close();}
+ const notice={id,pending:!!receipt.pending,failed:!!receipt.lastError};
+ window.dispatchEvent(new CustomEvent('cloud-binding-changed',{detail:notice}));
+ if(typeof BroadcastChannel!=='undefined'){const channel=new BroadcastChannel('dnd-card-cloud');channel.postMessage(notice);channel.close();}
 }
 export function cloudCardLock<T>(id:string,action:()=>Promise<T>){return navigator.locks?navigator.locks.request('dnd-card-cloud:'+id,action):action();}

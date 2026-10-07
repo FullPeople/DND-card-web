@@ -33,7 +33,7 @@ describe('cloud draft synchronization',()=>{
  it('reconciles a committed POST whose reply was lost without creating a second card',async()=>{
   const s=setup(),original=s.deps.mutation;s.deps.mutation=async<T>(...args:Parameters<SyncDependencies['mutation']>)=>{await original<T>(...args);throw Error('connection lost');};
   await s.engine.run(s.character.id,'owner');expect(s.receipt.pending).toBeTruthy();expect(s.states.at(-1)?.phase).toBe('uncertain');
-  s.deps.mutation=original;await s.engine.run(s.character.id,'owner');expect(s.writes).toHaveLength(1);expect(s.receipt.pending).toBeUndefined();expect(s.states.at(-1)?.phase).toBe('saved');
+  s.deps.mutation=original;await createCloudSync(s.deps).run(s.character.id,'owner');expect(s.writes).toHaveLength(1);expect(s.receipt.pending).toBeUndefined();expect(s.states.at(-1)?.phase).toBe('saved');
  });
  it('never retries an unknown upload when the public directory cannot confirm it',async()=>{
   const s=setup();s.deps.mutation=async()=>{s.writes.push('attempt');throw Error('connection lost');};await s.engine.run(s.character.id,'owner');await s.engine.run(s.character.id,'owner');

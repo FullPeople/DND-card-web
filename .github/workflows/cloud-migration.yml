@@ -1,7 +1,7 @@
 name: DND Center cloud migration
 on:
   push:
-    branches: [codex/dnd-center-migration-20261007, codex/dnd-center-temporary-library-20261007, codex/dnd-center-latest-ui-20261008]
+    branches: [codex/dnd-center-migration-20261007, codex/dnd-center-temporary-library-20261007, codex/dnd-center-latest-ui-20261008, codex/cloud-save-status-20261008]
   pull_request:
     # Shared modules the cloud flows exercise (staging, persistence, public viewing,
     # packaging) must also re-run these checks, not only the cloud-specific paths.
