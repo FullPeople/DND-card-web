@@ -10,6 +10,18 @@ export type WidgetIcon=typeof WIDGET_ICONS[number];
 export type ResourceWidgetLayout={x:number;y:number;w:number;h:number;page:number;style:WidgetStyle;members?:string[];label?:string;color?:string;icon?:WidgetIcon;resourceArea?:true;split?:number;contentScale?:number;background?:string;borderWidth?:number;borderRadius?:number;padding?:number;gap?:number};
 export const WIDGET_COLS=12,WIDGET_ROWS=6,ATTACKS_WIDGET_ID='__attacks__';
 export const widgetStyleNames:Record<WidgetStyle,string>={ring:'环形',pips:'图标',pool:'子资源',half:'半圆',orbit:'断环',square:'方框',segments:'分段槽',reservoir:'容器',matrix:'图标矩阵',fraction:'斜分数',counter:'计数牌',poolchips:'子资源铭牌',poolbars:'子资源条',poolpips:'子资源图标',ready:'单次状态',diamond:'菱形',bar:'分段槽',icon:'图标'};
+/** Presentation families for the style library. Identity-only: a style's group never changes how it is stored. */
+export const WIDGET_STYLE_GROUPS=[
+ {id:'count',name:'逐点',styles:['segments','orbit','pips','matrix','ready']},
+ {id:'gauge',name:'仪表',styles:['ring','square','diamond','half','reservoir']},
+ {id:'number',name:'数值',styles:['fraction','counter']},
+ {id:'group',name:'分组',styles:['pool','poolchips','poolbars','poolpips']},
+] as const satisfies readonly {id:string;name:string;styles:readonly CanonicalWidgetStyle[]}[];
+export type WidgetStyleGroup=typeof WIDGET_STYLE_GROUPS[number]['id'];
+export function widgetStyleGroup(style:WidgetStyle):WidgetStyleGroup{const id=canonicalWidgetStyle(style);return WIDGET_STYLE_GROUPS.find(group=>(group.styles as readonly string[]).includes(id))?.id??'count';}
+/** Styles whose artwork repeats the chosen flat icon. */
+export const ICON_WIDGET_STYLES:readonly CanonicalWidgetStyle[]=['pips','matrix','ready','poolpips'];
+export const isIconWidgetStyle=(style?:WidgetStyle)=>ICON_WIDGET_STYLES.includes(canonicalWidgetStyle(style));
 const clamp=(n:number,min:number,max:number)=>Math.max(min,Math.min(max,Math.round(Number.isFinite(n)?n:min)));
 const isColor=(v:unknown):v is string=>typeof v==='string'&&/^#[\da-f]{6}$/i.test(v);
 const isIcon=(v:unknown):v is WidgetIcon=>WIDGET_ICONS.includes(v as WidgetIcon);
@@ -46,14 +58,15 @@ export function resourceWidgetLayout(ids:string[],saved:Record<string,ResourceWi
  for(const id of ordered){const widget=place(normalizeWidget(Object.hasOwn(saved,id)?saved[id]:undefined),placed);result[id]=widget;placed.push(widget);}
  compactPages(placed);return result;
 }
+/** Smallest box a face still reads in; the artwork adapts down to these cells. */
 export function minimumWidgetSize(style:WidgetStyle):{w:number;h:number}{
  const id=canonicalWidgetStyle(style);
- if(id==='ready')return {w:2,h:2};
- if(['ring','orbit','square','reservoir'].includes(id))return {w:2,h:3};
+ if(id==='ready')return {w:1,h:1};
+ if(['ring','orbit','square','reservoir','diamond','half','matrix'].includes(id))return {w:2,h:2};
  if(['pool','poolchips'].includes(id))return {w:4,h:2};
- if(['counter','poolbars','poolpips'].includes(id))return {w:4,h:3};
- if(['half','matrix','fraction','diamond'].includes(id))return {w:3,h:3};
- return {w:3,h:2};
+ if(['poolbars','poolpips'].includes(id))return {w:4,h:3};
+ if(['counter','fraction'].includes(id))return {w:2,h:1};
+ return {w:3,h:1};
 }
 export function moveWidget(widget:ResourceWidgetLayout,dx:number,dy:number,handle='move',minimum?:{w:number;h:number}):ResourceWidgetLayout{
  if(handle==='move')return normalizeWidget({...widget,x:widget.x+dx,y:widget.y+dy});
@@ -77,6 +90,10 @@ export function chooseDefaultWidgetStyle(resource:Pick<ResourceValue,'max'|'unli
  return resource.max>=10000?'counter':'ring';
 }
 export const countableResource=(resource:Pick<ResourceValue,'max'|'unlimited'>)=>!resource.unlimited&&Number.isInteger(resource.max)&&resource.max>=1&&resource.max<=10;
+/** The capacity-driven default a module would receive without a saved style. */
+export function defaultModuleStyle(module:Pick<ResourceModule,'slots'|'rows'>):CanonicalWidgetStyle{
+ return module.slots||module.rows.length>1?'poolpips':chooseDefaultWidgetStyle(module.rows[0]?.[1]??{max:3,unlimited:false});
+}
 /** Candidate eligibility only. A saved style is never substituted after capacity changes. */
 export function supportsWidgetStyle(style:WidgetStyle,rows:ResourceModule['rows'],multi=rows.length>1){
  const id=canonicalWidgetStyle(style),grouped=['pool','poolchips','poolbars','poolpips'].includes(id);
@@ -130,10 +147,10 @@ export type ResourceTemplateValues={name:string;current:number;max:number;unlimi
 /** A group needs room for every actual resource pool, not only its first row. */
 export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle,contentScale=1):{w:number;h:number}{
  const min=minimumWidgetSize(style),multi=module.slots||module.rows.length>1,wide=multi&&module.rows.length>4;
- const multiHeight=!multi?2:module.rows.length>9?6:module.rows.length>6?5:module.rows.length>3?4:['poolbars','poolpips'].includes(canonicalWidgetStyle(style))?4:module.slots?2:3;
+ const multiHeight=!multi?1:module.rows.length>9?6:module.rows.length>6?5:module.rows.length>3?4:['poolbars','poolpips'].includes(canonicalWidgetStyle(style))?4:module.slots?2:3;
  const capacity=module.rows[0]?.[1].max||0,digits=Math.max(...module.rows.map(([,r])=>Math.max(String(r.current).length,String(r.max).length))),discrete=['pips','matrix','orbit','segments'].includes(canonicalWidgetStyle(style));
  const scale=Math.max(.25,Math.min(1,Number.isFinite(contentScale)?contentScale:1));
- const size={w:Math.max(min.w,multi?(digits>6?12:wide?8:6):digits>6?6:digits>4?4:discrete&&capacity>6?5:style==='ready'?2:3),h:Math.max(min.h,multiHeight,discrete&&capacity>6&&style!=='segments'?3:2)};
+ const size={w:Math.max(min.w,multi?(digits>6?12:wide?8:6):digits>6?5:digits>4?4:discrete&&capacity>6?4:min.w),h:Math.max(min.h,multiHeight,discrete&&capacity>6&&style!=='segments'?2:min.h)};
  // Small artwork may claim genuinely smaller cells; large artwork stays bounded.
  return {w:Math.max(1,Math.min(WIDGET_COLS,Math.ceil(size.w*scale))),h:Math.max(1,Math.min(WIDGET_ROWS,Math.ceil(size.h*scale)))};
 }
