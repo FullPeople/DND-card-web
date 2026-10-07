@@ -251,7 +251,8 @@
 }
 
 
-.sheet-viewport.screen-mode .resource-module-art.rm-group{container-type:inline-size;height:auto}
+/* The contained content needs the widget's definite height to paint. */
+.sheet-viewport.screen-mode .resource-module-art.rm-group{container-type:inline-size;height:100%}
 .sheet-viewport.screen-mode .resource-module-art .rm-pools{flex:none;min-height:22px}
 .sheet-viewport.screen-mode .resource-module-art .rm-pools.has-many-pools{grid-auto-rows:minmax(24px,auto);min-height:calc(var(--rm-pool-rows) * 25px)}
 

@@ -1,0 +1,48 @@
+name: Verify tool proficiency choices
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/warforged-tools.test.ts'
+      - 'tests/choice-catalog.test.ts'
+      - 'tests/fixtures/warforged-tool-sources.json'
+      - 'tests/helpers/warforgedToolFixture.ts'
+      - 'tests/e2e/warforgedTools.spec.ts'
+      - 'tests/e2e/fixtures.ts'
+      - 'tools/verifyWarforgedToolSources.mjs'
+      - 'playwright.warforged-tools.config.ts'
+      - 'package*.json'
+      - 'vite.config.ts'
+      - 'tsconfig*.json'
+      - '.github/workflows/warforged-tools.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tool-choices-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: node tools/verifyWarforgedToolSources.mjs
+      - run: npm ci
+      - run: npx vitest run tests/warforged-tools.test.ts tests/choice-catalog.test.ts
+      - run: npm run build:standalone
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.warforged-tools.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tool-choice-evidence
+          include-hidden-files: true
+          path: |
+            .local-evidence/warforged/source-verification.json
+            .local-evidence/warforged/browser/
+          if-no-files-found: error
+          retention-days: 14
