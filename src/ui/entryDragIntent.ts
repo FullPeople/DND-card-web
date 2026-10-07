@@ -9,5 +9,5 @@ export function entryDragIntent(entry:Entry,source:{libraryTab?:string;trainingS
 }
 export function entryDragPage(entry:Entry,intent:EntryDragIntent,preservePage=false){
   if(preservePage)return;
-  return intent==='training'?'主要':entry.kind==='spell'?'法术':entry.kind==='item'?'背包':undefined;
+  return intent==='training'?'主要':entry.kind==='spell'?'法术':entry.kind==='item'?'背包':entry.kind==='feature'&&entry.raw._category==='optionalfeature'?'特性':undefined;
 }
