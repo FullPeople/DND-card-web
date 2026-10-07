@@ -115,6 +115,7 @@ import {SheetDisplayButton} from './SheetDisplayButton';
 import { PaperFrame, type SheetPage } from './PaperFrame';
 import {SheetFullscreenButton,exitSheetFullscreen} from './SheetFullscreenButton';
 import { DropZone, EntryDragProvider, EntryDraggable } from './DragEntry';
+import {optionalFeatureLearningDrop} from './entryDragIntent';
 
 const SourceSettings=lazy(()=>import('./SourceSettings').then(m=>({default:m.SourceSettings})));
 const RoomRulesSummary=lazy(()=>import('./RoomRulesSummary').then(m=>({default:m.RoomRulesSummary})));
@@ -657,10 +658,9 @@ export default function App() {
     if (!c) return;
     if(pin){edit(draft=>pinEntry(draft,entry));return;}
     if (entry.raw._category === 'size') { edit(draft => { draft.size = entry.raw.size; }); return; }
-    if(automationEnabled(c)&&entry.raw._category==='optionalfeature'){
-      const choices=sheetChoices(c,allEntries).filter(choice=>choice.sourceProgression==='optional'&&choice.options.some(option=>option.entry.id===entry.id));
-      const choice=choices.find(choice=>!choice.restricted&&choice.options.some(option=>option.entry.id===entry.id&&!option.unavailable))||choices[0];
-      if(!choice){setNotice('此来源尚无已核对的学习选择入口；请查阅来源并手动记录。');return;}
+    const learningDrop=optionalFeatureLearningDrop(c,entry,allEntries);
+    if(learningDrop){
+      const choice=learningDrop.choice;
       openChoice(choice.id);
       const option=choice.options.find(option=>option.entry.id===entry.id)!,slot=choice.slots?.findIndex((value,index)=>index<choice.count&&!value)??-1;
       if(!choice.restricted&&!option.unavailable&&slot>=0&&!choice.slots?.includes(entry.id)){edit(draft=>setSheetChoiceSlot(draft,choice.id,slot,option.value,allEntries));setNotice(`已记录学习「${entry.name}」；具体效果及物品操作仍需手动处理。`);}

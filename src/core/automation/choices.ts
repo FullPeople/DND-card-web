@@ -8,11 +8,11 @@ import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbili
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
-import {sourceClassChoices} from './sourceClassChoices';
+import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
 import type {ClassChoiceSupport} from './classChoiceSupport';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
-export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntry?:Entry;hint?:string};
+export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntries?:Entry[];duplicateChoiceIds?:string[];hint?:string};
 export const equipmentTypeLabel=(type:string)=>({weaponMartial:'军用武器',weaponSimple:'简易武器',focusSpellcastingHoly:'圣徽',focusSpellcastingArcane:'奥术法器',focusSpellcastingDruidic:'德鲁伊法器'} as Record<string,string>)[type]||'尚未适配的装备类别';
 const blocks=(v:unknown):any[]=>Array.isArray(v)?v:[];
 export function equipmentOptionConcept(entry:Entry,index:number,value:string):Entry{return concept(entry,`equipment:${index}:${value}`,`起始装备 · 方案 ${value}`,blocks(equipmentBlocks(entry)[index]?.[value]).map(item=>typeof item==='string'?`{@item ${item}}`:item?.item?`${item.quantity||1} × {@item ${item.item}}`:item?.special||(item?.equipmentType?equipmentTypeLabel(item.equipmentType):undefined)||(item?.value!==undefined||item?.containsValue!==undefined?`${(item.value??item.containsValue)/100} GP`:'尚未支持的装备条目')));}
@@ -89,11 +89,11 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
   };
   walk(row.entry.entries,'entries');
   // A declared filter is an explicit candidate set, even when its wrapper is prose.
-  for(const [index,text] of row.entry.entries.entries())if(typeof text==='string'&&/(?:获得|选择).*(?:一项|一个|1)/.test(text)){
-   const match=text.match(/\{@filter ([^|}]+)\|feats\|category=([^|}]+)/);if(!match)continue;
+  for(const [index,text] of row.entry.entries.entries()){
+   const category=sourceFeatFilterCategory(text);if(!category)continue;
    // Filter values are case-insensitive metadata (the source uses category=o,
    // while feat records use O). Preserve the exact source/edition identities.
-   const category=match[2].trim().toLowerCase(),id=`${row.id}:filter:${index}`;
+   const id=`${row.id}:filter:${index}`;
    const others={...c,selections:c.selections.filter(s=>s.requirementId!==id)};
    const candidates=new Map<string,Entry>();
    for(const e of known)if(!candidates.has(e.id)&&e.kind==='feat'&&typeof e.raw.category==='string'&&e.raw.category.trim().toLowerCase()===category&&(e.edition==='both'||e.edition===c.edition))candidates.set(e.id,e);
@@ -106,7 +106,8 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
    push(`custom:${choice.id}`,choice.label,choice.count,options,!choice.kind&&options.length>0&&options.every(o=>!!SKILLS[skillKey(o.value)])?'skills':'content');
   }
  }
- return [...out,...sourceClassChoices(c,known),...classSpellChoices(c,catalog)];
+ const sourceChoices=sourceClassChoices(c,known),duplicates=new Set(sourceChoices.flatMap(choice=>choice.duplicateChoiceIds||[]));
+ return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...classSpellChoices(c,catalog)];
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);
@@ -162,7 +163,7 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  const draft=choice.channel==='spells'?structuredClone(c):{...c,answers:{...c.answers},featureLayout:c.featureLayout?{...c.featureLayout,optionsVisible:c.featureLayout.optionsVisible?{...c.featureLayout.optionsVisible}:undefined}:undefined};
  if(choice.channel==='spells')setClassSpellSlot(draft,choice,index,option?.entry);
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
-  if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,[option.entry.id]:structuredClone(option.entry),...(choice.evidenceEntry?{[choice.evidenceEntry.id]:structuredClone(choice.evidenceEntry)}:{})};
+  if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }
  finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
 }

@@ -9,6 +9,24 @@ const key=(value:unknown)=>String(value??'').trim().toLowerCase();
 const level=(row:Selection)=>Number.isSafeInteger(row.level)&&row.level>=1&&row.level<=20?row.level:0;
 const names=(entry:Entry)=>[entry.name,entry.english,entry.raw.name,entry.raw.ENG_name].map(key);
 const abilityImprovement=(entry:Entry)=>key(entry.raw.category)==='g'&&entry.raw.repeatable===true&&list(entry.raw.ability).some((row:any)=>Array.isArray(row?.choose?.from)&&row.choose.from.length>0&&row.choose.from.every((ability:any)=>ABILITIES.includes(ability))&&(row.choose.amount??1)*(row.choose.count??1)===2);
+/** The existing typed feat-filter syntax; it is not an additional grant. */
+export function sourceFeatFilterCategory(text:unknown):string|undefined{
+ if(typeof text!=='string'||!/(?:获得|选择).*(?:一项|一个|1)/.test(text))return;
+ return text.match(/\{@filter ([^|}]+)\|feats\|category=([^|}]+)/)?.[2].trim().toLowerCase();
+}
+function linkedClassFeatFilters(c:Character,owner:Selection,known:Entry[],group:{name?:string;ENG_name?:string;category?:unknown},atGrant:number):string[]{
+ const groupNames=[group.name,group.ENG_name].map(key).filter(Boolean),categories=list(group.category).map(key);
+ if(!groupNames.length)return [];
+ const refs=list(owner.entry.raw.classFeatures).flatMap(raw=>{const ref=typeof raw==='string'?raw:raw&&typeof raw==='object'?(raw as {classFeature?:unknown}).classFeature:undefined;return typeof ref==='string'&&Number(ref.split('|')[3])===atGrant?[ref]:[];});
+ const features=c.selections.filter(row=>row.parentId===owner.id&&row.entry.kind==='feature'&&key(row.entry.source)===key(owner.entry.source)&&names(row.entry).some(name=>groupNames.includes(name))&&refs.some(ref=>row.grantKey===`ref:${ref}`&&resolveEntryReference(ref,known,'feature')?.id===row.entry.id));
+ if(features.length!==1)return []; // Ambiguous or unrelated rewards stay separate.
+ const feature=features[0];
+ return feature.entry.entries.flatMap((text,index)=>{
+  const category=sourceFeatFilterCategory(text);if(!category||!categories.includes(category))return [];
+  const matchingGroups=list(owner.entry.raw.featProgression).filter((raw:any)=>raw&&[raw.name,raw.ENG_name].map(key).filter(Boolean).some(name=>names(feature.entry).includes(name))&&list(raw.category).map(key).includes(category)&&raw.progression?.[String(atGrant)]===1);
+  return matchingGroups.length===1?[`${feature.id}:filter:${index}`]:[];
+ });
+}
 /** Sparse optional-feature progressions carry the most recent declared total. */
 export function sourceProgressionCount(value:unknown,at:number):number|undefined{
  let count:unknown;
@@ -57,13 +75,13 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
  for(const owner of c.selections.filter(row=>row.entry.kind==='class')){
   const restricted=!selectionEffectsAllowed(c,owner.entry),at=level(owner);
   const sourceCard={...c,edition:owner.entry.edition==='both'?c.edition:owner.entry.edition,profile:{...c.profile,optional:{...c.profile.optional,legacy:false}}};
-  const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string,recordOnly=optional,support?:ClassChoiceSupport)=>{
+  const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string,recordOnly=optional,support?:ClassChoiceSupport,duplicateChoiceIds:string[]=[])=>{
    candidates=candidates.filter((entry,index)=>candidates.findIndex(other=>other.id===entry.id)===index);
-   const saved=c.answers[id]||[],options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
-    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id)},entry)||sourceChoicePrerequisite(c,entry,owner,optional)}));
+   const saved=c.answers[id]??duplicateChoiceIds.flatMap(alias=>c.answers[alias]||[]),options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
+    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||''))},entry)||sourceChoicePrerequisite(c,entry,owner,optional)}));
    const slots=Array.from({length:Math.max(count,saved.length)},(_,index)=>saved[index]||'');
    const selected=restricted?[]:saved.slice(0,count).filter((value,index,values)=>options.some(option=>option.value===value&&!option.unavailable)&&(values.indexOf(value)===index||options.find(option=>option.value===value)?.entry.raw.repeatable===true));
-   out.push({id,ownerId:owner.id,label,count,options,slots,selected,complete:selected.length===count&&count>0,restricted,channel:'content',catalogKind:optional?'feature':'feat',sourceProgression:optional?'optional':'feat',ownerEdition:owner.entry.edition,support,
+   out.push({id,ownerId:owner.id,label,count,options,slots,selected,complete:selected.length===count&&count>0,restricted,channel:'content',catalogKind:optional?'feature':'feat',sourceProgression:optional?'optional':'feat',ownerEdition:owner.entry.edition,support,duplicateChoiceIds,
     hint:hint||(optional?'数量来自此职业的来源声明。这里只保存已学记录；不会激活灌注物品、生成物品或返还资源。替换次数、重复子选项及具体机制需手动核对；调整记录不代表规则允许替换。':undefined)});
   };
   list(owner.entry.raw.optionalfeatureProgression).forEach((raw,index)=>{
@@ -74,7 +92,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined,true,optionalChoiceSupport(owner.entry,types,count??0,at));
   });
   list(owner.entry.raw.featProgression).forEach((raw,index)=>{
-   if(!raw||typeof raw!=='object')return;const group=raw as {name?:string;category?:unknown;progression?:unknown};
+   if(!raw||typeof raw!=='object')return;const group=raw as {name?:string;ENG_name?:string;category?:unknown;progression?:unknown};
    if(!group.progression||typeof group.progression!=='object'||Array.isArray(group.progression))return;
    const categories=list(group.category).filter((category):category is string=>typeof category==='string').map(key);
    for(const [step,value] of Object.entries(group.progression)){
@@ -82,8 +100,10 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     const unrestrictedCategory=categories.includes('eb')&&owner.entry.edition==='2024'&&grantedAt===19;
     const candidates=known.filter(entry=>entry.kind==='feat'&&(categories.includes(key(entry.raw.category))||unrestrictedCategory)&&(entry.edition==='both'||entry.edition===owner.entry.edition));
     for(let slot=0;slot<Number(value);slot++){
-     const id=`${owner.id}:class-feat:${index}:${step}:${slot}`;if(grantedAt>at&&!c.answers[id]?.some(Boolean))continue;
-     add(id,`${group.name||'职业专长'}（职业 ${step} 级）`,grantedAt<=at?1:0,candidates,false);
+     const id=`${owner.id}:class-feat:${index}:${step}:${slot}`;
+     const aliases=Number(value)===1?linkedClassFeatFilters(c,owner,known,group,grantedAt):[];
+     if(grantedAt>at&&!c.answers[id]?.some(Boolean)&&!aliases.some(alias=>c.answers[alias]?.some(Boolean)))continue;
+     add(id,`${group.name||'职业专长'}（职业 ${step} 级）`,grantedAt<=at?1:0,candidates,false,undefined,false,undefined,aliases);
     }
    }
   });
@@ -99,7 +119,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升（手动填写）',english:'Recorded ability improvement',entries:['保存本次属性提升方案；请在卡面手动填写属性，不重复叠加。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
     const feats=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
     add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。这里只保存方案；属性及专长效果仍手动处理。',true,legacyRecordSupport);
-    out.at(-1)!.evidenceEntry=feature;
+    out.at(-1)!.evidenceEntries=[feature];
     continue;
    }
    const typed=feature.entries.flatMap(node=>typeof node==='string'?[...node.matchAll(/\{@feat ([^}]+)\}/g)].map(match=>resolveEntryReference(match[1],known,'feat')):[]).filter((entry):entry is Entry=>!!entry);
@@ -113,8 +133,22 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
    const candidates=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
    add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；只有既有已适配机制生效。ASI 属性分配仍手动填写，不会重复改变卡面基础属性。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；仅既有已适配机制生效，ASI 属性仍手动填写。'});
-   out.at(-1)!.evidenceEntry=feature;
+   // The chosen feat can differ from the typed ASI identity. Preserve both
+   // references so catalog absence cannot turn a confirmed grant into no grant.
+   out.at(-1)!.evidenceEntries=[feature,grant];
   }
+ }
+ // Record-only legacy feats do not enter selections. Their active answers must
+ // still reserve a nonrepeatable feat across independent class grants. Old
+ // duplicates remain recorded; only the first eligible grant is active.
+ const claimed=new Map<string,string>();
+ for(const choice of out)if(choice.sourceProgression==='feat'&&!choice.restricted&&choice.count>0)
+  for(const value of choice.selected){const entry=choice.options.find(option=>option.value===value)?.entry;if(entry?.kind==='feat'&&entry.raw.repeatable!==true&&!claimed.has(entry.id))claimed.set(entry.id,choice.id);}
+ for(const choice of out)if(choice.sourceProgression==='feat'){
+  for(const option of choice.options)if(option.entry.kind==='feat'&&option.entry.raw.repeatable!==true&&claimed.has(option.entry.id)&&claimed.get(option.entry.id)!==choice.id)
+   option.unavailable||='此不可重复专长已在其他有效职业授予中选择；原记录保留。';
+  choice.selected=choice.selected.filter(value=>choice.options.some(option=>option.value===value&&!option.unavailable));
+  choice.complete=choice.selected.length===choice.count&&choice.count>0;
  }
  return out;
 }

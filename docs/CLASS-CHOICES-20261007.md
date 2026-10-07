@@ -1,5 +1,22 @@
 # 职业专长与可选特性入口：本地候选，未发布
 
+## PR17 独立 review 修复
+
+[Draft PR17](https://github.com/FullPeople/DND-card-web/pull/17) 仍为 blocked Draft，不合并、不部署。本节替代下文旧的“未 push / 无 PR”和 consumer `1a1717f` 交接状态；正式 producer 必须使用 PR 的最新完整 HEAD，不能沿用第一次候选或迁移的报告。
+
+1. **拖拽范围**：原 App 拦截所有 `optionalfeature`，无职业进度时直接返回，阻断子职 / 专长的战技等既有手动添加。有非 AI/EI 职业进度时也错误地强制学习记录。现由 `optionalFeatureLearningDrop` 只接管已有 class-owned AI/EI 学习入口；其他类别或无对应入口继续原明确添加路径，保留原来源 / 重复 / 权限校验。匹配到的 AI/EI 仍遵守不可用前置和来源限制，不用手动回退绕过该学习入口。
+2. **非 ASI 专长离线**：原快照只有所选专长和授予 classFeature，首次直接选择其他专长后缺少 typed ASI 定义，离线重建会丢选择并撤去已关联效果。现同时保存实际解析出的 classFeature 与 typed ASI 引用证据；目录为空、部分缺失和导入往返继续关联同一已选专长。来源关闭或等级降低仍暂停自动关联，答案和手工数据保留；恢复后只有原本已适配效果生效。不会按名字猜授予或自动分配 ASI 属性。
+3. **2014 不可重复专长**：[官方 2014 Feats 规则](https://www.dndbeyond.com/sources/dnd/basic-rules-2014/customization-options#Feats)明确限制默认只能选一次。record-only 方案不进入 selections，原 candidateReason 漏掉其他有效 ASI 答案。现跨有效 class-feat 记录保留唯一资格，新重复选择在 mutation 前拒绝；旧重复答案不删除，后续重复记录显示当前不可用 / 不完整。显式 `repeatable: true` 与手动属性提升方案可重复；非活动授予不占用当前资格。
+4. **同次 FS / EB 授予的重复入口**：这最初是组合风险，已通过保存的真实来源样本与 `syncFeatures` 复现。XPHB 战士 1 级 FS 原有 3 个入口（进度 + 两处 filter），战士 19 级 EB、圣武士 / 游侠 2 级 FS、魔契师 19 级 EB 各有 2 个。现只在来源身份、直属职业、明确 classFeatures 引用、授予等级、来源给出的组名 / 别名及类别都对应、单次授予且对应组唯一时合并为一个职业进度入口；不同来源奖励或无法明确对应的入口不按类别粗并。旧 filter 答案保持原字节，作为同一选择的保留记录读取；冲突旧答案显示超额，仅一个有效槽位。职业进度 ID 在特性后续加载前后保持稳定，清空新记录不会从旧 alias 自动补回。
+
+针对 7 个文件已执行 **89 通过 / 0 失败 / 0 跳过**，类型检查和 `git diff --check` 通过；包含 5 个实际来源组合、独立背景 / 独立特性不被合并、直接非 ASI 的空 / 部分目录、导入、限制与恢复，以及不同职业的不可重复资格。真实样本仍是本轮独立公开来源样本，不是原 229 producer 输入。最终完整 HEAD 的全量、构建与 CI 结果记录在 PR 和 `.local-evidence/class-level-choices/`；生产浏览器与包体积仍需真实账本解锁后执行，不将列出用例称作通过。
+
+红绿诊断：`review-regressions-red.log`、`review-overlap-red.log`、`review-targeted.json`。初次红测试中的一项旧重复离线夹具遗漏 6 级授予快照，已修正夹具；初次类型检查发现新测试的 unknown 类型标注不符合 normalizeData 参数，也已修正，最终检查通过。这两项不是产品回归证明。实际来源身份与文件散列保留于 `review-source-overlap-evidence.json`，没有把来源正文、样本或玩家数据加入仓库。
+
+远端 main 已从 `4a95a7d` 前进到 `949dbbd0fea5dac8a51089514fe402cdeb95baf5`。本分支仍基于原 `792e9a4`，没有 merge / rebase 迁移，也没有改 Data。迁移 owner 的另轮 review 提示 App 草稿写入与验证顺序、旧 cloud-staged 重开及 cloud workflow paths 缺 App / storage / PlayerViewer / package 覆盖，见 [PR16 讨论](https://github.com/FullPeople/DND-card-web/pull/16#discussion_r4206885126)。这些由原迁移 owner 处理；本轮未把“有恢复副本”说成已发生数据丢失，也未并行重写迁移。未来整合须明确执行 migration / cloud 场景，不能只依赖 paths 自动触发，且必须对组合消费者重新 producer。
+
+只回滚本节修复可用 `git revert <本节修复的实际提交 SHA>`；最终 SHA 见 PR。整批回滚还需按下文顺序撤去 c03c7d6 / f093b6c / 2077618，保留角色备份、手工记录和 Git 历史。
+
 本轮以远端 Web main `792e9a490216fcf352a436a3b789b70c23092bc2` 为基线，隔离分支为 `codex/class-level-feats-infusion-invocation-20261007`。不接管 `codex/dnd-center-migration-20261007` 的迁移、公告或部署，也不覆盖另一会话的修改。上线基线仍以 251 发布回执为准；最新 main 的资源 CI 有独立失败，不能用历史候选结果宣称 main 全绿。
 
 ## 实际定位与变化
