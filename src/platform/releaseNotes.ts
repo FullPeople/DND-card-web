@@ -1,5 +1,5 @@
 export const RELEASE_DATE='2026-10-07';
-export interface ReleaseSection {title:string;items:string[]}
+export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
  {title:'浏览器兼容与加载',items:['修复了部分旧版浏览器读取 Wiki 和连接服务器时加载失败的问题。','资料缓存写满时，已下载成功的资料仍可查看。','程序加载失败时，现在显示原因和重新加载按钮。']},
@@ -312,7 +312,7 @@ const RELEASE_250_SECTIONS:ReleaseSection[]=[
 ];
 const SUITE_RELEASE_250_SECTIONS:ReleaseSection[]=[...RELEASE_250_SECTIONS,{title:'适用范围与更新方式',items:['本次同步网站、新版插件与旧稳定插件的五页查看器。','真实枭熊房间仍待验证。关闭附加窗口，刷新枭熊房间，再重新打开插件。']}];
 export const RELEASE_SECTIONS:ReleaseSection[]=[
- {title:'熟练选择',items:['修复战俑等来源的工具选择没有列出可用工具的问题。','已保存但暂不可用、找不到或超额的选择仍保留提示，不会挤掉原有选择；手工熟练与资源余额保留。']},
+ {title:'熟练选择',items:['修复战俑等来源的工具选择没有列出可用工具的问题。','已保存但暂不可用、找不到或超额的选择仍保留提示，不会挤掉原有选择；手工熟练与资源余额保留。'],supersedes:['战俑工具选择仍待处理，实体手机和玩家原设备仍待验证。']},
  {title:'法术位图标',items:['修复自适应布局下法术位图标被裁剪、看起来消失的问题，保留普通、契约与自定义分组的颜色、缩放和已消耗次数。']},
  {title:'自动化进度与验证',items:['使用原有资料重新核对全部自动化覆盖记录，进度统计保持原有口径。','实体手机和玩家原设备仍待验证。']}
 ];
@@ -408,3 +408,19 @@ export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:'2026-09-27-二',sections:mode==='suite'?PREVIOUS_SUITE_RELEASE_SECTIONS:PREVIOUS_RELEASE_SECTIONS},
  {title:'2026-09-27-一',sections:mode==='suite'?SUITE_ARCHIVED_RELEASE_SECTIONS:ARCHIVED_RELEASE_SECTIONS},
 ];
+
+/** Newest entries own corrections; historical batches remain available unchanged. */
+export function releaseLogFor(mode:'standalone'|'suite') {
+ const days=new Map<string,{title:string;sections:ReleaseSection[]}>(),superseded=new Set<string>();
+ for(const release of releaseHistoryFor(mode)){
+  const date=release.title.match(/^\d{4}-\d{2}-\d{2}/)?.[0]||release.title;
+  let day=days.get(date);
+  if(!day){day={title:date,sections:[]};days.set(date,day);}
+  for(const section of release.sections){
+   const items=section.items.filter(item=>!superseded.has(item)&&!day.sections.some(row=>row.items.includes(item)));
+   if(items.length){const existing=day.sections.find(row=>row.title===section.title);if(existing)existing.items.push(...items);else day.sections.push({title:section.title,items:[...items]});}
+   section.supersedes?.forEach(item=>superseded.add(item));
+  }
+ }
+ return Array.from(days.values()).filter(day=>day.sections.length);
+}
