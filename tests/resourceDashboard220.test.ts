@@ -14,6 +14,11 @@ function expectNoOverlap(widgets:ResourceWidgetLayout[]){
  }
 }
 describe('220 approved dashboard persistence and shared canvas',()=>{
+ it('creates a single-level spell module at 3 by 2 and preserves an explicitly enlarged saved module and its pools',()=>{
+  const c=newCharacter();c.runtime.resources['spell-slot:1']={name:'1 环法术位',current:1,max:2};const pools=structuredClone(c.runtime.resources);
+  ensureResourceWidget(c,'spell-slot:1');expect(c.quickbarLayout!.widgets!['spell-slot:1']).toMatchObject({w:3,h:2,style:'poolpips'});expect(c.runtime.resources).toEqual(pools);
+  c.quickbarLayout!.widgets!['spell-slot:1'].w=7;c.quickbarLayout!.widgets!['spell-slot:1'].h=5;ensureResourceWidget(c,'spell-slot:1');expect(c.quickbarLayout!.widgets!['spell-slot:1']).toMatchObject({w:7,h:5});expect(c.runtime.resources).toEqual(pools);
+ });
  it('retains exactly the approved sixteen faces and excludes the nine rejected examples',()=>{
   expect(WIDGET_STYLES).toEqual(['ring','pips','pool','half','orbit','square','segments','reservoir','matrix','fraction','counter','poolchips','poolbars','poolpips','ready','diamond']);
   expect(RESOURCE_TEMPLATES.map(t=>t.id)).toEqual(WIDGET_STYLES);

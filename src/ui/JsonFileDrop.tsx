@@ -14,5 +14,5 @@ export function JsonFileDrop({disabled=false,multiple=true,receive}:{disabled?:b
   onDragLeave={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node))setOver(false);}}
   onDrop={event=>{event.preventDefault();event.stopPropagation();setOver(false);void accept([...event.dataTransfer.files]);}}>
   <strong>{busy?'正在校验并导入…':'拖入 JSON 文件，或点击选择文件'}</strong><span>{multiple?'支持一次拖入多个角色备份':'选择一个角色备份'} · 单个文件不超过 20 MB</span>
- </button><input ref={input} hidden type="file" multiple={multiple} accept=".json,application/json" aria-label="批量导入角色文件" disabled={disabled||busy} onChange={event=>{const files=[...(event.target.files||[])];event.target.value='';void accept(files);}}/>{error&&<p role="alert">{error}</p>}</div>;
+ </button><input ref={input} hidden type="file" multiple={multiple} accept=".json,application/json" aria-label={multiple?'批量导入角色文件':'单个角色文件选择'} disabled={disabled||busy} onChange={event=>{const files=[...(event.target.files||[])];event.target.value='';void accept(files);}}/>{error&&<p role="alert">{error}</p>}</div>;
 }

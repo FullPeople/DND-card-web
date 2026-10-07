@@ -230,7 +230,8 @@ export function ensureResourceWidget(c:Character,id:string,rng:()=>number=Math.r
  if(!module||Object.hasOwn(layout.widgets||{},module.id))return;
  const style=module.slots?'poolpips':chooseDefaultWidgetStyle(c.runtime.resources[id],rng),template=RESOURCE_TEMPLATES.find(t=>t.id===style)!;
  const current=freeDashboardLayout(modules.filter(m=>m.id!==module.id),layout.widgets,layout.attacks);
- const defaults=moduleDefaults([module],{[module.id]:normalizeWidget({style,w:template.w,h:template.h})});
+ const minimum=resourceModuleMinimum(module,style);
+ const defaults=moduleDefaults([module],{[module.id]:normalizeWidget({style,w:module.slots?minimum.w:template.w,h:module.slots?minimum.h:template.h})});
  const widget=place(defaults[module.id],Object.values(current.widgets));
  layout.widgets={...migrateDashboardWidgets(layout.widgets,layout.attacks),...current.widgets,[module.id]:widget};layout.attacks=current.attacks;
 }

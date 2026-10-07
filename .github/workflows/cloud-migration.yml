@@ -24,6 +24,7 @@ jobs:
       - run: python3 deploy/cloud/test_publish.py
       - run: python3 deploy/cloud/test_upgrade.py
       - run: python3 deploy/cloud/test_frontend.py
+      - run: python3 deploy/cloud/test_suite_links.py
       - run: npx playwright install --with-deps chromium
       - run: npm run test:cloud-browser
       - uses: actions/upload-artifact@v4

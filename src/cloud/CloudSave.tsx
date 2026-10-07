@@ -20,9 +20,9 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,chi
  useEffect(()=>{disposed.current=false;return()=>{disposed.current=true;};},[]);
  useEffect(()=>{
   if(!enabled)return;
-  let alive=true;
-  const refresh=async()=>{for(const character of latest.current.characters){const receipt=await readSyncReceipt(character.id);if(!alive)return;setStates(old=>({...old,[character.id]:receipt.lastError?{...receipt.lastError,cloudId:receipt.binding?.cloudId}:receipt.pending?{phase:Date.now()<(receipt.pending.startedAt||0)+35000?'syncing':'uncertain',cloudId:receipt.binding?.cloudId,message:'上次同步结果尚未确认，请重试核对。本机草稿保留。'}:old[character.id]?.phase==='syncing'?old[character.id]:receipt.binding?{phase:'saved',cloudId:receipt.binding.cloudId}:{phase:'local'}}));}};
-  void refresh().catch(()=>{});const pendingDeadline=setTimeout(()=>void refresh().catch(()=>{}),35000);
+  let alive=true,refreshEpoch=0,pendingDeadline:ReturnType<typeof setTimeout>|undefined;
+  const refresh=async()=>{const epoch=++refreshEpoch;clearTimeout(pendingDeadline);let nextDeadline=Infinity;for(const character of latest.current.characters){const receipt=await readSyncReceipt(character.id);if(!alive||epoch!==refreshEpoch)return;if(receipt.pending&&Date.now()<(receipt.pending.startedAt||0)+35000)nextDeadline=Math.min(nextDeadline,(receipt.pending.startedAt||0)+35000);setStates(old=>({...old,[character.id]:receipt.lastError?{...receipt.lastError,cloudId:receipt.binding?.cloudId}:receipt.pending?{phase:Date.now()<(receipt.pending.startedAt||0)+35000?'syncing':'uncertain',cloudId:receipt.binding?.cloudId,message:'上次同步结果尚未确认，请重试核对。本机草稿保留。'}:old[character.id]?.phase==='syncing'?old[character.id]:receipt.binding?{phase:'saved',cloudId:receipt.binding.cloudId}:{phase:'local'}}));}if(alive&&Number.isFinite(nextDeadline))pendingDeadline=setTimeout(()=>void refresh().catch(()=>{}),Math.max(1,nextDeadline-Date.now()));};
+  void refresh().catch(()=>{});
   const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('dnd-card-cloud'):undefined;
   channel?.addEventListener('message',refresh);window.addEventListener('cloud-binding-changed',refresh);
   return()=>{alive=false;clearTimeout(pendingDeadline);channel?.close();window.removeEventListener('cloud-binding-changed',refresh);};
@@ -32,7 +32,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,chi
   let alive=true;
   const timer=setTimeout(()=>{void (async()=>{for(const character of characters){const receipt=await readSyncReceipt(character.id);if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
   return()=>{alive=false;clearTimeout(timer);};
- },[enabled,disabled,characters,auto]);
+ },[enabled,disabled,characters,auto,readCharacter]);
  async function request(id:string){
   const character=latest.current.characters.find(card=>card.id===id);if(!character||latest.current.disabled)return;
   setConfirmed(false);setTarget({id,name:character.name});

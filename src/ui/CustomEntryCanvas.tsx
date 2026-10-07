@@ -1,3 +1,4 @@
+import {FieldHelp} from './CustomFieldHelp';
 import {useState,type ReactNode} from 'react';
 import {ABILITIES,ABILITY_LABELS,type Entry,type Raw} from '../core/model';
 import {CUSTOM_TYPES} from '../core/customEntries';
@@ -23,7 +24,7 @@ export function CustomEntryCanvas(p:Props){
  const item=entry.kind==='item';
  return <div className="custom-canvas">
  <p className="canvas-hint">点击示例中的名称、资料或正文即可修改；保存后才会加入自定义资料。</p>
- {selected&&<section className="canvas-field-editor" aria-label={`编辑${selected.label}`} key={selected.key}><header><strong>{selected.label}</strong><button type="button" disabled={invalid} onClick={()=>setSelected(undefined)}>完成修改</button></header><CanvasField {...p} field={selected.key} report={report}/></section>}
+ {selected&&<section className="canvas-field-editor" aria-label={`编辑${selected.label}`} key={selected.key}><header><strong>{selected.label}</strong>{['time','range','components','duration'].includes(selected.key)&&<FieldHelp label={selected.label}/>}<button type="button" disabled={invalid} onClick={()=>setSelected(undefined)}>完成修改</button></header><CanvasField {...p} field={selected.key} report={report}/></section>}
   <article className="custom-document rules-prose document-prose">
  <div className="detail-heading"><div className="canvas-edition">{region('type','类型',CUSTOM_TYPES[p.type].label)}{region('edition','适用版本',p.edition==='both'?'通用资料':p.edition)}</div><h1>{region('name','名称',entry.name)}</h1>{region('english','英文名',p.english||'点击填写英文名')}<small>自定义资料 · 示例中的所有文字均可修改</small></div>
  {entry.kind==='monster'?<><MonsterDocument entry={entry} onLink={()=>{}} onEdit={choose}/><div className="canvas-extra-fields">{[['save','豁免'],['skill','技能'],['resist','伤害抗性'],['immune','伤害免疫'],['conditionImmune','状态免疫'],['bonus','附赠动作'],['reaction','反应'],['legendary','传奇动作']].filter(([key])=>p.raw[key]===undefined).map(([key,label])=>region(key,label,`＋ ${label}`))}</div></>:<>
