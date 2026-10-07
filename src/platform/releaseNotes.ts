@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-06';
+export const RELEASE_DATE='2026-10-07';
 export interface ReleaseSection {title:string;items:string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -301,10 +301,16 @@ const SUITE_RELEASE_248_SECTIONS:ReleaseSection[]=[
  ]},
  {title:'更新与验证',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。','实体手机、真实枭熊房间和玩家原设备仍待验证。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_249_SECTIONS:ReleaseSection[]=[
  {title:'自动化进度',items:['简化了自动化进度说明，直接列出核对数量、已有实际功能的条目数，以及各扩展的进度。','条目只要有实际自动计算或选择功能就计入，其他尚未实现的效果仍需手动处理。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,{title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}];
+const SUITE_RELEASE_249_SECTIONS:ReleaseSection[]=[...RELEASE_249_SECTIONS,{title:'更新方式',items:['关闭附加窗口，刷新枭熊房间，再重新打开新版插件。']}];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'熟练与装备',items:['修复自动获得的盾牌熟练在保存后丢失的问题，保留手工熟练记录。','已知工具熟练使用中文名称，自定义名称和未知条目的原名保留。','复核了 2014／2024 锁子甲、鳞甲与盾牌的自动 AC 计算。']},
+ {title:'只读查看器',items:['只读查看器可以导出收到的原始 JSON，保留自定义字段、手工记录与资源余额。','刷新资料失败时会清除上次卡面，避免导出旧资料。']},
+ {title:'支持与验证范围',items:['感谢「别名」支持 50 元。','战俑工具选择仍待处理，实体手机和玩家原设备仍待验证。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,{title:'适用范围与更新方式',items:['本次同步网站、新版插件与旧稳定插件的五页查看器。','真实枭熊房间仍待验证。关闭附加窗口，刷新枭熊房间，再重新打开插件。']}];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
@@ -342,6 +348,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_249_SECTIONS:RELEASE_249_SECTIONS},
  {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_248_SECTIONS:RELEASE_248_SECTIONS},
  {title:'2026-10-05',sections:mode==='suite'?SUITE_RELEASE_246_SECTIONS:RELEASE_246_SECTIONS},
  {title:'2026-10-04',sections:mode==='suite'?SUITE_RELEASE_245_SECTIONS:RELEASE_245_SECTIONS},
