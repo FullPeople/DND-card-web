@@ -26,6 +26,18 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
     changed = false;
     for (const s of c.selections) if (!removed.has(s.id) && (s.parentId && removed.has(s.parentId) || s.requirementId && [...removed].some(key => s.requirementId!.startsWith(`${key}:`)) || [...removed].some(key => { const parent = c.selections.find(p => p.id === key); return parent && belongsToClass(s, parent); }))) { removed.add(s.id); changed = true; }
   }
+  if(dismiss&&c.classChoiceArchive){
+    const discardedParents:string[]=[];
+    for(const [key,archive] of Object.entries(c.classChoiceArchive)){
+      const root=archive.selections[0];
+      if(root.parentId&&removed.has(root.parentId)||archive.parent?.parentId&&removed.has(archive.parent.parentId))for(const row of archive.selections)removed.add(row.id);
+      for(let changed=true;changed;){changed=false;for(const row of archive.selections)if(row.parentId&&removed.has(row.parentId)&&!removed.has(row.id)){removed.add(row.id);changed=true;}}
+      archive.selections=archive.selections.filter(row=>!removed.has(row.id));
+      if(!archive.selections.length){if(archive.parent)discardedParents.push(archive.parent.id);delete c.classChoiceArchive[key];}
+    }
+    for(const parent of discardedParents)if(!c.selections.some(row=>row.id===parent)&&!Object.values(c.classChoiceArchive).some(archive=>archive.parent?.id===parent))removed.add(parent);
+    if(!Object.keys(c.classChoiceArchive).length)delete c.classChoiceArchive;
+  }
   rememberSourceSpellUses(c);
   const spellCounters=[...removed].map(id=>specialSpellResource(id,c));
   // Automatic level removal parks a class-choice tree first. Keep saved UI

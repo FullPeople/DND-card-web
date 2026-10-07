@@ -49,7 +49,7 @@ import {ensureSiteSources,sourceSettings,withSiteSources} from '../core/siteSour
 
 import {standalone} from '../platform/buildMode';
 import {LocalDice} from '../standalone/LocalDice';
-import {pinEntry} from '../core/quickbar';
+import {pinEntry,pruneQuickbar} from '../core/quickbar';
 const QuickbarManager=lazy(()=>import('./QuickbarManager').then(module=>({default:module.QuickbarManager})));
 import {recordAction,travelHistory,useActionHistory} from '../platform/actionHistory';
 import {applyPatch,sameValue} from '../core/merge';
@@ -548,7 +548,7 @@ export default function App() {
     const displayDraft=applyDisplayCharacterEdit(character,action);
     let draft:Character;
     if(displayDraft){if(displayDraft===character)return;draft=displayDraft;}
-    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); if (draft.quickbar) draft.quickbar = draft.quickbar.filter(id => draft.selections.some(s => s.id === id)); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
+    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
     if(!displayDraft&&inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
