@@ -107,6 +107,14 @@ export function validateCharacter(value: unknown): Character {
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
+  if(c.classChoiceSnapshots!==undefined){
+    assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
+    for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){
+      assert(validEntry(entry)&&id===entry.id&&['feat','feature'].includes(entry.kind),'职业选择快照无效。');
+      validateEntryContent(entry.entries);validateEntryContent(entry.raw);
+      if(entry.effects)validateEffects(entry.effects);if(entry.choices)validateChoices(entry.choices);
+    }
+  }
   assert(c.proficiencies === undefined || plain(c.proficiencies) && Object.entries(c.proficiencies).every(([key, value]) => [...Object.keys(SKILLS), ...ABILITIES.map(a => `save:${a}`)].includes(key) && typeof value === 'boolean'), '熟练记录无效。');
   assert(c.training === undefined || plain(c.training) && Object.entries(c.training).every(([key, value]) => ['armor', 'weapons', 'tools', 'languages'].includes(key) && typeof value === 'string' && value.length <= 10000), '装备训练记录无效。');
   assert(c.expertise === undefined || plain(c.expertise) && Object.entries(c.expertise).every(([key, value]) => Object.hasOwn(SKILLS, key) && typeof value === 'boolean'), '专精记录无效。');

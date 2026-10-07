@@ -8,9 +8,10 @@ import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbili
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
+import {sourceClassChoices} from './sourceClassChoices';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
-export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];hint?:string};
+export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];hint?:string};
 export const equipmentTypeLabel=(type:string)=>({weaponMartial:'军用武器',weaponSimple:'简易武器',focusSpellcastingHoly:'圣徽',focusSpellcastingArcane:'奥术法器',focusSpellcastingDruidic:'德鲁伊法器'} as Record<string,string>)[type]||'尚未适配的装备类别';
 const blocks=(v:unknown):any[]=>Array.isArray(v)?v:[];
 export function equipmentOptionConcept(entry:Entry,index:number,value:string):Entry{return concept(entry,`equipment:${index}:${value}`,`起始装备 · 方案 ${value}`,blocks(equipmentBlocks(entry)[index]?.[value]).map(item=>typeof item==='string'?`{@item ${item}}`:item?.item?`${item.quantity||1} × {@item ${item.item}}`:item?.special||(item?.equipmentType?equipmentTypeLabel(item.equipmentType):undefined)||(item?.value!==undefined||item?.containsValue!==undefined?`${(item.value??item.containsValue)/100} GP`:'尚未支持的装备条目')));}
@@ -104,12 +105,12 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
    push(`custom:${choice.id}`,choice.label,choice.count,options,!choice.kind&&options.length>0&&options.every(o=>!!SKILLS[skillKey(o.value)])?'skills':'content');
   }
  }
- return [...out,...classSpellChoices(c,catalog)];
+ return [...out,...sourceClassChoices(c,known),...classSpellChoices(c,catalog)];
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);
  if(!choice||choice.restricted||!option||option.unavailable&&!(choice.channel==='tools'&&c.answers[id]?.includes(value)))throw Error(option?.unavailable||'此选择当前不可用。');
- if(choice.channel==='tools'){
+ if(choice.channel==='tools'||choice.sourceProgression){
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
   const saved=c.answers[id]||[];
@@ -152,14 +153,16 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id);
  if(!choice||choice.restricted||['equipment','abilities'].includes(choice.channel)||!Number.isInteger(index)||index<0||index>=Math.max(choice.count,choice.slots?.length||0))throw Error('此选择位置当前不可用。');
  const option=value===undefined?undefined:choice.options.find(o=>o.value===value);
- if(value!==undefined&&(!option||option.unavailable))throw Error(option?.unavailable||'此条目不属于可选内容。');
+ if(value!==undefined&&(index>=choice.count||!option||option.unavailable))throw Error(option?.unavailable||'此条目不属于当前可选位置。');
  if(((choice.slots||choice.selected)[index]||undefined)===value)return;
  // Ordinary option edits only touch answers and option visibility. Keep atomic
  // validation without copying every source snapshot and inventory item again.
  // Spell allocation can modify selections, so it retains the full transaction.
  const draft=choice.channel==='spells'?structuredClone(c):{...c,answers:{...c.answers},featureLayout:c.featureLayout?{...c.featureLayout,optionsVisible:c.featureLayout.optionsVisible?{...c.featureLayout.optionsVisible}:undefined}:undefined};
  if(choice.channel==='spells')setClassSpellSlot(draft,choice,index,option?.entry);
- else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;}
+ else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
+  if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,[option.entry.id]:structuredClone(option.entry)};
+ }
  finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
 }
 /** Reconcile content only at the existing explicit edit/hydration boundary. */

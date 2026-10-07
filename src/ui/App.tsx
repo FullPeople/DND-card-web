@@ -80,7 +80,7 @@ const FeaturesPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.Featu
 const BackgroundPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.BackgroundPage})));
 import {ChoiceWorkspaceContext} from './ChoiceWorkspaceContext';
 import {usePointerStableValue} from './usePointerStableValue';
-import {sheetChoices} from '../core/automation/choices';
+import {sheetChoices,setSheetChoiceSlot} from '../core/automation/choices';
 import {SheetChoicesContext} from './SheetChoicesContext';
 import {choiceCatalog} from './choiceCatalog';
 const SpellsPage=lazy(()=>import('./SpellsPage').then(m=>({default:m.SpellsPage})));
@@ -339,7 +339,7 @@ export default function App() {
   function closeChoice(){setChoiceRoute(undefined);if(choiceSnapshot.current){library.restore(choiceSnapshot.current);choiceSnapshot.current=undefined;}}
   function openChoice(id:string){if(!c||!editing||readOnly||inWorkbench&&!wb.target?.write)return;const choice=choicesSnapshot?.choices.find(r=>r.id===id);if(!choice)return;
     choiceSnapshot.current??=library.snapshot();setChoiceRoute({id,characterId:c.id});setSheetPage('特性');exitSheetFullscreen();
-    const scope=choiceCatalog(c,choice,allEntries);if(scope.wiki){library.setKind(scope.tab);library.patch({query:'',detailId:undefined,focus:undefined,edition:c.edition,filters:scope.filters,sort:scope.tab==='spell'?'level':'source',descending:false},scope.tab);setFillPulse(n=>n+1);setTab('wiki');}else setTab('sheet');
+    const scope=choiceCatalog(c,choice,allEntries);if(scope.wiki){library.setKind(scope.tab);library.patch({query:'',detailId:undefined,focus:undefined,edition:choice.sourceProgression&&choice.ownerEdition!=='both'?choice.ownerEdition||c.edition:c.edition,filters:scope.filters,sort:scope.tab==='spell'?'level':'source',descending:false},scope.tab);setFillPulse(n=>n+1);setTab('wiki');}else setTab('sheet');
   }
   useEffect(()=>{if(choiceRoute&&(!activeChoice||!editing||sheetPage!=='特性'))closeChoice();},[c?.id,choiceRoute?.id,!!activeChoice,editing,sheetPage]);
   useNarrowWikiDrag(tab,setTab,!inWorkbench||workbenchPage==='console'||workbenchPage==='sheet'&&!!wb.target);
@@ -515,7 +515,7 @@ export default function App() {
     if (!c) return [];
     const candidates=choiceScope?.wiki&&choiceScope.tab===kind?new Set(choiceScope.entries.map(e=>e.id)):undefined;
     return libraryEntries.filter(e => (candidates?candidates.has(e.id):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
-      wikiEditionAllows(e,c,editionFilter));
+      (candidates&&activeChoice?.sourceProgression?true:wikiEditionAllows(e,c,editionFilter)));
   }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope]);
   const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery);
   const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery,matchesEntrySearch]);
@@ -657,6 +657,16 @@ export default function App() {
     if (!c) return;
     if(pin){edit(draft=>pinEntry(draft,entry));return;}
     if (entry.raw._category === 'size') { edit(draft => { draft.size = entry.raw.size; }); return; }
+    if(automationEnabled(c)&&entry.raw._category==='optionalfeature'){
+      const choices=sheetChoices(c,allEntries).filter(choice=>choice.sourceProgression==='optional'&&choice.options.some(option=>option.entry.id===entry.id));
+      const choice=choices.find(choice=>!choice.restricted&&choice.options.some(option=>option.entry.id===entry.id&&!option.unavailable))||choices[0];
+      if(!choice){setNotice('此来源尚无已核对的学习选择入口；请查阅来源并手动记录。');return;}
+      openChoice(choice.id);
+      const option=choice.options.find(option=>option.entry.id===entry.id)!,slot=choice.slots?.findIndex((value,index)=>index<choice.count&&!value)??-1;
+      if(!choice.restricted&&!option.unavailable&&slot>=0&&!choice.slots?.includes(entry.id)){edit(draft=>setSheetChoiceSlot(draft,choice.id,slot,option.value,allEntries));setNotice(`已记录学习「${entry.name}」；具体效果及物品操作仍需手动处理。`);}
+      else setNotice(option.unavailable||'已打开学习记录，可明确选择或替换一个槽位。');
+      return;
+    }
 
     const reason = candidateReason(c, entry); if (reason) { setNotice(reason); return; }
     edit(draft => {

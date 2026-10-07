@@ -51,6 +51,8 @@ export interface Character {
   inventory?: {sourceEquipment?:Record<string,SourceEquipmentReceipt>;capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
   backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
+  /** Saved choice display snapshots; these never enter the effect evaluator. */
+  classChoiceSnapshots?: Record<string,Entry>;
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];
