@@ -8,7 +8,8 @@ const content=readFileSync(asset),manifest:ProgressManifest=JSON.parse(content.t
 const manifestHash=createHash('sha256').update(content).digest('hex');
 const tab=(page:Page)=>page.getByRole('tab',{name:'自动化进度',exact:true});
 const panel=(page:Page)=>page.getByRole('tabpanel',{name:'自动化进度',exact:true});
-async function open(page:Page){await mockSource(page);await page.goto('/');await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.paper')).toBeVisible();}
+async function noticeReady(page:Page){await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete',{timeout:12000});await expect(page.locator('.announcement')).toBeVisible();}
+async function open(page:Page){await mockSource(page);await page.goto('/');await noticeReady(page);await expect(page.locator('.paper')).toBeVisible();}
 async function readWorkspace(page:Page){return page.evaluate(async()=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open('dnd-card-standalone');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});try{return await new Promise<string>((resolve,reject)=>{const tx=db.transaction('documents','readonly'),r=tx.objectStore('documents').get('workspace');r.onsuccess=()=>resolve(JSON.stringify(r.result));r.onerror=()=>reject(r.error);});}finally{db.close();}});}
 const books=manifest.sources.filter(s=>sourceRuleCounts(manifest,s.id,'all')?.total);
 
@@ -17,7 +18,7 @@ test('player progress, lazy caching and character preservation',async({page})=>{
  await open(page);await expect(tab(page)).toHaveAttribute('aria-selected','false');expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(0);
  await page.getByRole('button',{name:'我知道了',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('dnd-card-standalone');r.onsuccess=()=>resolve(r.result);});const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),request=store.get('workspace');request.onsuccess=()=>{const workspace=request.result,c=workspace.characters[0];c.story='原创验收手工记录';c.runtime.resources.manualProbe={name:'原创已消耗资源',max:4,current:1};c.automation={protocol:2,rulesVersion:'equipment.1',defaultsVersion:1,enabled:false};store.put(workspace,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();});
- await page.reload();await expect(page.locator('.announcement')).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await page.reload();await noticeReady(page);await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await expect(page.locator('.catalog-status > span').first()).toHaveText(/[\d,]+ 条资料 · \d+ 份缓存/);await expect(page.locator('.wiki-header button')).toBeEnabled();
  const before=await readWorkspace(page);requests.length=0;await tab(page).click();
  await expect(panel(page)).toContainText('大量条目目前放入角色卡不会有任何数据自动计算的功能，只会起一个可观测作用，因此自动化任重而道远。');

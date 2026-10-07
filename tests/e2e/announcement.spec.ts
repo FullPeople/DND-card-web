@@ -6,6 +6,8 @@ import {ANNOUNCEMENT_KEY,APP_VERSION} from '../../src/platform/announcement';
 const dialog=(page:Page)=>page.getByRole('dialog',{name:'欢迎使用这款开源禁商用车卡/Wiki网站！'});
 async function open(page:Page){
  await mockSource(page);await page.goto('/');
+ // The paper is visible during fading; the mandatory notice mounts after complete.
+ await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete',{timeout:12000});
  await expect(page.locator('.paper')).toBeVisible();
  await expect(dialog(page)).toBeVisible();
 }
