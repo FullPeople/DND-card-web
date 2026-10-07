@@ -1,12 +1,14 @@
-import {selectionEffectsAllowed,type Character,type Entry,type Selection} from '../model';
+import {ABILITIES,selectionEffectsAllowed,type Character,type Entry,type Selection} from '../model';
 import {candidateReason,evaluate} from '../engine';
 import {resolveEntryReference} from '../entryReferences';
+import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
 
 const list=(value:unknown):unknown[]=>Array.isArray(value)?value:[];
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
 const level=(row:Selection)=>Number.isSafeInteger(row.level)&&row.level>=1&&row.level<=20?row.level:0;
 const names=(entry:Entry)=>[entry.name,entry.english,entry.raw.name,entry.raw.ENG_name].map(key);
+const abilityImprovement=(entry:Entry)=>key(entry.raw.category)==='g'&&entry.raw.repeatable===true&&list(entry.raw.ability).some((row:any)=>Array.isArray(row?.choose?.from)&&row.choose.from.length>0&&row.choose.from.every((ability:any)=>ABILITIES.includes(ability))&&(row.choose.amount??1)*(row.choose.count??1)===2);
 /** Sparse optional-feature progressions carry the most recent declared total. */
 export function sourceProgressionCount(value:unknown,at:number):number|undefined{
  let count:unknown;
@@ -55,13 +57,13 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
  for(const owner of c.selections.filter(row=>row.entry.kind==='class')){
   const restricted=!selectionEffectsAllowed(c,owner.entry),at=level(owner);
   const sourceCard={...c,edition:owner.entry.edition==='both'?c.edition:owner.entry.edition,profile:{...c.profile,optional:{...c.profile.optional,legacy:false}}};
-  const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string)=>{
+  const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string,recordOnly=optional,support?:ClassChoiceSupport)=>{
    candidates=candidates.filter((entry,index)=>candidates.findIndex(other=>other.id===entry.id)===index);
    const saved=c.answers[id]||[],options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
-    grant:optional?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id)},entry)||sourceChoicePrerequisite(c,entry,owner,optional)}));
+    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id)},entry)||sourceChoicePrerequisite(c,entry,owner,optional)}));
    const slots=Array.from({length:Math.max(count,saved.length)},(_,index)=>saved[index]||'');
    const selected=restricted?[]:saved.slice(0,count).filter((value,index,values)=>options.some(option=>option.value===value&&!option.unavailable)&&(values.indexOf(value)===index||options.find(option=>option.value===value)?.entry.raw.repeatable===true));
-   out.push({id,ownerId:owner.id,label,count,options,slots,selected,complete:selected.length===count&&count>0,restricted,channel:'content',catalogKind:optional?'feature':'feat',sourceProgression:optional?'optional':'feat',ownerEdition:owner.entry.edition,
+   out.push({id,ownerId:owner.id,label,count,options,slots,selected,complete:selected.length===count&&count>0,restricted,channel:'content',catalogKind:optional?'feature':'feat',sourceProgression:optional?'optional':'feat',ownerEdition:owner.entry.edition,support,
     hint:hint||(optional?'数量来自此职业的来源声明。这里只保存已学记录；不会激活灌注物品、生成物品或返还资源。替换次数、重复子选项及具体机制需手动核对；调整记录不代表规则允许替换。':undefined)});
   };
   list(owner.entry.raw.optionalfeatureProgression).forEach((raw,index)=>{
@@ -69,7 +71,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const types=list(group.featureType).filter((type):type is string=>typeof type==='string').map(key),count=sourceProgressionCount(group.progression,at);
    if(count===0&&!c.answers[`${owner.id}:class-optional:${index}`]?.some(Boolean))return;
    const candidates=types.length?known.filter(entry=>entry.kind==='feature'&&entry.raw._category==='optionalfeature'&&list(entry.raw.featureType).some(type=>types.includes(key(type)))&&(entry.edition==='both'||entry.edition===owner.entry.edition)):[];
-   add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined);
+   add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined,true,optionalChoiceSupport(owner.entry,types,count??0,at));
   });
   list(owner.entry.raw.featProgression).forEach((raw,index)=>{
    if(!raw||typeof raw!=='object')return;const group=raw as {name?:string;category?:unknown;progression?:unknown};
@@ -92,8 +94,16 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    if(typeof ref!=='string')continue;
    const atGrant=Number(ref.split('|')[3]);if(!Number.isSafeInteger(atGrant)||atGrant<1)continue;
    const feature=resolveEntryReference(ref,known,'feature');if(!feature)continue;
+   if(legacyFeatEvidence(owner.entry,feature)){
+    const id=`${owner.id}:class-legacy-feat:${feature.id}`;if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
+    const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升（手动填写）',english:'Recorded ability improvement',entries:['保存本次属性提升方案；请在卡面手动填写属性，不重复叠加。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
+    const feats=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
+    add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。这里只保存方案；属性及专长效果仍手动处理。',true,legacyRecordSupport);
+    out.at(-1)!.evidenceEntry=feature;
+    continue;
+   }
    const typed=feature.entries.flatMap(node=>typeof node==='string'?[...node.matchAll(/\{@feat ([^}]+)\}/g)].map(match=>resolveEntryReference(match[1],known,'feat')):[]).filter((entry):entry is Entry=>!!entry);
-   const grant=typed.find(entry=>key(entry.raw.category)==='g'&&entry.raw.repeatable===true&&Array.isArray(entry.raw.ability));
+   const grant=typed.find(abilityImprovement);
    if(!grant){
     if(atGrant<=at&&feature.entries.some(node=>typeof node==='string'&&/\{@5etools [^|}]+\|feats\.html\}/.test(node))&&typed.length===0)
      add(`${owner.id}:class-untyped-feat:${feature.id}`,`${feature.name}（职业 ${atGrant} 级，待核对）`,0,[],false,'此来源只有专长目录链接。2014 属性提升与替换专长需手动核对和填写，本入口不会授予能力或改写属性。');
@@ -102,7 +112,8 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const id=`${owner.id}:class-typed-feat:${feature.id}`;
    if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
    const candidates=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
-   add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；属性分配仍手动填写，不会重复改变卡面基础属性。');
+   add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；只有既有已适配机制生效。ASI 属性分配仍手动填写，不会重复改变卡面基础属性。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；仅既有已适配机制生效，ASI 属性仍手动填写。'});
+   out.at(-1)!.evidenceEntry=feature;
   }
  }
  return out;

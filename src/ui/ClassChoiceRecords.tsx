@@ -14,6 +14,7 @@ export function ClassChoiceRecords({c,catalog,mode}:{c:Character;catalog:Entry[]
   return <section key={choice.id} data-class-choice={choice.id}>
    <button type="button" className={`sheet-choice-chip ${choice.complete?'':'is-pending'}`} data-choice-id={choice.id} disabled={!editing||choice.count===0} onClick={()=>workspace.open(choice.id)}>{owner.entry.name} · {owner.entry.source} · {choice.label} {choice.count?`${choice.selected.length}/${choice.count}`:'待核对'}</button>
    {choice.count===0&&choice.hint&&<small>{choice.hint}</small>}
+   {choice.support&&<small>{choice.support.reason} 当前发布验证：待核实。</small>}
    {mode==='optional'&&<small>已学记录；效果和物品操作手动处理</small>}
    {!!choice.restricted&&<small>来源未启用，原记录保留</small>}
    <div>{choice.slots?.map((value,index)=>{
