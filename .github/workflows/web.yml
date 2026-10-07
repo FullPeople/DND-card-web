@@ -94,6 +94,11 @@ jobs:
               npx playwright test --config playwright.feedback198.config.ts
               npx playwright test --config playwright.compat207.config.ts
               npx playwright test --config playwright.touch.config.ts
+          - group: latest-workspace-and-resources
+            commands: |
+              npx playwright test --config playwright.workspace-feedback.config.ts
+              DND_WORKSPACE_SUITE=1 npx playwright test --config playwright.workspace-feedback.config.ts
+              npx playwright test --config playwright.followup-ui231.config.ts --project=chromium-resources --project=firefox-resources
           - group: dashboard-appearance
             commands: |
               npx playwright test --config playwright.dashboard237.config.ts

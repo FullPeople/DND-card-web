@@ -7,7 +7,7 @@ describe('date-grouped changelog',()=>{
    const before=JSON.stringify(releaseHistoryFor(mode)),log=releaseLogFor(mode);
    expect(log.map(day=>day.title)).toEqual([...new Set(releaseHistoryFor(mode).map(day=>day.title.slice(0,10)))]);
    for(const day of log){expect(day.title).toMatch(/^\d{4}-\d{2}-\d{2}$/);const items=day.sections.flatMap(section=>section.items);expect(new Set(items).size).toBe(items.length);}
-   const latest=log[0].sections.flatMap(section=>section.items).join('\n');
+   const latest=log.find(day=>day.title==='2026-10-07')!.sections.flatMap(section=>section.items).join('\n');
    expect(latest).toContain('修复战俑等来源的工具选择没有列出可用工具的问题。');
    expect(latest).not.toContain('战俑工具选择仍待处理');
    expect(latest).toContain('实体手机和玩家原设备仍待验证。');
@@ -19,5 +19,15 @@ describe('date-grouped changelog',()=>{
  it('keeps Suite-only changes in the Suite changelog',()=>{
   expect(JSON.stringify(releaseLogFor('suite')[0])).toContain('新旧插件都移除了“编辑地图迷雾”右键入口');
   expect(JSON.stringify(releaseLogFor('standalone')[0])).not.toContain('编辑地图迷雾');
+ });
+ it('shows the new standalone batch and supersedes the former cloud policy without rewriting history',()=>{
+  const raw=JSON.stringify(releaseHistoryFor('standalone')),log=releaseLogFor('standalone');
+  expect(log[0].title).toBe('2026-10-08');
+  expect(JSON.stringify(log[0])).toContain('三个标签');
+  expect(JSON.stringify(log[0])).toContain('所有人都可以在云端看到所有卡');
+  expect(JSON.stringify(log)).not.toContain('不公开全站目录');
+  expect(JSON.stringify(log)).not.toContain('云端登录与保存暂不可用');
+  expect(JSON.stringify(releaseHistoryFor('standalone'))).toBe(raw);
+  expect(raw).toContain('不公开全站目录');
  });
 });
