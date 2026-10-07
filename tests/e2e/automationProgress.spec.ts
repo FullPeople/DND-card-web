@@ -35,7 +35,7 @@ test('player progress, lazy caching and character preservation',async({page})=>{
 
 test('compact source progress on a narrow touch viewport',async({browser,baseURL})=>{
  const context=await browser.newContext({viewport:{width:390,height:760},isMobile:true,hasTouch:true,baseURL});const page=await context.newPage();await open(page);
- const box=(await tab(page).boundingBox())!;expect(box.height).toBeGreaterThanOrEqual(44);expect(box.y+box.height).toBeLessThan(760);await tab(page).tap();
+ const box=(await tab(page).boundingBox())!;expect(box.height).toBe(22);expect(box.y+box.height).toBeLessThan(760);await tab(page).tap();
  await expect(panel(page).locator('.automation-progress-books')).toBeVisible();expect(await panel(page).evaluate(node=>node.scrollWidth<=node.clientWidth+1)).toBe(true);
  expect((await panel(page).locator('.automation-progress-books li').first().boundingBox())!.height).toBeLessThanOrEqual(30);
  await page.screenshot({path:test.info().outputPath('progress-phone.png')});const body=page.locator('.announcement-body');await body.evaluate(node=>{node.scrollTop=node.scrollHeight;});

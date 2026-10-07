@@ -38,3 +38,9 @@ npm run build
 $env:DND_WORKSPACE_SUITE='1'
 node node_modules/@playwright/test/cli.js test --config playwright.workspace-feedback.config.ts --grep 'release notes contain only'
 ```
+
+## 追加：公告上栏三栏按钮
+
+后续用户要求三个按钮融入上栏且高度减半。现将页签放入原公告 header，三个等宽按钮贴合，移除独立容器背景、边框、按钮圆角和间隙；高度由 44 像素改为 22 像素，选中项用底线表示，键盘焦点保留。桌面与手机均采用同一高度，手机布局仍可显示完整标签。
+
+类型、单机和常规构建通过。既有桌面公告、手机自动化进度、手机日志及三页签键盘切换 3 项浏览器场景复验通过。新增截图位于 `.local-evidence/workspace-feedback/screenshots/header-tabs-desktop.png` 和 `header-tabs-phone.png`；生产预览仍为 <http://127.0.0.1:5694/>。
