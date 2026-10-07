@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-06",
+  "dataRevision": "9acd4d5e7c5bed9cf34150db4319a7aeec6751e8",
+  "manifest": "reports/g1/inputs-sha256.json",
+  "evidenceBoundary": "Only mechanical field projection of two real class and two real shield identities; no copied rule prose or player data",
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/class/class-fighter.json",
+      "bytes": 170179,
+      "sha256": "da2d63f3d4eb692db32f22b081dafecbc08394f27fbaeff7a51503824aefd1e0"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "bytes": 197272,
+      "sha256": "9f1346c69344d66088dbdb1c26ea5872102d318ac148805a8ae9b5fedc5fc94f"
+    }
+  ],
+  "projection": {
+    "class": [
+      {
+        "name": "战士",
+        "ENG_name": "Fighter",
+        "source": "PHB",
+        "edition": "classic",
+        "hd": {
+          "number": 1,
+          "faces": 10
+        },
+        "proficiency": [
+          "str",
+          "con"
+        ],
+        "startingProficiencies": {
+          "armor": [
+            "light",
+            "medium",
+            "heavy",
+            "shield"
+          ]
+        },
+        "multiclassing": {
+          "proficienciesGained": {
+            "armor": [
+              "light",
+              "medium",
+              "shield"
+            ]
+          }
+        },
+        "entries": []
+      },
+      {
+        "name": "战士",
+        "ENG_name": "Fighter",
+        "source": "XPHB",
+        "edition": "one",
+        "hd": {
+          "number": 1,
+          "faces": 10
+        },
+        "proficiency": [
+          "str",
+          "con"
+        ],
+        "startingProficiencies": {
+          "armor": [
+            "light",
+            "medium",
+            "heavy",
+            "shield"
+          ]
+        },
+        "multiclassing": {
+          "proficienciesGained": {
+            "armor": [
+              "light",
+              "medium",
+              "shield"
+            ]
+          }
+        },
+        "entries": []
+      }
+    ],
+    "baseitem": [
+      {
+        "name": "盾牌",
+        "ENG_name": "Shield",
+        "source": "PHB",
+        "edition": "classic",
+        "type": "S",
+        "ac": 2,
+        "page": 144
+      },
+      {
+        "name": "盾牌",
+        "ENG_name": "Shield",
+        "source": "XPHB",
+        "edition": "one",
+        "type": "S|XPHB",
+        "ac": 2,
+        "page": 219
+      }
+    ]
+  }
+}
