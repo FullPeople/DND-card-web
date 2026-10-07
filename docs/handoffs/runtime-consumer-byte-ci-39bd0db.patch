@@ -1,0 +1,166 @@
+diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+index 461a984293eaa7cdaa6b3f135975bda4459f66c7..87cb48818856fb99ea81a7d07de666bc07a6ec21 100644
+--- a/.github/workflows/build.yml
++++ b/.github/workflows/build.yml
+@@ -29,6 +29,8 @@ jobs:
+           ref: ${{ steps.consumer.outputs.revision }}
+           path: .cache/web-consumer
+           persist-credentials: false
++      - name: Verify audited consumer revision and actual module bytes
++        run: node --experimental-strip-types scripts/verify_runtime_consumer.ts .cache/web-consumer
+       - name: Test coverage against real pinned consumer functions
+         run: node --experimental-strip-types scripts/test_runtime_probe.ts .cache/web-consumer
+       - run: npm test
+diff --git a/docs/RUNTIME-CONSUMER-BYTES-CI-20261007.md b/docs/RUNTIME-CONSUMER-BYTES-CI-20261007.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..79ddb06da775b4c384e38c5391a2ac309e074642
+--- /dev/null
++++ b/docs/RUNTIME-CONSUMER-BYTES-CI-20261007.md
+@@ -0,0 +1,48 @@
++# Runtime consumer byte verification CI candidate
++
++Based on the freshly fetched Data main `9acd4d5e7c5bed9cf34150db4319a7aeec6751e8`.
++The existing workflow checked out the report's consumer revision and exercised
++eight real function probes, but did not compare the report's module hashes to
++the files those probes would execute. A checkout or working-file mismatch could
++therefore go unnoticed by that CI step.
++
++The new mandatory `verify_runtime_consumer.ts` step runs before the probes. It
++validates the coverage ledger, requires the exact Git checkout root and revision,
++then hashes every declared module's actual file and committed Git blob. Missing
++files, symlinks, unsafe or duplicate paths, changed working files and a forged
++hash matching only changed files fail closed. It does not read upstream rule
++text, fetch the original cache, write player data or regenerate any statistics.
++Both progress reports remain byte-for-byte unchanged.
++
++Local verification: eight new regression cases; full Vitest 318 passed / 11
++existing real-data conditional skips; Node tests 14 passed; Python public export
++tests 6 passed; TypeScript build passed. The actual pinned Web checkout
++`0dde358a2382d4c3d88977165f3a854feb0609e4` passed all 48 module checks and eight
++existing real consumer probes. The current Warforged candidate is rejected as a
++different declared consumer revision, as required. No whole-corpus re-audit or
++publication proof is claimed.
++
++The first full test run lacked the committed `reports/g1/coverage-report.json`
++because this isolated checkout was sparse: 317 passed / 1 failed / 11 skipped.
++Adding the original committed reports/g1 directory fixed that setup failure;
++the original failure log and final logs are retained locally. No assertion was
++removed. There is no separate lint script; `git diff --check` passed.
++
++Reproduce from this candidate with a checkout of the report's exact Web commit:
++
++```sh
++npm ci
++node --experimental-strip-types scripts/verify_runtime_consumer.ts /path/to/pinned-web
++node --experimental-strip-types scripts/test_runtime_probe.ts /path/to/pinned-web
++python -B -m unittest discover -s scripts -p test_export_progress_status.py -v
++npm test
++npm run build
++```
++
++The prior Data write denial has no verified repair handoff. This is a local
++candidate; no new credential, alternate write route, push, PR, merge or deployment
++was attempted. Frozen revision, source hashes, rollback verification and bundle
++are in the local delivery receipt. After authorized transfer, revert the candidate
++commit with `git revert --no-edit <candidate-commit>`; do not reset the main branch
++or overwrite later work. The workflow and checker changes are reversible without
++touching the progress reports.
+diff --git a/docs/runtime-coverage.md b/docs/runtime-coverage.md
+index 8ec26baaff72a36ec13b5d8b2509527ae3b52893..5dedc693d0b63d3c7c54b1361a8c08fafeb8f64e 100644
+--- a/docs/runtime-coverage.md
++++ b/docs/runtime-coverage.md
+@@ -36,7 +36,13 @@ The count covers the observed supported behavior and does not certify complete
+ semantics, encounter settlement, or every possible condition of each rule.
+ 
+ CI runs the six existing Python export regressions, validates the whole public
+-ledger and source aggregates, and runs eight positive/negative scenarios against
+-the exact pinned consumer code. CI does not claim to replay the private cache.
++ledger and source aggregates, and verifies the exact checked-out revision and
++every audited module's working bytes and Git blob before running eight
++positive/negative scenarios against the pinned consumer code. The byte checker
++rejects missing files, symlinks, unsafe/duplicate paths and modified working
++files; it neither writes the ledger nor needs the original input cache.
++Run it locally with `node --experimental-strip-types
++scripts/verify_runtime_consumer.ts /path/to/pinned-web`.
++CI does not claim to replay the private cache.
+ The Web build must match every audited consumer module hash and verify the
+ committed Data blob before displaying the new count.
+diff --git a/scripts/verify_runtime_consumer.ts b/scripts/verify_runtime_consumer.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..b4ddac9b4cf6de1220aa20dc952e76a2be2ef23f
+--- /dev/null
++++ b/scripts/verify_runtime_consumer.ts
+@@ -0,0 +1,5 @@
++import {readFileSync} from 'node:fs';
++import {verifyConsumerBytes} from '../src/runtimeCoverage/consumerBytes.ts';
++const [webRoot,reportPath='reports/progress/runtime-coverage.json']=process.argv.slice(2);
++if(!webRoot)throw Error('Usage: verify_runtime_consumer.ts WEB_CHECKOUT [COVERAGE_REPORT]');
++console.log(JSON.stringify({verified:verifyConsumerBytes(JSON.parse(readFileSync(reportPath,'utf8')),webRoot)}));
+diff --git a/src/runtimeCoverage/consumerBytes.ts b/src/runtimeCoverage/consumerBytes.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..0df8249fad67a03eb66723c63466f2a41828cb3c
+--- /dev/null
++++ b/src/runtimeCoverage/consumerBytes.ts
+@@ -0,0 +1,27 @@
++import {createHash} from 'node:crypto';
++import {execFileSync} from 'node:child_process';
++import {lstatSync,readFileSync,realpathSync} from 'node:fs';
++import {join,resolve} from 'node:path';
++import {validateCoverage} from './report.ts';
++
++const digest=(bytes:Buffer)=>createHash('sha256').update(bytes).digest('hex');
++
++/** Verify the files CI will execute as well as their declared Git blobs. No cache or ledger writes. */
++export function verifyConsumerBytes(value:unknown,webRoot:string){
++ const report=validateCoverage(value),root=realpathSync(resolve(webRoot));
++ const git=(args:string[])=>execFileSync('git',['--no-replace-objects',...args],{cwd:root,maxBuffer:16*1024*1024});
++ if(realpathSync(git(['rev-parse','--show-toplevel']).toString().trim())!==root)throw Error('Consumer must be the checkout root');
++ const revision=git(['rev-parse','HEAD']).toString().trim();
++ if(revision!==report.consumer.revision)throw Error('Consumer revision does not match the coverage ledger');
++ for(const module of report.consumer.modules){
++  const parts=module.path.split('/');
++  if(parts.some(part=>!part||part==='.'||part==='..'))throw Error('Unsafe consumer module path: '+module.path);
++  // Refuse symlinks before reading, including links to files outside this checkout.
++  let path=root;
++  for(const part of parts){path=join(path,part);if(lstatSync(path).isSymbolicLink())throw Error('Symlink consumer module: '+module.path);}
++  if(!lstatSync(path).isFile())throw Error('Consumer module is not a file: '+module.path);
++  if(digest(readFileSync(path))!==module.sha256)throw Error('Consumer working bytes differ from coverage: '+module.path);
++  if(digest(git(['cat-file','blob','HEAD:'+module.path]))!==module.sha256)throw Error('Consumer committed bytes differ from coverage: '+module.path);
++ }
++ return {repository:report.consumer.repository,revision,modules:report.consumer.modules.length};
++}
+diff --git a/test/runtimeConsumerBytes.vitest.ts b/test/runtimeConsumerBytes.vitest.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..7f47a7fa53307b2e9e7dd3949d68a8b3503ee3e6
+--- /dev/null
++++ b/test/runtimeConsumerBytes.vitest.ts
+@@ -0,0 +1,29 @@
++import {createHash} from 'node:crypto';
++import {execFileSync} from 'node:child_process';
++import {mkdtempSync,mkdirSync,readFileSync,writeFileSync,rmSync,symlinkSync} from 'node:fs';
++import {tmpdir} from 'node:os';
++import {join} from 'node:path';
++import {afterEach,beforeEach,describe,expect,it} from 'vitest';
++import {verifyConsumerBytes} from '../src/runtimeCoverage/consumerBytes.ts';
++import type {CoverageReport} from '../src/runtimeCoverage/report.ts';
++const sha=(text:string)=>createHash('sha256').update(text).digest('hex');
++describe('CI verifies the actual pinned consumer bytes',()=>{
++ let root:string,web:string,report:CoverageReport;
++ beforeEach(()=>{
++  root=mkdtempSync(join(tmpdir(),'consumer-bytes-'));web=join(root,'web');mkdirSync(join(web,'src'),{recursive:true});
++  writeFileSync(join(web,'src/probe.ts'),'export const probe = 1;\n');
++  const git=(args:string[])=>execFileSync('git',args,{cwd:web,stdio:'pipe'}).toString().trim();
++  git(['init','-q']);git(['add','src/probe.ts']);
++  git(['-c','user.name=Consumer verification fixture','-c','user.email=fixture@example.invalid','commit','-qm','Synthetic consumer fixture']);
++  report={schemaVersion:1,definition:'at least one current calculation or usable choice; remaining effects are manual',updatedAt:'2026-10-07T00:00:00Z',consumer:{repository:'FullPeople/DND-card-web',revision:git(['rev-parse','HEAD']),modules:[{path:'src/probe.ts',sha256:sha(readFileSync(join(web,'src/probe.ts'),'utf8'))}]},snapshotSha256:'0'.repeat(64),inputs:[{url:'https://5e.kiwee.top/data/fixture.json',sha256:'0'.repeat(64)}],total:0,reviewed:0,implemented:0,unresolved:0,unavailable:0,sources:[],records:[]};
++ });
++ afterEach(()=>rmSync(root,{recursive:true,force:true}));
++ it('accepts matching working and committed bytes without modifying the ledger',()=>{const before=JSON.stringify(report);expect(verifyConsumerBytes(report,web)).toEqual({repository:report.consumer.repository,revision:report.consumer.revision,modules:1});expect(JSON.stringify(report)).toBe(before);});
++ it('rejects a different checked-out revision',()=>{report.consumer.revision='0'.repeat(40);expect(()=>verifyConsumerBytes(report,web)).toThrow('revision');});
++ it('rejects modified working bytes at the correct revision',()=>{writeFileSync(join(web,'src/probe.ts'),'export const probe = 2;\n');expect(()=>verifyConsumerBytes(report,web)).toThrow('working bytes');});
++ it('also rejects a forged hash matching only modified working bytes',()=>{const changed='export const probe = 2;\n';writeFileSync(join(web,'src/probe.ts'),changed);report.consumer.modules[0].sha256=sha(changed);expect(()=>verifyConsumerBytes(report,web)).toThrow('committed bytes');});
++ it('rejects a missing module',()=>{rmSync(join(web,'src/probe.ts'));expect(()=>verifyConsumerBytes(report,web)).toThrow('ENOENT');});
++ it('rejects symlink reads even when the external bytes match',()=>{const target=join(root,'external.ts');writeFileSync(target,readFileSync(join(web,'src/probe.ts')));rmSync(join(web,'src/probe.ts'));symlinkSync(target,join(web,'src/probe.ts'));expect(()=>verifyConsumerBytes(report,web)).toThrow('Symlink');});
++ it('rejects duplicate and unsafe module paths before executing a probe',()=>{report.consumer.modules.push({...report.consumer.modules[0]});expect(()=>verifyConsumerBytes(report,web)).toThrow('consumer modules');report.consumer.modules.pop();report.consumer.modules[0].path='src/../external.ts';expect(()=>verifyConsumerBytes(report,web)).toThrow('consumer modules');report.consumer.modules[0].path='src/./probe.ts';expect(()=>verifyConsumerBytes(report,web)).toThrow('Unsafe');});
++ it('rejects a directory nested inside another checkout as the root',()=>{expect(()=>verifyConsumerBytes(report,join(web,'src'))).toThrow('checkout root');});
++});

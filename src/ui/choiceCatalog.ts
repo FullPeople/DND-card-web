@@ -9,7 +9,7 @@ export function choiceEntryMatcher(c:Character,choice:SheetChoice):(entry:Entry)
  const ids=new Map<string,number>(),identities=new Map<string,number>(),skills=new Map<string,ChoiceOption>();
  choice.options.forEach((option,index)=>{if(choice.channel==='skills'){if(!skills.has(option.value))skills.set(option.value,option);return;}if(!wikiEntry(option.entry))return;if(!ids.has(option.entry.id))ids.set(option.entry.id,index);const alias=identity(option.entry);if(!identities.has(alias))identities.set(alias,index);});
  return entry=>{
-  if(!editionAllows(entry,c.edition)||!selectionAllowed(c,entry))return;
+  if(!selectionAllowed(c,entry)||choice.channel!=='tools'&&!editionAllows(entry,c.edition))return;
   if(choice.channel==='skills'){
    if(entry.kind!=='rule'||entry.raw._category!=='skill'||entry.source!==(c.edition==='2024'?'XPHB':'PHB'))return;
    // Preserve choice order when translated and English aliases identify different options.
@@ -21,7 +21,7 @@ export function choiceEntryMatcher(c:Character,choice:SheetChoice):(entry:Entry)
  };
 }
 export function optionForEntry(c:Character,choice:SheetChoice,entry:Entry):ChoiceOption|undefined{
- if(!editionAllows(entry,c.edition)||!selectionAllowed(c,entry))return;
+ if(!selectionAllowed(c,entry)||choice.channel!=='tools'&&!editionAllows(entry,c.edition))return;
  if(choice.channel==='skills'){
   if(entry.kind!=='rule'||entry.raw._category!=='skill'||entry.source!==(c.edition==='2024'?'XPHB':'PHB'))return;
   return choice.options.find(o=>[entry.name,entry.english,entry.raw.ENG_name].some(n=>typeof n==='string'&&skillKey(n)===o.value));
@@ -29,7 +29,7 @@ export function optionForEntry(c:Character,choice:SheetChoice,entry:Entry):Choic
  return choice.options.find(o=>wikiEntry(o.entry)&&(o.entry.id===entry.id||o.entry.kind===entry.kind&&o.entry.source===entry.source&&key(o.entry.english||o.entry.name)===key(entry.english||entry.name)&&['className','classSource','level','_category'].every(k=>key(o.entry.raw[k])===key(entry.raw[k]))));
 }
 export function choiceCatalog(c:Character,choice:SheetChoice,catalog:Entry[]):{wiki:boolean;tab:LibraryTab;entries:Entry[];filters:FacetSelection}{
- const match=choiceEntryMatcher(c,choice),matched=catalog.flatMap(entry=>{const option=match(entry);return option?[{entry,option}]:[]}),entries=matched.map(row=>row.entry),values=new Set(matched.map(row=>row.option.value)),wiki=!!choice.catalogKind&&choice.options.every(o=>wikiEntry(o.entry))||['skills','tools','spells'].includes(choice.channel)||choice.channel!=='equipment'&&choice.options.length>0&&choice.options.every(o=>o.unavailable==='引用资料尚未加载，不能确认此项。'||values.has(o.value));
+ const match=choiceEntryMatcher(c,choice),matched=catalog.flatMap(entry=>{const option=match(entry);return option?[{entry,option}]:[]}),entries=matched.map(row=>row.entry),values=new Set(matched.map(row=>row.option.value)),wiki=!!choice.catalogKind&&choice.options.every(o=>wikiEntry(o.entry))||['skills','spells'].includes(choice.channel)||choice.channel==='tools'&&choice.options.every(o=>wikiEntry(o.entry))||choice.channel!=='equipment'&&choice.options.length>0&&choice.options.every(o=>o.unavailable==='引用资料尚未加载，不能确认此项。'||values.has(o.value));
  const tab:LibraryTab=choice.channel==='skills'?'rule':choice.channel==='tools'?'item':choice.channel==='spells'?'spell':choice.catalogKind==='feat'?'feat':entries[0]?tabOf(entries[0]):'class';
  const filters:FacetSelection={};
  if(wiki){const owner=c.selections.find(s=>s.id===choice.ownerId),phb=c.edition==='2024'?'XPHB':'PHB',sources=[...new Set(entries.map(e=>e.source))];filters.source={include:choice.channel==='skills'||choice.channel==='spells'&&(sources.includes(phb)||!sources.length)?[phb]:sources.includes(owner?.entry.source||'')?[owner!.entry.source]:sources,exclude:[]};

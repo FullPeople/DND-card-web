@@ -36,9 +36,13 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
   const push=(path:string,label:string,count:number,options:ChoiceOption[],channel:SheetChoice['channel'],equipmentIndex?:number)=>{
    if(!Number.isSafeInteger(count)||count<1||count>100)return;
    const id=`${row.id}:${path}`,saved=channel==='equipment'?[sourceEquipmentChoices(c,row)[String(equipmentIndex)]].filter(Boolean) as string[]:channel==='abilities'?[backgroundAbilityValue(c.backgroundChoices?.[row.id]?.abilities)].filter(Boolean):c.answers[id]||[];
-   const selected=[...new Set(saved)].filter(v=>options.some(o=>o.value===v)).slice(0,count);
-   const slots=Array.from({length:count},(_,i)=>options.some(o=>o.value===saved[i])?saved[i]:'');
-   out.push({id,ownerId:row.id,label,count,options,selected,slots,complete:selected.length===count,restricted,channel,equipmentIndex});
+   // Recorded tools survive source/edition changes and missing catalog data.
+   // Current eligibility governs new picks, never the untouched saved slots.
+   const selected=[...new Set(saved)].filter(v=>channel==='tools'?!!v:options.some(o=>o.value===v));
+   if(channel!=='tools')selected.splice(count);
+   const slots=Array.from({length:channel==='tools'?Math.max(count,saved.length):count},(_,i)=>channel==='tools'?saved[i]||'':options.some(o=>o.value===saved[i])?saved[i]:'');
+   const complete=selected.length===count&&(channel!=='tools'||selected.every(v=>options.some(o=>o.value===v&&!o.unavailable)));
+   out.push({id,ownerId:row.id,label,count,options,selected,slots,complete,restricted,channel,equipmentIndex});
   };
   if(row.entry.kind==='background'&&Array.isArray(raw.ability)&&raw.ability.length){
    const options=backgroundAbilityOptions(row.entry).map(option=>({...option,entry:concept(row.entry,`abilities:${option.value}`,option.label,['背景属性分配记录；不会重复改写卡面的基础属性。'])}));
@@ -53,11 +57,11 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
     const choose=block?.choose,count=choose?.count??block?.any;if(!count)return;
     // Publisher tools use typed items, not a `tool` boolean. Only explicit
     // tool categories qualify; vehicles, armor and unknown types stay out.
-    const values=choose?.from??(field==='skills'?Object.keys(SKILLS):[...new Set(known.filter(e=>field==='languages'?e.raw._category==='language':e.kind==='item'&&selectionAllowed(c,e)&&(e.raw.tool||['AT','T','INS','GS'].includes(String(e.raw.type||'').split('|')[0]))).map(e=>e.id))]);
+    const values=choose?.from??(field==='skills'?Object.keys(SKILLS):[...new Set(known.filter(e=>field==='languages'?e.raw._category==='language':e.kind==='item'&&(e.raw.tool||['AT','T','INS','GS'].includes(String(e.raw.type||'').split('|')[0]))).map(e=>e.id))]);
     const options=(values||[]).map((v:string)=>{
      const value=field==='skills'?skillKey(v):v,label=SKILLS[value]?.name||known.find(e=>e.id===v)?.name||v;
      const found=field==='skills'?known.find(e=>e.kind==='rule'&&e.raw._category==='skill'&&e.source===(c.edition==='2024'?'XPHB':'PHB')&&[e.name,e.english,e.raw.ENG_name].some(n=>typeof n==='string'&&skillKey(n)===value)):known.find(e=>e.id===v)||known.find(e=>e.source===row.entry.source&&[e.name,e.english].some(n=>n.toLowerCase()===label.toLowerCase()));
-     return {value,label,entry:found||concept(row.entry,value,label,[`${label}熟练：相关检定加入熟练加值；专精及其他修正另行计算。`])};
+     return {value,label,entry:found||concept(row.entry,value,label,[`${label}熟练：相关检定加入熟练加值；专精及其他修正另行计算。`]),unavailable:field==='tools'&&found&&!selectionAllowed(c,found)?'此选项来源或版本当前不可用，已有记录保留。':undefined};
     });
     push(`${channel}:${index}`,`${row.entry.kind==='class'?'起始':''}${label}`,count,options,channel);
    });
@@ -104,7 +108,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);
- if(!choice||choice.restricted||!option||option.unavailable)throw Error(option?.unavailable||'此选择当前不可用。');
+ if(!choice||choice.restricted||!option||option.unavailable&&!(choice.channel==='tools'&&choice.selected.includes(value)))throw Error(option?.unavailable||'此选择当前不可用。');
  if(choice.channel==='spells'){chooseClassSpell(c,choice,option.entry);finishBuiltinChoices(c,before,catalog);return;}
  const selected=choice.selected.includes(value)?choice.selected.filter(v=>v!==value):choice.count===1?[value]:[...choice.selected,value];
  if(selected.length>choice.count)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
