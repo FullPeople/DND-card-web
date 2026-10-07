@@ -1,5 +1,49 @@
 # 职业专长与可选特性入口：本地候选，未发布
 
+## PR17 旧授予身份与子树保留补修
+
+独立 review 发现 `8412e80` 去重只保留旧 filter 答案，实际旧授予却被删除并改建成新 ID，手工子项、嵌套选择与按原授予路径保存的引用会随旧树消失。补修代码提交为 `bce848c8781fa215c45c703c1470d4a5f7b539f5`。本节补足下节“保留答案即可恢复”的不足；正式 Data producer 必须检出 PR17 **最新完整 HEAD**，不能沿用 `8412e80` 或后续文档提交前的代码头。
+
+- 对严格对应同次职业授予的旧 filter，持久化 canonical 答案副本，同时保留每个旧答案、原 selection ID、grantKey 和父项；只更新授予的 requirementId，不重新发放能力。
+- 来源特性自动移除前，将失去条件的职业专长完整子树保存到原生卡的 `classChoiceArchive`，包括自动 / 手工后代与父来源快照。档案不在 `selections` 中，不能参与熟练、效果或资源授予；快捷栏、布局、嵌套答案和资源引用保留。
+- 只有原职业、明确来源引用、合法职业等级、启用的来源与未 dismiss 的原特性允许时，才恢复原身份和子树。资源消耗不重置。未能恢复的档案不会被新 ID 替代，也不显示选择完成；历史重复授予保留在档案中，只有一个有效效果。
+- 清空新答案不会从旧 alias 补回。导入验证检查身份唯一性、完整子树关联、来源快照及总数量，失败不改输入。没有读取 / 修改真实玩家卡，没有提交上游正文或原 229 缓存。
+
+原创旧卡由实际 `1a1717f84d9774f34194b9e57a45c247980cfba2` 的 `syncFeatures` / `setSheetChoiceSlot` / `syncChoiceContent` 生成，含真实旧 filter grant、技能选择、两层子项、手工挂接、快捷栏和 1/3 剩余资源。补修前该卡三项回归均失败。另以本地实际 XPHB 圣武士 / 游侠 / 魔契师公開来源样本在同一旧代码生成无子项旧 grant，验证 **2→1→2、2→1→2、19→18→19**，不使用非法等级 0。来源正文仅存忽略的证据目录；公开夹具完全原创。重复历史 grant 用例是额外原创回归，不冒充旧 producer 输出。
+
+8 个针对文件 **104 通过 / 0 失败 / 0 跳过**，旧代码生成器复跑 **4 通过**，类型检查和 `git diff --check` 通过。完整单测 **1068 通过 / 17 失败 / 40 条件跳过**；17 项仍全部是正式 runtime coverage 对新消费者失效（公告 15、来源快照 2）。`build:standalone` 的 TS 阶段通过，Vite 在 0 个模块处被真实门禁拦截。最终推送 HEAD 的复测、远端与 CI 收据留在 `.local-evidence/class-level-choices/legacy-*.json/log`；没有生产包、浏览器 QA、截图或最终 bundle 体积证明。
+
+保留尝试包括最初三项身份回归失败、来源特性 pin 保留回归失败、旧整张 answers 相等断言改成旧 key 保留加 canonical 持久化，以及 JSON 固定键索引的类型错误。一次针对命令误带公告测试，再遇既有 15 项门禁失败，记录为 `legacy-targeted-with-stale-gate.*`。104 项命令只含指定 8 文件；完整命令不设置只含职业样本的 `DND_AUTOMATION_CORE_DATA`，避免把样本当完整 corpus。
+
+可重复生成旧卡（Node 22；自选目录，不含玩家数据）：
+
+```bash
+git worktree add --detach /tmp/class-choice-old 1a1717f84d9774f34194b9e57a45c247980cfba2
+mkdir -p /tmp/class-choice-old/tests/fixtures
+cp tests/fixtures/preDedupClassChoice.producer.ts /tmp/class-choice-old/tests/fixtures/preDedupClassChoice.test.ts
+cp tests/fixtures/preDedupRealClass.producer.ts /tmp/class-choice-old/tests/fixtures/preDedupRealClass.test.ts
+cd /tmp/class-choice-old
+npm ci
+DND_CLASS_CHOICE_FIXTURE_OUTPUT=/tmp/authored-old-card.json \
+  npx vitest run tests/fixtures/preDedupClassChoice.test.ts
+# 已取得实际公开职业样本时，输出到忽略的私有证据目录：
+DND_AUTOMATION_CORE_DATA=<private-source-directory> \
+  DND_CLASS_CHOICE_PRE_DEDUP_OUTPUT=<private-old-card-directory> \
+  npx vitest run tests/fixtures/preDedupRealClass.test.ts
+```
+
+生成器强制校验 Git HEAD 等于旧提交，UUID 在重跑时改变，结构、旧授予关系与剩余资源由断言核对。新候选针对 8 文件时同时设置 `DND_AUTOMATION_CORE_DATA=<private-source-directory>` 和 `DND_CLASS_CHOICE_PRE_DEDUP_DATA=<private-old-card-directory>`；缺实际来源时三项真实旧卡回归明确条件跳过。
+
+最新只读远端 main 为 `6ea7d790f35ac9af2cf06eaf20115dc28a7d8dba`。原迁移 owner 的 PR18、另一并行分支 `beac665` 的仪表板 / cloud review 成果不在本候选中。App 验证顺序、cloud-staged、Safari / 备份 / workflow paths 等由原 owner 处理，不把提案文档说成已修复。未来组合后须重新 producer，并明确运行迁移 / cloud 场景；本轮没有 merge / rebase、Data 更新或部署。
+
+只撤回本次兼容性补修，先备份原生卡，再按实际提交保留 Git 历史：
+
+```bash
+git revert bce848c8781fa215c45c703c1470d4a5f7b539f5
+```
+
+另撤本次记录时可先 revert 随后的文档提交（实际 SHA 见 PR）；整批继续按下節与旧回滚记录逆序撤回。Git revert 只恢复代码，不迁移玩家存档：旧版本不会恢复新档案中的停用子树，须保留补修版完整 JSON 和变更前备份，恢复玩家记录使用对应备份，不删档案或重发资源。
+
 ## PR17 独立 review 修复
 
 [Draft PR17](https://github.com/FullPeople/DND-card-web/pull/17) 仍为 blocked Draft，不合并、不部署。本节替代下文旧的“未 push / 无 PR”和 consumer `1a1717f` 交接状态；正式 producer 必须使用 PR 的最新完整 HEAD，不能沿用第一次候选或迁移的报告。
