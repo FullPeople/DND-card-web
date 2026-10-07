@@ -19,6 +19,7 @@ import {KeywordPreview} from './KeywordPreview';
 import {ContentBoundary,Entries} from './Entries';
 import {EntryFacts} from './EntryFacts';
 import {SourceName} from './SourceName';
+import {downloadBlob} from '../platform/storage';
 import {useUiLanguage} from './UiLanguage';
 
 import {uiEntryName,type UiTextKey} from './uiText';
@@ -35,14 +36,14 @@ class ViewerLoadError extends Error{constructor(readonly key:UiTextKey,readonly 
 export default function PlayerViewer(){
  const renderMode=useSheetRenderMode();
  const {language,t}=useUiLanguage();
- const [card,setCard]=useState<Character>(),[error,setError]=useState<Error>(),[page,setPage]=useState<SheetPage>('主要'),[detail,setDetail]=useState<Entry>(),[reload,setReload]=useState(0);
+ const [card,setCard]=useState<Character>(),[originalJson,setOriginalJson]=useState<string>(),[error,setError]=useState<Error>(),[page,setPage]=useState<SheetPage>('主要'),[detail,setDetail]=useState<Entry>(),[reload,setReload]=useState(0);
  const root=useRef<HTMLDivElement>(null);
- useEffect(()=>{const abort=new AbortController();setError(undefined);setCard(undefined);void(async()=>{
+ useEffect(()=>{const abort=new AbortController();setError(undefined);setCard(undefined);setOriginalJson(undefined);setDetail(undefined);void(async()=>{
   const target=new URLSearchParams(location.search).get('data_url');if(!target)throw new ViewerLoadError('readerMissing');
   const url=new URL(target,location.href);if(!['https:','http:'].includes(url.protocol)||/\.(?:xlsx?|xlsm)(?:$|[?#])/i.test(url.href))throw new ViewerLoadError('readerJsonOnly');
   const response=await fetch(url.href,{signal:abort.signal,credentials:'omit',cache:'no-cache'});if(!response.ok)throw new ViewerLoadError('readerHttp',{status:response.status});
   if(Number(response.headers.get('content-length')||0)>20_000_000)throw new ViewerLoadError('readerLarge');
-  const next=readViewerCharacter(parseFile(await response.text()));if(!abort.signal.aborted)setCard(next);
+  const text=await response.text(),next=readViewerCharacter(parseFile(text));if(!abort.signal.aborted){setCard(next);setOriginalJson(text);}
  })().catch(e=>{if(!abort.signal.aborted)setError(e instanceof Error?e:new Error(String(e)));});return()=>abort.abort();},[reload]);
  useLayoutEffect(()=>{for(const input of root.current?.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>('.paper input,.paper textarea,.paper select')||[])input.disabled=true;},[card,page,renderMode]);
  const derived=useMemo(()=>card?evaluate(card):undefined,[card]);
@@ -55,7 +56,7 @@ export default function PlayerViewer(){
  if(!card||!derived)return <main className="player-viewer-loading"><h1>{t('card')}</h1>{error?<><p role="alert">{error instanceof ViewerLoadError?t(error.key,error.values):error.message}</p><button onClick={()=>setReload(n=>n+1)}>{t('retry')}</button></>:<p role="status">{t('readerLoading')}</p>}<a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('goToSite')}</a></main>;
  const props={c:card,d:derived,edit,browse:noop,inspect:setDetail,onLink:link,add:noop,entries};
  return <KeywordPreview resolve={resolve} open={link}><SheetEditContext.Provider value={false}><main ref={root} className="player-viewer">
-  <header className="player-viewer-toolbar"><strong>{card.name}</strong><span>{card.edition} · {t('readOnly')}</span><button onClick={()=>setReload(n=>n+1)}>{t('refreshData')}</button><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('createOnSite')}</a></header>
+  <header className="player-viewer-toolbar"><strong>{card.name}</strong><span>{card.edition} · {t('readOnly')}</span><button disabled={originalJson===undefined} onClick={()=>{if(originalJson!==undefined)downloadBlob(`${card.name.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').slice(0,100)||'character'}.json`,new Blob([originalJson],{type:'application/json;charset=utf-8'}));}}>{t('exportJson')}</button><button onClick={()=>setReload(n=>n+1)}>{t('refreshData')}</button><a href="https://obr.dnd.center/card/" target="_blank" rel="noreferrer">{t('createOnSite')}</a></header>
   <section className="sheet-pane"><div className="pane-toolbar"><SheetDisplayButton/></div><PaperFrame character={card} page={page} changePage={setPage}>
    <ToolBoundary key={page} label={page} close={()=>setPage('主要')}><Suspense fallback={<p role="status">正在加载这一页…</p>}>{page==='主要'?<Overview {...props} catalog={entries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(card)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={card} rows={card.selections.filter(s=>s.entry.kind==='condition')} edit={noop} browse={noop} onLink={link}/><span/></div>} addEntry={noop} renderSelection={()=>null} openResources={noop} openQuickbar={noop} pinDrop={noop}/>:<div className="sheet-details"><DetailHeader {...props} page={page}/>{page==='特性'?<FeaturesPage {...props}/>:page==='背景'?<BackgroundPage {...props}/>:page==='法术'?<SpellsPage {...props} readOnly/>:<InventoryPage {...props}/>}</div>}
   </Suspense></ToolBoundary></PaperFrame></section>
