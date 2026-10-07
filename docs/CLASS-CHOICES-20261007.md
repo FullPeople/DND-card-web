@@ -15,6 +15,8 @@
 
 最终检查还发现 Node 22 的浏览器用例发现无法读取无 import attribute 的来源矩阵 JSON，已补显式 `with {type:'json'}`，不改变矩阵或机制。第一次全量命令误设只含职业文件的 `DND_AUTOMATION_CORE_DATA`，额外激活需要全库的 corpus 测试并失败；该目录只用于针对职业测试，全量恢复不带此环境变量。两次尝试各自保留日志，不用补规则全文、伪造完整缓存或把失败说成通过。
 
+新源码的真实 fingerprint `594070f45a41cccad8b9d0683e1fb3eb8d4497bcd148cc1d5dd9c0e94ec14561` 恰好以 `4561` 结尾，使旧公告测试对整个 JSON 的裸数字扫描误判为缺证据时泄露历史数量。诊断确认 audit.counts 仍为 null；测试改为先检查缺证据时 audit / snapshot / runtime / 来源计数及所有禁止字段，再对排除两项不透明哈希的玩家内容扫描历史数字。另补合法哈希包含 18789 / 4561 的回归。没有更改 fingerprint 算法、报告哈希或生产门禁。
+
 远端 main 已从 `4a95a7d` 前进到 `949dbbd0fea5dac8a51089514fe402cdeb95baf5`。本分支仍基于原 `792e9a4`，没有 merge / rebase 迁移，也没有改 Data。迁移 owner 的另轮 review 提示 App 草稿写入与验证顺序、旧 cloud-staged 重开及 cloud workflow paths 缺 App / storage / PlayerViewer / package 覆盖，见 [PR16 讨论](https://github.com/FullPeople/DND-card-web/pull/16#discussion_r4206885126)。这些由原迁移 owner 处理；本轮未把“有恢复副本”说成已发生数据丢失，也未并行重写迁移。未来整合须明确执行 migration / cloud 场景，不能只依赖 paths 自动触发，且必须对组合消费者重新 producer。
 
 只回滚本节修复可用 `git revert <本节修复的实际提交 SHA>`；最终 SHA 见 PR。整批回滚还需按下文顺序撤去 c03c7d6 / f093b6c / 2077618，保留角色备份、手工记录和 Git 历史。
