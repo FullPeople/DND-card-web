@@ -14,3 +14,6 @@ const output=resolve('dist-cloud');
 if(output!==join(process.cwd(),'dist-cloud'))throw new Error('Unexpected cloud build output');
 rmSync(output,{recursive:true,force:true});
 mkdirSync(output,{recursive:true});cpSync('dist-standalone',join(output,'card'),{recursive:true});cpSync('dist-library',join(output,'library'),{recursive:true});copyFileSync('public/cloud-home.html',join(output,'index.html'));
+// The backup unit executes current/backup.mjs beside server.mjs; the Vite SSR
+// build emits only the server entry, so the backend package carries it explicitly.
+copyFileSync('server/cloud/backup.mjs',join('dist-cloud-server','backup.mjs'));
