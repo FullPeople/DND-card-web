@@ -49,3 +49,5 @@
 .announcement-changelog hr{border:0;border-top:1px solid #dedede;margin:2.5px 0}
 .announcement-changelog li{position:relative;padding-left:11px;margin:.75px 0;line-height:1.35}
 .announcement-changelog li::before{content:'◆';position:absolute;left:0;top:4px;font-size:7px;color:#7b8272}
+
+.announcement-cloud-poster{background:#ddd;border:3px solid #50525b;padding:20px 16px;margin:0 0 16px;text-align:center;color:#393b43}.announcement-cloud-poster strong{display:block;font-size:clamp(23px,3.5vw,35px);font-weight:900;line-height:1.4}.announcement-cloud-poster small{display:block;font-size:12px;margin-top:10px}
