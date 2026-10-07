@@ -11,6 +11,7 @@ Environment=DND_CLOUD_RUN=1
 Environment=DND_CLOUD_DB=/var/lib/dnd-card-cloud/cards.sqlite
 Environment=DND_CLOUD_ORIGIN=https://dnd.center
 Environment=DND_CLOUD_PORT=5014
+Environment=DND_CLOUD_MODE=temporary-ip
 ExecStart=/opt/dnd-card-cloud/runtime/bin/node /opt/dnd-card-cloud/current/server.mjs
 Restart=on-failure
 RestartSec=5

@@ -1,7 +1,7 @@
 name: DND Center cloud migration
 on:
   push:
-    branches: [codex/dnd-center-migration-20261007]
+    branches: [codex/dnd-center-migration-20261007, codex/dnd-center-temporary-library-20261007]
   pull_request:
     paths: ['server/cloud/**', 'src/cloud/**', 'deploy/cloud/**', 'tests/cloud.test.ts', 'tests/e2e/cloud252.spec.ts', '*cloud*', 'library/**']
   workflow_dispatch:
@@ -20,6 +20,7 @@ jobs:
       - run: npm run test:cloud
       - run: npm run build:cloud
       - run: python3 deploy/cloud/test_publish.py
+      - run: python3 deploy/cloud/test_upgrade.py
       - run: npx playwright install --with-deps chromium
       - run: npm run test:cloud-browser
       - uses: actions/upload-artifact@v4
