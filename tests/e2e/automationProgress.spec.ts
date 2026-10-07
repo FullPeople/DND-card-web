@@ -27,7 +27,7 @@ test('player progress, lazy caching and character preservation',async({page})=>{
  await expect(panel(page).locator('select,details,button,a,[data-capability]')).toHaveCount(0);await expect(panel(page)).not.toContainText('逐条证据');await expect(panel(page)).not.toContainText('本地快照标记');
  await page.screenshot({path:test.info().outputPath('progress-desktop.png')});
  await page.getByRole('tab',{name:'公告内容',exact:true}).click();await expect(panel(page)).toBeHidden();await expect(page.locator('.announcement-faq')).toBeVisible();await tab(page).click();
- await tab(page).focus();await page.keyboard.press('ArrowLeft');await expect(page.getByRole('tab',{name:'公告内容',exact:true})).toBeFocused();await page.keyboard.press('End');await expect(tab(page)).toBeFocused();
+ await tab(page).focus();await page.keyboard.press('ArrowLeft');await expect(page.getByRole('tab',{name:'公告内容',exact:true})).toBeFocused();await page.keyboard.press('End');await expect(page.getByRole('tab',{name:'更新日志',exact:true})).toBeFocused();await expect(panel(page)).toBeHidden();await page.keyboard.press('ArrowLeft');await expect(tab(page)).toBeFocused();
  await page.getByRole('button',{name:'我知道了',exact:true}).click();await page.getByRole('button',{name:'公告',exact:true}).click();await tab(page).click();await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(books.length);
  expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(1);expect(requests.filter(u=>/5e\.kiwee|homebrew\.kiwee|cardRuntime|sourceSpells|catalog|libraryData|automation-rule-status|automation-runtime-coverage/i.test(u))).toEqual([]);
  expect(await readWorkspace(page)).toBe(before);expect(errors).toEqual([]);

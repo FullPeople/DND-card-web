@@ -41,3 +41,11 @@
 .spell-learners{margin-top:18px;padding-top:12px;border-top:1px solid #aaa}
 
 .announcement-feedback>a{display:inline-block;margin-right:16px;overflow-wrap:anywhere}
+
+.announcement-changelog{font-size:12px;line-height:1.35}
+.announcement-log-day{margin:0 0 4px;padding:4px 7px;background:#f0f0f0;border:1px solid #dedede;border-radius:2px}
+.announcement-changelog .announcement-log-day>h3{font-size:13px;margin:4px 0 2px;color:#414b3d}
+.announcement-changelog .announcement-section h4{font-size:12px;margin:2px 0 1px}
+.announcement-changelog hr{border:0;border-top:1px solid #dedede;margin:2.5px 0}
+.announcement-changelog li{position:relative;padding-left:11px;margin:.75px 0;line-height:1.35}
+.announcement-changelog li::before{content:'◆';position:absolute;left:0;top:4px;font-size:7px;color:#7b8272}

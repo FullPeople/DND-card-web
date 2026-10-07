@@ -1,0 +1,12 @@
+.workspace[data-hidden-side]{grid-template-columns:minmax(0,1fr)}
+.workspace[data-hidden-side=sheet]>.sheet-pane,
+.workspace[data-hidden-side=wiki]>.wiki-pane,
+.workspace[data-hidden-side]>.workspace-splitter{display:none}
+.workspace[data-hidden-side=sheet]>.wiki-pane,
+.workspace[data-hidden-side=wiki]>.sheet-pane{display:flex;width:100%;min-width:0}
+.mobile-tabs[data-hidden-side]{display:none}
+.workspace-reset-mount{display:contents}
+.workspace-hide-preview{position:fixed;top:0;bottom:0;z-index:1200;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(30,36,44,.58);color:#fff;text-align:center}
+.workspace-hide-preview strong{font-size:clamp(20px,3vw,38px);font-weight:600;letter-spacing:2px}
+.workspace-hide-preview span{font-size:13px;color:#ffffffe0}
+@media print{.workspace-hide-preview,.header-tools .workspace-reset{display:none!important}.workspace[data-hidden-side]>.sheet-pane{display:block!important}.workspace[data-hidden-side]>.wiki-pane{display:none!important}}

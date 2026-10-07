@@ -7,6 +7,12 @@ export const WIKI_COLUMNS_MIN_WIDTH = 780;
 export const WIKI_CATALOG_MIN_WIDTH = 320;
 export const WIKI_READER_MIN_WIDTH = 440;
 export const WIKI_DIVIDER_WIDTH = 9;
+export const WORKSPACE_HIDDEN_KEY = 'dnd-card:workspace-hidden';
+export type WorkspaceSide = 'sheet' | 'wiki';
+
+export function savedWorkspaceSide(value:string|null):WorkspaceSide|undefined {
+  return value==='sheet'||value==='wiki'?value:undefined;
+}
 
 export function savedWorkspaceShare(value: string | null): number {
   const parsed = Number(value);
