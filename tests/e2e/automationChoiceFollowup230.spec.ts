@@ -68,7 +68,7 @@ for(const choice of [{label:'起始熟练项',count:2},{label:'起始装备',cou
   await page.mouse.move(before!.x+before!.width/2,before!.y+before!.height/2);await page.mouse.down();
   // Finish the real source queue while the physical button is held. A late
   // warning must not move the target between pointerdown and pointerup.
-  release();await expect(page.locator('.wiki-header button')).toBeEnabled();await expect(banner).toHaveCount(0);
+  release();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await expect(banner).toHaveCount(0);
   const held=await chip.boundingBox();expect(held).not.toBeNull();for(const key of ['x','y','width','height'] as const)expect(Math.abs(held![key]-before![key])).toBeLessThan(.5);
   await page.mouse.up();await expect(workspace(page,choice.label)).toBeVisible();await expect(banner).toBeVisible();
   if(choice.label==='起始熟练项')await expect(page.locator('.catalog-row')).toHaveCount(3);else await expect(workspace(page,choice.label).getByRole('button',{name:'方案 A',exact:true})).toBeVisible();
