@@ -1,8 +1,9 @@
 import {it,expect,vi} from 'vitest';
 // Static markup checks use the real workspace and choice functions, with only
 // unused live-room transport and pointer-event setup isolated from Node.
-vi.mock('../src/platform/workbench',()=>({inWorkbench:false,workbenchRequest:vi.fn()}));
+vi.mock('../src/platform/workbench',()=>({inWorkbench:false,workbenchRequest:vi.fn(),composeRoll:vi.fn(),useWorkbench:()=>({role:'PLAYER'})}));
 vi.mock('../src/ui/pointerDrag',()=>({pointerDrag:vi.fn(),landingWithin:vi.fn()}));
+vi.mock('../src/ui/sheetDisplay',()=>({useSheetRenderMode:()=> 'a4'}));
 import {newCharacter,type Entry} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
 import {normalizeData} from '../src/data/catalog';
@@ -12,6 +13,7 @@ import {evaluate} from '../src/core/engine';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {ChoiceWorkspace} from '../src/ui/ChoiceWorkspace';
+import {Overview} from '../src/ui/Overview';
 import source from './fixtures/warforged-tool-sources.json';
 import {warforgedToolEntries} from './helpers/warforgedToolFixture';
 const catalog=normalizeData(source.projection,'mechanical-projection');
@@ -120,4 +122,29 @@ it('the actual workspace displays saved unavailable tools and offers explicit re
  const {c,a,id}=savedTools();c.profile.enabledSources=c.profile.enabledSources.filter(s=>s!=='PHB');const html=renderWorkspace(c,id,catalog);expect(html).toContain('此选项来源或版本当前不可用，已有记录保留。');expect(html).toContain('已有选择当前不可用，原记录保留');expect(c.answers[id][0]).toBe(a.id);
  const custom=explicitTools(['Custom Tool A','Custom Tool B']),customId=sheetChoices(custom,[]).find(r=>r.channel==='tools')!.id;custom.answers[customId]=['legacy-unindexed-tool'];const before=JSON.stringify(custom),customHtml=renderWorkspace(custom,customId,[]);
  expect(customHtml).toContain('已有记录：legacy-unindexed-tool');expect(customHtml).toContain('aria-label="移除legacy-unindexed-tool"');expect(JSON.stringify(custom)).toBe(before);setSheetChoiceSlot(custom,customId,0,undefined,[]);expect(custom.answers[customId]).toEqual(['']);
+});
+const renderToolTraining=(c:ReturnType<typeof newCharacter>,entries:Entry[])=>{
+ const html=renderToStaticMarkup(createElement(Overview,{c,d:evaluate(c),catalog:entries,statusRibbon:null,addEntry:()=>{},edit:action=>action(c),browse:()=>{},inspect:()=>{},renderSelection:()=>null,onLink:()=>{},openResources:()=>{},openQuickbar:()=>{},pinDrop:()=>{}}));
+ const row=/<dt>工具<\/dt><dd>(.*?)<\/dd>/s.exec(html);expect(row).not.toBeNull();return row![1];
+};
+it('without a manual override the actual main card excludes disabled tool training, preserves slots and restores it when re-enabled',()=>{
+ const {c,a,b,id}=savedTools();delete c.training!.tools;expect(renderToolTraining(c,catalog)).toContain('炼金工具');expect(renderToolTraining(c,catalog)).toContain('风笛');
+ c.profile.enabledSources=c.profile.enabledSources.filter(s=>s!=='PHB');const before=JSON.stringify(c),tool=sheetChoices(c,catalog).find(r=>r.id===id)!,html=renderToolTraining(c,catalog);
+ expect(html).not.toContain('炼金工具');expect(html).toContain('风笛');expect(tool.selected).toEqual([b.id]);expect(tool.slots).toEqual([a.id,b.id]);expect(JSON.stringify(c)).toBe(before);expect(c.training!.tools).toBeUndefined();
+ c.profile.enabledSources.push('PHB');expect(renderToolTraining(c,catalog)).toContain('炼金工具');expect(sheetChoices(c,catalog).find(r=>r.id===id)!.selected).toEqual([a.id,b.id]);expect(c.answers[id]).toEqual([a.id,b.id]);
+});
+it('unresolved saved tool IDs and missing catalog data stay in the workspace but never project active main-card training',()=>{
+ const {c,b,id}=savedTools();delete c.training!.tools;c.answers[id]=['legacy-unindexed-tool',b.id];const before=JSON.stringify(c),tool=sheetChoices(c,catalog).find(r=>r.id===id)!;
+ expect(renderToolTraining(c,catalog)).not.toContain('legacy-unindexed-tool');expect(renderToolTraining(c,catalog)).toContain('风笛');expect(tool.selected).toEqual([b.id]);expect(tool.slots).toEqual(['legacy-unindexed-tool',b.id]);expect(renderWorkspace(c,id,catalog)).toContain('已有记录：legacy-unindexed-tool');
+ expect(sheetChoices(c,[]).find(r=>r.id===id)!.selected).toEqual([]);expect(renderToolTraining(c,[])).not.toContain(b.id);expect(JSON.stringify(c)).toBe(before);expect(c.training!.tools).toBeUndefined();
+});
+it('wrong-edition and overflow tool records do not become automatic training merely because they were saved',()=>{
+ const {c,a,b,id}=savedTools();delete c.training!.tools;c.profile.optional.legacy=false;const before=JSON.stringify(c);
+ expect(sheetChoices(c,catalog).find(r=>r.id===id)!.selected).toEqual([b.id]);expect(renderToolTraining(c,catalog)).not.toContain('炼金工具');expect(JSON.stringify(c)).toBe(before);
+ c.profile.optional.legacy=true;expect(renderToolTraining(c,catalog)).toContain('炼金工具');c.answers[id]=['legacy-missing',b.id,a.id];const overflow=JSON.stringify(c),tool=sheetChoices(c,catalog).find(r=>r.id===id)!;
+ expect(tool.selected).toEqual([b.id]);expect(tool.slots).toEqual(['legacy-missing',b.id,a.id]);expect(tool.complete).toBe(false);expect(renderToolTraining(c,catalog)).not.toContain('炼金工具');expect(JSON.stringify(c)).toBe(overflow);
+});
+it('manual tool text and an explicit empty manual override remain authoritative when automatic eligibility changes',()=>{
+ const {c,id}=savedTools();c.profile.enabledSources=['EFA'];const originalAnswers=[...c.answers[id]];
+ for(const text of ['玩家自定义手工工具说明','']){c.training!.tools=text;const before=JSON.stringify(c),html=renderToolTraining(c,catalog);expect(html).not.toContain('炼金工具');expect(html).not.toContain('风笛');if(text)expect(html).toContain(text);expect(c.training!.tools).toBe(text);expect(c.answers[id]).toEqual(originalAnswers);expect(JSON.stringify(c)).toBe(before);}
 });

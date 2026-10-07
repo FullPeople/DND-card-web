@@ -38,10 +38,10 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
    const id=`${row.id}:${path}`,saved=channel==='equipment'?[sourceEquipmentChoices(c,row)[String(equipmentIndex)]].filter(Boolean) as string[]:channel==='abilities'?[backgroundAbilityValue(c.backgroundChoices?.[row.id]?.abilities)].filter(Boolean):c.answers[id]||[];
    // Recorded tools survive source/edition changes and missing catalog data.
    // Current eligibility governs new picks, never the untouched saved slots.
-   const selected=[...new Set(saved)].filter(v=>channel==='tools'?!!v:options.some(o=>o.value===v));
+   const selected=[...new Set(channel==='tools'?saved.slice(0,count):saved)].filter(v=>options.some(o=>o.value===v&&(channel!=='tools'||!restricted&&!o.unavailable)));
    if(channel!=='tools')selected.splice(count);
    const slots=Array.from({length:channel==='tools'?Math.max(count,saved.length):count},(_,i)=>channel==='tools'?saved[i]||'':options.some(o=>o.value===saved[i])?saved[i]:'');
-   const complete=selected.length===count&&(channel!=='tools'||selected.every(v=>options.some(o=>o.value===v&&!o.unavailable)));
+   const complete=selected.length===count&&(channel!=='tools'||!saved.slice(count).some(Boolean));
    out.push({id,ownerId:row.id,label,count,options,selected,slots,complete,restricted,channel,equipmentIndex});
   };
   if(row.entry.kind==='background'&&Array.isArray(raw.ability)&&raw.ability.length){
@@ -108,7 +108,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);
- if(!choice||choice.restricted||!option||option.unavailable&&!(choice.channel==='tools'&&choice.selected.includes(value)))throw Error(option?.unavailable||'此选择当前不可用。');
+ if(!choice||choice.restricted||!option||option.unavailable&&!(choice.channel==='tools'&&c.answers[id]?.includes(value)))throw Error(option?.unavailable||'此选择当前不可用。');
  if(choice.channel==='tools'){
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.

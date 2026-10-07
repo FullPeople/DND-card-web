@@ -93,7 +93,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
       return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
     });
-    values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.map(v=>r.options.find(o=>o.value===v)?.label||v)));
+    values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.flatMap(v=>{const option=r.options.find(o=>o.value===v);return key==='tools'?(option&&!option.unavailable?[option.label]:[]):[option?.label||v];})));
     return { key, label, values: [...new Set<string>(values.map(v => names[v] || trainingDisplayText(v,c.edition==='2024'?'XPHB':'PHB',key,trainingNames.get(v.toLowerCase())||[])))] };
   });
     const identity = <div className="identity-main overview-identity">
