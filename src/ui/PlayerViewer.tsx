@@ -40,7 +40,7 @@ export default function PlayerViewer(){
  const root=useRef<HTMLDivElement>(null);
  useEffect(()=>{const abort=new AbortController();setError(undefined);setCard(undefined);setOriginalJson(undefined);setDetail(undefined);void(async()=>{
   const params=new URLSearchParams(location.search),cloud=params.get('cloud');
-  if(cloud&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(cloud))throw new Error('云端卡 ID 格式不正确。');
+  if(cloud&&!/^[A-Z]{6}$/.test(cloud)&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(cloud))throw new Error('云端卡 ID 格式不正确。');
   const target=cloud?'/api/cards/'+cloud:params.get('data_url');if(!target)throw new ViewerLoadError('readerMissing');
   const url=new URL(target,location.href);if(!['https:','http:'].includes(url.protocol)||/\.(?:xlsx?|xlsm)(?:$|[?#])/i.test(url.href))throw new ViewerLoadError('readerJsonOnly');
   const response=await fetch(url.href,{signal:abort.signal,credentials:'omit',cache:cloud?'no-store':'no-cache'});if(!response.ok)throw new ViewerLoadError('readerHttp',{status:response.status});
