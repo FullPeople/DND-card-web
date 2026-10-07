@@ -17,7 +17,8 @@ async function pointDrag(page:Page,target:Locator,dx:number,dy:number){const rec
 test('filters the gallery by module capacity and preserves normalized geometry in the larger editor',async({page})=>{
  await visit(page);const values=(await read(page)).runtime.resources;const before=await widget(main(page),'surge').evaluate(el=>['x','y','w','h','page'].map(k=>el.getAttribute(`data-grid-${k}`)));const dialog=await open(page);
  const single=retained.filter(id=>!['pool','poolchips','poolbars','poolpips','ready'].includes(id));
- expect(await dialog.locator('[data-template-id]').evaluateAll(nodes=>nodes.map(el=>(el as HTMLElement).dataset.templateId))).toEqual(single);
+ // The library is grouped by family; the capacity filter decides membership, not order.
+ expect((await dialog.locator('[data-template-id]').evaluateAll(nodes=>nodes.map(el=>(el as HTMLElement).dataset.templateId))).sort()).toEqual([...single].sort());
  for(const id of removed)await expect(dialog.locator(`[data-template-id="${id}"]`)).toHaveCount(0);
  await expect(dialog.locator('.resource-template-option .rm-name')).toHaveText(Array(single.length).fill('新资源'));
  expect(await widget(dialog,'surge').evaluate(el=>['x','y','w','h','page'].map(k=>el.getAttribute(`data-grid-${k}`)))).toEqual(before);

@@ -1,4 +1,5 @@
 import type {Character} from '../core/model';
+import {withRequestTimeout} from '../platform/requestTimeout';
 export interface CloudCard {id:string;revision:number;character:Character;updatedAt:string;role?:'owner'|'editor';editors?:string[]}
 export interface CardSummary {id:string;revision:number;name:string;edition:string;updatedAt:string;role?:'owner'|'editor'}
 export interface Slots {free:number;permanent:number;total:number;used:number;priceYuan:number;paymentAvailable:boolean}
@@ -7,8 +8,12 @@ export interface CloudSession {authenticated:boolean;qqLogin:'pending';temporary
 export interface Directory {cards:CardSummary[];mine?:CardSummary[];slots:Slots|IPSlots;total?:number;offset?:number;hasMore?:boolean}
 export class CloudRequestError extends Error {constructor(public status:number,public code:string,message:string){super(message);}}
 async function request<T>(path:string,method='GET',value?:unknown,csrf?:string):Promise<T>{
-  const response=await fetch('/api/'+path,{method,credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(30_000),headers:{...(value===undefined?{}:{'Content-Type':'application/json'}),...(csrf?{'X-CSRF-Token':csrf}:{})},...(value===undefined?{}:{body:JSON.stringify(value)})});
-  const data=await response.json();if(!response.ok)throw new CloudRequestError(response.status,data.error||'request_failed',data.message||'云端操作失败，本机草稿保留。');return data as T;
+  // The library build targets Safari 15.4, which lacks AbortSignal.timeout; the
+  // shared helper keeps the deadline alive through body consumption everywhere.
+  return withRequestTimeout(30_000,undefined,async signal=>{
+    const response=await fetch('/api/'+path,{method,credentials:'same-origin',cache:'no-store',signal,headers:{...(value===undefined?{}:{'Content-Type':'application/json'}),...(csrf?{'X-CSRF-Token':csrf}:{})},...(value===undefined?{}:{body:JSON.stringify(value)})});
+    const data=await response.json();if(!response.ok)throw new CloudRequestError(response.status,data.error||'request_failed',data.message||'云端操作失败，本机草稿保留。');return data as T;
+  });
 }
 export const cloudSession=()=>request<CloudSession>('session');
 export const cloudCards=(offset=0)=>request<Directory>('cards?offset='+offset);

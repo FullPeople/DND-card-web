@@ -1,6 +1,6 @@
 import {test,expect,type Locator,type Page} from '@playwright/test';
 import {mockSource} from './fixtures';
-import {releaseHistoryFor} from '../../src/platform/releaseNotes';
+import {releaseLogFor} from '../../src/platform/releaseNotes';
 import {ANNOUNCEMENT_KEY,APP_VERSION} from '../../src/platform/announcement';
 
 const dialog=(page:Page)=>page.getByRole('dialog',{name:'欢迎使用这款开源禁商用车卡/Wiki网站！'});
@@ -20,20 +20,25 @@ async function center(locator:Locator){const box=await locator.boundingBox();exp
 // 展开答案会平滑滑入可见范围，测量前先等滚动停住。
 async function settle(page:Page,scroller:Locator){let last=-1;for(let i=0;i<25;i++){const value=await scroller.evaluate(node=>node.scrollTop);if(value===last)return;last=value;await page.waitForTimeout(80);}throw new Error('滚动位置未稳定');}
 
-test('首次打开单机站弹出公告，版本、问题清单与默认展开的 Q&A 完整',async({page})=>{
+test('首次公告保留 Q&A，更新日志按日期展开并采用最新说明',async({page})=>{
  await open(page);
- const updates=dialog(page).locator('.announcement-issues');await expect(updates.locator('> summary')).toHaveText('版本更新');expect(await updates.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(true);await expect(updates.locator('.announcement-current')).toBeVisible();
+ await expect(dialog(page).getByRole('tab')).toHaveText(['公告内容','自动化进度','更新日志']);
+ await expect(dialog(page).locator('.announcement-faq')).toBeVisible();
+ await expect(dialog(page).locator('.announcement-current')).toBeHidden();
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
- const releases=releaseHistoryFor('standalone'),current=releases[0];
- await expect(dialog(page).locator('.announcement-current>h3')).toHaveText(current.title);
- await expect(dialog(page).locator('.announcement-current li')).toHaveText(current.sections.flatMap(section=>section.items));
- const histories=dialog(page).locator('.announcement-history');await expect(histories.locator('summary')).toHaveText(releases.slice(1).map(release=>release.title));for(const item of await histories.all())expect(await item.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);const history=histories.first();
- await expect(history.locator('li').first()).toBeHidden();await history.locator('summary').click();await expect(history.locator('li').first()).toBeVisible();await history.locator('summary').click();
- await expect(dialog(page).locator('.announcement-issues')).toContainText('导出指定角色或多卡备份');
- await expect(dialog(page).locator('.announcement-issues')).not.toContainText('枭熊');await expect(dialog(page).locator('.announcement-issues')).not.toContainText('三龙');
- await expect(dialog(page).locator('.announcement-current .announcement-section h4')).toHaveText(current.sections.map(section=>section.title));
- await expect(dialog(page).locator('.announcement-current hr')).toHaveCount(current.sections.length-1);
- await expect(dialog(page).locator('.announcement-issues')).not.toContainText('怪物编辑');
+ await dialog(page).getByRole('tab',{name:'更新日志',exact:true}).click();
+ const log=dialog(page).getByRole('tabpanel',{name:'更新日志',exact:true}),releases=releaseLogFor('standalone'),current=releases[0];
+ await expect(log.locator('details,summary')).toHaveCount(0);
+ await expect(log.locator('.announcement-log-day>h3')).toHaveText(releases.map(release=>release.title));
+ await expect(log.locator('.announcement-current li')).toHaveText(current.sections.flatMap(section=>section.items));
+ await expect(log.locator('.announcement-log-day').first()).toHaveCSS('background-color','rgb(240, 240, 240)');
+ await expect(log.locator('.announcement-current .announcement-section h4')).toHaveText(current.sections.map(section=>section.title));
+ await expect(log).toContainText('导出指定角色或多卡备份');
+ await expect(log).toContainText('修复战俑等来源的工具选择没有列出可用工具的问题。');
+ await expect(log).not.toContainText('战俑工具选择仍待处理');
+ await expect(log).toContainText('实体手机和玩家原设备仍待验证');
+ await page.screenshot({path:test.info().outputPath('changelog-desktop.png')});
+ await dialog(page).getByRole('tab',{name:'公告内容',exact:true}).click();
  const faq=dialog(page).locator('.announcement-faq').first();
  await expect(faq.locator('details')).toHaveCount(4);
  expect(await faq.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(true);
@@ -55,7 +60,7 @@ test('首次打开单机站弹出公告，版本、问题清单与默认展开�
 });
 
 test('弹窗高度固定：展开答案只滚动正文，超出部分可滑下去看',async({page})=>{
- await open(page);await dialog(page).locator('.announcement-issues>summary').click();
+ await open(page);
  const body=dialog(page).locator('.announcement-body');
  const height=async()=>(await dialog(page).boundingBox())!.height;
  const before=await height();

@@ -1,0 +1,31 @@
+diff --git a/src/platform/storage.ts b/src/platform/storage.ts
+index e9997ae..8aeb805 100644
+--- a/src/platform/storage.ts
++++ b/src/platform/storage.ts
+@@ -52,7 +52,9 @@ export async function stageCloudDraft(character:Character,binding:CloudBinding):
+  const workspace=await tx.store.get('workspace') as Workspace|undefined;
+  // Reopening a cloud card always keeps its existing local draft and baseline.
+  // A conflicting or revoked save must not be erased by opening the editor.
+- if(!workspace?.characters.some(card=>card.id===id)&&!await tx.store.get('cloud-staged:'+id)){
++ // Without a workspace draft the staging record is stale (never imported, or
++ // the draft was deleted locally): refresh it from the card just fetched.
++ if(!workspace?.characters.some(card=>card.id===id)){
+   await tx.store.put({...structuredClone(character),id},'cloud-staged:'+id);await tx.store.put(binding,'cloud-binding:'+id);
+  }
+  await tx.done;return id;
+diff --git a/src/ui/App.tsx b/src/ui/App.tsx
+index c814912..3179662 100644
+--- a/src/ui/App.tsx
++++ b/src/ui/App.tsx
+@@ -399,8 +399,9 @@ export default function App() {
+       try {
+         const stored = await loadWorkspace();
+         const value = await prepareCloudDraft(stored,canWrite); if (!alive) return;
+-        if(value!==stored&&canWrite&&value)await saveWorkspace(value);
+-        if (value) {acceptWorkspace(value);if(localSources&&canWrite&&(!value.siteSources||!sameValue(value.characters,workspaceRef.current!.characters)))persist(workspaceRef.current!);} else { const first = createLocalCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
++        // Accept (read, repair and validate) a staged cloud draft before it becomes
++        // the primary record; an incompatible card must leave the stored workspace intact.
++        if (value) {acceptWorkspace(value);if(value!==stored&&canWrite)await saveWorkspace(value);if(localSources&&canWrite&&(!value.siteSources||!sameValue(value.characters,workspaceRef.current!.characters)))persist(workspaceRef.current!);} else { const first = createLocalCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
+       } catch (e) { if (alive) setStartupError(String(e)); }
+     };
+     if (navigator.locks) navigator.locks.request('dnd-card-editor', { ifAvailable: true }, async lock => {

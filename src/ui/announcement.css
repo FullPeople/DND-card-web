@@ -6,7 +6,7 @@
 .announcement>.supporter-marquee{z-index:0}
 /* 高度固定：展开答案只让正文区出现滚动条，弹窗本身不跟着长高。 */
 .announcement-panel{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;border:1px solid #b7bfaa;border-radius:5px;background:#fafaf6;box-shadow:0 15px 70px #171e2240}
-.announcement-head{flex-shrink:0;padding:17px 26px 13px;background:#f4f5ed;border-bottom:1px solid #d8ddcd}
+.announcement-head{flex-shrink:0;padding:17px 26px 0;background:#f4f5ed;border-bottom:1px solid #d8ddcd}
 .announcement-head h2{font-size:19px;font-weight:500;letter-spacing:1px;margin:0 0 6px;color:#414b3d}
 .announcement-version{font-size:13px;line-height:1.4;font-weight:650;letter-spacing:.3px;color:#414b3d;margin:4px 0 0;overflow-wrap:anywhere}.announcement-version small{font-size:11px;font-weight:400;color:#5f6b4e}
 .announcement-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y pinch-zoom;scrollbar-gutter:stable;padding:18px 26px 10px;font-size:12.5px;line-height:1.6}
@@ -29,7 +29,7 @@
 
 @media(max-width:520px){
  .announcement{width:calc(100vw - 20px)}
- .announcement-head{padding:14px 16px 11px}
+ .announcement-head{padding:14px 16px 0}
  .announcement-head h2{font-size:16px}
  .announcement-body{padding:14px 16px 8px;font-size:12px}
  .announcement-foot{padding:11px 16px}
@@ -41,3 +41,11 @@
 .spell-learners{margin-top:18px;padding-top:12px;border-top:1px solid #aaa}
 
 .announcement-feedback>a{display:inline-block;margin-right:16px;overflow-wrap:anywhere}
+
+.announcement-changelog{font-size:12px;line-height:1.35}
+.announcement-log-day{margin:0 0 4px;padding:4px 7px;background:#f0f0f0;border:1px solid #dedede;border-radius:2px}
+.announcement-changelog .announcement-log-day>h3{font-size:13px;margin:4px 0 2px;color:#414b3d}
+.announcement-changelog .announcement-section h4{font-size:12px;margin:2px 0 1px}
+.announcement-changelog hr{border:0;border-top:1px solid #dedede;margin:2.5px 0}
+.announcement-changelog li{position:relative;padding-left:11px;margin:.75px 0;line-height:1.35}
+.announcement-changelog li::before{content:'◆';position:absolute;left:0;top:4px;font-size:7px;color:#7b8272}
