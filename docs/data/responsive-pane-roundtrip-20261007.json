@@ -1,0 +1,2320 @@
+{
+  "schemaVersion": 1,
+  "originalFixCommit": "acd816f698e01fa790c4d9e0272a4fa17130a005",
+  "productionCssSha256": "7ed02de1d802a0c306a3fd7fc3d82446bc73a3dff7885f8ab4b10fe96932a903",
+  "scope": "One extra production scenario in each actual browser; same saved card and DOM pane, product splitter keyboard and real viewport resize, no injected pane width/height styles.",
+  "geometryToleranceCssPixels": 1,
+  "cases": [
+    {
+      "engine": "edge",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+      "records": [
+        {
+          "step": "narrow",
+          "viewportWidth": 1000,
+          "container": {
+            "paneWidth": 620,
+            "screenWidth": 605,
+            "screenClientWidth": 605,
+            "containerName": "screen",
+            "quickbarHeight": 215
+          },
+          "samePane": true,
+          "sameScreen": true,
+          "savedRecordUnchanged": true,
+          "modules": [
+            {
+              "id": "spell-slot:1",
+              "rowIds": [
+                "spell-slot:1",
+                "spell-slot:2",
+                "spell-slot:3"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "0"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 590,
+              "svgCount": 11,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "pact-slot:2",
+              "rowIds": [
+                "pact-slot:2"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "1"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 100,
+              "svgCount": 2,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "manual-a",
+              "rowIds": [
+                "manual-a",
+                "manual-b"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "2"
+              },
+              "style": {
+                "scale": "0.8",
+                "tone": "#a36d61",
+                "background": "#e7e2d9",
+                "borderWidth": "2px",
+                "borderRadius": "4px",
+                "padding": "3px",
+                "iconPath": "M13 2Q17 8 13 10Q19 8 19 14A7 7 0 0 1 5 14Q5 8 10 6Q8 11 11 12Q15 9 13 2Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 111.4625244140625,
+              "paintedPixels": 345,
+              "svgCount": 7,
+              "svgMinWidth": 11.199981689453125,
+              "svgMinHeight": 11.20001220703125,
+              "checkedClipAncestors": [
+                {
+                  "definition": 9,
+                  "bounds": [
+                    257.10970922459893,
+                    498.83271416083915,
+                    440.14029077540107,
+                    638.1516608391609
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            }
+          ]
+        },
+        {
+          "step": "wide",
+          "viewportWidth": 1600,
+          "container": {
+            "paneWidth": 992,
+            "screenWidth": 977,
+            "screenClientWidth": 977,
+            "containerName": "screen",
+            "quickbarHeight": 150
+          },
+          "samePane": true,
+          "sameScreen": true,
+          "savedRecordUnchanged": true,
+          "modules": [
+            {
+              "id": "spell-slot:1",
+              "rowIds": [
+                "spell-slot:1",
+                "spell-slot:2",
+                "spell-slot:3"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "0"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 100,
+              "contentHeight": 100,
+              "paintedPixels": 590,
+              "svgCount": 11,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    669.0625,
+                    316,
+                    831.5625,
+                    416
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    459.4375,
+                    264,
+                    973,
+                    445
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    456.4375,
+                    261,
+                    976,
+                    448
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    983,
+                    792
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    984,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    991,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1600,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "pact-slot:2",
+              "rowIds": [
+                "pact-slot:2"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "1"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 100,
+              "contentHeight": 100,
+              "paintedPixels": 100,
+              "svgCount": 2,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    669.0625,
+                    316,
+                    831.5625,
+                    416
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    459.4375,
+                    264,
+                    973,
+                    445
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    456.4375,
+                    261,
+                    976,
+                    448
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    983,
+                    792
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    984,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    991,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1600,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "manual-a",
+              "rowIds": [
+                "manual-a",
+                "manual-b"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "2"
+              },
+              "style": {
+                "scale": "0.8",
+                "tone": "#a36d61",
+                "background": "#e7e2d9",
+                "borderWidth": "2px",
+                "borderRadius": "4px",
+                "padding": "3px",
+                "iconPath": "M13 2Q17 8 13 10Q19 8 19 14A7 7 0 0 1 5 14Q5 8 10 6Q8 11 11 12Q15 9 13 2Z"
+              },
+              "groupHeight": 100,
+              "contentHeight": 76.79998779296875,
+              "paintedPixels": 337,
+              "svgCount": 7,
+              "svgMinWidth": 11.199951171875,
+              "svgMinHeight": 11.199981689453125,
+              "checkedClipAncestors": [
+                {
+                  "definition": 9,
+                  "bounds": [
+                    671.0563650306749,
+                    318,
+                    829.5686349693251,
+                    414
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    459.4375,
+                    264,
+                    973,
+                    445
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    456.4375,
+                    261,
+                    976,
+                    448
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    983,
+                    792
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    984,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    991,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1600,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            }
+          ]
+        },
+        {
+          "step": "narrow-restored",
+          "viewportWidth": 1000,
+          "container": {
+            "paneWidth": 620,
+            "screenWidth": 605,
+            "screenClientWidth": 605,
+            "containerName": "screen",
+            "quickbarHeight": 215
+          },
+          "samePane": true,
+          "sameScreen": true,
+          "savedRecordUnchanged": true,
+          "modules": [
+            {
+              "id": "spell-slot:1",
+              "rowIds": [
+                "spell-slot:1",
+                "spell-slot:2",
+                "spell-slot:3"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "0"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 590,
+              "svgCount": 11,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "pact-slot:2",
+              "rowIds": [
+                "pact-slot:2"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "1"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 100,
+              "svgCount": 2,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "manual-a",
+              "rowIds": [
+                "manual-a",
+                "manual-b"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "2"
+              },
+              "style": {
+                "scale": "0.8",
+                "tone": "#a36d61",
+                "background": "#e7e2d9",
+                "borderWidth": "2px",
+                "borderRadius": "4px",
+                "padding": "3px",
+                "iconPath": "M13 2Q17 8 13 10Q19 8 19 14A7 7 0 0 1 5 14Q5 8 10 6Q8 11 11 12Q15 9 13 2Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 111.4625244140625,
+              "paintedPixels": 345,
+              "svgCount": 7,
+              "svgMinWidth": 11.199981689453125,
+              "svgMinHeight": 11.20001220703125,
+              "checkedClipAncestors": [
+                {
+                  "definition": 9,
+                  "bounds": [
+                    257.10970922459893,
+                    498.83271416083915,
+                    440.14029077540107,
+                    638.1516608391609
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+      "records": [
+        {
+          "step": "narrow",
+          "viewportWidth": 1000,
+          "container": {
+            "paneWidth": 620,
+            "screenWidth": 605,
+            "screenClientWidth": 605,
+            "containerName": "screen",
+            "quickbarHeight": 215
+          },
+          "samePane": true,
+          "sameScreen": true,
+          "savedRecordUnchanged": true,
+          "modules": [
+            {
+              "id": "spell-slot:1",
+              "rowIds": [
+                "spell-slot:1",
+                "spell-slot:2",
+                "spell-slot:3"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "0"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 590,
+              "svgCount": 11,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "pact-slot:2",
+              "rowIds": [
+                "pact-slot:2"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "1"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 100,
+              "svgCount": 2,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "manual-a",
+              "rowIds": [
+                "manual-a",
+                "manual-b"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "2"
+              },
+              "style": {
+                "scale": "0.8",
+                "tone": "#a36d61",
+                "background": "#e7e2d9",
+                "borderWidth": "2px",
+                "borderRadius": "4px",
+                "padding": "3px",
+                "iconPath": "M13 2Q17 8 13 10Q19 8 19 14A7 7 0 0 1 5 14Q5 8 10 6Q8 11 11 12Q15 9 13 2Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 111.4625244140625,
+              "paintedPixels": 345,
+              "svgCount": 7,
+              "svgMinWidth": 11.199981689453125,
+              "svgMinHeight": 11.20001220703125,
+              "checkedClipAncestors": [
+                {
+                  "definition": 9,
+                  "bounds": [
+                    257.10970922459893,
+                    498.83271416083915,
+                    440.14029077540107,
+                    638.1516608391609
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            }
+          ]
+        },
+        {
+          "step": "wide",
+          "viewportWidth": 1600,
+          "container": {
+            "paneWidth": 992,
+            "screenWidth": 977,
+            "screenClientWidth": 977,
+            "containerName": "screen",
+            "quickbarHeight": 150
+          },
+          "samePane": true,
+          "sameScreen": true,
+          "savedRecordUnchanged": true,
+          "modules": [
+            {
+              "id": "spell-slot:1",
+              "rowIds": [
+                "spell-slot:1",
+                "spell-slot:2",
+                "spell-slot:3"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "0"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 100,
+              "contentHeight": 100,
+              "paintedPixels": 590,
+              "svgCount": 11,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    669.0625,
+                    316,
+                    831.5625,
+                    416
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    459.4375,
+                    264,
+                    973,
+                    445
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    456.4375,
+                    261,
+                    976,
+                    448
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    983,
+                    792
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    984,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    991,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1600,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "pact-slot:2",
+              "rowIds": [
+                "pact-slot:2"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "1"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 100,
+              "contentHeight": 100,
+              "paintedPixels": 100,
+              "svgCount": 2,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    669.0625,
+                    316,
+                    831.5625,
+                    416
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    459.4375,
+                    264,
+                    973,
+                    445
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    456.4375,
+                    261,
+                    976,
+                    448
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    983,
+                    792
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    984,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    991,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1600,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "manual-a",
+              "rowIds": [
+                "manual-a",
+                "manual-b"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "2"
+              },
+              "style": {
+                "scale": "0.8",
+                "tone": "#a36d61",
+                "background": "#e7e2d9",
+                "borderWidth": "2px",
+                "borderRadius": "4px",
+                "padding": "3px",
+                "iconPath": "M13 2Q17 8 13 10Q19 8 19 14A7 7 0 0 1 5 14Q5 8 10 6Q8 11 11 12Q15 9 13 2Z"
+              },
+              "groupHeight": 100,
+              "contentHeight": 76.79998779296875,
+              "paintedPixels": 337,
+              "svgCount": 7,
+              "svgMinWidth": 11.199951171875,
+              "svgMinHeight": 11.199981689453125,
+              "checkedClipAncestors": [
+                {
+                  "definition": 9,
+                  "bounds": [
+                    671.0563650306749,
+                    318,
+                    829.5686349693251,
+                    414
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    641.984375,
+                    291,
+                    967,
+                    441
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    459.4375,
+                    264,
+                    973,
+                    445
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    456.4375,
+                    261,
+                    976,
+                    448
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    983,
+                    792
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    984,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    991,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1600,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            }
+          ]
+        },
+        {
+          "step": "narrow-restored",
+          "viewportWidth": 1000,
+          "container": {
+            "paneWidth": 620,
+            "screenWidth": 605,
+            "screenClientWidth": 605,
+            "containerName": "screen",
+            "quickbarHeight": 215
+          },
+          "samePane": true,
+          "sameScreen": true,
+          "savedRecordUnchanged": true,
+          "modules": [
+            {
+              "id": "spell-slot:1",
+              "rowIds": [
+                "spell-slot:1",
+                "spell-slot:2",
+                "spell-slot:3"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "0"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 590,
+              "svgCount": 11,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "pact-slot:2",
+              "rowIds": [
+                "pact-slot:2"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "1"
+              },
+              "style": {
+                "scale": "1",
+                "tone": "#527880",
+                "background": "transparent",
+                "borderWidth": "0px",
+                "borderRadius": "0px",
+                "padding": "0px",
+                "iconPath": "M12 2 14.5 8.5 21 11 14.5 13.5 12 20 9.5 13.5 3 11 9.5 8.5Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 143.328125,
+              "paintedPixels": 100,
+              "svgCount": 2,
+              "svgMinWidth": 14,
+              "svgMinHeight": 14,
+              "checkedClipAncestors": [
+                {
+                  "definition": 0,
+                  "bounds": [
+                    255.109375,
+                    496.828125,
+                    442.140625,
+                    640.15625
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            },
+            {
+              "id": "manual-a",
+              "rowIds": [
+                "manual-a",
+                "manual-b"
+              ],
+              "grid": {
+                "x": "1",
+                "y": "1",
+                "w": "6",
+                "h": "4",
+                "page": "2"
+              },
+              "style": {
+                "scale": "0.8",
+                "tone": "#a36d61",
+                "background": "#e7e2d9",
+                "borderWidth": "2px",
+                "borderRadius": "4px",
+                "padding": "3px",
+                "iconPath": "M13 2Q17 8 13 10Q19 8 19 14A7 7 0 0 1 5 14Q5 8 10 6Q8 11 11 12Q15 9 13 2Z"
+              },
+              "groupHeight": 143.328125,
+              "contentHeight": 111.4625244140625,
+              "paintedPixels": 345,
+              "svgCount": 7,
+              "svgMinWidth": 11.199981689453125,
+              "svgMinHeight": 11.20001220703125,
+              "checkedClipAncestors": [
+                {
+                  "definition": 9,
+                  "bounds": [
+                    257.10970922459893,
+                    498.83271416083915,
+                    440.14029077540107,
+                    638.1516608391609
+                  ]
+                },
+                {
+                  "definition": 1,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 2,
+                  "bounds": [
+                    223.9375,
+                    461,
+                    598,
+                    676
+                  ]
+                },
+                {
+                  "definition": 3,
+                  "bounds": [
+                    15,
+                    434,
+                    604,
+                    680
+                  ]
+                },
+                {
+                  "definition": 4,
+                  "bounds": [
+                    12,
+                    431,
+                    607,
+                    683
+                  ]
+                },
+                {
+                  "definition": 5,
+                  "bounds": [
+                    8,
+                    105,
+                    611,
+                    1343
+                  ]
+                },
+                {
+                  "definition": 6,
+                  "bounds": [
+                    7,
+                    69,
+                    612,
+                    1097
+                  ]
+                },
+                {
+                  "definition": 7,
+                  "bounds": [
+                    0,
+                    36,
+                    619,
+                    1100
+                  ]
+                },
+                {
+                  "definition": 8,
+                  "bounds": [
+                    0,
+                    0,
+                    1000,
+                    1100
+                  ]
+                }
+              ],
+              "clipViolations": 0,
+              "unhandledClipTypes": [],
+              "polygonAncestorCount": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fullRawClipAndSvgRecords": "pane-roundtrip.json in the local evidence and production browser CI artifact; public summary has deduplicated ancestor bounds and shapes",
+  "clipDefinitions": [
+    {
+      "element": "span.resource-module-art rm-poolpips  rm-group",
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "div.resource-widget-scroll",
+      "overflowX": "hidden",
+      "overflowY": "auto",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "section.resource-workspace",
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "div.cell-surface",
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "contain": "none",
+      "clipPath": "polygon(6.25px 0px, calc(100% - 6.25px) 0px, 100% 6.25px, 100% calc(100% - 6.25px), calc(100% - 6.25px) 100%, 6.25px 100%, 0px calc(100% - 6.25px), 0px 6.25px)",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "div.cell-face",
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "contain": "none",
+      "clipPath": "polygon(8px 0px, calc(100% - 8px) 0px, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0px calc(100% - 8px), 0px 8px)",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "div.paper has-card-art  adaptive-card-host page-0",
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "div.sheet-viewport screen-mode",
+      "overflowX": "hidden",
+      "overflowY": "auto",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "section.sheet-pane mobile-active ",
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "div.app-shell compact-layout",
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ]
+    },
+    {
+      "element": "span.resource-module-art rm-poolpips  rm-group",
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "contain": "none",
+      "clipPath": "none",
+      "radii": [
+        "4px",
+        "4px",
+        "4px",
+        "4px"
+      ]
+    }
+  ]
+}
