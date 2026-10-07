@@ -1,6 +1,6 @@
 """Scoped DND Center migration. Capture/preflight are read-only; apply requires a sealed manifest."""
 from pathlib import Path, PurePosixPath
-import argparse, ctypes, fcntl, hashlib, json, os, re, shutil, subprocess, tarfile
+import argparse, ctypes, fcntl, hashlib, json, os, re, shutil, subprocess, tarfile, time, sqlite3
 from datetime import datetime, timezone
 
 KEY='dnd-center-migration252-20261007'
@@ -26,6 +26,12 @@ def tree(path):
     return result
 def digest(value): return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 def command(*args): return subprocess.check_output(args,text=True).strip()
+def wait_http(url,resolve=(),expected_sha=None):
+    for attempt in range(20):
+        response=subprocess.run(['curl','-fsS','--max-time','10',*resolve,url],capture_output=True)
+        if response.returncode==0 and response.stdout and (expected_sha is None or hashlib.sha256(response.stdout).hexdigest()==expected_sha): return response.stdout
+        if attempt<19: time.sleep(1)
+    raise RuntimeError('New HTTP response did not become ready: '+url)
 def protected():
     result={}
     for name in ['obr-character-cards','obr-three-dragon','obr-workbench-relay-dev','pm2-root','coturn']:
@@ -103,8 +109,7 @@ def apply(package,manifest_hash):
         exchange(OLD,oldstage);switched_old=True
         shutil.copy2(package/'nginx.conf',CONFIG);nginx_changed=True
         subprocess.run(['nginx','-t'],check=True);subprocess.run(['systemctl','reload','nginx'],check=True)
-        for path in ['/','/card/','/library/','/api/health']:
-            require(command('curl','-fsS','--resolve','dnd.center:443:127.0.0.1','https://dnd.center'+path),'Empty new response')
+        verify_https(manifest)
         require(tree(NEW)==manifest['frontendFiles'] and tree(OLD)==old_expected,'Post-switch tree mismatch')
         require(protected()==baseline['protected'],'Protected state changed after switch')
         record.update(status='published',protectedAfter=protected(),finishedAt=datetime.now(timezone.utc).isoformat());journal(record)
@@ -116,6 +121,55 @@ def apply(package,manifest_hash):
         subprocess.run(['nginx','-t'],check=True);subprocess.run(['systemctl','reload','nginx'],check=True)
         subprocess.run(['systemctl','disable','--now','dnd-card-cloud.service','dnd-card-cloud-backup.timer'],check=False)
         record['status']='failed-restored';journal(record);raise
+def verify_https(manifest):
+    resolve=['--resolve','dnd.center:443:127.0.0.1']
+    for path,file in [('/','index.html'),('/card/','card/index.html'),('/library/','library/index.html')]:
+        wait_http('https://dnd.center'+path,resolve,manifest['frontendFiles'][file])
+    require(json.loads(wait_http('https://dnd.center/api/health',resolve))['qqLogin']=='pending','API unhealthy after reload')
+def resume_restored(package,manifest_hash):
+    require(sha(package/'manifest.json')==manifest_hash,'Manifest changed');manifest=json.loads((package/'manifest.json').read_text());baseline=json.loads((package/'baseline.json').read_text());record=json.loads(JOURNAL.read_text())
+    require(manifest['release']==KEY and sha(package/'baseline.json')==manifest['baselineSha256'] and sha(Path(__file__))==manifest['publisherSha256'],'Package binding mismatch')
+    for name,expected in manifest['packageFiles'].items(): require('/' not in name and sha(package/name)==expected,'Package file mismatch: '+name)
+    require(record['release']==KEY and record['status']=='failed-restored','Only this restored first migration can resume')
+    require(protected()==baseline['protected']==record['protectedBefore'],'Protected-state drift; stopped')
+    require(tree(OLD)==baseline['old']==record['oldBefore'] and sha(CONFIG)==baseline['retiredConfig']==record['oldConfigSha256'],'Original site/config is not exactly restored')
+    require(not NEW.exists(),'New site unexpectedly exists')
+    backup=package/'backup';require(Path(record['backup'])==backup and tree(backup/'card')==baseline['old'] and sha(backup/'dnd-center.conf')==baseline['retiredConfig'],'Original recovery backup differs')
+    failed=Path('/var/www/.dnd-center-failed-'+KEY);oldstage=OLD.parent/('.card-migration-stage-'+KEY)
+    require(tree(failed)==record['newFiles'] and Path(record['oldStage'])==oldstage and tree(oldstage)==record['oldFiles'],'Restored staging tree differs')
+    require(record['backendFiles']==manifest['backendFiles'] and tree(SERVICE/'releases'/KEY)==manifest['backendFiles'] and (SERVICE/'current').is_symlink() and (SERVICE/'current').resolve()==SERVICE/'releases'/KEY,'Prepared backend differs')
+    for name in ['dnd-card-cloud.service','dnd-card-cloud-backup.service','dnd-card-cloud-backup.timer']:
+        require(sha(Path('/etc/systemd/system')/name)==manifest['packageFiles'][name],'Prepared unit differs')
+    for name in ['dnd-card-cloud.service','dnd-card-cloud-backup.timer']:
+        require(command('systemctl','show',name,'-p','ActiveState','--value')=='inactive','Prepared service is not stopped')
+    archive=Path('/root/dnd-center-node-v24.9.0.tar.xz');require(sha(archive)=='f52ec50e959d72d5c680d9731420b2661cd2a8070e94c7369b6ddfcd8b7278be','Runtime archive differs')
+    with tarfile.open(archive) as z: expected_node=hashlib.sha256(z.extractfile('node-v24.9.0-linux-x64/bin/node').read()).hexdigest()
+    require(not (SERVICE/'runtime/bin/node').is_symlink() and sha(SERVICE/'runtime/bin/node')==expected_node,'Prepared Node differs')
+    with sqlite3.connect('file:/var/lib/dnd-card-cloud/cards.sqlite?mode=ro',uri=True) as db:
+        require(db.execute('PRAGMA integrity_check').fetchone()[0]=='ok','Prepared database is damaged')
+        require(all(db.execute('SELECT COUNT(*) FROM '+name).fetchone()[0]==0 for name in ['accounts','cards','sessions']),'Unexpected first-migration account/card data; stopped')
+    require(shutil.disk_usage('/var/www').free>700_000_000,'Insufficient staging space')
+    newstage=Path('/var/www/.dnd-center-resume-stage-'+KEY);unpack(package/'frontend.tar.gz',newstage,manifest['frontendFiles'])
+    require(sha(oldstage/'migration-notice.js')==manifest['packageFiles']['migration-notice.js'],'Migration notice changed; stopped')
+    require(protected()==baseline['protected'] and tree(OLD)==baseline['old'] and sha(CONFIG)==baseline['retiredConfig'],'Drift during resume preparation')
+    previous={key:record[key] for key in ['sourceCommit','at','status','newFiles','newConfigSha256']};record.update(status='resume-prepared',sourceCommit=manifest['sourceCommit'],newFiles=manifest['frontendFiles'],newConfigSha256=sha(package/'nginx.conf'),previousAttempt=previous);journal(record)
+    switched_old=False;switched_new=False;nginx_changed=False
+    try:
+        subprocess.run(['systemctl','enable','--now','dnd-card-cloud.service','dnd-card-cloud-backup.timer'],check=True)
+        require(json.loads(wait_http('http://127.0.0.1:5014/api/health'))['qqLogin']=='pending','Prepared API unhealthy')
+        subprocess.run(['systemctl','start','dnd-card-cloud-backup.service'],check=True)
+        require(protected()==baseline['protected'],'Protected state changed before resume switch')
+        newstage.rename(NEW);switched_new=True;exchange(OLD,oldstage);switched_old=True;shutil.copy2(package/'nginx.conf',CONFIG);nginx_changed=True
+        subprocess.run(['nginx','-t'],check=True);subprocess.run(['systemctl','reload','nginx'],check=True);verify_https(manifest)
+        require(tree(NEW)==manifest['frontendFiles'] and tree(OLD)==record['oldFiles'] and protected()==baseline['protected'],'Resume post-switch verification failed')
+        record.update(status='published',protectedAfter=protected(),finishedAt=datetime.now(timezone.utc).isoformat());journal(record)
+        return {'status':'published','version':'standalone-1.0.252','receipt':str(JOURNAL),'backup':str(backup),'cloudLogin':'pending','protectedItems':len(baseline['protected']),'resumedRestoredAttempt':True}
+    except Exception:
+        if nginx_changed:shutil.copy2(backup/'dnd-center.conf',CONFIG)
+        if switched_old:exchange(OLD,oldstage)
+        if switched_new:NEW.rename(Path('/var/www/.dnd-center-resume-failed-'+KEY))
+        subprocess.run(['nginx','-t'],check=True);subprocess.run(['systemctl','reload','nginx'],check=True);subprocess.run(['systemctl','disable','--now','dnd-card-cloud.service','dnd-card-cloud-backup.timer'],check=False)
+        record['status']='resume-failed-restored';journal(record);raise
 def rollback(package,manifest_hash):
     require(sha(package/'manifest.json')==manifest_hash,'Manifest changed');manifest=json.loads((package/'manifest.json').read_text());require(sha(Path(__file__))==manifest['publisherSha256'],'Publisher changed')
     record=json.loads(JOURNAL.read_text());backup=Path(record['backup']);require(record['status']=='published','Release is not published')
@@ -128,14 +182,15 @@ def rollback(package,manifest_hash):
     NEW.rename(Path('/var/www/.dnd-center-rolled-back-'+KEY));require(protected()==record['protectedAfter'],'Protected state differs after rollback')
     record.update(status='rolled-back',rolledBackAt=datetime.now(timezone.utc).isoformat(),databasePreserved=True);journal(record);return {'status':'rolled-back','databasePreserved':True}
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--package',type=Path,required=True);parser.add_argument('--capture',action='store_true');parser.add_argument('--manifest-sha');parser.add_argument('--apply',action='store_true');parser.add_argument('--rollback',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--package',type=Path,required=True);parser.add_argument('--capture',action='store_true');parser.add_argument('--manifest-sha');parser.add_argument('--apply',action='store_true');parser.add_argument('--resume-restored',action='store_true');parser.add_argument('--rollback',action='store_true');args=parser.parse_args()
     require(args.package.resolve()==Path('/root/codex-release-packages')/KEY,'Unexpected package directory')
     with open('/run/lock/obr-static-release.lock','a') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         if args.capture: result=snapshot()
         else:
             require(bool(re.fullmatch('[a-f0-9]{64}',args.manifest_sha or '')),'Exact manifest hash required')
-            if args.apply: result=apply(args.package,args.manifest_sha)
+            if args.resume_restored:result=resume_restored(args.package,args.manifest_sha)
+            elif args.apply: result=apply(args.package,args.manifest_sha)
             elif args.rollback: result=rollback(args.package,args.manifest_sha)
             else: manifest,baseline=preflight(args.package,args.manifest_sha);result={'preflightPassed':True,'onlineWrites':False,'sourceCommit':manifest['sourceCommit'],'protectedItems':len(baseline['protected'])}
         print(json.dumps(result,ensure_ascii=False,indent=2))
