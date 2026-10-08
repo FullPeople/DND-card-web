@@ -1,3 +1,4 @@
+import {customField} from './customCanvasHelpers';
 import {test,expect,type Page} from '@playwright/test';
 import {newCharacter} from '../../src/core/model';
 import {mockSource} from './fixtures';
@@ -58,7 +59,7 @@ test('native-owner grants keep remote reads in memory and explicit edits in reco
 });
 
 test('custom entry Chinese and English names survive save and reload independently',async({page})=>{
- await mockSource(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'自定义',exact:true}).click();await page.getByLabel('自定义条目类型',{exact:true}).selectOption('feature');await page.getByLabel('自定义条目名称',{exact:true}).fill('星海庇护');await page.getByLabel('自定义条目英文名',{exact:true}).fill('Starlit Shelter');await page.getByLabel('自定义条目正文',{exact:true}).fill('自制测试条目。');await page.getByRole('button',{name:'保存条目',exact:true}).click();await page.reload();await page.getByRole('button',{name:'编辑此条目'}).click();await expect(page.getByLabel('自定义条目名称',{exact:true})).toHaveValue('星海庇护');await expect(page.getByLabel('自定义条目英文名',{exact:true})).toHaveValue('Starlit Shelter');
+ await mockSource(page);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'自定义',exact:true}).click();await (await customField(page,'自定义条目类型')).selectOption('feature');await (await customField(page,'自定义条目名称')).fill('星海庇护');await (await customField(page,'自定义条目英文名')).fill('Starlit Shelter');await (await customField(page,'自定义条目正文')).fill('自制测试条目。');await page.getByRole('button',{name:'保存条目',exact:true}).click();await page.reload();await page.getByRole('button',{name:'编辑此条目'}).click();await expect((await customField(page,'自定义条目名称'))).toHaveValue('星海庇护');await expect((await customField(page,'自定义条目英文名'))).toHaveValue('Starlit Shelter');
 });
 const classes={class:['甲职业','乙职业'].map((name,i)=>({name,ENG_name:'Class '+i,source:'XPHB',hd:{faces:6},proficiency:['int','wis'],casterProgression:'full',spellcastingAbility:i?'wis':'int',preparedSpellsProgression:Array(20).fill(6),preparedSpellsChange:'restLong',entries:['自制职业。']})),subclass:['甲职业','乙职业'].flatMap(name=>['PHB','XPHB'].map(source=>({name:name+'分支',ENG_name:name+' Branch',source,className:name,classSource:source,entries:['自制子职业。']})))};
 const spells={spell:Array.from({length:30},(_,i)=>({name:'实验法术'+String(i).padStart(2,'0'),source:'XPHB',level:1,school:'A',time:[{number:1,unit:'action'}],duration:[{type:'instant'}],entries:['自制测试法术。'],classes:{fromClassList:[{name:'甲职业',source:'XPHB'}]}}))};

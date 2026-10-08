@@ -5,7 +5,7 @@ import {evaluate} from '../core/engine';
 import {classEditionSuffix} from '../core/classEdition';
 import {readCharacter,importOwlbear,parseFile} from '../core/validation';
 import {SheetDisplayButton} from './SheetDisplayButton';
-import {useSheetRenderMode} from './sheetDisplay';
+import {useSheetRenderMode,beginSheetCapture} from './sheetDisplay';
 import {PaperFrame,type SheetPage} from './PaperFrame';
 import {SheetEditContext} from './SheetEdit';
 import {Overview} from './Overview';
@@ -34,7 +34,9 @@ export function readViewerCharacter(value:unknown):Character{
 const noop=()=>{};
 class ViewerLoadError extends Error{constructor(readonly key:UiTextKey,readonly values:Record<string,string|number>={}){super(key);}}
 export default function PlayerViewer(){
+ const libraryPreview=new URLSearchParams(location.search).get('libraryPreview')==='1';
  const renderMode=useSheetRenderMode();
+ useEffect(()=>libraryPreview?beginSheetCapture():undefined,[libraryPreview]);
  const {language,t}=useUiLanguage();
  const [card,setCard]=useState<Character>(),[originalJson,setOriginalJson]=useState<string>(),[error,setError]=useState<Error>(),[page,setPage]=useState<SheetPage>('主要'),[detail,setDetail]=useState<Entry>(),[reload,setReload]=useState(0);
  const root=useRef<HTMLDivElement>(null);
@@ -57,7 +59,7 @@ export default function PlayerViewer(){
  const edit=(action:(draft:Character)=>void)=>setCard(current=>{if(!current)return current;const draft=structuredClone(current);action(draft);return {...current,featureLayout:draft.featureLayout};});
  if(!card||!derived)return <main className="player-viewer-loading"><h1>{t('card')}</h1>{error?<><p role="alert">{error instanceof ViewerLoadError?t(error.key,error.values):error.message}</p><button onClick={()=>setReload(n=>n+1)}>{t('retry')}</button></>:<p role="status">{t('readerLoading')}</p>}<a href="https://dnd.center/card/" target="_blank" rel="noreferrer">{t('goToSite')}</a></main>;
  const props={c:card,d:derived,edit,browse:noop,inspect:setDetail,onLink:link,add:noop,entries};
- return <KeywordPreview resolve={resolve} open={link}><SheetEditContext.Provider value={false}><main ref={root} className="player-viewer">
+ return <KeywordPreview resolve={resolve} open={link}><SheetEditContext.Provider value={false}><main ref={root} className={`player-viewer ${libraryPreview?'cloud-library-preview':''}`}>
   <header className="player-viewer-toolbar"><strong>{card.name}</strong><span>{card.edition} · {t('readOnly')}</span><button disabled={originalJson===undefined} onClick={()=>{if(originalJson!==undefined)downloadBlob(`${card.name.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').slice(0,100)||'character'}.json`,new Blob([originalJson],{type:'application/json;charset=utf-8'}));}}>{t('exportJson')}</button><button onClick={()=>setReload(n=>n+1)}>{t('refreshData')}</button><a href="https://dnd.center/card/" target="_blank" rel="noreferrer">{t('createOnSite')}</a></header>
   <section className="sheet-pane"><div className="pane-toolbar"><SheetDisplayButton/></div><PaperFrame character={card} page={page} changePage={setPage}>
    <ToolBoundary key={page} label={page} close={()=>setPage('主要')}><Suspense fallback={<p role="status">正在加载这一页…</p>}>{page==='主要'?<Overview {...props} catalog={entries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(card)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={card} rows={card.selections.filter(s=>s.entry.kind==='condition')} edit={noop} browse={noop} onLink={link}/><span/></div>} addEntry={noop} renderSelection={()=>null} openResources={noop} openQuickbar={noop} pinDrop={noop}/>:<div className="sheet-details"><DetailHeader {...props} page={page}/>{page==='特性'?<FeaturesPage {...props}/>:page==='背景'?<BackgroundPage {...props}/>:page==='法术'?<SpellsPage {...props} readOnly/>:<InventoryPage {...props}/>}</div>}

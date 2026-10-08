@@ -19,7 +19,7 @@ test('player progress, lazy caching and character preservation',async({page})=>{
  await page.getByRole('button',{name:'我知道了',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('dnd-card-standalone');r.onsuccess=()=>resolve(r.result);});const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),request=store.get('workspace');request.onsuccess=()=>{const workspace=request.result,c=workspace.characters[0];c.story='原创验收手工记录';c.runtime.resources.manualProbe={name:'原创已消耗资源',max:4,current:1};c.automation={protocol:2,rulesVersion:'equipment.1',defaultsVersion:1,enabled:false};store.put(workspace,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();});
  await page.reload();await noticeReady(page);await expect(page.locator('.save-status')).toContainText('已保存到本机');
- await expect(page.locator('.catalog-status > span').first()).toHaveText(/[\d,]+ 条资料 · \d+ 份缓存/);await expect(page.locator('.wiki-header button')).toBeEnabled();
+ await expect(page.locator('.catalog-status > span').first()).toHaveText(/[\d,]+ 条资料 · \d+ 份缓存/);await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  const before=await readWorkspace(page);requests.length=0;await tab(page).click();
  await expect(panel(page)).toContainText('大量条目目前放入角色卡不会有任何数据自动计算的功能，只会起一个可观测作用，因此自动化任重而道远。');
  await expect(panel(page)).toContainText(`规则条目（含第三方）已核对：${manifest.audit.counts!.reviewed}/${manifest.audit.counts!.total}，已实装${manifest.runtimeAudit!.implemented}/${manifest.audit.counts!.total}`);

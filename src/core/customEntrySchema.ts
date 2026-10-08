@@ -8,14 +8,15 @@ const examples:Record<string,Raw>={
  item:{weight:1,value:100},weapon:{weight:2,value:100,type:'M',weaponCategory:'simple',dmg1:'1d6',dmgType:'P'},armor:{weight:10,value:1000,type:'LA',ac:11},tool:{weight:1,value:100,type:'AT'},
  spell:{level:1,school:'A',time:[{number:1,unit:'action'}],range:{type:'point',distance:{type:'feet',amount:30}},components:{v:true,s:true},duration:[{type:'instant'}]},
  class:{hd:{number:1,faces:8},proficiency:['str','con'],startingProficiencies:{skills:[{choose:{from:['athletics','perception'],count:1}}]}},subclass:{className:'所属职业名称',classSource:'XPHB'},
- race:{size:['M'],speed:30},language:{type:'standard',script:'自定文字'},feat:{},background:{},feature:{},condition:{},weaponProperty:{},weaponMastery:{},rule:{}
+ race:{size:['M'],speed:30},language:{type:'standard',script:'自定文字'},feat:{},background:{},feature:{},condition:{},weaponProperty:{},weaponMastery:{},rule:{},
+ monster:{size:['M'],type:'construct',alignment:['U'],ac:[13],hp:{average:22,formula:'4d8+4'},speed:{walk:30},str:14,dex:12,con:12,int:6,wis:10,cha:6,cr:'1/2',senses:['黑暗视觉 60 尺'],passive:10,languages:['理解创造者的语言'],trait:[{name:'示例特质',entries:['完整描述此怪物的特质。']}],action:[{name:'示例攻击',entries:['近战武器攻击：命中 +4，触及 5 尺，单一目标。命中：{@damage 1d6+2} 钝击伤害。']}]}
 };
 export function customEntryExample(type:string){return {name:'自定义条目',type,edition:'both',entries:['填写完整内容。规则引用采用 {@spell 法术名称|XPHB} 或 {@item 物品名称|XPHB}。',{type:'entries',name:'子内容',entries:['填写子内容。']}],raw:structuredClone(examples[type]||{})};}
 /** Strict authoring boundary; existing imported snapshots remain readable. */
 export function validateCustomFields(type:string,raw:Raw,entries?:unknown[]){
  const require=(condition:unknown,message:string)=>{if(!condition)throw Error(message);};
  require(!!CUSTOM_TYPES[type]&&object(raw),'请选择有效类型并填写结构字段对象');
- if(entries)require(entries.length>0,'请填写正文或结构化子内容');
+ if(entries)require(entries.length>0||type==='monster'&&['trait','action','spellcasting'].some(key=>Array.isArray(raw[key])&&raw[key].length>0),'请填写正文或结构化子内容');
  if(CUSTOM_TYPES[type].kind==='item'){require(nonnegative(raw.weight),'请填写非负的物品重量（磅）');require(nonnegative(raw.value),'请填写非负的物品价格（铜币）');}
  if(type==='weapon'){require(['simple','martial'].includes(raw.weaponCategory),'请选择简易或军用武器');require(['M','R'].includes(raw.type),'请选择近战或远程武器');require(typeof raw.dmg1==='string'&&raw.dmg1.trim(),'请填写武器伤害骰');require(typeof raw.dmgType==='string'&&raw.dmgType.trim(),'请填写武器伤害类型');}
  if(type==='armor'){require(['LA','MA','HA','S'].includes(raw.type),'请选择护甲类别');require(nonnegative(raw.ac),'请填写护甲基础值');}
@@ -23,6 +24,15 @@ export function validateCustomFields(type:string,raw:Raw,entries?:unknown[]){
  if(type==='subclass')require(typeof raw.className==='string'&&raw.className.trim()&&typeof raw.classSource==='string'&&raw.classSource.trim(),'请填写所属职业名称与来源标识');
  if(type==='race'){require(Array.isArray(raw.size)&&raw.size.length>0&&raw.size.every((s:any)=>['T','S','M','L','H','G'].includes(s)),'请选择种族体型');require(nonnegative(raw.speed)||object(raw.speed)&&nonnegative(raw.speed.walk),'请填写种族步行速度');}
  if(type==='spell'){require(Number.isInteger(raw.level)&&raw.level>=0&&raw.level<=9,'法术环阶必须为 0 至 9');require(['A','C','D','E','V','I','N','T'].includes(raw.school),'请选择法术学派');require(Array.isArray(raw.time)&&raw.time.length>0&&raw.time.every((t:any)=>object(t)&&nonnegative(t.number)&&t.number>0&&typeof t.unit==='string'&&t.unit),'施法时间需要 JSON 数组，例如 [{"number":1,"unit":"action"}]；右侧 ? 可查看多种例子');require(object(raw.range)&&typeof raw.range.type==='string'&&raw.range.type,'请填写施法距离');require(object(raw.components),'请填写法术成分对象，无成分可填 {}');require(Array.isArray(raw.duration)&&raw.duration.length>0&&raw.duration.every((d:any)=>object(d)&&typeof d.type==='string'&&d.type),'请填写法术持续时间');}
+ if(type==='monster'){
+  require(Array.isArray(raw.size)&&raw.size.length>0&&raw.size.every((s:any)=>['T','S','M','L','H','G'].includes(s)),'请选择怪物体型');
+  require(typeof raw.type==='string'&&raw.type.trim()||object(raw.type)&&typeof raw.type.type==='string'&&raw.type.type.trim(),'请填写怪物类型');
+  require(Array.isArray(raw.ac)&&raw.ac.length>0&&raw.ac.every((v:any)=>nonnegative(v)||object(v)&&(nonnegative(v.ac)||typeof v.special==='string'&&v.special.trim())),'请填写怪物 AC');
+  require(object(raw.hp)&&(nonnegative(raw.hp.average)||typeof raw.hp.special==='string'&&raw.hp.special.trim()),'请填写怪物 HP');
+  require(nonnegative(raw.speed)||object(raw.speed)&&Object.values(raw.speed).every(v=>typeof v==='boolean'||nonnegative(v)||object(v)&&nonnegative(v.number)),'请填写有效的怪物速度');
+  require(ABILITIES.every(a=>Number.isInteger(raw[a])&&raw[a]>=1&&raw[a]<=30),'怪物六项属性必须为 1 至 30');
+  for(const key of ['trait','action','bonus','reaction','legendary','mythic','variant','spellcasting'])if(raw[key]!==undefined){require(Array.isArray(raw[key]),`怪物 ${key} 必须是数组`);validateEntryContent(raw[key]);}
+ }
  if(type==='language')require(typeof raw.type==='string'&&raw.type&&typeof raw.script==='string'&&raw.script,'请填写语言类别与文字');
 }
 export function parseCustomEntryJson(text:string,fallbackType='feature'):Entry{

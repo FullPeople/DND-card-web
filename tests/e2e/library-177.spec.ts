@@ -1,3 +1,4 @@
+import {customField} from './customCanvasHelpers';
 import {test,expect} from '@playwright/test';
 import {mockSource} from './fixtures';
 import {newCharacter} from '../../src/core/model';
@@ -30,10 +31,10 @@ test('player rules are a compact immutable room overview while source display re
 });
 
 test('authored backpack goods store visible price and weight fields in the existing item units',async({page})=>{
- await mockSource(page);await page.goto('/');await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'自定义',exact:true}).click();await page.getByLabel('自定义条目名称').fill('计价测试物品');await page.getByLabel('自定义条目类型').selectOption('tool');await page.getByLabel('物品价格（金币）').fill('2.5');await page.getByLabel('物品重量（磅）').fill('3.25');await page.getByRole('button',{name:'保存条目',exact:true}).click();
+ await mockSource(page);await page.goto('/');await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'自定义',exact:true}).click();await (await customField(page,'自定义条目名称')).fill('计价测试物品');await (await customField(page,'自定义条目类型')).selectOption('tool');await (await customField(page,'物品价格（金币）')).fill('2.5');await (await customField(page,'物品重量（磅）')).fill('3.25');await page.getByRole('button',{name:'保存条目',exact:true}).click();
  await expect(page.locator('.catalog-row')).toContainText('计价测试物品');
  const fields=await page.evaluate(()=>new Promise<any>((resolve,reject)=>{const req=indexedDB.open('dnd-card-workspace');req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>{resolve(r.result.customEntries[0].raw);db.close();};};}));expect(fields.value).toBe(250);expect(fields.weight).toBe(3.25);
- await page.reload();await page.locator('.catalog-row').filter({hasText:'计价测试物品'}).click();await expect(page.getByLabel('物品价格（金币）')).toHaveValue('2.5');await expect(page.getByLabel('物品重量（磅）')).toHaveValue('3.25');
+ await page.reload();await page.locator('.catalog-row').filter({hasText:'计价测试物品'}).click();await expect((await customField(page,'物品价格（金币）'))).toHaveValue('2.5');await expect((await customField(page,'物品重量（磅）'))).toHaveValue('3.25');
 });
 
 test('third-party source index loads collections once with source names and their edition',async({page})=>{

@@ -1,0 +1,4 @@
+.json-file-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;min-height:104px;padding:16px;border:3px dashed #62646b;background:#eeeeef;color:#34363b;text-align:center;cursor:pointer;transition:background .15s,border-color .15s}
+.json-file-drop span{font-size:12px}.json-file-drop.is-over{background:#d9dee5;border-color:#303a47;box-shadow:inset 0 0 0 3px #858b94}.json-file-drop:focus-visible{outline:3px solid #526880;outline-offset:3px}.json-file-import>p{color:#a52f36;font-size:12px}
+
+.settings-section .file-input[data-testid="character-file"]{display:none}
