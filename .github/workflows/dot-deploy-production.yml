@@ -1,0 +1,113 @@
+name: Deploy dnd.center frontends
+run-name: dnd.center ${{ inputs.operation }} · ${{ inputs.source_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'preflight uploads and validates; publish atomically switches both frontends'
+        type: choice
+        options: [preflight, publish]
+        default: preflight
+        required: true
+      source_sha:
+        description: 'Full commit SHA; must equal the selected main workflow SHA and current main head'
+        type: string
+        required: true
+      ci_run_ids:
+        description: 'Exact-SHA successful main CI IDs: web, cloud-migration, dot-deploy-contract'
+        type: string
+        required: true
+      expected_release_sha256:
+        description: 'Fresh SHA256 of https://dnd.center/card/release.json'
+        type: string
+        required: true
+      release_version:
+        description: 'Frontend version, for example standalone-1.0.257'
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: obr-static-production
+  cancel-in-progress: false
+env:
+  SOURCE_SHA: ${{ inputs.source_sha }}
+  CI_RUN_IDS: ${{ inputs.ci_run_ids }}
+  EXPECTED_RELEASE_SHA256: ${{ inputs.expected_release_sha256 }}
+  RELEASE_VERSION: ${{ inputs.release_version }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      archive_sha256: ${{ steps.package.outputs.archive_sha256 }}
+      archive_bytes: ${{ steps.package.outputs.archive_bytes }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Enforce main and all complete CI runs for this exact commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B tools/dot-deploy/build_production.py --validate-only
+      - name: Verify fixed deployment contracts
+        working-directory: tools/dot-deploy
+        run: python3 -B -m unittest -v test_preflight test_production
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:cloud
+      - name: Package only card and library with exact source archive and hashes
+        id: package
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B tools/dot-deploy/build_production.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dnd-center-frontends-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .deployment/deployment.tar.gz
+            .deployment/build-receipt.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production-card
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dnd-center-frontends-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .deployment
+      - name: Authenticate, recheck CI, stream artifact and call the fixed server publisher
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOY_OPERATION: ${{ inputs.operation }}
+          ARCHIVE_SHA256: ${{ needs.build.outputs.archive_sha256 }}
+          ARCHIVE_BYTES: ${{ needs.build.outputs.archive_bytes }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS || secrets.DEPLOY_KNOWN_HOSTS }}
+        run: python3 -B tools/dot-deploy/runner_production.py
+      - name: Preserve sanitized deployment receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dnd-center-receipt-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .deployment/receipt.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90

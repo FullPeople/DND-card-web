@@ -1,3 +1,9 @@
+# 2026-10-08 · 正式部署工作流与受限发布入口候选
+
+本次用户授权实现正式 GitHub Actions 部署接入，沿用 production-card 的现有 DEPLOY_SSH_KEY、DEPLOY_KNOWN_HOSTS、不可变 OIDC 身份和人工审批。独立分支新增指定 main SHA 的完整 Web/Cloud/部署合约 CI 门禁、双目录构建包、GitHub Artifact/SSH 流上传与服务器固定分派入口。目标固定 /var/www/dnd-center/card 和 library；安装器复用原账号与公钥并提供失败恢复。部署账号不执行上传的发布器、任意 shell 或 rollback。实现、管理员精确提交安装命令及配置清单见 [正式部署接入](DND-CENTER-PRODUCTION-DEPLOY.md)。
+
+本地 36 项身份/归档/传输/真实 Linux 发布与安装恢复检查、既有 21 项发布器检查通过；完整云端构建、actionlint 与真实双目录封包通过，完整源码 ZIP 与 GitHub 全部 Git blobs 匹配。当前云端认证实际 dispatch 合约运行 37780818927，精确实现 SHA f8046e7、全部步骤 success，证明 Actions 写/读权限可用；含工作流文件的 push 也已成功。正式工作流仍需合并 main 注册及管理员安装、GitHub 人工审批；本接入尚未在服务器安装或执行发布。完整证据与限制见 [交付回执](DND-CENTER-PRODUCTION-DEPLOY-RECEIPT.md)，线上状态以另一会话的 257 最终回执为准。
+
 # 2026-10-08 · 257 统一界面与职业图标已上线
 
 独立站及卡库 standalone-1.0.257 / 公告 0.1.47，新版枭熊 1.0.257-dev，稳定版 1.3.18，后端继续 1.0.253。统一调色盘、Wiki 右键副本、精简法术提示、卡库全屏与缓存、手机侧栏及 11 个 PSD 职业图标已配套发布。枭熊按最新决定不接入云端；独立站临时公开上传可用，QQ 登录仍申请中。精确 CI、公网测试、公告版本索引修正、保护值和三步回滚见 [257 最终回执](RELEASE-257-FINAL.md)。下方历史不覆盖本段。
