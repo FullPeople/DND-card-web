@@ -2,7 +2,7 @@
 
 本次用户授权实现正式 GitHub Actions 部署接入，沿用 production-card 的现有 DEPLOY_SSH_KEY、DEPLOY_KNOWN_HOSTS、不可变 OIDC 身份和人工审批。独立分支新增指定 main SHA 的完整 Web/Cloud/部署合约 CI 门禁、双目录构建包、GitHub Artifact/SSH 流上传与服务器固定分派入口。目标固定 /var/www/dnd-center/card 和 library；安装器复用原账号与公钥并提供失败恢复。部署账号不执行上传的发布器、任意 shell 或 rollback。实现、管理员精确提交安装命令及配置清单见 [正式部署接入](DND-CENTER-PRODUCTION-DEPLOY.md)。
 
-本地 36 项身份/归档/传输/真实 Linux 发布与安装恢复检查、既有 21 项发布器检查通过；应用完整云端构建与 actionlint 工作流校验通过；GitHub Actions 实际触发权限继续核验，结果在交付回执中记录。尚未安装服务器入口或发布新网站；另一会话的 257 候选和实际线上 256 状态保留。
+本地 36 项身份/归档/传输/真实 Linux 发布与安装恢复检查、既有 21 项发布器检查通过；完整云端构建、actionlint 与真实双目录封包通过，完整源码 ZIP 与 GitHub 全部 Git blobs 匹配。当前云端认证实际 dispatch 合约运行 37780818927，精确实现 SHA f8046e7、全部步骤 success，证明 Actions 写/读权限可用；含工作流文件的 push 也已成功。正式工作流仍需合并 main 注册及管理员安装、GitHub 人工审批；尚未安装服务器入口或发布新网站。完整证据与限制见 [交付回执](DND-CENTER-PRODUCTION-DEPLOY-RECEIPT.md)，另一会话的 257 候选和实际线上 256 状态保留。
 
 # 2026-10-08 · 256 实际上线与服务器恢复完成
 

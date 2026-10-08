@@ -102,6 +102,8 @@ python3 /root/codex-release-packages/dnd-center-actions-<run-id>-<attempt>/front
 
 ## 本次验证范围
 
+实际认证、构建、封包与 GitHub 运行证据见 [交付回执](DND-CENTER-PRODUCTION-DEPLOY-RECEIPT.md)，其中给出管理员应使用的冻结实现提交。
+
 本地及 GitHub 合约 CI 分别记录验证结果。合约测试包含错误 OIDC 身份/提交/工作流/审批环境、完整 CI/跳过项、恶意归档、源码 ZIP 内容、截断上传、旧预检兼容、真实 Linux 双目录发布/失败恢复/管理员回滚、数据库及第三方首页保留、旧 assets 保留、安装失败恢复原 SSH/sudo/公钥。
 
 管理员实际安装、生产 Environment 人工审批和真实服务器发布需要对应现场回执；代码、合约通过或 workflow_dispatch 返回成功均不等于实际部署完成。新工作流未注册时，可先用同一认证向现有无凭据合约工作流实际 dispatch，独立验证 Actions 写权限。
