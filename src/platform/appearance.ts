@@ -18,7 +18,7 @@ let current:Appearance={ui:{},wiki:{}};
 export const appearance=()=>current;
 export function applyAppearance(value=current){
  if(typeof document==='undefined')return;
- for(const [name,key] of Object.entries({'suite-paper':'surface','suite-surface':'heading','suite-ink':'ink','suite-muted':'muted','suite-line':'line',ink:'ink',muted:'muted',line:'line',accent:'accent'}))document.documentElement.style.setProperty('--'+name,'var(--ui-'+key+')');
+ for(const [name,key] of Object.entries({'suite-tone':'accent','suite-paper':'surface','suite-surface':'heading','suite-ink':'ink','suite-muted':'muted','suite-line':'line',ink:'ink',muted:'muted',line:'line',accent:'accent'}))document.documentElement.style.setProperty('--'+name,'var(--ui-'+key+')');
  const night=document.documentElement.dataset.suiteNight==='true';
  const dark:Record<AppearanceGroup,Record<string,string>>={ui:{background:'#1c2028',surface:'#262c35',heading:'#303846',ink:'#e2e6ea',muted:'#aeb7c2',line:'#525c68',button:'#303846',buttonInk:'#e2e6ea'},wiki:{background:'#262c35',ink:'#e2e6ea',muted:'#aeb7c2',title:'#e2e6ea',link:'#b8c5d3',area:'#303846',line:'#525c68',entry:'#262c35',entryInk:'#e2e6ea',selected:'#424b57',selectedInk:'#ffffff',feature:'#303846',featureInk:'#e2e6ea',tableHeading:'#424b57',tableHeadingInk:'#ffffff',tableCell:'#262c35',tableAlternate:'#303846',tableInk:'#e2e6ea',tableLine:'#525c68'}};
  for(const [group,definitions] of [['ui',UI_COLORS],['wiki',WIKI_COLORS]] as const)for(const [key,definition] of Object.entries(definitions))document.documentElement.style.setProperty(`--${group}-${key}`,value[group][key]||(night?dark[group][key]:undefined)||definition[1]);

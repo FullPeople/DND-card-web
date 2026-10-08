@@ -23,7 +23,7 @@ describe('公告确认记录的读写',()=>{
   it('枭熊更新只重新提示枭熊公告，保留单机确认记录',()=>{
     vi.stubGlobal('localStorage',new MemoryStorage());
     rememberAnnouncementVersion(APP_VERSION,'standalone');
-    rememberAnnouncementVersion(APP_VERSION,'suite');
+    rememberAnnouncementVersion('older-suite-version','suite');
     expect(announcementPending(readAnnouncementVersion('suite'),announcementVersionFor('suite'))).toBe(true);
     rememberAnnouncementVersion(announcementVersionFor('suite'),'suite');
     expect(announcementPending(readAnnouncementVersion('suite'),announcementVersionFor('suite'))).toBe(false);

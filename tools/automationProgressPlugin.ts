@@ -2,10 +2,10 @@ import type {Plugin} from 'vite';
 import {gzipSync} from 'node:zlib';
 import {generateProgress,progressDigest} from './automationProgress.ts';
 import {validProgress,PROGRESS_LIMIT} from '../src/platform/automationProgress.ts';
-export function automationProgressPlugin():Plugin{
+export function automationProgressPlugin(sourceRoot?:string):Plugin{
  let root:string,mode:string,reference:string,identity:object;
  const virtual='virtual:automation-progress',resolved='\0'+virtual;
- return {name:'public-automation-progress',configResolved(config){root=config.root;mode=config.mode;},
+ return {name:'public-automation-progress',configResolved(config){root=sourceRoot||config.root;mode=config.mode;},
   buildStart(){const manifest=generateProgress(root,mode);if(!validProgress(manifest))throw Error('Invalid generated public automation manifest');const content=JSON.stringify(manifest);if(Buffer.byteLength(content)>PROGRESS_LIMIT)throw Error('Automation manifest exceeded 48 KiB');
    identity={sourceCommit:manifest.build.sourceCommit,fingerprint:manifest.build.fingerprint,mode,manifestSha256:progressDigest(content)};
    if(this.meta.watchMode||process.env.NODE_ENV!=='production')reference='';

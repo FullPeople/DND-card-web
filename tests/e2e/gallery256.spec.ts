@@ -16,14 +16,21 @@ test('incognito circular gallery shares its renderer, bounds reads and fits the 
   const first=await active.getAttribute('data-card-id');
   for(let i=0;i<3;i++){await page.getByRole('button',{name:'下一张角色卡'}).click();await expect(active.locator('.paper')).toBeVisible();await page.waitForTimeout(80);}
   await expect(active).toHaveAttribute('data-card-id',first!);expect(new Set(reads).size).toBe(3);expect(reads).toHaveLength(3);
-  await active.getByRole('tab',{name:'背景',exact:true}).click();await expect(active.locator('.paper')).toContainText('云端五页故事');
-  for(const name of ['主要','特性','背景','法术','背包']){await active.getByRole('tab',{name,exact:true}).click();await expect(active.getByRole('tabpanel',{name,exact:true})).toBeVisible();}
-  await active.getByRole('tab',{name:'主要',exact:true}).click();await page.screenshot({path:test.info().outputPath('circular-gallery-desktop.png')});
+  await expect(active.getByRole('tab')).toHaveCount(0);await expect(active.locator('.paper')).toHaveAttribute('role','img');
+  await expect(page.locator('.cloud-gallery-title')).not.toContainText('画廊验收');
+  await active.locator('.paper').evaluate(el=>{(window as any).cachedPaper=el;});
+  await active.getByRole('button',{name:/全屏查看角色卡/}).click();
+  const full=page.getByRole('dialog',{name:'全屏角色卡'});await expect(full).toBeVisible();
+  await full.getByRole('tab',{name:'背景',exact:true}).click();await expect(full.locator('.paper')).toContainText('云端五页故事');
+  for(const name of ['主要','特性','背景','法术','背包']){await full.getByRole('tab',{name,exact:true}).click();await expect(full.getByRole('tabpanel',{name,exact:true})).toBeVisible();}
+  await full.getByRole('button',{name:'返回画廊',exact:true}).click();await expect(full).not.toBeVisible();
+  expect(await active.locator('.paper').evaluate(el=>el===(window as any).cachedPaper)).toBe(true);expect(reads).toHaveLength(3);
+  await page.screenshot({path:test.info().outputPath('circular-gallery-desktop.png')});
   for(const size of [{width:1440,height:960},{width:390,height:844}]){
    await page.setViewportSize(size);await page.waitForTimeout(600);
    const fit=await active.locator('.paper').evaluate(el=>{const p=el.getBoundingClientRect(),s=el.closest('.cloud-gallery-stage')!.getBoundingClientRect();return p.top>=s.top-1&&p.bottom<=s.bottom+1&&p.left>=s.left-1&&p.right<=s.right+1;});expect(fit).toBe(true);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   }
-  await page.screenshot({path:test.info().outputPath('circular-gallery-mobile.png')});await page.setViewportSize({width:1440,height:960});await page.waitForTimeout(600);
+  await expect(page.locator('.cloud-sidebar')).not.toBeInViewport();await page.getByRole('button',{name:'打开卡库侧栏',exact:true}).click();await expect(page.locator('.cloud-sidebar')).toBeInViewport();await page.getByRole('button',{name:'关闭侧栏',exact:true}).click();await page.screenshot({path:test.info().outputPath('circular-gallery-mobile.png')});await page.setViewportSize({width:1440,height:960});await page.waitForTimeout(600);
   const bounds=await active.locator('.paper').boundingBox();await page.mouse.move(bounds!.x+bounds!.width*.65,bounds!.y+bounds!.height*.6);await page.mouse.down();await page.mouse.move(bounds!.x+bounds!.width*.65-130,bounds!.y+bounds!.height*.6,{steps:10});await page.mouse.up();await expect(active).not.toHaveAttribute('data-card-id',first!);
   await page.emulateMedia({reducedMotion:'reduce'});expect(await active.evaluate(el=>getComputedStyle(el).transitionDuration)).toBe('0s');expect(errors).toEqual([]);
  }finally{for(const id of ids)expect((await request.delete('/api/cards/'+id,{headers,data:{revision:1}})).ok()).toBe(true);}
