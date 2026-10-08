@@ -48,16 +48,3 @@ export function Portrait({c,edit,field='portrait'}:{c:Character;edit:Edit;field?
  {error&&<span className="portrait-error" role="alert">{error}</span>}
  </div>{deleteConfirm&&createPortal(<div className="portrait-confirm-shade" onPointerDown={event=>{if(event.target===event.currentTarget)setDeleteConfirm(false);}}><section role="alertdialog" aria-modal="true" aria-label={`删除${label}`} className="portrait-confirm"><strong>删除当前{label}？</strong><div><button autoFocus onClick={()=>setDeleteConfirm(false)}>取消</button><button onClick={()=>{edit(character=>{delete character[field];});setDeleteConfirm(false);}}>删除</button></div></section></div>,document.body)}</SheetCell>;
 }
-
-const colors={paper:'#ededeb',surface:'#e8e8e8',frame:'#595959',heading:'#7c7c7c',ink:'#343532',badge:'#555555'};
-type PaletteKey=keyof typeof colors;
-function PaletteColor({colorKey,label,value,edit}:{colorKey:PaletteKey;label:string;value:string;edit:Edit}){
- const input=useRef<HTMLInputElement>(null),frame=useRef(0),pending=useRef<string|undefined>(undefined);
- const latest=useRef({value,edit});latest.current={value,edit};
- function preview(){frame.current=0;const el=input.current;if(el&&pending.current)el.closest<HTMLElement>('.paper')?.style.setProperty(`--paper-${colorKey}`,pending.current);}
- function commit(){cancelAnimationFrame(frame.current);preview();const next=pending.current;pending.current=undefined;if(next&&next!==latest.current.value)latest.current.edit(c=>{(c.palette||={})[colorKey]=next;},`color-${colorKey}`);}
- useEffect(()=>{if(input.current)input.current.value=value;},[value]);
- useEffect(()=>{const el=input.current!;el.addEventListener('change',commit);el.addEventListener('blur',commit);return()=>{cancelAnimationFrame(frame.current);el.removeEventListener('change',commit);el.removeEventListener('blur',commit);};},[colorKey]);
- return <label title={label}><input ref={input} type="color" aria-label={label} defaultValue={value} onInput={e=>{pending.current=e.currentTarget.value;if(!frame.current)frame.current=requestAnimationFrame(preview);}}/></label>;
-}
-export function Palette({c,edit}:{c:Character;edit:Edit}){return <div className="palette-controls">{Object.entries({paper:'纸张色调',surface:'内容底色',frame:'框默认色',heading:'标题颜色',ink:'文字颜色',badge:'职业图标颜色'}).map(([key,label])=><PaletteColor key={`${c.id}:${key}`} colorKey={key as PaletteKey} label={label} value={c.palette?.[key as PaletteKey]||colors[key as PaletteKey]} edit={edit}/>)}</div>;}

@@ -1,5 +1,4 @@
 import {entryLabel} from '../core/entryLabel';
-import {SpellLearners} from './SpellLearners';
 import {MonsterDocument} from './MonsterDocument';
 import {useLayoutEffect,useRef,useState} from 'react';
 import {entryEdition,KIND_LABELS} from '../core/model';
@@ -24,6 +23,6 @@ export default function Pane({ value, pinned, index, keep, leave, open }: { valu
   }, [value]);
   return <aside ref={ref} className={`keyword-preview ${pinned ? 'is-pinned' : ''} ${value.excluded?'entry-disabled':''}`} id={value.id} data-tooltip-id={value.id} role="tooltip" onDragStart={event => event.preventDefault()} style={{ ...position, zIndex: value.layer + 1 + index }} onMouseEnter={keep} onMouseLeave={leave}>
     <header><strong>{entry?entryLabel(entry):value.reference.split('|')[0]}{entry?.english && entry.english !== entry.name && <small className="tooltip-english"> {entry.english}</small>}</strong>{entry && <EntryBadges entry={entry}/>}<small>{value.sourceLabel || (entry ? `${KIND_LABELS[entry.kind]} · ${format(entry.source)} · ${entryEdition(entry) === 'both' ? '通用' : entryEdition(entry)}` : '资料尚未收录')}{pinned && <span className="tooltip-pin"> · 已固定</span>}</small></header>
-    <div className="keyword-content rules-prose">{entry ? <ContentBoundary key={entry.id}>{entry.kind==='monster'?<MonsterDocument entry={entry} onLink={open}/>:<>{!value.sourceLabel && <EntryFacts entry={entry} onLink={open}/>}<Entries compact={entry.kind==='feature'} value={entry.entries} onLink={open}/><SpellLearners entry={entry} onLink={open}/></>}</ContentBoundary> : null}</div>
+    <div className="keyword-content rules-prose">{entry ? <ContentBoundary key={entry.id}>{entry.kind==='monster'?<MonsterDocument entry={entry} onLink={open}/>:<>{!value.sourceLabel && <EntryFacts entry={entry} onLink={open}/>}<Entries compact={entry.kind==='feature'} value={entry.entries} onLink={open}/></>}</ContentBoundary> : null}</div>
   </aside>;
 }
