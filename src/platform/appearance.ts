@@ -31,4 +31,5 @@ export function saveAppearance(group:AppearanceGroup,key:string,color?:string){
  window.dispatchEvent(new Event(APPEARANCE_EVENT));return saved;
 }
 export function resetAppearance(group:AppearanceGroup){current={...current,[group]:{}};applyAppearance();let saved=true;try{localStorage.setItem(APPEARANCE_KEY,JSON.stringify(current));}catch{saved=false;}window.dispatchEvent(new Event(APPEARANCE_EVENT));return saved;}
+export function replaceAppearance(value:Appearance){current=readAppearance(JSON.stringify(value));applyAppearance();let saved=true;try{localStorage.setItem(APPEARANCE_KEY,JSON.stringify(current));}catch{saved=false;}window.dispatchEvent(new Event(APPEARANCE_EVENT));return saved;}
 if(typeof window!=='undefined'){restore();window.addEventListener('storage',event=>{if(event.key===APPEARANCE_KEY||event.key==='full-suite/ui-tone'||event.key==='full-suite/ui-night'||event.key===null){restore();window.dispatchEvent(new Event(APPEARANCE_EVENT));}});new MutationObserver(()=>applyAppearance()).observe(document.documentElement,{attributes:true,attributeFilter:['data-suite-night']});}

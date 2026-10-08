@@ -1,7 +1,8 @@
-export const RELEASE_DATE='2026-10-07';
+export const RELEASE_DATE='2026-10-08';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
+ {title:'调色盘与角色卡库',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域，点击或按住并拖动都可选色，松开后应用。','卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4。']},
  {title:'浏览器兼容与加载',items:['修复了部分旧版浏览器读取 Wiki 和连接服务器时加载失败的问题。','资料缓存写满时，已下载成功的资料仍可查看。','程序加载失败时，现在显示原因和重新加载按钮。']},
  {title:'本次修复：职业与法术',items:[
   '现在每个主职业都可以单独查找和添加子职了。',
