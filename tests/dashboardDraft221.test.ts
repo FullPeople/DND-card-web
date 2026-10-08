@@ -50,8 +50,8 @@ describe('221 free dashboard placement',()=>{
  it('uses a group-aware resize minimum and displays the exact saved geometry after shrinking a custom group',()=>{
   const c=card();c.runtime.resources.extra=resource('丙');c.quickbarLayout!.widgets={a:normalizeWidget({x:3,y:0,w:6,h:5,style:'pool',members:['a','b','extra'],label:'组合资源'})};
   const draft=createDashboardDraft(c),module=resourceModules(Object.entries(draft.runtime.resources),draft.quickbarLayout!.widgets)[0],minimum=resourceModuleMinimum(module,'pool');
-  expect(minimum).toEqual({w:6,h:3});draft.quickbarLayout!.widgets!.a=moveWidget(draft.quickbarLayout!.widgets!.a,-99,-99,'se',minimum);
-  expect(draft.quickbarLayout!.widgets!.a).toMatchObject({x:3,y:0,w:6,h:3});
+  expect(minimum).toEqual({w:4,h:3});draft.quickbarLayout!.widgets!.a=moveWidget(draft.quickbarLayout!.widgets!.a,-99,-99,'se',minimum);
+  expect(draft.quickbarLayout!.widgets!.a).toMatchObject({x:3,y:0,w:4,h:3});
   const result=commitDashboardDraft(c,c,draft),shown=visible(result);expect(shown.widgets.a).toEqual(result.quickbarLayout!.widgets!.a);expect(shown.widgets.a).toEqual(draft.quickbarLayout!.widgets!.a);
  });
  it('grows a spell module for new levels without moving neighbours and keeps the resulting collision explicit',()=>{
@@ -65,7 +65,7 @@ describe('221 free dashboard placement',()=>{
  });
  it('normalizes only the dense module and does not silently shrink its requested presentation',()=>{
   const rows:[string,ReturnType<typeof resource>][]=[['a',resource()],['b',resource()],['c',resource()]],saved=normalizeWidget({x:8,y:4,w:4,h:2,style:'poolpips',members:['a','b','c']});
-  const module=resourceModules(rows,{a:saved})[0];expect(resourceModuleMinimum(module,'poolpips')).toEqual({w:6,h:4});expect(normalizeModuleWidget(module,saved)).toMatchObject({x:6,y:2,w:6,h:4});expect(saved).toMatchObject({x:8,y:4,w:4,h:2});
+  const module=resourceModules(rows,{a:saved})[0];expect(resourceModuleMinimum(module,'poolpips')).toEqual({w:4,h:3});expect(normalizeModuleWidget(module,saved)).toMatchObject({x:8,y:3,w:4,h:3});expect(saved).toMatchObject({x:8,y:4,w:4,h:2});
  });
  it('keeps enough room for an attack heading and row without pushing any resource aside',()=>{
   const c=card();c.quickbarLayout!.attacks=normalizeWidget({x:4,y:4,w:2,h:2});const before=structuredClone(c),shown=visible(c);

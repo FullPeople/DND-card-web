@@ -25,7 +25,7 @@ export const tabOf = (e: Entry): LibraryTab => {
   return e.kind;
 };
 export const browseTab = (kind: Kind): LibraryTab => kind === 'subclass' || kind === 'feature' ? 'class' : kind;
-export const matchesLibraryTab=(entry:Entry,tab:LibraryTab)=>tabOf(entry)===tab||tab==='weaponProperty'&&entry.kind==='item'&&!!trainingCategory(entry)&&(!entry.raw.rarity||entry.raw.rarity==='none')&&!entry.raw.reqAttune;
+export const matchesLibraryTab=(entry:Entry,tab:LibraryTab)=>(tabOf(entry)===tab||entry.raw._workbenchCustom&&tab!=='custom'&&tabOf({...entry,raw:{...entry.raw,_workbenchCustom:false}})===tab)||tab==='weaponProperty'&&entry.kind==='item'&&!!trainingCategory(entry)&&(!entry.raw.rarity||entry.raw.rarity==='none')&&!entry.raw.reqAttune;
 export function speedText(raw: any): string { return typeof raw === 'number' ? `${raw}尺` : raw && typeof raw === 'object' ? Object.entries(raw).filter(([k,v])=>['walk','fly','swim','climb','burrow'].includes(k) && v).map(([k,v]:[string,any])=>`${({walk:'步行',fly:'飞行',swim:'游泳',climb:'攀爬',burrow:'掘穴'} as Record<string,string>)[k]} ${typeof v==='number'?v:v===true?'等同步速':v.number||''}尺`).join(' / ') : '—'; }
 export function abilityText(value: unknown):string {
  if(Array.isArray(value))return value.map(abilityText).join(' 或 ');

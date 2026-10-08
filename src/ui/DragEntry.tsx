@@ -45,8 +45,8 @@ export function EntryDragProvider({ character, receive, children, editing=false,
         const target=find(hit,item,intent),nearest=hit?.closest<HTMLElement>('[data-drop-zone]'),zone=nearest?.dataset.dropZone?zones.current.get(nearest.dataset.dropZone):undefined;
         clear();if(!target&&!zone&&!hit?.closest('.paper'))return;
         const state=latest.current,fail=(detail:string)=>window.dispatchEvent(new CustomEvent('workbench-error',{detail}));
-        if(state.disabledReason){fail(state.disabledReason);return;}
-        if(!state.editing&&(target?.zone.referenceOnly||zone?.referenceOnly||target?.zone.training||zone?.training||requiresEditing(item,intent))){fail(`添加「${item.name}」前，请先在角色卡右上角开启编辑模式。`);return;}
+        if(state.disabledReason&&!target?.zone.authoring){fail(state.disabledReason);return;}
+        if(!target?.zone.authoring&&!state.editing&&(target?.zone.referenceOnly||zone?.referenceOnly||target?.zone.training||zone?.training||requiresEditing(item,intent))){fail(`添加「${item.name}」前，请先在角色卡右上角开启编辑模式。`);return;}
         if(!target){fail(zone?dropRejection(state.character,item,zone,intent)||'请将条目拖到对应的填写格。':candidateReason(state.character,item)||'这里没有对应的填写格，请拖到带有栏目标题的接收位置。');return;}
         if(target.zone.onReceive)target.zone.onReceive(item);else state.receive(item,target.zone.requirement);
         return landingWithin(target.zone.element,()=>target.zone.element.querySelector<HTMLElement>(`[data-entry-id="${CSS.escape(item.id)}"],[data-overview-condition="${CSS.escape(item.id)}"]`)||target.zone.element.querySelector<HTMLElement>('.stock-empty'));

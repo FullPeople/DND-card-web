@@ -146,11 +146,11 @@ export type ResourceTemplate=typeof RESOURCE_TEMPLATES[number];
 export type ResourceTemplateValues={name:string;current:number;max:number;unlimited:boolean;count?:number;children?:{name:string;current:number;max:number;unlimited:boolean}[]};
 /** A group needs room for every actual resource pool, not only its first row. */
 export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle,contentScale=1):{w:number;h:number}{
- const min=minimumWidgetSize(style),multi=module.slots||module.rows.length>1,wide=multi&&module.rows.length>4;
- const multiHeight=!multi?1:module.rows.length>9?6:module.rows.length>6?5:module.rows.length>3?4:['poolbars','poolpips'].includes(canonicalWidgetStyle(style))?4:module.slots?2:3;
+ const multi=module.slots||module.rows.length>1,count=module.rows.length;
+ const min=multi?{w:count<=1?3:count<=3?4:count<=6?6:8,h:count<=1||count<=3&&module.slots&&['pool','poolchips'].includes(canonicalWidgetStyle(style))?2:count<=3?3:count<=6?4:count<=9?5:6}:minimumWidgetSize(style);
  const capacity=module.rows[0]?.[1].max||0,digits=Math.max(...module.rows.map(([,r])=>Math.max(String(r.current).length,String(r.max).length))),discrete=['pips','matrix','orbit','segments'].includes(canonicalWidgetStyle(style));
  const scale=Math.max(.25,Math.min(1,Number.isFinite(contentScale)?contentScale:1));
- const size={w:Math.max(min.w,multi?(digits>6?12:wide?8:6):digits>6?5:digits>4?4:discrete&&capacity>6?4:min.w),h:Math.max(min.h,multiHeight,discrete&&capacity>6&&style!=='segments'?2:min.h)};
+ const size={w:Math.max(min.w,multi?(digits>6?12:digits>4?5:min.w):digits>6?5:digits>4?4:discrete&&capacity>6?4:min.w),h:Math.max(min.h,discrete&&capacity>6&&style!=='segments'?2:min.h)};
  // Small artwork may claim genuinely smaller cells; large artwork stays bounded.
  return {w:Math.max(1,Math.min(WIDGET_COLS,Math.ceil(size.w*scale))),h:Math.max(1,Math.min(WIDGET_ROWS,Math.ceil(size.h*scale)))};
 }
@@ -168,7 +168,8 @@ export function normalizeModuleWidget(module:ResourceModule,input?:Partial<Resou
  const savedStyle=input?canonicalWidgetStyle(input.style):undefined;
  const style=savedStyle??(module.slots||module.rows.length>1?'poolpips':chooseDefaultWidgetStyle(module.rows[0][1]));
  const template=RESOURCE_TEMPLATES.find(t=>t.id===style)!;
- const widget=normalizeWidget(input??{style,w:template.w,h:module.slots?2:template.h}),min=resourceModuleMinimum(module,style,widget.contentScale);
+ const baseline=resourceModuleMinimum(module,style),grouped=module.slots||module.rows.length>1;
+ const widget=normalizeWidget(input??{style,w:grouped?baseline.w:template.w,h:grouped?baseline.h:template.h}),min=resourceModuleMinimum(module,style,widget.contentScale);
  return normalizeWidget({...widget,style,w:Math.max(widget.w,min.w),h:Math.max(widget.h,min.h)});
 }
 function moduleDefaults(modules:ResourceModule[],saved:Record<string,ResourceWidgetLayout>){
@@ -229,7 +230,8 @@ export function ensureResourceWidget(c:Character,id:string,rng:()=>number=Math.r
  if(!module||Object.hasOwn(layout.widgets||{},module.id))return;
  const style=module.slots?'poolpips':chooseDefaultWidgetStyle(c.runtime.resources[id],rng),template=RESOURCE_TEMPLATES.find(t=>t.id===style)!;
  const current=freeDashboardLayout(modules.filter(m=>m.id!==module.id),layout.widgets,layout.attacks);
- const defaults=moduleDefaults([module],{[module.id]:normalizeWidget({style,w:template.w,h:template.h})});
+ const minimum=resourceModuleMinimum(module,style);
+ const defaults=moduleDefaults([module],{[module.id]:normalizeWidget({style,w:module.slots?minimum.w:template.w,h:module.slots?minimum.h:template.h})});
  const widget=place(defaults[module.id],Object.values(current.widgets));
  layout.widgets={...migrateDashboardWidgets(layout.widgets,layout.attacks),...current.widgets,[module.id]:widget};layout.attacks=current.attacks;
 }
