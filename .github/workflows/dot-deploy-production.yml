@@ -6,7 +6,7 @@ on:
       operation:
         description: 'preflight uploads and validates; publish atomically switches both frontends'
         type: choice
-        options: [preflight, publish]
+        options: [preflight, publish, inventory, status, recover]
         default: preflight
         required: true
       source_sha:
@@ -25,6 +25,27 @@ on:
         description: 'Frontend version, for example standalone-1.0.257'
         type: string
         required: true
+      prepared_run_id:
+        description: 'Successful artifact preflight run ID; required for publish/status/recover'
+        type: string
+        default: ''
+      prepared_run_attempt:
+        description: 'Exact preflight run attempt'
+        type: string
+        default: '1'
+      prepared_manifest_sha256:
+        description: 'Sealed manifest hash from the successful preflight receipt'
+        type: string
+        default: ''
+      lookup_run_id:
+        description: 'Original publish attempt run ID for read-only status or guarded recovery'
+        type: string
+        default: ''
+      lookup_run_attempt:
+        description: 'Original publish run attempt for status/recover'
+        type: string
+        default: '1'
+
 permissions:
   contents: read
   actions: read
@@ -36,6 +57,12 @@ env:
   CI_RUN_IDS: ${{ inputs.ci_run_ids }}
   EXPECTED_RELEASE_SHA256: ${{ inputs.expected_release_sha256 }}
   RELEASE_VERSION: ${{ inputs.release_version }}
+  DEPLOY_OPERATION: ${{ inputs.operation }}
+  PREPARED_RUN_ID: ${{ inputs.prepared_run_id }}
+  PREPARED_RUN_ATTEMPT: ${{ inputs.prepared_run_id && inputs.prepared_run_attempt || '' }}
+  PREPARED_MANIFEST_SHA256: ${{ inputs.prepared_manifest_sha256 }}
+  LOOKUP_RUN_ID: ${{ inputs.lookup_run_id }}
+  LOOKUP_RUN_ATTEMPT: ${{ inputs.lookup_run_id && inputs.lookup_run_attempt || '' }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -56,18 +83,35 @@ jobs:
       - name: Verify fixed deployment contracts
         working-directory: tools/dot-deploy
         run: python3 -B -m unittest -v test_preflight test_production
+      - name: Download the exact successful preflight artifact
+        if: inputs.operation == 'publish' || inputs.operation == 'status' || inputs.operation == 'recover'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dnd-center-frontends-${{ inputs.prepared_run_id }}-${{ inputs.prepared_run_attempt }}
+          run-id: ${{ inputs.prepared_run_id }}
+          github-token: ${{ github.token }}
+          path: .deployment
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: inputs.operation == 'preflight'
         with:
           node-version: '24.9.0'
           cache: npm
       - run: npm ci
+        if: inputs.operation == 'preflight'
       - run: npm run build:cloud
+        if: inputs.operation == 'preflight'
       - name: Package only card and library with exact source archive and hashes
         id: package
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python3 -B tools/dot-deploy/build_production.py
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        run: |
+          if [ "$DEPLOY_OPERATION" = preflight ]; then
+            python3 -B tools/dot-deploy/build_production.py
+          elif [ "$DEPLOY_OPERATION" != inventory ]; then
+            python3 -B tools/dot-deploy/build_production.py --use-prepared
+          fi
+      - if: inputs.operation != 'inventory'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dnd-center-frontends-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
@@ -79,7 +123,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     environment: production-card
     permissions:
       contents: read
@@ -90,7 +134,8 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - if: inputs.operation != 'inventory'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: dnd-center-frontends-${{ github.run_id }}-${{ github.run_attempt }}
           path: .deployment
@@ -104,6 +149,7 @@ jobs:
           DEPLOY_KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS || secrets.DEPLOY_KNOWN_HOSTS }}
         run: python3 -B tools/dot-deploy/runner_production.py
       - name: Preserve sanitized deployment receipt
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dnd-center-receipt-${{ github.run_id }}-${{ github.run_attempt }}

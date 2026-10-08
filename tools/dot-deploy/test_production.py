@@ -221,11 +221,20 @@ class PublicationTests(unittest.TestCase):
         stack.enter_context(patch.object(server.c.legacy, 'get_json', side_effect=[commit, tree]))
         return publisher, data, archive
 
+    def approved(self, data, archive):
+        preflight = {**data, 'operation': 'preflight'}
+        result = server.publish(preflight, claims(int(time.time())), io.BytesIO(archive.read_bytes()))
+        data.update(run_id='457', prepared_run_id='456', prepared_run_attempt='1',
+                    prepared_manifest_sha256=result['manifestSha256'])
+        identity = claims(int(time.time())); identity['run_id'] = '457'
+        return identity
+
     def test_authenticated_upload_calls_fixed_publisher_and_preserves_other_sites_assets_and_database(self):
         with tempfile.TemporaryDirectory() as directory:
             publisher, data, archive = self.fixture(Path(directory)); inode = publisher.ROOT.stat().st_ino
             before_db = publisher.DB.read_bytes(); outside = publisher.outside(publisher.tree(publisher.ROOT))
-            result = server.publish(data, claims(int(time.time())), io.BytesIO(archive.read_bytes()))
+            identity = self.approved(data, archive)
+            result = server.publish(data, identity, io.BytesIO(archive.read_bytes()))
             self.assertEqual(result['status'], 'published'); self.assertTrue(result['onlineVersionWrites'])
             self.assertEqual((publisher.ROOT / 'card/index.html').read_text(), 'new card')
             self.assertEqual((publisher.ROOT / 'card/assets/old-abc.js').read_text(), 'old hashed asset')
@@ -247,9 +256,10 @@ class PublicationTests(unittest.TestCase):
     def test_failure_after_switch_restores_both_targets_and_keeps_home_and_database(self):
         with tempfile.TemporaryDirectory() as directory:
             publisher, data, archive = self.fixture(Path(directory)); before = publisher.tree(publisher.ROOT)
+            identity = self.approved(data, archive)
             self.verify.side_effect = RuntimeError('not ready')
             with self.assertRaisesRegex(RuntimeError, 'not ready'):
-                server.publish(data, claims(int(time.time())), io.BytesIO(archive.read_bytes()))
+                server.publish(data, identity, io.BytesIO(archive.read_bytes()))
             self.assertEqual(before, publisher.tree(publisher.ROOT)); self.assertEqual(publisher.database_check()['temporary_cards'], 1)
             record = json.loads(next(publisher.RECEIPTS.glob('*.json')).read_text())
             self.assertEqual(record['status'], 'failed-restored')
@@ -260,11 +270,78 @@ class PublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(server.c.Denied, 'online-baseline-changed'):
                 server.publish(data, claims(int(time.time())), io.BytesIO(archive.read_bytes()))
             self.assertEqual((publisher.ROOT / 'card/index.html').read_text(), 'old card')
-            with self.assertRaisesRegex(server.c.Denied, 'deployment-attempt-already-received'):
-                server.publish(data, claims(int(time.time())), io.BytesIO(archive.read_bytes()))
+            result = server.publish(data, claims(int(time.time())), io.BytesIO(archive.read_bytes()))
+            self.assertEqual(result['status'], 'attempt-incomplete')
+            data['archive_sha256'] = 'e' * 64
+            with self.assertRaises(server.c.Denied):
+                server.publish({**data, 'operation': 'status'}, claims(int(time.time())), io.BytesIO())
+    def test_duplicate_success_and_read_only_lookup_use_physical_hashes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            publisher, data, archive = self.fixture(Path(directory))
+            identity = self.approved(data, archive)
+            first = server.publish(data, identity, io.BytesIO(archive.read_bytes()))
+            before = publisher.tree(publisher.ROOT)
+            repeated = server.publish(data, identity, io.BytesIO(archive.read_bytes()))
+            self.assertEqual(repeated['status'], 'published')
+            self.assertEqual(before, publisher.tree(publisher.ROOT))
+            lookup = {**data, 'operation': 'status', 'run_id': '458', 'lookup_run_id': '457', 'lookup_run_attempt': '1'}
+            lookup_identity = {**identity, 'run_id': '458'}
+            result = server.publish(lookup, lookup_identity, io.BytesIO())
+            self.assertEqual(result['manifestSha256'], first['manifestSha256'])
+            self.assertFalse(result['persistentServerWrites'])
+            (publisher.ROOT / 'library/index.html').write_text('external release')
+            self.assertEqual(server.publish(lookup, lookup_identity, io.BytesIO())['status'], 'recovery-required')
+
+    def test_publish_requires_exact_preflight_artifact_and_manifest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            publisher, data, archive = self.fixture(Path(directory))
+            identity = self.approved(data, archive)
+            data['prepared_manifest_sha256'] = 'e' * 64
+            with self.assertRaisesRegex(server.c.Denied, 'approved-manifest-differs'):
+                server.publish(data, identity, io.BytesIO(archive.read_bytes()))
+            self.assertEqual((publisher.ROOT / 'card/index.html').read_text(), 'old card')
+
+    def test_recovery_with_fresh_run_identity_resolves_interrupted_publish(self):
+        with tempfile.TemporaryDirectory() as directory:
+            publisher, data, archive = self.fixture(Path(directory))
+            identity = self.approved(data, archive); original = publisher.m.exchange
+            class ProcessDeath(BaseException): pass
+            def interrupted(a, b): original(a, b); raise ProcessDeath()
+            with patch.object(publisher.m, 'exchange', side_effect=interrupted), self.assertRaises(ProcessDeath):
+                server.publish(data, identity, io.BytesIO(archive.read_bytes()))
+            recovery = {**data, 'operation': 'recover', 'run_id': '458', 'lookup_run_id': '457', 'lookup_run_attempt': '1'}
+            result = server.publish(recovery, {**identity, 'run_id': '458'}, io.BytesIO())
+            self.assertEqual(result['status'], 'failed-restored')
+            self.assertEqual((publisher.ROOT / 'library/index.html').read_text(), 'old library')
+            self.assertEqual((publisher.ROOT / 'card/index.html').read_text(), 'old card')
+
+    def test_cleanup_failure_does_not_hide_success(self):
+        with tempfile.TemporaryDirectory() as directory:
+            publisher, data, archive = self.fixture(Path(directory))
+            identity = self.approved(data, archive)
+            original = Path.unlink
+            def fail_upload(path, *args, **kwargs):
+                if path.name == 'incoming.tar.gz': raise OSError('cleanup failed')
+                return original(path, *args, **kwargs)
+            with patch.object(Path, 'unlink', fail_upload):
+                result = server.publish(data, identity, io.BytesIO(archive.read_bytes()))
+            self.assertEqual(result['status'], 'published'); self.assertTrue(result['cleanupPending'])
+            self.assertEqual(server.publish({**data, 'operation': 'status'}, identity, io.BytesIO())['status'], 'published')
 
 
 class RunnerAndInstallerTests(unittest.TestCase):
+    def test_ssh_timeout_reconciles_read_only_without_second_publish(self):
+        response = {'ok': True, 'result': {'status': 'published'}}
+        data = request()
+        with patch.object(runner, 'transfer', side_effect=[c.Denied('ssh-transfer-timeout'), response]) as transfer, \
+             patch.object(runner, 'fresh_token', return_value='FRESH_TOKEN'):
+            self.assertEqual(runner.reconcile(['ssh'], data, Path('archive')), response)
+            self.assertEqual([call.args[1]['operation'] for call in transfer.call_args_list], ['publish', 'status'])
+        with patch.object(runner, 'transfer', side_effect=c.Denied('publisher-lock-busy')), \
+             patch.object(runner, 'fresh_token', return_value='FRESH_TOKEN'):
+            with self.assertRaisesRegex(runner.c.Denied, 'deployment-result-unknown'):
+                runner.reconcile(['ssh'], data, Path('archive'))
+
     def test_existing_identity_is_reused_and_unrestricted_or_multiple_keys_rejected(self):
         old = 'restrict,command="' + admin.OLD_COMMAND + '" ssh-ed25519 AAAA existing\n'
         changed = admin.upgraded_key(old)
@@ -295,6 +372,17 @@ class RunnerAndInstallerTests(unittest.TestCase):
         with patch.object(entry.sys, 'stdin', fake), patch.object(entry.sys, 'argv', ['server_entry.py']), patch('sys.stdout', output):
             self.assertEqual(entry.main(), 1)
         self.assertNotIn('NEVER_ECHO_TOKEN', output.getvalue())
+
+    def test_reused_preflight_archive_is_hash_verified_without_building(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); archive = root / 'deployment.tar.gz'; metadata = archive_data(archive)
+            receipt = {'sha256': c.sha_file(archive), 'bytes': archive.stat().st_size, 'sourceCommit': 'a' * 40,
+                       'version': metadata['version'], 'targets': list(c.TARGETS)}
+            (root / 'build-receipt.json').write_text(json.dumps(receipt))
+            with patch.object(build.c, 'sha_file', side_effect=lambda path: metadata['publisherHashes'][Path(path).name] if Path(path).name in ('frontend.py', 'publish.py') else c.sha_file(path)):
+                self.assertEqual(build.use_prepared(root, root, 'a' * 40, metadata['version']), receipt)
+            archive.write_bytes(b'changed archive')
+            with self.assertRaises(build.c.Denied): build.use_prepared(root, root, 'a' * 40, metadata['version'])
 
     def test_package_includes_only_two_frontends_and_exact_tracked_source(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -368,6 +456,34 @@ class InstallationTransitionTests(unittest.TestCase):
             for path, content in before.items(): self.assertEqual(path.read_bytes(), content)
             self.assertFalse((lib / 'server_entry.py').exists()); self.assertFalse((lib / 'production').exists())
             self.assertEqual((lib / 'server_preflight.py').read_text(), 'legacy identity policy')
+    def test_first_policy_restore_failure_does_not_skip_other_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); lib, policies = self.fixture(root)
+            before = {path: path.read_bytes() for path in policies}
+            first = next(iter(policies)); original = admin.replace
+            self.isolation.side_effect = RuntimeError('force recovery')
+            def fail_first_restore(path, content, mode):
+                if path == first and content == before[first]: raise OSError('restore failed')
+                return original(path, content, mode)
+            with patch.object(admin, 'replace', side_effect=fail_first_restore):
+                with self.assertRaisesRegex(RuntimeError, 'force recovery'): admin.install('a' * 40, True)
+            for path in list(policies)[1:]: self.assertEqual(path.read_bytes(), before[path])
+            report = json.loads(next((root / 'backups').glob('*/recovery.json')).read_text())
+            self.assertEqual(report['files'][str(first)]['status'], 'failed')
+            self.assertFalse((lib / 'server_entry.py').exists())
+
+    def test_failed_upgrade_restores_existing_helpers_instead_of_deleting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); lib, policies = self.fixture(root)
+            (lib / 'production').mkdir()
+            helpers = [lib / name for name in ('server_entry.py', 'server_production.py', 'production_common.py')]
+            helpers += [lib / 'production' / name for name in ('frontend.py', 'publish.py')]
+            for path in helpers: path.write_text('previous reviewed code ' + path.name)
+            before = {path: path.read_bytes() for path in helpers}
+            self.isolation.side_effect = RuntimeError('upgrade validation failed')
+            with self.assertRaisesRegex(RuntimeError, 'upgrade validation failed'):
+                admin.install('a' * 40, True, 'b' * 40)
+            for path, content in before.items(): self.assertEqual(path.read_bytes(), content)
 
 
 if __name__ == '__main__':
