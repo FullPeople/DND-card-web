@@ -2,7 +2,7 @@ import {isPaletteColor} from '../core/palette';
 export const APPEARANCE_KEY='dnd-card/ui-palette:v1';
 export const APPEARANCE_EVENT='dnd-card-palette-changed';
 export const UI_COLORS={
- background:['页面背景','#d1d1d1'],surface:['内容区域','#f5f5f3'],heading:['标题栏','#e5e5e5'],ink:['正文文字','#343532'],muted:['次要文字','#666666'],line:['描边','#a5a5a5'],accent:['链接与强调','#50525b'],button:['按钮底色','#e5e5e5'],buttonInk:['按钮文字','#303239'],selected:['选中区域','#50525b'],selectedInk:['选中文字','#ffffff'],
+ background:['页面背景','#d1d1d1'],surface:['内容区域','#f5f5f3'],heading:['工具栏','#e5e5e5'],band:['切角标题带','#7c7c7c'],bandInk:['切角标题文字','#ffffff'],ink:['正文文字','#343532'],muted:['次要文字','#666666'],line:['描边','#a5a5a5'],accent:['链接与强调','#50525b'],button:['按钮底色','#e5e5e5'],buttonInk:['按钮文字','#303239'],selected:['选中区域','#50525b'],selectedInk:['选中文字','#ffffff'],
 } as const;
 export const WIKI_COLORS={
  background:['Wiki 背景','#fafaf8'],ink:['正文文字','#343532'],muted:['来源与次要文字','#707070'],title:['标题文字','#454545'],link:['条目链接','#50525b'],area:['区域底色','#eeeeec'],line:['区域描边','#b8b8b4'],entry:['条目底色','#f5f5f3'],entryInk:['条目文字','#343532'],selected:['选中条目','#d8d8d4'],selectedInk:['选中条目文字','#252525'],feature:['特性与引文底色','#eeeeea'],featureInk:['特性与引文文字','#343532'],tableHeading:['表头底色','#deded9'],tableHeadingInk:['表头文字','#343532'],tableCell:['表格底色','#fafaf8'],tableAlternate:['表格交替行','#eeeee9'],tableInk:['表格文字','#343532'],tableLine:['表格描边','#b2b2ad'],

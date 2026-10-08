@@ -2,11 +2,11 @@
 :root{--suite-paper:var(--ui-surface);--suite-surface:var(--ui-heading);--suite-ink:var(--ui-ink);--suite-muted:var(--ui-muted);--suite-line:var(--ui-line);--ink:var(--ui-ink);--muted:var(--ui-muted);--line:var(--ui-line);--accent:var(--ui-accent)}
 body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(--ui-background);color:var(--ui-ink)}
 .app-header,.cloud-header,.dialog,.dm-console{background:var(--ui-surface);color:var(--ui-ink);border-color:var(--ui-line)}
-.app-shell :is(.pane-toolbar,.save-status,.character-tabs,.workbench-bar,.dialog-head,.mobile-tabs),.cloud-frame>h2{background:var(--ui-heading);color:var(--ui-ink);border-color:var(--ui-line)}
+.app-shell :is(.pane-toolbar,.save-status,.character-tabs,.workbench-bar,.dialog-head,.mobile-tabs){background:var(--ui-heading);color:var(--ui-ink);border-color:var(--ui-line)}
 :is(.app-header,.pane-toolbar,.dialog,.character-tabs,.workbench-bar,.cloud-header) :is(button,.suite-website-link),.cloud-library :is(.cloud-button,.cloud-stack-id button,.cloud-id-box button){background:var(--ui-button)!important;color:var(--ui-buttonInk)!important;border-color:var(--ui-line)}
 :is(.app-header,.character-tabs,.workbench-bar,.dialog) :is(button.primary,[aria-pressed=true],[aria-selected=true]){background:var(--ui-selected)!important;color:var(--ui-selectedInk)!important}
 .cloud-library .cloud-frame{background:var(--ui-line)}.cloud-content,.cloud-sidebar{background:var(--ui-surface);color:var(--ui-ink)}.cloud-sidebar :is(p,strong),.cloud-sidebar-warning :is(h2,p){color:var(--ui-ink)}
-.cloud-library button:not(.player-viewer *, .cloud-gallery-select,.palette-drawer *, .palette-toggle){color:var(--ui-buttonInk)!important}.cloud-library button:not(.player-viewer *, .cloud-gallery-select,.palette-drawer *, .palette-toggle)::before{background:var(--ui-button)!important}
+.cloud-library button:not(.player-viewer *, .cloud-gallery-select,.cloud-gallery-open,.palette-drawer *, .palette-toggle){color:var(--ui-buttonInk)!important}.cloud-library button:not(.player-viewer *, .cloud-gallery-select,.cloud-gallery-open,.palette-drawer *, .palette-toggle)::before{background:var(--ui-button)!important}
 .cloud-sidebar nav [aria-current=page]{color:var(--ui-selectedInk)!important}.cloud-sidebar nav [aria-current=page]::before{background:var(--ui-selected)!important}
 .cloud-stack-id button,.cloud-id-box button{color:var(--ui-buttonInk,#303239)!important;background:var(--ui-button,#e5e5e5)!important}.cloud-stack-id button::before{background:var(--ui-button,#e5e5e5)!important}
 .app-shell .wiki-pane{--ink:var(--wiki-ink);--muted:var(--wiki-muted);--accent:var(--wiki-link);--line:var(--wiki-line);background:var(--wiki-background);color:var(--wiki-ink)}
@@ -56,3 +56,5 @@ body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(-
 .paper.page-2 .cell-heading,.paper.page-2 .cell-heading h3{color:var(--card-background-headingInk,var(--card-all-headingInk,#fff))}
 .paper.page-3 .cell-heading,.paper.page-3 .cell-heading h3{color:var(--card-spells-headingInk,var(--card-all-headingInk,#fff))}
 .paper.page-4 .cell-heading,.paper.page-4 .cell-heading h3{color:var(--card-inventory-headingInk,var(--card-all-headingInk,#fff))}
+
+.cloud-library :is(.cloud-frame>h2,.cloud-gallery-title){background:var(--ui-band,#7c7c7c);color:var(--ui-bandInk,#ffffff)}.cloud-gallery-title>.cloud-stack-id{color:var(--ui-bandInk,#ffffff)}
