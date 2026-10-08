@@ -68,15 +68,15 @@ body,.app-shell{background:#e6e8ee;color:var(--suite-ink)}
 :root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) :is(h1,h3,h4,.document-nav>strong,.inline-reference,.monster-ability-row>span:nth-child(n+3)){color:#c2ceeb;border-color:var(--suite-line)}
 :root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) :is(.entry-facts,.entry-inset,.detail-facts,.document-nav,.catalog-columns,.depth-0>h4,.monster-ability-row,.entry-badges>span){background:var(--suite-surface);color:var(--suite-ink);border-color:var(--suite-line)}
 :root[data-suite-night=true] .wiki-pane .library-body :is(.catalog-list,.catalog-row){background:var(--suite-paper);color:var(--suite-ink);border-color:var(--suite-line)}
-:root[data-suite-night=true] .wiki-pane :is(.virtual-row:nth-child(odd) .catalog-row,.catalog-row:nth-child(odd),.catalog-race-group){background-color:var(--suite-surface)!important}
-:root[data-suite-night=true] .wiki-pane :is(.catalog-row:hover,.catalog-row.active,.catalog-row:focus-visible){background-color:var(--suite-hover)!important;outline-color:#91a4cc;border-color:#91a4cc}
-:root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) :is(.inline-reference:hover,.inline-reference[aria-describedby],.document-nav button.active){background:var(--suite-hover)!important;color:#d3dff8;outline-color:#91a4cc}
+:root[data-suite-night=true] .wiki-pane :is(.virtual-row:nth-child(odd) .catalog-row,.catalog-row:nth-child(odd),.catalog-race-group){background-color:var(--wiki-entry)!important}
+:root[data-suite-night=true] .wiki-pane :is(.catalog-row:hover,.catalog-row.active,.catalog-row:focus-visible){background-color:var(--wiki-selected)!important;outline-color:var(--wiki-line);border-color:var(--wiki-line)}
+:root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) :is(.inline-reference:hover,.inline-reference[aria-describedby],.document-nav button.active){background:var(--wiki-selected)!important;color:var(--wiki-selectedInk);outline-color:var(--wiki-line)}
 :root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) .rules-prose :is(table,th,td){background:var(--suite-paper);color:var(--suite-ink);border-color:var(--suite-line)}
 :root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) .rules-prose :is(th,tr:nth-child(even)>td,td[rowspan]){background:var(--suite-surface)}
-:root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) .rules-prose tbody tr:hover>td{background:var(--suite-hover)!important}
+:root[data-suite-night=true] :is(.wiki-pane,.keyword-preview) .rules-prose tbody tr:hover>td{background:var(--wiki-tableAlternate)!important}
 :root[data-suite-night=true] .wiki-pane :is(.global-results,.global-results>header){background:var(--suite-surface);color:var(--suite-ink);border-color:var(--suite-line)}
-:root[data-suite-night=true] .wiki-pane .global-result{background:var(--suite-paper)!important;color:var(--suite-ink)!important;border-color:var(--suite-line)!important}
-:root[data-suite-night=true] .wiki-pane .global-result:hover{background:var(--suite-hover)!important}
+:root[data-suite-night=true] .wiki-pane .global-result{background:var(--wiki-entry)!important;color:var(--wiki-entryInk)!important;border-color:var(--wiki-line)!important}
+:root[data-suite-night=true] .wiki-pane .global-result:hover{background:var(--wiki-selected)!important}
 .paper .resource-numeric{background:#f1f1f1!important}.paper .assign-token-name:hover,.paper .ability-save.roll-row:hover,.paper .ability-skill.roll-row:hover{background:#d7d7d7!important;outline-color:#777}
 /* Keep overview resources compact. Controls float in the title's right corner. */
 .resource-title{position:relative;padding-right:31px;min-height:10px;line-height:10px}.resource-title>.resource-actions{position:absolute;right:0;top:0;display:flex;gap:1px;align-items:center;visibility:visible;opacity:0;pointer-events:none}.console-resource:hover .resource-actions,.console-resource:focus-within .resource-actions{opacity:1;pointer-events:auto}.resource-actions .resource-lock,.resource-actions .resource-configure{width:14px!important;height:11px!important;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;line-height:11px!important;font-size:10px!important;visibility:inherit!important}.resource-actions .resource-lock svg{width:10px;height:10px}.resource-title>strong{font-size:8px;line-height:10px}

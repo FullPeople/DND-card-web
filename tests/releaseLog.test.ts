@@ -16,9 +16,13 @@ describe('date-grouped changelog',()=>{
    expect(JSON.stringify(releaseHistoryFor(mode))).toBe(before);
   });
  }
+ it('adds palette and gallery interactions to the current day without moving earlier batches',()=>{
+  for(const mode of ['standalone','suite'] as const)expect(JSON.stringify(releaseLogFor(mode)[0])).toContain('保存和导入配色文件');
+  expect(JSON.stringify(releaseLogFor('standalone')[0])).toContain('点击旁边的卡只切换');
+ });
  it('keeps Suite-only changes in the Suite changelog',()=>{
-  expect(JSON.stringify(releaseLogFor('suite')[0])).toContain('新旧插件都移除了“编辑地图迷雾”右键入口');
-  expect(JSON.stringify(releaseLogFor('standalone')[0])).not.toContain('编辑地图迷雾');
+  expect(JSON.stringify(releaseLogFor('suite').find(day=>day.title==='2026-10-07'))).toContain('新旧插件都移除了“编辑地图迷雾”右键入口');
+  expect(JSON.stringify(releaseLogFor('standalone').find(day=>day.title==='2026-10-07'))).not.toContain('编辑地图迷雾');
  });
  it('shows the new standalone batch and supersedes the former cloud policy without rewriting history',()=>{
   const raw=JSON.stringify(releaseHistoryFor('standalone')),log=releaseLogFor('standalone');

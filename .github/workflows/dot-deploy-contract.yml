@@ -1,7 +1,7 @@
 name: Validate dot deploy contract
 on:
   push:
-    branches: [codex/dot-deploy-preflight-20261006, codex/dot-deploy-default-registration-20261006]
+    branches: [main, codex/dnd-center-production-deploy-20261008, codex/dot-deploy-preflight-20261006, codex/dot-deploy-default-registration-20261006]
     paths: ['tools/dot-deploy/**', '.github/workflows/dot-deploy*.yml']
   pull_request:
     paths: ['tools/dot-deploy/**', '.github/workflows/dot-deploy*.yml']
@@ -18,4 +18,6 @@ jobs:
           persist-credentials: false
       - name: Check the fixed entry point without server credentials
         working-directory: tools/dot-deploy
-        run: python3 -B -m unittest -v test_preflight
+        run: python3 -B -m unittest -v test_preflight test_production
+      - name: Exercise the existing atomic front-end publisher on real Linux directories
+        run: python3 -B deploy/cloud/test_frontend.py

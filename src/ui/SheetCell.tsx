@@ -13,6 +13,7 @@ export function SheetCell({ label, children, style, className = '', missing = fa
   dropKinds?: Kind[]; dropRequirement?: Requirement; onReceive?: (entry: Entry) => void; allowExisting?: boolean;
 }) {
   const identity=useContext(CardIdentityContext),previous=useRef({identity,flashKey});
+  const component=/ability-box/.test(className)?'abilities':/identity|total-level/.test(className)?'identity':/portrait|illustration/.test(className)?'portrait':/quickbar|resource/.test(className)?'resources':/spell/.test(className)?'spells':/inventory|coin|equipment/.test(className)?'inventory':/feature|proficiency|language|trait/.test(className)?'features':/health|hit-dice|death|armor|initiative|speed|vital/.test(className)?'vitals':undefined;
   const [flash,setFlash]=useState(0);
   useLayoutEffect(()=>{const before=previous.current;previous.current={identity,flashKey};if(before.identity!==identity)setFlash(0);else if(flashKey&&before.flashKey!==flashKey)setFlash(value=>value+1);},[identity,flashKey]);
   const ref = useRef<HTMLElement>(null);
@@ -29,7 +30,7 @@ export function SheetCell({ label, children, style, className = '', missing = fa
   }, []);
   const { width: w, height: h } = size;
   const content = <><header className={`cell-heading ${onHeadingClick ? 'heading-action' : ''}`} role={onHeadingClick ? 'button' : undefined} tabIndex={onHeadingClick ? 0 : undefined} aria-label={onHeadingClick ? headingActionLabel || label : undefined} aria-expanded={headingExpanded} aria-pressed={headingPressed} onClick={onHeadingClick ? event => { event.stopPropagation(); onHeadingClick(); } : undefined} onKeyDown={onHeadingClick ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); onHeadingClick(); } } : undefined}><h3>{label}{settingsIcon&&onHeadingClick&&<SettingsMark/>}</h3>{headingInline}{trailing}</header><div className="cell-content">{children}{outlined && onFill && <button className="cell-fill choose-button" onClick={event => { event.stopPropagation(); onFill(); }}>点击并拖拽填写</button>}</div></>;
-  return <section ref={ref} style={style} className={`sheet-cell ${className} ${missing ? 'cell-incomplete' : ''} ${outlined ? 'cell-missing' : ''}`} aria-label={label} data-requirement={requirementId} title={hint} onClick={event => {
+  return <section ref={ref} style={style} data-palette-component={component} className={`sheet-cell ${className} ${missing ? 'cell-incomplete' : ''} ${outlined ? 'cell-missing' : ''}`} aria-label={label} data-requirement={requirementId} title={hint} onClick={event => {
     if (missing && onFill && !(event.target as HTMLElement).closest('button,input,select,textarea,a,summary,label')) onFill();
   }}>
     <div className="cell-face">

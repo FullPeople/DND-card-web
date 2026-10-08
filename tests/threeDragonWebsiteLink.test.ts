@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 const app=readFileSync(new URL('../src/ui/App.tsx',import.meta.url),'utf8');
 describe('online Three Dragon link stays independent of card recovery',()=>{
  it('uses the deployed explicit new-window link without an embedded table lifecycle',()=>{
-  expect(app).toContain('href="https://obr.dnd.center/three-dragon-ante/" target="_blank" rel="noopener noreferrer"');
+  expect(app).toContain('href="https://dnd.center/3-dragon/" target="_blank" rel="noopener noreferrer"');
   expect(app).toContain("import './threeDragonLink.css'");
   expect(app).not.toMatch(/ThreeDragonFullscreen|tableOpen|setTableOpen|workbench-underlay|workbench-content/);
   expect(app).toContain("wb.enabled.threeDragonAnte!==false&&<a");

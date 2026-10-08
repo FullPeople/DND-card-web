@@ -1,3 +1,4 @@
+import type {CardComponent,CardPalette} from './palette';
 export type Edition = '2014' | '2024';
 export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule' | 'monster';
 export const KIND_LABELS: Record<Kind, string> = { class: '职业', subclass: '子职', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', feature: '特性', condition: '状态', rule: '规则', monster: '怪物' };
@@ -46,7 +47,8 @@ export interface Character {
   overviewSpellsHidden?: boolean;
   portrait?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
   illustration?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
-  palette?: Partial<Record<'paper'|'surface'|'frame'|'heading'|'ink'|'badge',string>>;
+  palette?: CardPalette;
+  componentPalette?: Partial<Record<CardComponent,CardPalette>>;
   spellSettings?: SpellSettings;
   inventory?: {sourceEquipment?:Record<string,SourceEquipmentReceipt>;capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
   backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;

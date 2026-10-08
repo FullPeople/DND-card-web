@@ -1,0 +1,263 @@
+{
+  "source": "图标.psd",
+  "sourceSha256": "f49bd2de1d275bbc325f6d80a52beb120bc089c057a7378c67da69e666dbca2a",
+  "canvas": [
+    1000,
+    1000
+  ],
+  "format": "transparent RGBA PNG",
+  "outputSize": 512,
+  "minimumPadding": 52,
+  "exported": [
+    {
+      "layer": "野蛮人",
+      "badge": "barbarian",
+      "layerBounds": [
+        100,
+        116,
+        901,
+        908
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        52,
+        54,
+        460,
+        457
+      ],
+      "bytes": 18756,
+      "sha256": "026577c007ab63d282811854119733f692772fefdbc160cba2936f77361a6167"
+    },
+    {
+      "layer": "吟游诗人",
+      "badge": "bard",
+      "layerBounds": [
+        90,
+        149,
+        910,
+        880
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        52,
+        74,
+        460,
+        438
+      ],
+      "bytes": 11188,
+      "sha256": "0722e1bb40c90b24d1edd702e605c9562125c536cf2e8dd6bfdc7539449af35b"
+    },
+    {
+      "layer": "牧师",
+      "badge": "cleric",
+      "layerBounds": [
+        93,
+        93,
+        908,
+        908
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        52,
+        52,
+        460,
+        460
+      ],
+      "bytes": 14229,
+      "sha256": "422b7fec9dd9351d5097f28f0cb8ebac4a5649d01d3cd129d5142ed6a11e2e81"
+    },
+    {
+      "layer": "德鲁伊",
+      "badge": "druid",
+      "layerBounds": [
+        147,
+        36,
+        893,
+        950
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        89,
+        52,
+        422,
+        460
+      ],
+      "bytes": 18856,
+      "sha256": "0b54867574f9d4ad032b9ea2366c31c851c68efa97ab436dbad3ff72430496d1"
+    },
+    {
+      "layer": "战士",
+      "badge": "fighter",
+      "layerBounds": [
+        42,
+        193,
+        960,
+        898
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        52,
+        99,
+        460,
+        412
+      ],
+      "bytes": 20062,
+      "sha256": "f6bd9b8d03854d3d39b49fd652eed6405e97c659bd8f3809e909a11f5ec98a88"
+    },
+    {
+      "layer": "游侠",
+      "badge": "ranger",
+      "layerBounds": [
+        109,
+        115,
+        888,
+        963
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        68,
+        52,
+        443,
+        460
+      ],
+      "bytes": 19941,
+      "sha256": "9db6a9d1cb59087e7cbf5852cd6a623c94c7d4939d600821dabf3fe8db4bc142"
+    },
+    {
+      "layer": "游荡者",
+      "badge": "rogue",
+      "layerBounds": [
+        220,
+        61,
+        781,
+        954
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        128,
+        52,
+        384,
+        459
+      ],
+      "bytes": 18032,
+      "sha256": "5106a879da58a607e7fc42ea7a21582a22c595ecaa99e423b9e3a551e426cd9e"
+    },
+    {
+      "layer": "圣骑士",
+      "badge": "paladin",
+      "layerBounds": [
+        101,
+        89,
+        900,
+        975
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        72,
+        52,
+        440,
+        460
+      ],
+      "bytes": 14708,
+      "sha256": "5962efdd13789da1a8f415660a400bbbb395355b28b9989892eadbbb360cfdc0"
+    },
+    {
+      "layer": "术士",
+      "badge": "sorcerer",
+      "layerBounds": [
+        88,
+        24,
+        907,
+        933
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        72,
+        52,
+        440,
+        460
+      ],
+      "bytes": 21128,
+      "sha256": "c3c012d2e74a4ae043c6173542505be04ddf0e8f4b183951fc168029d67db3f3"
+    },
+    {
+      "layer": "魔契师",
+      "badge": "warlock",
+      "layerBounds": [
+        90,
+        191,
+        911,
+        810
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        52,
+        102,
+        460,
+        410
+      ],
+      "bytes": 18407,
+      "sha256": "ca1de3e4971fb29bb42f2ed997a33671ce313a9c13fef3cadea96ebf77bc4bb4"
+    },
+    {
+      "layer": "奇械师",
+      "badge": "artificer",
+      "layerBounds": [
+        149,
+        146,
+        852,
+        855
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "alphaBounds": [
+        53,
+        52,
+        458,
+        460
+      ],
+      "bytes": 18970,
+      "sha256": "572fc724af03d953b31669730ab44c46498e1b44a0350a2a27e8dbca78f74e50"
+    }
+  ],
+  "retained": [
+    "monk",
+    "wizard",
+    "mystic",
+    "expert-sidekick",
+    "spellcaster-sidekick",
+    "warrior-sidekick"
+  ]
+}

@@ -1,11 +1,11 @@
 name: DND Center cloud migration
 on:
   push:
-    branches: [codex/dnd-center-migration-20261007, codex/dnd-center-temporary-library-20261007, codex/dnd-center-latest-ui-20261008, codex/cloud-save-status-20261008]
+    branches: [codex/unified-ui-20261008, codex/gallery-performance-256-20261008, codex/dnd-center-migration-20261007, codex/dnd-center-temporary-library-20261007, codex/dnd-center-latest-ui-20261008, codex/cloud-save-status-20261008]
   pull_request:
     # Shared modules the cloud flows exercise (staging, persistence, public viewing,
     # packaging) must also re-run these checks, not only the cloud-specific paths.
-    paths: ['server/cloud/**', 'src/cloud/**', 'deploy/cloud/**', 'tests/cloud.test.ts', 'tests/e2e/cloud252.spec.ts', '*cloud*', 'library/**', 'public/cloud-home.html', 'src/platform/storage.ts', 'src/platform/requestTimeout.ts', 'src/platform/buildMode.ts', 'src/platform/announcement.ts', 'src/platform/releaseNotes.ts', 'src/ui/App.tsx', 'src/ui/PlayerViewer.tsx', 'src/ui/Announcement.tsx', 'src/core/validation.ts', 'tools/buildCloud.mjs', 'tools/standalonePlugin.ts', 'tools/offlineShell.ts', 'vite.library.config.ts', 'vite.config.ts', 'package.json', 'package-lock.json']
+    paths: ['src/assets/class-badges/**', 'src/ui/classBadges.ts', 'src/ui/PaletteDrawer.tsx', 'src/ui/PaletteColorField.tsx', 'src/ui/paletteDrawer.css', 'src/ui/paletteHighlight.ts', 'src/platform/paletteSettings.ts', 'tests/e2e/palette258.spec.ts', 'tests/e2e/gallery258.spec.ts', 'tests/paletteSettings.test.ts', 'src/ui/appearance.css', 'src/platform/appearance.ts', 'tests/e2e/palette257.spec.ts', 'server/cloud/**', 'src/cloud/**', 'deploy/cloud/**', 'tests/cloud.test.ts', 'tests/e2e/cloud252.spec.ts', 'tests/e2e/gallery256.spec.ts', 'src/platform/afterPaint.ts', 'tools/startupChunks.ts', '*cloud*', 'library/**', 'public/cloud-home.html', 'src/platform/storage.ts', 'src/platform/requestTimeout.ts', 'src/platform/buildMode.ts', 'src/platform/announcement.ts', 'src/platform/releaseNotes.ts', 'src/ui/App.tsx', 'src/ui/PlayerViewer.tsx', 'src/ui/Announcement.tsx', 'src/core/validation.ts', 'tools/buildCloud.mjs', 'tools/standalonePlugin.ts', 'tools/offlineShell.ts', 'vite.library.config.ts', 'vite.config.ts', 'package.json', 'package-lock.json']
   workflow_dispatch:
 permissions:
   contents: read
