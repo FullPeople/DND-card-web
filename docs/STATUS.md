@@ -1,12 +1,14 @@
-# 2026-10-08 · 调色盘与卡库 258 候选
+# 2026-10-08 · 长期自主更新授权，取消审批受集成权限阻塞
 
-按最新决定完善配色导入导出、圆形长按选色与悬停高亮，卡库加入滚轮、循环拖拽与等比全屏动画。继承全部完成后合并部署的授权；枭熊不接云端。实际线上仍为 257，最终验证与发布以回执为准。原混合目录保留。
+用户最新明确授权云端部署、持续 AI 自行维护和 dot 推进在既定范围内自行更新，无需逐次人工审批；用户报告问题后允许恢复已知可用版本。授权已写入 AGENTS.md、AI_HANDOFF.md 及 [部署说明](DND-CENTER-PRODUCTION-DEPLOY.md)。身份、精确提交三组 CI、备份和玩家数据保护保留；AI 可通过恢复已知正常源码为新的 main 提交并重新验证发布进行回退。
 
-# 2026-10-08 · 正式部署工作流与受限发布入口候选
+正式工作流已由 PR26 合入 main 84b54e7 并注册 active，28 项 PR 检查通过。云端实际触发正式运行 37785977083 被接受，随后旧提交 CI 被精确 SHA 门禁拒绝，deploy job 跳过，未连接服务器。此次按授权取消 production-card required reviewers 的 PUT 返回 403 Resource not accessible by integration，缺少 Environments 写权限；回读确认 FullPeople 一名审批者、仅 main 分支及管理员不可绕过未变。已提供管理员一次性取消规则的命令和界面操作，不声称取消成功。服务器受限入口仍需管理员按冻结实现提交 f8046e7 安装，未通过该流程发布；未新增持续 AI 调度任务。
+
+# 2026-10-08 · 正式部署工作流与受限发布入口实现
 
 本次用户授权实现正式 GitHub Actions 部署接入，沿用 production-card 的现有 DEPLOY_SSH_KEY、DEPLOY_KNOWN_HOSTS、不可变 OIDC 身份和人工审批。独立分支新增指定 main SHA 的完整 Web/Cloud/部署合约 CI 门禁、双目录构建包、GitHub Artifact/SSH 流上传与服务器固定分派入口。目标固定 /var/www/dnd-center/card 和 library；安装器复用原账号与公钥并提供失败恢复。部署账号不执行上传的发布器、任意 shell 或 rollback。实现、管理员精确提交安装命令及配置清单见 [正式部署接入](DND-CENTER-PRODUCTION-DEPLOY.md)。
 
-本地 36 项身份/归档/传输/真实 Linux 发布与安装恢复检查、既有 21 项发布器检查通过；完整云端构建、actionlint 与真实双目录封包通过，完整源码 ZIP 与 GitHub 全部 Git blobs 匹配。当前云端认证实际 dispatch 合约运行 37780818927，精确实现 SHA f8046e7、全部步骤 success，证明 Actions 写/读权限可用；含工作流文件的 push 也已成功。正式工作流仍需合并 main 注册及管理员安装、GitHub 人工审批；本接入尚未在服务器安装或执行发布。完整证据与限制见 [交付回执](DND-CENTER-PRODUCTION-DEPLOY-RECEIPT.md)，线上状态以另一会话的 257 最终回执为准。
+本地 36 项身份/归档/传输/真实 Linux 发布与安装恢复检查、既有 21 项发布器检查通过；完整云端构建、actionlint 与真实双目录封包通过，完整源码 ZIP 与 GitHub 全部 Git blobs 匹配。当前云端认证实际 dispatch 合约运行 37780818927，精确实现 SHA f8046e7、全部步骤 success，证明 Actions 写/读权限可用；含工作流文件的 push 也已成功。正式工作流后续已合并并注册，人工审批授权由上方最新决定覆盖；本接入尚未在服务器安装或执行发布。完整证据与限制见 [交付回执](DND-CENTER-PRODUCTION-DEPLOY-RECEIPT.md)，线上状态以另一会话的 257 最终回执为准。
 
 # 2026-10-08 · 257 统一界面与职业图标已上线
 

@@ -1,15 +1,40 @@
 # dnd.center 正式部署接入
 
-新增工作流 `Deploy dnd.center frontends`：`.github/workflows/dot-deploy-production.yml`。只允许手动从 Web `main` 触发，构建输入的完整提交 SHA。输入 SHA、工作流 SHA、当前 main 头和三组完整 CI 的 SHA 必须完全相同。新文件合并到默认分支后，GitHub 才会注册首次 `workflow_dispatch`。
+正式工作流 [Deploy dnd.center frontends](https://github.com/FullPeople/DND-card-web/actions/workflows/dot-deploy-production.yml) 已由 [PR26](https://github.com/FullPeople/DND-card-web/pull/26) 合入 main 并注册。AI 可用 `workflow_dispatch` 从 Web `main` 自行触发，构建输入的完整提交 SHA。输入 SHA、工作流 SHA、当前 main 头和三组完整 CI 的 SHA 必须完全相同。
 
 发布目标固定为 `/var/www/dnd-center/card` 和 `/var/www/dnd-center/library`，两个入口成对发布。网站首页、三龙牌、旧 `/var/www/obr-plugins/card`、后台、SQLite、Nginx 和其他站点不在上传范围。
 
-## 操作与审批
+## 自主发布授权与当前接入状态
 
 - `preflight`：构建并上传候选，服务器验证并保留 root 管理的恢复封包；不会切换线上目录。**会写入服务器的候选封包目录**，与旧工作流的纯只读预检不同。
 - `publish`：经过同样校验后备份两个目录，调用预先安装的固定发布器进行原子切换和就绪检查；失败时恢复本次已切换的目录。
 
-两种操作的服务器 job 均使用现有 `production-card` Environment，由 FullPeople 在 GitHub 网页人工批准。实现没有批准审批、移除审批规则或绕过 Environment 的接口。构建 job 不持有部署密钥或 OIDC 写权限。
+2026-10-08 用户明确授权云端部署、持续 AI 维护和 dot 推进自行更新，无需逐次人工批准；报告问题后可恢复已知可用版本。两种操作仍使用现有 `production-card` Environment，以保留密钥和 OIDC 身份。移除该环境的 required reviewers 后，AI 可自行发起预检、读取回执并发起发布，无需网页点批准。构建 job 不持有部署密钥或 OIDC 写权限。
+
+**当前阻塞**：云端实际取消审批的 PUT 请求返回 `403 Resource not accessible by integration`，缺少仓库 `Environments: write` 权限。随后 GET 复核仍有一名 FullPeople 审批者，main 分支限制和管理员不可绕过均保留。此记录不代表审批已经取消。触发 Actions 的权限已实际验证；不需要新部署密钥或 PAT 才能运行工作流。
+
+管理员用已有仓库管理权限，在 [production-card 设置](https://github.com/FullPeople/DND-card-web/settings/environments) 中取消 **Required reviewers** 并保存，保留 main 部署分支及现有两项凭据。也可在具有仓库 `Environments: write` 权限的管理员 `gh` 会话中执行以下一次性命令（现有环境配置为零等待时间、只允许自定义 main 分支）：
+
+```sh
+gh api --method PUT repos/FullPeople/DND-card-web/environments/production-card --input - <<'JSON'
+{
+  "wait_timer": 0,
+  "prevent_self_review": false,
+  "reviewers": [],
+  "can_admins_bypass": false,
+  "deployment_branch_policy": {
+    "protected_branches": false,
+    "custom_branch_policies": true
+  }
+}
+JSON
+gh api repos/FullPeople/DND-card-web/environments/production-card \
+  --jq '{name,protection_rules,deployment_branch_policy,can_admins_bypass}'
+gh api repos/FullPeople/DND-card-web/environments/production-card/deployment-branch-policies \
+  --jq '[.branch_policies[] | {name,type}]'
+```
+
+回读结果必须没有 `required_reviewers`，且部署分支仍只有 `main`。取消审批仅修改该规则，不删除或重建 Environment。服务器安装是另一项一次性管理员工作，步骤见下方。若希望由云端完成环境设置，还需给其 GitHub 集成增加该仓库的 Environments 写权限；用户授权本身不会改变集成权限。
 
 ## 现有配置与新增配置清单
 
@@ -19,7 +44,7 @@
 | `DEPLOY_KNOWN_HOSTS` | 优先读取现有 Environment Variable；也兼容同名 Environment Secret。内容为已核对的单行 `obr.dnd.center ssh-ed25519 ...` |
 | SSH host / port / user | 固定 `obr.dnd.center:22` / `obr-deploy`；传输仍连接原服务器，发布目录使用新站点路径 |
 | SSH host key 指纹 | 继续固定 `SHA256:bS1JRj3+1zJntm+ZOKtjlRhK7MjAAOEdKOdnKq+2yco` |
-| Environment 规则 | 保留只允许 main、FullPeople 人工审批、管理员不可跳过；不新增免审批环境 |
+| Environment 规则 | 只允许 main，保留管理员不可绕过；按最新用户授权取消 required reviewers。当前云端修改返回 403，管理员尚需完成一次性设置 |
 | 云端触发认证 | 同一仓库的 Actions 写权限用于 `workflow_dispatch`；读取状态需要 Actions 读权限。提交工作流文件需要 Contents 写权限及 Workflows 写权限 |
 | 服务器固定入口 | 安装 `server_entry.py`、`server_production.py`、`production_common.py`；保留原 `server_preflight.py` |
 | 服务器固定发布器 | 安装 root 管理的 `production/frontend.py` 和 `production/publish.py`。候选只能上传静态数据，不能替换或执行发布器 |
@@ -29,10 +54,10 @@
 
 ## 管理员安装
 
-先审查 PR 和安装器，然后在服务器管理员终端执行。`INSTALL_SHA` 使用最终交付的完整安装提交 SHA，不能填 main 或分支名。此提交可以在 PR 分支上；正式工作流仍必须合并到 main 才能运行。
+在服务器管理员 root 终端执行。`INSTALL_SHA` 使用已验证的冻结实现完整提交，不能填 main 或分支名；后续文档及授权变更没有修改该安装器或发布器。
 
 ```sh
-INSTALL_SHA='<交付的完整安装提交 SHA>'
+INSTALL_SHA=f8046e7b0244a1b21ae15b4d2d5ae710c6144e6d
 INSTALL_DIR=$(mktemp -d /root/dnd-deploy-install.XXXXXX)
 git -C "$INSTALL_DIR" init
 git -C "$INSTALL_DIR" fetch --depth=1 https://github.com/FullPeople/DND-card-web.git "$INSTALL_SHA"
@@ -78,7 +103,13 @@ gh workflow run dot-deploy-production.yml --repo FullPeople/DND-card-web --ref m
   -f expected_release_sha256="$BASELINE_SHA" -f release_version="$RELEASE_VERSION"
 ```
 
-在 GitHub 网页人工批准 `production-card`，检查构建产物和服务器回执。预检通过后，以相同源码和仍有效的线上基线另行触发 `operation=publish`，再次经过人工审批。每次运行或重跑使用自己的 run ID/attempt，已有接收目录拒绝重复请求；不覆盖失败回执或复用旧备份。
+确认 required reviewers 已移除、服务器入口已安装后，由 AI 自行检查构建产物和服务器回执。预检通过后，以相同源码和仍有效的线上基线另行触发 `operation=publish`，再验证真实公网结果并记录回执。AI 发起 API 请求不需要用户逐次确认。每次运行或重跑使用自己的 run ID/attempt，已有接收目录拒绝重复请求；不覆盖失败回执或复用旧备份。
+
+## 用户报告问题后的自主恢复
+
+发布过程中就绪检查失败时，固定发布器自动恢复本次切换的目录。上线后若用户报告问题，AI 已获授权将确认可用的应用源码恢复到新的 main 提交，取得该新提交的三组完整成功 CI，再刷新线上基线并通过同一 preflight/publish 流程恢复。完整 SHA 必须仍是当前 main；不能直接给工作流传入旧 SHA 复用旧 CI，也不能覆盖玩家数据库。若恢复涉及已安装的发布器变更，须先核对固定发布器版本；异常配置或未知恢复点应明确报告，不放宽校验。下方现有 root 快速回滚命令继续保留，部署账号本身没有任意 shell 或服务器 rollback 权限。
+
+持续自主维护还需要实际运行中的 AI 任务或已配置的调度器来发起工作；本次没有新增定时 AI 任务。工作流就绪及长期授权不代表 AI 会在会话结束后持续运行。
 
 ## 上传、验证、发布与恢复边界
 
@@ -104,6 +135,6 @@ python3 /root/codex-release-packages/dnd-center-actions-<run-id>-<attempt>/front
 
 实际认证、构建、封包与 GitHub 运行证据见 [交付回执](DND-CENTER-PRODUCTION-DEPLOY-RECEIPT.md)，其中给出管理员应使用的冻结实现提交。
 
-本地及 GitHub 合约 CI 分别记录验证结果。合约测试包含错误 OIDC 身份/提交/工作流/审批环境、完整 CI/跳过项、恶意归档、源码 ZIP 内容、截断上传、旧预检兼容、真实 Linux 双目录发布/失败恢复/管理员回滚、数据库及第三方首页保留、旧 assets 保留、安装失败恢复原 SSH/sudo/公钥。
+本地及 GitHub 合约 CI 分别记录验证结果。合约测试包含错误 OIDC 身份/提交/工作流/部署环境、完整 CI/跳过项、恶意归档、源码 ZIP 内容、截断上传、旧预检兼容、真实 Linux 双目录发布/失败恢复/管理员回滚、数据库及第三方首页保留、旧 assets 保留、安装失败恢复原 SSH/sudo/公钥。
 
-管理员实际安装、生产 Environment 人工审批和真实服务器发布需要对应现场回执；代码、合约通过或 workflow_dispatch 返回成功均不等于实际部署完成。新工作流未注册时，可先用同一认证向现有无凭据合约工作流实际 dispatch，独立验证 Actions 写权限。
+管理员实际安装、取消 Environment 审批和真实服务器发布需要各自的现场回执；代码、合约通过或 workflow_dispatch 返回成功均不等于实际部署完成。正式工作流实际触发 [37785977083](https://github.com/FullPeople/DND-card-web/actions/runs/37785977083) 已成功提交请求，并按预期拒绝旧提交 CI，deploy job 跳过；未读取部署密钥或连接服务器。
