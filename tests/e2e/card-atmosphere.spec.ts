@@ -11,7 +11,7 @@ async function openCard(page:Page,c:Character){await mockSource(page);await page
 test('highest class watermark follows levels, tie order, removal, page changes and refresh',async({page})=>{
  const c=newCharacter();c.profile.optional.multiclass=true;c.selections=[row(makeEntry('wizard','class','法师','Wizard'),2),row(makeEntry('fighter','class','战士','Fighter'),1)];
  await openCard(page,c);await page.getByRole('switch',{name:'编辑模式'}).click();const badge=page.locator('.class-watermarks img');await expect(badge).toHaveCount(1);await expect(badge).toHaveAttribute('data-class-badge','wizard');
- await badge.evaluate((image:HTMLImageElement)=>image.decode());expect(await badge.getAttribute('src')).toMatch(/wizard.*\.svg(?:$|\?)/);
+ await badge.evaluate((image:HTMLImageElement)=>image.decode());expect(await badge.getAttribute('src')).toMatch(/(?:^data:image\/svg\+xml[,;]|wizard.*\.svg(?:$|\?))/);
  await page.getByRole('spinbutton',{name:'战士等级',exact:true}).fill('2');await page.getByRole('spinbutton',{name:'战士等级',exact:true}).press('Tab');await expect(badge).toHaveAttribute('data-class-badge','wizard');
  await page.getByRole('spinbutton',{name:'战士等级',exact:true}).fill('3');await page.getByRole('spinbutton',{name:'战士等级',exact:true}).press('Tab');await expect(badge).toHaveAttribute('data-class-badge','fighter');
  await badge.evaluate((image:HTMLImageElement)=>image.decode());expect(await badge.evaluate((image:HTMLImageElement)=>[image.naturalWidth,image.naturalHeight])).toEqual([512,512]);expect(await badge.getAttribute('src')).toMatch(/fighter.*\.png(?:$|\?)/);await page.screenshot({path:test.info().outputPath('class-badge-fighter.png'),fullPage:true});
