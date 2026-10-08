@@ -58,3 +58,24 @@ body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(-
 .paper.page-4 .cell-heading,.paper.page-4 .cell-heading h3{color:var(--card-inventory-headingInk,var(--card-all-headingInk,#fff))}
 
 .cloud-library :is(.cloud-frame>h2,.cloud-gallery-title){background:var(--ui-band,#7c7c7c);color:var(--ui-bandInk,#ffffff)}.cloud-gallery-title>.cloud-stack-id{color:var(--ui-bandInk,#ffffff)}
+
+/* Theme authority for actual catalog/document nodes, including legacy night rules. */
+.app-header,.cloud-header{background:var(--ui-heading);color:var(--ui-ink)}
+.app-header .brand,.app-header .brand strong,.cloud-header .cloud-brand{color:var(--ui-ink)!important}
+:root .app-shell .wiki-pane .library-body :is(.catalog-list,.catalog-row,.virtual-row:nth-child(odd) .catalog-row,.catalog-row:nth-child(odd),.catalog-race-group){background-color:var(--wiki-entry)!important;color:var(--wiki-entryInk)!important;border-color:var(--wiki-line)}
+:root .app-shell .wiki-pane .library-body .catalog-list .catalog-row:is(.active,.selected,[aria-selected=true],:hover,:focus-visible){background-color:var(--wiki-selected)!important;color:var(--wiki-selectedInk)!important;outline-color:var(--wiki-line);border-color:var(--wiki-line)}
+:root .app-shell .wiki-pane .catalog-row :is(.entry-name,.catalog-value){color:var(--wiki-entryInk)!important}
+:root .app-shell .wiki-pane .catalog-row:is(.active,.selected,[aria-selected=true],:hover,:focus-visible) :is(.entry-name,.catalog-value){color:var(--wiki-selectedInk)!important}
+:root .app-shell .wiki-pane :is(.catalog-columns,.entry-facts,.detail-facts,.document-nav,.monster-ability-row,.entry-badges>span){background:var(--wiki-area)!important;color:var(--wiki-ink)!important;border-color:var(--wiki-line)}
+:root .app-shell .wiki-pane :is(.catalog-columns,.category-tabs,.document-nav) button{background:transparent;color:var(--wiki-ink);border-color:var(--wiki-line)}
+:root .app-shell .wiki-pane :is(.category-tabs button.active,.document-nav button.active){background:var(--wiki-selected)!important;color:var(--wiki-selectedInk)!important;border-color:var(--wiki-line)}
+:root :is(.wiki-pane,.keyword-preview) :is(.rules-prose,.document-prose,.monster-document,.entry-facts dd,.monster-footnotes,.table-caption){color:var(--wiki-ink)!important}
+:root :is(.wiki-pane,.keyword-preview) :is(h1,h2,h3,h4,.document-nav>strong){color:var(--wiki-title)!important;border-color:var(--wiki-line)}
+:root :is(.wiki-pane,.keyword-preview) :is(small,.eyebrow,.wiki-source,.catalog-value small,.entry-facts dt,.nav-level){color:var(--wiki-muted)!important}
+:root :is(.wiki-pane,.keyword-preview) :is(.inline-reference,.reference-link,.rule-link,.text-link,a){color:var(--wiki-link)!important;border-color:var(--wiki-line)}
+:root .app-shell .wiki-pane .rules-prose .inline-reference:is(:hover,[aria-describedby]){background:var(--wiki-selected)!important;color:var(--wiki-selectedInk)!important;outline-color:var(--wiki-line)}
+:root :is(.wiki-pane,.keyword-preview) :is(.entry-inset,.entry-quote,.feature-subentry,.resolved-feature){background:var(--wiki-feature)!important;color:var(--wiki-featureInk)!important;border-color:var(--wiki-line)}
+:root :is(.wiki-pane,.keyword-preview) .rules-prose :is(table,td){background:var(--wiki-tableCell)!important;color:var(--wiki-tableInk)!important;border-color:var(--wiki-tableLine)}
+:root :is(.wiki-pane,.keyword-preview) .rules-prose th{background:var(--wiki-tableHeading)!important;color:var(--wiki-tableHeadingInk)!important;border-color:var(--wiki-tableLine)}
+:root :is(.wiki-pane,.keyword-preview) .rules-prose tbody tr:nth-child(even)>td{background:var(--wiki-tableAlternate)!important}
+:root :is(.wiki-pane,.keyword-preview) .rules-prose tbody tr:hover>td{background:var(--wiki-tableAlternate)!important}
