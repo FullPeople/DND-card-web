@@ -1,17 +1,17 @@
 import type { Entry } from '../core/model';
-import badge0 from '../assets/class-badges/barbarian.svg';
-import badge1 from '../assets/class-badges/bard.svg';
-import badge2 from '../assets/class-badges/cleric.svg';
-import badge3 from '../assets/class-badges/druid.svg';
-import badge4 from '../assets/class-badges/fighter.svg';
+import badge0 from '../assets/class-badges/barbarian.png';
+import badge1 from '../assets/class-badges/bard.png';
+import badge2 from '../assets/class-badges/cleric.png';
+import badge3 from '../assets/class-badges/druid.png';
+import badge4 from '../assets/class-badges/fighter.png';
 import badge5 from '../assets/class-badges/monk.svg';
-import badge6 from '../assets/class-badges/ranger.svg';
-import badge7 from '../assets/class-badges/rogue.svg';
-import badge8 from '../assets/class-badges/paladin.svg';
-import badge9 from '../assets/class-badges/sorcerer.svg';
-import badge10 from '../assets/class-badges/warlock.svg';
+import badge6 from '../assets/class-badges/ranger.png';
+import badge7 from '../assets/class-badges/rogue.png';
+import badge8 from '../assets/class-badges/paladin.png';
+import badge9 from '../assets/class-badges/sorcerer.png';
+import badge10 from '../assets/class-badges/warlock.png';
 import badge11 from '../assets/class-badges/wizard.svg';
-import badge12 from '../assets/class-badges/artificer.svg';
+import badge12 from '../assets/class-badges/artificer.png';
 import badge13 from '../assets/class-badges/mystic.svg';
 import badge14 from '../assets/class-badges/expert-sidekick.svg';
 import badge15 from '../assets/class-badges/spellcaster-sidekick.svg';
@@ -26,7 +26,7 @@ const badges = [
   { id: 'monk', names: ['武僧', 'monk'], url: badge5 },
   { id: 'ranger', names: ['游侠', 'ranger'], url: badge6 },
   { id: 'rogue', names: ['游荡者', 'rogue'], url: badge7 },
-  { id: 'paladin', names: ['圣武士', 'paladin'], url: badge8 },
+  { id: 'paladin', names: ['圣武士', '圣骑士', 'paladin'], url: badge8 },
   { id: 'sorcerer', names: ['术士', 'sorcerer'], url: badge9 },
   { id: 'warlock', names: ['魔契师', 'warlock'], url: badge10 },
   { id: 'wizard', names: ['法师', 'wizard'], url: badge11 },
