@@ -9,6 +9,7 @@ import { requirementMismatch } from './engine';
 import { uid, type Character, type Entry, type Selection } from './model';
 import {inventoryState} from './characterDetails';
 import {classMatches,featureOwner} from './featureOwnership';
+import {retainedClassFeatureGrant} from './automation/classChoiceSourceGrant';
 
 export function belongsToClass(child: Selection, parent: Selection) {
   return child.entry.kind === 'subclass' && classMatches(child.entry,parent.entry) && (!child.parentId || child.parentId === parent.id);
@@ -120,6 +121,10 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
     const expected = new Set(grants.map(g => g.key));
     for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !s.grantKey.startsWith('source-spell:') && !s.grantKey.startsWith('choice:') && (!s.grantKey.startsWith('equipment:')||!!review?.equipmentPreview) && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
     for (const grant of grants) {
+      if(!grant.entry&&grant.key.startsWith('ref:')){
+        const retained=retainedClassFeatureGrant(c,owner,grant.key.slice(4));
+        if(retained)grant.entry=retained.entry;
+      }
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);
       if(attached){if(review?.refresh&&JSON.stringify(attached.entry)!==JSON.stringify(grant.entry)||attached.entry.raw._equipmentRef&&!grant.entry.raw._equipmentRef){attached.entry=structuredClone(grant.entry);changed=true;}continue;}

@@ -50,6 +50,43 @@ it.skipIf(!directory).each(['paladin','ranger'])('restores the exact real %s gra
  const down=edit(upgraded,old.entries,c=>{c.selections.find(s=>s.id==='class-owner')!.level=1;});expect(down.selections.some(s=>s.id===old.ids.feat)).toBe(false);expect(down.runtime.resources[old.ids.resource]).toBeUndefined();expect(down.quickbar).toEqual(old.c.quickbar);
  const restored=edit(validateCharacter(JSON.parse(JSON.stringify(down))),old.entries,c=>{c.selections.find(s=>s.id==='class-owner')!.level=2;});preserved(old,restored);
 });
+it.skipIf(!directory).each(['paladin','ranger'])('restores the exact real %s Defense after level 2→1, native import and offline level 2 recovery',name=>{
+ const old=load(name),upgraded=edit(old.c,old.entries),down=edit(upgraded,old.entries,c=>{c.selections.find(s=>s.id==='class-owner')!.level=1;});
+ expect(down.selections.some(s=>s.id===old.ids.feature||s.id===old.ids.feat)).toBe(false);expect(down.classChoiceArchive![old.ids.feat].parent!.id).toBe(old.ids.feature);
+ const imported=validateCharacter(JSON.parse(JSON.stringify(down))),before=JSON.stringify(imported);
+ const restored=edit(imported,[],c=>{c.selections.find(s=>s.id==='class-owner')!.level=2;});expect(JSON.stringify(imported)).toBe(before);preserved(old,restored);
+ expect(sheetChoices(restored,[]).find(q=>q.sourceProgression==='feat'&&q.selected.includes(old.ids.featEntry))!.complete).toBe(true);
+ const repeated=edit(validateCharacter(JSON.parse(JSON.stringify(restored))),[]);preserved(old,repeated);expect(repeated).toEqual(restored);
+});
+it.skipIf(!directory).each(['paladin','ranger'])('keeps the downgraded imported %s tree parked while offline source is off, then restores it after source-on at level 2',name=>{
+ const old=load(name),upgraded=edit(old.c,old.entries),sources=[...upgraded.profile.enabledSources];
+ const down=edit(upgraded,old.entries,c=>{c.selections.find(s=>s.id==='class-owner')!.level=1;c.profile.enabledSources=[];});
+ const off=edit(validateCharacter(JSON.parse(JSON.stringify(down))),[],c=>{c.selections.find(s=>s.id==='class-owner')!.level=2;});
+ expect(off.selections.some(s=>s.id===old.ids.feature||s.id===old.ids.feat)).toBe(false);expect(off.runtime.resources[old.ids.resource]).toBeUndefined();expect(off.classChoiceArchive![old.ids.feat].selections).toEqual(down.classChoiceArchive![old.ids.feat].selections);expect(off.quickbar).toEqual(old.c.quickbar);
+ const on=edit(validateCharacter(JSON.parse(JSON.stringify(off))),[],c=>{c.profile.enabledSources=sources;});preserved(old,on);expect(edit(on,[])).toEqual(on);
+});
+const offlineRejectModes=['disabled source','disabled feature','dismissed feature','missing snapshot','wrong source','wrong level','wrong identity','wrong owner','wrong grant reference','undeclared reference','manual parent','wrong edition','unknown feat condition'] as const;
+it.skipIf(!directory).each(['paladin','ranger'].flatMap(name=>offlineRejectModes.map(mode=>({name,mode}))))('keeps the imported offline $name Defense tree inactive for $mode',({name,mode})=>{
+ const old=load(name),upgraded=edit(old.c,old.entries),down=edit(upgraded,old.entries,c=>{c.selections.find(s=>s.id==='class-owner')!.level=1;}),archive=down.classChoiceArchive![old.ids.feat],parent=archive.parent!;
+ if(mode==='disabled source')down.profile.enabledSources=[];
+ if(mode==='disabled feature')down.profile.disabledEntries=[parent.entry.id];
+ if(mode==='dismissed feature')down.dismissedFeatures=[`class-owner|${parent.grantKey}`];
+ if(mode==='missing snapshot')delete down.classChoiceSnapshots![parent.entry.id];
+ if(mode==='wrong source')parent.entry.source='PHB';
+ if(mode==='wrong level'){parent.entry.raw.level=3;down.classChoiceSnapshots![parent.entry.id]=structuredClone(parent.entry);}
+ if(mode==='wrong identity')parent.entry.id='authored-unknown-source-identity';
+ if(mode==='wrong owner')parent.parentId='authored-other-owner';
+ if(mode==='wrong grant reference')parent.grantKey='ref:unverified-source-reference';
+ if(mode==='undeclared reference')down.selections.find(s=>s.id==='class-owner')!.entry.raw.classFeatures=[];
+ if(mode==='manual parent'){parent.entry.raw._category='inlineChoice';down.classChoiceSnapshots![parent.entry.id]=structuredClone(parent.entry);}
+ if(mode==='wrong edition'){parent.entry.edition='2014';down.profile.optional.legacy=true;down.classChoiceSnapshots![parent.entry.id]=structuredClone(parent.entry);}
+ if(mode==='unknown feat condition'){archive.selections[0].entry.raw.prerequisite=[{feature:['未核对特性']}];down.classChoiceSnapshots![old.ids.featEntry]=structuredClone(archive.selections[0].entry);}
+ const imported=validateCharacter(JSON.parse(JSON.stringify(down))),tree=structuredClone(imported.classChoiceArchive![old.ids.feat].selections),before=JSON.stringify(imported),restored=edit(imported,[],c=>{c.selections.find(s=>s.id==='class-owner')!.level=2;});
+ expect(JSON.stringify(imported)).toBe(before);expect(restored.selections.some(s=>s.id===old.ids.feat||s.id===old.ids.manual||s.id===old.ids.nested)).toBe(false);expect(restored.runtime.resources[old.ids.resource]).toBeUndefined();expect(evaluate(restored).ac).not.toBe(old.defenseAc);
+ expect(restored.classChoiceArchive![old.ids.feat].selections).toEqual(tree);expect(restored.quickbar).toEqual(old.c.quickbar);expect(restored.notes).toBe(old.c.notes);expect(restored.abilities).toEqual(old.c.abilities);expect(restored.runtime.hp).toBe(3);
+ const choice=sheetChoices(restored,[]).find(q=>q.id===archive.choiceId)!;expect(choice?.selected||[]).not.toContain(old.ids.featEntry);expect(choice?.complete||false).toBe(false);
+ expect(edit(validateCharacter(JSON.parse(JSON.stringify(restored))),[])).toEqual(restored);
+});
 it.skipIf(!directory).each(['fighter','paladin','ranger'])('keeps a new unknown %s feat prerequisite blocked and rejects its edit without mutation',name=>{
  const old=load(name),c=edit(old.c,old.entries),unknown:Entry={...structuredClone(old.entries.find(e=>e.id===old.ids.featEntry)!),id:'authored-unknown-fs',name:'原创未知FS',english:'Authored Unknown FS',raw:{_category:'feat',category:'FS',prerequisite:[{feature:['未核对特性']}]}};
  const entries=[...old.entries,unknown],choice=sheetChoices(c,entries).find(q=>q.sourceProgression==='feat'&&q.duplicateChoiceIds?.includes(old.ids.choice))!;expect(choice.options.find(o=>o.value===unknown.id)!.unavailable).toBeTruthy();const before=JSON.stringify(c);expect(()=>setSheetChoiceSlot(c,choice.id,0,unknown.id,entries)).toThrow();expect(JSON.stringify(c)).toBe(before);
