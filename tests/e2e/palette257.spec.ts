@@ -8,7 +8,7 @@ test('top palette persists UI, Wiki and per-component card colors; right-click c
  const change=async(name:string,value:string)=>{const field=drawer.getByRole('textbox',{name:name+'颜色代码',exact:true});await field.fill(value);await field.blur();};
  await change('页面背景','#CBDBCA');await expect.poll(()=>page.locator('.app-shell').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(203, 219, 202)');
  await drawer.getByRole('button',{name:'Wiki',exact:true}).click();await change('条目底色','#DBCABD');await change('条目链接','#663344');
- await drawer.getByRole('button',{name:'角色卡组件',exact:true}).click();await drawer.getByRole('combobox',{name:'角色卡配色组件'}).selectOption('abilities');await change('内容底色','#CCDDAB');
+ await drawer.getByRole('button',{name:'角色卡组件',exact:true}).click();await drawer.getByRole('navigation',{name:'角色卡配色组件'}).getByRole('button',{name:'六项属性',exact:true}).click();await change('内容底色','#CCDDAB');
  await expect.poll(()=>page.locator('[data-palette-component=abilities] .cell-content').first().evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(204, 221, 171)');
  await page.screenshot({path:test.info().outputPath('unified-palette.png')});await drawer.getByRole('button',{name:'关闭调色盘'}).click();await page.reload();await expect(page.locator('.paper')).toBeVisible();
  await expect.poll(()=>page.locator('[data-palette-component=abilities] .cell-content').first().evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(204, 221, 171)');
