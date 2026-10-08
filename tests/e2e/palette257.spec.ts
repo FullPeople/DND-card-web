@@ -13,7 +13,7 @@ test('top palette persists UI, Wiki and per-component card colors; right-click c
  await page.screenshot({path:test.info().outputPath('unified-palette.png')});await drawer.getByRole('button',{name:'关闭调色盘'}).click();await page.reload();await expect(page.locator('.paper')).toBeVisible();
  await expect.poll(()=>page.locator('[data-palette-component=abilities] .cell-content').first().evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(204, 221, 171)');
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();const row=page.locator('.catalog-row').filter({hasText:'微光术'}).first();await expect(row).toBeVisible();
- expect(await row.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(219, 202, 189)');await row.click();await expect(page.locator('.entry-detail .spell-learners')).toBeVisible();
+ expect(await row.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(219, 202, 189)');await page.evaluate(()=>document.documentElement.dataset.suiteNight='true');await expect.poll(()=>row.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(219, 202, 189)');await page.evaluate(()=>document.documentElement.dataset.suiteNight='false');await row.click();await expect(page.locator('.entry-detail .spell-learners')).toBeVisible();
  await row.click({button:'right'});await page.getByRole('menuitem',{name:'创建自定义副本',exact:true}).click();await expect(page.locator('.custom-entry-editor')).toBeVisible();
  await expect(page.locator('.custom-entry-editor')).toContainText('微光术');await page.screenshot({path:test.info().outputPath('wiki-clone.png')});
 });

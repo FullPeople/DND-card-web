@@ -62,6 +62,9 @@ body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(-
 /* Theme authority for actual catalog/document nodes, including legacy night rules. */
 .app-header,.cloud-header{background:var(--ui-heading);color:var(--ui-ink)}
 .app-header .brand,.app-header .brand strong,.cloud-header .cloud-brand{color:var(--ui-ink)!important}
+:root .app-shell .wiki-pane :is(button,input,select,textarea){color:var(--wiki-ink);border-color:var(--wiki-line)}
+:root .app-shell .wiki-pane :is(input,select,textarea){background:var(--wiki-background)}
+:root :is(.keyword-tooltip,.pinned-tooltip){background:var(--wiki-background)!important;color:var(--wiki-ink)!important;border-color:var(--wiki-line)}
 :root .app-shell .wiki-pane .library-body :is(.catalog-list,.catalog-row,.virtual-row:nth-child(odd) .catalog-row,.catalog-row:nth-child(odd),.catalog-race-group){background-color:var(--wiki-entry)!important;color:var(--wiki-entryInk)!important;border-color:var(--wiki-line)}
 :root .app-shell .wiki-pane .library-body .catalog-list .catalog-row:is(.active,.selected,[aria-selected=true],:hover,:focus-visible){background-color:var(--wiki-selected)!important;color:var(--wiki-selectedInk)!important;outline-color:var(--wiki-line);border-color:var(--wiki-line)}
 :root .app-shell .wiki-pane .catalog-row :is(.entry-name,.catalog-value){color:var(--wiki-entryInk)!important}
