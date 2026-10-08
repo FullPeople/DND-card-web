@@ -1,7 +1,7 @@
 import {createContext,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
 import type {Character} from '../core/model';
 import {cloudCards,cloudMutation,cloudSession,readCloudCard} from './api';
-import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,writeSyncReceipt,type SyncState} from './sync';
+import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
 import {UploadWarning} from './UploadWarning';
 import './cloudSave.css';
 
@@ -21,16 +21,25 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,chi
  useEffect(()=>{
   if(!enabled)return;
   let alive=true,refreshEpoch=0,pendingDeadline:ReturnType<typeof setTimeout>|undefined;
-  const refresh=async()=>{const epoch=++refreshEpoch;clearTimeout(pendingDeadline);let nextDeadline=Infinity;for(const character of latest.current.characters){const receipt=await readSyncReceipt(character.id);if(!alive||epoch!==refreshEpoch)return;if(receipt.pending&&Date.now()<(receipt.pending.startedAt||0)+35000)nextDeadline=Math.min(nextDeadline,(receipt.pending.startedAt||0)+35000);setStates(old=>({...old,[character.id]:receipt.lastError?{...receipt.lastError,cloudId:receipt.binding?.cloudId}:receipt.pending?{phase:Date.now()<(receipt.pending.startedAt||0)+35000?'syncing':'uncertain',cloudId:receipt.binding?.cloudId,message:'上次同步结果尚未确认，请重试核对。本机草稿保留。'}:old[character.id]?.phase==='syncing'?old[character.id]:receipt.binding?{phase:'saved',cloudId:receipt.binding.cloudId}:{phase:'local'}}));}if(alive&&Number.isFinite(nextDeadline))pendingDeadline=setTimeout(()=>void refresh().catch(()=>{}),Math.max(1,nextDeadline-Date.now()));};
+  const refresh=async()=>{
+   const epoch=++refreshEpoch;clearTimeout(pendingDeadline);const receipts=await readSyncReceipts(latest.current.characters.map(character=>character.id));if(!alive||epoch!==refreshEpoch)return;
+   let nextDeadline=Infinity;const updates:Record<string,SyncState>={};
+   for(const character of latest.current.characters){const receipt=receipts[character.id];if(!receipt)continue;if(receipt.pending&&Date.now()<(receipt.pending.startedAt||0)+35000)nextDeadline=Math.min(nextDeadline,(receipt.pending.startedAt||0)+35000);
+    updates[character.id]=receipt.lastError?{...receipt.lastError,cloudId:receipt.binding?.cloudId}:receipt.pending?{phase:Date.now()<(receipt.pending.startedAt||0)+35000?'syncing':'uncertain',cloudId:receipt.binding?.cloudId,message:'上次同步结果尚未确认，请重试核对。本机草稿保留。'}:receipt.binding?{phase:'saved',cloudId:receipt.binding.cloudId}:{phase:'local'};
+   }
+   setStates(old=>{const next={...old};for(const [id,state] of Object.entries(updates))if(state.phase==='syncing'||old[id]?.phase!=='syncing')next[id]=state;return next;});
+   if(Number.isFinite(nextDeadline))pendingDeadline=setTimeout(()=>void refresh().catch(()=>{}),Math.max(1,nextDeadline-Date.now()));
+  };
   void refresh().catch(()=>{});
   const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('dnd-card-cloud'):undefined;
-  channel?.addEventListener('message',refresh);window.addEventListener('cloud-binding-changed',refresh);
-  return()=>{alive=false;clearTimeout(pendingDeadline);channel?.close();window.removeEventListener('cloud-binding-changed',refresh);};
- },[enabled]);
+  let refreshTimer:ReturnType<typeof setTimeout>;const changed=()=>{clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>void refresh().catch(()=>{}),40);};
+  channel?.addEventListener('message',changed);window.addEventListener('cloud-binding-changed',changed);
+  return()=>{alive=false;clearTimeout(pendingDeadline);clearTimeout(refreshTimer);channel?.close();window.removeEventListener('cloud-binding-changed',changed);};
+ },[enabled,characters.map(character=>character.id).join('|')]);
  useEffect(()=>{
   if(!enabled||disabled||!auto)return;
   let alive=true;
-  const timer=setTimeout(()=>{void (async()=>{for(const character of characters){const receipt=await readSyncReceipt(character.id);if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
+  const timer=setTimeout(()=>{void (async()=>{const receipts=await readSyncReceipts(characters.map(character=>character.id));for(const character of characters){const receipt=receipts[character.id];if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
   return()=>{alive=false;clearTimeout(timer);};
  },[enabled,disabled,characters,auto,readCharacter]);
  async function request(id:string){
