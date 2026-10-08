@@ -44,8 +44,15 @@ with tempfile.TemporaryDirectory(prefix='web-fixes250-synthetic-') as td:
         for n in m.TARGETS:assert m.tree(m.ROOT/(n+'-before-'+m.KEY))==baseline['sites'][n]
         if not calls:
             database=sqlite3.connect(normal/'new-cards.sqlite');database.execute("INSERT INTO cards VALUES('during-publication')");database.commit();database.close()
+        if len(calls)<len(m.TARGETS):
+            assert (a/'index.html').read_text()=='old synthetic '+a.name
+            assert (a/'preserved.js').stat().st_ino==(b/'preserved.js').stat().st_ino
+            assert (m.ROOT/(a.name+'-before-'+m.KEY)/'preserved.js').stat().st_ino!=(a/'preserved.js').stat().st_ino
         calls.append(a.name);return original(a,b)
     m.exchange=tracked;m.apply(archives);assert calls==list(m.TARGETS);results.append('both complete backups precede the first real atomic exchange')
+    sentinel=m.ROOT/m.TARGETS[0]/'preserved.js';sentinel.write_text('authored external in-place mutation')
+    assert (m.ROOT/(m.TARGETS[0]+'-before-'+m.KEY)/'preserved.js').read_text()=='historical asset'
+    sentinel.write_text('historical asset');results.append('hardlink staging never truncates original files and full backups remain independent')
     changed.write_text('late synthetic change')
     try:m.rollback(archives);raise AssertionError('rollback drift accepted')
     except ValueError as e:assert 'Current site changed' in str(e)

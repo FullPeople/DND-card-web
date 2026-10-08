@@ -79,7 +79,11 @@ def preflight(archives):
         for prefix in [n+'-before-'+KEY,'.'+n+'-stage-'+KEY,'.'+n+'-retired-'+KEY]: require(not (ROOT/prefix).exists(),'Recovery/stage path already exists '+prefix)
         require(tree(ROOT/n)==baseline['sites'][n],'Concurrent frontend change '+n)
         archive_check(archives/receipt['targets'][n]['archive'],n,receipt['targets'][n],receipt)
-    bytes_needed=sum(sum((ROOT/n/p).stat().st_size for p in baseline['sites'][n]) for n in TARGETS)*2+sum(r['bytes'] for r in receipt['targets'].values())
+    changed_bytes=0
+    for n in TARGETS:
+        with tarfile.open(archives/receipt['targets'][n]['archive']) as archive:
+            changed_bytes+=sum(item.size for item in archive.getmembers() if baseline['sites'][n].get(item.name)!=receipt['targets'][n]['files'][item.name])
+    bytes_needed=sum(sum((ROOT/n/p).stat().st_size for p in baseline['sites'][n]) for n in TARGETS)+changed_bytes
     require(shutil.disk_usage(ROOT).free>bytes_needed+300*1024*1024,'Insufficient space for all backups and stages')
     require(getattr(ctypes.CDLL(None),'renameat2',None) is not None,'Atomic exchange unavailable')
     return receipt,baseline
@@ -97,12 +101,16 @@ def apply(archives):
             record['targets'][n]={'backup':str(backup),'backupFiles':len(baseline['sites'][n]),'version':receipt['targets'][n]['version']}
             write(JOURNAL,record)
         for n in TARGETS:
-            stage=ROOT/('.'+n+'-stage-'+KEY); shutil.copytree(ROOT/n,stage); stages[n]=stage
+            stage=ROOT/('.'+n+'-stage-'+KEY); shutil.copytree(ROOT/n,stage,copy_function=os.link); stages[n]=stage
             with tarfile.open(archives/receipt['targets'][n]['archive']) as z:
                 for m in z.getmembers():
+                    if baseline['sites'][n].get(m.name)==receipt['targets'][n]['files'][m.name]: continue
                     dest=stage/safe_name(m.name); dest.parent.mkdir(parents=True,exist_ok=True)
-                    with z.extractfile(m) as inp, dest.open('wb') as out: shutil.copyfileobj(inp,out)
-                    os.chmod(dest,0o644)
+                    # Break shared staging inodes before writing; the independent full backups remain immutable.
+                    temporary=dest.with_name(dest.name+'.release-new')
+                    require(not temporary.exists(),'Staging temporary already exists')
+                    with z.extractfile(m) as inp, temporary.open('xb') as out: shutil.copyfileobj(inp,out)
+                    os.chmod(temporary,0o644); os.replace(temporary,dest)
             expected={**baseline['sites'][n],**receipt['targets'][n]['files']}
             require(tree(stage)==expected,'Full stage mismatch '+n)
             record['targets'][n]['expectedFiles']=expected
@@ -144,7 +152,9 @@ def rollback(archives):
         require(tree(ROOT/n)==record['targets'][n]['expectedFiles'],'Current site changed since release '+n)
         backup=Path(record['targets'][n]['backup']); require(backup==ROOT/(n+'-before-'+KEY) and tree(backup)==baseline['sites'][n],'Backup changed')
         stage=ROOT/('.'+n+'-rollback-'+KEY); require(not stage.exists(),'Rollback stage exists')
-        shutil.copytree(backup,stage); require(tree(stage)==baseline['sites'][n],'Rollback copy incomplete'); stages[n]=stage
+        retired=Path(record['targets'][n]['retiredOriginal'])
+        require(retired==ROOT/('.'+n+'-retired-'+KEY) and tree(retired)==baseline['sites'][n],'Retired original changed')
+        shutil.copytree(retired,stage,copy_function=os.link); require(tree(stage)==baseline['sites'][n],'Rollback copy incomplete'); stages[n]=stage
     try:
         for n in TARGETS: exchange(ROOT/n,stages[n]); changed.append(n)
         require(all(tree(ROOT/n)==baseline['sites'][n] for n in TARGETS),'Rollback verification failed')
