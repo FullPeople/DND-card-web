@@ -170,9 +170,6 @@
 .sheet-viewport.screen-mode .biography-multi textarea{min-height:36px;font-size:15px;line-height:1.55;resize:vertical}
 .sheet-viewport.screen-mode .bio-portrait>.portrait-cell{height:220px}
 .sheet-viewport.screen-mode .bio-portrait .cell-content{flex:1;padding:0}
-/* A4 里立绘备注移到立绘上方(让图框底部与背景故事齐平)；屏幕模式保持原顺序。 */
-.sheet-viewport.screen-mode .bio-portrait>.biography-field{order:1}
-.sheet-viewport.screen-mode .bio-portrait>.portrait-cell{order:0}
 .sheet-viewport.screen-mode .spells-page-grid,.sheet-viewport.screen-mode .spell-workspace-grid{height:auto;min-height:0;flex:none;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-items:start;gap:7px}
 .sheet-viewport.screen-mode .spells-page-grid>.sheet-cell,.sheet-viewport.screen-mode .spell-workspace-grid>.sheet-cell{height:auto;min-height:0}
 .sheet-viewport.screen-mode .paper .spell-stock-cell .spell-stock-grid{grid-template-columns:repeat(auto-fill,minmax(min(125px,100%),1fr));gap:4px}
