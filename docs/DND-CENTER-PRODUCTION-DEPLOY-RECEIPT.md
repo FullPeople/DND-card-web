@@ -8,7 +8,9 @@
 
 认证结论：实际写入含工作流文件的分支成功，实际 `workflow_dispatch` 成功，并能读取运行和 jobs。现有云端认证具备本仓库所需的 Contents/Workflows 写权限及 Actions 写/读权限，本次没有发现需要补充的触发权限。未读取或修改 Environment Secret 的值，未调用人工审批 API。
 
-新正式工作流尚未合并到默认 main，GitHub 的 workflow 查询返回 404，属于**尚未注册**，不能据此认定缺少 Actions 权限。合并后才能首次从 main 触发正式流程；合约工作流已存在于默认分支，所以可先用同一认证在候选分支上 dispatch 验证权限。
+交付后 [PR26](https://github.com/FullPeople/DND-card-web/pull/26) 已合入 main `84b54e7a062f1a8fa6859c3108512f963b5984cd`，最终候选 28 项检查全部通过，正式工作流注册为 active。现有认证实际提交正式 `workflow_dispatch` [37785977083](https://github.com/FullPeople/DND-card-web/actions/runs/37785977083)，随后按预期因旧提交的 CI 拒绝，日志确认 `full-ci-not-successful-for-exact-sha`，deploy job 跳过。此负向测试证明新入口可触发且不能借用旧 CI，不是服务器发布失败。
+
+用户随后明确要求取消人工审批并长期授权自主更新及故障回退。当前认证读取环境设置成功，实际移除 required reviewers 的 PUT 返回 `403 Resource not accessible by integration`，缺少 `Environments: write`；回读确认 FullPeople 审批规则仍存在，仅允许 main 及管理员不可绕过均未变。管理员一次性操作见部署说明。身份与密钥不变，没有代替用户批准某次运行。
 
 ## 实际验证
 
@@ -21,9 +23,9 @@
 
 ## 尚需现场完成
 
-1. 审查并合并正式工作流到 main，取得该 main 精确 SHA 的 Web、Cloud、部署合约三组完整成功 CI。
+1. 管理员一次性移除 production-card required reviewers，保留环境身份、密钥和 main 部署分支；或给云端集成该仓库 Environments 写权限后再执行修改并回读验证。
 2. 管理员使用冻结实现提交执行安装预检及 `--apply`；云端环境未配置 VPN/TCP，本次没有直接 SSH 安装。
-3. 从 main 运行正式流程的 `operation=preflight`，在 GitHub 网页批准 `production-card`，取得真实服务器产物预检回执。
-4. 使用仍有效的线上基线以 `operation=publish` 运行并再次人工批准，取得真实发布回执。
+3. AI 自行取得当前 main 精确 SHA 的 Web、Cloud、部署合约三组完整成功 CI，运行 `operation=preflight`，取得真实服务器产物预检回执。
+4. AI 使用仍有效的线上基线以 `operation=publish` 运行，取得发布回执并核验公网结果；取消规则后无需人工点批准。
 
-本次完成代码和部署接入交付，不代表服务器已安装新入口或新网站已上线。原 production-card 审批、现有密钥/公钥、固定 host key 和线上版本没有被工具修改。
+本次完成代码和部署接入交付，不代表服务器已安装新入口或新网站已上线。此次取消 production-card 审批未成功；现有密钥/公钥、固定 host key 和线上版本没有被工具修改。长期授权与接入流程不构成持续运行的 AI 调度器。
