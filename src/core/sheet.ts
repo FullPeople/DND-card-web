@@ -126,6 +126,11 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       const existing = c.selections.find(s => s.entry.id === grant.entry!.id && !s.grantKey && (!s.parentId || s.parentId === owner.id) && (!s.requirementId || s.requirementId.startsWith(`${owner.id}:`)));
       if (existing) { existing.parentId = owner.id; existing.grantKey = grant.key; changed = true; continue; }
       if (c.selections.length >= 3000) break;
+      // A prerequisite may keep the archived feat inactive until its source
+      // feature is present. Recreate that already-declared feature using its
+      // saved identity, so the later choice sync restores the exact old tree.
+      const retainedParent=Object.values(c.classChoiceArchive||{}).map(archive=>archive.parent).find(parent=>parent?.entry.kind==='feature'&&parent.parentId===owner.id&&parent.grantKey===grant.key&&parent.entry.id===grant.entry!.id&&!c.selections.some(row=>row.id===parent.id));
+      if(retainedParent){const restored=structuredClone(retainedParent);if(review?.refresh)restored.entry=structuredClone(grant.entry);c.selections.push(restored);changed=true;continue;}
       const legacyId = grant.key.startsWith('inline:') ? `${owner.id}:trait:${grant.key.slice(7)}` : undefined;
       c.selections.push({ id: legacyId && !c.selections.some(s => s.id === legacyId) ? legacyId : uid(), entry: structuredClone(grant.entry), level: 1, quantity: grant.quantity||1, equipped: false, parentId: owner.id, grantKey: grant.key }); changed = true;
     }

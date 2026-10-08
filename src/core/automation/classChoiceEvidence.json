@@ -9,6 +9,15 @@
     "legacyInfusions": "https://www.dndbeyond.com/posts/854-artificer-101-a-beginners-guide-to-making-magical",
     "plans": "https://www.dndbeyond.com/posts/2106-whats-new-with-the-artificer-in-eberron-forge-of"
   },
+  "fightingStylePrerequisites": [
+    {"owner":"Fighter|XPHB","feature":"战斗风格|战士|XPHB|1","level":1},
+    {"owner":"Paladin|XPHB","feature":"战斗风格|圣武士|XPHB|2","level":2},
+    {"owner":"Ranger|XPHB","feature":"战斗风格|游侠|XPHB|2","level":2}
+  ],
+  "fightingStyleAlternatives": [
+    {"owner":"Paladin|XPHB","feature":"战斗风格|圣武士|XPHB|2","level":2,"feat":"Blessed Warrior|XPHB","category":"fs:p"},
+    {"owner":"Ranger|XPHB","feature":"战斗风格|游侠|XPHB|2","level":2,"feat":"Druidic Warrior|XPHB","category":"fs:r"}
+  ],
   "legacyFeatChoices": [
     {"owner": "Artificer|TCE","feature": "属性值提升|奇械师|TCE|4","level": 4},
     {"owner": "Artificer|TCE","feature": "属性值提升|奇械师|TCE|8","level": 8},

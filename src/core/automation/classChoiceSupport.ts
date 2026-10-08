@@ -10,6 +10,12 @@ export function legacyFeatEvidence(owner:Entry,feature:Entry){
 export function modernFeatEvidence(owner:Entry,feature:Entry){
  return evidence.modernFeatChoices.find(row=>matchesReference(owner,row.owner)&&matchesReference(feature,row.feature)&&feature.raw.level===row.level);
 }
+export function fightingStylePrerequisiteEvidence(owner:Entry,feature:Entry){
+ return evidence.fightingStylePrerequisites.find(row=>matchesReference(owner,row.owner)&&matchesReference(feature,row.feature)&&feature.raw.level===row.level);
+}
+export function fightingStyleAlternativeEvidence(owner:Entry,feature:Entry,feat:Entry){
+ return evidence.fightingStyleAlternatives.find(row=>matchesReference(owner,row.owner)&&matchesReference(feature,row.feature)&&matchesReference(feat,row.feat)&&feature.raw.level===row.level&&String(feat.raw.category).trim().toLowerCase()===row.category);
+}
 export function optionalChoiceSupport(owner:Entry,types:string[],count:number,at:number):ClassChoiceSupport{
  const keys=types.map(value=>value.trim().toLowerCase());
  const row=evidence.optionalProgressions.find(row=>matchesReference(owner,row.owner)&&row.featureType.some(type=>keys.includes(type.toLowerCase())));

@@ -1,5 +1,23 @@
 # 职业专长与可选特性入口：本地候选，未发布
 
+## 2026-10-08：修复真实 FS 旧卡能力收缩
+
+`79634877` 的真实 229 输入审计完成后，发现 15 条覆盖下降不能统称统计差异：12 条 Epic Boon 的 filter 去重后归属父职业，旧 Data probe 只认 `ownerId === 'candidate'`，确实漏证；3 条 Fighting Style 则被未知 `feature` / `otherSummary` 前置统一禁用，旧答案被排除、旧自动专长与手工子树归档，已适配 Defense 效果暂停。这是 PR17 的实际升级回归，未将其称作 254 主线整合引入，也未用保存档案代替功能保留。
+
+受影响的确切身份为 `kiwee:classfeature:xphb:fighting%20style:xphb:fighter:::1:::`、`kiwee:classfeature:xphb:fighting%20style:xphb:paladin:::2:::`、`kiwee:classfeature:xphb:fighting%20style:xphb:ranger:::2:::`。已核对[官方专长前置](https://www.dndbeyond.com/sources/dnd/br-2024/feats)和[职业授予及替代选项](https://www.dndbeyond.com/sources/dnd/br-2024/character-classes)。矩阵只增加明确来源的职业 / 特性 / 候选引用和等级，不保存规则全文，不按具体职业或特性名称编写运行分支。
+
+使用真实旧 `1a1717f84d9774f34194b9e57a45c247980cfba2` 代码，从锁定输入读取战士 / 圣武士 / 游侠、实际 Defense 专长和实际轻甲，生成三张原创验收卡。保留真实 `feature` 前置和 Defense 已适配护甲效果；两层手工子项、1/3 已耗资源、答案 / 布局 / pin 为原创验收记录，不冒充 Defense 的规则资源。生成器强制旧 HEAD 并验证输入 SHA，**3 项通过**。原升级红测试 **8 失败 / 3 通过**，扩展真实替代前置后 **10 失败 / 8 通过**。
+
+只支持矩阵中当前来源实际授予、有效等级且未禁用 / dismiss 的 FS 特性，验证直属职业、确切 `classFeatures` 引用及原 `ref:` grant。单项 `feature` 必须匹配该已核对特性；同名手工项、其他来源、未到等级和未知结构不能满足前置。`otherSummary` 只识别两个明确来源的替代项，且其完整前置形状与来源职业 / 特性 / 等级组成的已核对条件完全对应；任意其他文字或附加条件仍禁用。不会解析任意规则正文或补齐机制。
+
+实际有前置的旧 FS 在降级再恢复时还暴露源父项被重建 ID 的问题。`syncFeatures` 对已明确将要生成的同一来源 grant 复用档案中的原父项身份与记录，后续选择同步恢复原专长和手工子树；不另造授予或补资源。首次修复 **13 通过 / 5 失败**，保留父项身份后 **18 通过 / 0 失败 / 0 跳过**。其余两类失败是测试误把升级合法新增资源控件当旧布局变化、以及已保存的正确候选快照遮住了新的未知前置样本；已针对旧控件逐项保留和未选候选修正测试，未放松数据保留或未知条件拒绝要求。类型检查通过。
+
+合并原选择、档案、pin、纯显示编辑专项 **11 文件 / 135 通过 / 0 失败 / 0 跳过**。涵盖真实旧卡首次升级、重复打开、原生导入、等级升级、合法 2→1→2、来源关闭 / 恢复、空目录恢复，原 selection ID / grantKey / 父项 / 两层手工子项 / 旧答案 / 资源 / pin / 原布局均保留。新增选项适配只证明前置与既有授予管线，不宣称替换次数、全部效果或发布验收已完成。
+
+Data 的准确归属补丁见 `docs/CLASS-CHOICES-DATA-PROBE.patch`，只在候选本身确为直属且已声明的源职业特性、等级与来源均匹配、canonical choice 显式列出该候选的旧 filter alias 时接受父职业入口。不会拿其他父职业选择证明本条规则。连同现有 runtime / consumer bytes 校验 **25 项通过**。本地 Data 基线仍为 `a59ed56d8399ecc5005e915aaadf44879c38c86f`，未提交 / 推送 Data 或重试拒绝；覆盖计数只由实际 producer 重算。
+
+最终冻结 HEAD 的全量、双构建、真实全量重审、CI 与交接包以 PR17 和 `.local-evidence/class-level-choices/fs-upgrade-oct08/` 回执为准。`79634877` 及 6512 属于修复前历史证据，不是新代码证明；旧包已保存 Library，后续新包保留版本身份。正式 Data SHA 仍须原授权会话提交；本候选不合并、不部署。撤回本轮修复用 `git revert <PR17 本轮实际修复提交 SHA>`，具体 SHA 见最终 PR 回执；先撤后续正式报告绑定（如有），保留原生卡备份，Git 回滚不迁移玩家数据。
+
 ## 2026-10-08：PR17 与已发布 254 主线的兼容整合
 
 只读核对 Web main `92cf89ca650e0ecef273f05b421cb1a95308ed1c`、PR17 `fd875ed`、未合并 PR20 `bff0489` 及 Data main `a59ed56d8399ecc5005e915aaadf44879c38c86f`。PR17 没有后续分支提交或接手评论，另一个开放 PR 是独立 255 云端工作；未发现重复职业选择分支。本轮只在 PR17 原分支合入已发布 main，不合入 PR20，不替其三个失败浏览器组修发布，不合并 PR17 到 main、不部署、不改权限或创建凭据。
