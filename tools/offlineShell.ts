@@ -6,7 +6,7 @@ export function offlineShell(): Plugin {
     // Opening layers are embedded in index.html; installation must not fetch
     // the original full-size PNGs that the page no longer requests.
     const startupAssets:string[] = [];
-    const first = new Set<string>(['index.html','favicon.svg','dnd-center-logo.png',...startupAssets]);
+    const first = new Set<string>(['index.html','favicon.svg','dnd-center-icon.png',...startupAssets]);
     const visit = (name:string) => {
       if(first.has(name))return;
       const chunk=bundle[name];if(!chunk)return;first.add(name);
@@ -15,16 +15,25 @@ export function offlineShell(): Plugin {
         for(const css of (chunk as typeof chunk&{viteMetadata?:{importedCss:Set<string>}}).viteMetadata?.importedCss??[])first.add(css);
       }
     };
-    for(const chunk of Object.values(bundle))if(chunk.type==='chunk'&&(chunk.isEntry||/\/ui\/(App|PlayerViewer)\.tsx$/.test(chunk.facadeModuleId?.replaceAll('\\','/')||'')))visit(chunk.fileName);
+    for(const chunk of Object.values(bundle))if(chunk.type==='chunk'&&(chunk.isEntry||/\/ui\/App\.tsx$/.test(chunk.facadeModuleId?.replaceAll('\\','/')||'')))visit(chunk.fileName);
     const files=[...first];
     const html=bundle['index.html'];
-    const revision = createHash('sha256').update('on-demand-shell-v4:'+JSON.stringify(assets)).update(html?.type==='asset'?html.source:'').digest('hex').slice(0, 12);
+    const revision = createHash('sha256').update('on-demand-shell-v5:'+JSON.stringify(assets)).update(html?.type==='asset'?html.source:'').digest('hex').slice(0, 12);
     this.emitFile({ type: 'asset', fileName: 'sw.js', source: `
 const PREFIX = 'dnd-card-shell:' + new URL('./', self.location.href).pathname + ':';
 const CACHE = PREFIX + ${JSON.stringify(revision)};
 const FILES = ${JSON.stringify(files)};
-const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png','dnd-center-logo.png',...startupAssets])}.map(file=>new URL(file,self.location.href).href));
-self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(file => new URL(file, self.location.href).href)))));
+const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png','dnd-center-logo.png','dnd-center-icon.png',...startupAssets])}.map(file=>new URL(file,self.location.href).href));
+// Two low-priority readers reuse the browser HTTP cache without competing
+// with every deferred editor and rules download after the first paint.
+async function installShell(){
+ const cache=await caches.open(CACHE);let next=0;
+ await Promise.all([0,1].map(async()=>{while(next<FILES.length){const file=FILES[next++],url=new URL(file,self.location.href).href;
+  const response=await fetch(url,{cache:file==='index.html'?'no-cache':'force-cache',priority:'low'});
+  if(!response.ok)throw new Error('Offline shell asset unavailable');await cache.put(url,response);
+ }}));
+}
+self.addEventListener('install', event => event.waitUntil(installShell()));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('message', event => {
   if (event.data === 'activate-update') self.skipWaiting();
@@ -33,7 +42,7 @@ self.addEventListener('message', event => {
     // those used files only, and never cache documents or arbitrary URLs.
     for(const url of new Set(event.data.urls.filter(url=>ASSETS.has(url)))){
       if(await cache.match(url,{ignoreVary:true}))continue;
-      try{const response=await fetch(url);if(response.ok)await cache.put(url,response);}catch{}
+      try{const response=await fetch(url,{cache:'force-cache',priority:'low'});if(response.ok)await cache.put(url,response);}catch{}
     }
   }));
 });

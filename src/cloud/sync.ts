@@ -81,9 +81,14 @@ export async function characterHash(character:Character){
  return Array.from(new Uint8Array(bytes),byte=>byte.toString(16).padStart(2,'0')).join('');
 }
 export async function readSyncReceipt(id:string):Promise<SyncReceipt>{
+ return (await readSyncReceipts([id]))[id];
+}
+export async function readSyncReceipts(ids:string[]):Promise<Record<string,SyncReceipt>>{
+ if(!ids.length)return {};
  const db=await openDB('dnd-card-standalone',1);try{
-  const tx=db.transaction('documents','readonly'),binding=await tx.store.get('cloud-binding:'+id),receipt=await tx.store.get('cloud-sync:'+id);await tx.done;
-  return {...receipt,binding};
+  const tx=db.transaction('documents','readonly');
+  const rows=await Promise.all(ids.map(async id=>{const [binding,receipt]=await Promise.all([tx.store.get('cloud-binding:'+id),tx.store.get('cloud-sync:'+id)]);return [id,{...receipt,binding}] as const;}));await tx.done;
+  return Object.fromEntries(rows);
  }finally{db.close();}
 }
 export async function writeSyncReceipt(id:string,receipt:SyncReceipt){

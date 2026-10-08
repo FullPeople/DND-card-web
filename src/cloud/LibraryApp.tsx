@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import type {Character} from '../core/model';
 import {exportCharacter} from '../core/export';
 import {download,loadWorkspace,loadCloudBindings,stageCloudDraft,type CloudBinding} from '../platform/storage';
@@ -9,21 +9,31 @@ import {CloudSaveProvider,CloudSaveControl} from './CloudSave';
 import {CardStack} from './CardStack';
 import {withSiteSources} from '../core/siteSources';
 
-const warning='在接入 QQ 登录之前，所有的卡并不会安全保存，所有人都可以在云端看到所有卡。';
+const warning='所有人都可以在云端看到所有卡。';
+const warningDetails='请勿上传私人信息，同一个 IP 最多上传 10 张；共用网络的人共享额度。临时上传无需登录，只有原上传浏览器可以修改或删除；清除 Cookie 或更换设备可能失去管理权限。';
 const options=[['all','全部云端卡'],['local','本机角色'],['mine','我的上传'],['migration','迁移与备份']] as const;
 type View=typeof options[number][0];
 export default function LibraryApp(){
-  const [session,setSession]=useState<CloudSession>(),[cards,setCards]=useState<CardSummary[]>([]),[mine,setMine]=useState<CardSummary[]>([]),[local,setLocal]=useState<Character[]>([]),[bindings,setBindings]=useState<Record<string,CloudBinding>>({}),[query,setQuery]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[manage,setManage]=useState<CloudCard>(),[qq,setQQ]=useState(''),[view,setView]=useState<View>('all'),[total,setTotal]=useState(0),[hasMore,setHasMore]=useState(false),[nextOffset,setNextOffset]=useState(0);
+  const [session,setSession]=useState<CloudSession>(),[cards,setCards]=useState<CardSummary[]>([]),[mine,setMine]=useState<CardSummary[]>([]),[local,setLocal]=useState<Character[]>([]),[bindings,setBindings]=useState<Record<string,CloudBinding>>({}),[query,setQuery]=useState(()=>new URLSearchParams(location.search).get('q')||''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[manage,setManage]=useState<CloudCard>(),[qq,setQQ]=useState(''),[view,setView]=useState<View>('all'),[total,setTotal]=useState(0),[hasMore,setHasMore]=useState(false),[nextOffset,setNextOffset]=useState(0);
   const account=session?.authenticated?session.account?.id:session?.uploadOwner?.id;
-  async function refresh(){
-    const results=await Promise.allSettled([loadWorkspace(),loadCloudBindings(),cloudSession()]);
+  const latestView=useRef(view);latestView.current=view;
+  async function refreshLocal(){
+    const results=await Promise.allSettled([loadWorkspace(),loadCloudBindings()]);
     if(results[0].status==='fulfilled')setLocal(results[0].value?.characters||[]);else setMessage('本机角色读取失败，原记录保留。请回到在线车卡导出备份。');
     if(results[1].status==='fulfilled')setBindings(results[1].value);
-    if(results[2].status==='fulfilled'){
-      const next=results[2].value;setSession(next);
-      if(next.authenticated||next.temporaryUpload){try{const rows=await cloudCards();setCards(rows.cards);setMine(rows.mine||rows.cards.filter(row=>row.role));setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);setSession({...next,slots:rows.slots});}catch(error){setMessage(error instanceof Error?error.message:String(error));setCards([]);setMine([]);}}
+  }
+  async function refresh(){
+    if(latestView.current==='local')void refreshLocal();
+    try{
+      const next=await cloudSession();setSession(next);
+      if(next.authenticated||next.temporaryUpload){const rows=await cloudCards();setCards(rows.cards);setMine(rows.mine||rows.cards.filter(row=>row.role));setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);setSession({...next,slots:rows.slots});}
       else {setCards([]);setMine([]);}
-    }else {setSession(undefined);setCards([]);setMine([]);setMessage('云端服务暂时无法连接。本机角色和 JSON 导出仍可使用，可稍后刷新重试。');}
+    }catch{setSession(undefined);setMessage('云端服务暂时无法连接。本机角色和 JSON 导出仍可使用，可稍后刷新重试。');}
+  }
+  useEffect(()=>{if(view==='local')void refreshLocal();},[view]);
+  function missing(id:string){
+    setCards(old=>old.filter(row=>row.id!==id));setMine(old=>old.filter(row=>row.id!==id));
+    setMessage('一张卡已删除或不存在，已移出画廊并刷新列表。');void refresh();
   }
   useEffect(()=>{void refresh();let timer:ReturnType<typeof setTimeout>;const update=()=>{if(document.visibilityState==='visible')void refresh();};const changed=(event:Event|MessageEvent)=>{const detail='data' in event?event.data:(event as CustomEvent).detail;if(detail?.pending||detail?.failed)return;clearTimeout(timer);timer=setTimeout(()=>void refresh(),250);};const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('dnd-card-cloud'):undefined;channel?.addEventListener('message',changed);window.addEventListener('cloud-binding-changed',changed);document.addEventListener('visibilitychange',update);return()=>{clearTimeout(timer);channel?.close();window.removeEventListener('cloud-binding-changed',changed);document.removeEventListener('visibilitychange',update);};},[]);
 
@@ -42,15 +52,14 @@ export default function LibraryApp(){
   const matches=(name:string,id:string,edition:string)=>`${name} ${id} ${edition}`.toLowerCase().includes(query.trim().toLowerCase());
   const visible=(view==='mine'?mine:cards).filter(row=>matches(row.name,row.id,row.edition));
   const localVisible=local.filter(row=>matches(row.name,bindings[row.id]?.cloudId||'',row.edition));
-  return <CloudSaveProvider enabled disabled={busy} characters={local} readCharacter={async id=>{const w=await loadWorkspace(),card=w?.characters.find(row=>row.id===id);if(!card)throw Error('本机角色已不存在，未上传。');return withSiteSources(card,w?.siteSources,w?.packs||[]);}}><main className="cloud-library">
-    <header className="cloud-header"><a className="cloud-brand" href="/"><img src="/card/dnd-center-logo.png" alt="DND 角色卡网站标志"/><h1>角色卡库</h1></a><div className="cloud-header-tools"><span>QQ 登录申请中</span><a href="/card/">在线车卡</a><a href="/">首页</a></div></header>
-    <div className="cloud-workspace"><aside className="cloud-sidebar"><nav aria-label="卡库选项">{options.map(([key,label])=><button key={key} aria-current={view===key?'page':undefined} onClick={()=>setView(key)}>{label}</button>)}</nav><div className="cloud-sidebar-status"><p>{session?.temporaryUpload?'当前 IP 上传额度':'自有卡槽位'}</p><strong>{session?.slots?session.slots.used+' / '+session.slots.total:'— / 10'}</strong><p>数量限制用于避免服务器被大量角色卡占满。</p><button disabled={busy} onClick={()=>void act(refresh)}>刷新卡库</button><button disabled>QQ 登录（申请中）</button></div></aside>
+  return <CloudSaveProvider enabled={view==='local'&&local.length>0} disabled={busy} characters={local} readCharacter={async id=>{const w=await loadWorkspace(),card=w?.characters.find(row=>row.id===id);if(!card)throw Error('本机角色已不存在，未上传。');return withSiteSources(card,w?.siteSources,w?.packs||[]);}}><main className={`cloud-library ${view==='all'||view==='mine'?'has-gallery':''}`}>
+    <header className="cloud-header"><a className="cloud-brand" href="/"><img src="/card/dnd-center-icon.png" alt="DND 角色卡网站标志"/><h1>角色卡库</h1></a><div className="cloud-header-tools"><span>QQ 登录申请中</span><a href="/card/">在线车卡</a><a href="/">首页</a></div></header>
+    <div className="cloud-workspace"><aside className="cloud-sidebar"><nav aria-label="卡库选项">{options.map(([key,label])=><button key={key} aria-current={view===key?'page':undefined} onClick={()=>setView(key)}>{label}</button>)}</nav><div className="cloud-sidebar-status"><p>{session?.temporaryUpload?'当前 IP 上传额度':'自有卡槽位'}</p><strong>{session?.slots?session.slots.used+' / '+session.slots.total:'— / 10'}</strong><p>数量限制用于避免服务器被大量角色卡占满。</p><button disabled={busy} onClick={()=>void act(refresh)}>刷新卡库</button><button disabled>QQ 登录（申请中）</button><section className="cloud-sidebar-warning"><h2><strong>{warning}</strong></h2><p>{warningDetails}</p></section></div></aside>
     <div className="cloud-main"><div className="cloud-search"><label htmlFor="cloud-search-input">搜索角色卡</label><input id="cloud-search-input" value={query} onChange={event=>setQuery(event.target.value)} placeholder="角色名 / 卡片 ID / 规则版本" type="search"/>{query&&<button onClick={()=>setQuery('')}>清除</button>}</div>
-      <section className="cloud-frame cloud-warning"><h2>临时云端存储警告</h2><div className="cloud-content"><p><strong>{warning}</strong></p><p>请勿上传私人信息，并始终保留本机完整 JSON 备份。同一个 IP 最多上传 10 张；共用网络的人共享额度。临时上传无需登录，只有原上传浏览器可以修改或删除；清除 Cookie 或更换设备可能失去管理权限。</p>{!session?.temporaryUpload&&!session?.authenticated&&<p role="status">正在连接后端；服务未开放时仍可使用本机保存与导入导出。</p>}</div></section>
       {message&&<p className="cloud-message" role="alert">{message}</p>}
-      {view==='all'&&<section className="cloud-frame"><h2>全部云端卡 · {total} 张</h2><div className="cloud-content"><p>临时开放阶段，所有人都可以浏览这里的全部卡片。点击“查看五页”打开完整角色卡。</p><CardStack cards={visible} edit={row=>void act(()=>draft(row))} manage={row=>void act(async()=>{setManage(await readCloudCard(row.id));setQQ('');})}/>{hasMore&&<button disabled={busy} onClick={()=>void act(async()=>{const rows=await cloudCards(nextOffset);setCards(previous=>[...previous,...rows.cards.filter(row=>!previous.some(old=>old.id===row.id))]);setHasMore(!!rows.hasMore);setNextOffset((rows.offset||0)+rows.cards.length);setTotal(rows.total||0);})}>加载更多角色卡</button>}</div></section>}
+      {view==='all'&&<section className="cloud-frame cloud-gallery-frame"><h2>全部云端卡 · {total} 张</h2><div className="cloud-content"><CardStack missing={missing} cards={visible} edit={row=>void act(()=>draft(row))} manage={row=>void act(async()=>{setManage(await readCloudCard(row.id));setQQ('');})}/>{hasMore&&<button disabled={busy} onClick={()=>void act(async()=>{const rows=await cloudCards(nextOffset);setCards(previous=>[...previous,...rows.cards.filter(row=>!previous.some(old=>old.id===row.id))]);setHasMore(!!rows.hasMore);setNextOffset((rows.offset||0)+rows.cards.length);setTotal(rows.total||0);})}>加载更多角色卡</button>}</div></section>}
       {view==='local'&&<section className="cloud-frame"><h2>本机角色与待保存草稿</h2><div className="cloud-content"><p>每张角色卡分别显示本机保存、云端 ID 或同步状态。首次选择“保存到云端”后，需要阅读警告并明确同意。</p>{!local.length&&<p>本机尚无角色。请先打开在线车卡创建，或导入完整 JSON 备份。</p>}{local.length>0&&!localVisible.length&&<p>没有找到本机角色，可以清除搜索后重试。</p>}<ul className="cloud-card-list">{localVisible.map(character=><li key={character.id}><div className="cloud-card-info"><strong>{character.name}</strong><small>{character.edition} · {bindings[character.id]?'云端卡的本机草稿':'仅本机保存'}</small></div><div className="cloud-inline"><button onClick={()=>download((character.name||'角色')+'-完整备份.json',exportCharacter(character))}>导出完整 JSON</button><CloudSaveControl id={character.id} book/></div></li>)}</ul></div></section>}
-      {view==='mine'&&<section className="cloud-frame"><h2>我的上传{session?.authenticated?'与获授权卡':''}</h2><div className="cloud-content"><p>这里列出当前浏览器可管理的角色卡。IP 相同不会获得其他浏览器上传卡片的修改或删除权限。</p><CardStack cards={visible} edit={row=>void act(()=>draft(row))} manage={row=>void act(async()=>{setManage(await readCloudCard(row.id));setQQ('');})}/></div></section>}
+      {view==='mine'&&<section className="cloud-frame cloud-gallery-frame"><h2>我的上传{session?.authenticated?'与获授权卡':''}</h2><div className="cloud-content"><CardStack missing={missing} cards={visible} edit={row=>void act(()=>draft(row))} manage={row=>void act(async()=>{setManage(await readCloudCard(row.id));setQQ('');})}/></div></section>}
       {view==='migration'&&<section className="cloud-frame"><h2>旧站迁移与完整备份</h2><div className="cloud-content"><ol><li>使用原来保存角色的浏览器打开 <a href="https://obr.dnd.center/card/" target="_blank" rel="noopener noreferrer">旧站入口</a>。进入“导入 / 导出”，选择角色或“全部可见角色”，点击“下载 JSON”。</li><li>在 <a href="/card/">新站在线车卡</a>进入“导入 / 导出”，使用“批量导入 JSON 文件”或“导入角色 JSON”，校验并确认后导入。</li><li>核对全部五页、资源余额和人物背景，下载一份新站完整 JSON 备份后再关闭旧站。</li></ol><p>浏览器不会跨域搬运存档。旧站继续提供原角色读取及导出，不强制跳转。Wiki 缓存和界面偏好需在新域名重新建立；JSON 保留完整角色内容、来源快照、选择与运行资源。</p></div></section>}
       <footer className="cloud-source-footer"><a href="/card/source.zip">本版本完整源码</a> · <a href="https://github.com/FullPeople/DND-card-web" target="_blank" rel="noopener noreferrer">源码仓库 ↗</a></footer>
     </div></div>
