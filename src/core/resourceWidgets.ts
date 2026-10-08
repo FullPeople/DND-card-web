@@ -147,7 +147,7 @@ export type ResourceTemplateValues={name:string;current:number;max:number;unlimi
 /** A group needs room for every actual resource pool, not only its first row. */
 export function resourceModuleMinimum(module:ResourceModule,style:WidgetStyle,contentScale=1):{w:number;h:number}{
  const multi=module.slots||module.rows.length>1,count=module.rows.length;
- const min=multi?{w:count<=1?3:count<=3?4:count<=6?6:8,h:count<=1?2:count<=3?3:count<=6?4:count<=9?5:6}:minimumWidgetSize(style);
+ const min=multi?{w:count<=1?3:count<=3?4:count<=6?6:8,h:count<=1||count<=3&&module.slots&&['pool','poolchips'].includes(canonicalWidgetStyle(style))?2:count<=3?3:count<=6?4:count<=9?5:6}:minimumWidgetSize(style);
  const capacity=module.rows[0]?.[1].max||0,digits=Math.max(...module.rows.map(([,r])=>Math.max(String(r.current).length,String(r.max).length))),discrete=['pips','matrix','orbit','segments'].includes(canonicalWidgetStyle(style));
  const scale=Math.max(.25,Math.min(1,Number.isFinite(contentScale)?contentScale:1));
  const size={w:Math.max(min.w,multi?(digits>6?12:digits>4?5:min.w):digits>6?5:digits>4?4:discrete&&capacity>6?4:min.w),h:Math.max(min.h,discrete&&capacity>6&&style!=='segments'?2:min.h)};

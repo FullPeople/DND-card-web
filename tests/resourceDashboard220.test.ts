@@ -31,6 +31,11 @@ describe('220 approved dashboard persistence and shared canvas',()=>{
   c.runtime.resources.a.max=1000;const before=structuredClone(c);const shown=dashboardLayout(resourceModules(Object.entries(c.runtime.resources)),c.quickbarLayout?.widgets,c.quickbarLayout?.attacks);expect(shown.widgets.a.style).toBe('orbit');expect(c).toEqual(before);
   for(const restored of [readCharacter(exportCharacter(c)).character,importOwlbear(exportLinkedOwlbear(c,evaluate(c)))])expect(restored.quickbarLayout).toEqual(c.quickbarLayout);
  });
+ it('keeps an existing horizontal spell group at its saved height without blocking neighboring modules',()=>{
+  const c=newCharacter();c.runtime.resources={'spell-slot:1':value(4),'spell-slot:2':value(3),'spell-slot:3':value(2),'pact-slot:2':value(2),surge:value(1)};
+  const saved={'spell-slot:1':normalizeWidget({x:0,y:0,w:12,h:2,style:'pool'}),'pact-slot:2':normalizeWidget({x:0,y:2,w:6,h:2,style:'pool'}),surge:normalizeWidget({x:6,y:2,w:5,h:2,style:'pips'})},attacks=normalizeWidget({resourceArea:true}),before=structuredClone(c);
+  const modules=resourceModules(Object.entries(c.runtime.resources),saved),shown=dashboardLayout(modules,saved,attacks);expect(shown.widgets).toEqual(saved);expectNoOverlap(Object.values(shown.widgets));expect(c).toEqual(before);
+ });
  it('never randomizes or mutates unsaved old cards while repeatedly projecting their dashboard',()=>{
   const c=newCharacter();c.runtime.resources={a:value(4),b:value(18),c:value(200)};const before=structuredClone(c);
   const rng=vi.spyOn(Math,'random').mockImplementation(()=>{throw Error('render must not randomize');});

@@ -83,8 +83,8 @@ test('narrow touch pointer dragging from the gallery places one module without c
 test('a compact spell group keeps the saved geometry on the card and after reload without repacking neighbors',async({page})=>{
  await page.goto('/tests/fixtures/resource-dashboard220/index.html');await open(page);const initial=await read(page),pool=widget(page,'spell-slot:1'),pactBefore=await geometry(widget(page,'pact-slot:2')),surgeBefore=await geometry(widget(page,'surge'));
  await pool.locator('.resource-widget-face').click();await moveCells(page,'spell-slot:1',-8,0,'.handle-e');
- // Three actual spell pools remain legible at the supported six-cell minimum.
- await expect(pool).toHaveAttribute('data-grid-w','6');await expect(pool.locator('[data-subresource-id]')).toHaveCount(3);expect(await geometry(widget(page,'pact-slot:2'))).toEqual(pactBefore);expect(await geometry(widget(page,'surge'))).toEqual(surgeBefore);
+ // Three actual spell pools use four cells in the compact horizontal face.
+ await expect(pool).toHaveAttribute('data-grid-w','4');await expect(pool.locator('[data-subresource-id]')).toHaveCount(3);expect(await geometry(widget(page,'pact-slot:2'))).toEqual(pactBefore);expect(await geometry(widget(page,'surge'))).toEqual(surgeBefore);
  const arranged=await geometry(pool);await save(page).click();await editor(page).getByRole('button',{name:'关闭弹窗',exact:true}).click();const main=page.locator('.fixture-quickbar');expect(await geometry(main.locator('[data-resource-id="spell-slot:1"]'))).toEqual(arranged);expect(await geometry(main.locator('[data-resource-id="pact-slot:2"]'))).toEqual(pactBefore);expect(await geometry(main.locator('[data-resource-id="surge"]'))).toEqual(surgeBefore);
  await page.reload();expect(await geometry(main.locator('[data-resource-id="spell-slot:1"]'))).toEqual(arranged);expect((await read(page)).runtime.resources).toEqual(initial.runtime.resources);
 });
