@@ -1,0 +1,26 @@
+[Unit]
+Description=DND Center standalone character-card cloud API
+After=network.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+StateDirectory=dnd-card-cloud
+StateDirectoryMode=0700
+Environment=DND_CLOUD_RUN=1
+Environment=DND_CLOUD_DB=/var/lib/dnd-card-cloud/cards.sqlite
+Environment=DND_CLOUD_ORIGIN=https://dnd.center
+Environment=DND_CLOUD_PORT=5014
+Environment=DND_CLOUD_MODE=temporary-ip
+ExecStart=/opt/dnd-card-cloud/runtime/bin/node /opt/dnd-card-cloud/current/server.mjs
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

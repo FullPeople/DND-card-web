@@ -8,7 +8,8 @@ const read=(page:Page)=>page.locator('#fixture-data').textContent().then(value=>
 async function scale(page:Page,value:string){const range=editor(page).getByLabel('模块内部缩放',{exact:true});await range.focus();await range.press('Home');for(let n=0;n<Math.round((Number(value)-.25)/.05);n++)await range.press('ArrowRight');await expect(range).toHaveValue(value);}
 for(const width of [1280,390])test(`237 ${width}: compact artwork reclaims real footprint, frame controls roundtrip and divider has no dead gap`,async({page})=>{
  await page.setViewportSize({width,height:960});await fixture(page);const initial=await read(page),ring=widget(page),group=widget(page,'first'),original=(await ring.boundingBox())!;
- await expect(ring.locator('.resource-module-art')).toHaveCSS('border-top-width','0px');await expect(ring).toHaveCSS('padding','0px');
+ // The redesigned face carries a 1px design frame until the player overrides it; the cell itself has no padding.
+ await expect(ring.locator('.resource-module-art')).toHaveCSS('border-top-width','1px');await expect(ring).toHaveCSS('padding','0px');
  const divider=editor(page).getByRole('separator');expect((await divider.boundingBox())!.width).toBeLessThanOrEqual(1.1);
  await ring.locator('.resource-widget-face').click();await scale(page,'0.25');await editor(page).getByRole('button',{name:'紧凑尺寸',exact:true}).click();
  await expect(ring).toHaveAttribute('data-grid-w','1');await expect(ring).toHaveAttribute('data-grid-h','1');const compact=(await ring.boundingBox())!;expect(compact.width).toBeLessThan(original.width*.4);expect(compact.height).toBeLessThan(original.height*.4);

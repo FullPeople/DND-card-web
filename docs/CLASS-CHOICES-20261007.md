@@ -1,5 +1,19 @@
 # 职业专长与可选特性入口：本地候选，未发布
 
+## 2026-10-08：PR17 与已发布 254 主线的兼容整合
+
+只读核对 Web main `92cf89ca650e0ecef273f05b421cb1a95308ed1c`、PR17 `fd875ed`、未合并 PR20 `bff0489` 及 Data main `a59ed56d8399ecc5005e915aaadf44879c38c86f`。PR17 没有后续分支提交或接手评论，另一个开放 PR 是独立 255 云端工作；未发现重复职业选择分支。本轮只在 PR17 原分支合入已发布 main，不合入 PR20，不替其三个失败浏览器组修发布，不合并 PR17 到 main、不部署、不改权限或创建凭据。
+
+`merge-tree --write-tree` 与实际 `merge --no-commit --no-ff` 都复现唯一内容冲突 `docs/STATUS.md`；保留两侧全部历史并加本轮说明。App 与 web workflow 自动合并后逐项核对：职业来源选择、AI/EI 限定拖拽、`pruneQuickbar`、档案身份 / 子树 / 资源 / 旧答案均保留；同序编辑和纯显示编辑专项合计 **117 通过 / 0 失败 / 0 跳过**。没有重写已有角色数据或新增能力机制。合入的包版本 0.1.44、254 公告和云端代码属于已发布主线，候选不据此冒充职业入口线上已验证。
+
+Data PR8 确已合并，实际报告绑定 Web `09b53cf92405c67bb43511fb3869a1fcdbc02ce9`、229 输入及 49 模块；主线现有 Web 报告绑定 `7ad94f1`，均不能证明本次组合消费者。原 Windows 缓存未访问；通过已授权公开输入 URL 重新取得 **全部 229 份**，按真实 producer 的 `sha256(JSON.stringify(parsed body))` 对 Data a59 输入账本逐条验证，229 匹配、0 缺失 / 摘要不符。新组装 index SHA256 为 `1d3bd0f6af68f4511f20fd9ad2791a3de0d80ad3198bdab3708bc9b34a52e8c4`，不是旧 Windows index。原数据只存在忽略的 `.cache/pr17-inputs`，不提交源全文或私有角色资料。
+
+在隔离 Data 只读克隆使用实际 producer，并只应用公开的最小绑定补丁到本地脚本；不写 Data 远端。补丁增加本次真实编辑流程使用的 `src/core/resourceWidgets.ts`，保留此前 `quickbar.ts` / 导入校验 / 新入口绑定。正式审计结果、实际消费者 SHA、运行模块和统计以本轮生成回执为准，不复制旧报告，不预先假定数量增加。需要原 Data 会话审阅并正式提交新报告，Web 才能锁定其真实 Data SHA；当前正式门禁继续保留。
+
+最终冻结 HEAD 的完整单测、类型、构建、浏览器运行状态、实际本地 producer 结果和远端 CI 保存在 PR17 与 `.local-evidence/class-level-choices/oct08/`。首次 npm ci 因默认缓存 `/home/agent/.npm` 不存在失败，使用工作区明确缓存路径后成功；首次专项未能启动不是测试通过。Node fetch 没有取得源，环境标准网络配置取得 200 并完成全部摘要检查，没有权限拒绝或改身份。下节旧 HEAD / 无缓存 / 未整合文字为当时记录，不覆盖本节真实进展。
+
+本轮合入 main 的实际 merge SHA 和回滚收据见 PR17。撤回这次主线整合使用 `git revert -m 1 <本轮实际merge-SHA>`，保留 PR17 原提交与后续 Git 历史，不 reset 或 force push；若后来有正式报告绑定，应先撤回绑定提交。回滚前保留原生卡备份，Git 回滚不迁移玩家存档。
+
 ## PR17 App 编辑末尾的 pin 保留补修
 
 终审 `2e3bcda` 发现 App.edit 在 `syncFeatures` 后仍只保留当前 `selections` 的快捷栏 ID，导致降级档案中的 grant / 子项 / 父来源 pin 被删除。先前直接调用 `syncFeatures` 的回归没有覆盖这个实际编辑末尾。本轮替换为共享 `pruneQuickbar`：保留 active selections 与档案中实际保存的 selection / parent ID；`quickbarEntries` 仍只读 active selections，不呈现或启用档案中的能力。

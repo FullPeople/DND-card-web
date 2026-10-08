@@ -44,6 +44,12 @@ function make(){
   c.runtime.resources={probe:{name:'八点缩放样本',current:2,max:5,type:'number'}};
   c.quickbarLayout.widgets={probe:normalizeWidget({x:5,y:2,w:4,h:2,page:0,style:'segments',color:'#527880'})};
  }
+ if(scenario==='sizes'){
+  // Every single-resource face at its smallest allowed footprint plus a few larger boxes.
+  const r=(name:string,current:number,max:number,unlimited=false)=>({name,current,max,unlimited,type:unlimited?'number':'count'});
+  c.runtime.resources={ready:r('专注',1,1),pips:r('动作如潮',3,5),segments:r('怒气',2,5),counter:r('金币',1874,9999),fraction:r('灵感',2,3),ring:r('气',4,7),orbit:r('灵能',2,4),square:r('法术点',11,17),diamond:r('命运',1,3),half:r('耐力',6,10),reservoir:r('血量储备',32,50),matrix:r('充能',5,9),big:r('储备',123456,0,true),a:r('甲',1,3),b:r('乙',44,100),c:r('丙',2,4),d:r('丁',7,10)};
+  c.quickbarLayout.widgets={ready:normalizeWidget({x:0,y:0,w:2,h:2,style:'ready',icon:'shield'}),pips:normalizeWidget({x:2,y:0,w:3,h:2,style:'pips',icon:'spark'}),segments:normalizeWidget({x:5,y:0,w:3,h:2,style:'segments'}),counter:normalizeWidget({x:8,y:0,w:4,h:3,style:'counter'}),fraction:normalizeWidget({x:0,y:2,w:3,h:3,style:'fraction'}),ring:normalizeWidget({x:3,y:2,w:2,h:3,style:'ring'}),orbit:normalizeWidget({x:5,y:2,w:2,h:3,style:'orbit'}),square:normalizeWidget({x:7,y:3,w:2,h:3,style:'square'}),diamond:normalizeWidget({x:9,y:3,w:3,h:3,style:'diamond'}),half:normalizeWidget({x:0,y:5,w:3,h:1,style:'half',contentScale:.25}),reservoir:normalizeWidget({x:0,y:0,w:2,h:3,page:1,style:'reservoir'}),matrix:normalizeWidget({x:2,y:0,w:4,h:3,page:1,style:'matrix',icon:'flame',color:'#a36d61'}),big:normalizeWidget({x:6,y:0,w:5,h:2,page:1,style:'counter'}),a:normalizeWidget({x:6,y:2,w:6,h:4,page:1,style:'poolbars',members:['a','b'],label:'远行物资'}),c:normalizeWidget({x:0,y:3,w:5,h:3,page:1,style:'poolchips',members:['c','d'],label:'小队补给',color:'#558977'})};
+ }
  if(scenario==='interaction'){
   c.runtime.resources={alpha:{name:'左侧测试资源',current:2,max:5,type:'count'},beta:{name:'右侧测试资源',current:3,max:6,type:'count'},peer:{name:'另一页测试资源',current:4,max:8,type:'count'}};
   c.quickbarLayout.widgets={alpha:normalizeWidget({x:0,y:0,w:4,h:2,page:0,style:'segments',color:'#527880'}),beta:normalizeWidget({x:4,y:0,w:4,h:2,page:0,style:'pips',color:'#8a7652'}),peer:normalizeWidget({x:0,y:0,w:4,h:3,page:1,style:'diamond'})};

@@ -1,5 +1,5 @@
 export const RELEASE_DATE='2026-10-07';
-export interface ReleaseSection {title:string;items:string[]}
+export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
  {title:'浏览器兼容与加载',items:['修复了部分旧版浏览器读取 Wiki 和连接服务器时加载失败的问题。','资料缓存写满时，已下载成功的资料仍可查看。','程序加载失败时，现在显示原因和重新加载按钮。']},
@@ -312,7 +312,7 @@ const RELEASE_250_SECTIONS:ReleaseSection[]=[
 ];
 const SUITE_RELEASE_250_SECTIONS:ReleaseSection[]=[...RELEASE_250_SECTIONS,{title:'适用范围与更新方式',items:['本次同步网站、新版插件与旧稳定插件的五页查看器。','真实枭熊房间仍待验证。关闭附加窗口，刷新枭熊房间，再重新打开插件。']}];
 export const RELEASE_SECTIONS:ReleaseSection[]=[
- {title:'熟练选择',items:['修复战俑等来源的工具选择没有列出可用工具的问题。','已保存但暂不可用、找不到或超额的选择仍保留提示，不会挤掉原有选择；手工熟练与资源余额保留。']},
+ {title:'熟练选择',items:['修复战俑等来源的工具选择没有列出可用工具的问题。','已保存但暂不可用、找不到或超额的选择仍保留提示，不会挤掉原有选择；手工熟练与资源余额保留。'],supersedes:['战俑工具选择仍待处理，实体手机和玩家原设备仍待验证。']},
  {title:'法术位图标',items:['修复自适应布局下法术位图标被裁剪、看起来消失的问题，保留普通、契约与自定义分组的颜色、缩放和已消耗次数。']},
  {title:'自动化进度与验证',items:['使用原有资料重新核对全部自动化覆盖记录，进度统计保持原有口径。','实体手机和玩家原设备仍待验证。']}
 ];
@@ -356,6 +356,22 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
  }
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'?[{title:'2026-10-08',sections:[
+  {title:'公告与更新日志',items:['公告顶部改为“公告内容”“自动化进度”“更新日志”三个标签。更新日志按日期分组，完整历史直接展开，间距更紧凑。']},
+  {title:'工作区与资料列表',items:['拖动角色卡与 Wiki 之间的分隔条到一侧，确认“隐藏该区域”提示后松开，即可只显示另一侧；顶部“重置隐藏区域”恢复双栏。隐藏状态保存在本机，角色内容保留。','资料列表行高统一为 20 像素，种族分组与条目同步缩小，保留排序、点击和拖拽。']},
+  {title:'资源快捷栏与编辑器',items:['资源样式统一为灰色标题带和内容区，紧凑模块按实际尺寸调整文字与图形。保留已保存的布局、外观与剩余次数。','资源编辑器集中预览、数值和外观设置，样式按逐点、仪表、数值与分组分类；公共资源设置同步使用分组预览。']},
+  {title:'临时云端上传',items:['无需登录的临时上传继续开放，同一个 IP 最多上传 10 张。真实 QQ 登录仍在申请中。','在接入 QQ 登录之前，所有的卡并不会安全保存，所有人都可以在云端看到所有卡。请保留完整 JSON 备份。'],supersedes:['QQ 登录申请中，云端登录与保存暂不可用；本机保存和 JSON 导入导出可正常使用。','每账号最多免费保存 10 张自有云端卡；被授权编辑的卡不占编辑者槽位。按独立 ID 可以免登录查看完整角色卡，不公开全站目录。']},
+  {title:'验证范围',items:['实体手机和玩家原设备仍待验证。QQ 登录与正式账号编辑授权尚未接入。']}
+ ]}]:[]),
+ ...(mode==='standalone'?[{title:'2026-10-07',sections:[
+  {title:'临时云端上传',items:['QQ 登录申请中，暂时开放无需登录的角色卡上传。同一个 IP 最多上传 10 张，由服务端限制；共用网络的人共享额度。','在接入 QQ 登录之前，所有的卡并不会安全保存，所有人都可以在云端看到所有卡。请勿上传私人信息，并保留完整 JSON 备份。','上传前需要勾选公开存储警告并明确确认。原上传浏览器可以修改或删除；清除 Cookie 或更换设备可能失去管理权限。并发冲突保留本机草稿。']},
+  {title:'角色卡库',items:['改为细标题栏、左侧选项和中间主要界面，延续灰色切角样式。','每张新云端卡使用 6 位大写字母 ID，例如 KQXJTP；公开目录和独立 ID 均可查看完整五页。旧站迁移和 JSON 备份入口继续保留。']}
+ ]}]:[]),
+ ...(mode==='standalone'?[{title:'2026-10-07',sections:[
+  {title:'独立网站与角色卡库',items:['独立角色卡迁至 dnd.center/card/，角色卡库位于 dnd.center/library/。保留完整五页、规则计算和本机保存。','右上角“云端存储”在新标签页打开卡库，只有明确确认后才上传。','QQ 登录申请中，云端登录与保存暂不可用；本机保存和 JSON 导入导出可正常使用。']},
+  {title:'旧站迁移与备份',items:['旧站 obr.dnd.center/card/ 继续提供存档读取和完整 JSON 导出，不强制跳转。','在旧站“导入 / 导出”选择“全部可见角色”并下载 JSON，再在新站批量导入；核对五页、背景与资源后保留备份。','不同域名不会自动共享浏览器存档。Wiki 缓存和界面偏好需在新站重新建立。']},
+  {title:'云端保存说明',items:['每账号最多免费保存 10 张自有云端卡；被授权编辑的卡不占编辑者槽位。按独立 ID 可以免登录查看完整角色卡，不公开全站目录。','卡主可以指定 QQ 号管理编辑授权，只有卡主能删除云端卡。并发冲突保留本机草稿。以上云端登录操作仍待真实 QQ 接入后开放。']}
+ ]}]:[]),
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
  {title:'2026-10-07',sections:mode==='suite'?SUITE_RELEASE_250_SECTIONS:RELEASE_250_SECTIONS},
  {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_249_SECTIONS:RELEASE_249_SECTIONS},
@@ -399,3 +415,19 @@ export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:'2026-09-27-二',sections:mode==='suite'?PREVIOUS_SUITE_RELEASE_SECTIONS:PREVIOUS_RELEASE_SECTIONS},
  {title:'2026-09-27-一',sections:mode==='suite'?SUITE_ARCHIVED_RELEASE_SECTIONS:ARCHIVED_RELEASE_SECTIONS},
 ];
+
+/** Newest entries own corrections; historical batches remain available unchanged. */
+export function releaseLogFor(mode:'standalone'|'suite') {
+ const days=new Map<string,{title:string;sections:ReleaseSection[]}>(),superseded=new Set<string>();
+ for(const release of releaseHistoryFor(mode)){
+  const date=release.title.match(/^\d{4}-\d{2}-\d{2}/)?.[0]||release.title;
+  let day=days.get(date);
+  if(!day){day={title:date,sections:[]};days.set(date,day);}
+  for(const section of release.sections){
+   const items=section.items.filter(item=>!superseded.has(item)&&!day.sections.some(row=>row.items.includes(item)));
+   if(items.length){const existing=day.sections.find(row=>row.title===section.title);if(existing)existing.items.push(...items);else day.sections.push({title:section.title,items:[...items]});}
+   section.supersedes?.forEach(item=>superseded.add(item));
+  }
+ }
+ return Array.from(days.values()).filter(day=>day.sections.length);
+}
