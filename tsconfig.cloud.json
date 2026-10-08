@@ -1,1 +1,1 @@
-{"extends":"./tsconfig.json","include":["server/cloud","src/cloud","vite.cloud.config.ts","vite.library.config.ts"]}
+{"extends":"./tsconfig.json","include":["server/cloud","src/cloud","src/automation-progress.d.ts","vite.cloud.config.ts","vite.library.config.ts"]}
