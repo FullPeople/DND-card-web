@@ -1,4 +1,5 @@
 import {validWidget,validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
+import {CARD_COMPONENTS,validCardPalette} from './palette';
 import {legacyTraining} from './legacyTraining';
 import {validateRestState} from './automation/rest';
 import {correctSourceData} from './sourceCorrections';
@@ -146,6 +147,7 @@ export function validateCharacter(value: unknown): Character {
   if(c.hpProgression!==undefined){const h=c.hpProgression;assert(plain(h)&&['average','rolled'].includes(h.mode)&&plain(h.rolls)&&Object.keys(h.rolls).length<=100&&Object.values(h.rolls).every(v=>Array.isArray(v)&&v.length<=20&&v.every(n=>n===null||Number.isInteger(n)&&n>=1&&n<=100)),'逐级生命骰记录无效。');}
   if(c.biography!==undefined)assert(plain(c.biography)&&Object.values(c.biography).every(v=>typeof v==='string'&&v.length<=100000),'人物背景无效。');
   if(c.palette!==undefined)assert(plain(c.palette)&&Object.entries(c.palette).every(([key,v])=>['paper','surface','frame','heading','ink','badge'].includes(key)&&typeof v==='string'&&/^#[\da-f]{6}$/i.test(v)),'角色卡颜色无效。');
+  if(c.componentPalette!==undefined)assert(plain(c.componentPalette)&&Object.entries(c.componentPalette).every(([key,palette])=>CARD_COMPONENTS.includes(key as typeof CARD_COMPONENTS[number])&&plain(palette)&&validCardPalette(palette)),'角色卡组件颜色无效。');
   assert(c.portraitFrameHidden===undefined||typeof c.portraitFrameHidden==='boolean','头像框显示设置无效。');
   assert(c.overviewSpellsHidden===undefined||typeof c.overviewSpellsHidden==='boolean','主要页法术框显示设置无效。');
   if(c.tokenPortraitTransform!==undefined){const t=c.tokenPortraitTransform;assert(plain(t)&&Object.keys(t).every(k=>['x','y','zoom','frameWidth','frameHeight'].includes(k))&&['x','y','zoom'].every(k=>Number.isFinite(t[k]))&&Math.abs(t.x)<=300&&Math.abs(t.y)<=300&&t.zoom>=1&&t.zoom<=5&&['frameWidth','frameHeight'].every(k=>t[k]===undefined||Number.isFinite(t[k])&&t[k]>0&&t[k]<=2000),'棋子头像变换无效。');}

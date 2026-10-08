@@ -17,6 +17,7 @@ import '../ui/domesticCompact.css';
 import '../ui/screenLayout.css';
 import './gallerySheet.css';
 
-export default function SheetPreview({character,active}:{character:Character;active:boolean}){
- return <UiLanguageProvider><SourceProvider><PlayerSheet character={character} preview active={active}/></SourceProvider></UiLanguageProvider>;
+import '../ui/appearance.css';
+export default function SheetPreview({character,active,displayOnly=true,originalJson,onReload}:{character:Character;active:boolean;displayOnly?:boolean;originalJson?:string;onReload?:()=>void}){
+ return <UiLanguageProvider><SourceProvider><PlayerSheet character={character} preview={displayOnly} displayOnly={displayOnly} active={active} originalJson={originalJson} onReload={onReload}/></SourceProvider></UiLanguageProvider>;
 }
