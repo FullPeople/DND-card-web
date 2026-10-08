@@ -43,6 +43,7 @@ evidence/
 test-results-choices/
 
 .local-evidence/
+.deployment/
 test-results-screen/
 
 __pycache__/
