@@ -144,6 +144,15 @@ class ArtifactTests(unittest.TestCase):
             self.assertEqual((root / 'candidate/card/index.html').read_bytes(), b'new card')
             self.assertEqual((root / 'candidate/card/index.html').stat().st_mode & 0o777, 0o644)
 
+    def test_existing_unicode_avatar_names_remain_valid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); archive = root / 'artifact.tgz'
+            archive_data(archive, extra={'card/support/supporter-avatars/xhchi_小火车.png': b'avatar'})
+            metadata, _ = c.inspect_archive(archive)
+            c.extract_frontends(archive, root / 'candidate')
+            self.assertIn('card/support/supporter-avatars/xhchi_小火车.png', metadata['files'])
+            self.assertEqual((root / 'candidate/card/support/supporter-avatars/xhchi_小火车.png').read_bytes(), b'avatar')
+
     def test_paths_links_duplicates_and_missing_second_target_denied(self):
         for options in ({'extra': {'index.html': b'home'}}, {'extra': {'card/../../etc/shadow': b'evil'}},
                         {'extra': {'card/assets/../index.html': b'evil'}}, {'symlink': True}, {'duplicate': True},

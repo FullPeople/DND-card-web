@@ -124,7 +124,8 @@ def safe_path(name):
     path = PurePosixPath(name)
     require(isinstance(name, str) and name == path.as_posix() and not path.is_absolute()
             and len(name) <= 240 and len(path.parts) >= 2 and path.parts[0] in TARGETS
-            and all(re.fullmatch(r'[A-Za-z0-9_.-]+', part) and part not in ('.', '..') for part in path.parts),
+            and all(re.fullmatch(r'[\w.-]+', part) and part not in ('.', '..')
+                    and len(part.encode('utf-8')) <= 255 for part in path.parts),
             'artifact-path-denied')
     return path
 
