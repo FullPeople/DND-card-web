@@ -1,7 +1,8 @@
-export const RELEASE_DATE='2026-10-07';
+export const RELEASE_DATE='2026-10-08';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
+ {title:'调色盘与规则资料',items:['上栏增加统一调色盘，可分别调整基础界面、Wiki 与角色卡组件；配色随浏览器或角色保存。','Wiki 条目右键可以创建自定义副本。','法术悬浮提示不再显示学习者列表，完整 Wiki 仍保留这项资料。']},
  {title:'浏览器兼容与加载',items:['修复了部分旧版浏览器读取 Wiki 和连接服务器时加载失败的问题。','资料缓存写满时，已下载成功的资料仍可查看。','程序加载失败时，现在显示原因和重新加载按钮。']},
  {title:'本次修复：职业与法术',items:[
   '现在每个主职业都可以单独查找和添加子职了。',

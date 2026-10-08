@@ -9,16 +9,16 @@ body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(-
 .cloud-library button:not(.player-viewer *, .cloud-gallery-select,.palette-drawer *, .palette-toggle){color:var(--ui-buttonInk)!important}.cloud-library button:not(.player-viewer *, .cloud-gallery-select,.palette-drawer *, .palette-toggle)::before{background:var(--ui-button)!important}
 .cloud-sidebar nav [aria-current=page]{color:var(--ui-selectedInk)!important}.cloud-sidebar nav [aria-current=page]::before{background:var(--ui-selected)!important}
 .cloud-stack-id button,.cloud-id-box button{color:var(--ui-buttonInk,#303239)!important;background:var(--ui-button,#e5e5e5)!important}.cloud-stack-id button::before{background:var(--ui-button,#e5e5e5)!important}
-.wiki-pane{--ink:var(--wiki-ink);--muted:var(--wiki-muted);--accent:var(--wiki-link);--line:var(--wiki-line);background:var(--wiki-background);color:var(--wiki-ink)}
-.wiki-pane :is(.wiki-header,.wiki-footer,.wiki-filters,.catalog-status,.category-tabs,.custom-create,.library-toolbar){background:var(--wiki-area);color:var(--wiki-ink);border-color:var(--wiki-line)}
-.wiki-pane :is(.entry-detail,.reading-placeholder,.detail-frozen,.wiki-detail,.custom-entry-editor){background:var(--wiki-background);color:var(--wiki-ink)}
-.wiki-pane :is(.catalog-entry,.entry-row,.library-entry,.catalog-item){background:var(--wiki-entry);color:var(--wiki-entryInk);border-color:var(--wiki-line)}
-.wiki-pane :is(.catalog-entry,.entry-row,.library-entry,.catalog-item) :is(strong,b){color:var(--wiki-entryInk)}
-.wiki-pane :is(.catalog-entry,.entry-row,.library-entry,.catalog-item):is(.active,[aria-selected=true]),.wiki-pane .category-tabs button.active{background:var(--wiki-selected);color:var(--wiki-selectedInk);border-color:var(--wiki-line)}
-.wiki-pane :is(h1,h2,h3,h4,.entry-title,.entry-name){color:var(--wiki-title)}.wiki-pane :is(a,.reference-link,.rule-link,.entry-link){color:var(--wiki-link)}
-.wiki-pane :is(small,.source-name,.source-tag,.catalog-status,.entry-source){color:var(--wiki-muted)}.wiki-pane :is(.feature-subentry,.resolved-feature,.entry-inset){background:var(--wiki-feature);color:var(--wiki-featureInk);border-color:var(--wiki-line)}
-.wiki-pane table{color:var(--wiki-tableInk);background:var(--wiki-tableCell);border-color:var(--wiki-tableLine)}.wiki-pane table :is(td,th){border-color:var(--wiki-tableLine);color:var(--wiki-tableInk);background:var(--wiki-tableCell)}
-.wiki-pane table th{background:var(--wiki-tableHeading);color:var(--wiki-tableHeadingInk)}.wiki-pane table tbody tr:nth-child(even) td{background:var(--wiki-tableAlternate)}
+.app-shell .wiki-pane{--ink:var(--wiki-ink);--muted:var(--wiki-muted);--accent:var(--wiki-link);--line:var(--wiki-line);background:var(--wiki-background);color:var(--wiki-ink)}
+.app-shell .wiki-pane :is(.wiki-header,.wiki-footer,.wiki-filters,.catalog-status,.category-tabs,.custom-create,.library-toolbar){background:var(--wiki-area);color:var(--wiki-ink);border-color:var(--wiki-line)}
+.app-shell .wiki-pane :is(.entry-detail,.reading-placeholder,.detail-frozen,.wiki-detail,.custom-entry-editor){background:var(--wiki-background);color:var(--wiki-ink)}
+.app-shell .wiki-pane :is(.catalog-entry,.entry-row,.library-entry,.catalog-item){background:var(--wiki-entry);color:var(--wiki-entryInk);border-color:var(--wiki-line)}
+.app-shell .wiki-pane :is(.catalog-entry,.entry-row,.library-entry,.catalog-item) :is(strong,b){color:var(--wiki-entryInk)}
+.app-shell .wiki-pane :is(.catalog-entry,.entry-row,.library-entry,.catalog-item):is(.active,[aria-selected=true]),.app-shell .wiki-pane .category-tabs button.active{background:var(--wiki-selected);color:var(--wiki-selectedInk);border-color:var(--wiki-line)}
+.app-shell .wiki-pane :is(h1,h2,h3,h4,.entry-title,.entry-name){color:var(--wiki-title)}.app-shell .wiki-pane :is(a,.reference-link,.rule-link,.entry-link){color:var(--wiki-link)}
+.app-shell .wiki-pane :is(small,.source-name,.source-tag,.catalog-status,.entry-source){color:var(--wiki-muted)}.app-shell .wiki-pane :is(.feature-subentry,.resolved-feature,.entry-inset){background:var(--wiki-feature);color:var(--wiki-featureInk);border-color:var(--wiki-line)}
+.app-shell .wiki-pane table{color:var(--wiki-tableInk);background:var(--wiki-tableCell);border-color:var(--wiki-tableLine)}.app-shell .wiki-pane table :is(td,th){border-color:var(--wiki-tableLine);color:var(--wiki-tableInk);background:var(--wiki-tableCell)}
+.app-shell .wiki-pane table th{background:var(--wiki-tableHeading);color:var(--wiki-tableHeadingInk)}.app-shell .wiki-pane table tbody tr:nth-child(even) td{background:var(--wiki-tableAlternate)}
 .paper [data-palette-component=identity]{--paper-surface:var(--card-identity-surface,var(--card-all-surface));--paper-frame:var(--card-identity-frame,var(--card-all-frame));--paper-heading:var(--card-identity-heading,var(--card-all-heading));--paper-ink:var(--card-identity-ink,var(--card-all-ink));--paper-badge:var(--card-identity-badge,var(--card-all-badge))}
 .paper [data-palette-component=abilities]{--paper-surface:var(--card-abilities-surface,var(--card-all-surface));--paper-frame:var(--card-abilities-frame,var(--card-all-frame));--paper-heading:var(--card-abilities-heading,var(--card-all-heading));--paper-ink:var(--card-abilities-ink,var(--card-all-ink));--paper-badge:var(--card-abilities-badge,var(--card-all-badge))}
 .paper [data-palette-component=skills]{--paper-surface:var(--card-skills-surface,var(--card-abilities-surface,var(--card-all-surface)));--paper-frame:var(--card-skills-frame,var(--card-all-frame));--paper-heading:var(--card-skills-heading,var(--card-all-heading));--paper-ink:var(--card-skills-ink,var(--card-abilities-ink,var(--card-all-ink)))}
@@ -31,3 +31,28 @@ body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(-
 .paper [data-palette-component=resources]{--paper-surface:var(--card-resources-surface,var(--card-all-surface));--paper-frame:var(--card-resources-frame,var(--card-all-frame));--paper-heading:var(--card-resources-heading,var(--card-all-heading));--paper-ink:var(--card-resources-ink,var(--card-all-ink));--paper-badge:var(--card-resources-badge,var(--card-all-badge))}
 .paper [data-palette-component]{color:var(--paper-ink)}.paper [data-palette-component] :is(.cell-surface,.cell-content){background:var(--paper-surface);color:var(--paper-ink)}.paper [data-palette-component] .cell-heading{background:var(--paper-heading)}
 .paper [data-palette-component=skills]{background:var(--paper-surface);color:var(--paper-ink)}.paper [data-palette-component=skills] :is(b,span){color:var(--paper-ink)}
+
+.app-shell .wiki-pane :is(.catalog-row,.catalog-race-group){background:var(--wiki-entry);color:var(--wiki-entryInk);border-color:var(--wiki-line)}
+.app-shell .wiki-pane .catalog-row .entry-name{color:var(--wiki-entryInk)}
+.app-shell .wiki-pane .catalog-row:is(.active,:hover){background:var(--wiki-selected);color:var(--wiki-selectedInk);outline-color:var(--wiki-line)}
+.app-shell .wiki-pane .catalog-row:is(.active,:hover) .entry-name{color:var(--wiki-selectedInk)}
+.app-shell .wiki-pane :is(.catalog-columns,.document-nav,.document-heading-toggle,.document-section.depth-1,.document-section.depth-2){background:var(--wiki-area);border-color:var(--wiki-line)}
+.app-shell .wiki-pane :is(.inline-reference,.text-link){color:var(--wiki-link)}
+.app-shell .wiki-pane .rules-prose :is(h3,h4){color:var(--wiki-title)}
+.app-shell .wiki-pane .document-section .document-heading-toggle{color:var(--wiki-title)}
+
+.paper .cell-heading,.paper .cell-heading h3{color:var(--paper-headingInk,#fff)}
+.paper [data-palette-component=identity] .cell-heading,.paper [data-palette-component=identity] .cell-heading h3{color:var(--card-identity-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=abilities] .cell-heading,.paper [data-palette-component=abilities] .cell-heading h3{color:var(--card-abilities-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=skills] .cell-heading,.paper [data-palette-component=skills] .cell-heading h3{color:var(--card-skills-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=vitals] .cell-heading,.paper [data-palette-component=vitals] .cell-heading h3{color:var(--card-vitals-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=portrait] .cell-heading,.paper [data-palette-component=portrait] .cell-heading h3{color:var(--card-portrait-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=features] .cell-heading,.paper [data-palette-component=features] .cell-heading h3{color:var(--card-features-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=spells] .cell-heading,.paper [data-palette-component=spells] .cell-heading h3{color:var(--card-spells-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=inventory] .cell-heading,.paper [data-palette-component=inventory] .cell-heading h3{color:var(--card-inventory-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=background] .cell-heading,.paper [data-palette-component=background] .cell-heading h3{color:var(--card-background-headingInk,var(--card-all-headingInk,#fff))}
+.paper [data-palette-component=resources] .cell-heading,.paper [data-palette-component=resources] .cell-heading h3{color:var(--card-resources-headingInk,var(--card-all-headingInk,#fff))}
+.paper.page-1 .cell-heading,.paper.page-1 .cell-heading h3{color:var(--card-features-headingInk,var(--card-all-headingInk,#fff))}
+.paper.page-2 .cell-heading,.paper.page-2 .cell-heading h3{color:var(--card-background-headingInk,var(--card-all-headingInk,#fff))}
+.paper.page-3 .cell-heading,.paper.page-3 .cell-heading h3{color:var(--card-spells-headingInk,var(--card-all-headingInk,#fff))}
+.paper.page-4 .cell-heading,.paper.page-4 .cell-heading h3{color:var(--card-inventory-headingInk,var(--card-all-headingInk,#fff))}
