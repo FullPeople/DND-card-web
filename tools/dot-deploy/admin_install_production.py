@@ -152,7 +152,7 @@ def install(revision, apply, installed_revision=None):
               'newSecretNames': [], 'identityReused': True, 'productionEntry': str(LIB / 'server_entry.py'),
               'installedFileHashes': {path: sha(source) for path, source in source_files.items()},
               'onlineVersionWrites': False, 'previousRevision': installed_revision,
-              'sshPolicyChanged': not bool(installed_revision), 'sshReloaded': not bool(installed_revision)}
+              'sshPolicyChanged': bool(apply) and not bool(installed_revision), 'sshReloaded': bool(apply) and not bool(installed_revision)}
     if not apply:
         return {**result, 'status': 'installation-preflight-passed'}
     import fcntl

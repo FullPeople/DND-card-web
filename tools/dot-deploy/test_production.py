@@ -337,10 +337,16 @@ class RunnerAndInstallerTests(unittest.TestCase):
              patch.object(runner, 'fresh_token', return_value='FRESH_TOKEN'):
             self.assertEqual(runner.reconcile(['ssh'], data, Path('archive')), response)
             self.assertEqual([call.args[1]['operation'] for call in transfer.call_args_list], ['publish', 'status'])
-        with patch.object(runner, 'transfer', side_effect=c.Denied('publisher-lock-busy')), \
+        with patch.object(runner, 'transfer', side_effect=[c.Denied('ssh-transfer-timeout')] + [c.Denied('publisher-lock-busy')] * 3), \
              patch.object(runner, 'fresh_token', return_value='FRESH_TOKEN'):
             with self.assertRaisesRegex(runner.c.Denied, 'deployment-result-unknown'):
                 runner.reconcile(['ssh'], data, Path('archive'))
+
+    def test_explicit_permission_denial_stops_without_alternate_query(self):
+        with patch.object(runner, 'transfer', side_effect=runner.c.Denied('oidc-scope-denied')) as transfer:
+            with self.assertRaisesRegex(runner.c.Denied, 'oidc-scope-denied'):
+                runner.reconcile(['ssh'], request(), Path('archive'))
+            self.assertEqual(transfer.call_count, 1)
 
     def test_existing_identity_is_reused_and_unrestricted_or_multiple_keys_rejected(self):
         old = 'restrict,command="' + admin.OLD_COMMAND + '" ssh-ed25519 AAAA existing\n'

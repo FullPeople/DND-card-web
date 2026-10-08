@@ -59,8 +59,12 @@ def transfer(command, envelope, archive=None, timeout=600):
 def reconcile(command, envelope, archive):
     try:
         return transfer(command, envelope, archive if envelope['operation'] in ('preflight', 'publish') else None)
-    except Exception:
+    except Exception as error:
         if envelope['operation'] not in ('preflight', 'publish'): raise
+        # Explicit authentication, permission and validation denials are final.
+        # Only ambiguous transport/runtime failures justify a status query.
+        ambiguous = {'ssh-transfer-timeout', 'ssh-transfer-failed', 'invalid-server-response', 'deployment-unavailable'}
+        if type(error).__name__ == 'Denied' and str(error) not in ambiguous: raise
     query = {**envelope, 'operation': 'status'}
     # An SSH exit/timeout is not proof of a failed publication. Read physical
     # target hashes with a fresh short-lived token; never retry a write here.

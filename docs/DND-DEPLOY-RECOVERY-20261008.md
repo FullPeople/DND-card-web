@@ -16,7 +16,7 @@
 
 frontend.py 在备份前写 preparing；持久备份/候选后写 prepared；每目标写 publish/restore intent，原子交换和目录 fsync 后再写结果。JSON 临时文件、rename 后的父目录与备份/候选均 fsync。进程死在交换与结果写入之间时，status 用完整实际树哈希消除歧义，recover 只接受冻结基线/候选。补偿失败保存 recovery-required 并继续尝试另一个目标。外部漂移拒绝覆盖；数据库只读检查，后续玩家记录保留。恢复/回滚验证 card 和 library HTTP。
 
-服务器持久保存不含 OIDC 的 attempt binding、manifest 指针与结果。同 attempt 重复请求先核对身份字段/封包哈希，再返回实际状态，不再重复交换。SSH 超时或断开仅触发带新 OIDC 的只读查询；无法查询则明确 publicationOutcome=unknown，不宣称失败或成功。成功回执先持久化，清理失败只标 cleanupPending。
+服务器持久保存不含 OIDC 的 attempt binding、manifest 指针与结果。同 attempt 重复请求先核对身份字段/封包哈希，再返回实际状态，不再重复交换。明确身份/权限/校验拒绝立即停止；仅 SSH 超时或不明确断开触发带新 OIDC 的只读查询；无法查询则明确 publicationOutcome=unknown，不宣称失败或成功。成功回执先持久化，清理失败只标 cleanupPending。
 
 preflight 保存唯一封包，publish 从该成功 preflight 的 GitHub artifact 下载原始 bytes，服务器核对完整 archive hash/bytes、source、CI、基线与 sealed manifest；不重新构建。未完成的 preflight、self-reference、错误哈希和新旧源不匹配均拒绝。保留完整 Git blob ZIP核验、限额、独立备份、空间预算与 assets/downloads。
 
@@ -29,7 +29,7 @@ preflight 保存唯一封包，publish 从该成功 preflight 的 GitHub artifac
 | 安装相对路径 | 候选 SHA256 |
 | --- | --- |
 | `server_entry.py` | `faa58b5cec0862a2df4c23569bf2b630bd68228bea6336dcb5183e6c9e7c608d` |
-| `server_production.py` | `020fef889bceed6f78179b196230ed3b3eea111b89447b0ef4ed49a0a6c31cee` |
+| `server_production.py` | `4966ae2c08539feb3c876d8a265e340c3f4b2e02a9b27cc38743ebb1024a907a` |
 | `production_common.py` | `67d1e9b3b4a4f09e6457f94680fe96ce83da2ddcbf58e6be51765d155161f5af` |
 | `production/frontend.py` | `1af02bf054d0e040b8afe2e6921683a80e4cf97eba1f1b29aad09d6a3ff12e91` |
 | `production/publish.py` | `7aecd9312d8a97881121833698f03250912e20513ca641e6af0def1489b980b6` |
@@ -58,7 +58,7 @@ sh "$INSTALL_DIR/tools/dot-deploy/admin-install-production.sh" \
 
 ## 验证与门槛
 
-本机 19 frontend unittest + 44 dot unittest + 8 publish unittest + 3 upgrade unittest + 8 Suite filesystem checks 全部通过；31 cloud 单元及完整 build:cloud 通过。actionlint 1.7.7 校验两份改动 workflow 通过。故障测试包含真实 Linux fork/os._exit：两次发布交换后和回滚交换后进程终止、备份准备中止、回执写失败/fsync失败、补偿失败、外部漂移、library HTTP失败、重复请求、错误批准封包、cleanup失败、SSH超时及安装首文件恢复失败。
+本机 19 frontend unittest + 45 dot unittest + 8 publish unittest + 3 upgrade unittest + 8 Suite filesystem checks 全部通过；31 cloud 单元及完整 build:cloud 通过。actionlint 1.7.7 校验两份改动 workflow 通过。故障测试包含真实 Linux fork/os._exit：两次发布交换后和回滚交换后进程终止、备份准备中止、回执写失败/fsync失败、补偿失败、外部漂移、library HTTP失败、重复请求、错误批准封包、cleanup失败、SSH超时及安装首文件恢复失败。
 
 最终候选同 SHA 的 Web/Cloud/contract CI 将在 Draft PR 运行并通过 GitHub 元数据回读；PR 事件 CI 不能冒充服务器要求的 main push/dispatch CI。独审及安装变更确认前不合并、不发布。本轮没有必要重发健康的 258。
 

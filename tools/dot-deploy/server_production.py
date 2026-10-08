@@ -141,7 +141,9 @@ def request_binding(request):
 
 def package_for(run_id, attempt):
     require(c.NUMBER.fullmatch(run_id) and c.NUMBER.fullmatch(attempt), 'invalid-attempt-reference')
-    return PACKAGES / ('dnd-center-actions-' + run_id + '-' + attempt)
+    path = PACKAGES / ('dnd-center-actions-' + run_id + '-' + attempt)
+    require(not path.is_symlink() and path.resolve() == path, 'unsafe-attempt-path')
+    return path
 
 
 def replay_status(package, request, publisher):
