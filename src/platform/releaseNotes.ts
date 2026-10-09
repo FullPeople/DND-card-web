@@ -329,13 +329,21 @@ const SUITE_RELEASE_259_SECTIONS:ReleaseSection[]=[...RELEASE_259_SECTIONS.filte
  {title:'枭熊房间',items:['棋子绑定选择器也读取房间角色目录，跨场景仍可选择已有角色。','血条设置增加占格框锚定，默认仍使用原有画布锚定。','角色读写继续使用房间中的棋子归属权限，枭熊插件不接入独立站云端。']},
  {title:'更新与验证范围',items:['关闭附加窗口，刷新枭熊房间后重新打开插件。','真实多人房间和实体手机仍待验证。']}
 ];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_262_SECTIONS:ReleaseSection[]=[
  {title:'条目与扩展',items:['新建条目在点击处附近编辑，长怪物文档可以滚动到底。','怪物编辑使用完整文档和虚线框，保留 JSON 模式与原有结构字段。','自行导入的扩展同时出现在自定义和原分类，来源开关继续生效。','规则与扩展支持拖入 JSON；编写示例补齐武器、护甲、工具和普通物品。']},
  {title:'角色管理',items:['角色簿支持排序、权限筛选和手动调整顺序，名字栏沿用手动顺序。','核对旧卡时先保留同步前备份，再更新当前卡，保留身份；失败时保留本机草稿。','空公共仓库默认收起；公告记住“不再弹出”的偏好，版本更新后仍展示新公告。','职业与自定义筛选明确显示当前查看状态。']},
  {title:'感谢支持',items:['感谢「用短弓磨死欧吕尔的神秘红发女子」支持 100 元。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_262_SECTIONS:ReleaseSection[]=[...RELEASE_262_SECTIONS,
  {title:'枭熊工作台',items:['玩家与怪物分开显示，卡名右键和卡面定位按钮可找到场景中仍绑定的角色。','Wiki 怪物右键可添加到场景中央，沿用图鉴先攻和隐形设置。','设置和功能按钮再次点击返回原界面，移除设置中的迷雾编辑器入口。','公告和设置在工作台内打开；旧插件每张卡不再播放启动画面。','枭熊继续使用房间保存，不接独立站云端；真实多人房间与实体设备仍待验收。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'Wiki 收藏',items:['规则资料增加“收藏”分类，普通条目右键可添加至收藏，收藏中的条目右键可移除。','收藏按当前浏览器保存，切换角色与刷新后仍保留；不同版本和来源分别收藏，来源和房间权限继续生效。']},
+ {title:'筛选与搜索',items:['仅非自定义、仅自定义和职业主体／子职的当前状态持续显示流动提示，选中背景与文字使用清楚的对比色。','全局搜索遵守规则与扩展中的基础版本及兼容设置，不再默认混列 2014 和 2024 条目。']},
+ {title:'就地填写与忽略',items:['非编辑模式也能点击虚线选项，自动开启编辑，并在当前特性框内展开选择区，保留当前页和其他数据。','可以忽略未填项：填写数字仍显示真实进度，虚线变为实线；全部填完或忽略后自动收起选项。','核对并同步旧卡后，未填选项按忽略处理；先备份旧卡，再更新当前卡，已有选择、资源和身份继续保留。','右键可以重新选择或显示自带选项；恢复填写后继续提醒未填项。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+ {title:'枭熊更新',items:['新版工作台同步 Wiki 收藏和就地选择，保留上一版小批次骰子提速修复。','收藏由各自浏览器保存，不写入房间公共规则；角色卡仍按房间权限保存。','关闭附加窗口，刷新枭熊房间后重新打开插件；真实多人房间与实体触屏待验收。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -377,6 +385,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
  {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
  {title:'2026-10-08',sections:[{title:'调色盘与规则资料',items:['上栏增加统一调色盘，可分别调整基础界面、Wiki 与角色卡组件；配色随浏览器或角色保存。','Wiki 条目右键可以创建自定义副本。','法术悬浮提示不再显示学习者列表，完整 Wiki 仍保留这项资料。','更新 11 个职业图标，使用提供的 PSD 图层，统一为透明背景和四周留空的正方形。']},{title:'本轮共享更新',items:['新建自定义条目、怪物示例和三态筛选同步到新版工作台，JSON 导入支持拖入文件。','默认法术位最小占位随环阶数量调整，保留已使用次数和手动布局。',...(mode==='standalone'?['卡库卡面为纯展示，点击进入平滑全屏后查看五页与细节；切换复用已读取内容，手机侧栏默认收起。','从首页和卡库进入在线车卡会直接打开卡面。']:['枭熊角色卡继续按房间权限保存，不接入独立站云端。'])]}]},

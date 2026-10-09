@@ -1,18 +1,19 @@
-import {useContext} from 'react';
+import {builtinOptionsVisible,sheetChoicePending,sheetChoiceIgnored} from '../core/automation/choices';
 import type {Character,Entry} from '../core/model';
 import {useSheetChoices} from './SheetChoicesContext';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
-import {SheetEditContext} from './SheetEdit';
 import {Reference} from './Reference';
 
 /** Display saved learning intent without creating selections or rule effects. */
 export function ClassChoiceRecords({c,catalog,mode}:{c:Character;catalog:Entry[];mode:'feat'|'optional'}){
- const choices=useSheetChoices(c,catalog).filter(choice=>choice.sourceProgression===mode),workspace=useChoiceWorkspace(),editing=useContext(SheetEditContext);
+ const allChoices=useSheetChoices(c,catalog),choices=allChoices.filter(choice=>choice.sourceProgression===mode),workspace=useChoiceWorkspace();
  if(!choices.length)return null;
  return <div className="class-choice-records" aria-label={mode==='feat'?'职业授予专长':'职业学习记录'}>{choices.map(choice=>{
   const owner=c.selections.find(row=>row.id===choice.ownerId)!;
+  const show=builtinOptionsVisible(c,owner.id,allChoices);
+  if(!show&&!choice.slots?.some(Boolean))return null;
   return <section key={choice.id} data-class-choice={choice.id}>
-   <button type="button" className={`sheet-choice-chip ${choice.complete?'':'is-pending'}`} data-choice-id={choice.id} disabled={!editing||choice.count===0} onClick={()=>workspace.open(choice.id)}>{owner.entry.name} · {owner.entry.source} · {choice.label} {choice.count?`${choice.selected.length}/${choice.count}`:'待核对'}</button>
+   {show?<button type="button" className={`sheet-choice-chip ${sheetChoicePending(c,choice)?'is-pending':''}`} data-choice-id={choice.id} disabled={workspace.canEdit===false} onClick={()=>workspace.open(choice.id)}>{owner.entry.name} · {owner.entry.source} · {choice.label} {choice.count?`${choice.selected.length}/${choice.count}`:'待核对'}{sheetChoiceIgnored(c,choice.id)&&'（已忽略）'}</button>:<strong>{owner.entry.name} · {choice.label}</strong>}
    {choice.count===0&&choice.hint&&<small>{choice.hint}</small>}
    {choice.support&&<small>{choice.support.reason} 当前发布验证：待核实。</small>}
    {mode==='optional'&&<small>已学记录；效果和物品操作手动处理</small>}

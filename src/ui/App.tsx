@@ -135,6 +135,7 @@ import { Reference } from './Reference';
 
 
 import { useLibrary } from './useLibrary';
+import {useLibraryFavorites} from './useLibraryFavorites';
 import { explicitlyExcluded, librarySourceEnabled, LIBRARY_TABS, tabOf, matchesLibraryTab, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
 
 import { registerOffline } from '../platform/offline';
@@ -261,9 +262,11 @@ export default function App() {
   },[defaultSources,workspace]);
   const sourceEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
   const selectedEntries = useMemo(()=>workspace?.characters.filter(row=>!inWorkbench||!row.id.startsWith('suite:')||(wb.access?wb.access.enabled.characterCards!==false&&wb.access.cards.some(card=>row.id===`suite:${wb.access!.room}:card:${card.id}`):!!wb.document&&!!wb.target&&row.id===workbenchCharacterId(wb.target))).flatMap(row=>row.selections.map(s=>s.entry))||[],[workspace?.characters,wb.access,wb.target?.key,wb.document]);
+  const favorites=useLibraryFavorites();
   const library = useLibrary(allEntries,selectedEntries,inWorkbench);
   const { kind, setKind, detail: storedDetail, setDetail, state: libraryState } = library;
   const detail=storedDetail&&c&&librarySourceEnabled(c,storedDetail)?storedDetail:undefined;
+  useEffect(()=>{if(kind==='favorites'&&storedDetail&&!favorites.has(storedDetail))setDetail(undefined);},[kind,storedDetail,favorites.has]);
   useEffect(()=>{if(!monstersVisible&&kind==='monster')setKind('class');if(!monstersVisible&&detail?.kind==='monster')setDetail(undefined);},[monstersVisible,kind,detail?.id]);
   const { edition: editionFilter, filters, sort, descending, query:categoryQuery } = libraryState;
   const libraryEntries=useMemo(()=>sourceEntries.filter(entry=>customVisibilityAllows(entry,customVisibility.mode)),[sourceEntries,customVisibility.mode]);
@@ -324,7 +327,7 @@ export default function App() {
       ||(inWorkbench?Object.values(wb.inventory?.containers||{}).flatMap(container=>container.items).map(row=>row.entry).find((row):row is Entry=>!!row&&same(row)):undefined)
       ||(inWorkbench?[...wb.cards,...wb.monsters].flatMap(row=>row.conditions||[]).map(overviewConditionEntry).find(same):undefined);
   };
-  useEntryMenuActions({character:c,editing,canSpawnMonster:inWorkbench&&wb.online&&wb.role==='GM'&&wb.enabled.bestiary!==false,createCustom:newCustomEntry,canCreateCustom:canAuthor&&!rulesReadonly&&!readOnly,scope:inWorkbench?JSON.stringify([wb.online,wb.role,wb.access?.room,wb.access?.scope,wb.access?.epoch]):undefined,readableEntry:readableMenuEntry,writable:!readOnly&&(!inWorkbench||!!wb.target?.write),add:entry=>add(entry),inspect,remove:id=>edit(draft=>removeSelection(draft,id)),canRemoveCustom:entry=>canAuthor&&!readOnly&&!rulesBusy&&customEntries.some(row=>row.id===entry.id),removeCustom:entry=>{void changeCustom(entry,true).catch(error=>setNotice(String(error)));}});
+  useEntryMenuActions({character:c,editing,isFavorite:favorites.has,toggleFavorite:entry=>{try{favorites.change(entry,!favorites.has(entry));}catch{setNotice('收藏未能保存，请检查浏览器存储空间和权限后重试。');}},canSpawnMonster:inWorkbench&&wb.online&&wb.role==='GM'&&wb.enabled.bestiary!==false,createCustom:newCustomEntry,canCreateCustom:canAuthor&&!rulesReadonly&&!readOnly,scope:inWorkbench?JSON.stringify([wb.online,wb.role,wb.access?.room,wb.access?.scope,wb.access?.epoch]):undefined,readableEntry:readableMenuEntry,writable:!readOnly&&(!inWorkbench||!!wb.target?.write),add:entry=>add(entry),inspect,remove:id=>edit(draft=>removeSelection(draft,id)),canRemoveCustom:entry=>canAuthor&&!readOnly&&!rulesBusy&&customEntries.some(row=>row.id===entry.id),removeCustom:entry=>{void changeCustom(entry,true).catch(error=>setNotice(String(error)));}});
   const [tab, setTab] = useState('sheet');
   const groupReturn=useRef<{page:string;tab:string;sheet:SheetPage;scrolls:{selector:string;top:number;left:number}[]}|undefined>(undefined);
   const mapFollowing=useRef(false);
@@ -348,16 +351,16 @@ export default function App() {
     }
   },[groupRoll?.id,wb.role]);
 
-  const [choiceRoute,setChoiceRoute]=useState<{id:string;characterId:string}>();
+  const [choiceRoute,setChoiceRoute]=useState<{id:string;characterId:string;host?:string;page:SheetPage}>();
   const choiceSnapshot=useRef<ReturnType<typeof library.snapshot>|undefined>(undefined);
   const activeChoice=useMemo(()=>c&&choiceRoute?.characterId===c.id?choicesSnapshot?.choices.find(r=>r.id===choiceRoute.id):undefined,[c?.id,choicesSnapshot,choiceRoute]);
   const choiceScope=useMemo(()=>c&&activeChoice?choiceCatalog(c,activeChoice,allEntries):undefined,[c,activeChoice,allEntries]);
   function closeChoice(){setChoiceRoute(undefined);if(choiceSnapshot.current){library.restore(choiceSnapshot.current);choiceSnapshot.current=undefined;}}
-  function openChoice(id:string){if(!c||!editing||readOnly||inWorkbench&&!wb.target?.write)return;const choice=choicesSnapshot?.choices.find(r=>r.id===id);if(!choice)return;
-    choiceSnapshot.current??=library.snapshot();setChoiceRoute({id,characterId:c.id});setSheetPage('特性');exitSheetFullscreen();
-    const scope=choiceCatalog(c,choice,allEntries);if(scope.wiki){library.setKind(scope.tab);library.patch({query:'',detailId:undefined,focus:undefined,edition:choice.sourceProgression&&choice.ownerEdition!=='both'?choice.ownerEdition||c.edition:c.edition,filters:scope.filters,sort:scope.tab==='spell'?'level':'source',descending:false},scope.tab);setFillPulse(n=>n+1);setTab('wiki');}else setTab('sheet');
+  function openChoice(id:string,host?:string){if(!c||readOnly||!writable.current||inWorkbench&&(!wb.online||!wb.target?.write))return;const choice=choicesSnapshot?.choices.find(r=>r.id===id);if(!choice)return;
+    choiceSnapshot.current??=library.snapshot();setEditing(true);setChoiceRoute({id,characterId:c.id,host,page:sheetPage});
+    const scope=choiceCatalog(c,choice,allEntries);if(scope.wiki){library.setKind(scope.tab);library.patch({query:'',detailId:undefined,focus:undefined,edition:choice.sourceProgression&&choice.ownerEdition!=='both'?choice.ownerEdition||c.edition:c.edition,filters:scope.filters,sort:scope.tab==='spell'?'level':'source',descending:false},scope.tab);setFillPulse(n=>n+1);}setTab('sheet');
   }
-  useEffect(()=>{if(choiceRoute&&(!activeChoice||!editing||sheetPage!=='特性'))closeChoice();},[c?.id,choiceRoute?.id,!!activeChoice,editing,sheetPage]);
+  useEffect(()=>{if(choiceRoute&&(!activeChoice||!editingRequested||sheetPage!==choiceRoute.page||readOnly||inWorkbench&&(!wb.online||!wb.target?.write)))closeChoice();},[c?.id,choiceRoute?.id,!!activeChoice,editingRequested,sheetPage,readOnly,wb.online,wb.target?.write]);
   useNarrowWikiDrag(tab,setTab,!inWorkbench||workbenchPage==='console'||workbenchPage==='sheet'&&!!wb.target);
   const [exception, setException] = useState('');
   const [importError, setImportError] = useState('');
@@ -532,9 +535,9 @@ export default function App() {
   const categoryEntries = useMemo(() => {
     if (!c) return [];
     const candidates=choiceScope?.wiki&&choiceScope.tab===kind?new Set(choiceScope.entries.map(e=>e.id)):undefined;
-    return libraryEntries.filter(e => (candidates?candidates.has(e.id):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
+    return libraryEntries.filter(e => (candidates?candidates.has(e.id):kind==='favorites'?favorites.has(e):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
       (candidates&&activeChoice?.sourceProgression?true:wikiEditionAllows(e,c,editionFilter)));
-  }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope]);
+  }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope,favorites.has]);
   const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery);
   const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery,matchesEntrySearch]);
   useEffect(() => { setException(''); }, [detail?.id]);
@@ -780,7 +783,7 @@ export default function App() {
     await queue.current;
     const w=workspaceRef.current!,original=w.characters.find(card=>card.id===plan.originalId),target=wb.target;
     if(saveFailed.current||!original||original.revision!==plan.originalRevision||w.activeId!==plan.originalId||!migrationStillCurrent(plan,inWorkbench?c!:withSiteSources(original,w.siteSources,w.packs)))throw Error('角色记录、保存状态或规则已变化，请重新打开资料同步并预览。');
-    const {backup,current}=cardSyncCopies(original,plan.card);
+    const {backup,current}=cardSyncCopies(original,plan.card,undefined,allEntries);
     if(inWorkbench){
       await createRemoteCard(backup,false,false);
       const live=getWorkbench(),latest=workspaceRef.current!,card=latest.characters.find(card=>card.id===original.id);
@@ -834,7 +837,7 @@ export default function App() {
     workbenchUncertain.current.has(c.id)?'上一项修改尚未确认，请先核对枭熊数据。':undefined;
   const managerId=inWorkbench?wb.target?.cardId||'':c.id;
   const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!readOnly}));
-  return <CloudSaveProvider enabled={standalone&&!inWorkbench} disabled={readOnly} characters={workspace.characters} readCharacter={async id=>{await queue.current;if(saveFailed.current||!writable.current)throw Error('本机保存尚未成功，云端同步已暂停。请先导出备份。');return (await readCards([id]))[0];}}><OverviewDashboardHost><SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
+  return <CloudSaveProvider enabled={standalone&&!inWorkbench} disabled={readOnly} characters={workspace.characters} readCharacter={async id=>{await queue.current;if(saveFailed.current||!writable.current)throw Error('本机保存尚未成功，云端同步已暂停。请先导出备份。');return (await readCards([id]))[0];}}><OverviewDashboardHost><SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,host:choiceRoute?.host,canEdit:!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write),browse:()=>{exitSheetFullscreen();setTab('wiki');},open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src={standalone?'./dnd-center-icon.png':startupComplete?'./exe_icon.png':'./favicon.svg'} alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
       <div className="header-tools"><PaletteButton open={paletteOpen} toggle={()=>setPaletteOpen(value=>!value)}/>{standalone&&<CloudSaveControl id={c.id}/>} {standalone&&<a className="suite-website-link" href="https://dnd.center/library/" target="_blank" rel="noopener noreferrer">云端存储</a>}{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<a className="suite-website-link" href="https://dnd.center/3-dragon/" target="_blank" rel="noopener noreferrer">{t('threeDragon')}</a>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{toggleWorkbenchPanel('features');setTab('sheet');}}>{t('featuresToggle')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{toggleWorkbenchPanel('settings');setTab('sheet');}}>{t('settings')}</button>}{(standalone||inWorkbench)&&<button onClick={()=>setAnnouncement(true)}>{t('announcements')}</button>}<button onClick={() => setModal('characters')}>{t('characters')} <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button><button onClick={() => setModal('rules')}>{t('rules')}</button><button className="primary" onClick={() => setModal('export')}>{t('transfer')}</button></div>
     </header>

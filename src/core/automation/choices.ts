@@ -119,18 +119,18 @@ export function chooseSheetOption(c:Character,id:string,value:string,catalog:Ent
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
   const saved=c.answers[id]||[];
-  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];finishBuiltinChoices(c,before,catalog);return;}
+  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
   const index=choice.count===1?0:choice.slots!.findIndex((v,i)=>i<choice.count&&!v);
   if(index<0)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
   setSheetChoiceSlot(c,id,index,value,catalog);return;
  }
- if(choice.channel==='spells'){chooseClassSpell(c,choice,option.entry);finishBuiltinChoices(c,before,catalog);return;}
+ if(choice.channel==='spells'){chooseClassSpell(c,choice,option.entry);resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
  const selected=choice.selected.includes(value)?choice.selected.filter(v=>v!==value):choice.count===1?[value]:[...choice.selected,value];
  if(selected.length>choice.count)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
  if(choice.channel==='abilities'){const target=(c.backgroundChoices||={})[choice.ownerId]||={};target.abilities=selected.length?{...option.abilities}:{};}
  else if(choice.channel==='equipment'){const target=(c.backgroundChoices||={})[choice.ownerId]||={};(target.equipment||={})[String(choice.equipmentIndex)]=selected[0]||'';}
  else c.answers[id]=selected;
- finishBuiltinChoices(c,before,catalog);
+ resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);
 }
 
 export function choiceSource(c:Character,choice:SheetChoice):string{
@@ -138,20 +138,40 @@ export function choiceSource(c:Character,choice:SheetChoice):string{
  while(row?.parentId&&!seen.has(row.id)){seen.add(row.id);const parent=c.selections.find(s=>s.id===row!.parentId);if(!parent)break;row=parent;}
  return row?.id||choice.ownerId;
 }
+/** Presentation acknowledgements never change answers, eligibility or effects. */
+export const sheetChoiceIgnored=(c:Character,id:string)=>!!c.featureLayout?.ignoredChoices?.includes(id);
+export const sheetChoicePending=(c:Character,choice:SheetChoice)=>!choice.complete&&!sheetChoiceIgnored(c,choice.id);
+function resumeSheetChoice(c:Character,id:string){if(c.featureLayout?.ignoredChoices)c.featureLayout.ignoredChoices=c.featureLayout.ignoredChoices.filter(key=>key!==id);}
+export function setSheetChoiceIgnored(c:Character,id:string,ignored:boolean,catalog:Entry[]=[]){
+ const before=sheetChoices(c,catalog);if(!before.some(choice=>choice.id===id))throw Error('此选择已不适用，请重新打开特性。');
+ const layout=c.featureLayout||={order:[],expanded:[]};
+ layout.ignoredChoices=[...new Set([...(layout.ignoredChoices||[]).filter(key=>key!==id),...(ignored?[id]:[])])];
+ if(ignored)finishBuiltinChoices(c,before,catalog);
+ else setBuiltinOptionsVisible(c,choiceSource(c,before.find(choice=>choice.id===id)!),true);
+}
+/** A reviewed legacy card keeps real answers and suppresses only present gaps. */
+export function ignoreUnfilledSheetChoices(c:Character,catalog:Entry[]=[]){
+ const view=c.automation?{...c,automation:{...c.automation,enabled:true}}:c;
+ const choices=sheetChoices(view,catalog),pending=choices.filter(choice=>!choice.complete);
+ if(!pending.length)return;
+ const layout=c.featureLayout||={order:[],expanded:[]};
+ layout.ignoredChoices=[...new Set([...(layout.ignoredChoices||[]),...pending.map(choice=>choice.id)])];
+ if(layout.optionsVisible)for(const source of new Set(choices.map(choice=>choiceSource(view,choice))))delete layout.optionsVisible[source];
+}
 export function builtinChoices(c:Character,ownerId:string,choices=sheetChoices(c)):SheetChoice[]{
  const firstLevel=c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0)===1;
  return choices.filter(r=>r.ownerId===ownerId&&(r.channel!=='equipment'||c.selections.find(row=>row.id===r.ownerId)?.entry.kind!=='class'||r.complete||firstLevel||c.featureLayout?.optionsVisible?.[ownerId]===true));
 }
 export function builtinOptionsVisible(c:Character,ownerId:string,choices=sheetChoices(c)):boolean{
  const source=choiceSource(c,{ownerId} as SheetChoice);
- return c.featureLayout?.optionsVisible?.[source]??choices.some(r=>choiceSource(c,r)===source&&!r.complete&&(r.channel!=='equipment'||c.selections.find(row=>row.id===r.ownerId)?.entry.kind!=='class'||c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0)===1));
+ return c.featureLayout?.optionsVisible?.[source]??choices.some(r=>choiceSource(c,r)===source&&sheetChoicePending(c,r)&&(r.channel!=='equipment'||c.selections.find(row=>row.id===r.ownerId)?.entry.kind!=='class'||c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0)===1));
 }
 export function setBuiltinOptionsVisible(c:Character,ownerId:string,visible:boolean){
  const layout=c.featureLayout||={order:[],expanded:[]};(layout.optionsVisible||={})[choiceSource(c,{ownerId} as SheetChoice)]=visible;
 }
 function finishBuiltinChoices(c:Character,before:SheetChoice[],catalog:Entry[]){
  const after=sheetChoices(c,catalog),sources=new Set(before.filter(r=>!r.complete).map(r=>choiceSource(c,r)));
- for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>r.complete)&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
+ for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>!sheetChoicePending(c,r))&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
 }
 /** Slot edits validate and replace atomically, including already full choices. */
 export function setSheetChoiceSlot(c:Character,id:string,index:number,value:string|undefined,catalog:Entry[]=[]){
@@ -168,7 +188,7 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
   if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }
- finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
+ resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
 }
 const classFeatRequirement=(id:string|undefined)=>!!id&&/:(?:class-feat|class-typed-feat):/.test(id);
 function parkClassChoiceGrant(c:Character,root:Selection){
@@ -278,5 +298,5 @@ export function claimStartingEquipment(c:Character,id:string,value:string,catalo
  const inv=c.inventory||=structuredClone(inventoryState(c));inv.coins.gp+=money;
  const target=(c.backgroundChoices||={})[owner.id]||={};(target.equipment||={})[String(choice.equipmentIndex)]=value;Object.assign(target.equipment,picks);
  if(sourceOwned)recordSourceEquipmentClaim(c,owner,parts,{[String(choice.equipmentIndex)]:value,...picks},claimedIds);
- finishBuiltinChoices(c,before,catalog);
+ resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);
 }

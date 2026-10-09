@@ -3,7 +3,7 @@ const collator = new Intl.Collator('zh-CN', { numeric: true });
 import { entryEdition, ABILITY_LABELS, type Ability, type Character, type Entry, type Kind } from '../core/model';
 import {trainingCategory} from './trainingData';
 
-export const LIBRARY_TABS = { class: '职业', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', condition: '状态', rule: '术语汇编', language: '语言', size: '体型', weaponProperty: '装备词条', weaponMastery: '武器精通', monster: '怪物图鉴', reference: '其他资料', custom:'自定义' };
+export const LIBRARY_TABS = { class: '职业', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', condition: '状态', rule: '术语汇编', language: '语言', size: '体型', weaponProperty: '装备词条', weaponMastery: '武器精通', monster: '怪物图鉴', reference: '其他资料', custom:'自定义', favorites:'收藏' };
 export type LibraryTab = keyof typeof LIBRARY_TABS;
 export type FacetSelection = Record<string, { include: string[]; exclude: string[] }>;
 export type Column = { key: string; label: string; value: (e: Entry) => string | number };
