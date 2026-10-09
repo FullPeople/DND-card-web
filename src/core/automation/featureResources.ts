@@ -45,7 +45,7 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
   if(!specs.length){
    const escaped=row.entry.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
    const use=text.match(new RegExp(`(?:可以|能够|能)(?:使用|施用)(?:(?:此|本|这项|该)(?:特性|能力)?|${escaped})(?:共计|总计|总共)?([一二两三四五六七八九十\\d]+)次`));
-   const once=text.match(/(?:(?:使用|施用)(?:本|此|该)特性后[^。；]{0,180}?|必须完成一次)(短(?:暂)?(?:休|歇)?(?:或|与|和|\/)长(?:休|歇)|长(?:休|歇)(?:或|与|和|\/)短(?:暂)?(?:休|歇)|(?:短|长)(?:暂)?(?:休|歇))/);
+   const once=text.split(/[。；]/).find(clause=>/(?:使用|施用)(?:本|此|该)特性后|必须完成一次/.test(clause)&&/(?:不能|无法|不可|不得|才能|方可)[^。；]{0,30}?(?:再次|再度|重新)?(?:使用|施用)(?:本|此|该)特性/.test(clause))?.match(/(短(?:暂)?(?:休|歇)?(?:或|与|和|\/)长(?:休|歇)|长(?:休|歇)(?:或|与|和|\/)短(?:暂)?(?:休|歇)|(?:短|长)(?:暂)?(?:休|歇))/);
    if(use||once){
     const recovery:Recovery={};
     for(const [key,word] of [['short','短'],['long','长']] as const){

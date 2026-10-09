@@ -78,6 +78,12 @@ it.each(['短休或长休','长休或短休','短暂或长休'])('once-use prose
  expect(planFeatureResources(c)).toMatchObject({grants:[{max:1,recovery:{short:'all',long:'all'}}],issues:[]});
 });
 
+it.each(['。','，'])('a repeated-check difficulty that resets after rest is not a once-use resource: %s',separator=>{
+ const c=card();c.selections[2].entry.raw={};
+ c.selections[2].entry.entries=[`使用此特性后，下一次检定难度增加 5${separator}完成短休或长休后，难度重置为 10。`];
+ expect(planFeatureResources(c).grants).toEqual([]);
+});
+
 it('a resolved dynamic class formula preserves spending through level changes, import and source toggles',()=>{
  const c=card({max:'@classes.reserve.levels',recovery:'long'});syncFeatureResources(c);
  const key=Object.keys(c.runtime.resources)[0];setResource(c,key,2);
