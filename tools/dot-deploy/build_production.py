@@ -37,8 +37,9 @@ def validate_context(source, ci, baseline, version):
     return c.verify_ci(request, os.environ.get('GITHUB_TOKEN'))
 
 
-def package(root, output, source, version, backend_version):
+def package(root, output, source, version, backend_version, qq_login='pending'):
     c.require(c.SHA.fullmatch(source) and c.VERSION.fullmatch(version), 'invalid-release-input')
+    c.require(qq_login in ('pending', 'ready'), 'invalid-qq-login-policy')
     c.require(subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip() == source,
               'checkout-source-mismatch')
     c.require(not subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], cwd=root, text=True).strip(),
@@ -55,7 +56,7 @@ def package(root, output, source, version, backend_version):
         shutil.copytree(built, candidate / name)
         (candidate / name / 'release.json').write_text(json.dumps({
             'version': version, 'sourceCommit': source, 'sourceRepository': c.REPOSITORY,
-            'targets': list(c.TARGETS), 'backendVersion': backend_version,
+            'targets': list(c.TARGETS), 'backendVersion': backend_version, 'qqLogin': qq_login,
         }, sort_keys=True) + '\n')
     source_zip = candidate / 'card/source.zip'
     subprocess.run(['git', 'archive', '--format=zip', '--output=' + str(source_zip), source], cwd=root, check=True)
@@ -66,9 +67,9 @@ def package(root, output, source, version, backend_version):
             name = file.relative_to(candidate).as_posix()
             c.safe_path(name)
             files[name] = c.sha_file(file)
-    metadata = {'format': 1, 'targets': list(c.TARGETS), 'sourceCommit': source,
+    metadata = {'format': 2, 'targets': list(c.TARGETS), 'sourceCommit': source,
                 'sourceRepository': c.REPOSITORY, 'version': version, 'backendVersion': backend_version,
-                'files': files, 'publisherHashes': {
+                'qqLogin': qq_login, 'files': files, 'publisherHashes': {
                     name: c.sha_file(root / 'deploy/cloud' / name) for name in ('frontend.py', 'publish.py')}}
     (candidate / 'artifact.json').write_text(json.dumps(metadata, sort_keys=True) + '\n')
     archive = output / 'deployment.tar.gz'
@@ -129,8 +130,8 @@ def main():
     c.require(hashlib.sha256(raw).hexdigest() == baseline, 'online-baseline-changed')
     health, _ = public_json('https://dnd.center/api/health')
     c.require(health.get('temporaryUpload') is True and health.get('quotaScope') == 'ip'
-              and health.get('qqLogin') == 'pending', 'backend-policy-changed')
-    result = package(Path.cwd(), Path.cwd() / '.deployment', source, version, health['version'])
+              and health.get('qqLogin') in ('pending', 'ready'), 'backend-policy-changed')
+    result = package(Path.cwd(), Path.cwd() / '.deployment', source, version, health['version'], health['qqLogin'])
     with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
         output.write('archive_sha256=' + result['sha256'] + '\narchive_bytes=' + str(result['bytes']) + '\n')
     print(json.dumps(result))

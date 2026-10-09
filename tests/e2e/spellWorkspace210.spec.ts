@@ -131,16 +131,19 @@ test('full class cantrips accept an explicitly recorded feat gift separately acr
  await expect(page.getByLabel('来源法术上限调整',{exact:true})).toHaveValue('0');
  await page.getByLabel('来源法术上限调整',{exact:true}).fill('1');await page.getByLabel('来源法术上限调整',{exact:true}).press('Enter');
  const group=page.locator('[data-source-cantrip-group="gift-feat"]'),ordinary=page.locator('[data-cantrip-group="Source Mage"]');
+ // Aim at the actual recipient, not a section center that may hit its heading
+ // after deletion, reflow or A4 scaling.
+ const recipient=group.locator('[data-spell-target="source"]');
  const library=page.locator('.spell-library'),mist=library.getByRole('button',{name:'小雾团',exact:true});
- await drag(page,mist,group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
- await drag(page,mist,group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
+ await drag(page,mist,recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
+ await drag(page,mist,recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
  await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();
  await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await group.getByRole('button',{name:'小雾团',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'从角色卡移除',exact:true}).click();
  await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
- await drag(page,library.getByRole('button',{name:'小雾团',exact:true}),group);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
- await drag(page,library.getByRole('button',{name:'小火花',exact:true}),group);await expect(page.locator('.suite-toast')).toContainText('赠送法术数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
+ await drag(page,library.getByRole('button',{name:'小雾团',exact:true}),recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
+ await drag(page,library.getByRole('button',{name:'小火花',exact:true}),recipient);await expect(page.locator('.suite-toast')).toContainText('赠送法术数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await expect(page.locator('.spell-tile-flight,.entry-drag-ghost,.drag-lifted,.drag-landing-hidden')).toHaveCount(0);await page.screenshot({path:test.info().outputPath('feat-cantrip-separate.png')});
  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);await group.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('feat-cantrip-separate-mobile.png'),fullPage:true});
 });

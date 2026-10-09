@@ -141,6 +141,14 @@ def safe_path(name):
     return path
 
 
+def qq_policy(metadata):
+    # Historical format-1 artifacts had only the pending policy. Never infer
+    # readiness from a missing field when replaying or recovering an old attempt.
+    value = metadata.get('qqLogin', 'pending')
+    require(isinstance(value, str) and value in ('pending', 'ready'), 'invalid-qq-login-policy')
+    return value
+
+
 def inspect_archive(archive, expected_sha=None):
     """Validate every regular member before creating files; never use extractall."""
     if expected_sha is not None:
@@ -169,10 +177,14 @@ def inspect_archive(archive, expected_sha=None):
                 metadata = json_unique(bytes(content))
             else:
                 hashes[member.name] = digest.hexdigest()
-    require(isinstance(metadata, dict) and set(metadata) == {
+    fields = {
         'format', 'targets', 'sourceCommit', 'sourceRepository', 'version',
-        'backendVersion', 'files', 'publisherHashes'}, 'invalid-artifact-metadata')
-    require(metadata['format'] == 1 and metadata['targets'] == list(TARGETS)
+        'backendVersion', 'files', 'publisherHashes'}
+    require(isinstance(metadata, dict) and type(metadata.get('format')) is int
+            and ((metadata['format'] == 1 and set(metadata) == fields)
+                 or (metadata['format'] == 2 and set(metadata) == fields | {'qqLogin'})), 'invalid-artifact-metadata')
+    qq_policy(metadata)
+    require(metadata['targets'] == list(TARGETS)
             and metadata['sourceRepository'] == REPOSITORY, 'artifact-scope-denied')
     require(isinstance(metadata['sourceCommit'], str) and SHA.fullmatch(metadata['sourceCommit']), 'invalid-artifact-sha')
     require(isinstance(metadata['version'], str) and VERSION.fullmatch(metadata['version']), 'invalid-artifact-version')
