@@ -342,8 +342,11 @@ export const RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'筛选与搜索',items:['仅非自定义、仅自定义和职业主体／子职的当前状态持续显示流动提示，选中背景与文字使用清楚的对比色。','全局搜索遵守规则与扩展中的基础版本及兼容设置，不再默认混列 2014 和 2024 条目。']},
  {title:'就地填写与忽略',items:['非编辑模式也能点击虚线选项，自动开启编辑，并在当前特性框内展开选择区，保留当前页和其他数据。','可以忽略未填项：填写数字仍显示真实进度，虚线变为实线；全部填完或忽略后自动收起选项。','核对并同步旧卡后，未填选项按忽略处理；先备份旧卡，再更新当前卡，已有选择、资源和身份继续保留。','右键可以重新选择或显示自带选项；恢复填写后继续提醒未填项。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_264_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
  {title:'枭熊更新',items:['新版工作台同步 Wiki 收藏和就地选择，保留上一版小批次骰子提速修复。','收藏由各自浏览器保存，不写入房间公共规则；角色卡仍按房间权限保存。','关闭附加窗口，刷新枭熊房间后重新打开插件；真实多人房间与实体触屏待验收。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'文字演出',items:['音乐板右侧新增独立的“文字演出”按钮，可配置标题、副标题、正文、字体、颜色、背景、动画和时长。','面板中可即时预览，也可只在自己的枭熊画面中预览；DM 可以直接向当前房间播放文字和效果。','支持自定义预设、长正文分页和停止本次演出，不生成 APNG。配置和预设保存在本机。','保留 Wiki 收藏、就地填写及小批次骰子修复。关闭附加窗口并刷新枭熊房间后重新打开插件；真实多人房间和实体设备仍待验收。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -384,7 +387,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
  }
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ ...(mode==='suite'?[{title:'2026-10-10-265',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
