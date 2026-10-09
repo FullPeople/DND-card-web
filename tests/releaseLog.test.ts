@@ -17,7 +17,7 @@ describe('date-grouped changelog',()=>{
   });
  }
  it('adds current history and framing fixes while retaining the previous palette and gallery day',()=>{
-  for(const mode of ['standalone','suite'] as const){const log=releaseLogFor(mode);expect(log[0].title).toBe(mode==='suite'?'2026-10-10':'2026-10-09');expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('撤回与重做');expect(JSON.stringify(log.find(day=>day.title==='2026-10-08'))).toContain('保存和导入配色文件');}
+  for(const mode of ['standalone','suite'] as const){const log=releaseLogFor(mode);expect(log[0].title).toBe('2026-10-10');expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('撤回与重做');expect(JSON.stringify(log.find(day=>day.title==='2026-10-08'))).toContain('保存和导入配色文件');}
   expect(JSON.stringify(releaseLogFor('standalone').find(day=>day.title==='2026-10-08'))).toContain('点击旁边的卡只切换');
  });
  it('keeps Suite-only changes in the Suite changelog',()=>{
@@ -29,8 +29,9 @@ describe('date-grouped changelog',()=>{
  });
  it('shows the new standalone batch and supersedes the former cloud policy without rewriting history',()=>{
   const raw=JSON.stringify(releaseHistoryFor('standalone')),log=releaseLogFor('standalone');
-  expect(log[0].title).toBe('2026-10-09');
-  expect(JSON.stringify(log[0])).toContain('赞助二维码');
+  expect(log[0].title).toBe('2026-10-10');
+  expect(JSON.stringify(log[0])).toContain('资源次数与来源');
+  expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('赞助二维码');
   expect(JSON.stringify(log)).toContain('三个标签');
   expect(JSON.stringify(log)).toContain('所有人都可以在云端看到所有卡');
   expect(JSON.stringify(log)).not.toContain('不公开全站目录');

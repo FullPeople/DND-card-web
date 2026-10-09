@@ -10,6 +10,10 @@
   "sourcesNotice": "书目来自既有来源登记与版本锁定的本地逐条快照。快照包含主库（含官方与 UA）及第三方；书目、核对和本地载荷均不代表当前发布可用。机制来源标签仍只表示原创软件夹具覆盖的身份。",
   "changes": [
     {
+      "date": "2026-10-10",
+      "summary": "重审原有 18,789 个规则身份：6,535 项具备至少一项计算或可用选择，净增 8 项。资源公式、具名次数表与恢复归属已修正；归属不明的多项休息限制仍需人工核对。"
+    },
+    {
       "date": "2026-10-05",
       "summary": "接入实际逐条核对快照并按来源／类别重算；保留本地完成标记和部分支持边界，历史测试不升级为当前发布可用。"
     },
@@ -238,7 +242,7 @@
       "category": "resources",
       "state": "partial",
       "playerAvailable": true,
-      "reviewedAt": "2026-10-05",
+      "reviewedAt": "2026-10-10",
       "sampleSources": [
         "XPHB"
       ],
@@ -253,9 +257,12 @@
       "tests": [
         "tests/automation-choices-resources.test.ts",
         "tests/sourceSpellMechanics217.test.ts",
-        "tests/resources.test.ts"
+        "tests/resources.test.ts",
+        "tests/featureResourceRules.test.ts"
       ],
-      "browserTests": []
+      "browserTests": [
+        "tests/e2e/featureResourceRules.spec.ts"
+      ]
     },
     {
       "id": "rest",
@@ -263,7 +270,7 @@
       "category": "resources",
       "state": "unavailable",
       "playerAvailable": false,
-      "reviewedAt": "2026-10-05",
+      "reviewedAt": "2026-10-10",
       "sampleSources": [
         "XPHB"
       ],
@@ -273,7 +280,8 @@
       ],
       "tests": [
         "tests/automation-choices-resources.test.ts",
-        "tests/transitionRest.test.ts"
+        "tests/transitionRest.test.ts",
+        "tests/featureResourceRules.test.ts"
       ],
       "browserTests": []
     },
