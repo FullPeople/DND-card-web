@@ -5,7 +5,7 @@ const units: Record<string, string> = { action: '动作', bonus: '附赠动作',
 const schools: Record<string, string> = { A: '防护', C: '咒法', D: '预言', E: '惑控', V: '塑能', I: '幻术', N: '死灵', T: '变化' };
 const shapes: Record<string, string> = { cone: '锥状', line: '线状', sphere: '球状', cube: '立方', radius: '半径', hemisphere: '半球', cylinder: '柱状' };
 const translate = (v: unknown) => units[String(v)] || String(v ?? '');
-export function EntryFacts({ entry, onLink, onEdit }: { entry: Entry; onLink: (ref: string, kind?: string) => void;onEdit?:(key:string,label:string)=>void }) {
+export function EntryFacts({ entry, onLink, onEdit }: { entry: Entry; onLink: (ref: string, kind?: string) => void;onEdit?:(key:string,label:string,anchor:HTMLElement,point?:{x:number;y:number})=>void }) {
   const r = entry.raw; const facts: [string, string][] = [];
   if (entry.kind === 'spell') {
     facts.push(['学派', `${r.level === 0 ? '戏法' : `${r.level} 环`} · ${schools[r.school] || r.school || '—'}${r.meta?.ritual ? ' · 仪式' : ''}`]);
@@ -57,5 +57,5 @@ export function EntryFacts({ entry, onLink, onEdit }: { entry: Entry; onLink: (r
   }
   if (!facts.length) return null;
   const editKeys:Record<string,string>={'学派':'school','施法时间':'time','施法距离':'range','法术成分':'components','持续时间':'duration','生命骰':'hd','豁免熟练':'proficiency','施法属性':'spellcastingAbility','速度':'speed','属性值加成':'ability','体型':'size','护甲基础值':'ac','武器伤害':'dmg1','同调':'reqAttune','专长类别':'category','先决条件':'prerequisite','获得等级':'level','类别':'typeRawLanguage','文字':'script','典型使用者':'typicalSpeakers'};
-  return <dl className="entry-facts">{facts.map(([label, value]) => <div key={label} className={onEdit?'canvas-region':undefined} role={onEdit?'button':undefined} tabIndex={onEdit?0:undefined} aria-label={onEdit?`修改${label}`:undefined} onClickCapture={onEdit?event=>{event.preventDefault();event.stopPropagation();onEdit(editKeys[label]||label,label);}:undefined} onKeyDown={onEdit?event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onEdit(editKeys[label]||label,label);}}:undefined}><dt>{label}</dt><dd><Inline text={value} onLink={onLink}/></dd></div>)}</dl>;
+  return <dl className="entry-facts">{facts.map(([label, value]) => <div key={label} className={onEdit?'canvas-region':undefined} role={onEdit?'button':undefined} tabIndex={onEdit?0:undefined} aria-label={onEdit?`修改${label}`:undefined} onClickCapture={onEdit?event=>{event.preventDefault();event.stopPropagation();onEdit(editKeys[label]||label,label,event.currentTarget,{x:event.clientX,y:event.clientY});}:undefined} onKeyDown={onEdit?event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onEdit(editKeys[label]||label,label,event.currentTarget);}}:undefined}><dt>{label}</dt><dd><Inline text={value} onLink={onLink}/></dd></div>)}</dl>;
 }

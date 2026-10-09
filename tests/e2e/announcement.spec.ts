@@ -108,6 +108,8 @@ test('勾选后本版本不再弹出，换版本仍会弹出，未勾选则下�
  await page.evaluate(key=>localStorage.setItem(key,'0.1.3'),ANNOUNCEMENT_KEY);
  await page.reload();
  await expect(dialog(page)).toBeVisible();
+ await expect(page.getByRole('checkbox',{name:'下次版本更新之前不再弹出'})).toBeChecked();
+ await page.getByRole('checkbox',{name:'下次版本更新之前不再弹出'}).uncheck();
  await page.getByRole('button',{name:'我知道了'}).click();
  await expect(dialog(page)).toBeHidden();
  expect(await page.evaluate(key=>localStorage.getItem(key),ANNOUNCEMENT_KEY)).toBe(null);

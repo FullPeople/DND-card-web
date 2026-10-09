@@ -22,7 +22,7 @@ export function StockBoard({container,targets=[],gm=false,disabled=false,operati
  const wb=useWorkbench();
  const recipientIds=new Set([...wb.cards,...wb.monsters].filter(card=>card.inScene&&(gm||card.write||!card.locked)).map(card=>card.kind==='monster'?`monster:${card.itemId}`:`card:${card.id}`));
  const recipients=targets.filter(target=>target.id!==container.id&&recipientIds.has(target.id));
- const [collapsed,setCollapsed]=useState(()=>{try{return container.kind==='public'&&localStorage.getItem('inventory-collapsed:'+container.id)==='true';}catch{return false;}});
+ const [collapsed,setCollapsed]=useState(()=>{try{const saved=localStorage.getItem('inventory-collapsed:'+container.id);return container.kind==='public'&&(saved===null?container.items.length===0:saved==='true');}catch{return container.kind==='public'&&container.items.length===0;}});
  const toggleCollapsed=()=>setCollapsed(value=>{try{localStorage.setItem('inventory-collapsed:'+container.id,String(!value));}catch{}return !value;});
  const [view,setView]=useState<'grid'|'list'>(()=>{try{return container.kind!=='public'&&localStorage.getItem('inventory-view:'+container.id)==='list'?'list':'grid';}catch{return 'grid';}}),[selected,setSelected]=useState<string[]>([]),[menu,setMenu]=useState<{x:number;y:number;ids:string[]}>(),[quantity,setQuantity]=useState('1'),[editingQuantity,setEditingQuantity]=useState(''),[split,setSplit]=useState<{row:Stock;target?:string;slot?:number}>(),[marquee,setMarquee]=useState<{x:number;y:number;w:number;h:number}>();
  useEffect(()=>{if(!menu)return;const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setMenu(undefined);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[!!menu]);

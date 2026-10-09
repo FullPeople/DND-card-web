@@ -1,4 +1,4 @@
-import {customField} from './customCanvasHelpers';
+import {customField,finishCustomField} from './customCanvasHelpers';
 import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announcement';
@@ -12,9 +12,9 @@ test('spell authoring offers field examples, saves without guessing JSON, and se
  await page.getByRole('button',{name:'查看参考格式',exact:true}).click();const reference=page.getByRole('dialog',{name:'自定义条目参考格式'});await expect(reference).toContainText('JSON');await expect(reference).toContainText('"concentration":true');await page.screenshot({path:test.info().outputPath('reference-format.png')});await reference.getByRole('button',{name:'关闭参考格式'}).click();
  await page.getByRole('button',{name:'使用必看！填写帮助'}).hover();await expect(page.getByRole('tooltip')).toContainText('复制创作提示词并打开 AI');
  await (await customField(page,'自定义条目名称')).fill('格式帮助验收法术');await (await customField(page,'法术环阶')).fill('1');await (await customField(page,'法术学派')).selectOption('V');
- await (await customField(page,'自定义条目正文')).fill('自制的完整规则说明。');await page.locator('.custom-entry-editor details>summary').click();const raw=page.getByLabel('自定义结构字段',{exact:true});const fields={...JSON.parse(await raw.inputValue()),time:'action',range:{type:'point',distance:{type:'feet',amount:60}},components:{v:true,s:true},duration:[{type:'instant'}]};await raw.fill(JSON.stringify(fields));
- await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.getByRole('alert')).toContainText('施法时间需要 JSON 数组');
- await raw.fill(JSON.stringify({...fields,time:[{number:1,unit:'action'}]}));await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.locator('.entry-detail')).toContainText('自制的完整规则说明');await expect(page.getByLabel('自定义条目名称',{exact:true})).toHaveCount(0);await page.screenshot({path:test.info().outputPath('custom-reading.png')});
+ await (await customField(page,'自定义条目正文')).fill('自制的完整规则说明。');await finishCustomField(page);await page.locator('.custom-entry-editor details>summary').click();const raw=page.getByLabel('自定义结构字段',{exact:true});const fields={...JSON.parse(await raw.inputValue()),time:'action',range:{type:'point',distance:{type:'feet',amount:60}},components:{v:true,s:true},duration:[{type:'instant'}]};await raw.fill(JSON.stringify(fields));
+ await finishCustomField(page);await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.getByRole('alert')).toContainText('施法时间需要 JSON 数组');
+ await raw.fill(JSON.stringify({...fields,time:[{number:1,unit:'action'}]}));await finishCustomField(page);await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.locator('.entry-detail')).toContainText('自制的完整规则说明');await expect(page.getByLabel('自定义条目名称',{exact:true})).toHaveCount(0);await page.screenshot({path:test.info().outputPath('custom-reading.png')});
  await page.reload();await expect(page.locator('.entry-detail')).toContainText('格式帮助验收法术');await expect(page.getByLabel('自定义条目名称',{exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'编辑此条目'}).click();expect(JSON.parse(await raw.inputValue()).time).toEqual([{number:1,unit:'action'}]);await page.getByRole('button',{name:'＋ 新建条目',exact:true}).click();await expect((await customField(page,'自定义条目名称'))).toHaveValue('自定义条目');await expect(page.locator('.catalog-row.active')).toHaveCount(0);
 });
@@ -75,11 +75,11 @@ test('wide custom reading keeps edit and new buttons clickable across reload and
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'自定义',exact:true}).click();
  await expect(page.locator('.wiki-layout')).toHaveClass(/wiki-columns/);
  await (await customField(page,'自定义条目类型')).selectOption('feat');await (await customField(page,'自定义条目名称')).fill('双列按钮验收');await (await customField(page,'自定义条目正文')).fill('原创测试专长正文。');
- await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.locator('.entry-detail')).toContainText('原创测试专长正文');
+ await finishCustomField(page);await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.locator('.entry-detail')).toContainText('原创测试专长正文');
  await page.getByRole('button',{name:'编辑此条目',exact:true}).click({timeout:5000});await expect((await customField(page,'自定义条目名称'))).toHaveValue('双列按钮验收');
- await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();
+ await finishCustomField(page);await page.getByRole('button',{name:'保存条目',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();
  await page.getByRole('button',{name:'编辑此条目',exact:true}).click();await expect((await customField(page,'自定义条目名称'))).toHaveValue('双列按钮验收');
- await page.getByRole('button',{name:'保存条目',exact:true}).click();await page.setViewportSize({width:1280,height:1080});await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
+ await finishCustomField(page);await page.getByRole('button',{name:'保存条目',exact:true}).click();await page.setViewportSize({width:1280,height:1080});await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
  await page.getByRole('button',{name:'编辑此条目',exact:true}).click();await page.getByRole('button',{name:'＋ 新建条目',exact:true}).click();await expect((await customField(page,'自定义条目名称'))).toHaveValue('自定义条目');
  await page.setViewportSize({width:2560,height:1080});await expect(page.locator('.wiki-layout')).toHaveClass(/wiki-columns/);await expect((await customField(page,'自定义条目名称'))).toBeEditable();
 });

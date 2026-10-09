@@ -1,0 +1,14 @@
+.character-context-menu{position:fixed;z-index:2147483000;width:190px;padding:5px;border:2px solid #555;background:#ddd;box-shadow:2px 4px 12px #0005}
+.character-context-menu button{width:100%;display:flex;align-items:center;gap:8px;padding:8px;background:#eee;color:#333;border:1px solid #888}
+.character-context-menu button:disabled{opacity:.5}
+.card-locate{display:inline-flex;align-items:center;justify-content:center;color:inherit}
+.monster-editor-document{background:var(--suite-paper,#eee);color:var(--suite-ink,#333);border-color:#555}
+.monster-editor-document .monster-editor-footer{background:var(--suite-paper,#eee)}
+.canvas-field-editor>fieldset{flex:1 1 100%;border:0;padding:0;display:flex;gap:10px;flex-wrap:wrap;min-width:0}
+.canvas-field-editor>fieldset>label{flex:1 1 180px;display:grid;gap:5px;min-width:0}
+.workbench-monsters{margin-top:2px;border-top:1px solid #888;padding:3px 0;min-height:28px}
+.workbench-monsters>strong{align-self:center;padding:0 8px;flex:none;color:var(--suite-ink,#555);font-size:12px}
+.class-jumps button[aria-pressed=true]{background:#555;color:#fff;box-shadow:inset 0 -3px #aaa;animation:selection-emphasis .35s ease-out}
+button[data-mode=native],button[data-mode=custom]{background:#555;color:#fff;border-color:#333;box-shadow:inset 0 -3px #aaa;animation:selection-emphasis .35s ease-out}
+@keyframes selection-emphasis{from{box-shadow:inset 0 0 0 3px #ddd,0 0 8px #8888}to{box-shadow:inset 0 -3px #aaa}}
+@media(prefers-reduced-motion:reduce){.class-jumps button[aria-pressed=true],button[data-mode=native],button[data-mode=custom]{animation:none}}

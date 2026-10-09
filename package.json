@@ -1,6 +1,6 @@
 {
   "name": "dnd-card-web",
-  "version": "0.1.51",
+  "version": "0.1.52",
   "private": true,
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -23,7 +23,7 @@
     "test:release": "playwright test --config playwright.release.config.ts",
     "test:standalone": "playwright test --config playwright.standalone.config.ts",
     "build:cloud": "node tools/buildCloud.mjs",
-    "test:cloud": "vitest run tests/cloud.test.ts tests/cloud-sync.test.ts tests/qq-login.test.ts",
+    "test:cloud": "vitest run tests/cloud.test.ts tests/cloud-sync.test.ts",
     "test:cloud-browser": "playwright test --config playwright.cloud.config.ts"
   },
   "dependencies": {

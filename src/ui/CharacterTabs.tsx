@@ -1,8 +1,9 @@
 import {useEffect,useLayoutEffect,useRef,type KeyboardEvent,type PointerEvent} from 'react';
 import type {Character} from '../core/model';
+import {useCharacterBookOrder} from './characterBookOrder';
 /** A single-row, roving-tabindex list; navigation never moves the sheet viewport. */
-export function CharacterTabs({characters,activeId,warnings,label,select}:{characters:Character[];activeId:string;warnings:Set<string>;label:string;select:(id:string)=>void}){
- const list=useRef<HTMLDivElement>(null);
+export function CharacterTabs({characters:inputCharacters,activeId,warnings,label,select}:{characters:Character[];activeId:string;warnings:Set<string>;label:string;select:(id:string)=>void}){
+ const characters=useCharacterBookOrder(inputCharacters),list=useRef<HTMLDivElement>(null);
  const drag=useRef<{id:number;x:number;y:number;left:number;moved:boolean}|undefined>(undefined),suppress=useRef(false);
  const tabIds=JSON.stringify(characters.map(character=>character.id));
  const reveal=(button:HTMLButtonElement)=>{const container=list.current;if(!container)return;const strip=container.getBoundingClientRect(),tab=button.getBoundingClientRect();if(tab.left<strip.left)container.scrollLeft+=tab.left-strip.left;else if(tab.right>strip.right)container.scrollLeft+=tab.right-strip.right;};

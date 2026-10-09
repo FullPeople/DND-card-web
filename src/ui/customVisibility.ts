@@ -2,7 +2,7 @@ import {useState} from 'react';
 import type {Entry} from '../core/model';
 export type CustomVisibility='all'|'native'|'custom';
 export const CUSTOM_VISIBILITY_LABELS={all:'目前全部',native:'目前仅非自定义',custom:'目前仅自定义'};
-export const isCustomEntry=(entry:Entry)=>entry.raw._custom===true||entry.raw._workbenchCustom===true||entry.packId==='custom'&&entry.source==='CUSTOM';
+export const isCustomEntry=(entry:Entry)=>entry.raw._customPack===true||entry.raw._custom===true||entry.raw._workbenchCustom===true||entry.packId==='custom'&&entry.source==='CUSTOM';
 export const customVisibilityAllows=(entry:Entry,mode:CustomVisibility)=>mode==='all'||isCustomEntry(entry)===(mode==='custom');
 export function useCustomVisibility(){
  const [mode,setMode]=useState<CustomVisibility>(()=>{try{const value=localStorage.getItem('dnd-library-custom-visibility');return value==='native'||value==='custom'?value:'all';}catch{return 'all';}});

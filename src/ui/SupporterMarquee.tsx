@@ -4,6 +4,7 @@ import './supporterMarquee.css';
 type Supporter={name:string;amount:number};
 type Flight=Supporter&{id:number;lane:number;top:number;duration:number;delay:number;color:string;size:number;avatar?:string};
 const avatars: Record<string,string> = {
+  "用短弓磨死欧吕尔的神秘红发女子": "supporter-avatars/auril-redhead.jpg",
   "Dino":                       "supporter-avatars/Dino.jpg",
   "St.Monk":                    "supporter-avatars/St_Monk.png",
   "lingkkkkuang":               "supporter-avatars/lingkkkkuang.png",

@@ -3,6 +3,8 @@ import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter,type Entry,type Character} from '../../src/core/model';
 import {exportCharacter} from '../../src/core/export';
 async function workspace(page:Page){return page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(ok=>{const r=indexedDB.open('dnd-card-standalone');r.onsuccess=()=>ok(r.result);});try{return await new Promise<any>(ok=>{const r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>ok(r.result);});}finally{db.close();}});}
+function expectOldBackup(rows:Character[],original:Character){const backup=rows.find(card=>card.id!==original.id&&card.name===original.name+'（同步前备份）');expect(backup).toBeDefined();expect({...backup,id:original.id,name:original.name,revision:original.revision,createdAt:original.createdAt,updatedAt:original.updatedAt}).toEqual(original);}
+
 test('multi-candidate migration recommends the current handbook, respects custom and saves only the reviewed copy',async({page})=>{
  await mockSource(page);await suppressAnnouncement(page);
  await page.route('**/data/races.json',r=>r.fulfill({json:{race:['PHB','XPHB','XDMG','EXP-A','EXP-B'].map(source=>({name:'原创旅人',ENG_name:'Original Traveller',source,entries:['原创迁移候选 '+source]}))}}));
@@ -19,6 +21,6 @@ test('multi-candidate migration recommends the current handbook, respects custom
  await custom.check();await dialog.getByRole('button',{name:'确认并继续',exact:true}).click();await dialog.getByRole('button',{name:'上一步',exact:true}).click();await expect(custom).toBeChecked();
  await core.check();await dialog.getByRole('button',{name:'确认并继续',exact:true}).click();
  await expect(dialog.locator('.migration-preview')).toContainText('原创旅人');expect((await workspace(page)).characters).toEqual(before.characters);
- await dialog.getByRole('button',{name:'创建同步副本',exact:true}).click();await expect(dialog).toHaveCount(0);await page.reload();await expect(page.locator('.paper')).toBeVisible();
- const after=await workspace(page),copy=after.characters.find((row:Character)=>row.id===after.activeId);expect(after.characters.find((row:Character)=>row.id===original.id)).toEqual(original);expect(copy.id).not.toBe(original.id);expect(copy.selections.find((row:any)=>row.entry.kind==='race').entry.source).toBe('XPHB');
+ await dialog.getByRole('button',{name:'备份旧卡并同步当前卡',exact:true}).click();await expect(dialog).toHaveCount(0);await page.reload();await expect(page.locator('.paper')).toBeVisible();
+ const after=await workspace(page),copy=after.characters.find((row:Character)=>row.id===after.activeId);expectOldBackup(after.characters,original);expect(copy.id).toBe(original.id);expect(copy.selections.find((row:any)=>row.entry.kind==='race').entry.source).toBe('XPHB');
 });

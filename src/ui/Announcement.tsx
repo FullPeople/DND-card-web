@@ -1,6 +1,6 @@
 import {releaseLogFor,type ReleaseSection} from '../platform/releaseNotes';
 import {Fragment,lazy,Suspense,useEffect,useRef,useState} from 'react';
-import {announcementVersionFor,announcementPending,forgetAnnouncementVersion,readAnnouncementVersion,rememberAnnouncementVersion,type AnnouncementMode} from '../platform/announcement';
+import {announcementVersionFor,forgetAnnouncementVersion,readAnnouncementPreference,rememberAnnouncementPreference,rememberAnnouncementVersion,type AnnouncementMode} from '../platform/announcement';
 import './announcement.css';
 import {useUiLanguage} from './UiLanguage';
 import {FeedbackSection} from './UiControls';
@@ -31,7 +31,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
   useEffect(()=>{if(mode!=='standalone')return;let current=true;void fetch('./release.json',{cache:'no-store'}).then(response=>response.ok?response.json():undefined).then(value=>{if(current)setRelease(value);}).catch(()=>{});return()=>{current=false;};},[mode]);
   const ref=useRef<HTMLDialogElement>(null);
   const confirmRef=useRef<HTMLButtonElement>(null);
-  const [remember,setRemember]=useState(()=>!announcementPending(readAnnouncementVersion(mode),version));
+  const [remember,setRemember]=useState(()=>readAnnouncementPreference(mode));
   useEffect(()=>{ref.current?.showModal();confirmRef.current?.focus();},[]);
   const confirm=()=>{
     if(remember)rememberAnnouncementVersion(version,mode);
@@ -69,7 +69,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
       <section id="announcement-panel-2" className="announcement-changelog" role="tabpanel" aria-labelledby="announcement-tab-2" hidden={tab!==2}>{releases.map((release,index)=><section className={`announcement-log-day ${index===0?'announcement-current':'announcement-history'}`} key={release.title}><h3>{release.title}{language==='en'&&release.title!=='2026-09-28'&&` · ${t('chineseOriginal')}`}</h3>{sections(language==='en'&&release.title==='2026-09-28'?englishCurrent:release.sections)}</section>)}</section>
     </div>
     <footer className="announcement-foot">
-      <label><input type="checkbox" checked={remember} onChange={event=>setRemember(event.target.checked)}/>{t('rememberVersion')}</label>
+      <label><input type="checkbox" checked={remember} onChange={event=>{setRemember(event.target.checked);rememberAnnouncementPreference(event.target.checked,mode);}}/>{t('rememberVersion')}</label>
       <button ref={confirmRef} className="primary" onClick={confirm}>{t('gotIt')}</button>
     </footer>
     </div>
