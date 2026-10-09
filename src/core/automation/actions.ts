@@ -4,7 +4,7 @@ import {setResource} from '../resources';
 import {sourceSpellEnabled,rememberSourceSpellUses} from './sourceSpellState';
 import {automationEnabled} from './state';
 import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../bookRituals';
-import {planSourceSpells} from './sourceSpells';
+import {planSourceSpells} from './sourceSpellPlan';
 
 export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string}
 export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long'}
