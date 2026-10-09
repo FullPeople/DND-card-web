@@ -37,7 +37,7 @@ async function choose(page:Page,name:string){
  // unlike synthetic inline options which render buttons inside the workspace.
  await expect(choices.locator('.choice-slot')).toHaveCount(1);await dragWiki(page,name,0);await expect(choices.getByRole('status')).toContainText('测试风格 1/1');
  await expect.poll(async()=>(await saved(page)).selections.filter(row=>row.grantKey?.startsWith('choice:')).map(row=>row.entry.name)).toEqual([name]);
- await page.getByRole('button',{name:'返回特性',exact:true}).click();
+ await page.getByRole('button',{name:'收起选择',exact:true}).click();
  await page.getByRole('tab',{name:'主要',exact:true}).click();
 }
 for(const edition of ['2014','2024'] as const)test(`${edition} dashed source choice applies armor AC, replacement/undo/reload and shield-only conditions`,async({page})=>{

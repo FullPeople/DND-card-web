@@ -81,20 +81,34 @@
 /* Filling tools need readable controls on phones. This temporary surface does
    not change the saved A4 preference or the character's print/export layout. */
 @media screen and (max-width:760px){
- .sheet-viewport:has(.choice-workspace){display:block;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;overscroll-behavior-y:contain}
- .sheet-viewport .paper-stack:has(.choice-workspace){width:100%!important;height:auto!important;transform:none!important;display:flex;flex-direction:column}
- .sheet-viewport .paper:not(.sheet-export):has(.choice-workspace){position:relative;width:100%!important;height:auto!important;min-height:0;transform:none!important;padding:7px;font-size:14px;box-shadow:none}
- .paper:not(.sheet-export):has(.choice-workspace)>.paper-heading,.paper:not(.sheet-export):has(.choice-workspace)>.paper-footer,.paper:not(.sheet-export) .sheet-details:has(.choice-workspace)>.edition-divider,.paper:not(.sheet-export) .sheet-details:has(.choice-workspace)>.detail-page-header{display:none}
- .paper:not(.sheet-export) .sheet-details:has(.choice-workspace){flex:none;min-height:0}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-workspace{flex:none;min-height:0}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-workspace .cell-face{position:relative;inset:auto;height:auto;min-height:0}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-workspace .cell-content{flex:none;overflow:visible;font-size:14px}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-workspace .cell-heading{min-height:32px}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-workspace .cell-heading h3{font-size:14px;line-height:1.4}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-owner,.paper:not(.sheet-export):has(.choice-workspace) .choice-hint,.paper:not(.sheet-export):has(.choice-workspace) .choice-navigation button,.paper:not(.sheet-export):has(.choice-workspace) .choice-exit,.paper:not(.sheet-export):has(.choice-workspace) .choice-footer button{font-size:12px}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-navigation button,.paper:not(.sheet-export):has(.choice-workspace) .choice-footer button{min-height:34px}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-slot-entry{font-size:14px}
- .paper:not(.sheet-export):has(.choice-workspace) .choice-option{min-height:38px;font-size:14px}
- .paper-stack:has(.choice-workspace)>.sheet-pages{position:relative;inset:auto!important;display:flex;width:100%;gap:4px;padding:6px 0;flex-direction:row}
- .paper-stack:has(.choice-workspace)>.sheet-pages button{min-height:34px;height:auto;writing-mode:horizontal-tb;flex:1;margin:0;padding:3px 2px;font-size:12px;border-radius:3px}
+ .sheet-viewport:has(.choice-workspace:not(.choice-inline)){display:block;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;overscroll-behavior-y:contain}
+ .sheet-viewport .paper-stack:has(.choice-workspace:not(.choice-inline)){width:100%!important;height:auto!important;transform:none!important;display:flex;flex-direction:column}
+ .sheet-viewport .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)){position:relative;width:100%!important;height:auto!important;min-height:0;transform:none!important;padding:7px;font-size:14px;box-shadow:none}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline))>.paper-heading,.paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline))>.paper-footer,.paper:not(.sheet-export) .sheet-details:has(.choice-workspace:not(.choice-inline))>.edition-divider,.paper:not(.sheet-export) .sheet-details:has(.choice-workspace:not(.choice-inline))>.detail-page-header{display:none}
+ .paper:not(.sheet-export) .sheet-details:has(.choice-workspace:not(.choice-inline)){flex:none;min-height:0}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-workspace{flex:none;min-height:0}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-workspace .cell-face{position:relative;inset:auto;height:auto;min-height:0}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-workspace .cell-content{flex:none;overflow:visible;font-size:14px}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-workspace .cell-heading{min-height:32px}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-workspace .cell-heading h3{font-size:14px;line-height:1.4}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-owner,.paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-hint,.paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-navigation button,.paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-exit,.paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-footer button{font-size:12px}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-navigation button,.paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-footer button{min-height:34px}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-slot-entry{font-size:14px}
+ .paper:not(.sheet-export):has(.choice-workspace:not(.choice-inline)) .choice-option{min-height:38px;font-size:14px}
+ .paper-stack:has(.choice-workspace:not(.choice-inline))>.sheet-pages{position:relative;inset:auto!important;display:flex;width:100%;gap:4px;padding:6px 0;flex-direction:row}
+ .paper-stack:has(.choice-workspace:not(.choice-inline))>.sheet-pages button{min-height:34px;height:auto;writing-mode:horizontal-tb;flex:1;margin:0;padding:3px 2px;font-size:12px;border-radius:3px}
 }
+
+/* Inline choices scroll within the existing feature frame; the other stats stay visible. */
+.paper .feature-panel .choice-inline{position:relative;flex:none;width:100%;height:300px;max-height:none;margin:0 0 8px;min-height:0}
+.paper .feature-panel .choice-inline>.cell-face{position:absolute;inset:0;height:100%;width:100%;flex:none}
+.paper .feature-panel .choice-inline .cell-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.paper .feature-panel .choice-inline .cell-heading{min-height:24px}
+.paper .feature-panel .choice-inline .choice-slots{grid-template-columns:1fr;gap:6px;margin:10px 0}
+.paper .feature-panel .choice-inline .choice-slot{min-height:44px}
+.paper .feature-panel .choice-inline .choice-options{gap:4px}
+.paper .feature-panel .choice-inline .choice-option{padding:6px 8px}
+.paper .feature-panel .choice-inline .choice-option.is-picked{padding:5px 7px}
+.paper .feature-panel .choice-inline .choice-footer{position:relative;background:var(--paper-surface,#e8e8e8);padding:6px 0;margin-top:6px}
+
+@media print{.choice-inline{display:none!important}}

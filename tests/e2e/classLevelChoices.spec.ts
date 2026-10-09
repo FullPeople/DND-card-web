@@ -32,10 +32,11 @@ test('class grants appear in the feat region; optional learning drag saves witho
  await page.getByRole('tab',{name:'特性',exact:true}).click();
  await page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'}).getByRole('button').click();
  await expect(page.locator('.choice-slot')).toHaveCount(5);
+ if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({hasText:'原创祈唤记录'}).first();await expect(row).toBeVisible();
  await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();await page.mouse.move(from!.x+20,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+30,from!.y+from!.height/2,{steps:3});
  const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(slot).toContainText('原创祈唤记录');
- await page.getByRole('button',{name:'返回特性',exact:true}).click();await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
+ await page.getByRole('button',{name:'收起选择',exact:true}).click();await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
  await page.screenshot({path:info.outputPath('class-learning.png')});await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();
  await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
 });
