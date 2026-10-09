@@ -2,7 +2,12 @@ import {useEffect,useState} from 'react';
 import {cloudMutation,cloudSession,type CloudSession} from './api';
 import './qqLogin.css';
 
-export function QQLogin({session:managedSession,managed=false,beforeLogin,refresh}:{session?:CloudSession;managed?:boolean;beforeLogin?:()=>Promise<void>;refresh?:()=>Promise<void>}){
+type QQLoginProps={session?:CloudSession;managed?:boolean;beforeLogin?:()=>Promise<void>;refresh?:()=>Promise<void>};
+export function QQLogin(props:QQLoginProps){
+  if(!['http:','https:'].includes(location.protocol)||!['/card/','/library/'].includes(location.pathname))return null;
+  return <OnlineQQLogin {...props}/>;
+}
+function OnlineQQLogin({session:managedSession,managed=false,beforeLogin,refresh}:QQLoginProps){
   const [local,setLocal]=useState<CloudSession>(),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const session=managed?managedSession:local;
   useEffect(()=>{
