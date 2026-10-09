@@ -4,6 +4,7 @@ import copy
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import tarfile
@@ -53,8 +54,11 @@ def source_zip(sha='a' * 40, content=b'license'):
     return output.getvalue()
 
 
-def archive_data(path, extra=None, symlink=False, duplicate=False, omitted=None):
-    release = json.dumps({'version': 'standalone-1.0.257', 'sourceCommit': 'a' * 40}).encode()
+def archive_data(path, extra=None, symlink=False, duplicate=False, omitted=None, qq_login=None, metadata_overrides=None):
+    release_fields = {'version': 'standalone-1.0.257', 'sourceCommit': 'a' * 40}
+    if qq_login is not None:
+        release_fields.update(backendVersion='1.0.253', qqLogin=qq_login)
+    release = json.dumps(release_fields).encode()
     files = {'card/index.html': b'new card', 'library/index.html': b'new library',
              'card/release.json': release, 'library/release.json': release,
              'card/sw.js': b'new worker', 'card/source.zip': source_zip(), 'library/source.zip': source_zip(),
@@ -69,6 +73,10 @@ def archive_data(path, extra=None, symlink=False, duplicate=False, omitted=None)
                 'backendVersion': '1.0.253', 'files': {name: hashlib.sha256(data).hexdigest() for name, data in files.items()},
                 'publisherHashes': {name: c.sha_file(Path(__file__).parents[2] / 'deploy/cloud' / name)
                                     for name in ('frontend.py', 'publish.py')}}
+    if qq_login is not None:
+        metadata.update(format=2, qqLogin=qq_login)
+    if metadata_overrides:
+        metadata.update(metadata_overrides)
     with tarfile.open(path, 'w:gz') as archive:
         for name, data in {'artifact.json': json.dumps(metadata).encode(), **files}.items():
             member = tarfile.TarInfo(name); member.size = len(data)
@@ -135,6 +143,24 @@ class IdentityTests(unittest.TestCase):
 
 
 class ArtifactTests(unittest.TestCase):
+    def test_explicit_qq_policy_is_bound_and_legacy_artifacts_remain_pending(self):
+        for policy in ('pending', 'ready', None):
+            with self.subTest(policy=policy), tempfile.TemporaryDirectory() as directory:
+                archive = Path(directory) / 'artifact.tgz'
+                archive_data(archive, qq_login=policy)
+                metadata, _ = c.inspect_archive(archive)
+                self.assertEqual(c.qq_policy(metadata), policy or 'pending')
+                self.assertEqual(metadata['format'], 1 if policy is None else 2)
+
+    def test_missing_unknown_or_legacy_injected_qq_policy_is_rejected(self):
+        invalid = [{'format': 2}, {'format': 3}, {'format': True}, {'qqLogin': 'ready'}]
+        invalid += [{'format': 2, 'qqLogin': value} for value in ('mock', '', None, True, [], {})]
+        for fields in invalid:
+            with self.subTest(fields=fields), tempfile.TemporaryDirectory() as directory:
+                archive = Path(directory) / 'artifact.tgz'
+                archive_data(archive, metadata_overrides=fields)
+                with self.assertRaises(c.Denied): c.inspect_archive(archive)
+
     def test_hashes_and_extraction_ignore_incoming_permission_bits(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory); archive = root / 'artifact.tgz'; expected = archive_data(archive)
@@ -188,7 +214,7 @@ class ArtifactTests(unittest.TestCase):
 
 
 class PublicationTests(unittest.TestCase):
-    def fixture(self, root):
+    def fixture(self, root, qq_login='pending', artifact_qq=None):
         front = root / 'site'; front.mkdir()
         for name in c.TARGETS:
             (front / name).mkdir(); (front / name / 'index.html').write_text('old ' + name)
@@ -209,14 +235,14 @@ class PublicationTests(unittest.TestCase):
             stack.enter_context(patch.object(module, key, value))
         stack.enter_context(patch.object(publisher, 'protected', return_value={'cloud-backend': 'preserved'}))
         stack.enter_context(patch.object(publisher.m, 'command', return_value='active'))
-        health = json.dumps({'version': '1.0.253', 'temporaryUpload': True,
-                             'quotaScope': 'ip', 'qqLogin': 'pending'}).encode()
+        self.health = {'version': '1.0.253', 'temporaryUpload': True,
+                       'quotaScope': 'ip', 'qqLogin': qq_login}
         stack.enter_context(patch.object(publisher.m, 'wait_http',
-                           side_effect=lambda url, *args: health if url.endswith('/api/health') else b'old card'))
+                           side_effect=lambda url, *args: json.dumps(self.health).encode() if url.endswith('/api/health') else b'old card'))
         self.verify = stack.enter_context(patch.object(publisher, 'verify'))
         stack.enter_context(patch.object(server.c, 'load', return_value=publisher))
         stack.enter_context(patch.object(server.c, 'verify_ci', return_value={'exactSha': 'a' * 40, 'runs': []}))
-        archive = root / 'incoming.tgz'; archive_data(archive)
+        archive = root / 'incoming.tgz'; archive_data(archive, qq_login=artifact_qq)
         data = request(); data.update(archive_bytes=archive.stat().st_size, archive_sha256=c.sha_file(archive),
                                       expected_release_sha256=c.sha_file(front / 'card/release.json'))
         commit = {'sha': 'a' * 40, 'tree': {'sha': 'b' * 40}}
@@ -231,6 +257,53 @@ class PublicationTests(unittest.TestCase):
                     prepared_manifest_sha256=result['manifestSha256'])
         identity = claims(int(time.time())); identity['run_id'] = '457'
         return identity
+
+    def test_both_real_qq_states_flow_from_archive_to_preflight_and_publication(self):
+        for policy in ('pending', 'ready'):
+            with self.subTest(policy=policy), tempfile.TemporaryDirectory() as directory:
+                publisher, data, archive = self.fixture(Path(directory), policy, policy)
+                before_db = publisher.DB.read_bytes()
+                identity = self.approved(data, archive)
+                prepared = server.package_for('456', '1')
+                self.assertFalse((prepared / 'backup').exists())
+                self.assertEqual(json.loads((prepared / 'manifest.json').read_text())['qqLogin'], policy)
+                result = server.publish(data, identity, io.BytesIO(archive.read_bytes()))
+                self.assertEqual(result['status'], 'published')
+                for name in c.TARGETS:
+                    self.assertEqual(json.loads((publisher.ROOT / name / 'release.json').read_text())['qqLogin'], policy)
+                self.assertEqual(publisher.DB.read_bytes(), before_db)
+
+    def test_qq_drift_after_preflight_is_rejected_before_backup_or_switch(self):
+        for policy in ('pending', 'ready'):
+            with self.subTest(policy=policy), tempfile.TemporaryDirectory() as directory:
+                publisher, data, archive = self.fixture(Path(directory), policy, policy)
+                before = publisher.tree(publisher.ROOT)
+                identity = self.approved(data, archive)
+                self.health['qqLogin'] = 'ready' if policy == 'pending' else 'pending'
+                with self.assertRaisesRegex(RuntimeError, 'API policy changed'):
+                    server.publish(data, identity, io.BytesIO(archive.read_bytes()))
+                self.assertEqual(publisher.tree(publisher.ROOT), before)
+                self.assertFalse((server.package_for('456', '1') / 'backup').exists())
+
+    def test_legacy_pending_archive_cannot_publish_against_ready_backend(self):
+        with tempfile.TemporaryDirectory() as directory:
+            publisher, data, archive = self.fixture(Path(directory), 'ready')
+            before = publisher.tree(publisher.ROOT)
+            with self.assertRaisesRegex(RuntimeError, 'API policy changed'):
+                self.approved(data, archive)
+            self.assertEqual(publisher.tree(publisher.ROOT), before)
+            self.assertFalse((server.package_for('456', '1') / 'backup').exists())
+
+    def test_application_release_cannot_disagree_with_sealed_qq_policy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); archive = root / 'artifact.tgz'
+            archive_data(archive, qq_login='ready', extra={'library/release.json': json.dumps({
+                'version': 'standalone-1.0.257', 'sourceCommit': 'a' * 40,
+                'backendVersion': '1.0.253', 'qqLogin': 'pending'}).encode()})
+            metadata, _ = c.inspect_archive(archive)
+            c.extract_frontends(archive, root / 'candidate')
+            with self.assertRaisesRegex(c.Denied, 'application-policy-binding-mismatch'):
+                server.check_application(root / 'candidate', metadata)
 
     def test_authenticated_upload_calls_fixed_publisher_and_preserves_other_sites_assets_and_database(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -333,6 +406,29 @@ class PublicationTests(unittest.TestCase):
 
 
 class RunnerAndInstallerTests(unittest.TestCase):
+    def test_runner_seals_live_qq_policy_and_refuses_unknown_health(self):
+        raw = b'{"version":"standalone-1.0.262"}'
+        for policy in ('pending', 'ready', 'mock', None):
+            with self.subTest(policy=policy), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                health = {'version': '1.0.261', 'temporaryUpload': True, 'quotaScope': 'ip', 'qqLogin': policy}
+                env = {'SOURCE_SHA': 'a' * 40, 'CI_RUN_IDS': '123,124,125',
+                       'EXPECTED_RELEASE_SHA256': hashlib.sha256(raw).hexdigest(),
+                       'RELEASE_VERSION': 'standalone-1.0.262', 'DEPLOY_OPERATION': 'preflight',
+                       'GITHUB_OUTPUT': str(root / 'output')}
+                result = {'sha256': 'c' * 64, 'bytes': 10}
+                with patch.dict(os.environ, env), patch.object(sys, 'argv', ['build_production.py']), \
+                        patch.object(build, 'validate_context'), patch.object(build.Path, 'cwd', return_value=root), \
+                        patch.object(build, 'public_json', side_effect=[({}, raw), (health, b'health')]), \
+                        patch.object(build, 'package', return_value=result) as packed, patch('builtins.print'):
+                    if policy in ('pending', 'ready'):
+                        build.main()
+                        packed.assert_called_once_with(root, root / '.deployment', 'a' * 40,
+                                                       'standalone-1.0.262', '1.0.261', policy)
+                    else:
+                        with self.assertRaisesRegex(c.Denied, 'backend-policy-changed'): build.main()
+                        packed.assert_not_called()
+
     def test_ssh_timeout_reconciles_read_only_without_second_publish(self):
         response = {'ok': True, 'result': {'status': 'published'}}
         data = request()
@@ -409,12 +505,19 @@ class RunnerAndInstallerTests(unittest.TestCase):
             (root / 'dist-cloud/card/standalone-audit.json').write_text('{"singlePlayer":true,"multiplayerModules":[]}')
             (root / 'deploy/cloud').mkdir(parents=True)
             for name in ('frontend.py', 'publish.py'): (root / 'deploy/cloud' / name).write_text('fixed publisher fixture')
-            result = build.package(root, root / 'out', sha, 'standalone-1.0.257', '1.0.253')
-            metadata, _ = build.c.inspect_archive(root / 'out/deployment.tar.gz', result['sha256'])
-            self.assertNotIn('index.html', metadata['files'])
-            destination = root / 'extracted'; build.c.extract_frontends(root / 'out/deployment.tar.gz', destination)
-            with zipfile.ZipFile(destination / 'card/source.zip') as archive:
-                self.assertEqual(archive.comment.decode(), sha); self.assertEqual(archive.namelist(), ['LICENSE'])
+            for policy in ('pending', 'ready'):
+                output = root / ('out-' + policy)
+                result = build.package(root, output, sha, 'standalone-1.0.257', '1.0.253', policy)
+                metadata, _ = build.c.inspect_archive(output / 'deployment.tar.gz', result['sha256'])
+                self.assertEqual(metadata['format'], 2)
+                self.assertEqual(metadata['qqLogin'], policy)
+                self.assertNotIn('index.html', metadata['files'])
+                destination = root / ('extracted-' + policy)
+                build.c.extract_frontends(output / 'deployment.tar.gz', destination)
+                for target in c.TARGETS:
+                    self.assertEqual(json.loads((destination / target / 'release.json').read_text())['qqLogin'], policy)
+                with zipfile.ZipFile(destination / 'card/source.zip') as archive:
+                    self.assertEqual(archive.comment.decode(), sha); self.assertEqual(archive.namelist(), ['LICENSE'])
 
 
 class InstallationTransitionTests(unittest.TestCase):
