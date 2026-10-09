@@ -2,7 +2,7 @@ import {test,expect,type Page} from '@playwright/test';
 import {ready,workspace,dragWiki} from './automationChoiceFixture';
 
 async function saved(page:Page){return page.evaluate(()=>new Promise<any>((resolve,reject)=>{
- const request=indexedDB.open('dnd-card-standalone');request.onerror=()=>reject(request.error);request.onupgradeneeded=()=>{request.transaction?.abort();reject(Error('Expected saved standalone database'));};request.onsuccess=()=>{const db=request.result,get=db.transaction('documents').objectStore('documents').get('workspace');get.onerror=()=>{db.close();reject(get.error);};get.onsuccess=()=>{const w=get.result;db.close();resolve(w.characters.find((c:any)=>c.id===w.activeId));};};
+ const request=indexedDB.open('dnd-card-automation-choices-20261001');request.onerror=()=>reject(request.error);request.onupgradeneeded=()=>{request.transaction?.abort();reject(Error('Expected saved choice-preview database'));};request.onsuccess=()=>{const db=request.result,get=db.transaction('documents').objectStore('documents').get('workspace');get.onerror=()=>{db.close();reject(get.error);};get.onsuccess=()=>{const w=get.result;db.close();resolve(w.characters.find((c:any)=>c.id===w.activeId));};};
 }));}
 test('reading-mode choice activates editing inside the main feature frame and keeps the other stats visible',async({page},info)=>{
  await ready(page);await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','false');

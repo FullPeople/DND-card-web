@@ -109,6 +109,6 @@
 .paper .feature-panel .choice-inline .choice-options{gap:4px}
 .paper .feature-panel .choice-inline .choice-option{padding:6px 8px}
 .paper .feature-panel .choice-inline .choice-option.is-picked{padding:5px 7px}
-.paper .feature-panel .choice-inline .choice-footer{position:sticky;bottom:0;background:var(--paper-surface,#e8e8e8);padding:6px 0;margin-top:6px;z-index:1}
+.paper .feature-panel .choice-inline .choice-footer{position:relative;background:var(--paper-surface,#e8e8e8);padding:6px 0;margin-top:6px}
 
 @media print{.choice-inline{display:none!important}}
