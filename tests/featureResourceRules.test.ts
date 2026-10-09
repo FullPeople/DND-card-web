@@ -73,8 +73,8 @@ it.each(['一旦使用此特性后，直到你完成一次长休为止，你都�
  restResources(c,'long');expect(c.runtime.resources[key].current).toBe(1);
 });
 
-it('short-or-long once-use prose preserves both supported recovery periods',()=>{
- const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['使用此特性后，你必须完成一次短休或长休，才能再次使用此特性。'];
+it.each(['短休或长休','长休或短休','短暂或长休'])('once-use prose preserves both supported recovery periods: %s',periods=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=[`使用此特性后，你必须完成一次${periods}，才能再次使用此特性。`];
  expect(planFeatureResources(c)).toMatchObject({grants:[{max:1,recovery:{short:'all',long:'all'}}],issues:[]});
 });
 

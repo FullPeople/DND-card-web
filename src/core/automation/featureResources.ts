@@ -45,14 +45,14 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
   if(!specs.length){
    const escaped=row.entry.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
    const use=text.match(new RegExp(`(?:可以|能够|能)(?:使用|施用)(?:(?:此|本|这项|该)(?:特性|能力)?|${escaped})(?:共计|总计|总共)?([一二两三四五六七八九十\\d]+)次`));
-   const once=text.match(/(?:(?:使用|施用)(?:本|此|该)特性后[^。；]{0,180}?|必须完成一次)(短|长)(?:暂)?(?:休|歇)/);
+   const once=text.match(/(?:(?:使用|施用)(?:本|此|该)特性后[^。；]{0,180}?|必须完成一次)(短(?:暂)?(?:休|歇)?(?:或|与|和|\/)长(?:休|歇)|长(?:休|歇)(?:或|与|和|\/)短(?:暂)?(?:休|歇)|(?:短|长)(?:暂)?(?:休|歇))/);
    if(use||once){
     const recovery:Recovery={};
     for(const [key,word] of [['short','短'],['long','长']] as const){
      const match=text.match(new RegExp(`${word}(?:暂)?(?:休|歇)[^。；，,]{0,90}?(?:恢复|重获|重新获得|再次使用|再度使用|重置)([^。；，,]*)`));
      if(match){const n=match[1].match(/([一二两三四五六七八九十\d]+)次/);recovery[key]=/所有|全部/.test(match[1])?'all':n?count(n[1]):'all';}
     }
-    if(once){if(once[1]==='短')recovery.short='all';recovery.long='all';}
+    if(once){if(once[1].includes('短'))recovery.short='all';recovery.long='all';}
     if(recovery.short&&!recovery.long)recovery.long='all';
     let max=use?count(use[1]):1;
     for(const upgrade of text.matchAll(/第(\d+)级[^。；]{0,45}?(?:使用|施用)([一二两三四五六七八九十\d]+)次/g))if(level>=Number(upgrade[1]))max=Math.max(max,count(upgrade[2])||0);
