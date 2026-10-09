@@ -1,3 +1,7 @@
+# 2026-10-08 · 接入复核与恢复安全修复候选
+
+用户14:07UTC已自行取消人工审批并报告正式入口 status:installed；此次GitHub实查 production-card 无 required_reviewers、仅 main、管理员不可绕过。原只读认证预检37858208000全success；安装revision/hashes暂无现有只读查询，artifact下载存储端403已停止。线上258/后端253与两插件258-dev/1.3.19健康，未重复发布。发布中断恢复缺陷已在独立Draft候选修复；新增服务器代码/固定恢复操作需主会话独审具体hash后确认安装。完整核验、故障测试、安装影响和恢复点见 [恢复接入核验](DND-DEPLOY-RECOVERY-20261008.md)。以下未安装/仍有审批者的条目为历史，不覆盖用户新声明和实际回读。
+
 # dnd.center 正式部署接入
 
 正式工作流 [Deploy dnd.center frontends](https://github.com/FullPeople/DND-card-web/actions/workflows/dot-deploy-production.yml) 已由 [PR26](https://github.com/FullPeople/DND-card-web/pull/26) 合入 main 并注册。AI 可用 `workflow_dispatch` 从 Web `main` 自行触发，构建输入的完整提交 SHA。输入 SHA、工作流 SHA、当前 main 头和三组完整 CI 的 SHA 必须完全相同。
@@ -11,7 +15,7 @@
 
 2026-10-08 用户明确授权云端部署、持续 AI 维护和 dot 推进自行更新，无需逐次人工批准；报告问题后可恢复已知可用版本。两种操作仍使用现有 `production-card` Environment，以保留密钥和 OIDC 身份。移除该环境的 required reviewers 后，AI 可自行发起预检、读取回执并发起发布，无需网页点批准。构建 job 不持有部署密钥或 OIDC 写权限。
 
-**当前阻塞**：云端实际取消审批的 PUT 请求返回 `403 Resource not accessible by integration`，缺少仓库 `Environments: write` 权限。随后 GET 复核仍有一名 FullPeople 审批者，main 分支限制和管理员不可绕过均保留。此记录不代表审批已经取消。触发 Actions 的权限已实际验证；不需要新部署密钥或 PAT 才能运行工作流。
+**历史记录（已被上方最新实查覆盖）**：云端取消审批的 PUT 请求曾返回 `403 Resource not accessible by integration`，缺少仓库 `Environments: write` 权限。随后 GET 复核仍有一名 FullPeople 审批者，main 分支限制和管理员不可绕过均保留。此记录不代表审批已经取消。触发 Actions 的权限已实际验证；不需要新部署密钥或 PAT 才能运行工作流。
 
 管理员用已有仓库管理权限，在 [production-card 设置](https://github.com/FullPeople/DND-card-web/settings/environments) 中取消 **Required reviewers** 并保存，保留 main 部署分支及现有两项凭据。也可在具有仓库 `Environments: write` 权限的管理员 `gh` 会话中执行以下一次性命令（现有环境配置为零等待时间、只允许自定义 main 分支）：
 
@@ -44,7 +48,7 @@ gh api repos/FullPeople/DND-card-web/environments/production-card/deployment-bra
 | `DEPLOY_KNOWN_HOSTS` | 优先读取现有 Environment Variable；也兼容同名 Environment Secret。内容为已核对的单行 `obr.dnd.center ssh-ed25519 ...` |
 | SSH host / port / user | 固定 `obr.dnd.center:22` / `obr-deploy`；传输仍连接原服务器，发布目录使用新站点路径 |
 | SSH host key 指纹 | 继续固定 `SHA256:bS1JRj3+1zJntm+ZOKtjlRhK7MjAAOEdKOdnKq+2yco` |
-| Environment 规则 | 只允许 main，保留管理员不可绕过；按最新用户授权取消 required reviewers。当前云端修改返回 403，管理员尚需完成一次性设置 |
+| Environment 规则 | 只允许 main，保留管理员不可绕过；按最新用户授权取消 required reviewers。最新GET已确认 required reviewers 移除；见文首核验 |
 | 云端触发认证 | 同一仓库的 Actions 写权限用于 `workflow_dispatch`；读取状态需要 Actions 读权限。提交工作流文件需要 Contents 写权限及 Workflows 写权限 |
 | 服务器固定入口 | 安装 `server_entry.py`、`server_production.py`、`production_common.py`；保留原 `server_preflight.py` |
 | 服务器固定发布器 | 安装 root 管理的 `production/frontend.py` 和 `production/publish.py`。候选只能上传静态数据，不能替换或执行发布器 |
@@ -103,7 +107,7 @@ gh workflow run dot-deploy-production.yml --repo FullPeople/DND-card-web --ref m
   -f expected_release_sha256="$BASELINE_SHA" -f release_version="$RELEASE_VERSION"
 ```
 
-确认 required reviewers 已移除、服务器入口已安装后，由 AI 自行检查构建产物和服务器回执。预检通过后，以相同源码和仍有效的线上基线另行触发 `operation=publish`，再验证真实公网结果并记录回执。AI 发起 API 请求不需要用户逐次确认。每次运行或重跑使用自己的 run ID/attempt，已有接收目录拒绝重复请求；不覆盖失败回执或复用旧备份。
+确认 required reviewers 已移除、服务器入口已安装后，由 AI 自行检查构建产物和服务器回执。预检通过后，以相同源码和仍有效的线上基线另行触发 `operation=publish`，再验证真实公网结果并记录回执。AI 发起 API 请求不需要用户逐次确认。每次运行或重跑使用自己的 run ID/attempt，旧安装版已有接收目录拒绝重复请求；修复候选增加绑定核对后的幂等状态返回，且发布复用唯一成功预检封包；详见文首核验。
 
 ## 用户报告问题后的自主恢复
 

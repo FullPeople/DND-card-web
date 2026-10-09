@@ -2,9 +2,9 @@ name: Validate dot deploy contract
 on:
   push:
     branches: [main, codex/dnd-center-production-deploy-20261008, codex/dot-deploy-preflight-20261006, codex/dot-deploy-default-registration-20261006]
-    paths: ['tools/dot-deploy/**', '.github/workflows/dot-deploy*.yml']
+    paths: ['tools/dot-deploy/**', 'deploy/cloud/frontend.py', 'deploy/cloud/test_frontend.py', '.github/workflows/dot-deploy*.yml']
   pull_request:
-    paths: ['tools/dot-deploy/**', '.github/workflows/dot-deploy*.yml']
+    paths: ['tools/dot-deploy/**', 'deploy/cloud/frontend.py', 'deploy/cloud/test_frontend.py', '.github/workflows/dot-deploy*.yml']
   workflow_dispatch:
 permissions:
   contents: read

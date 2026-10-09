@@ -1,6 +1,6 @@
 """Synthetic Linux filesystem checks for static publication and database preservation."""
 from pathlib import Path
-import importlib.util,json,sqlite3,tarfile,tempfile,unittest
+import importlib.util,json,sqlite3,tarfile,tempfile,unittest,os
 from contextlib import ExitStack
 from unittest.mock import patch
 spec=importlib.util.spec_from_file_location('frontend',Path(__file__).with_name('frontend.py'));u=importlib.util.module_from_spec(spec);spec.loader.exec_module(u)
@@ -95,4 +95,98 @@ class FrontendTests(unittest.TestCase):
    (package/'manifest.json').write_text(json.dumps(manifest));digest=u.sha(package/'manifest.json')
    with self.assertRaisesRegex(RuntimeError,'outside card/library scope'):u.apply(package,digest)
    self.assertFalse((package/'backup').exists());self.assertEqual((u.ROOT/'index.html').read_text(),'cosmic homepage')
+ def test_process_death_after_each_rename_is_recoverable_from_hashes(self):
+  for boundary in (1,2):
+   with self.subTest(boundary=boundary),tempfile.TemporaryDirectory() as folder:
+    package,digest,manifest=self.fixture(Path(folder));before=u.tree(u.ROOT);original=u.m.exchange
+    child=os.fork()
+    if child==0:
+     calls=[]
+     def die_after_rename(a,b):
+      original(a,b);calls.append(a.name)
+      if len(calls)==boundary:os._exit(19)
+     with patch.object(u.m,'exchange',side_effect=die_after_rename):u.apply(package,digest)
+     os._exit(20)
+    _,code=os.waitpid(child,0);self.assertEqual(os.waitstatus_to_exitcode(code),19)
+    inspected=u.status(package,digest);self.assertTrue(inspected['recoveryNeeded'])
+    self.assertEqual(inspected['targetsState']['card']['state'],'candidate')
+    self.assertEqual(u.recover(package,digest)['status'],'failed-restored');self.assertEqual(before,u.tree(u.ROOT))
+ def test_receipt_failure_after_switch_preserves_intent_and_can_recover(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));original=u.write_receipt
+   def fail_after_rename(manifest,record):
+    if (u.ROOT/'card/index.html').read_text()=='new card':raise OSError('receipt disk failure')
+    return original(manifest,record)
+   with patch.object(u,'write_receipt',side_effect=fail_after_rename):
+    with self.assertRaisesRegex(OSError,'receipt disk failure'):u.apply(package,digest)
+   record=json.loads(u.receipt_path(manifest).read_text());self.assertEqual(record['targetJournal']['card']['result'],'intent')
+   self.assertEqual(u.recover(package,digest)['status'],'failed-restored')
+ def test_compensation_failure_is_recorded_and_other_target_restores(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));original=u.m.exchange;self.verify.side_effect=RuntimeError('not ready')
+   calls=[]
+   def fail_first_restore(a,b):
+    calls.append(a.name)
+    if len(calls)==3:raise OSError('library compensation unavailable')
+    return original(a,b)
+   with patch.object(u.m,'exchange',side_effect=fail_first_restore):
+    with self.assertRaisesRegex(RuntimeError,'not ready'):u.apply(package,digest)
+   record=json.loads(u.receipt_path(manifest).read_text());self.assertEqual(record['status'],'recovery-required')
+   self.assertEqual(record['targetJournal']['library']['result'],'failed');self.assertEqual((u.ROOT/'card/index.html').read_text(),'old card')
+   self.assertEqual(u.recover(package,digest)['status'],'failed-restored')
+ def test_external_target_drift_is_never_overwritten_and_other_target_restores(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder))
+   def drift(_):
+    (u.ROOT/'library/index.html').write_text('external release');raise RuntimeError('drift')
+   self.verify.side_effect=drift
+   with self.assertRaisesRegex(RuntimeError,'drift'):u.apply(package,digest)
+   self.assertEqual((u.ROOT/'library/index.html').read_text(),'external release');self.assertEqual((u.ROOT/'card/index.html').read_text(),'old card')
+   self.assertEqual(u.status(package,digest)['targetsState']['library']['state'],'drift')
+ def test_rollback_checks_library_http_and_can_resume_failed_verification(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));u.apply(package,digest)
+   original=u.m.wait_http
+   def library_unavailable(url,*args):
+    if '/library/' in url:raise RuntimeError('library not ready')
+    return b'old card'
+   with patch.object(u.m,'wait_http',side_effect=library_unavailable):
+    with self.assertRaisesRegex(RuntimeError,'Recovery incomplete'):u.rollback(package,digest)
+   self.assertEqual(u.rollback(package,digest)['status'],'rolled-back')
+ def test_receipt_fsync_failure_prevents_first_exchange(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));before=u.tree(u.ROOT);original=u.os.fsync
+   def fail_receipt(fd):
+    if '/receipts/' in os.readlink('/proc/self/fd/'+str(fd)):raise OSError('receipt fsync failed')
+    return original(fd)
+   with patch.object(u.os,'fsync',side_effect=fail_receipt):
+    with self.assertRaisesRegex(OSError,'receipt fsync failed'):u.apply(package,digest)
+   self.assertEqual(before,u.tree(u.ROOT))
+ def test_rollback_process_death_resumes_both_targets_and_keeps_new_card(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));u.apply(package,digest);original=u.m.exchange
+   with sqlite3.connect(u.DB) as db:db.execute('INSERT INTO temporary_cards VALUES("later-player-card")')
+   child=os.fork()
+   if child==0:
+    def die(a,b):original(a,b);os._exit(19)
+    with patch.object(u.m,'exchange',side_effect=die):u.rollback(package,digest)
+    os._exit(20)
+   _,code=os.waitpid(child,0);self.assertEqual(os.waitstatus_to_exitcode(code),19)
+   self.assertEqual(u.rollback(package,digest)['status'],'rolled-back');self.assertEqual(u.database_check()['temporary_cards'],2)
+ def test_process_death_during_backup_preparation_restores_without_partial_backup(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));original=u.shutil.copytree
+   child=os.fork()
+   if child==0:
+    def die(a,b,*args,**kwargs):
+     original(a,b,*args,**kwargs);os._exit(19)
+    with patch.object(u.shutil,'copytree',side_effect=die):u.apply(package,digest)
+    os._exit(20)
+   _,code=os.waitpid(child,0);self.assertEqual(os.waitstatus_to_exitcode(code),19)
+   self.assertEqual(u.status(package,digest)['recordedStatus'],'preparing')
+   self.assertEqual(u.recover(package,digest)['status'],'failed-restored')
+ def test_special_live_file_refuses_publication(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));os.mkfifo(u.ROOT/'library/unsafe')
+   with self.assertRaisesRegex(RuntimeError,'Unsafe static'):u.apply(package,digest)
 if __name__=='__main__':unittest.main()
