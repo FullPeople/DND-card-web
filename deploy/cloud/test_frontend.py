@@ -19,6 +19,7 @@ class FrontendTests(unittest.TestCase):
   stack.enter_context(patch.object(u.m,'command',return_value='active'))
   stack.enter_context(patch.object(u.m,'wait_http',return_value=b'old card'))
   self.verify=stack.enter_context(patch.object(u,'verify'))
+  self.policy=stack.enter_context(patch.object(u,'verify_policy'))
   package=root/'package';package.mkdir();baseline=u.snapshot();(package/'baseline.json').write_text(json.dumps(baseline));(package/'publish.py').write_bytes(Path(u.m.__file__).read_bytes())
   candidate=root/'candidate';(candidate/'card').mkdir(parents=True);(candidate/'card/index.html').write_text('new card');(candidate/'card/release.json').write_text(json.dumps({'version':'standalone-1.0.254','sourceCommit':'a'*40}))
   (candidate/'library').mkdir();(candidate/'library/index.html').write_text('new library')
@@ -189,4 +190,34 @@ class FrontendTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as folder:
    package,digest,manifest=self.fixture(Path(folder));os.mkfifo(u.ROOT/'library/unsafe')
    with self.assertRaisesRegex(RuntimeError,'Unsafe static'):u.apply(package,digest)
+
+ def test_policy_drift_is_rejected_before_backup_or_exchange(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,digest,manifest=self.fixture(Path(folder));before=u.tree(u.ROOT)
+   self.policy.side_effect=RuntimeError('API policy changed')
+   with self.assertRaisesRegex(RuntimeError,'API policy changed'):u.apply(package,digest)
+   self.assertEqual(before,u.tree(u.ROOT));self.assertFalse((package/'backup').exists())
+
+class PolicyTests(unittest.TestCase):
+ def health(self,state):
+  return {'version':'1.0.261','temporaryUpload':True,'quotaScope':'ip','qqLogin':state}
+ def test_matching_pending_and_ready_policies(self):
+  for state in ['pending','ready']:
+   with self.subTest(state=state),patch.object(u.m,'wait_http',return_value=json.dumps(self.health(state)).encode()):
+    u.verify_policy({'backendVersion':'1.0.261','qqLogin':state})
+ def test_legacy_manifests_require_pending(self):
+  with patch.object(u.m,'wait_http',return_value=json.dumps(self.health('pending')).encode()):
+   u.verify_policy({'backendVersion':'1.0.261'})
+  with patch.object(u.m,'wait_http',return_value=json.dumps(self.health('ready')).encode()):
+   with self.assertRaisesRegex(RuntimeError,'API policy changed'):u.verify_policy({'backendVersion':'1.0.261'})
+ def test_live_policy_changes_are_rejected_in_both_directions(self):
+  for state,expected in [('ready','pending'),('pending','ready')]:
+   with self.subTest(state=state),patch.object(u.m,'wait_http',return_value=json.dumps(self.health(state)).encode()):
+    with self.assertRaisesRegex(RuntimeError,'API policy changed'):u.verify_policy({'backendVersion':'1.0.261','qqLogin':expected})
+ def test_invalid_sealed_state_and_quota_changes_are_rejected(self):
+  with self.assertRaisesRegex(RuntimeError,'Invalid sealed'):u.verify_policy({'backendVersion':'1.0.261','qqLogin':'mock'})
+  for field,value in [('version','1.0.262'),('temporaryUpload',False),('quotaScope','account')]:
+   data={**self.health('ready'),field:value}
+   with self.subTest(field=field),patch.object(u.m,'wait_http',return_value=json.dumps(data).encode()):
+    with self.assertRaisesRegex(RuntimeError,'API policy changed'):u.verify_policy({'backendVersion':'1.0.261','qqLogin':'ready'})
 if __name__=='__main__':unittest.main()

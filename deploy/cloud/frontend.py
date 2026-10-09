@@ -97,16 +97,23 @@ def preflight(package,manifest_hash):
     require(baseline['release']['version']==manifest['previousVersion'] and baseline['release']['sourceCommit']==manifest['previousSourceCommit'],'Unexpected release baseline')
     require(shutil.disk_usage(ROOT).free>200_000_000,'Insufficient staging and backup space')
     require(m.command('systemctl','is-active','dnd-card-cloud.service')=='active','Backend inactive')
+    verify_policy(manifest)
     database_check()
     return manifest,baseline
+
+def verify_policy(manifest):
+    expected=manifest.get('qqLogin','pending')
+    require(expected in ('pending','ready'),'Invalid sealed QQ login state')
+    health=json.loads(m.wait_http('https://dnd.center/api/health',['--resolve','dnd.center:443:127.0.0.1']))
+    require(health['version']==manifest['backendVersion'] and health.get('temporaryUpload') is True
+      and health.get('quotaScope')=='ip' and health.get('qqLogin')==expected,'API policy changed')
 
 def verify(manifest):
     resolve=['--resolve','dnd.center:443:127.0.0.1']
     for path in ['card/index.html','library/index.html','card/sw.js','card/release.json','library/release.json']:
         url='https://dnd.center/'+('' if path=='index.html' else path.replace('/index.html','/'))
         m.wait_http(url,resolve,manifest['frontendFiles'][path])
-    health=json.loads(m.wait_http('https://dnd.center/api/health',resolve))
-    require(health['version']==manifest['backendVersion'] and health.get('temporaryUpload') is True and health.get('quotaScope')=='ip' and health.get('qqLogin')=='pending','API policy changed')
+    verify_policy(manifest)
 
 def stage_path(manifest,kind): return ROOT.parent/('.dnd-center-'+kind+'-'+manifest['release'])
 
