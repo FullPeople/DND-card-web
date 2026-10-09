@@ -2,6 +2,7 @@ import {useSheetChoices} from './SheetChoicesContext';
 import {useEntryMenu} from './EntrySharing';
 import {useSheetRenderMode} from './sheetDisplay';
 import {builtinChoices,builtinOptionsVisible,setBuiltinOptionsVisible} from '../core/automation/choices';
+import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {ChoiceOutline} from './ChoiceOutline';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import {spellState} from '../core/characterDetails';
@@ -35,7 +36,7 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
   const byOwner=useMemo(()=>{const result=new Map<string,typeof choices>();for(const choice of choices)result.set(choice.ownerId,[...(result.get(choice.ownerId)||[]),choice]);return result;},[choices]);
   const choicesFor=(id:string)=>byOwner.get(id)||[];
   const spells = kinds.length === 1 && kinds[0] === 'spell';
-  const features: Feature[] = rows.filter(s=>!s.grantKey?.startsWith('choice:')).map(s => {
+  const features: Feature[] = rows.filter(s=>!s.grantKey?.startsWith('choice:')||s.requirementId?.includes(':class-')).map(s => {
     const owner = featureOwner(c,s);
     return { id: s.id, group: spells ? String(s.entry.raw.level ?? 0) : grouped ? owner?.id || 'other' : 'all', origin: owner ? `${KIND_LABELS[owner.entry.kind]} ${owner.entry.name}${['class', 'subclass'].includes(owner.entry.kind) ? ` Lv.${selectionLevel(c,owner)}` : ''}` : '其他特性', name: entryLabel(s.entry), entry: s.entry, body: s.entry.entries, restricted: !selectionEffectsAllowed(c, s.entry) || !!owner && !selectionEffectsAllowed(c, owner.entry) };
   });
@@ -127,7 +128,7 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
         {choicesFor(f.id).some(r=>!r.complete)&&<ChoiceOutline/>}{expanded.has(f.id) ? <strong><em>{f.name.replace(/[。.]$/, '')}。</em></strong> : f.name}{choicesFor(f.id).filter(r=>!r.complete).map(r=>` ${r.selected.length}/${r.count}`)}
       </Reference>{editing&&!inline&&expanded.has(f.id)&&choicesFor(f.id).length>0&&<div className="feature-choice-actions">{choicesFor(f.id).map(choice=><button key={choice.id} onClick={()=>setChoiceId(choice.id)} data-choice-id={choice.id}>{choice.complete?'调整':'选择'}{choice.label} <span>{choice.selected.length}/{choice.count}</span></button>)}<button className="feature-choice-collapse" aria-label={`折叠${f.name}`} onClick={()=>toggle(f.id)}>折叠</button></div>}{inline && conditionVisual(f.entry) === 'exhaustion' && <NumberInput className="exhaustion-level" aria-label="力竭层数" type="number" min="1" max="6" value={c.selections.find(s => s.id === f.id)?.level || 1} onChange={event => edit(draft => { const row = draft.selections.find(s => s.id === f.id); if (row) row.level = Math.max(1, Math.min(6, Math.trunc(Number(event.target.value) || 1))); })}/>} {expanded.has(f.id) && <div className="feature-prose rules-prose"><ContentBoundary key={f.id}><Entries value={f.body} onLink={onLink}/>{f.restricted && <p className="inline-warning">来源未启用</p>}</ContentBoundary></div>}
     </article>)}</div></section>)}
-    </div>{children}{!inline && !screen && <button className="feature-browse" onClick={browse}>＋ 查阅{label}</button>}</>;
+    </div>{kinds.includes('feature')&&label==='特性'&&<ClassChoiceRecords c={c} catalog={catalog} mode="optional"/>}{children}{!inline && !screen && <button className="feature-browse" onClick={browse}>＋ 查阅{label}</button>}</>;
   if (inline) return <DropZone className="status-strip" kinds={kinds} onReceive={receive} wholePaper>{contents}</DropZone>;
   return <SheetCell label={label} headingInline={headingInline} trailing={screen?<button className="feature-browse-heading" aria-label={`查阅${label}`} title={`查阅${label}`} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();browse();}}>＋</button>:undefined} className={`${className} traits-box feature-panel`} dropKinds={kinds} onReceive={receive} wholePaper={kinds.length === 1 && kinds[0] === 'condition'} onHeadingClick={() => saveLayout(ordered.map(f => f.id), allOpen ? [] : ordered.map(f => f.id))} headingExpanded={allOpen} headingActionLabel={`${allOpen ? '折叠' : '展开'}全部${label}`}>{contents}</SheetCell>;
 }

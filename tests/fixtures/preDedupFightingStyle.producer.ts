@@ -1,0 +1,36 @@
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {join} from 'node:path';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {it,expect} from 'vitest';
+import {normalizeData} from '../../src/data/catalog';
+import {newCharacter,type Entry} from '../../src/core/model';
+import {newAutomationState} from '../../src/core/automation/state';
+import {sheetChoices,setSheetChoiceSlot,syncChoiceContent} from '../../src/core/automation/choices';
+import {syncFeatures} from '../../src/core/sheet';
+import {syncAutoResources,setResource} from '../../src/core/resources';
+import {ensureResourceWidget} from '../../src/core/resourceWidgets';
+import {evaluate} from '../../src/core/engine';
+import {validateCharacter} from '../../src/core/validation';
+
+const cache=process.env.DND_CLASS_CHOICE_RULE_CACHE,output=process.env.DND_FIGHTING_STYLE_UPGRADE_FIXTURE_OUTPUT;
+it.skipIf(!cache||!output).each([['fighter',1],['paladin',2],['ranger',2]] as const)('creates an actual old %s Defense grant with its original source prerequisite',(name,level)=>{
+ expect(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()).toBe('1a1717f84d9774f34194b9e57a45c247980cfba2');
+ const index=JSON.parse(readFileSync(join(cache!,'index.json'),'utf8'));
+ const load=(suffix:string)=>{const row=index.rows.find((r:any)=>r.url.endsWith(suffix));expect(row).toBeDefined();const body=JSON.parse(readFileSync(join(cache!,row.path),'utf8'));expect(createHash('sha256').update(JSON.stringify(body)).digest('hex')).toBe(row.sha256);return {row,body};};
+ const source=load(`/data/class/class-${name}.json`),feats=load('/data/feats.json'),items=load('/data/items-base.json');
+ const entries=normalizeData({...source.body,feat:feats.body.feat,baseitem:items.body.baseitem,item:items.body.item},'pinned-fs-upgrade');
+ const owner=entries.find(e=>e.kind==='class'&&e.source==='XPHB')!,feat=entries.find(e=>e.kind==='feat'&&e.source==='XPHB'&&e.english==='Defense')!,armor=entries.find(e=>e.kind==='item'&&e.source==='XPHB'&&e.raw.ac===11&&String(e.raw.type).split('|')[0]==='LA')!;
+ expect(feat.raw.prerequisite).toEqual([{feature:['战斗风格']}]);expect(armor).toBeDefined();
+ const c=newCharacter('2024');c.id=`authored-real-fs-${name}`;c.name='原创真实FS升级验收';c.createdAt=c.updatedAt='2026-10-08T00:00:00.000Z';c.notes='原创手工记录，请保留。';c.automation=newAutomationState();c.profile.enabledSources=['XPHB','CUSTOM'];c.runtime.hp=3;
+ c.selections=[{id:'class-owner',entry:owner,level,quantity:1,equipped:false},{id:'worn-armor',entry:armor,level:1,quantity:1,equipped:true}];syncFeatures(c,entries);
+ const feature=c.selections.find(s=>s.parentId==='class-owner'&&s.entry.raw.level===level&&s.entry.english==='Fighting Style')!;
+ expect(feature).toBeDefined();const choice=sheetChoices(c,entries).find(q=>q.ownerId===feature.id&&q.id.includes(':filter:')&&q.options.some(o=>o.value===feat.id))!;
+ expect(choice).toBeDefined();const armorAc=evaluate(c).ac;setSheetChoiceSlot(c,choice.id,0,feat.id,entries);syncChoiceContent(c,entries);const grant=c.selections.find(s=>s.entry.id===feat.id)!;expect(grant.parentId).toBe(feature.id);expect(evaluate(c).ac).toBe(armorAc+1);
+ const manual:Entry={id:'authored-fs-manual-entry',kind:'feature',name:'原创手工子项',english:'Authored Manual FS Child',source:'CUSTOM',edition:'both',packId:'fixture',revision:'1',entries:['原创手工记录。'],raw:{_custom:true,resources:[{name:'原创已耗资源',max:3,recovery:'long'}]}};
+ const nested:Entry={...manual,id:'authored-fs-nested-entry',name:'原创第二层手工子项',english:'Authored Nested FS Child',raw:{_custom:true}};
+ c.selections.push({id:'manual-child',entry:manual,parentId:grant.id,level:1,quantity:1,equipped:false},{id:'nested-child',entry:nested,parentId:'manual-child',level:1,quantity:1,equipped:false});entries.push(manual,nested);
+ c.answers['authored-manual-answer']=['kept'];c.quickbar=[feature.id,grant.id,'manual-child','nested-child'];c.featureLayout={order:[feature.id,grant.id,'manual-child','nested-child'],expanded:[grant.id,'manual-child']};
+ syncAutoResources(c);const resource=Object.keys(c.runtime.resources).find(k=>c.runtime.resources[k].featureGrant?.ownerId==='manual-child')!;expect(resource).toBeDefined();setResource(c,resource,1);syncAutoResources(c);for(const id of Object.keys(c.runtime.resources))ensureResourceWidget(c,id,()=>0.5);validateCharacter(c);
+ mkdirSync(output!,{recursive:true});writeFileSync(join(output!,`${name}.json`),JSON.stringify({producerCommit:'1a1717f84d9774f34194b9e57a45c247980cfba2',inputs:[source.row,feats.row,items.row],level,entries,character:c,armorAc,defenseAc:evaluate(c).ac,ids:{feature:feature.id,choice:choice.id,feat:grant.id,featEntry:feat.id,resource,manual:'manual-child',nested:'nested-child'}})+'\n');
+});

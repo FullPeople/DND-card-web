@@ -23,7 +23,17 @@ describe('automation progress evidence boundary',()=>{
  it('rejects fabricated implementation numbers even after their local artifact hash is updated',()=>{const path=fixture(true);try{const r=JSON.parse(readFileSync(join(path,RUNTIME_COVERAGE),'utf8'));r.implemented++;const bytes=Buffer.from(JSON.stringify(r)+'\n'),lock=JSON.parse(readFileSync(join(path,RUNTIME_LOCK),'utf8'));writeFileSync(join(path,RUNTIME_COVERAGE),bytes);lock.sha256=createHash('sha256').update(bytes).digest('hex');writeFileSync(join(path,RUNTIME_LOCK),JSON.stringify(lock));expect(()=>runtimeCoverage(path,readFileSync(join(path,'docs/data/automation-rule-status.json')))).toThrow('not derived from observed');}finally{rmSync(path,{recursive:true,force:true});}});
  it('generates allowlisted compact data with unknown counts when actual rule evidence is missing',()=>{
   const path=fixture();try{rmSync(join(path,'docs/data/automation-rule-status.json'));const m=generateProgress(path,'standalone');expect(validProgress(m)).toBe(true);expect(m.audit.counts).toBeNull();expect(m.missingEvidence).toContain('docs/data/automation-rule-status.json');expect(Buffer.byteLength(JSON.stringify(m))).toBeLessThan(PROGRESS_LIMIT);
-  expect(JSON.stringify(m)).not.toMatch(/18789|4561[^-]|24\.3%|0\.86%|"entries"|"raw"|"characters"|"modules"|"tests"/);
+  expect(m.audit.snapshot).toBeUndefined();expect(m.runtimeAudit).toBeUndefined();expect(m.sources.every(source=>source.counts===null)).toBe(true);
+  expect(JSON.stringify(m)).not.toMatch(/"entries"|"raw"|"characters"|"modules"|"tests"/);
+  // Opaque Git/content hashes can legitimately contain the digits of historical
+  // counts. Scan player content, while checking all forbidden fields above.
+  expect(JSON.stringify({...m,build:{...m.build,sourceCommit:undefined,fingerprint:undefined}})).not.toMatch(/18789|4561[^-]|24\.3%|0\.86%/);
+  }finally{rmSync(path,{recursive:true,force:true});}
+ });
+ it('does not mistake a valid hash suffix for leaked rule counts while missing evidence remains unknown',()=>{
+  const path=fixture();try{rmSync(join(path,'docs/data/automation-rule-status.json'));const m=generateProgress(path,'standalone');m.build.sourceCommit='b'.repeat(35)+'18789';m.build.fingerprint='a'.repeat(60)+'4561';
+   expect(validProgress(m)).toBe(true);expect(m.audit.counts).toBeNull();expect(m.audit.snapshot).toBeUndefined();expect(m.runtimeAudit).toBeUndefined();expect(m.sources.every(source=>source.counts===null)).toBe(true);
+   expect(JSON.stringify({...m,build:{...m.build,sourceCommit:undefined,fingerprint:undefined}})).not.toMatch(/18789|4561[^-]|24\.3%|0\.86%|"entries"|"raw"|"characters"|"modules"|"tests"/);
   }finally{rmSync(path,{recursive:true,force:true});}
  });
  it('unverified or stale receipts cannot mark implemented mechanics as verified',()=>{
