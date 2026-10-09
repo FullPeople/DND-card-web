@@ -21,8 +21,10 @@ describe('DM permission notice read status',()=>{
  it('role change or unmount retires all pending status replies',async()=>{
   let resolve!:(value:unknown)=>void;const changes:boolean[]=[];const state=permissionNoticeState(()=>new Promise(r=>resolve=r),v=>changes.push(v));const pending=state.refresh();state.dispose();resolve({seen:true});await pending;await state.refresh();expect(changes).toEqual([]);
  });
- it('the real DM toolbar puts the entry directly after Music and keeps explicit labels',()=>{
-  const source=readFileSync(new URL('../src/ui/Workbench.tsx',import.meta.url),'utf8');expect(source).toContain('>音乐板</button>}<PlayerPermissionButton');
+ it('the real DM toolbar retains the guide after Music and text effects with explicit labels',()=>{
+  const source=readFileSync(new URL('../src/ui/Workbench.tsx',import.meta.url),'utf8');
+  const music=source.indexOf('>音乐板</button>'),effects=source.indexOf('>文字演出</button>'),guide=source.indexOf('<PlayerPermissionButton');
+  expect(music).toBeGreaterThan(-1);expect(effects).toBeGreaterThan(music);expect(guide).toBeGreaterThan(effects);
   const entry=readFileSync(new URL('../src/ui/PlayerPermissionButton.tsx',import.meta.url),'utf8');expect(entry).toContain('关于玩家分配卡和权限');expect(entry).toContain('if(!gm||seen)return null');expect(entry).toContain("statusOnly:true");expect(entry).not.toContain('setItem');
  });
 });
