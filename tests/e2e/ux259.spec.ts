@@ -26,5 +26,5 @@ test('each page keeps its framing through switches, reload and JSON export',asyn
 });
 test('library publishes all dice and support artwork, including announcement QR popover',async({page,request})=>{
  for(const path of ['dice/d4.png','dice/d6.png','dice/d8.png','dice/d10.png','dice/d12.png','support/wechat.png','support/alipay.jpg']){const response=await request.get('/library/'+path);expect(response.status(),path).toBe(200);expect(response.headers()['content-type'],path).toMatch(/^image\//);}
- await page.goto('/library/');await expect(page.locator('dialog.announcement')).toBeVisible();const images=page.locator('dialog.announcement img');expect(await images.count()).toBeGreaterThanOrEqual(2);for(const image of await images.all())await expect.poll(()=>image.evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0)).toBe(true);
+ await page.goto('/library/');await page.getByRole('button',{name:'公告',exact:true}).click();await expect(page.locator('dialog.announcement')).toBeVisible();const images=page.locator('dialog.announcement img');expect(await images.count()).toBeGreaterThanOrEqual(2);for(const image of await images.all())await expect.poll(()=>image.evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0)).toBe(true);
 });

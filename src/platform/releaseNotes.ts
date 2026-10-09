@@ -365,6 +365,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
  }
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
  {title:'2026-10-08',sections:[{title:'调色盘与规则资料',items:['上栏增加统一调色盘，可分别调整基础界面、Wiki 与角色卡组件；配色随浏览器或角色保存。','Wiki 条目右键可以创建自定义副本。','法术悬浮提示不再显示学习者列表，完整 Wiki 仍保留这项资料。','更新 11 个职业图标，使用提供的 PSD 图层，统一为透明背景和四周留空的正方形。']},{title:'本轮共享更新',items:['新建自定义条目、怪物示例和三态筛选同步到新版工作台，JSON 导入支持拖入文件。','默认法术位最小占位随环阶数量调整，保留已使用次数和手动布局。',...(mode==='standalone'?['卡库卡面为纯展示，点击进入平滑全屏后查看五页与细节；切换复用已读取内容，手机侧栏默认收起。','从首页和卡库进入在线车卡会直接打开卡面。']:['枭熊角色卡继续按房间权限保存，不接入独立站云端。'])]}]},
  ...(mode==='standalone'?[{title:'2026-10-08',sections:[{title:'加载与角色卡库',items:['卡库改为完整 A4 圆形画廊，支持拖动、按钮和键盘循环切换。','相邻卡共用查看界面，优先读取当前卡，减少重复加载与离线缓存的并发下载。','已删除的云端卡会移出画廊并刷新列表；临时公开存储警告移到左侧 QQ 登录按钮下方。']}]}]:[]),
@@ -386,8 +387,7 @@ export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
   {title:'旧站迁移与备份',items:['旧站 obr.dnd.center/card/ 继续提供存档读取和完整 JSON 导出，不强制跳转。','在旧站“导入 / 导出”选择“全部可见角色”并下载 JSON，再在新站批量导入；核对五页、背景与资源后保留备份。','不同域名不会自动共享浏览器存档。Wiki 缓存和界面偏好需在新站重新建立。']},
   {title:'云端保存说明',items:['每账号最多免费保存 10 张自有云端卡；被授权编辑的卡不占编辑者槽位。按独立 ID 可以免登录查看完整角色卡，不公开全站目录。','卡主可以指定 QQ 号管理编辑授权，只有卡主能删除云端卡。并发冲突保留本机草稿。以上云端登录操作仍待真实 QQ 接入后开放。']}
  ]}]:[]),
- {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
- {title:'2026-10-08',sections:mode==='suite'?SUITE_RELEASE_258_SECTIONS:RELEASE_258_SECTIONS},
+ {title:'2026-10-07',sections:mode==='suite'?SUITE_RELEASE_258_SECTIONS:RELEASE_258_SECTIONS},
  {title:'2026-10-07',sections:mode==='suite'?SUITE_RELEASE_250_SECTIONS:RELEASE_250_SECTIONS},
  {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_249_SECTIONS:RELEASE_249_SECTIONS},
  {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_248_SECTIONS:RELEASE_248_SECTIONS},
