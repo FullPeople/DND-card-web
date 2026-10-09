@@ -135,6 +135,7 @@ import { Reference } from './Reference';
 
 
 import { useLibrary } from './useLibrary';
+import {useLibraryFavorites} from './useLibraryFavorites';
 import { explicitlyExcluded, librarySourceEnabled, LIBRARY_TABS, tabOf, matchesLibraryTab, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
 
 import { registerOffline } from '../platform/offline';
@@ -261,9 +262,11 @@ export default function App() {
   },[defaultSources,workspace]);
   const sourceEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
   const selectedEntries = useMemo(()=>workspace?.characters.filter(row=>!inWorkbench||!row.id.startsWith('suite:')||(wb.access?wb.access.enabled.characterCards!==false&&wb.access.cards.some(card=>row.id===`suite:${wb.access!.room}:card:${card.id}`):!!wb.document&&!!wb.target&&row.id===workbenchCharacterId(wb.target))).flatMap(row=>row.selections.map(s=>s.entry))||[],[workspace?.characters,wb.access,wb.target?.key,wb.document]);
+  const favorites=useLibraryFavorites();
   const library = useLibrary(allEntries,selectedEntries,inWorkbench);
   const { kind, setKind, detail: storedDetail, setDetail, state: libraryState } = library;
   const detail=storedDetail&&c&&librarySourceEnabled(c,storedDetail)?storedDetail:undefined;
+  useEffect(()=>{if(kind==='favorites'&&storedDetail&&!favorites.has(storedDetail))setDetail(undefined);},[kind,storedDetail,favorites.has]);
   useEffect(()=>{if(!monstersVisible&&kind==='monster')setKind('class');if(!monstersVisible&&detail?.kind==='monster')setDetail(undefined);},[monstersVisible,kind,detail?.id]);
   const { edition: editionFilter, filters, sort, descending, query:categoryQuery } = libraryState;
   const libraryEntries=useMemo(()=>sourceEntries.filter(entry=>customVisibilityAllows(entry,customVisibility.mode)),[sourceEntries,customVisibility.mode]);
@@ -324,7 +327,7 @@ export default function App() {
       ||(inWorkbench?Object.values(wb.inventory?.containers||{}).flatMap(container=>container.items).map(row=>row.entry).find((row):row is Entry=>!!row&&same(row)):undefined)
       ||(inWorkbench?[...wb.cards,...wb.monsters].flatMap(row=>row.conditions||[]).map(overviewConditionEntry).find(same):undefined);
   };
-  useEntryMenuActions({character:c,editing,canSpawnMonster:inWorkbench&&wb.online&&wb.role==='GM'&&wb.enabled.bestiary!==false,createCustom:newCustomEntry,canCreateCustom:canAuthor&&!rulesReadonly&&!readOnly,scope:inWorkbench?JSON.stringify([wb.online,wb.role,wb.access?.room,wb.access?.scope,wb.access?.epoch]):undefined,readableEntry:readableMenuEntry,writable:!readOnly&&(!inWorkbench||!!wb.target?.write),add:entry=>add(entry),inspect,remove:id=>edit(draft=>removeSelection(draft,id)),canRemoveCustom:entry=>canAuthor&&!readOnly&&!rulesBusy&&customEntries.some(row=>row.id===entry.id),removeCustom:entry=>{void changeCustom(entry,true).catch(error=>setNotice(String(error)));}});
+  useEntryMenuActions({character:c,editing,isFavorite:favorites.has,toggleFavorite:entry=>{try{favorites.change(entry,!favorites.has(entry));}catch{setNotice('收藏未能保存，请检查浏览器存储空间和权限后重试。');}},canSpawnMonster:inWorkbench&&wb.online&&wb.role==='GM'&&wb.enabled.bestiary!==false,createCustom:newCustomEntry,canCreateCustom:canAuthor&&!rulesReadonly&&!readOnly,scope:inWorkbench?JSON.stringify([wb.online,wb.role,wb.access?.room,wb.access?.scope,wb.access?.epoch]):undefined,readableEntry:readableMenuEntry,writable:!readOnly&&(!inWorkbench||!!wb.target?.write),add:entry=>add(entry),inspect,remove:id=>edit(draft=>removeSelection(draft,id)),canRemoveCustom:entry=>canAuthor&&!readOnly&&!rulesBusy&&customEntries.some(row=>row.id===entry.id),removeCustom:entry=>{void changeCustom(entry,true).catch(error=>setNotice(String(error)));}});
   const [tab, setTab] = useState('sheet');
   const groupReturn=useRef<{page:string;tab:string;sheet:SheetPage;scrolls:{selector:string;top:number;left:number}[]}|undefined>(undefined);
   const mapFollowing=useRef(false);
@@ -532,9 +535,9 @@ export default function App() {
   const categoryEntries = useMemo(() => {
     if (!c) return [];
     const candidates=choiceScope?.wiki&&choiceScope.tab===kind?new Set(choiceScope.entries.map(e=>e.id)):undefined;
-    return libraryEntries.filter(e => (candidates?candidates.has(e.id):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
+    return libraryEntries.filter(e => (candidates?candidates.has(e.id):kind==='favorites'?favorites.has(e):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
       (candidates&&activeChoice?.sourceProgression?true:wikiEditionAllows(e,c,editionFilter)));
-  }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope]);
+  }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope,favorites.has]);
   const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery);
   const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery,matchesEntrySearch]);
   useEffect(() => { setException(''); }, [detail?.id]);

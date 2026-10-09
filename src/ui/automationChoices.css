@@ -100,7 +100,7 @@
 }
 
 /* Inline choices scroll within the existing feature frame; the other stats stay visible. */
-.paper .feature-panel .choice-inline{position:relative;flex:none;width:100%;height:300px;max-height:42vh;margin:0 0 8px;min-height:160px}
+.paper .feature-panel .choice-inline{position:relative;flex:none;width:100%;height:300px;max-height:none;margin:0 0 8px;min-height:0}
 .paper .feature-panel .choice-inline>.cell-face{position:absolute;inset:0;height:100%;width:100%;flex:none}
 .paper .feature-panel .choice-inline .cell-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .paper .feature-panel .choice-inline .cell-heading{min-height:24px}
@@ -110,5 +110,5 @@
 .paper .feature-panel .choice-inline .choice-option{padding:6px 8px}
 .paper .feature-panel .choice-inline .choice-option.is-picked{padding:5px 7px}
 .paper .feature-panel .choice-inline .choice-footer{position:sticky;bottom:0;background:var(--paper-surface,#e8e8e8);padding:6px 0;margin-top:6px;z-index:1}
-@media screen and (max-width:760px){.paper .feature-panel .choice-inline{height:290px;max-height:42dvh}}
+
 @media print{.choice-inline{display:none!important}}
