@@ -34,8 +34,10 @@ test('standalone has no room transport, survives offline reload and rolls withou
  await page.locator('.quick-weapon').filter({hasText:'训练剑'}).getByRole('button',{name:'+4',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'})).toBeVisible();await page.getByRole('button',{name:'投骰',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'}).getByRole('status')).toContainText('1d20');await page.getByRole('button',{name:'关闭',exact:true}).click();
- await page.getByRole('textbox',{name:'当前生命值',exact:true}).fill('17');await page.locator('.brand').click();
+ const hp=page.getByRole('textbox',{name:'当前生命值',exact:true});await hp.fill('17');await hp.press('Tab');
  await expect(page.getByRole('textbox',{name:'当前生命值',exact:true})).toHaveValue('17');
+ await expect.poll(()=>page.evaluate(async()=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open('dnd-card-standalone');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});return new Promise<number>(resolve=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{const w=req.result;db.close();resolve(w.characters.find((c:any)=>c.id===w.activeId).runtime.hp);};});})).toBe(17);
+ await page.reload();await expect(hp).toHaveValue('17');
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await expect(page.getByRole('button',{name:'导入枭熊 JSON'})).toHaveCount(0);await expect(page.getByText('完整 JSON 备份 · 网站与枭熊通用')).toBeVisible();await page.getByRole('button',{name:'关闭弹窗'}).click();
  await page.locator('.catalog-row').first().click();await expect(page.locator('.entry-detail')).toContainText('测试法师');
  await page.screenshot({path:test.info().outputPath('standalone-desktop.png')});
