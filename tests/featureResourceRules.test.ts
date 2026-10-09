@@ -139,6 +139,35 @@ it('a restriction on resetting check difficulty still does not restrict reuse of
  expect(planFeatureResources(c).grants).toEqual([]);
 });
 
+it('distinct rest-limited actions cannot become one shared feature counter',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=[
+  '你可以免费施展一个法术，并且你必须在完成一次长休后才能再次这么做。',
+  '一旦你以此特性恢复过法术位，直到完成一次长休为止，你无法再次这么做。'
+ ];
+ const report=planFeatureResources(c);expect(report.grants).toEqual([]);expect(report.issues).toHaveLength(1);
+});
+
+it('identical cooldown wording for two declared spells does not establish shared uses',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=[
+  '你可以通过此特性施展原创光幕。你必须完成一次长休才能再次通过此特性施放该法术。',
+  '你可以通过此特性施展原创暗幕。你必须完成一次长休才能再次通过此特性施放该法术。'
+ ];
+ const report=planFeatureResources(c);expect(report.grants).toEqual([]);expect(report.issues).toHaveLength(1);
+});
+
+it('explicit separate resource declarations retain independent spending despite multiple prose cooldowns',()=>{
+ const c=card();c.selections[2].entry.raw={resources:[{name:'原创光幕次数',max:3,recovery:'long'},{name:'原创暗幕次数',max:2,recovery:'long'}]};
+ c.selections[2].entry.entries=['你必须完成一次长休才能再次施展原创光幕。你必须完成一次长休才能再次施展原创暗幕。'];
+ syncFeatureResources(c);const keys=Object.keys(c.runtime.resources);expect(keys).toHaveLength(2);
+ setResource(c,keys[0],1);syncFeatureResources(c);
+ expect(keys.map(key=>c.runtime.resources[key].current)).toEqual([1,2]);expect(planFeatureResources(c).issues).toEqual([]);
+});
+
+it('an incidental second rest mention without a reuse restriction does not make a once-use rule ambiguous',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['使用此特性后，你必须完成一次长休才能再次使用。你在短休时可以整理自己的装备。'];
+ expect(planFeatureResources(c)).toMatchObject({grants:[{max:1,recovery:{long:'all'}}],issues:[]});
+});
+
 it('a source-bound uses column supplies the maximum and preserves spending while leveling',()=>{
  const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['用尽本特性的最大次数后，你必须完成一次长休，才能再次使用此特性。'];
  c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:Array.from({length:20},(_,i)=>[i<6?2:3])}];

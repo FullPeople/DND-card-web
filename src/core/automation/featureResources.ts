@@ -18,7 +18,9 @@ function proseOnce(text:string){
  const periods=/(短(?:暂)?(?:休|歇)?(?:或|与|和|\/)长(?:休|歇)|长(?:休|歇)(?:或|与|和|\/)短(?:暂)?(?:休|歇)|(?:短|长)(?:暂)?(?:休|歇))/;
  const repeat=/(?:不能|无法|不可|不得|才能|才可以|方可)[^。；]{0,30}?(?:(?:再次|再度|重新|再)[^。；]{0,18}?(?:使用|施用|施放|施法|施展|释放|创造|创建|创作|召唤|唤出|显现|分享|启动|激活|受益|这么做|这样做|如此做)|(?:使用|施用)(?:本|此|该)特性)/;
  const marked=text.replace(/\{@quickref ([^}]+)}/g,(_,body:string)=>{const parts=body.split('|');return parts[4]||parts[0];});
- for(const clause of clean(marked).split(/[。；]/)){
+ const cooldowns=clean(marked).split(/[。；]/).filter(clause=>repeat.test(clause)&&periods.test(clause));
+ if(cooldowns.length>1&&cooldowns.some(clause=>/(?:使用|施用)(?:本|此|该)特性后|必须(?:在)?完成一次/.test(clause)))return {clause:cooldowns[0],issue:'该条目包含多项休息限制，次数归属尚未明确'};
+ for(const clause of cooldowns){
   if(!/(?:使用|施用)(?:本|此|该)特性后|必须(?:在)?完成一次/.test(clause)||!repeat.test(clause))continue;
   const match=clause.match(periods);if(!match)continue;
   if(/对同一|同一(?:个)?(?:生物|目标)|(?:生物|目标)[，,]*(?:都|皆)?必须/.test(clause))return {clause,issue:'恢复按目标分别限制，尚未生成全局次数'};
