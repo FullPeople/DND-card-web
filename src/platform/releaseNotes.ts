@@ -387,8 +387,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
  }
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='suite'?[{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[]),
- {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ ...(mode==='suite'?[{title:'2026-10-10-265',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
