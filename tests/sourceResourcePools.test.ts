@@ -33,6 +33,9 @@ it('unselected spell schemes and incompatible class editions cannot declare an a
  const c=setup();c.selections[1].entry.raw.additionalSpells.push(structuredClone(c.selections[1].entry.raw.additionalSpells[0]));syncAutoResources(c);expect(point(c)).toBeUndefined();
  c.automation!.spellSets={owner:0};c.selections[0].entry.edition='2014';syncAutoResources(c);expect(point(c)).toBeUndefined();
 });
+it('an unsupported source block condition cannot initialize a class pool',()=>{
+ const c=setup();c.selections[1].entry.raw.additionalSpells[0].unsupportedCondition={required:true};syncAutoResources(c);expect(point(c)).toBeUndefined();
+});
 it('an existing explicit class-owned pool wins over a duplicate table-derived pool',()=>{
  const c=setup();c.selections.push({id:'explicit',parentId:'class',entry:entry('原创点数声明','feature',{resources:[{name:'原创星火',max:9,recovery:'long'}]}),level:1,quantity:1,equipped:false});
  syncAutoResources(c);expect(Object.values(c.runtime.resources)).toHaveLength(1);expect(point(c)![1]).toMatchObject({max:9,featureGrant:{ownerId:'explicit'}});

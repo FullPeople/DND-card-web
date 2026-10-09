@@ -52,7 +52,7 @@ export function planClassResourcePools(c:Character,featureGrants:ResourceGrant[]
   if(!active.has(owner.id)||owner.entry.kind==='item')continue;
   const cls=resourceClass(c,owner),blocks=owner.entry.raw.additionalSpells;if(!cls||!active.has(cls.id)||!Array.isArray(blocks))continue;
   const index=blocks.length===1?0:c.automation?.spellSets?.[owner.id],block=Number.isInteger(index)?blocks[index!]:undefined;
-  if(!object(block)||typeof block.resourceName!=='string'||!block.resourceName.trim()||block.resourceName.length>160)continue;
+  if(!object(block)||Object.keys(block).some(key=>!['name','ENG_name','ability','known','prepared','innate','expanded','resourceName'].includes(key))||typeof block.resourceName!=='string'||!block.resourceName.trim()||block.resourceName.length>160)continue;
   const hasResource=['known','prepared','innate'].some(kind=>object(block[kind])&&Object.values(block[kind]).some(value=>object(value)&&object(value.resource)&&Object.entries(value.resource).some(([cost,refs])=>validResourceCost(cost)&&Array.isArray(refs)&&refs.length)));
   if(!hasResource)continue;
   const chosen=c.automation?.spellResourceColumns?.[sourceResourceBindingKey(c,owner,index!,block.resourceName)],columns=resourceColumns(cls);
