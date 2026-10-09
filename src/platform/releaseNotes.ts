@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-09';
+export const RELEASE_DATE='2026-10-10';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -353,7 +353,7 @@ export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'文字演出效果与配置',items:['文字演出补齐 23 种入场、18 种退场、9 种停留效果和七种正文展开方式，直接在枭熊中播放，不生成 APNG。','滚动设置时预览和播放按钮保持可见；设置分为五页，用高亮按钮选择效果，相关参数按需显示。','新增渐变、双层描边、阴影、副标题、竖排及装饰细节配置；保留已有草稿、预设和原有光芒等画面效果。','保存预设后可直接点选，删除支持撤销。关闭附加窗口并刷新枭熊后重新打开插件；真实多人房间和实体设备仍待验收。']}
 ];
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
-export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:[
+const standalone264Sections=()=>[
  {title:'QQ 登录',items:['首页、角色卡和仓库增加 QQ 登录入口，登录后显示昵称并可退出。','应用审核通过前，请使用已添加的调试 QQ 号测试登录。','登录保留本机角色和原浏览器的临时上传管理权限。已公开的卡片仍可公开查看，请保留 JSON 备份。','按 QQ 号码分配编辑权限仍待接入。'],supersedes:['QQ 登录与正式账号编辑授权尚未接入。']},
  ...RELEASE_SECTIONS
 ];
@@ -389,8 +389,12 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
   ]
  }
 ];
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?SUITE_RELEASE_SECTIONS:[
+ {title:'资源次数与来源',items:['按当前角色实际启用的职业计算资源公式，并读取所属职业的具名次数表；升级会更新上限，保留已消耗次数。','关闭来源、刷新和重新导入不会补满次数。长休限定不会被当成短休恢复。','按目标限制、随机冷却及归属不明的多项次数仍需人工核对，不会合成一个共享计数器。']},
+ {title:'自动化进度',items:['进度页更新逐条验证结果。至少有一项计算或选择可用，不代表整条规则已经自动执行。','玩家休息执行入口仍未开放；恢复资源请按来源核对并手动记录。']}
+];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='suite'?[{title:'2026-10-10-266',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)}]),
+ ...(mode==='suite'?[{title:'2026-10-10-266',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)},{title:'2026-10-09-264',sections:standalone264Sections()}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
