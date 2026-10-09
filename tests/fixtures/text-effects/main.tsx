@@ -26,7 +26,7 @@ function reply(request:any){
   if(w.hold){w.held=request;return;}if(w.failNext){w.failNext=false;w.reply(request,undefined,'模拟播放失败');return;}
   const data=args[1];if(!data.preview&&role!=='GM'){w.reply(request,undefined,'只有 DM 可以向房间播放');return;}
   if(data.action==='stop'){document.querySelector(`iframe[data-id="${data.id}"]`)?.remove();w.reply(request,{requestId:data.requestId,ok:true,id:data.id,preview:data.preview});return;}
-  const now=Date.now(),config=data.config,event={version:1,id:crypto.randomUUID(),sceneKey:crypto.randomUUID(),order:++sequence,issuedAt:now,startsAt:now+500,expiresAt:now+1000+config.enter+config.hold+config.exit,config};
+  const now=Date.now(),config=data.config,total=w.textEffectDuration?w.textEffectDuration(config):config.enter+config.hold+config.exit,event={version:1,id:crypto.randomUUID(),sceneKey:crypto.randomUUID(),order:++sequence,issuedAt:now,startsAt:now+500,expiresAt:now+1000+total,config};
   document.querySelectorAll('.native-effect').forEach(el=>el.remove());
   const frame=document.createElement('iframe');frame.className='native-effect';frame.dataset.id=event.id;frame.title=data.preview?'自己的枭熊画面':'模拟房间画面';frame.src='/suite-dev/text-effect-display.html#'+encodeURIComponent(JSON.stringify({...event,modalId:'com.obr-suite/text-effects/display/'+event.id,reduced:false}));document.body.append(frame);setTimeout(()=>frame.remove(),event.expiresAt-now);
   w.presentations.push({preview:data.preview,event});w.reply(request,{requestId:data.requestId,ok:true,id:event.id,preview:data.preview,expiresAt:event.expiresAt});return;
