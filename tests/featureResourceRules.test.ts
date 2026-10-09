@@ -84,6 +84,59 @@ it.each(['。','，'])('a repeated-check difficulty that resets after rest is no
  expect(planFeatureResources(c).grants).toEqual([]);
 });
 
+it.each([
+ '使用此特性后，你必须完成一次长休，才能再次使用。',
+ '该特性在使用后必须完成一次短休或长休，才能再使用。',
+ '创造原创护符后，你必须完成一次长休，才能再次创造新的护符。',
+ '施展原创光环后，你必须完成一次长休，才能再次以这种方式施展。',
+ '你必须完成一次长休，才能再次如此做。'
+])('an explicit repeat-action restriction does not require repeating the feature name: %s',text=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=[text];
+ expect(planFeatureResources(c)).toMatchObject({grants:[{max:1,recovery:{long:'all'}}],issues:[]});
+});
+
+it('tagged rest references keep both periods when the order is long then short',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['你使用此特性后，必须在完成一次{@variantrule 长休|AUTHORED}或{@variantrule 短休|AUTHORED|短}后才能再次使用。'];
+ expect(planFeatureResources(c)).toMatchObject({grants:[{max:1,recovery:{short:'all',long:'all'}}],issues:[]});
+});
+
+it('a quick reference uses its explicit rest label rather than the generic category',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['使用此特性后，直到你完成一次{@quickref 休息|AUTHORED|2|0|长休}前，你都不能再次使用它。'];
+ expect(planFeatureResources(c)).toMatchObject({grants:[{max:1,recovery:{long:'all'}}],issues:[]});
+});
+
+it.each([
+ '你必须完成一次长休，才能再次对同一生物使用此特性。',
+ '通过此特性恢复过生命值的生物，都必须完成一次长休才能再次使用此效果。',
+ '通过此特性恢复过生命值的生物，都必须完成一次长休才能再次从中受益。',
+ '使用此特性后，直到你完成{@dice 1d4}次长休后，你都不能再次使用此特性。',
+ '使用此特性后，你必须完成两次短休，才能再次使用此特性。'
+])('target-specific or multiple-rest cooldowns cannot become a global once-use pool: %s',text=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=[text];
+ const report=planFeatureResources(c);expect(report.grants).toEqual([]);expect(report.issues).toHaveLength(1);
+});
+
+it('a restriction on resetting check difficulty still does not restrict reuse of the feature',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['使用此特性后，检定难度增加 5；你必须完成一次长休，才能再次重置检定难度。'];
+ expect(planFeatureResources(c).grants).toEqual([]);
+});
+
+it('a source-bound uses column supplies the maximum and preserves spending while leveling',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['用尽本特性的最大次数后，你必须完成一次长休，才能再次使用此特性。'];
+ c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:Array.from({length:20},(_,i)=>[i<6?2:3])}];
+ const plan=planFeatureResources(c);expect(plan).toMatchObject({grants:[{max:2}],issues:[]});
+ syncFeatureResources(c);const key=plan.grants[0].key;setResource(c,key,0);c.selections[0].level=7;syncFeatureResources(c);
+ expect(c.runtime.resources[key]).toMatchObject({max:3,current:1,featureGrant:{spent:2}});
+});
+
+it.each(['missing','symbolic','ambiguous','malformed'])('an unresolved source count table stays manual: %s',shape=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['用尽本特性的最大次数后，你必须完成一次长休，才能再次使用此特性。'];
+ if(shape==='symbolic')c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:[['2'],['无限']]}];
+ if(shape==='ambiguous')c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源','原创资源次数'],rows:[[2,3],[2,3]]}];
+ if(shape==='malformed')c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:'22'}];
+ const report=planFeatureResources(c);expect(report.grants).toEqual([]);expect(report.issues).toHaveLength(1);
+});
+
 it('a resolved dynamic class formula preserves spending through level changes, import and source toggles',()=>{
  const c=card({max:'@classes.reserve.levels',recovery:'long'});syncFeatureResources(c);
  const key=Object.keys(c.runtime.resources)[0];setResource(c,key,2);

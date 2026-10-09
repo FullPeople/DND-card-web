@@ -238,7 +238,7 @@
       "category": "resources",
       "state": "partial",
       "playerAvailable": true,
-      "reviewedAt": "2026-10-05",
+      "reviewedAt": "2026-10-10",
       "sampleSources": [
         "XPHB"
       ],
@@ -253,9 +253,12 @@
       "tests": [
         "tests/automation-choices-resources.test.ts",
         "tests/sourceSpellMechanics217.test.ts",
-        "tests/resources.test.ts"
+        "tests/resources.test.ts",
+        "tests/featureResourceRules.test.ts"
       ],
-      "browserTests": []
+      "browserTests": [
+        "tests/e2e/featureResourceRules.spec.ts"
+      ]
     },
     {
       "id": "rest",
@@ -263,7 +266,7 @@
       "category": "resources",
       "state": "unavailable",
       "playerAvailable": false,
-      "reviewedAt": "2026-10-05",
+      "reviewedAt": "2026-10-10",
       "sampleSources": [
         "XPHB"
       ],
@@ -273,7 +276,8 @@
       ],
       "tests": [
         "tests/automation-choices-resources.test.ts",
-        "tests/transitionRest.test.ts"
+        "tests/transitionRest.test.ts",
+        "tests/featureResourceRules.test.ts"
       ],
       "browserTests": []
     },

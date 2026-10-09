@@ -25,7 +25,7 @@ test('named class resource spending survives level changes, reload and native JS
  c.selections=[{id:'owner',entry,level:2,quantity:1,equipped:false},{id:'reserve',entry:{...entry,id:'resource-rule-reserve',name:'原创储备职业',english:'Authored Reserve',raw:{identifier:'reserve'}},level:5,quantity:1,equipped:false},{id:'feature',parentId:'owner',entry:{...entry,id:'resource-rule-feature',kind:'feature',name:'原创储备次数',english:'Authored Reserve Uses',raw:{resources:[{max:'@classes.reserve.levels',recovery:'long'}]}},level:1,quantity:1,equipped:false}];
  await page.goto('/');await expect(page.getByRole('button',{name:'导入 / 导出',exact:true})).toBeEnabled();await importCard(page,exportCharacter(c));
  const resource=page.locator('.resource-widget[data-resource-name="原创储备次数"]');await expect(resource).toBeVisible();
- await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await resource.locator('.resource-widget-face').click();
+ await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await resource.locator('.resource-widget-face').dblclick();
  const editor=page.getByRole('dialog',{name:'资源配置',exact:true});await expect(editor.getByRole('spinbutton',{name:'资源上限',exact:true})).toHaveValue('5');
  await editor.getByRole('spinbutton',{name:'资源剩余',exact:true}).fill('2');await editor.getByRole('button',{name:'保存',exact:true}).click();await page.keyboard.press('Escape');
  const level=page.getByRole('spinbutton',{name:'原创储备职业等级',exact:true});await level.fill('7');await level.press('Tab');
