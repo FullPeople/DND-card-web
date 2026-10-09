@@ -15,10 +15,24 @@ const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Arra
 const strings=(v:unknown,depth=0):string[]=>depth>12?[]:typeof v==='string'?[v]:Array.isArray(v)?v.flatMap(n=>strings(n,depth+1)):plain(v)?[...strings(v.entries,depth+1),...strings(v.items,depth+1)]:[];
 const clean=(v:unknown)=>String(v??'').replace(/\{@\w+ ([^|}]+)(?:[^}]*)}/g,'$1').replace(/<[^>]*>/g,'').replace(/\s/g,'');
 function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
-function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();return {cls,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0))-1)/4)+(c.sheetBonuses?.proficiency||0)};}
+function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();const classes=c.selections.filter(s=>s.entry.kind==='class'&&selectionActive(c,s)),total=classes.reduce((n,s)=>n+s.level,0);return {cls,classes,total,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,total)-1)/4)+(c.sheetBonuses?.proficiency||0)};}
 function formulaText(c:Character,row:Selection,formula:string):string{
- const {level,prof}=context(c,row);
- return formula.replace(/@(?:class\.level|classes\.[\w-]+\.levels|details\.level|level|prof|abilities\.(str|dex|con|int|wis|cha)\.mod)/g,(v,a)=>a?String(abilityModifier(c,a)):v==='@prof'?String(prof):String(v==='@details.level'?c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0):level));
+ const {cls,classes,total,level,prof}=context(c,row);
+ return formula.replace(/@[\w.-]+/g,token=>{
+  const ability=token.match(/^@abilities\.(str|dex|con|int|wis|cha)\.mod$/)?.[1] as Ability|undefined;
+  if(ability)return String(abilityModifier(c,ability));
+  if(token==='@prof')return String(prof);
+  if(token==='@details.level')return String(total);
+  if(token==='@level')return String(level);
+  if(token==='@class.level'){if(!cls||!classes.includes(cls))throw Error('资源公式缺少已启用的所属职业');return String(cls.level);}
+  const identifier=token.match(/^@classes\.([\w-]+)\.levels$/)?.[1];
+  if(identifier){
+   const matches=classes.filter(s=>[s.entry.raw.identifier,s.entry.raw.system?.identifier,s.entry.english,s.entry.raw.ENG_name].some(name=>typeof name==='string'&&name.trim().toLowerCase().replace(/\s+/g,'-')===identifier.toLowerCase()));
+   if(matches.length!==1)throw Error('资源公式引用的职业缺失、未启用或不唯一');
+   return String(matches[0].level);
+  }
+  throw Error('资源公式包含尚未适配的变量');
+ });
 }
 function numericMax(c:Character,row:Selection,value:unknown){if(typeof value==='number')return value;if(typeof value==='string')return numericExpression(`=${formulaText(c,row,value)}`,0).value;throw Error('次数上限没有可计算的数值或公式');}
 export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues:Issue[]}{
@@ -26,19 +40,19 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
  for(const row of c.selections){
   if(!['feature','feat','race','background','class','subclass'].includes(row.entry.kind)||!selectionActive(c,row))continue;
   const raw=row.entry.raw,text=strings(row.entry.entries).join(' '),{cls,level}=context(c,row);
-  const explicit=Array.isArray(raw.resources)?raw.resources:plain(raw.resource)?[raw.resource]:plain(raw.uses)?[{...raw.uses,name:row.entry.name,recovery:raw.uses.recovery||raw.uses.per}]:plain(raw.system?.uses)&&raw.system.uses.max?[{...raw.system.uses,name:row.entry.name}]:[];
+  const explicit=Array.isArray(raw.resources)?raw.resources:plain(raw.resource)?[raw.resource]:plain(raw.uses)?[{...raw.uses,name:row.entry.name,recovery:raw.uses.recovery||raw.uses.per}]:plain(raw.system?.uses)&&raw.system.uses.max!==undefined?[{...raw.system.uses,name:row.entry.name}]:[];
   let specs:any[]=explicit;
   if(!specs.length){
    const escaped=row.entry.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
    const use=text.match(new RegExp(`(?:可以|能够|能)(?:使用|施用)(?:(?:此|本|这项|该)(?:特性|能力)?|${escaped})(?:共计|总计|总共)?([一二两三四五六七八九十\\d]+)次`));
-   const once=/(?:使用|施用)(?:本|此|该)特性后.*?(?:短|长)(?:暂)?(?:休|歇)|必须完成一次(?:短|长)/.test(text);
+   const once=text.match(/(?:(?:使用|施用)(?:本|此|该)特性后[^。；]{0,180}?|必须完成一次)(短|长)(?:暂)?(?:休|歇)/);
    if(use||once){
     const recovery:Recovery={};
     for(const [key,word] of [['short','短'],['long','长']] as const){
      const match=text.match(new RegExp(`${word}(?:暂)?(?:休|歇)[^。；，,]{0,90}?(?:恢复|重获|重新获得|再次使用|再度使用|重置)([^。；，,]*)`));
      if(match){const n=match[1].match(/([一二两三四五六七八九十\d]+)次/);recovery[key]=/所有|全部/.test(match[1])?'all':n?count(n[1]):'all';}
     }
-    if(once){recovery.short='all';recovery.long='all';}
+    if(once){if(once[1]==='短')recovery.short='all';recovery.long='all';}
     if(recovery.short&&!recovery.long)recovery.long='all';
     let max=use?count(use[1]):1;
     for(const upgrade of text.matchAll(/第(\d+)级[^。；]{0,45}?(?:使用|施用)([一二两三四五六七八九十\d]+)次/g))if(level>=Number(upgrade[1]))max=Math.max(max,count(upgrade[2])||0);
@@ -56,7 +70,7 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
    let recovery:Recovery=plain(spec.recovery)?spec.recovery:{};
    if(['sr','short'].includes(spec.recovery))recovery={short:'all',long:'all'};else if(['lr','long'].includes(spec.recovery))recovery={long:'all'};
    else if(typeof spec.recovery==='string'&&spec.recovery!=='manual')throw Error('恢复周期尚未适配');
-   if(Array.isArray(spec.recovery))for(const rule of spec.recovery){if(!['sr','lr'].includes(rule.period))throw Error('恢复周期尚未适配');const amount=rule.type==='recoverAll'?'all':numericMax(c,row,rule.formula);recovery[rule.period==='sr'?'short':'long']=amount;}
+   if(Array.isArray(spec.recovery))for(const rule of spec.recovery){if(!['sr','lr'].includes(rule.period))throw Error('恢复周期尚未适配');if(!['recoverAll','formula'].includes(rule.type))throw Error('恢复方式尚未适配');const period=rule.period==='sr'?'short':'long';if(recovery[period]!==undefined)throw Error('同一周期的多项恢复规则尚未适配');const amount=rule.type==='recoverAll'?'all':numericMax(c,row,rule.formula);recovery[period]=amount;}
    for(const [key,value] of Object.entries(recovery))if(!['short','long'].includes(key)||value!=='all'&&(!Number.isSafeInteger(value)||Number(value)<0||Number(value)>10000))throw Error('恢复次数或周期无效');
    const identity=cls&&raw.className?JSON.stringify([cls.id,row.entry.source,raw.classSource,raw.subclassShortName||'',row.entry.english]):sourceOwnerIdentity(c,row);
    const grant={key:`feature-resource:${identity}:${index}`,ownerId:row.id,name:spec.name||row.entry.name,max,formula:typeof spec.formula==='string'?formulaText(c,row,spec.formula):undefined,recovery,origin:`${row.entry.name} · ${row.entry.source}`};
