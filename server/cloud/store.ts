@@ -29,6 +29,7 @@ export class CloudStore {
       CREATE INDEX IF NOT EXISTS temporary_cards_ip ON temporary_cards(ip_hash);
       CREATE TABLE IF NOT EXISTS cloud_settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS cloud_ids(id TEXT PRIMARY KEY);
+      CREATE TABLE IF NOT EXISTS qq_profiles(account_id TEXT PRIMARY KEY REFERENCES accounts(id),nickname TEXT NOT NULL,avatar TEXT NOT NULL);
       INSERT OR IGNORE INTO cloud_ids SELECT id FROM cards;
       INSERT OR IGNORE INTO cloud_ids SELECT id FROM temporary_cards;`);
     this.db.prepare('INSERT OR IGNORE INTO cloud_settings VALUES(?,?)').run('ip_hash_secret',randomBytes(32).toString('hex'));
@@ -54,6 +55,11 @@ export class CloudStore {
     if(row)return {account:{id:row.id,qq:row.qq,extra_slots:row.extra_slots},csrf:row.csrf};
   }
   logout(token:string){this.db.prepare('DELETE FROM sessions WHERE token_hash=?').run(hash(token));}
+  saveQQProfile(accountId:string,nickname:unknown,avatar:unknown){
+    let safeAvatar='';try{const url=new URL(String(avatar));if(['http:','https:'].includes(url.protocol)&&/(^|\.)(qlogo\.cn|qq\.com)$/.test(url.hostname)&&!url.username&&!url.password){url.protocol='https:';safeAvatar=url.href;}}catch{}
+    this.db.prepare('INSERT INTO qq_profiles VALUES(?,?,?) ON CONFLICT(account_id) DO UPDATE SET nickname=excluded.nickname,avatar=excluded.avatar').run(accountId,typeof nickname==='string'?nickname.slice(0,80):'',safeAvatar);
+  }
+  qqProfile(accountId:string){return this.db.prepare('SELECT nickname,avatar FROM qq_profiles WHERE account_id=?').get(accountId) as {nickname:string;avatar:string}|undefined;}
   slots(account:Account){
     const fresh=this.db.prepare('SELECT extra_slots FROM accounts WHERE id=?').get(account.id) as {extra_slots:number};
     const count=this.db.prepare('SELECT COUNT(*) AS n FROM cards WHERE owner_id=?').get(account.id) as {n:number};
@@ -152,6 +158,7 @@ export class CloudStore {
   listTemporary(owner:TemporaryOwner){
     return this.db.prepare('SELECT id FROM temporary_cards WHERE owner_id=? ORDER BY updated_at DESC,id').all(owner.id).map(row=>{const card=this.read(String(row.id),undefined,owner);return {id:card.id,revision:card.revision,name:card.character.name,edition:card.character.edition,updatedAt:card.updatedAt,role:card.role};});
   }
+  isTemporaryCard(id:string){return !!this.db.prepare('SELECT 1 FROM temporary_cards WHERE id=?').get(id);}
   createTemporary(owner:TemporaryOwner,ip:string,character:unknown){
     this.checkBody(character);
     return this.transaction(()=>{

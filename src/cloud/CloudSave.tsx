@@ -4,8 +4,9 @@ import {cloudCards,cloudMutation,cloudSession,readCloudCard} from './api';
 import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
 import {UploadWarning} from './UploadWarning';
 import './cloudSave.css';
+import {QQLogin} from './QQLogin';
 
-const CloudSaveContext=createContext<{states:Record<string,SyncState>;request:(id:string)=>void;disabled:boolean}|undefined>(undefined);
+const CloudSaveContext=createContext<{states:Record<string,SyncState>;request:(id:string)=>void;beforeLogin:(id:string)=>Promise<void>;disabled:boolean}|undefined>(undefined);
 export function CloudSaveProvider({enabled,disabled,characters,readCharacter,children,auto=true}:{enabled:boolean;disabled:boolean;auto?:boolean;characters:Character[];readCharacter:(id:string)=>Promise<Character>;children:ReactNode}){
  const [states,setStates]=useState<Record<string,SyncState>>({}),[target,setTarget]=useState<{id:string;name:string;account?:string;error?:string}>(),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false);
  const latest=useRef({readCharacter,disabled,characters});latest.current={readCharacter,disabled,characters};
@@ -48,7 +49,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,chi
   try{const session=await cloudSession(),account=session.authenticated?session.account?.id:session.temporaryUpload?session.uploadOwner?.id:undefined;setTarget(old=>old?.id===id?{...old,account,error:account?undefined:'云端暂时无法保存。请保留本机 JSON 备份，稍后重试。'}:old);}
   catch{setTarget(old=>old?.id===id?{...old,error:'云端连接失败。请保留本机 JSON 备份，稍后重试。'}:old);}
  }
- return <CloudSaveContext.Provider value={enabled?{states,request:id=>void request(id),disabled}:undefined}>{children}
+ return <CloudSaveContext.Provider value={enabled?{states,request:id=>void request(id),beforeLogin:async id=>{if(!latest.current.disabled)await latest.current.readCharacter(id);},disabled}:undefined}>{children}
  {target&&<CloudUploadDialog target={target} confirmed={confirmed} busy={busy} disabled={disabled} change={setConfirmed} cancel={()=>setTarget(undefined)} submit={async()=>{if(!confirmed||!target.account||busy||disabled)return;setBusy(true);try{await engine.current!.run(target.id,target.account);const result=terminal.current[target.id];if(result?.phase==='saved')setTarget(undefined);else setTarget(old=>old?{...old,error:result?.message||'同步未成功，本机草稿保留。'}:old);}finally{setBusy(false);}}}/>}
  </CloudSaveContext.Provider>;
 }
@@ -68,12 +69,12 @@ export function CloudSaveControl({id,disabled=false,book=false}:{id:string;disab
  useEffect(()=>{setCopied(false);setCopyError(false);},[id]);
  if(!context)return null;
  const state=context.states[id]||{phase:'local'},busy=state.phase==='syncing',failed=['error','conflict','uncertain'].includes(state.phase);
- return <span className={`cloud-save-control ${book?'cloud-save-book':''}`} data-cloud-phase={state.phase}>
+ return <>{!book&&<QQLogin beforeLogin={()=>context.beforeLogin(id)}/>}<span className={`cloud-save-control ${book?'cloud-save-book':''}`} data-cloud-phase={state.phase}>
  {busy?<span className="cloud-sync-status" role="status"><i className="cloud-sync-spinner" aria-hidden="true"/>正在同步...</span>:<>
  {state.cloudId?<span className="cloud-id-box"><code aria-label="云端卡 ID">{state.cloudId}</code><button aria-label={`复制云端卡 ID ${state.cloudId}`} title="复制卡片 ID" onClick={()=>void navigator.clipboard.writeText(state.cloudId!).then(()=>{setCopied(true);setCopyError(false);setTimeout(()=>setCopied(false),2000);}).catch(()=>setCopyError(true))}>{copied?'已复制':'复制'}</button></span>:<button disabled={disabled||context.disabled} onClick={()=>context.request(id)}>保存到云端</button>}
  {book&&!state.cloudId&&!failed&&<small>仅本机保存</small>}
  {failed&&<button className="cloud-sync-retry" disabled={disabled||context.disabled} title={state.message} onClick={()=>context.request(id)}>{state.phase==='conflict'?'同步冲突':state.phase==='uncertain'?'核对同步结果':'同步失败'} · 重试</button>}
  </>}
  {failed&&book&&<small role="alert">{state.message} 本机草稿保留。</small>}{copyError&&<small role="alert">复制失败，请选中 ID 手动复制。</small>}
- </span>;
+ </span></>;
 }
