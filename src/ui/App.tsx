@@ -795,7 +795,7 @@ export default function App() {
     workspaceRef.current=next;pendingSaves.current++;setSaving('保存旧卡备份并同步当前卡…');
     const operation=queue.current.catch(()=>{}).then(()=>saveWorkspace(next));queue.current=operation.catch(()=>{});
     try{await operation;if(workspaceRef.current===next)restoredWorkspacePendingSave.current=false;setWorkspace(workspaceRef.current);saveFailed.current=false;setSaving('已保存到本机');rememberCharacter(original,current);setModal('');setNotice('已更新当前卡，同步前备份保留在角色簿中。');}
-    catch(e){if(workspaceRef.current===next){workspaceRef.current=w;setWorkspace(w);}setSaving('保存失败');saveFailed.current=true;throw Error(`本机同步未保存，原卡保留。${String(e)}`);}
+    catch(e){const restored=workspaceRef.current===next;if(restored){workspaceRef.current=w;setWorkspace(w);}setSaving('保存失败');saveFailed.current=!restored;throw Error(`本机同步未保存，原卡保留。${String(e)}`);}
     finally{pendingSaves.current--;}
   }
   async function finishImport(character:Character){
