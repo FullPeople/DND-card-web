@@ -29,7 +29,7 @@ export function TrainingChips({ label, value, onChange, editAll = false,group,so
           cancel.current = pointerDrag(event, { title: chip.label, outside: hit => !hit || !ref.current?.closest('.training-cell')?.contains(hit),
             move: (_point, hit) => { const chip = hit?.closest<HTMLElement>('[data-training-index]'); if (!chip || !ref.current?.contains(chip)) return; const to = Number(chip.dataset.trainingIndex); if (to === current) return; const next = [...live.current]; next.splice(to, 0, ...next.splice(current, 1)); current = to; live.current = next; setOrder(next); },
             finish: (_point, hit) => { const next = [...live.current]; if (!hit || !ref.current?.closest('.training-cell')?.contains(hit)) next.splice(current, 1); onChange(next.join('、')); setOrder(undefined);return hit&&ref.current?.closest('.training-cell')?.contains(hit)?{resolve:()=>ref.current?.querySelector<HTMLElement>(`[data-training-index="${current}"]`)||null}:{removed:true}; }, cancel: () => setOrder(undefined) });
-        }}><Inline text={trainingCaption(name,chip.label,group)}/></Reference></span>;
+        }}><Inline text={trainingCaption(name,chip.label,group,source)}/></Reference></span>;
       })}</>}
   </div>;
 }

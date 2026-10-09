@@ -322,7 +322,7 @@ const SUITE_RELEASE_258_SECTIONS:ReleaseSection[]=[...RELEASE_258_SECTIONS,
 ];
 export const RELEASE_SECTIONS:ReleaseSection[]=[
  {title:'配色与角色操作',items:['调色盘增加撤回与重做，导入配色和恢复默认也可以撤回。','角色名字栏支持滚轮横向浏览与拖拽，拖动后不会误切换角色。','各页头像分别保存位置与缩放，旧卡沿用原有构图；背景页的立绘仍单独保存。']},
- {title:'角色卡库',items:['补齐生命骰图标、赞助二维码及共用图片。','提前读取邻近角色卡，减少重复渲染；拖动时各张卡沿弧线前进、后退。','保留循环切换、侧卡点击切换和当前卡全屏查看。']},
+ {title:'角色卡库',items:['补齐生命骰图标、赞助二维码及共用图片。','修复旧卡在卡库中显示英文武器熟练名称的问题，保留自定义名称与原始引用。','提前读取邻近角色卡，减少重复渲染；拖动时各张卡沿弧线前进、后退。','保留循环切换、侧卡点击切换和当前卡全屏查看。']},
  {title:'背景与职业选择',items:['调整背景页布局，为背景故事和人物资料留出更多空间。','补齐资料明确支持的职业升级专长、魔能祈唤和注魔选择，未知条件仍显示限制。','旧 FS 备份继续支持读取与恢复，请保留完整 JSON 备份。']}
 ];
 export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS.filter(section=>section.title!=='角色卡库'),
