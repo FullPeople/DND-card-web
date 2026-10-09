@@ -46,7 +46,7 @@ function abilityModifier(c:Character,ability:Ability){let value=c.abilities[abil
 function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();const classes=c.selections.filter(s=>s.entry.kind==='class'&&selectionActive(c,s)),total=classes.reduce((n,s)=>n+s.level,0);return {cls,classes,total,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,total)-1)/4)+(c.sheetBonuses?.proficiency||0)};}
 function formulaText(c:Character,row:Selection,formula:string):string{
  const {cls,classes,total,level,prof}=context(c,row);
- return formula.replace(/@[\w.-]+/g,token=>{
+ return formula.replace(/@(?:abilities\.(?:str|dex|con|int|wis|cha)\.mod|classes\.[\w-]+\.levels|class\.level|details\.level|prof|level)(?![\w.])|@[\w.-]+/g,token=>{
   const ability=token.match(/^@abilities\.(str|dex|con|int|wis|cha)\.mod$/)?.[1] as Ability|undefined;
   if(ability)return String(abilityModifier(c,ability));
   if(token==='@prof')return String(prof);

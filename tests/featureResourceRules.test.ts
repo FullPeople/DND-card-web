@@ -18,6 +18,24 @@ it('a named class formula reads the declared class rather than the feature owner
  expect(planFeatureResources(c)).toMatchObject({grants:[{max:7}],issues:[]});
 });
 
+it.each([['@class.level-1',1],['@details.level-6',1],['@level-1',1],['@prof-1',2],['@abilities.wis.mod-1',1]])('a supported variable permits subtraction without spaces: %s',(max,expected)=>{
+ const c=card({max,recovery:'long'});c.abilities.wis=14;
+ expect(planFeatureResources(c)).toMatchObject({grants:[{max:expected}],issues:[]});
+});
+
+it('a hyphenated named class can supply unspaced maximum and recovery formulas',()=>{
+ const c=card({max:'@classes.reserve-extra.levels-1',recovery:[{period:'lr',type:'formula',formula:'@classes.reserve-extra.levels-3'}]});
+ c.selections[1].entry.raw.identifier='reserve-extra';
+ syncFeatureResources(c);const key=Object.keys(c.runtime.resources)[0];
+ expect(c.runtime.resources[key]?.max).toBe(4);setResource(c,key,0);
+ restResources(c,'long');expect(c.runtime.resources[key].current).toBe(2);
+});
+
+it.each(['@prof2','@class.levels','@abilities.wis.modifier','@classes.reserve.levels.extra'])('an unsupported variable cannot resolve a known prefix: %s',max=>{
+ const report=planFeatureResources(card({max}));
+ expect(report.grants).toEqual([]);expect(report.issues).toHaveLength(1);
+});
+
 it.each(['missing','reserve-extra'])('an unresolved class reference %s remains manual',identifier=>{
  const c=card({max:`@classes.${identifier}.levels`,recovery:'long'});
  const before=JSON.stringify(c),report=planFeatureResources(c);
