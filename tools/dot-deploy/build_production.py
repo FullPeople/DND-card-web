@@ -91,16 +91,40 @@ def package(root, output, source, version, backend_version):
     return result
 
 
+def use_prepared(root, output, source, version, historical=False):
+    receipt = c.json_unique((output / 'build-receipt.json').read_bytes())
+    c.require(historical or receipt['sourceCommit'] == source, 'approved-source-differs')
+    c.require(receipt['version'] == version and receipt['targets'] == list(c.TARGETS), 'approved-version-differs')
+    archive = output / 'deployment.tar.gz'
+    c.require(archive.stat().st_size == receipt['bytes'], 'approved-archive-size-differs')
+    metadata, _ = c.inspect_archive(archive, receipt['sha256'])
+    c.require(metadata['sourceCommit'] == receipt['sourceCommit'] and metadata['version'] == version, 'approved-metadata-differs')
+    if not historical:
+        c.require(metadata['publisherHashes'] == {name: c.sha_file(root / 'deploy/cloud' / name)
+                  for name in ('frontend.py', 'publish.py')}, 'approved-publisher-differs')
+    return receipt
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--validate-only', action='store_true')
+    parser.add_argument('--use-prepared', action='store_true')
     args = parser.parse_args()
     source, ci, baseline, version = (os.environ.get(key, '') for key in (
         'SOURCE_SHA', 'CI_RUN_IDS', 'EXPECTED_RELEASE_SHA256', 'RELEASE_VERSION'))
-    validate_context(source, ci, baseline, version)
+    operation = os.environ.get('DEPLOY_OPERATION', 'preflight')
+    if operation in ('status', 'inventory'):
+        c.require(os.environ.get('GITHUB_REPOSITORY') == c.REPOSITORY and os.environ.get('GITHUB_REF') == 'refs/heads/main'
+                  and os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch' and source == os.environ.get('GITHUB_SHA'), 'workflow-context-denied')
+    else: validate_context(source, ci, baseline, version)
     if args.validate_only:
         print(json.dumps({'ok': True, 'sourceCommit': source, 'requiredCI': list(c.POLICY['ci_paths'])}))
         return
+    if args.use_prepared:
+        result = use_prepared(Path.cwd(), Path.cwd() / '.deployment', source, version, historical=operation in ('status', 'recover'))
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write('archive_sha256=' + result['sha256'] + '\narchive_bytes=' + str(result['bytes']) + '\n')
+        print(json.dumps(result)); return
     _, raw = public_json('https://dnd.center/card/release.json')
     c.require(hashlib.sha256(raw).hexdigest() == baseline, 'online-baseline-changed')
     health, _ = public_json('https://dnd.center/api/health')

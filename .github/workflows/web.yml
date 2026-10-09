@@ -82,6 +82,9 @@ jobs:
           - group: origin-feat
             commands: |
               npx playwright test --config playwright.origin-feat.config.ts
+          - group: class-choices
+            commands: |
+              npx playwright test --config playwright.class-choices.config.ts
           - group: owner-sync
             commands: |
               npx playwright test --config playwright.owner-sync.config.ts

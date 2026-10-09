@@ -1,15 +1,16 @@
-import {editionAllows,selectionAllowed,skillKey,type Character,type Entry} from '../core/model';
+import {editionAllows,selectionAllowed,selectionEffectsAllowed,skillKey,type Character,type Entry} from '../core/model';
 import type {ChoiceOption,SheetChoice} from '../core/automation/choices';
 import {facetsFor,tabOf,type FacetSelection,type LibraryTab} from './libraryData';
 const key=(s:unknown)=>String(s||'').trim().toLocaleLowerCase();
 const wikiEntry=(entry:Entry)=>!entry.raw._choiceConcept&&entry.raw._category!=='inlineChoice'&&!entry.raw._custom;
 const identity=(entry:Entry)=>JSON.stringify([entry.kind,entry.source,key(entry.english||entry.name),...['className','classSource','level','_category'].map(k=>key(entry.raw[k]))]);
+const choiceAllows=(c:Character,choice:SheetChoice,entry:Entry)=>choice.sourceProgression?selectionEffectsAllowed(c,entry)&&(entry.edition==='both'||choice.ownerEdition==='both'||entry.edition===choice.ownerEdition):selectionAllowed(c,entry)&&(choice.channel==='tools'||editionAllows(entry,c.edition));
 /** Resolve candidates in one catalog pass, including older saved entry aliases. */
 export function choiceEntryMatcher(c:Character,choice:SheetChoice):(entry:Entry)=>ChoiceOption|undefined{
  const ids=new Map<string,number>(),identities=new Map<string,number>(),skills=new Map<string,ChoiceOption>();
  choice.options.forEach((option,index)=>{if(choice.channel==='skills'){if(!skills.has(option.value))skills.set(option.value,option);return;}if(!wikiEntry(option.entry))return;if(!ids.has(option.entry.id))ids.set(option.entry.id,index);const alias=identity(option.entry);if(!identities.has(alias))identities.set(alias,index);});
  return entry=>{
-  if(!selectionAllowed(c,entry)||choice.channel!=='tools'&&!editionAllows(entry,c.edition))return;
+  if(!choiceAllows(c,choice,entry))return;
   if(choice.channel==='skills'){
    if(entry.kind!=='rule'||entry.raw._category!=='skill'||entry.source!==(c.edition==='2024'?'XPHB':'PHB'))return;
    // Preserve choice order when translated and English aliases identify different options.
@@ -21,7 +22,7 @@ export function choiceEntryMatcher(c:Character,choice:SheetChoice):(entry:Entry)
  };
 }
 export function optionForEntry(c:Character,choice:SheetChoice,entry:Entry):ChoiceOption|undefined{
- if(!selectionAllowed(c,entry)||choice.channel!=='tools'&&!editionAllows(entry,c.edition))return;
+ if(!choiceAllows(c,choice,entry))return;
  if(choice.channel==='skills'){
   if(entry.kind!=='rule'||entry.raw._category!=='skill'||entry.source!==(c.edition==='2024'?'XPHB':'PHB'))return;
   return choice.options.find(o=>[entry.name,entry.english,entry.raw.ENG_name].some(n=>typeof n==='string'&&skillKey(n)===o.value));

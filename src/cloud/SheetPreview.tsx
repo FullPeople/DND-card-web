@@ -1,4 +1,5 @@
 import type {Character} from '../core/model';
+import {memo} from 'react';
 import {PlayerSheet} from '../ui/PlayerViewer';
 import {UiLanguageProvider} from '../ui/UiLanguage';
 import {SourceProvider} from '../ui/SourceName';
@@ -18,6 +19,7 @@ import '../ui/screenLayout.css';
 import './gallerySheet.css';
 
 import '../ui/appearance.css';
-export default function SheetPreview({character,active,displayOnly=true,originalJson,onReload}:{character:Character;active:boolean;displayOnly?:boolean;originalJson?:string;onReload?:()=>void}){
+function SheetPreview({character,active,displayOnly=true,originalJson,onReload}:{character:Character;active:boolean;displayOnly?:boolean;originalJson?:string;onReload?:()=>void}){
  return <UiLanguageProvider><SourceProvider><PlayerSheet character={character} preview={displayOnly} displayOnly={displayOnly} active={active} originalJson={originalJson} onReload={onReload}/></SourceProvider></UiLanguageProvider>;
 }
+export default memo(SheetPreview);

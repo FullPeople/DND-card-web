@@ -8,9 +8,11 @@ import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbili
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
+import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
+import type {ClassChoiceSupport} from './classChoiceSupport';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
-export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];hint?:string};
+export type SheetChoice={id:string;ownerId:string;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntries?:Entry[];duplicateChoiceIds?:string[];hint?:string};
 export const equipmentTypeLabel=(type:string)=>({weaponMartial:'军用武器',weaponSimple:'简易武器',focusSpellcastingHoly:'圣徽',focusSpellcastingArcane:'奥术法器',focusSpellcastingDruidic:'德鲁伊法器'} as Record<string,string>)[type]||'尚未适配的装备类别';
 const blocks=(v:unknown):any[]=>Array.isArray(v)?v:[];
 export function equipmentOptionConcept(entry:Entry,index:number,value:string):Entry{return concept(entry,`equipment:${index}:${value}`,`起始装备 · 方案 ${value}`,blocks(equipmentBlocks(entry)[index]?.[value]).map(item=>typeof item==='string'?`{@item ${item}}`:item?.item?`${item.quantity||1} × {@item ${item.item}}`:item?.special||(item?.equipmentType?equipmentTypeLabel(item.equipmentType):undefined)||(item?.value!==undefined||item?.containsValue!==undefined?`${(item.value??item.containsValue)/100} GP`:'尚未支持的装备条目')));}
@@ -87,11 +89,11 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
   };
   walk(row.entry.entries,'entries');
   // A declared filter is an explicit candidate set, even when its wrapper is prose.
-  for(const [index,text] of row.entry.entries.entries())if(typeof text==='string'&&/(?:获得|选择).*(?:一项|一个|1)/.test(text)){
-   const match=text.match(/\{@filter ([^|}]+)\|feats\|category=([^|}]+)/);if(!match)continue;
+  for(const [index,text] of row.entry.entries.entries()){
+   const category=sourceFeatFilterCategory(text);if(!category)continue;
    // Filter values are case-insensitive metadata (the source uses category=o,
    // while feat records use O). Preserve the exact source/edition identities.
-   const category=match[2].trim().toLowerCase(),id=`${row.id}:filter:${index}`;
+   const id=`${row.id}:filter:${index}`;
    const others={...c,selections:c.selections.filter(s=>s.requirementId!==id)};
    const candidates=new Map<string,Entry>();
    for(const e of known)if(!candidates.has(e.id)&&e.kind==='feat'&&typeof e.raw.category==='string'&&e.raw.category.trim().toLowerCase()===category&&(e.edition==='both'||e.edition===c.edition))candidates.set(e.id,e);
@@ -104,12 +106,16 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
    push(`custom:${choice.id}`,choice.label,choice.count,options,!choice.kind&&options.length>0&&options.every(o=>!!SKILLS[skillKey(o.value)])?'skills':'content');
   }
  }
- return [...out,...classSpellChoices(c,catalog)];
+ const sourceChoices=sourceClassChoices(c,known),duplicates=new Set(sourceChoices.flatMap(choice=>choice.duplicateChoiceIds||[]));
+ for(const choice of sourceChoices)if(choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&choice.selected.includes(archive.selections[0].entry.id)&&!c.selections.some(row=>row.requirementId===choice.id&&row.entry.id===archive.selections[0].entry.id))){
+  choice.complete=false;choice.hint='原授予与子项记录已保留，关联恢复前不会生效；来源特性停用时请先恢复原来源。';
+ }
+ return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...classSpellChoices(c,catalog)];
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);
  if(!choice||choice.restricted||!option||option.unavailable&&!(choice.channel==='tools'&&c.answers[id]?.includes(value)))throw Error(option?.unavailable||'此选择当前不可用。');
- if(choice.channel==='tools'){
+ if(choice.channel==='tools'||choice.sourceProgression){
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
   const saved=c.answers[id]||[];
@@ -152,27 +158,89 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id);
  if(!choice||choice.restricted||['equipment','abilities'].includes(choice.channel)||!Number.isInteger(index)||index<0||index>=Math.max(choice.count,choice.slots?.length||0))throw Error('此选择位置当前不可用。');
  const option=value===undefined?undefined:choice.options.find(o=>o.value===value);
- if(value!==undefined&&(!option||option.unavailable))throw Error(option?.unavailable||'此条目不属于可选内容。');
+ if(value!==undefined&&(index>=choice.count||!option||option.unavailable))throw Error(option?.unavailable||'此条目不属于当前可选位置。');
  if(((choice.slots||choice.selected)[index]||undefined)===value)return;
  // Ordinary option edits only touch answers and option visibility. Keep atomic
  // validation without copying every source snapshot and inventory item again.
  // Spell allocation can modify selections, so it retains the full transaction.
  const draft=choice.channel==='spells'?structuredClone(c):{...c,answers:{...c.answers},featureLayout:c.featureLayout?{...c.featureLayout,optionsVisible:c.featureLayout.optionsVisible?{...c.featureLayout.optionsVisible}:undefined}:undefined};
  if(choice.channel==='spells')setClassSpellSlot(draft,choice,index,option?.entry);
- else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;}
+ else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
+  if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
+ }
  finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
+}
+const classFeatRequirement=(id:string|undefined)=>!!id&&/:(?:class-feat|class-typed-feat):/.test(id);
+function parkClassChoiceGrant(c:Character,root:Selection){
+ if(c.classChoiceArchive?.[root.id])throw Error('职业选择保留身份冲突，请保留角色备份。');
+ const children=new Map<string,Selection[]>();for(const row of c.selections)if(row.parentId)children.set(row.parentId,[...children.get(row.parentId)||[],row]);
+ const ids=new Set<string>(),tree:Selection[]=[],pending=[root];
+ while(pending.length){const row=pending.shift()!;if(ids.has(row.id))continue;ids.add(row.id);tree.push(row);pending.push(...children.get(row.id)||[]);}
+ const parent=c.selections.find(row=>row.id===root.parentId);
+ c.classChoiceArchive={...c.classChoiceArchive,[root.id]:{choiceId:root.requirementId!,parent:parent?structuredClone(parent):undefined,selections:structuredClone(tree)}};
+ c.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([root.entry,...(parent?.entry.kind==='feature'?[parent.entry]:[])].map(entry=>[entry.id,structuredClone(entry)]))};
+ c.selections=c.selections.filter(row=>!ids.has(row.id));
+}
+/** Normalize only proven aliases, before source-feature removal can cascade. */
+export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
+ if(!automationEnabled(c))return false;
+ let changed=false;
+ const choices=sheetChoices(c,catalog).filter(choice=>choice.sourceProgression==='feat');
+ for(const choice of choices)if(choice.duplicateChoiceIds?.length){
+  if(!Object.hasOwn(c.answers,choice.id)&&choice.slots?.some(Boolean)){c.answers={...c.answers,[choice.id]:[...choice.slots]};changed=true;}
+  for(const row of c.selections)if(row.entry.kind==='feat'&&choice.duplicateChoiceIds.some(alias=>row.requirementId===alias&&row.grantKey===`choice:${alias}:${row.entry.id}`)){
+   row.requirementId=choice.id; // Keep selection ID, grant key and source ancestry.
+   const parent=c.selections.find(parent=>parent.id===row.parentId);
+   c.classChoiceSnapshots={...c.classChoiceSnapshots,[row.entry.id]:structuredClone(row.entry),...(parent?.entry.kind==='feature'?{[parent.entry.id]:structuredClone(parent.entry)}:{})};changed=true;
+  }
+ }
+ for(const row of [...c.selections])if(row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)&&row.grantKey?.startsWith('choice:')){
+  const choice=choices.find(choice=>choice.id===row.requirementId);
+  if(!choice?.selected.includes(row.entry.id)){parkClassChoiceGrant(c,row);changed=true;}
+ }
+ for(const [id,archive] of Object.entries(c.classChoiceArchive||{})){
+  const root=archive.selections[0],choice=sheetChoices(c,catalog).find(choice=>choice.id===archive.choiceId&&choice.sourceProgression==='feat');
+  if(!choice?.selected.includes(root.entry.id)||!choice.options.find(option=>option.value===root.entry.id)?.grant)continue;
+  // Historical duplicate grants remain parked once a single identity is active.
+  if(c.selections.some(row=>row.entry.kind==='feat'&&row.requirementId===choice.id&&row.entry.id===root.entry.id))continue;
+  let parent=c.selections.find(row=>row.id===root.parentId),restoreParent:Selection|undefined;
+  if(parent&&archive.parent&&(parent.entry.id!==archive.parent.entry.id||parent.grantKey!==archive.parent.grantKey||parent.parentId!==archive.parent.parentId))continue;
+  if(!parent&&archive.parent){
+   const saved=archive.parent;
+   parent=c.selections.find(row=>row.parentId===saved.parentId&&row.entry.id===saved.entry.id&&row.grantKey===saved.grantKey);
+   if(!parent&&saved.entry.kind==='feature'&&saved.grantKey?.startsWith('ref:')){
+    const owner=c.selections.find(row=>row.id===saved.parentId&&row.id===choice.ownerId&&row.entry.kind==='class'),ref=saved.grantKey.slice(4),at=Number(ref.split('|')[3]);
+    const declared=blocks(owner?.entry.raw.classFeatures).some(raw=>(typeof raw==='string'?raw:raw?.classFeature)===ref);
+    if(owner&&declared&&Number.isSafeInteger(at)&&at>=1&&owner.level>=at&&selectionActive(c,owner)&&selectionEffectsAllowed(c,saved.entry)&&!c.dismissedFeatures?.includes(`${owner.id}|${saved.grantKey}`)&&resolveEntryReference(ref,[saved.entry,...catalog],'feature')?.id===saved.entry.id)restoreParent=structuredClone(saved);
+   }
+  }
+  if(!parent&&!restoreParent||parent&&!selectionActive(c,parent))continue;
+  const restored=structuredClone(archive.selections);restored[0].parentId=(parent||restoreParent)!.id;
+  const additions=[...(restoreParent?[restoreParent]:[]),...restored];
+  if(additions.some(row=>c.selections.some(current=>current.id===row.id)))throw Error('职业选择恢复身份冲突，请保留角色备份。');
+  c.selections.push(...additions);delete c.classChoiceArchive![id];if(!Object.keys(c.classChoiceArchive!).length)delete c.classChoiceArchive;changed=true;
+ }
+ return changed;
 }
 /** Reconcile content only at the existing explicit edit/hydration boundary. */
 export function syncChoiceContent(c:Character,catalog:Entry[]){
  if(!automationEnabled(c))return false;
- let changed=false;const desired=new Map<string,{owner:string;entry:Entry;requirementId:string}>();
+ let changed=preserveClassChoiceGrants(c,catalog);const desired=new Map<string,{owner:string;entry:Entry;requirementId:string}>();
  // Resolve newly granted nested options in bounded passes without inventing answers.
  for(let pass=0;pass<12;pass++){
   let added=false;
-  for(const choice of sheetChoices(c,catalog))if(choice.channel==='content')for(const value of choice.selected){const option=choice.options.find(o=>o.value===value);if(option?.grant){const key=`choice:${choice.id}:${value}`;desired.set(key,{owner:choice.ownerId,entry:option.grant,requirementId:choice.id});if(!c.selections.some(s=>s.grantKey===key)){const hash=(text:string)=>{let a=2166136261,b=5381;for(const ch of text){a=Math.imul(a^ch.charCodeAt(0),16777619);b=Math.imul(b,33)^ch.charCodeAt(0);}return `${a>>>0}-${b>>>0}`;};const id=`chosen:${hash(key)}`;if(c.selections.some(s=>s.id===id))throw Error('选择条目身份冲突，请保留角色备份。');c.selections.push({id,entry:structuredClone(option.grant),level:1,quantity:1,equipped:false,parentId:choice.ownerId,grantKey:key,requirementId:choice.id});changed=added=true;}}}
+  for(const choice of sheetChoices(c,catalog))if(choice.channel==='content')for(const value of choice.selected){
+   const option=choice.options.find(o=>o.value===value);if(!option?.grant)continue;
+   const retained=choice.sourceProgression==='feat'?c.selections.find(row=>row.requirementId===choice.id&&row.entry.id===option.entry.id&&row.grantKey?.startsWith('choice:')):undefined;
+   // An un-restorable saved tree must never be replaced by a fresh active grant.
+   if(!retained&&choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&archive.selections[0].entry.id===value))continue;
+   const key=retained?.grantKey||`choice:${choice.id}:${value}`;desired.set(key,{owner:choice.ownerId,entry:option.grant,requirementId:choice.id});
+   if(!c.selections.some(s=>s.grantKey===key)){const hash=(text:string)=>{let a=2166136261,b=5381;for(const ch of text){a=Math.imul(a^ch.charCodeAt(0),16777619);b=Math.imul(b,33)^ch.charCodeAt(0);}return `${a>>>0}-${b>>>0}`;};const id=`chosen:${hash(key)}`;if(c.selections.some(s=>s.id===id))throw Error('选择条目身份冲突，请保留角色备份。');c.selections.push({id,entry:structuredClone(option.grant),level:1,quantity:1,equipped:false,parentId:choice.ownerId,grantKey:key,requirementId:choice.id});changed=added=true;}
+  }
   if(!added)break;
  }
  const removed=new Set(c.selections.filter(s=>s.grantKey?.startsWith('choice:')&&!desired.has(s.grantKey)).map(s=>s.id));
+ for(const row of [...c.selections])if(removed.has(row.id)&&row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)){parkClassChoiceGrant(c,row);changed=true;}
  for(let pass=0;pass<12;pass++)for(const row of c.selections)if(row.parentId&&removed.has(row.parentId))removed.add(row.id);
  if(removed.size){c.selections=c.selections.filter(s=>!removed.has(s.id));changed=true;}
  return changed;

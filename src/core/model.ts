@@ -30,6 +30,7 @@ export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean;
 export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface RuntimeResource {current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string}}
 export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number}
+export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
   automation?:import('./automation/state').AutomationState;
   /** Legacy score-ownership marker retained for backup compatibility. */
@@ -43,6 +44,7 @@ export interface Character {
   portraitFrameHidden?: boolean;
   /** Framing for the current bound token fallback; never stores its live URL. */
   tokenPortraitTransform?: PortraitFraming;
+  portraitPageFraming?: Partial<Record<PortraitPage,PortraitFraming>>;
   /** Hide only the main-page spell summary; the spell page stays available. */
   overviewSpellsHidden?: boolean;
   portrait?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};
@@ -53,6 +55,10 @@ export interface Character {
   inventory?: {sourceEquipment?:Record<string,SourceEquipmentReceipt>;capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
   backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
+  /** Saved choice display snapshots; these never enter the effect evaluator. */
+  classChoiceSnapshots?: Record<string,Entry>;
+  /** Inactive class-grant trees retain identities, manual children and references. */
+  classChoiceArchive?: Record<string,{choiceId:string;parent?:Selection;selections:Selection[]}>;
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];

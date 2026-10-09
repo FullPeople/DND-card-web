@@ -2,13 +2,14 @@ import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEq
 import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
 import {resolveEntryReference} from './entryReferences';
-import {equipmentBlocks,syncChoiceContent} from './automation/choices';
+import {equipmentBlocks,syncChoiceContent,preserveClassChoiceGrants} from './automation/choices';
 import {rememberFeatureResources} from './automation/featureResources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import { requirementMismatch } from './engine';
 import { uid, type Character, type Entry, type Selection } from './model';
 import {inventoryState} from './characterDetails';
 import {classMatches,featureOwner} from './featureOwnership';
+import {retainedClassFeatureGrant} from './automation/classChoiceSourceGrant';
 
 export function belongsToClass(child: Selection, parent: Selection) {
   return child.entry.kind === 'subclass' && classMatches(child.entry,parent.entry) && (!child.parentId || child.parentId === parent.id);
@@ -26,10 +27,26 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
     changed = false;
     for (const s of c.selections) if (!removed.has(s.id) && (s.parentId && removed.has(s.parentId) || s.requirementId && [...removed].some(key => s.requirementId!.startsWith(`${key}:`)) || [...removed].some(key => { const parent = c.selections.find(p => p.id === key); return parent && belongsToClass(s, parent); }))) { removed.add(s.id); changed = true; }
   }
+  if(dismiss&&c.classChoiceArchive){
+    const discardedParents:string[]=[];
+    for(const [key,archive] of Object.entries(c.classChoiceArchive)){
+      const root=archive.selections[0];
+      if(root.parentId&&removed.has(root.parentId)||archive.parent?.parentId&&removed.has(archive.parent.parentId))for(const row of archive.selections)removed.add(row.id);
+      for(let changed=true;changed;){changed=false;for(const row of archive.selections)if(row.parentId&&removed.has(row.parentId)&&!removed.has(row.id)){removed.add(row.id);changed=true;}}
+      archive.selections=archive.selections.filter(row=>!removed.has(row.id));
+      if(!archive.selections.length){if(archive.parent)discardedParents.push(archive.parent.id);delete c.classChoiceArchive[key];}
+    }
+    for(const parent of discardedParents)if(!c.selections.some(row=>row.id===parent)&&!Object.values(c.classChoiceArchive).some(archive=>archive.parent?.id===parent))removed.add(parent);
+    if(!Object.keys(c.classChoiceArchive).length)delete c.classChoiceArchive;
+  }
   rememberSourceSpellUses(c);
   const spellCounters=[...removed].map(id=>specialSpellResource(id,c));
+  // Automatic level removal parks a class-choice tree first. Keep saved UI
+  // references to its source snapshot so restoring the old ID restores pins.
+  const retainedParents=new Set(dismiss?[]:Object.values(c.classChoiceArchive||{}).flatMap(archive=>archive.parent?[archive.parent.id]:[]));
+  const removedReference=(key:string)=>removed.has(key)&&!retainedParents.has(key);
   c.selections = c.selections.filter(s => !removed.has(s.id));
-  c.quickbar = c.quickbar?.filter(key => !removed.has(key));
+  c.quickbar = c.quickbar?.filter(key => !removedReference(key));
   if(c.spellSettings){c.spellSettings.prepared=c.spellSettings.prepared.map(key=>removed.has(key)?'':key);for(const [owner,ids] of Object.entries(c.spellSettings.cantrips||{})){if(removed.has(owner))delete c.spellSettings.cantrips![owner];else c.spellSettings.cantrips![owner]=ids.map(id=>removed.has(id)?'':id);}}
   if(c.spellSettings?.classSpells)for(const [owner,ids] of Object.entries(c.spellSettings.classSpells)){if(removed.has(owner))delete c.spellSettings.classSpells[owner];else c.spellSettings.classSpells[owner]=ids.map(id=>removed.has(id)?'':id);}
   for(const key of removed)if(c.spellSettings?.special)delete c.spellSettings.special[key];
@@ -37,13 +54,14 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
   for(const key of spellCounters)if(!Object.keys(c.spellSettings?.special||{}).some(id=>specialSpellResource(id,c)===key))delete c.runtime.resources[key];
   if(c.inventory)c.inventory.order=c.inventory.order.filter(key=>!removed.has(key));
   if(c.backgroundChoices)for(const key of removed)delete c.backgroundChoices[key];
-  if (c.featureLayout) { c.featureLayout.order = c.featureLayout.order.filter(key => !removed.has(key)); c.featureLayout.expanded = c.featureLayout.expanded.filter(key => !removed.has(key)); c.featureLayout.detailsExpanded=c.featureLayout.detailsExpanded?.filter(key=>!removed.has(key));for(const id of removed)if(c.featureLayout.optionsVisible)delete c.featureLayout.optionsVisible[id]; }
+  if (c.featureLayout) { c.featureLayout.order = c.featureLayout.order.filter(key => !removedReference(key)); c.featureLayout.expanded = c.featureLayout.expanded.filter(key => !removedReference(key)); c.featureLayout.detailsExpanded=c.featureLayout.detailsExpanded?.filter(key=>!removedReference(key));for(const id of removed)if(removedReference(id)&&c.featureLayout.optionsVisible)delete c.featureLayout.optionsVisible[id]; }
 }
 
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
 export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean;equipmentPreview?:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
-  let changed = review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id)));
+  let changed = preserveClassChoiceGrants(c,catalog);
+  changed = (review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id))))||changed;
   for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
   const selectedNames=entryNameIndex(c.selections.map(s=>s.entry)),publishedNames=catalogNames||entryNameIndex(catalog);
   const named=(name:string)=>review?.refresh?[...(publishedNames.get(name)||[]),...(selectedNames.get(name)||[])]:[...(selectedNames.get(name)||[]),...(publishedNames.get(name)||[])];
@@ -103,12 +121,21 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
     const expected = new Set(grants.map(g => g.key));
     for (const child of c.selections.filter(s => s.parentId === owner.id && s.grantKey && !s.grantKey.startsWith('source-spell:') && !s.grantKey.startsWith('choice:') && (!s.grantKey.startsWith('equipment:')||!!review?.equipmentPreview) && !expected.has(s.grantKey))) { removeSelection(c, child.id, false); changed = true; }
     for (const grant of grants) {
+      if(!grant.entry&&grant.key.startsWith('ref:')){
+        const retained=retainedClassFeatureGrant(c,owner,grant.key.slice(4));
+        if(retained)grant.entry=retained.entry;
+      }
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);
       if(attached){if(review?.refresh&&JSON.stringify(attached.entry)!==JSON.stringify(grant.entry)||attached.entry.raw._equipmentRef&&!grant.entry.raw._equipmentRef){attached.entry=structuredClone(grant.entry);changed=true;}continue;}
       const existing = c.selections.find(s => s.entry.id === grant.entry!.id && !s.grantKey && (!s.parentId || s.parentId === owner.id) && (!s.requirementId || s.requirementId.startsWith(`${owner.id}:`)));
       if (existing) { existing.parentId = owner.id; existing.grantKey = grant.key; changed = true; continue; }
       if (c.selections.length >= 3000) break;
+      // A prerequisite may keep the archived feat inactive until its source
+      // feature is present. Recreate that already-declared feature using its
+      // saved identity, so the later choice sync restores the exact old tree.
+      const retainedParent=Object.values(c.classChoiceArchive||{}).map(archive=>archive.parent).find(parent=>parent?.entry.kind==='feature'&&parent.parentId===owner.id&&parent.grantKey===grant.key&&parent.entry.id===grant.entry!.id&&!c.selections.some(row=>row.id===parent.id));
+      if(retainedParent){const restored=structuredClone(retainedParent);if(review?.refresh)restored.entry=structuredClone(grant.entry);c.selections.push(restored);changed=true;continue;}
       const legacyId = grant.key.startsWith('inline:') ? `${owner.id}:trait:${grant.key.slice(7)}` : undefined;
       c.selections.push({ id: legacyId && !c.selections.some(s => s.id === legacyId) ? legacyId : uid(), entry: structuredClone(grant.entry), level: 1, quantity: grant.quantity||1, equipped: false, parentId: owner.id, grantKey: grant.key }); changed = true;
     }

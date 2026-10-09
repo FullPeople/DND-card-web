@@ -41,8 +41,19 @@ def sha_file(path):
 def check_request(request):
     fields = {'operation', 'target', 'sha', 'ci_run_ids', 'expected_release_sha256',
               'oidc', 'archive_sha256', 'archive_bytes', 'run_id', 'run_attempt'}
-    require(isinstance(request, dict) and set(request) == fields, 'invalid-request-fields')
-    require(request['operation'] in ('preflight', 'publish'), 'operation-not-allowed')
+    reference = {'prepared_run_id', 'prepared_run_attempt', 'prepared_manifest_sha256'}
+    lookup = {'lookup_run_id', 'lookup_run_attempt'}
+    require(isinstance(request, dict) and set(request) in (fields, fields | reference, fields | reference | lookup), 'invalid-request-fields')
+    if reference <= set(request):
+        for key, pattern in [('prepared_run_id', NUMBER), ('prepared_run_attempt', NUMBER), ('prepared_manifest_sha256', HASH)]:
+            require(isinstance(request[key], str) and (request[key] == '' or pattern.fullmatch(request[key])), 'invalid-prepared-reference')
+        require(all(request[key] == '' for key in reference) or all(request[key] for key in reference), 'incomplete-prepared-reference')
+    if lookup <= set(request):
+        require(all(isinstance(request[key], str) and (request[key] == '' or NUMBER.fullmatch(request[key])) for key in lookup), 'invalid-lookup-reference')
+        require(bool(request['lookup_run_id']) == bool(request['lookup_run_attempt']), 'incomplete-lookup-reference')
+        require(not request['lookup_run_id'] or request['operation'] in ('status', 'recover'), 'lookup-operation-denied')
+    require(not request.get('prepared_run_id') or request['operation'] in ('publish', 'status', 'recover'), 'prepared-operation-denied')
+    require(request['operation'] in ('preflight', 'publish', 'status', 'recover', 'inventory'), 'operation-not-allowed')
     require(request['target'] == 'dnd-center', 'target-not-allowed')
     for key, pattern in [('sha', SHA), ('expected_release_sha256', HASH),
                          ('archive_sha256', HASH), ('run_id', NUMBER), ('run_attempt', NUMBER)]:
@@ -50,7 +61,7 @@ def check_request(request):
     ci = request['ci_run_ids']
     require(isinstance(ci, str) and re.fullmatch(r'[1-9][0-9]{0,19}(,[1-9][0-9]{0,19}){2}', ci), 'invalid-ci-runs')
     require(len(set(ci.split(','))) == 3, 'duplicate-ci-runs')
-    require(type(request['archive_bytes']) is int and 0 < request['archive_bytes'] <= MAX_ARCHIVE, 'invalid-archive-size')
+    require(type(request['archive_bytes']) is int and (0 < request['archive_bytes'] <= MAX_ARCHIVE or request['operation'] == 'inventory' and request['archive_bytes'] == 0), 'invalid-archive-size')
 
 
 def authorize(request, claims, now=None):

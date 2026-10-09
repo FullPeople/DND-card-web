@@ -1,3 +1,4 @@
+import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {useSheetChoices} from './SheetChoicesContext';
 import {displayCharacterEdit} from '../core/displayCharacterEdit';
 import {ScreenAbilities} from './ScreenAbilities';
@@ -120,7 +121,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const quickbar = <SheetCell label="快捷栏" className="quickbar-cell" missing={!pins.length} onHeadingClick={openResources} headingActionLabel="打开快捷栏编辑器">
             <DropZone referenceOnly onReceive={pinDrop} className="quickbar-copy-zone"><Quickbar c={c} d={d} edit={edit} inspect={inspect} manage={openResources} manageQuickbar={openQuickbar}/></DropZone>
         </SheetCell>;
-  const heritageCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>row.entry.kind==='background')} receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}/>;
+  const heritageCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>row.entry.kind==='background')} receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}><ClassChoiceRecords c={c} catalog={catalog} mode="feat"/></FeaturePanel>;
   const featuresCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>['class','subclass','race'].includes(row.entry.kind))} receive={entry => addEntry(entry, 'features')} c={c} rows={classFeatures} edit={edit} browse={() => browse('feature')} onLink={onLink}/>;
   const spellsHidden=c.overviewSpellsHidden===true;
   const spellCell = spellsHidden&&!editing?null:contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spellIsReady(c,s)), ['spell'], `overview-spells spells-box ${spellsHidden?'overview-spells-hidden':''}`,editing?<button type="button" className="overview-spells-visibility" aria-label="隐藏主要页法术框" aria-pressed={spellsHidden} title={spellsHidden?'退出编辑后隐藏法术框':'隐藏主要页法术框'} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();edit(displayCharacterEdit('overviewSpellsHidden',!spellsHidden));}}><VisibilityEye hidden={spellsHidden}/></button>:undefined);

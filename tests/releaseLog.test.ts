@@ -16,9 +16,9 @@ describe('date-grouped changelog',()=>{
    expect(JSON.stringify(releaseHistoryFor(mode))).toBe(before);
   });
  }
- it('adds palette and gallery interactions to the current day without moving earlier batches',()=>{
-  for(const mode of ['standalone','suite'] as const)expect(JSON.stringify(releaseLogFor(mode)[0])).toContain('保存和导入配色文件');
-  expect(JSON.stringify(releaseLogFor('standalone')[0])).toContain('点击旁边的卡只切换');
+ it('adds current history and framing fixes while retaining the previous palette and gallery day',()=>{
+  for(const mode of ['standalone','suite'] as const){const log=releaseLogFor(mode);expect(log[0].title).toBe('2026-10-09');expect(JSON.stringify(log[0])).toContain('撤回与重做');expect(JSON.stringify(log.find(day=>day.title==='2026-10-08'))).toContain('保存和导入配色文件');}
+  expect(JSON.stringify(releaseLogFor('standalone').find(day=>day.title==='2026-10-08'))).toContain('点击旁边的卡只切换');
  });
  it('keeps Suite-only changes in the Suite changelog',()=>{
   expect(JSON.stringify(releaseLogFor('suite').find(day=>day.title==='2026-10-07'))).toContain('新旧插件都移除了“编辑地图迷雾”右键入口');
@@ -26,9 +26,10 @@ describe('date-grouped changelog',()=>{
  });
  it('shows the new standalone batch and supersedes the former cloud policy without rewriting history',()=>{
   const raw=JSON.stringify(releaseHistoryFor('standalone')),log=releaseLogFor('standalone');
-  expect(log[0].title).toBe('2026-10-08');
-  expect(JSON.stringify(log[0])).toContain('三个标签');
-  expect(JSON.stringify(log[0])).toContain('所有人都可以在云端看到所有卡');
+  expect(log[0].title).toBe('2026-10-09');
+  expect(JSON.stringify(log[0])).toContain('赞助二维码');
+  expect(JSON.stringify(log)).toContain('三个标签');
+  expect(JSON.stringify(log)).toContain('所有人都可以在云端看到所有卡');
   expect(JSON.stringify(log)).not.toContain('不公开全站目录');
   expect(JSON.stringify(log)).not.toContain('云端登录与保存暂不可用');
   expect(JSON.stringify(releaseHistoryFor('standalone'))).toBe(raw);

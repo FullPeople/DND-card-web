@@ -1,0 +1,52 @@
+diff --git a/src/runtimeCoverage/probe.ts b/src/runtimeCoverage/probe.ts
+index 543fbe5..bac4a92 100644
+--- a/src/runtimeCoverage/probe.ts
++++ b/src/runtimeCoverage/probe.ts
+@@ -5,6 +5,20 @@ const sourceCache=new WeakMap<any[],any[]>();
+ const stats=(d:any)=>({abilities:d.abilities,ac:d.ac,maxHp:d.maxHp,speed:d.speed,initiative:d.initiative,passive:d.passive,skills:Object.fromEntries(Object.entries(d.skills).map(([k,v]:any)=>[k,[v.value,v.proficient,v.expertise]])),saves:d.saves});
+ const resources=(c:any)=>Object.fromEntries(Object.entries(c.runtime.resources).filter(([,r]:any)=>r.automatic||r.featureGrant).map(([k,r]:any)=>[k,r.max]));
+ const changed=(a:unknown,b:unknown)=>JSON.stringify(a)!==JSON.stringify(b);
++/** Dedup may move a source feature's filter to its explicitly declared class
++ * progression. Attribute only the canonical alias of this candidate filter;
++ * unrelated choices on the parent class are never witnesses for this record.
++ */
++export function candidateWitnessChoices(card:any,choices:any[]){
++ const candidate=card.selections.find((s:any)=>s.id==='candidate'),parent=candidate?.parentId&&card.selections.find((s:any)=>s.id===candidate.parentId);
++ const ref=candidate?.grantKey?.startsWith('ref:')?candidate.grantKey.slice(4):undefined;
++ const at=ref?Number(ref.split('|')[3]):NaN;
++ const declared=Array.isArray(parent?.entry.raw.classFeatures)&&parent.entry.raw.classFeatures.some((raw:any)=>(typeof raw==='string'?raw:raw?.classFeature)===ref);
++ const exactParent=!!candidate&&candidate.entry.kind==='feature'&&candidate.entry.raw._category==='classFeature'&&parent?.entry.kind==='class'&&declared&&
++  Number.isInteger(at)&&at>=1&&at<=20&&Number.isInteger(parent.level)&&parent.level>=at&&parent.level<=20&&candidate.entry.raw.level===at&&
++  candidate.entry.source===parent.entry.source&&(candidate.entry.raw.classSource||'PHB')===parent.entry.source&&[parent.entry.name,parent.entry.english].includes(candidate.entry.raw.className);
++ return choices.filter(q=>q.ownerId==='candidate'||exactParent&&q.ownerId===parent.id&&q.sourceProgression==='feat'&&Array.isArray(q.duplicateChoiceIds)&&q.duplicateChoiceIds.some((id:any)=>typeof id==='string'&&id.startsWith('candidate:filter:')));
++}
+ export function probeEntry(api:RuntimeAdapter,entry:any,catalog:any[],parents:any[]):RuntimeWitness|null {
+  let sources=sourceCache.get(catalog);if(!sources){sources=[...new Set(catalog.map(e=>e.source))];sourceCache.set(catalog,sources);}
+  const root=['class','subclass','race','background'].includes(entry.kind);
+@@ -40,7 +54,7 @@ export function probeEntry(api:RuntimeAdapter,entry:any,catalog:any[],parents:an
+    api.syncSourceSpells(trial,catalog);const delivered=trial.selections.filter((s:any)=>s.parentId==='candidate'&&s.grantKey?.startsWith('source-spell:'));
+    if(delivered.length)return {kind:'source-spell-choice',level,edition,before:[],after:delivered.map((s:any)=>s.entry.id).sort()};
+   }
+-  for(const choice of api.sheetChoices(card,catalog).filter((q:any)=>q.ownerId==='candidate'&&!q.restricted)){
++  for(const choice of candidateWitnessChoices(card,api.sheetChoices(card,catalog)).filter((q:any)=>!q.restricted)){
+    for(const option of choice.options.filter((o:any)=>!o.unavailable)){
+     const trial=structuredClone(card);try{
+      if(choice.channel==='equipment')api.claimStartingEquipment(trial,choice.id,option.value,catalog);
+diff --git a/test/runtimeChoiceOwnership.vitest.ts b/test/runtimeChoiceOwnership.vitest.ts
+new file mode 100644
+index 0000000..59da8e1
+--- /dev/null
++++ b/test/runtimeChoiceOwnership.vitest.ts
+@@ -0,0 +1,12 @@
++import {it,expect} from 'vitest';
++import {candidateWitnessChoices} from '../src/runtimeCoverage/probe.ts';
++const ref='Authored Grant|Authored Class|XPHB|19';
++function setup(){return {selections:[{id:'parent',level:19,entry:{kind:'class',name:'Authored Class',english:'Authored Class',source:'XPHB',raw:{classFeatures:[ref]}}},{id:'candidate',parentId:'parent',grantKey:'ref:'+ref,entry:{kind:'feature',source:'XPHB',raw:{_category:'classFeature',className:'Authored Class',classSource:'XPHB',level:19}}}]};}
++const own={id:'direct',ownerId:'candidate'},canonical={id:'canonical',ownerId:'parent',sourceProgression:'feat',duplicateChoiceIds:['candidate:filter:0']},unrelated={id:'unrelated',ownerId:'parent',sourceProgression:'feat',duplicateChoiceIds:['another:filter:0']};
++it('attributes only the declared candidate-filter alias moved to its canonical class choice',()=>{expect(candidateWitnessChoices(setup(),[own,canonical,unrelated])).toEqual([own,canonical]);});
++it.each(['no parent','manual grant','wrong source','wrong class','wrong level','future grant','undeclared reference','other category','other alias'])('does not infer a parent-owned witness for %s',mode=>{
++ const card=setup(),candidate:any=card.selections[1],parent:any=card.selections[0],choice:any=structuredClone(canonical);
++ if(mode==='no parent')delete candidate.parentId;if(mode==='manual grant')delete candidate.grantKey;if(mode==='wrong source')candidate.entry.source='PHB';if(mode==='wrong class')candidate.entry.raw.className='Different';if(mode==='wrong level')candidate.entry.raw.level=18;if(mode==='future grant')parent.level=18;if(mode==='undeclared reference')parent.entry.raw.classFeatures=[];if(mode==='other category')choice.sourceProgression='optional';if(mode==='other alias')choice.duplicateChoiceIds=['another:filter:0'];
++ expect(candidateWitnessChoices(card,[own,choice])).toEqual([own]);
++});
++it('uses an explicit object classFeature reference without broadening attribution',()=>{const card=setup();(card.selections[0].entry.raw as any).classFeatures=[{classFeature:ref}];expect(candidateWitnessChoices(card,[canonical,unrelated])).toEqual([canonical]);});

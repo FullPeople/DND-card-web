@@ -1,4 +1,4 @@
-export const RELEASE_DATE='2026-10-07';
+export const RELEASE_DATE='2026-10-09';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
@@ -311,14 +311,23 @@ const RELEASE_250_SECTIONS:ReleaseSection[]=[
  {title:'支持与验证范围',items:['感谢「别名」支持 50 元。','战俑工具选择仍待处理，实体手机和玩家原设备仍待验证。']}
 ];
 const SUITE_RELEASE_250_SECTIONS:ReleaseSection[]=[...RELEASE_250_SECTIONS,{title:'适用范围与更新方式',items:['本次同步网站、新版插件与旧稳定插件的五页查看器。','真实枭熊房间仍待验证。关闭附加窗口，刷新枭熊房间，再重新打开插件。']}];
-export const RELEASE_SECTIONS:ReleaseSection[]=[
+const RELEASE_258_SECTIONS:ReleaseSection[]=[
  {title:'熟练选择',items:['修复战俑等来源的工具选择没有列出可用工具的问题。','已保存但暂不可用、找不到或超额的选择仍保留提示，不会挤掉原有选择；手工熟练与资源余额保留。'],supersedes:['战俑工具选择仍待处理，实体手机和玩家原设备仍待验证。']},
  {title:'法术位图标',items:['修复自适应布局下法术位图标被裁剪、看起来消失的问题，保留普通、契约与自定义分组的颜色、缩放和已消耗次数。']},
  {title:'自动化进度与验证',items:['使用原有资料重新核对全部自动化覆盖记录，进度统计保持原有口径。','实体手机和玩家原设备仍待验证。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS,
+const SUITE_RELEASE_258_SECTIONS:ReleaseSection[]=[...RELEASE_258_SECTIONS,
  {title:'地图与新版骰子',items:['新旧插件都移除了“编辑地图迷雾”右键入口，动态迷雾设置与运行保留。','新版骰子首次启动时并行准备字体、音效和渲染器；所有资源成功且画面上下文可用后才允许投掷。','修复首次加载中画面上下文恢复可能提前允许投掷的问题；字体失败时仍显示错误。']},
  {title:'适用范围与更新方式',items:['骰子冷启动修复适用于新版 Full Suite；旧稳定插件同步五页查看器和迷雾入口移除。','真实枭熊房间仍待验证。关闭附加窗口，刷新枭熊房间，再重新打开插件。']}
+];
+export const RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'配色与角色操作',items:['调色盘增加撤回与重做，导入配色和恢复默认也可以撤回。','角色名字栏支持滚轮横向浏览与拖拽，拖动后不会误切换角色。','各页头像分别保存位置与缩放，旧卡沿用原有构图；背景页的立绘仍单独保存。']},
+ {title:'角色卡库',items:['补齐生命骰图标、赞助二维码及共用图片。','修复旧卡在卡库中显示英文武器熟练名称的问题，保留自定义名称与原始引用。','提前读取邻近角色卡，减少重复渲染；拖动时各张卡沿弧线前进、后退。','保留循环切换、侧卡点击切换和当前卡全屏查看。']},
+ {title:'背景与职业选择',items:['调整背景页布局，为背景故事和人物资料留出更多空间。','补齐资料明确支持的职业升级专长、魔能祈唤和注魔选择，未知条件仍显示限制。','旧 FS 备份继续支持读取与恢复，请保留完整 JSON 备份。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS.filter(section=>section.title!=='角色卡库'),
+ {title:'枭熊房间',items:['棋子绑定选择器也读取房间角色目录，跨场景仍可选择已有角色。','血条设置增加占格框锚定，默认仍使用原有画布锚定。','角色读写继续使用房间中的棋子归属权限，枭熊插件不接入独立站云端。']},
+ {title:'更新与验证范围',items:['关闭附加窗口，刷新枭熊房间后重新打开插件。','真实多人房间和实体手机仍待验证。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
@@ -356,6 +365,7 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
  }
 ];
 export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
  {title:'2026-10-08',sections:[{title:'调色盘与规则资料',items:['上栏增加统一调色盘，可分别调整基础界面、Wiki 与角色卡组件；配色随浏览器或角色保存。','Wiki 条目右键可以创建自定义副本。','法术悬浮提示不再显示学习者列表，完整 Wiki 仍保留这项资料。','更新 11 个职业图标，使用提供的 PSD 图层，统一为透明背景和四周留空的正方形。']},{title:'本轮共享更新',items:['新建自定义条目、怪物示例和三态筛选同步到新版工作台，JSON 导入支持拖入文件。','默认法术位最小占位随环阶数量调整，保留已使用次数和手动布局。',...(mode==='standalone'?['卡库卡面为纯展示，点击进入平滑全屏后查看五页与细节；切换复用已读取内容，手机侧栏默认收起。','从首页和卡库进入在线车卡会直接打开卡面。']:['枭熊角色卡继续按房间权限保存，不接入独立站云端。'])]}]},
  ...(mode==='standalone'?[{title:'2026-10-08',sections:[{title:'加载与角色卡库',items:['卡库改为完整 A4 圆形画廊，支持拖动、按钮和键盘循环切换。','相邻卡共用查看界面，优先读取当前卡，减少重复加载与离线缓存的并发下载。','已删除的云端卡会移出画廊并刷新列表；临时公开存储警告移到左侧 QQ 登录按钮下方。']}]}]:[]),
@@ -377,7 +387,7 @@ export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
   {title:'旧站迁移与备份',items:['旧站 obr.dnd.center/card/ 继续提供存档读取和完整 JSON 导出，不强制跳转。','在旧站“导入 / 导出”选择“全部可见角色”并下载 JSON，再在新站批量导入；核对五页、背景与资源后保留备份。','不同域名不会自动共享浏览器存档。Wiki 缓存和界面偏好需在新站重新建立。']},
   {title:'云端保存说明',items:['每账号最多免费保存 10 张自有云端卡；被授权编辑的卡不占编辑者槽位。按独立 ID 可以免登录查看完整角色卡，不公开全站目录。','卡主可以指定 QQ 号管理编辑授权，只有卡主能删除云端卡。并发冲突保留本机草稿。以上云端登录操作仍待真实 QQ 接入后开放。']}
  ]}]:[]),
- {title:RELEASE_DATE,sections:releaseSectionsFor(mode)},
+ {title:'2026-10-07',sections:mode==='suite'?SUITE_RELEASE_258_SECTIONS:RELEASE_258_SECTIONS},
  {title:'2026-10-07',sections:mode==='suite'?SUITE_RELEASE_250_SECTIONS:RELEASE_250_SECTIONS},
  {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_249_SECTIONS:RELEASE_249_SECTIONS},
  {title:'2026-10-06',sections:mode==='suite'?SUITE_RELEASE_248_SECTIONS:RELEASE_248_SECTIONS},

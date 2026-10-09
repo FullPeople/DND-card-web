@@ -62,6 +62,10 @@ test('known spells press in place and toggle a prepared copy, including cantrips
  await load(page);const known=page.locator('.spell-library [data-spell-id="Ward"]'),prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]'),gift=page.locator('.source-spell-row');
  // The page is loaded on demand. Snapshot the mounted library, not the empty
  // interval between selecting its tab and completing the deferred module.
+ // This authored class is intentionally outside the mock catalog. Its deferred
+ // compatibility banner must settle before measuring absolute spell positions.
+ await expect(page.locator('.class-compatibility-banner')).toBeVisible();
+ await known.hover();
  await expect(known).toBeVisible();
  const positions=()=>page.locator('.spell-library .spell-stock-tile').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return {id:(el as HTMLElement).dataset.spellId,x:r.x,y:r.y,w:r.width,h:r.height};}));
  const before=await positions();await recordMotion(page);await known.click();await expect(prepared).toBeVisible();await expect(known).toHaveAttribute('aria-pressed','true');await expect(known).toHaveCSS('box-shadow',/inset/);await expect(known.locator('.spell-ready-mark')).toContainText('已预备');expect(await positions()).toEqual(before);
