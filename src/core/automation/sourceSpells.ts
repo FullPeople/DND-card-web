@@ -8,14 +8,17 @@ import {spellState} from '../characterDetails';
 import {specialSpellResource} from '../spellResourceKeys';
 import {activeSelections} from './active';
 import {automationEnabled,supportedAutomation} from './state';
+import {planFeatureResources} from './featureResources';
+import {sourceResourcePool,validResourceCost,type ResourceColumn} from './sourceResourcePools';
 
 export const sourceSpellKey=(key?:string)=>!!key?.startsWith('source-spell:');
 export interface SourceSpellPlan {id:string;owner:Selection;key:string;entry:Entry;eligible:boolean;config:SpecialSpell}
-export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number}
+export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;resourceColumns?:ResourceColumn[]}
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 /** Interpret declared data, never rule prose. Unresolved choices and shapes are visible. */
 export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceSpellPlan[];issues:Issue[];choices:SourceSpellChoice[]}{
  const grants:SourceSpellPlan[]=[],issues:Issue[]=[],choices:SourceSpellChoice[]=[];
+ let resourceGrants:ReturnType<typeof planFeatureResources>['grants']|undefined;
  if(!supportedAutomation(c))return {grants,issues,choices};
  const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
  // Saved snapshots win over a newly downloaded edition/revision of the same entry.
@@ -62,7 +65,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       return selected;
      });
     }
-    function addList(list:unknown,path:string,usage:'slot'|'free'|'ritual'|'check',count?:number,recovery?:SpecialSpell['recovery'],shared=false){
+    function addList(list:unknown,path:string,usage:'slot'|'free'|'ritual'|'check'|'resource',count?:number,recovery?:SpecialSpell['recovery'],shared=false,resource?:{name:string;cost:number;key:string}){
      if(!Array.isArray(list)){issue(path,'赠送列表格式未支持。');return;}
      for(const ref of resolveList(list,path)){
       const [uid,castLevel]=ref.split('#'),parts=uid.split('|'),reference=`${parts[0]}|${parts[1]||'PHB'}`;
@@ -72,10 +75,10 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       const entry=entries[0];if(castLevel==='c'&&Number(entry.raw.level)!==0){issue(path+':'+ref,'声明的戏法与条目环阶不符。');continue;}
       const key=`source-spell:${index}/${kind}/${gate}/${path}/${ref.toLowerCase()}`,id=`auto-spell:${owner.id}:${encodeURIComponent(key)}`;
       const poolPath=`source-spell:${index}/${kind}/${gate}/${path}`,usageKey=JSON.stringify([sourceOwnerIdentity(c,owner),shared?poolPath:key]);
-      const resourceKey=shared?`source-spell-pool:${encodeURIComponent(usageKey)}`:undefined;
+      const resourceKey=resource?.key||(shared?`source-spell-pool:${encodeURIComponent(usageKey)}`:undefined);
       const enabled=automationEnabled(c)&&active.has(owner.id)&&eligible&&selectionAllowed(c,entry);
-      const label=kind==='prepared'?'始终预备':count?'来源次数施法':usage==='free'?'随意施法':usage==='ritual'?'仅仪式':kind==='known'?'来源已知法术':'来源天生施法';
-      const config:SpecialSpell={mode:count?'uses':'locked',...(count?{max:count,recovery}:{}),label,sourceGrant:{ownerId:owner.id,key,usageKey,resourceKey,canUseSlots:kind==='known'||kind==='prepared',ability,active:enabled,usage:usage==='slot'&&Number(entry.raw.level)===0?'free':usage,castLevel:castLevel&&castLevel!=='c'?Number(castLevel):undefined,reason:enabled?undefined:!automationEnabled(c)?'自动计算已关闭':!eligible?'尚未达到来源等级':'来源、版本或依赖未启用'}};
+      const label=resource?'来源资源施法':kind==='prepared'?'始终预备':count?'来源次数施法':usage==='free'?'随意施法':usage==='ritual'?'仅仪式':kind==='known'?'来源已知法术':'来源天生施法';
+      const config:SpecialSpell={mode:count?'uses':'locked',...(count?{max:count,recovery}:{}),label,sourceGrant:{ownerId:owner.id,key,usageKey,resourceKey,...(resource?{resourceName:resource.name,resourceCost:resource.cost}:{}),canUseSlots:!resource&&(kind==='known'||kind==='prepared'),ability,active:enabled,usage:usage==='slot'&&Number(entry.raw.level)===0?'free':usage,castLevel:castLevel&&castLevel!=='c'?Number(castLevel):undefined,reason:enabled?undefined:!automationEnabled(c)?'自动计算已关闭':!eligible?'尚未达到来源等级':'来源、版本或依赖未启用'}};
       grants.push({id,owner,key,entry,eligible,config});
      }
     }
@@ -83,6 +86,19 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
     if(!object(value)){issue(`${kind}/${gate}`,'赠送法术配置未支持。');continue;}
     for(const [schedule,spells] of Object.entries(value)){
      if(schedule==='_'||schedule==='will'||schedule==='ritual'){addList(spells,schedule,schedule==='will'?'free':schedule==='ritual'?'ritual':kind==='innate'?'check':'slot');continue;}
+     if(schedule==='resource'){
+      if(typeof block.resourceName!=='string'||!block.resourceName.trim()||block.resourceName.length>160||!object(spells)){issue(`${kind}/${gate}/resource`,'资源名称或消耗声明未支持，请人工核对。');continue;}
+      const costs=Object.entries(spells).filter(([cost,refs])=>validResourceCost(cost)&&Array.isArray(refs));
+      for(const [cost,refs] of Object.entries(spells))if(!validResourceCost(cost)||!Array.isArray(refs))issue(`resource/${cost}`,'资源消耗需要明确的正整数，未自动施法。');
+      if(!costs.length)continue;
+      const binding=sourceResourcePool(c,owner,index,block.resourceName,resourceGrants??=planFeatureResources(c).grants);
+      if(binding.columns.length&&(binding.reason||c.automation?.spellResourceColumns?.[binding.key]!==undefined)&&!choices.some(choice=>choice.key===binding.key))choices.push({ownerId:owner.id,key:binding.key,label:`${owner.entry.name}的${block.resourceName}资源`,resourceColumns:binding.columns});
+      if(!binding.grant){issue(`${kind}/${gate}/resource`,binding.reason!);continue;}
+      for(const [cost,refs] of costs){
+       addList(refs,`resource/${cost}`,'resource',undefined,undefined,false,{name:block.resourceName,cost:Number(cost),key:binding.grant.key});
+      }
+      continue;
+     }
      if(!['daily','rest'].includes(schedule)||!object(spells)){issue(`${kind}/${gate}/${schedule}`,'充能、资源或次数机制尚未支持。');continue;}
      for(const [count,refs] of Object.entries(spells)){
       if(!(/^[1-9]\d?e?$/.test(count)||count==='pb'||count==='pbe')||!Array.isArray(refs)){issue(`${schedule}/${count}`,'次数公式未支持。');continue;}
@@ -145,4 +161,11 @@ export function setSourceSpellChoices(c:Character,key:string,refs:string[],catal
  const choice=planSourceSpells(c,catalog).choices.find(x=>x.key===key&&x.spells);
  if(!choice||refs.length>choice.count!||new Set(refs).size!==refs.length||refs.some(ref=>!choice.spells!.includes(ref)))throw Error('赠送法术选择与当前声明不符。');
  const choices=c.automation!.spellChoices||={};Object.defineProperty(choices,key,{value:[...refs],enumerable:true,writable:true,configurable:true});
+}
+
+export function setSourceResourceColumn(c:Character,key:string,column:string,catalog:Entry[]=[]):void{
+ const choice=planSourceSpells(c,catalog).choices.find(choice=>choice.key===key&&choice.resourceColumns);
+ if(!choice||column&&!choice.resourceColumns!.some(option=>option.label===column))throw Error('所选资源列与当前职业声明不符。');
+ const columns=c.automation!.spellResourceColumns||={};
+ if(!column)delete columns[key];else Object.defineProperty(columns,key,{value:column,enumerable:true,writable:true,configurable:true});
 }

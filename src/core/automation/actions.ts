@@ -4,6 +4,7 @@ import {setResource} from '../resources';
 import {sourceSpellEnabled,rememberSourceSpellUses} from './sourceSpellState';
 import {automationEnabled} from './state';
 import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../bookRituals';
+import {planSourceSpells} from './sourceSpells';
 
 export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string}
 export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long'}
@@ -13,17 +14,23 @@ export type SpellActionResult={status:'applied'|'duplicate';receipt:SpellActionR
 
 /** A read-only offer. Reading the menu never spends or creates resources. */
 export function spellPayments(c:Character,id:string):{options:SpellPayment[];reason?:string}{
- const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell'),config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;
+ const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell');let config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;
  if(!row||!automationEnabled(c))return {options:[],reason:'此来源法术当前不可用。'};
  if(!grant){
   const groups=config?[]:bookRitualGroups(c).filter(group=>group.spells.some(spell=>spell.id===id));
   return {options:groups.map(group=>({id:bookRitualPaymentId(group.owner.id),label:`书内仪式施法（${group.owner.entry.name}；${BOOK_RITUAL_TIME}）`,level:Number(row.entry.raw.level),cost:0,available:true})),...(!groups.length?{reason:'此法术没有已核实的书内仪式资格；普通施法仍须按预备与法术位规则处理。'}:{})};
  }
  if(!sourceSpellEnabled(c,id))return {options:[],reason:'此来源法术当前不可用。'};
+ const current=planSourceSpells(c).grants.find(candidate=>candidate.id===id),declared=current?.config.sourceGrant;
+ if(!declared?.active||declared.ownerId!==grant.ownerId||declared.key!==grant.key||declared.usage!==grant.usage||declared.resourceKey!==grant.resourceKey||declared.resourceCost!==grant.resourceCost||declared.resourceName!==grant.resourceName)return {options:[],reason:'来源声明或资源归属已变化，请同步当前卡后再施法。'};
+ config=current!.config;grant=declared;
  const base=Number(row.entry.raw.level),level=grant.castLevel??base;
  if(!Number.isInteger(base)||base<0||base>9||level<base)return {options:[],reason:'法术环阶未支持，请人工核对。'};
  const options:SpellPayment[]=[];
- if(config.mode==='uses'){
+ if(grant.usage==='resource'){
+  const resourceId=grant.resourceKey!,r=c.runtime.resources[resourceId],cost=grant.resourceCost!,available=!!r&&!r.unlimited&&Number.isSafeInteger(r.max)&&r.max>=0&&Number.isSafeInteger(r.current)&&r.current<=r.max&&r.current>=cost;
+  options.push({id:'resource',label:`${grant.resourceName}（消耗 ${cost}；${r?.current??0} / ${r?.max??0}）`,level,resourceId,cost,available,...(!available?{reason:'来源资源不足或计数器不可用。'}:{})});
+ }else if(config.mode==='uses'){
   const resourceId=specialSpellResource(id,c),r=c.runtime.resources[resourceId],available=!!r&&Number.isSafeInteger(r.current)&&r.current>=1;
   options.push({id:'source',label:`${grant.resourceKey?'共享':'来源'}次数（${r?.current??0} / ${r?.max??config.max}）`,level,resourceId,cost:1,available,...(!available?{reason:'来源次数不足或计数器不可用。'}:{})});
  }else if(grant.usage==='free'||grant.usage==='ritual')options.push({id:grant.usage,label:grant.usage==='ritual'?'仪式施法（不消耗法术位）':'免费施法',level,cost:0,available:true});

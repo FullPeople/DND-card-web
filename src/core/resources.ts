@@ -34,5 +34,4 @@ export function syncAutoResources(c:Character,before?:Character){
  const featuresChanged=syncFeatureResources(c);
  return featuresChanged||previous!==JSON.stringify([resources,c.spellSettings?.slots]);
 }
-export function setResource(c:Character,id:string,current:number){const r=c.runtime.resources[id];if(!r)return;r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));if(r.featureGrant)r.featureGrant.spent=Math.max(0,r.max-r.current);if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};}
-
+export function setResource(c:Character,id:string,current:number){const r=c.runtime.resources[id];if(!r)return;r.current=Math.max(0,r.unlimited?current:Math.min(r.max,current));if(r.featureGrant){r.featureGrant.spent=Math.max(0,r.max-r.current);(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}if(id.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[id.split(':')[1]]={max:r.max,used:r.max-r.current};}

@@ -190,19 +190,23 @@
       "does": "支持明确 UID 的固定法术、choose.from 选择、方案 / 施法属性选择，以及固定数值或 PB 次数；来源法术与普通学会法术分开。",
       "trigger": "明确选择来源方案和法术；有歧义的次数归属由玩家选择。施法时明确选择次数或法术位付费。",
       "conditions": "来源、等级、法术身份和次数声明可解析，歧义已经确认；操作校验通过后才扣费。",
-      "boundary": "choose.filter / all、扩展法表、属性动态次数及外部职业资源尚未统一适配；次数耗尽不自动改用法术位。切换或刷新不补次数。",
+      "boundary": "choose.filter / all、扩展法表、属性动态次数及外部职业资源尚未统一适配；次数耗尽不自动改用法术位。切换或刷新不补次数。 明确的正整数资源消耗可绑定同职业、同版本的唯一资源；名称不同需玩家选择实际次数表列。未知恢复、充能和特殊消耗仍需人工处理。",
       "modules": [
         "src/core/automation/sourceSpells.ts",
-        "src/core/automation/actions.ts"
+        "src/core/automation/actions.ts",
+        "src/core/automation/sourceResourcePools.ts"
       ],
       "tests": [
         "tests/automation209-spells.test.ts",
         "tests/automation209-actions.test.ts",
-        "tests/sourceSpellMechanics217.test.ts"
+        "tests/sourceSpellMechanics217.test.ts",
+        "tests/sourceResourcePools.test.ts",
+        "tests/sourceResourcePayments.test.ts"
       ],
       "browserTests": [
         "tests/e2e/automation209.spec.ts",
-        "tests/e2e/sourceSpellMechanics217.spec.ts"
+        "tests/e2e/sourceSpellMechanics217.spec.ts",
+        "tests/e2e/sourceResourcePayments.spec.ts"
       ]
     },
     {
@@ -248,16 +252,20 @@
       "boundary": "刷新、重新开来源、布局编辑和方案切换不补满。未知次数、缺失规则与第三方自定义公式不默认执行。",
       "modules": [
         "src/core/automation/featureResources.ts",
-        "src/core/resources.ts"
+        "src/core/resources.ts",
+        "src/core/automation/sourceResourcePools.ts"
       ],
       "tests": [
         "tests/automation-choices-resources.test.ts",
         "tests/sourceSpellMechanics217.test.ts",
         "tests/resources.test.ts",
-        "tests/featureResourceRules.test.ts"
+        "tests/featureResourceRules.test.ts",
+        "tests/sourceResourcePools.test.ts",
+        "tests/sourceResourcePayments.test.ts"
       ],
       "browserTests": [
-        "tests/e2e/featureResourceRules.spec.ts"
+        "tests/e2e/featureResourceRules.spec.ts",
+        "tests/e2e/sourceResourcePayments.spec.ts"
       ]
     },
     {
