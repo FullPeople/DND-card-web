@@ -209,7 +209,10 @@ class PublicationTests(unittest.TestCase):
             stack.enter_context(patch.object(module, key, value))
         stack.enter_context(patch.object(publisher, 'protected', return_value={'cloud-backend': 'preserved'}))
         stack.enter_context(patch.object(publisher.m, 'command', return_value='active'))
-        stack.enter_context(patch.object(publisher.m, 'wait_http', return_value=b'old card'))
+        health = json.dumps({'version': '1.0.253', 'temporaryUpload': True,
+                             'quotaScope': 'ip', 'qqLogin': 'pending'}).encode()
+        stack.enter_context(patch.object(publisher.m, 'wait_http',
+                           side_effect=lambda url, *args: health if url.endswith('/api/health') else b'old card'))
         self.verify = stack.enter_context(patch.object(publisher, 'verify'))
         stack.enter_context(patch.object(server.c, 'load', return_value=publisher))
         stack.enter_context(patch.object(server.c, 'verify_ci', return_value={'exactSha': 'a' * 40, 'runs': []}))
