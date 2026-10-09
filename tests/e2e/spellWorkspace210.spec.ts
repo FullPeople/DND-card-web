@@ -127,6 +127,9 @@ test('a declared feat grants its cantrip after a real Wiki drop even when class 
 });
 test('full class cantrips accept an explicitly recorded feat gift separately across reload, deletion and duplicate drops',async({page})=>{
  const c=card();c.selections.push(row(e('gift-feat','选学专长','feat',{})));await load(page,c);
+ // This authored class is outside the catalog. Its deferred compatibility
+ // banner must settle after every load before measuring drag coordinates.
+ await expect(page.locator('.class-compatibility-banner')).toBeVisible();
  await page.getByLabel('赠送法术来源',{exact:true}).selectOption('gift-feat',{timeout:5000});
  await expect(page.getByLabel('来源法术上限调整',{exact:true})).toHaveValue('0');
  await page.getByLabel('来源法术上限调整',{exact:true}).fill('1');await page.getByLabel('来源法术上限调整',{exact:true}).press('Enter');
@@ -139,9 +142,11 @@ test('full class cantrips accept an explicitly recorded feat gift separately acr
  await drag(page,mist,recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
  await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();
+ await expect(page.locator('.class-compatibility-banner')).toBeVisible();
  await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await group.getByRole('button',{name:'小雾团',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'从角色卡移除',exact:true}).click();
  await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
+ await expect(page.locator('.class-compatibility-banner')).toBeVisible();
  await drag(page,library.getByRole('button',{name:'小雾团',exact:true}),recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await drag(page,library.getByRole('button',{name:'小火花',exact:true}),recipient);await expect(page.locator('.suite-toast')).toContainText('赠送法术数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await expect(page.locator('.spell-tile-flight,.entry-drag-ghost,.drag-lifted,.drag-landing-hidden')).toHaveCount(0);await page.screenshot({path:test.info().outputPath('feat-cantrip-separate.png')});
