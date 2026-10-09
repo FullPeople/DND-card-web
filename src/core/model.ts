@@ -30,6 +30,7 @@ export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean;
 export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface RuntimeResource {current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string}}
 export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number}
+export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
   automation?:import('./automation/state').AutomationState;
   /** Legacy score-ownership marker retained for backup compatibility. */
@@ -43,6 +44,7 @@ export interface Character {
   portraitFrameHidden?: boolean;
   /** Framing for the current bound token fallback; never stores its live URL. */
   tokenPortraitTransform?: PortraitFraming;
+  portraitPageFraming?: Partial<Record<PortraitPage,PortraitFraming>>;
   /** Hide only the main-page spell summary; the spell page stays available. */
   overviewSpellsHidden?: boolean;
   portrait?: {data:string;x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number};

@@ -11,7 +11,7 @@ const now=new Date().toISOString(),character={schemaVersion:1,id:crypto.randomUU
 const card=store.create(owner,character);store.grant(card.id,owner,editor.qq);
 mkdirSync('evidence',{recursive:true});writeFileSync('evidence/cloud-fixture.json',JSON.stringify({owner,editor,ownerSession,editorSession,card}));
 const api=createCloudServer(store,origin,{temporaryUpload:true});api.listen(5321,'127.0.0.1');
-const mime={'.html':'text/html; charset=utf-8','.js':'application/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.webp':'image/webp'};
+const mime={'.html':'text/html; charset=utf-8','.js':'application/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.webp':'image/webp'};
 const server=createServer((req,res)=>{
  const url=new URL(req.url,origin);
  if(url.pathname.startsWith('/api/')){const upstream=proxy('http://127.0.0.1:5321'+req.url,{method:req.method,headers:req.headers},reply=>{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res);});upstream.on('error',()=>{res.writeHead(502);res.end();});req.pipe(upstream);return;}

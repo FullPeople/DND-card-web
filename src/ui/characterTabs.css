@@ -1,3 +1,4 @@
 /* Local characters and Suite room cards share one non-wrapping strip. */
 .character-tabs{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;min-width:0}.character-tabs button{flex:none;padding:5px 10px;border:1px solid #888;background:#eee}.character-tabs button[aria-selected=true]{background:#444;color:white}
 .character-tabs button{white-space:nowrap}
+.character-tabs{touch-action:pan-y;user-select:none;overscroll-behavior-x:contain;scrollbar-width:thin}.character-tabs.is-dragging,.character-tabs.is-dragging button{cursor:grabbing}.pane-toolbar>div:has(.character-tabs){min-width:0;overflow:hidden}
