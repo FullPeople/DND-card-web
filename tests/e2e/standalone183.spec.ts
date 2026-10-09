@@ -31,6 +31,9 @@ test('standalone has no room transport, survives offline reload and rolls withou
  await expect(page.getByRole('textbox',{name:'角色姓名',exact:true})).toHaveValue('单机冒险者');
  await expect(page.locator('.quick-weapon').filter({hasText:'训练剑'})).toBeVisible();await expect(resource.locator('[data-resource-name="活力"]')).toHaveAttribute('data-resource-current','3');await expect.poll(savedResource).toBe(3);
  await expect(page.getByRole('switch',{name:'编辑模式'})).toHaveAttribute('aria-checked','false');
+ // A cached sheet is visible before the deferred editing runtime is ready.
+ // This existing disabled control is the actual readiness gate for edits.
+ await expect(page.getByRole('switch',{name:'编辑模式'})).toBeEnabled({timeout:20000});
  await page.locator('.quick-weapon').filter({hasText:'训练剑'}).getByRole('button',{name:'+4',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'})).toBeVisible();await page.getByRole('button',{name:'投骰',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'本地投骰'}).getByRole('status')).toContainText('1d20');await page.getByRole('button',{name:'关闭',exact:true}).click();
