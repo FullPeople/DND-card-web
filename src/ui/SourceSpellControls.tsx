@@ -4,8 +4,15 @@ import type {Edit} from './CharacterPages';
 import {useSources} from './SourceName';
 import {matchesReference} from '../core/entryReferences';
 import {entryLabel} from '../core/entryLabel';
-import {setSourceSpellChoices,syncSourceSpells,type SourceSpellChoice} from '../core/automation/sourceSpells';
+import {setSourceSpellChoices,setSourceResourceColumn,syncSourceSpells,type SourceSpellChoice} from '../core/automation/sourceSpells';
+import {syncAutoResources} from '../core/resources';
 import './sourceSpellControls.css';
+
+export function SourceResourceColumnControl({c,choice,entries,edit,writable}:{c:Character;choice:SourceSpellChoice;entries:Entry[];edit:Edit;writable:boolean}){
+ const [message,setMessage]=useState(''),selected=c.automation?.spellResourceColumns?.[choice.key]||'';
+ function save(column:string){if(!writable)return;try{edit(draft=>{setSourceResourceColumn(draft,choice.key,column,entries);syncAutoResources(draft);syncSourceSpells(draft,entries);});setMessage('选择已应用；保存结果请查看卡面状态。');}catch(error){setMessage(error instanceof Error?error.message:String(error));}}
+ return <fieldset className="source-spell-choice" disabled={!writable}><legend>{choice.label}</legend><p>选择这项施法实际消耗的职业资源。已有点数保留，恢复方式请按来源核对。</p><select aria-label={choice.label} value={selected} onChange={event=>save(event.target.value)}><option value="">请选择</option>{selected&&!choice.resourceColumns?.some(column=>column.label===selected)&&<option value={selected}>旧选择：{selected}（需要重新核对）</option>}{choice.resourceColumns?.map(column=><option key={column.label} value={column.label}>{column.className} · {column.label}（上限 {column.max}）</option>)}</select>{message&&<small role="status">{message}</small>}</fieldset>;
+}
 
 export function SourceSpellChoiceControl({c,choice,entries,edit,writable}:{c:Character;choice:SourceSpellChoice;entries:Entry[];edit:Edit;writable:boolean}){
  const {registry}=useSources(),selected=c.automation?.spellChoices?.[choice.key]||[];

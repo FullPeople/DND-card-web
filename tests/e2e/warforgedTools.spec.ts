@@ -1,4 +1,4 @@
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect,type Page,type Locator} from '@playwright/test';
 import {newCharacter,type Character} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
@@ -19,11 +19,16 @@ async function ready(page:Page,book:'ERLW'|'EFA',mobile=false){
  if(book==='ERLW')await page.getByRole('dialog',{name:'导入前核对',exact:true}).getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
  const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();return c;
 }
+async function dragToSlot(page:Page,name:string,slot:Locator){
+ // Fixed drag coordinates must start away from the frame's auto-scroll edge.
+ await slot.evaluate(node=>node.scrollIntoView({block:'center',inline:'nearest'}));
+ await page.locator('.catalog-row').filter({hasText:name}).dragTo(slot);
+}
 for(const book of ['ERLW','EFA'] as const)test(`${book} real Warforged skill/tool slots accept drags, replacement, undo and persisted removal`,async({page})=>{
  await ready(page,book);await page.getByRole('button',{name:'工具熟练 0/1',exact:true}).click();const tools=page.getByRole('region',{name:'选择工具熟练',exact:true}),slot=tools.locator('[aria-label="工具熟练选择格 1"]');await expect(slot).toBeVisible();
- await page.locator('.catalog-row').filter({hasText:'炼金工具'}).dragTo(slot);await expect(tools.getByRole('status')).toContainText('1/1');await expect(slot).toContainText('炼金工具');
- await page.locator('.catalog-row').filter({hasText:'风笛'}).dragTo(slot);await expect(slot).toContainText('风笛');await expect(slot).not.toContainText('炼金工具');await tools.getByRole('button',{name:'完成并返回',exact:true}).click();
- await page.getByRole('button',{name:'熟练项 0/1',exact:true}).click();const skills=page.getByRole('region',{name:'选择熟练项',exact:true});await page.locator('.catalog-row').filter({hasText:'运动'}).dragTo(skills.locator('[aria-label="熟练项选择格 1"]'));await expect(skills.getByRole('status')).toContainText('1/1');await skills.getByRole('button',{name:'完成并返回',exact:true}).click();
+ await dragToSlot(page,'炼金工具',slot);await expect(tools.getByRole('status')).toContainText('1/1');await expect(slot).toContainText('炼金工具');
+ await dragToSlot(page,'风笛',slot);await expect(slot).toContainText('风笛');await expect(slot).not.toContainText('炼金工具');await tools.getByRole('button',{name:'完成并返回',exact:true}).click();
+ await page.getByRole('button',{name:'熟练项 0/1',exact:true}).click();const skills=page.getByRole('region',{name:'选择熟练项',exact:true});await dragToSlot(page,'运动',skills.locator('[aria-label="熟练项选择格 1"]'));await expect(skills.getByRole('status')).toContainText('1/1');await skills.getByRole('button',{name:'完成并返回',exact:true}).click();
  await expect.poll(async()=>(await saved(page)).answers['race:tools:0']?.[0]).toBe(warforgedToolEntries().find(e=>e.name==='风笛'&&e.source===(book==='ERLW'?'PHB':'XPHB'))!.id);const chosen=await saved(page);expect(chosen.training?.tools).toBe('手工工具记录');expect(chosen.runtime.resources.spent.current).toBe(1);expect(chosen.selections).toHaveLength(1);
  await page.reload();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(page.locator('.sheet-choice-chip')).toHaveCount(0);await page.locator('.feature-group h4').getByRole('button',{name:'种族 战俑',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'显示自带选项',exact:true}).click();await expect(page.getByRole('button',{name:'工具熟练 1/1',exact:true})).toBeVisible();await page.getByRole('button',{name:'工具熟练 1/1',exact:true}).click();await tools.getByRole('button',{name:'移除风笛',exact:true}).click();await expect(slot).toContainText('等待拖拽加入');await tools.getByRole('button',{name:'完成并返回',exact:true}).click();
  await page.getByRole('button',{name:'撤销',exact:true}).click();await expect(page.getByRole('button',{name:'工具熟练 1/1',exact:true})).toBeVisible();await page.getByRole('button',{name:'重做',exact:true}).click();await expect(page.getByRole('button',{name:'工具熟练 0/1',exact:true})).toBeVisible();await page.reload();expect((await saved(page)).answers['race:tools:0']).toEqual(['']);expect((await saved(page)).training).toEqual(chosen.training);expect((await saved(page)).runtime).toEqual(chosen.runtime);await page.screenshot({path:test.info().outputPath('warforged-tools-'+book+'.png')});

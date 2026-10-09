@@ -6,9 +6,10 @@ import {automationEnabled} from './state';
 import {selectionActive} from './choices';
 import {sourceOwnerIdentity,rememberSourceSpellUses,sourceSpellResourceEnabled} from './sourceSpellState';
 import {specialSpellResource} from '../spellResourceKeys';
+import {planClassResourcePools} from './sourceResourcePools';
 
 type Recovery={short?:number|'all';long?:number|'all'};
-export type ResourceGrant={key:string;ownerId:string;name:string;max:number;formula?:string;recovery:Recovery;origin:string};
+export type ResourceGrant={key:string;ownerId:string;name:string;max:number;formula?:string;recovery:Recovery;origin:string;classPool?:import('../model').ClassPoolMetadata};
 const words:Record<string,number>={'一':1,'二':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
 const count=(v:string)=>/^\d+$/.test(v)?Number(v):words[v];
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
@@ -107,7 +108,7 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
    const existing=grants.findIndex(g=>g.key===grant.key);if(existing<0)grants.push(grant);else if(grant.max>=grants[existing].max)grants[existing]=grant;
   }catch(error){issues.push({id:`resource:${row.id}:${index}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${error instanceof Error?error.message:String(error)}，未执行资源规则。`});}
  }
- return {grants,issues};
+ grants.push(...planClassResourcePools(c,grants));return {grants,issues};
 }
 export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
 /** Own lifecycle and recovery only; preserve player-owned presentation and overrides. */
@@ -117,7 +118,7 @@ export function syncFeatureResources(c:Character){
  for(const grant of planFeatureResources(c).grants){needed.add(grant.key);const old=c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key];
   const manual=old?.featureGrant?.manualMax||!!old?.featureGrant&&old.max!==old.featureGrant.ruleMax;
   const max=manual?old!.max:grant.max,spent=old?old.featureGrant?.spent??Math.max(0,old.max-old.current):0;
-  c.runtime.resources[grant.key]={...old,name:grant.name,type:old?.type||'count',icon:old?.icon||'gem',max,current:Math.max(0,max-spent),featureGrant:{ownerId:grant.ownerId,ruleMax:grant.max,manualMax:manual,spent,recovery:grant.recovery,formula:grant.formula,origin:grant.origin}};
+  c.runtime.resources[grant.key]={...old,name:grant.name,type:old?.type||'count',icon:old?.icon||'gem',max,current:Math.max(0,max-spent),featureGrant:{ownerId:grant.ownerId,ruleMax:grant.max,manualMax:manual,spent,recovery:grant.recovery,formula:grant.formula,origin:grant.origin,classPool:grant.classPool}};
  }
  for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key))delete c.runtime.resources[key];
  for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant)(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);
@@ -142,7 +143,7 @@ export function restResources(c:Character,kind:'short'|'long'){
  rememberFeatureResources(c);rememberSourceSpellUses(c);
 }
 export function validateFeatureResourceState(runtime:Character['runtime']){
- const valid=(r:RuntimeResource)=>plain(r)&&Number.isSafeInteger(r.max)&&r.max>=0&&r.max<=99999&&Number.isSafeInteger(r.current)&&r.current>=0&&r.current<=r.max&&plain(r.featureGrant)&&typeof r.featureGrant.ownerId==='string'&&(r.featureGrant.manualMax===undefined||typeof r.featureGrant.manualMax==='boolean')&&(r.featureGrant.spent===undefined||Number.isSafeInteger(r.featureGrant.spent)&&r.featureGrant.spent>=0&&r.featureGrant.spent<=99999)&&(r.featureGrant.formula===undefined||typeof r.featureGrant.formula==='string'&&r.featureGrant.formula.length<=160)&&Number.isSafeInteger(r.featureGrant.ruleMax)&&r.featureGrant.ruleMax>=0&&r.featureGrant.ruleMax<=10000&&plain(r.featureGrant.recovery)&&Object.entries(r.featureGrant.recovery).every(([k,n])=>['short','long'].includes(k)&&(n==='all'||Number.isSafeInteger(n)&&Number(n)>=0&&Number(n)<=10000));
+ const valid=(r:RuntimeResource)=>plain(r)&&Number.isSafeInteger(r.max)&&r.max>=0&&r.max<=99999&&Number.isSafeInteger(r.current)&&r.current>=0&&r.current<=r.max&&plain(r.featureGrant)&&typeof r.featureGrant.ownerId==='string'&&(r.featureGrant.manualMax===undefined||typeof r.featureGrant.manualMax==='boolean')&&(r.featureGrant.spent===undefined||Number.isSafeInteger(r.featureGrant.spent)&&r.featureGrant.spent>=0&&r.featureGrant.spent<=99999)&&(r.featureGrant.formula===undefined||typeof r.featureGrant.formula==='string'&&r.featureGrant.formula.length<=160)&&Number.isSafeInteger(r.featureGrant.ruleMax)&&r.featureGrant.ruleMax>=0&&r.featureGrant.ruleMax<=10000&&plain(r.featureGrant.recovery)&&Object.entries(r.featureGrant.recovery).every(([k,n])=>['short','long'].includes(k)&&(n==='all'||Number.isSafeInteger(n)&&Number(n)>=0&&Number(n)<=10000))&&(r.featureGrant.classPool===undefined||plain(r.featureGrant.classPool)&&typeof r.featureGrant.classPool.entryId==='string'&&r.featureGrant.classPool.entryId.length>0&&r.featureGrant.classPool.entryId.length<=4000&&typeof r.featureGrant.classPool.label==='string'&&r.featureGrant.classPool.label.length>0&&r.featureGrant.classPool.label.length<=160);
  if(runtime.featureResourceArchive!==undefined&&(!plain(runtime.featureResourceArchive)||Object.keys(runtime.featureResourceArchive).length>10000||Object.values(runtime.featureResourceArchive).some(r=>!valid(r))))throw Error('职业资源历史记录无效。');
  for(const r of Object.values(runtime.resources))if(r.featureGrant&&!valid(r))throw Error('职业资源归属记录无效。');
 }
