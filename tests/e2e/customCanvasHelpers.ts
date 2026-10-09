@@ -11,3 +11,5 @@ export async function customField(page:Page,label:string){
  if(!name)throw Error(`No canvas area for ${label}`);
  await page.locator('.custom-document').getByRole('button',{name:'修改'+name,exact:true}).click();await expect(input).toBeVisible();return input;
 }
+
+export async function finishCustomField(page:Page){const button=page.getByRole('button',{name:'完成修改',exact:true});if(await button.isVisible())await button.click();}
