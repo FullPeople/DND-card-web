@@ -8,6 +8,7 @@ import {SheetCell} from './SheetCell';
 import {SheetEditContext} from './SheetEdit';
 import {Portrait} from './Portrait';
 import {FeaturePanel} from './FeaturePanel';
+import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {ChoiceWorkspace} from './ChoiceWorkspace';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import {IdentityToken} from './IdentityToken';
@@ -27,7 +28,7 @@ export function DetailHeader(props:PageProps&{page:string;openSpellAbility?:()=>
  {page!=='背景'&&<Portrait c={c} edit={edit} page={page==='特性'?'features':page==='法术'?'spells':page==='背包'?'inventory':'overview'}/>}</div></header>;
 }
 export function FeaturesPage(props:PageProps){const workspace=useChoiceWorkspace();const {c,edit,browse,onLink,add}=props;const owner=(s:Selection)=>{let row=s;const seen=new Set<string>();while(row.parentId&&!seen.has(row.id)){seen.add(row.id);const parent=c.selections.find(p=>p.id===row.parentId);if(!parent)break;row=parent;}return row.entry.kind;};const rows=c.selections.filter(s=>['feature','rule','feat'].includes(s.entry.kind));
- const panel=(label:string,items:Selection[],kinds:Kind[],className:string)=><FeaturePanel detailed catalog={props.entries||[]} owners={c.selections.filter(s=>label==='职业特性'?['class','subclass'].includes(s.entry.kind):label==='种族特性'?s.entry.kind==='race':label==='背景特性'?s.entry.kind==='background':false)} c={c} edit={edit} rows={items} label={label} kinds={kinds} className={className} browse={()=>browse(kinds[0])} receive={add} onLink={onLink}/>;
+ const panel=(label:string,items:Selection[],kinds:Kind[],className:string)=><FeaturePanel detailed catalog={props.entries||[]} owners={c.selections.filter(s=>label==='职业特性'?['class','subclass'].includes(s.entry.kind):label==='种族特性'?s.entry.kind==='race':label==='背景特性'?s.entry.kind==='background':false)} c={c} edit={edit} rows={items} label={label} kinds={kinds} className={className} browse={()=>browse(kinds[0])} receive={add} onLink={onLink}>{label==='职业特性'&&<ClassChoiceRecords c={c} catalog={props.entries||[]} mode="optional"/>}</FeaturePanel>;
  if(workspace.id)return <ChoiceWorkspace key={`${c.id}:${workspace.id}`} c={c} catalog={props.entries||[]} id={workspace.id} edit={edit} close={workspace.close}/>;
  return <><div className="features-page-grid">{panel('职业特性',rows.filter(s=>s.entry.kind!=='feat'&&!['race','background'].includes(owner(s))),['feature','rule'],'detail-class-features')}{panel('种族特性',rows.filter(s=>s.entry.kind!=='feat'&&owner(s)==='race'),['feature','rule'],'detail-race-features')}{panel('专长',rows.filter(s=>s.entry.kind==='feat'),['feat'],'detail-feats')}{panel('背景特性',rows.filter(s=>s.entry.kind!=='feat'&&owner(s)==='background'),['feature','rule'],'detail-background-features')}</div></>;
 }
