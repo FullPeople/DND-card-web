@@ -1,10 +1,12 @@
 import {FieldHelp} from './CustomFieldHelp';
-import {useState,type ReactNode} from 'react';
+import {useLayoutEffect,useRef,useState,type ReactNode} from 'react';
+import {createPortal} from 'react-dom';
 import {ABILITIES,ABILITY_LABELS,type Entry,type Raw} from '../core/model';
 import {CUSTOM_TYPES} from '../core/customEntries';
 import {EntryFacts} from './EntryFacts';
 import {MonsterDocument} from './MonsterDocument';
 import {Entries} from './Entries';
+import {monsterNumber,setMonsterNumber} from '../core/monsterEditing';
 import './customCanvas.css';
 
 const schools={A:'防护',C:'咒法',D:'预言',E:'惑控',V:'塑能',I:'幻术',N:'死灵',T:'变化'};
@@ -12,27 +14,34 @@ const sizes={T:'微型',S:'小型',M:'中型',L:'大型',H:'巨型',G:'超巨型
 const damageTypes={B:'钝击',P:'穿刺',S:'挥砍',A:'强酸',C:'寒冷',F:'火焰',O:'力场',L:'闪电',N:'暗蚀',I:'毒素',Y:'心灵',R:'光耀',T:'雷鸣'};
 const prose=(entries:unknown[])=>entries.map(v=>typeof v==='string'?v:JSON.stringify(v)).join('\n\n');
 const parseProse=(text:string)=>text.split(/\n\s*\n/).filter(s=>s.trim()).map(s=>{try{const v=JSON.parse(s);return v&&typeof v==='object'?v:s;}catch{return s;}});
-type Props={name:string;english:string;type:string;edition:Entry['edition'];body:string;entries:unknown[];raw:Raw;identity:(key:'name'|'english'|'type'|'edition',value:string)=>void;change:(raw:Raw)=>void;changeBody:(body:string)=>void;invalid:(message:string)=>void};
+type Props={name:string;english:string;type:string;edition:Entry['edition'];body:string;entries:unknown[];raw:Raw;monsterCard?:boolean;disabled?:boolean;identity:(key:'name'|'english'|'type'|'edition',value:string)=>void;change:(raw:Raw)=>void;changeBody:(body:string)=>void;invalid:(message:string)=>void};
 
 /** The ordinary rules document is the editing surface; only the selected area opens inputs. */
 export function CustomEntryCanvas(p:Props){
- const [selected,setSelected]=useState<{key:string;label:string}>(),[invalid,setInvalid]=useState(false);
- const entry:Entry={id:'custom-preview',name:p.name||'自定义条目',english:p.english||p.name,kind:CUSTOM_TYPES[p.type].kind,source:'CUSTOM',packId:'custom',revision:'draft',edition:p.edition,entries:p.entries,raw:p.type==='monster'?{...p.raw,entries:undefined}:p.raw};
- function choose(key:string,label:string){if(invalid)return;setSelected({key,label});}
+ const [selected,setSelected]=useState<{key:string;label:string;anchor:HTMLElement;x:number;y:number}>(),[invalid,setInvalid]=useState(false);
+ const editor=useRef<HTMLElement>(null),[position,setPosition]=useState<{left:number;top:number}>();
+ const entry:Entry={id:'custom-preview',name:p.name||'自定义条目',english:p.english||p.name,kind:CUSTOM_TYPES[p.type].kind,source:p.monsterCard?p.raw.source||'CUSTOM':'CUSTOM',page:p.raw.page,packId:'custom',revision:'draft',edition:p.edition,entries:p.entries,raw:p.type==='monster'?{...p.raw,entries:undefined}:p.raw};
+ function choose(key:string,label:string,anchor:HTMLElement,point?:{x:number;y:number}){if(invalid||p.disabled)return;const bounds=anchor.getBoundingClientRect();setPosition(undefined);setSelected({key,label,anchor,x:(point&&point.x!==0?point.x:bounds.left)-bounds.left,y:(point&&point.y!==0?point.y:Math.max(bounds.top,0))-bounds.top});}
+ useLayoutEffect(()=>{
+  if(!selected)return;
+  const update=()=>{const popup=editor.current;if(!popup)return;const bounds=selected.anchor.getBoundingClientRect(),width=popup.offsetWidth,height=popup.offsetHeight,x=bounds.left+selected.x,y=bounds.top+selected.y;const left=Math.max(12,Math.min(x,innerWidth-width-12)),top=Math.max(12,Math.min(y+12+height<=innerHeight-12?y+12:y-height-12,innerHeight-height-12));setPosition(old=>old?.left===left&&old.top===top?old:{left,top});};
+  update();const observer=new ResizeObserver(update);if(editor.current)observer.observe(editor.current);window.addEventListener('resize',update);window.addEventListener('scroll',update,true);
+  return()=>{observer.disconnect();window.removeEventListener('resize',update);window.removeEventListener('scroll',update,true);};
+ },[selected]);
  function report(message:string){setInvalid(!!message);p.invalid(message);}
- function region(key:string,label:string,content:ReactNode){return <button type="button" key={key} className="canvas-region" aria-label={`修改${label}`} onClick={()=>choose(key,label)}>{content}</button>;}
+ function region(key:string,label:string,content:ReactNode){return <button type="button" key={key} className="canvas-region" aria-label={`修改${label}`} onClick={event=>choose(key,label,event.currentTarget,{x:event.clientX,y:event.clientY})}>{content}</button>;}
  const item=entry.kind==='item';
  return <div className="custom-canvas">
- <p className="canvas-hint">点击示例中的名称、资料或正文即可修改；保存后才会加入自定义资料。</p>
- {selected&&<section className="canvas-field-editor" aria-label={`编辑${selected.label}`} key={selected.key}><header><strong>{selected.label}</strong>{['time','range','components','duration'].includes(selected.key)&&<FieldHelp label={selected.label}/>}<button type="button" disabled={invalid} onClick={()=>setSelected(undefined)}>完成修改</button></header><CanvasField {...p} field={selected.key} report={report}/></section>}
+ <p className="canvas-hint">{p.monsterCard?'点击虚线框中的内容，在原位置附近修改；保存资料后生效。':'点击示例中的名称、资料或正文，在原位置附近修改；保存后才会加入自定义资料。'}</p>
+ {selected&&createPortal(<section ref={editor} className="canvas-field-editor" role="region" aria-label={`编辑${selected.label}`} key={selected.key} style={{left:position?.left??0,top:position?.top??0,visibility:position?'visible':'hidden'}} onKeyDown={event=>{if(!invalid&&(event.key==='Escape'||event.key==='Enter'&&event.target instanceof HTMLInputElement)){event.preventDefault();selected.anchor.focus({preventScroll:true});setSelected(undefined);}}}><header><strong>{selected.label}</strong>{['time','range','components','duration'].includes(selected.key)&&<FieldHelp label={selected.label}/>}<button type="button" disabled={invalid} onClick={()=>{selected.anchor.focus({preventScroll:true});setSelected(undefined);}}>完成修改</button></header><fieldset disabled={p.disabled}><CanvasField {...p} field={selected.key} report={report}/></fieldset>{invalid&&<p role="alert">请先修正此区域的格式，再完成修改。</p>}</section>,document.body)}
   <article className="custom-document rules-prose document-prose">
- <div className="detail-heading"><div className="canvas-edition">{region('type','类型',CUSTOM_TYPES[p.type].label)}{region('edition','适用版本',p.edition==='both'?'通用资料':p.edition)}</div><h1>{region('name','名称',entry.name)}</h1>{region('english','英文名',p.english||'点击填写英文名')}<small>自定义资料 · 示例中的所有文字均可修改</small></div>
- {entry.kind==='monster'?<><MonsterDocument entry={entry} onLink={()=>{}} onEdit={choose}/><div className="canvas-extra-fields">{[['save','豁免'],['skill','技能'],['resist','伤害抗性'],['immune','伤害免疫'],['conditionImmune','状态免疫'],['bonus','附赠动作'],['reaction','反应'],['legendary','传奇动作']].filter(([key])=>p.raw[key]===undefined).map(([key,label])=>region(key,label,`＋ ${label}`))}</div></>:<>
+ <div className="detail-heading">{!p.monsterCard&&<div className="canvas-edition">{region('type','类型',CUSTOM_TYPES[p.type].label)}{region('edition','适用版本',p.edition==='both'?'通用资料':p.edition)}</div>}<h1>{region('name','名称',entry.name)}</h1>{region('english','英文名',p.english||'点击填写英文名')}{!p.monsterCard&&<small>自定义资料 · 示例中的所有文字均可修改</small>}</div>
+ {entry.kind==='monster'?<><MonsterDocument entry={entry} onLink={()=>{}} onEdit={choose}/><div className="canvas-extra-fields">{[['save','豁免'],['skill','技能'],['resist','伤害抗性'],['immune','伤害免疫'],['conditionImmune','状态免疫'],['trait','特质'],['action','动作'],['bonus','附赠动作'],['reaction','反应'],['legendary','传奇动作'],['mythic','神话动作'],['spellcasting','施法'],['cr','挑战等级']].filter(([key])=>p.raw[key]===undefined).map(([key,label])=>region(key,label,`＋ ${label}`))}</div></>:<>
  <EntryFacts entry={entry} onLink={()=>{}} onEdit={choose}/>
  {item&&<div className="canvas-item-facts">{region('value','价格（金币）',`价格：${Number(p.raw.value||0)/100} 金币`)}{region('weight','重量（磅）',`重量：${p.raw.weight??0} 磅`)}{p.type==='weapon'&&<>{region('weaponCategory','武器熟练类别',p.raw.weaponCategory==='martial'?'军用武器':'简易武器')}{region('typeRaw','武器类型',p.raw.type==='R'?'远程武器':'近战武器')}{region('dmgType','武器伤害类型',damageTypes[p.raw.dmgType as keyof typeof damageTypes]||'伤害类型')}</>}{['armor','tool'].includes(p.type)&&region('typeRaw',p.type==='armor'?'护甲类型':'工具类别',String(p.raw.type||'类别'))}</div>}
  {p.type==='subclass'&&<div className="canvas-item-facts">{region('className','所属职业名称',`所属职业：${p.raw.className}`)}{region('classSource','所属职业来源',`职业来源：${p.raw.classSource}`)}</div>}
  </>}
- <div className="canvas-region canvas-body" role="button" tabIndex={0} aria-label="修改正文" onClickCapture={event=>{event.preventDefault();event.stopPropagation();choose('body','正文');}} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();choose('body','正文');}}}><Entries value={p.entries} onLink={()=>{}}/>{!p.entries.length&&<p>点击填写完整正文。</p>}</div>
+ <div className="canvas-region canvas-body" role="button" tabIndex={0} aria-label="修改正文" onClickCapture={event=>{event.preventDefault();event.stopPropagation();choose('body','正文',event.currentTarget,{x:event.clientX,y:event.clientY});}} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();choose('body','正文',event.currentTarget);}}}><Entries value={p.entries} onLink={()=>{}}/>{!p.entries.length&&<p>点击填写完整正文。</p>}</div>
  </article></div>;
 }
 
@@ -65,16 +74,21 @@ function CanvasField(p:Props&{field:string;report:(message:string)=>void}){
   const current=r.duration?.[0]||{type:'instant'},change=(value:Raw)=>update('duration',[{...current,...value},...(r.duration?.slice(1)||[])]);
   return <>{select('持续时间类型',current.type,v=>change({type:v,...(v==='timed'&&!current.duration?{duration:{type:'minute',amount:1}}:{})}),{instant:'立即',timed:'计时',permanent:'直至解除',special:'特殊'})}{current.type==='timed'&&<>{input('持续时间数量',current.duration?.amount,v=>change({duration:{...current.duration,amount:Number(v)}}),'number',0)}{select('持续时间单位',current.duration?.type,v=>change({duration:{...current.duration,type:v}}),{round:'轮',minute:'分钟',hour:'小时',day:'天'})}</>}<label><input type="checkbox" aria-label="需要专注" checked={!!current.concentration} onChange={e=>change({concentration:e.target.checked})}/>需要专注</label></>;
  }
- if(k==='classification')return <>{select('怪物体型',r.size?.[0],v=>update('size',[v,...(r.size?.slice(1)||[])]),sizes)}{select('怪物类型',typeof r.type==='string'?r.type:r.type?.type,v=>update('type',typeof r.type==='object'?{...r.type,type:v}:v),{aberration:'异怪',beast:'野兽',celestial:'天界生物',construct:'构装体',dragon:'龙',elemental:'元素',fey:'妖精',fiend:'邪魔',giant:'巨人',humanoid:'类人生物',monstrosity:'怪兽',ooze:'泥怪',plant:'植物',undead:'亡灵'})}{checks('alignment','阵营',{L:'守序',N:'中立',C:'混乱',G:'善良',E:'邪恶',U:'无阵营',A:'任意阵营'})}</>;
- if(k==='hp')return <>{input('怪物平均 HP',r.hp?.average,v=>update('hp',{...r.hp,average:Number(v)}),'number',0)}{input('怪物生命骰',r.hp?.formula,v=>update('hp',{...r.hp,formula:v}))}{r.hp?.special&&input('特殊 HP',r.hp.special,v=>update('hp',{...r.hp,special:v}))}</>;
- if(k==='ac'&&p.type==='monster')return input('怪物 AC',typeof r.ac?.[0]==='number'?r.ac[0]:r.ac?.[0]?.ac,v=>update('ac',[typeof r.ac?.[0]==='object'?{...r.ac[0],ac:Number(v)}:Number(v),...(r.ac?.slice(1)||[])]),'number',0);
+ if(k==='classification')return <>{select('怪物体型',Array.isArray(r.size)?r.size[0]:r.size,v=>update('size',[v,...(Array.isArray(r.size)?r.size.slice(1):[])]),sizes)}{select('怪物类型',typeof r.type==='string'?r.type:r.type?.type,v=>update('type',typeof r.type==='object'?{...r.type,type:v}:v),{aberration:'异怪',beast:'野兽',celestial:'天界生物',construct:'构装体',dragon:'龙',elemental:'元素',fey:'妖精',fiend:'邪魔',giant:'巨人',humanoid:'类人生物',monstrosity:'怪兽',ooze:'泥怪',plant:'植物',undead:'亡灵'})}{checks('alignment','阵营',{L:'守序',N:'中立',C:'混乱',G:'善良',E:'邪恶',U:'无阵营',A:'任意阵营'})}</>;
+ if(k==='hp')return <>{input('怪物平均 HP',monsterNumber(r,'hp'),v=>p.change(setMonsterNumber(r,'hp',Number(v))),'number',0)}{input('怪物生命骰',r.hp?.formula,v=>update('hp',{...r.hp,formula:v}))}{r.hp?.special&&input('特殊 HP',r.hp.special,v=>update('hp',{...r.hp,special:v}))}</>;
+ if(k==='ac'&&p.type==='monster')return input('怪物 AC',monsterNumber(r,'ac'),v=>p.change(setMonsterNumber(r,'ac',Number(v))),'number',0);
  if(ABILITIES.includes(k as any))return <>{number(k,`怪物${ABILITY_LABELS[k as keyof typeof ABILITY_LABELS]}属性`,1,30)}{input('该属性豁免加值',r.save?.[k]??'',v=>{const save={...r.save};if(v.trim())save[k]=v;else delete save[k];update('save',save);})}</>;
  if(k==='speed')return typeof r.speed==='number'?input('步行速度',r.speed,v=>update('speed',Number(v)),'number',0):<>{Object.entries({walk:'步行',fly:'飞行',swim:'游泳',climb:'攀爬',burrow:'掘穴'}).map(([key,label])=>input(`${label}速度`,typeof r.speed?.[key]==='object'?r.speed[key].number:r.speed?.[key]??'',v=>{const next={...r.speed};if(v.trim())next[key]=typeof next[key]==='object'?{...next[key],number:Number(v)}:Number(v);else delete next[key];update('speed',next);},'number',0))}</>;
- if(['trait','action','bonus','reaction','legendary','mythic','variant'].includes(k))return <TraitRegion value={r[k]||[]} change={v=>update(k,v)} report={p.report}/>;
+ if(/^(trait|action|bonus|reaction|legendary|mythic|variant)(\.\d+)?$/.test(k)){const [key,index]=k.split('.');return <TraitRegion value={r[key]||[]} initialIndex={Number(index)||0} change={v=>update(key,v)} report={p.report}/>;}
+ if(k==='spellcasting')return <TraitRegion value={r[k]||[]} change={v=>update(k,v)} report={p.report} spellcasting/>;
+ if(k==='senses')return <><TextListRegion value={r.senses||[]} change={v=>update('senses',v)} report={p.report}/>{number('passive','被动察觉',0)}</>;
+ if(k==='environment'||k==='treasure')return <TextListRegion value={r[k]||[]} change={v=>update(k,v)} report={p.report}/>;
+ if(['pb','passive','page','legendaryActions'].includes(k))return number(k,({pb:'熟练加值',passive:'被动察觉',page:'来源页码',legendaryActions:'传奇动作次数'})[k]!);
+ if(k==='source')return input('来源',r.source,v=>update(k,v));
  if(['senses','languages','conditionImmune','resist','immune','vulnerable','typicalSpeakers'].includes(k))return <TextListRegion value={r[k]||[]} change={v=>update(k,v)} report={p.report}/>;
  if(k==='hd')return select('职业生命骰',r.hd?.faces,v=>update('hd',{...r.hd,number:r.hd?.number||1,faces:Number(v)}),Object.fromEntries([4,6,8,10,12,20].map(n=>[n,`d${n}`])));
  if(k==='proficiency')return checks('proficiency','职业豁免熟练',ABILITY_LABELS);
- if(k==='size')return select('种族体型',r.size?.[0],v=>update('size',[v,...(r.size?.slice(1)||[])]),sizes);
+ if(k==='size')return select('种族体型',Array.isArray(r.size)?r.size[0]:r.size,v=>update('size',[v,...(Array.isArray(r.size)?r.size.slice(1):[])]),sizes);
  if(k==='value')return input('物品价格（金币）',typeof r.value==='number'?r.value/100:'',v=>update('value',Number(v)*100),'number',0);
  if(k==='weight')return number('weight','物品重量（磅）');
  if(k==='typeRaw')return select(p.type==='weapon'?'武器类型':p.type==='armor'?'护甲类型':'工具类别',r.type,v=>update('type',v),p.type==='weapon'?{M:'近战',R:'远程'}:p.type==='armor'?{LA:'轻甲',MA:'中甲',HA:'重甲',S:'盾牌'}:{AT:'工匠工具',T:'工具',INS:'乐器',GS:'游戏工具'});
@@ -88,15 +102,16 @@ function CanvasField(p:Props&{field:string;report:(message:string)=>void}){
 
 function JsonRegion({label,value,change,report}:{label:string;value:unknown;change:(v:any)=>void;report:(message:string)=>void}){
  const [text,setText]=useState(()=>JSON.stringify(value,null,2));
- return <label>{label}<textarea autoFocus aria-label={label} value={text} onChange={e=>{setText(e.target.value);try{const v=JSON.parse(e.target.value);change(v);report('');}catch{report('此区域的 JSON 尚未完整，请修正后完成修改。');}}}/></label>;
+ return <label>{label}<textarea autoFocus aria-label={label} value={text} onChange={e=>{setText(e.target.value);try{const v=JSON.parse(e.target.value);change(v);report('');}catch(error){report(error instanceof SyntaxError?'此区域的 JSON 尚未完整，请修正后完成修改。':error instanceof Error?error.message:String(error));}}}/></label>;
 }
 function TextListRegion({value,change,report}:{value:unknown[];change:(v:unknown[])=>void;report:(message:string)=>void}){
  if(value.some(v=>typeof v!=='string'))return <JsonRegion label="完整列表结构" value={value} change={change} report={report}/>;
  return <label>每行一项<textarea autoFocus aria-label="每行一项" value={value.join('\n')} onChange={e=>change(e.target.value.split('\n').filter(v=>v.trim()))}/></label>;
 }
-function TraitRegion({value,change,report}:{value:any[];change:(v:any[])=>void;report:(message:string)=>void}){
- const [index,setIndex]=useState(0),current=value[index];
+function TraitRegion({value,change,report,initialIndex=0,spellcasting=false}:{value:any[];change:(v:any[])=>void;report:(message:string)=>void;initialIndex?:number;spellcasting?:boolean}){
+ const [index,setIndex]=useState(initialIndex),current=value[index];
  if(current&&typeof current!=='object')return <JsonRegion label="完整特质或动作结构" value={value} change={change} report={report}/>;
  const update=(next:Raw)=>change(value.map((v,i)=>i===index?{...v,...next}:v));
- return <><nav aria-label="子条目选择">{value.map((v,i)=><button type="button" key={i} aria-pressed={i===index} onClick={()=>setIndex(i)}>{v.name||`第 ${i+1} 项`}</button>)}<button type="button" onClick={()=>{setIndex(value.length);change([...value,{name:'新条目',entries:['填写完整内容。']}]);}}>＋ 添加</button></nav>{current&&<><label>子条目名称<input autoFocus aria-label="子条目名称" value={current.name||''} onChange={e=>update({name:e.target.value})}/></label><label>子条目正文<textarea aria-label="子条目正文" value={prose(current.entries||(current.entry?[current.entry]:[]))} onChange={e=>{const next={...current,entries:parseProse(e.target.value)};delete next.entry;change(value.map((v,i)=>i===index?next:v));}}/></label><button type="button" onClick={()=>{change(value.filter((_,i)=>i!==index));setIndex(Math.max(0,index-1));}}>删除此子条目</button></>}</>;
+ const proseKey=spellcasting?'headerEntries':'entries';
+ return <><nav aria-label="子条目选择">{value.map((v,i)=><button type="button" key={i} aria-pressed={i===index} onClick={()=>setIndex(i)}>{v.name||`第 ${i+1} 项`}</button>)}<button type="button" onClick={()=>{setIndex(value.length);change([...value,{name:'新条目',[proseKey]:['填写完整内容。']}]);}}>＋ 添加</button></nav>{current&&<><label>子条目名称<input autoFocus aria-label="子条目名称" value={current.name||''} onChange={e=>update({name:e.target.value})}/></label><label>子条目正文<textarea aria-label="子条目正文" value={prose(current[proseKey]||(current.entry?[current.entry]:[]))} onChange={e=>{const next={...current,[proseKey]:parseProse(e.target.value)};delete next.entry;change(value.map((v,i)=>i===index?next:v));}}/></label>{spellcasting&&<JsonRegion label="法术频率与列表" value={Object.fromEntries(Object.entries(current).filter(([key])=>key!=='name'&&key!==proseKey))} change={v=>{if(v&&typeof v==='object'&&!Array.isArray(v))change(value.map((row,i)=>i===index?{name:current.name,[proseKey]:current[proseKey],...v}:row));else throw Error('法术频率与列表必须是对象。');}} report={report}/>}<button type="button" onClick={()=>{change(value.filter((_,i)=>i!==index));setIndex(Math.max(0,index-1));}}>删除此子条目</button></>}</>;
 }
