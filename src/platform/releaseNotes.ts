@@ -389,12 +389,16 @@ const RELEASE_236_SECTIONS:ReleaseSection[]=[
   ]
  }
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?SUITE_RELEASE_SECTIONS:[
+const STANDALONE_267_SECTIONS:ReleaseSection[]=[
  {title:'资源次数与来源',items:['按当前角色实际启用的职业计算资源公式，并读取所属职业的具名次数表；升级会更新上限，保留已消耗次数。','关闭来源、刷新和重新导入不会补满次数。长休限定不会被当成短休恢复。','按目标限制、随机冷却及归属不明的多项次数仍需人工核对，不会合成一个共享计数器。']},
  {title:'自动化进度',items:['进度页更新逐条验证结果。至少有一项计算或选择可用，不代表整条规则已经自动执行。','玩家休息执行入口仍未开放；恢复资源请按来源核对并手动记录。']}
 ];
-export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='suite'?[{title:'2026-10-10-266',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)},{title:'2026-10-09-264',sections:standalone264Sections()}]),
+
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?SUITE_RELEASE_SECTIONS:[
+ {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
+ {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
+];export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='suite'?[{title:'2026-10-10-266',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
