@@ -1,7 +1,7 @@
 name: DND Center cloud migration
 on:
   push:
-    branches: [codex/unified-ui-20261008, codex/gallery-performance-256-20261008, codex/dnd-center-migration-20261007, codex/dnd-center-temporary-library-20261007, codex/dnd-center-latest-ui-20261008, codex/cloud-save-status-20261008]
+    branches: [codex/qq-login-release-20261009, codex/unified-ui-20261008, codex/gallery-performance-256-20261008, codex/dnd-center-migration-20261007, codex/dnd-center-temporary-library-20261007, codex/dnd-center-latest-ui-20261008, codex/cloud-save-status-20261008]
   pull_request:
     # Shared modules the cloud flows exercise (staging, persistence, public viewing,
     # packaging) must also re-run these checks, not only the cloud-specific paths.
@@ -23,6 +23,8 @@ jobs:
       - run: npm run build:cloud
       - run: python3 deploy/cloud/test_publish.py
       - run: python3 deploy/cloud/test_upgrade.py
+      - run: python3 deploy/qq/test_backend.py
+      - run: python3 deploy/qq/publish_home.py --self-test
       - run: python3 deploy/cloud/test_frontend.py
       - run: python3 deploy/cloud/test_suite_links.py
       - run: npx playwright install --with-deps chromium

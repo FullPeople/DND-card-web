@@ -1,0 +1,9 @@
+.qq-account{display:flex;align-items:center;gap:6px;flex-shrink:0;font-size:12px}
+a.qq-login-button{display:inline-flex;align-items:center;padding:0;border:0;background:none;clip-path:none;line-height:0;flex-shrink:0;min-height:32px;text-decoration:none}
+.qq-login-button picture{display:block;line-height:0}
+.qq-account .qq-login-button img{display:block;width:170px;height:32px;max-width:none;object-fit:contain;image-rendering:auto;filter:none;border:0;padding:0}
+.qq-profile{display:flex;align-items:center;gap:5px;max-width:140px;overflow:hidden}
+.qq-profile>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qq-account .qq-profile>img{width:24px;height:24px;object-fit:cover;image-rendering:auto;border-radius:50%}
+.qq-account-error{max-width:160px;white-space:normal;color:#d24a3b}
+@media(max-width:640px){.qq-account .qq-login-button img{width:120px;height:24px}.qq-profile{max-width:96px}}

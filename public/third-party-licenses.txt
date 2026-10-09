@@ -135,3 +135,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+QQ login button images: Copyright Tencent. Official unmodified assets from
+https://wiki.connect.qq.com/wp-content/uploads/2016/12/Connect_logo_4.png
+https://wiki.connect.qq.com/wp-content/uploads/2016/12/Connect_logo_3.png
