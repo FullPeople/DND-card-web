@@ -302,7 +302,7 @@ class PublicationTests(unittest.TestCase):
                 'backendVersion': '1.0.253', 'qqLogin': 'pending'}).encode()})
             metadata, _ = c.inspect_archive(archive)
             c.extract_frontends(archive, root / 'candidate')
-            with self.assertRaisesRegex(c.Denied, 'application-policy-binding-mismatch'):
+            with self.assertRaisesRegex(server.c.Denied, 'application-policy-binding-mismatch'):
                 server.check_application(root / 'candidate', metadata)
 
     def test_authenticated_upload_calls_fixed_publisher_and_preserves_other_sites_assets_and_database(self):
@@ -426,7 +426,7 @@ class RunnerAndInstallerTests(unittest.TestCase):
                         packed.assert_called_once_with(root, root / '.deployment', 'a' * 40,
                                                        'standalone-1.0.262', '1.0.261', policy)
                     else:
-                        with self.assertRaisesRegex(c.Denied, 'backend-policy-changed'): build.main()
+                        with self.assertRaisesRegex(build.c.Denied, 'backend-policy-changed'): build.main()
                         packed.assert_not_called()
 
     def test_ssh_timeout_reconciles_read_only_without_second_publish(self):
