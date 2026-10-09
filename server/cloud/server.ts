@@ -4,6 +4,7 @@ import {mkdirSync,statfsSync} from 'node:fs';
 import {isIP} from 'node:net';
 import {dirname} from 'node:path';
 import {CloudError,CloudStore} from './store';
+import {createQQAuth,type QQConfig} from './qq';
 import {parseFile} from '../../src/core/validation';
 export {CloudStore} from './store';
 
@@ -14,7 +15,7 @@ export function canonicalIP(value:string){
   const family=isIP(value);if(!family)throw new CloudError(400,'client_ip','无法识别上传 IP，请稍后重试。');
   return family===6?new URL('http://['+value+']/').hostname.slice(1,-1):value;
 }
-export interface CloudServerOptions {temporaryUpload?:boolean;trustedLoopbackProxy?:boolean;freeBytes?:()=>number}
+export interface CloudServerOptions {temporaryUpload?:boolean;trustedLoopbackProxy?:boolean;freeBytes?:()=>number;qq?:QQConfig}
 async function body(request:IncomingMessage):Promise<Record<string,unknown>> {
   if(!/^application\/json(?:;|$)/i.test(request.headers['content-type']||''))throw new CloudError(415,'json_required','请求必须使用 JSON。');
   let size=0;const parts:Buffer[]=[];
@@ -24,7 +25,8 @@ async function body(request:IncomingMessage):Promise<Record<string,unknown>> {
 }
 const equal=(a:string,b:string)=>{const left=Buffer.from(a),right=Buffer.from(b);return left.length===right.length&&timingSafeEqual(left,right);};
 export function createCloudServer(store:CloudStore,origin='https://dnd.center',options:CloudServerOptions={}){
-  const currentPolicy=options.temporaryUpload?{freeSlots:10,quotaScope:'ip',paymentAvailable:false,qqLogin:'pending',publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy;
+  const qq=createQQAuth(store,origin,options.qq),qqLogin=qq.ready?'ready':'pending';
+  const currentPolicy={...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',paymentAvailable:false,publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
   const limits=new Map<string,{at:number;count:number}>();
   const send=(response:ServerResponse,status:number,value:unknown)=>{response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'});response.end(JSON.stringify(value));};
   const server=createServer(async(request,response)=>{
@@ -35,6 +37,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       let counter=limits.get(key);if(!counter||now-counter.at>60_000){counter={at:now,count:0};limits.set(key,counter);}if(++counter.count>3000)throw new CloudError(429,'rate_limit','请求过于频繁，请稍后再试。');
       if(limits.size>10000)for(const [ip,row] of limits)if(now-row.at>60_000)limits.delete(ip);
       const url=new URL(request.url||'/',origin),method=request.method||'GET';
+      if(await qq.handle(request,response,url))return;
       const token=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('dnd_cloud='))?.slice('dnd_cloud='.length);
       const session=store.session(token);
       const temporaryToken=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('dnd_temporary='))?.slice('dnd_temporary='.length);
@@ -47,23 +50,22 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         }
         return socketIP;
       };
-      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.253',...currentPolicy});
+      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.261',...currentPolicy});
       if(method==='GET'&&url.pathname==='/api/session'){
         if(options.temporaryUpload&&!session){
           if(!temporaryOwner){const issued=store.issueTemporarySession();temporaryOwner=issued.owner;response.setHeader('Set-Cookie','dnd_temporary='+issued.token+'; Path=/api/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=31536000');}
-          return send(response,200,{authenticated:false,qqLogin:'pending',temporaryUpload:true,uploadOwner:{id:temporaryOwner.id},csrf:temporaryOwner.csrf,slots:store.temporarySlots(clientIP())});
+          return send(response,200,{authenticated:false,qqLogin,temporaryUpload:true,uploadOwner:{id:temporaryOwner.id},csrf:temporaryOwner.csrf,slots:store.temporarySlots(clientIP())});
         }
-        return send(response,200,{authenticated:!!session,qqLogin:'pending',...(session?{account:{id:session.account.id,qq:session.account.qq},csrf:session.csrf,slots:store.slots(session.account)}:{})});
+        return send(response,200,{authenticated:!!session,qqLogin,...(session?{account:{id:session.account.id,qq:session.account.qq,...store.qqProfile(session.account.id)},csrf:session.csrf,slots:store.slots(session.account)}:{})});
       }
       if(method==='GET'&&url.pathname==='/api/policy')return send(response,200,currentPolicy);
-      if(url.pathname==='/api/auth/qq/login')throw new CloudError(503,'qq_pending','QQ 登录申请中。临时上传无需登录；QQ 接入前，所有卡片公开且不能作为安全备份。');
       const cardMatch=/^\/api\/cards\/([^/]+)(?:\/(editors)(?:\/([^/]+))?)?$/.exec(url.pathname);
       if(cardMatch&&!UUID.test(cardMatch[1])&&!/^[A-Z]{6}$/.test(cardMatch[1]))throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
       if(method==='GET'&&cardMatch&&!cardMatch[2])return send(response,200,store.read(cardMatch[1],session?.account,temporaryOwner));
       if(method==='GET'&&url.pathname==='/api/cards'&&options.temporaryUpload){
         const offset=Number(url.searchParams.get('offset')||0),limit=Number(url.searchParams.get('limit')||50);
         if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(limit)||limit<1||limit>100)throw new CloudError(400,'pagination','分页参数无效。');
-        return send(response,200,{...store.publicDirectory(offset,limit,session?.account,temporaryOwner),mine:session?store.list(session.account):temporaryOwner?store.listTemporary(temporaryOwner):[],slots:session?store.slots(session.account):store.temporarySlots(clientIP())});
+        return send(response,200,{...store.publicDirectory(offset,limit,session?.account,temporaryOwner),mine:[...(session?store.list(session.account):[]),...(temporaryOwner?store.listTemporary(temporaryOwner):[])],slots:session?store.slots(session.account):store.temporarySlots(clientIP())});
       }
       if(!['/api/cards','/api/logout','/api/slots'].includes(url.pathname)&&!cardMatch)throw new CloudError(404,'not_found','接口不存在。');
       if(!session&&!temporaryOwner)throw new CloudError(401,'login_required','请刷新卡库后确认上传。QQ 登录仍在申请中。');
@@ -71,7 +73,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         if(request.headers.origin!==origin)throw new CloudError(403,'origin','请在本站发起操作。');
         if(typeof request.headers['x-csrf-token']!=='string'||!equal(request.headers['x-csrf-token'],(session||temporaryOwner)!.csrf))throw new CloudError(403,'csrf','浏览器状态已改变，请刷新卡库后重试。本机草稿保留。');
       }
-      if(!session&&temporaryOwner){
+      if(temporaryOwner&&(!session||cardMatch&&store.isTemporaryCard(cardMatch[1]))){
         if(method==='GET'&&url.pathname==='/api/slots')return send(response,200,store.temporarySlots(clientIP()));
         if(cardMatch?.[2])throw new CloudError(503,'qq_pending','QQ 登录接入前，暂不开放编辑授权。');
         if(method==='POST'&&url.pathname==='/api/cards'||method==='PUT'&&cardMatch){
@@ -87,7 +89,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       if(url.pathname==='/api/cards'&&method==='GET')return send(response,200,{cards:store.list(session.account),slots:store.slots(session.account)});
       if(url.pathname==='/api/slots'&&method==='GET')return send(response,200,store.slots(session.account));
       if(url.pathname==='/api/logout'&&method==='POST'){store.logout(token!);response.setHeader('Set-Cookie','dnd_cloud=; Path=/api/; Secure; HttpOnly; SameSite=Strict; Max-Age=0');return send(response,200,{ok:true});}
-      if(url.pathname==='/api/cards'&&method==='POST'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认上传完整角色卡。');return send(response,201,store.create(session.account,data.character));}
+      if(url.pathname==='/api/cards'&&method==='POST'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认上传完整角色卡。');if(options.freeBytes&&options.freeBytes()<128*1024*1024)throw new CloudError(507,'storage_full','服务器存储空间不足，请保留本机完整 JSON 备份。');return send(response,201,store.create(session.account,data.character));}
       if(cardMatch){const [,id,editors,qq]=cardMatch;
         if(!editors&&method==='PUT'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认保存完整角色卡。');return send(response,200,store.update(id,session.account,data.revision,data.character));}
         if(!editors&&method==='DELETE'){const data=await body(request);store.delete(id,session.account,data.revision);return send(response,200,{ok:true});}
@@ -100,13 +102,15 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
   server.requestTimeout=30_000;server.headersTimeout=15_000;return server;
 }
 
-// This service deliberately has no OAuth callback or public mock-login route.
+// OAuth uses only Tencent's verified response. No public mock-login route exists.
 if(process.env.DND_CLOUD_RUN==='1'){
-  if(process.env.MOCK||process.env.QQ_MOCK||process.env.AUTH_MODE&&process.env.AUTH_MODE!=='pending')throw Error('Only pending QQ authentication is supported in this release');
+  if(process.env.MOCK||process.env.QQ_MOCK)throw Error('Mock authentication is forbidden');
   const [major,minor]=process.versions.node.split('.').map(Number);if(major<24||major===24&&minor<9)throw Error('Node >=24.9 required');
   const path=process.env.DND_CLOUD_DB;if(!path||!path.startsWith('/'))throw Error('DND_CLOUD_DB must be an absolute persistent path');mkdirSync(dirname(path),{recursive:true});
   const mode=process.env.DND_CLOUD_MODE||'pending';if(!['pending','temporary-ip'].includes(mode))throw Error('Unsupported cloud mode');
-  const store=new CloudStore(path),server=createCloudServer(store,process.env.DND_CLOUD_ORIGIN||'https://dnd.center',{temporaryUpload:mode==='temporary-ip',trustedLoopbackProxy:true,freeBytes:()=>{const disk=statfsSync(dirname(path));return disk.bavail*disk.bsize;}});
-  server.listen(Number(process.env.DND_CLOUD_PORT||5014),'127.0.0.1',()=>console.log('DND card cloud ready; QQ authentication pending'));
+  const origin=process.env.DND_CLOUD_ORIGIN||'https://dnd.center';
+  if(!!process.env.QQ_APPID!==!!process.env.QQ_APPKEY)throw Error('Incomplete QQ configuration');
+  const store=new CloudStore(path),server=createCloudServer(store,origin,{temporaryUpload:mode==='temporary-ip',trustedLoopbackProxy:true,qq:process.env.QQ_APPID?{appId:process.env.QQ_APPID,appKey:process.env.QQ_APPKEY!,callback:process.env.QQ_CALLBACK||origin+'/api/auth/qq/callback'}:undefined,freeBytes:()=>{const disk=statfsSync(dirname(path));return disk.bavail*disk.bsize;}});
+  server.listen(Number(process.env.DND_CLOUD_PORT||5014),'127.0.0.1',()=>console.log('DND card cloud ready'));
   const stop=()=>server.close(()=>{store.close();process.exit(0);});process.on('SIGTERM',stop);process.on('SIGINT',stop);
 }

@@ -1,0 +1,7 @@
+#home-qq-account{position:fixed;right:calc(5% + 46px);top:38px;z-index:150;display:flex;align-items:center;gap:8px;pointer-events:auto;font-size:13px}
+#home-qq-account a{display:block;line-height:0}
+#home-qq-account picture,#home-qq-account picture img{display:block;width:170px;height:32px;max-width:none;filter:none}
+#home-qq-account .qq-avatar{width:28px;height:28px;object-fit:cover;border-radius:50%}
+#home-qq-account .qq-name{max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#home-qq-account button{font:inherit;background:#f5f2e9;border:1px solid #91947d70;padding:6px 9px;border-radius:4px}
+@media(max-width:640px){#home-qq-account{top:25px;right:calc(5% + 44px)}#home-qq-account picture,#home-qq-account picture img{width:120px;height:24px}}

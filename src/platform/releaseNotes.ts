@@ -331,7 +331,10 @@ export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...RELEASE_SECTIONS.filter
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
-export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:RELEASE_SECTIONS;
+export const releaseSectionsFor=(mode:'standalone'|'suite')=>mode==='suite'?SUITE_RELEASE_SECTIONS:[
+ {title:'QQ 登录',items:['首页、角色卡和仓库增加 QQ 登录入口，登录后显示昵称并可退出。','应用审核通过前，请使用已添加的调试 QQ 号测试登录。','登录保留本机角色和原浏览器的临时上传管理权限。已公开的卡片仍可公开查看，请保留 JSON 备份。','按 QQ 号码分配编辑权限仍待接入。'],supersedes:['QQ 登录与正式账号编辑授权尚未接入。']},
+ ...RELEASE_SECTIONS
+];
 const RELEASE_236_SECTIONS:ReleaseSection[]=[
  {
   "title": "启动与卡面操作",

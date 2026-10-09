@@ -4,7 +4,7 @@ export interface CloudCard {id:string;revision:number;character:Character;update
 export interface CardSummary {id:string;revision:number;name:string;edition:string;updatedAt:string;role?:'owner'|'editor'}
 export interface Slots {free:number;permanent:number;total:number;used:number;priceYuan:number;paymentAvailable:boolean}
 export interface IPSlots {scope:'ip';total:number;used:number}
-export interface CloudSession {authenticated:boolean;qqLogin:'pending';temporaryUpload?:boolean;uploadOwner?:{id:string};account?:{id:string;qq:string|null};csrf?:string;slots?:Slots|IPSlots}
+export interface CloudSession {authenticated:boolean;qqLogin:'pending'|'ready';temporaryUpload?:boolean;uploadOwner?:{id:string};account?:{id:string;qq:string|null;nickname?:string;avatar?:string};csrf?:string;slots?:Slots|IPSlots}
 export interface Directory {cards:CardSummary[];mine?:CardSummary[];slots:Slots|IPSlots;total?:number;offset?:number;hasMore?:boolean}
 export class CloudRequestError extends Error {constructor(public status:number,public code:string,message:string){super(message);}}
 async function request<T>(path:string,method='GET',value?:unknown,csrf?:string):Promise<T>{

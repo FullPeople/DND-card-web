@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e9">
+  <link rel="icon" href="/scene/logo.png">
+  <title>DND.CENTER</title>
+  <script type="module" crossorigin src="/assets/index-B4Nn6rMo.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-B0Ja1iLP.css">
+  <link rel="stylesheet" href="/assets/qq-login-20261009.css">
+  <script type="module" src="/assets/qq-login-20261009.js"></script>
+</head>
+<body class="intro-active" data-style="orbits" data-intro="loading">
+  <div class="intro-backdrop" aria-hidden="true"></div>
+  <div id="world" aria-hidden="true"></div>
+  <header class="masthead">
+    <div class="header-right">
+      <button id="replay" class="icon-button" aria-label="重播开屏动画">↻</button>
+    </div>
+  </header>
+
+<div id="home-qq-account"><a href="/api/auth/qq/login?returnTo=%2F" aria-label="QQ 登录"><picture><source media="(max-width: 640px)" srcset="/card/qq-login-120x24.png"><img src="/card/qq-login-170x32.png" alt="QQ 登录" width="170" height="32"></picture></a></div>
+  <main id="space" aria-label="DND.CENTER">
+    <a id="make-card" class="entry entry-create" href="https://dnd.center/card/" target="_blank" rel="noopener noreferrer">
+      <span>制作角色卡</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>
+    </a>
+    <div class="center-stage">
+      <div id="hero" class="hero" role="img" aria-label="由原有四张切图拼合的角色、分子、骰子和桌面">
+        <img id="hero-base" class="hero-piece piece-base" src="/scene/startup-logo/4.PNG" alt="" draggable="false">
+        <img id="hero-person" class="hero-piece piece-person" src="/scene/startup-logo/1.PNG" alt="" draggable="false">
+        <img id="hero-molecule" class="hero-piece piece-molecule" src="/scene/startup-logo/2.PNG" alt="" draggable="false">
+        <img id="hero-die" class="hero-piece piece-die" src="/scene/startup-logo/3.PNG" alt="" draggable="false">
+        <button id="molecule-handle" class="molecule-handle" aria-label="查看作品" aria-expanded="false" aria-controls="works-panel"></button>
+        <button id="die-hit" class="die-hit" aria-label="掷骰"></button>
+        <button id="logo-return" class="logo-return" aria-label="返回中心图案"></button>
+      </div>
+    </div>
+
+    <aside id="steam-card" class="steam-card" hidden aria-label="fuvtt Steam 预约">
+      <button id="reset-die" class="promo-close" aria-label="收起预约卡">×</button>
+      <span class="promo-eyebrow">YOUR NEXT TABLETOP</span>
+      <h2>fuvtt</h2>
+      <p class="promo-title">更好的 VTT 平台</p>
+      <p class="promo-status">已在 Steam 开启预约！</p>
+      <a href="https://store.steampowered.com/app/3177780/" target="_blank" rel="noopener noreferrer">开启预约 <span>↗</span></a>
+    </aside>
+    <section id="works-panel" class="works-panel" aria-label="作品" hidden>
+      <button id="close-works" class="works-close" aria-label="返回中心图案">×</button>
+      <div class="works-grid">
+        <a class="work-card" href="https://5e.kiwee.top/" target="_blank" rel="noopener noreferrer">
+          <img src="/scene/kiwee.png" alt="" draggable="false">
+          <h2>Kiwee - 5eTool中文站 DND速查网站</h2>
+        </a>
+        <a class="work-card" href="https://www.bilibili.com/video/BV1iDiiBDEbh/" target="_blank" rel="noopener noreferrer">
+          <img src="/scene/sealchat.png" alt="" draggable="false">
+          <h2>星尘 - SealChat 新一代TRPG文字团平台</h2>
+        </a>
+        <a class="work-card" href="/downloads/DesktopDice-0.1.0-preview.10-windows-x64.exe" download>
+          <img src="/scene/desktop-dice.png" alt="" draggable="false">
+          <h2>FullPeople - 超越窗口的桌面3D骰子</h2>
+        </a>
+        <a class="work-card" href="https://github.com/FullPeople/MusicBoard/releases" target="_blank" rel="noopener noreferrer">
+          <img src="/scene/musicboard.png" alt="" draggable="false">
+          <h2>FullPeople - 便捷桌面音乐板和悬浮窗</h2>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <a id="library" class="entry entry-library" href="https://dnd.center/library/" target="_blank" rel="noopener noreferrer">
+    <span>角色卡大厅</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>
+  </a>
+  <div id="dice-stage" aria-live="off"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="roll-history" class="roll-history" aria-live="polite"></div>
+  <button id="skip-intro" class="skip-intro">跳过 ↗</button>
+</body>
+</html>
