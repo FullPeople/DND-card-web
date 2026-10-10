@@ -3,6 +3,11 @@ import {expect,type Page} from '@playwright/test';
 /** Authoring scenarios resume empty choices; import scenarios keep them ignored. */
 export async function restoreAuthoredChoices(page:Page,database?:string){
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ // Stop the imported page before changing this fixture: late catalog hydration
+ // can otherwise save its old presentation state over the authored setup.
+ const resume=page.url(),blank=new URL('/__authored-choice-fixture__',resume).href;
+ await page.route(blank,route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Authored choice setup</title>'}));
+ await page.goto(blank);await expect(page.locator('.paper')).toHaveCount(0);
  await page.evaluate(async database=>{
   const name=database||(await indexedDB.databases()).find(row=>['dnd-card-standalone','dnd-card-workspace'].includes(row.name||''))?.name;
   if(!name)throw Error('Expected an existing saved authoring workspace');
@@ -15,5 +20,5 @@ export async function restoreAuthoredChoices(page:Page,database?:string){
    store.put(workspace,'workspace');await new Promise<void>((resolve,reject)=>{transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error);});
   }finally{db.close();}
  },database);
- await page.reload();await expect(page.locator('.paper')).toBeVisible();
+ await page.unroute(blank);await page.goto(resume);await expect(page.locator('.paper')).toBeVisible();
 }
