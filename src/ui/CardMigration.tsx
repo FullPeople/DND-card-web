@@ -40,7 +40,7 @@ export function CardMigration({c,entries,loading,readOnly,save,busy,setBusy,impo
  return <section className="card-migration"><p>核对基础资料后，一次同步 {c.edition} 规则对应的来源气泡、法术与相关内容。最后统一预览，并筛选要保留的自定义内容。</p><p className="muted">{importing?'同步完成后直接导入这张卡，不生成同步副本。':'先保留同步前的旧卡副本，再更新当前卡；当前卡 ID 与棋子绑定保留。'}等级、已有装备、已消耗资源、手动调整和选择记录不会重置；资料不明确的内容默认保留。</p>
  <ol className="migration-steps" aria-label="同步步骤">{stages.map((label,i)=><li key={label} aria-current={Number(!!review)===i?'step':undefined}><span>{i+1}</span>{label}</li>)}</ol>
  {loading&&<p role="status">正在加载资料，完成后才可继续核对。</p>}
- <fieldset disabled={busy||uncertain}><h3>{review?'2. 整卡同步预览':'1. 基础资料'}</h3>
+ <fieldset disabled={readOnly||busy||uncertain}><h3>{review?'2. 整卡同步预览':'1. 基础资料'}</h3>
  {!review&&<><p>选择目标基础资料，其来源内容会一起处理，无需逐个同步。选「自定义」保留原项或手动查找。</p>{rootRows.map(row=><Mapping key={row.id} c={mappingContext} row={row} entries={entries} kinds={[row.entry.kind]} value={roots[row.id]??suggested[row.id]??''} change={v=>{setRoots(old=>({...old,[row.id]:v}));setError('');}}/>)}{!rootRows.length&&<p>没有需要核对的基础资料，继续预览其余内容。</p>}</>}
  {review&&batch&&<div className="migration-preview"><p>来源内容已统一处理。新增资源从 0 开始，已有装备和金钱不会重复领取。{importing?'核对以下变化，确认后导入这张卡。':'核对以下变化，再备份旧卡并同步当前卡。'}</p>
  <div className="migration-batch-counts" aria-label="同步变化汇总"><span>更新 {plan!.refreshed.length}</span><span>新增 {plan!.added.length}</span><span>移除 {plan!.removed.length}</span><span>待筛选 {batch.retained.length}</span></div>
