@@ -87,7 +87,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
       const data=await body();if(data.confirmRoomSync!==true||typeof data.room!=='string'||!/^[A-Za-z0-9_-]{1,100}$/.test(data.room))throw new CloudError(400,'room_request','需要确认房间改动自动写回云端原卡。');
       const existing=store.db.prepare('SELECT id FROM room_cards WHERE card_id=? AND room=?').get(card.id,data.room);
       const id=existing?String(existing.id):randomUUID(),capability=secret(),expires=Date.now()+7*86400000;
-      store.db.prepare('INSERT INTO room_cards VALUES(?,?,?,?,1,?) ON CONFLICT(card_id,room) DO UPDATE SET capability_hash=excluded.capability_hash,locked=1,expires=excluded.expires').run(id,card.id,data.room,hash(capability),expires);
+      store.db.prepare('INSERT INTO room_cards VALUES(?,?,?,?,1,?) ON CONFLICT(card_id,room) DO UPDATE SET capability_hash=excluded.capability_hash,expires=excluded.expires').run(id,card.id,data.room,hash(capability),expires);
       send(201,{...roomResult(grant(id),true,s.account),capability,expiresAt:expires});return true;
     }
     const match=/^\/api\/room-cards\/([a-f0-9-]{36})(?:\/(lock))?$/.exec(url.pathname);
@@ -105,11 +105,12 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
       if((auth.isOwner||auth.isEditor)&&request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'csrf','登录状态已改变，请重新连接。');
       const data=await body();
       // Read permissions again after receiving the body: locking revokes an in-flight write.
-      const fresh=grant(g.id),permission=authorized(fresh,request,s);if(!permission.isOwner&&!permission.isEditor&&fresh.locked)throw new CloudError(403,'room_locked','卡主未授予当前账号编辑权限，本机草稿保留。');
+      const fresh=grant(g.id),liveSession=request.headers.authorization?session(request):store.session(cookieToken),permission=authorized(fresh,request,liveSession);if(!permission.isOwner&&!permission.isEditor&&fresh.locked)throw new CloudError(403,'room_locked','卡主未授予当前账号编辑权限，本机草稿保留。');
+      if((permission.isOwner||permission.isEditor)&&request.headers['x-csrf-token']!==liveSession!.csrf)throw new CloudError(403,'csrf','登录状态已改变，请重新连接。');
       const native=(data.document as {dnd_card_web?:unknown}|undefined)?.dnd_card_web??data.character;
       const before=store.read(g.card_id,auth.account);if(!native||typeof native!=='object'||(native as {id?:string}).id!==before.character.id)throw new CloudError(422,'identity_changed','房间改动不能更换云端原卡的身份。');
       store.update(g.card_id,auth.account,data.revision,native);
-      send(200,roomResult(grant(g.id),auth.isOwner,auth.account,auth.isEditor));return true;
+      send(200,roomResult(grant(g.id),permission.isOwner,permission.account,permission.isEditor));return true;
     }
     if(method==='DELETE'&&!match[2]){
       if(!auth.isOwner||request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'owner_only','只有卡主可以移除房间授权。');
