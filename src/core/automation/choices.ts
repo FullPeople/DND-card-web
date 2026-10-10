@@ -4,6 +4,7 @@ import {resolveEntryReference} from '../entryReferences';
 import {selectionLevel} from '../featureOwnership';
 import {automationEnabled} from './state';
 import {candidateReason} from '../engine';
+import {removeSelection} from '../sheet';
 import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbilities';
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
@@ -261,8 +262,10 @@ export function syncChoiceContent(c:Character,catalog:Entry[]){
  }
  const removed=new Set(c.selections.filter(s=>s.grantKey?.startsWith('choice:')&&!desired.has(s.grantKey)).map(s=>s.id));
  for(const row of [...c.selections])if(removed.has(row.id)&&row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)){parkClassChoiceGrant(c,row);changed=true;}
- for(let pass=0;pass<12;pass++)for(const row of c.selections)if(row.parentId&&removed.has(row.parentId))removed.add(row.id);
- if(removed.size){c.selections=c.selections.filter(s=>!removed.has(s.id));changed=true;}
+ // A real removal must clean dependent spell settings and preserve spent-use
+ // receipts, just like the direct remove button. Parked class-choice trees
+ // have already left active selections and keep their archived references.
+ for(const id of removed)if(c.selections.some(row=>row.id===id)){removeSelection(c,id,false);changed=true;}
  return changed;
 }
 
