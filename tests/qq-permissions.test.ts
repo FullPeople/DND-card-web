@@ -24,6 +24,21 @@ async function setup(options:{accountPrivate?:boolean;temporaryUpload?:boolean}=
   return {store,server,base,owner,other,issued,second,origin,pluginOrigin,headers,request,connect};
 }
 describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
+  it('keeps locked room cards readonly for an ungranted DM, permits verified editors and immediately revokes them',async()=>{
+    const s=await setup(),card=s.store.create(s.owner,newCharacter()),owner=await s.connect(),editor=await s.connect(s.second);
+    const room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'permission-room',confirmRoomSync:true},owner.h)).json();
+    const member={Origin:s.pluginOrigin,'Content-Type':'application/json','X-Room-Capability':room.capability,'X-Role':'GM'},path='room-cards/'+room.id;
+    let info=await(await s.request(path,'GET',undefined,member)).json();expect(info.owner).toBe(false);expect(info.write).toBe(false);
+    expect((await s.request(path,'PUT',{revision:1,character:{...card.character,name:'forged DM write'}},member)).status).toBe(403);
+    const unchanged=await(await s.request(path+'?since=1','GET',undefined,member)).json();expect(unchanged.unchanged).toBe(true);expect(unchanged.document).toBeUndefined();expect(unchanged.character).toBeUndefined();
+    await s.request('cards/'+card.id+'/editors','POST',{accountId:s.other.id});
+    const named={...editor.h,'X-Room-Capability':room.capability};info=await(await s.request(path,'GET',undefined,named)).json();expect(info.editor).toBe(true);expect(info.write).toBe(true);expect(info.owner).toBe(false);
+    expect((await s.request(path+'/lock','PUT',{locked:false},named)).status).toBe(403);
+    expect((await s.request(path,'PUT',{revision:1,character:{...card.character,name:'verified editor change'}},named)).status).toBe(200);
+    await s.request('cards/'+card.id+'/editors/'+s.other.id,'DELETE');
+    expect((await s.request(path,'PUT',{revision:2,character:{...card.character,name:'revoked editor change'}},named)).status).toBe(403);
+    expect(s.store.read(card.id,s.owner).character.name).toBe('verified editor change');
+  });
   it('isolates signed-in directories and denies guessed private IDs in temporary mode',async()=>{
     const s=await setup(),a=s.store.create(s.owner,newCharacter()),b=s.store.create(s.other,newCharacter()),tmp=s.store.issueTemporarySession();s.store.createTemporary(tmp.owner,'127.0.0.1',newCharacter());
     const mine=await(await s.request('cards')).json();expect(mine.cards.map((row:any)=>row.id)).toEqual([a.id]);
@@ -69,7 +84,7 @@ describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
     const card=s.store.create(s.owner,newCharacter()),owner={...source,Authorization:'Bearer '+token,'X-CSRF-Token':s.issued.csrf};
     const load=()=>s.request('cards/'+card.id+'/rooms','POST',{room:'rotation',confirmRoomSync:true},owner);
     const first=await(await load()).json(),path='room-cards/'+first.id;await s.request(path+'/lock','PUT',{locked:false},owner);
-    const next=await(await load()).json();expect(next.id).toBe(first.id);expect(next.locked).toBe(true);
+    const next=await(await load()).json();expect(next.id).toBe(first.id);expect(next.locked).toBe(false);
     expect((await s.request(path,'GET',undefined,{...source,'X-Room-Capability':first.capability})).status).toBe(403);
     expect((await s.request(path,'GET',undefined,{...source,'X-Room-Capability':next.capability})).status).toBe(200);
   });
@@ -87,6 +102,13 @@ describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
       stream!.end(JSON.stringify({character:{...card.character,name:'不可写入'},revision:1}).slice(1));
       expect(await response).toBe(403);expect(s.store.read(card.id,s.owner).character.name).toBe(card.character.name);
     }
+  });
+  it('rejects slow owner writes and unlocks after the personal plugin session is logged out',async()=>{
+    for(const unlock of [false,true]){const s=await setup(),card=s.store.create(s.owner,newCharacter()),p=await s.connect(),room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'logout-inflight',confirmRoomSync:true},p.h)).json();
+    const started=new Promise(resolve=>s.server.once('request',resolve));let stream:ReturnType<typeof httpRequest>;
+    const response=new Promise<number>((resolve,reject)=>{stream=httpRequest(s.base+'/api/room-cards/'+room.id+(unlock?'/lock':''),{method:'PUT',headers:p.h},res=>{res.resume();res.on('end',()=>resolve(res.statusCode!));});stream.on('error',reject);stream.write('{');});
+    await started;expect((await s.request('plugin/logout','POST',{},p.h)).status).toBe(200);stream!.end(JSON.stringify(unlock?{locked:false}:{character:{...card.character,name:'logged-out write'},revision:1}).slice(1));
+    expect(await response).toBe(403);expect(s.store.read(card.id,s.owner).character.name).toBe(card.character.name);expect(s.store.db.prepare('SELECT locked FROM room_cards WHERE id=?').get(room.id)!.locked).toBe(1);}
   });
   it('private mode closes guest directory and new anonymous uploads while retaining original-browser migration access',async()=>{
     const s=await setup({temporaryUpload:false,accountPrivate:true}),temp=s.store.issueTemporarySession(),card=s.store.createTemporary(temp.owner,'127.0.0.1',newCharacter()),guest={'Content-Type':'application/json',Origin:s.origin,Cookie:'dnd_temporary='+temp.token,'X-CSRF-Token':temp.owner.csrf};

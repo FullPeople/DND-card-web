@@ -2,6 +2,7 @@ export const RELEASE_DATE='2026-10-10';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
 
 const SHARED_SECTIONS:ReleaseSection[]=[
+ {title:'QQ 卡库与云端卡',items:['QQ 登录入口集中在账号弹窗，卡库移除重复账号、公告及调色盘。','卡库上一张与两侧进出场保持连续动画。','枭熊云端卡导入原角色簿，用云图标标识；房间改动自动同步原卡。','卡主可以允许房间编辑或授权指定 QQ 账号；未获授权的 DM 同样只读。','无编辑权限时显示紧凑黄色提示。']},
  {title:'浏览器兼容与加载',items:['修复了部分旧版浏览器读取 Wiki 和连接服务器时加载失败的问题。','资料缓存写满时，已下载成功的资料仍可查看。','程序加载失败时，现在显示原因和重新加载按钮。']},
  {title:'本次修复：职业与法术',items:[
   '现在每个主职业都可以单独查找和添加子职了。',

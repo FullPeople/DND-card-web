@@ -1,0 +1,1 @@
+export function CloudIcon(){return <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" aria-label="云端同步卡" role="img"><path d="M7 18h11a4 4 0 000-8 6 6 0 00-11.5-1A4.5 4.5 0 007 18Z"/></svg>;}

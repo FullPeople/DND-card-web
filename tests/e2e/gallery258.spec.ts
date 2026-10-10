@@ -9,6 +9,7 @@ test('wheel and continuous drag wrap; side taps select; fullscreen keeps A4 prop
   page.on('request',r=>{if(/\/api\/cards\/[A-Z]{6}$/.test(r.url())&&r.method()==='GET')reads.push(r.url());});page.on('pageerror',error=>errors.push(error.message));await page.goto('/library/?q=循环交互验收');const active=page.locator('.cloud-gallery-item.is-active'),stage=page.locator('.cloud-gallery-stage'),full=page.getByRole('dialog',{name:'全屏角色卡'});await expect(active.locator('.paper')).toBeVisible();await expect.poll(()=>reads.length).toBe(3);const first=(await active.getAttribute('data-card-id'))!;
   await stage.hover();for(let i=0;i<9;i++){const previous=await active.getAttribute('data-card-id');await page.mouse.wheel(0,70);await expect(active).not.toHaveAttribute('data-card-id',previous!);}await expect(active).toHaveAttribute('data-card-id',first);await expect(full).toHaveCount(0);
   const side=page.locator('.cloud-gallery-item[data-offset="1"] .cloud-gallery-open');
+  await expect.poll(()=>stage.evaluate(el=>[...el.querySelectorAll('.cloud-gallery-item')].reduce((count,item)=>count+item.getAnimations().length,0))).toBe(0);
   // The gallery also animates with requestAnimationFrame; getAnimations() alone
   // does not establish that the side card has reached its visible position.
   const sidePoint=()=>side.evaluate(el=>{const r=el.getBoundingClientRect(),y=(r.top+r.bottom)/2;for(let x=Math.min(r.right-8,innerWidth-8);x>r.left;x-=6)if(document.elementFromPoint(x,y)===el)return {x,y};});
