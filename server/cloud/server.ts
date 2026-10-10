@@ -62,7 +62,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         }
         return socketIP;
       };
-      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.274',...currentPolicy});
+      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.279',...currentPolicy});
       if(method==='GET'&&url.pathname==='/api/session'){
         if(options.temporaryUpload&&!session){
           if(!temporaryOwner){const issued=store.issueTemporarySession();temporaryOwner=issued.owner;response.setHeader('Set-Cookie','dnd_temporary='+issued.token+'; Path=/api/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=31536000');}

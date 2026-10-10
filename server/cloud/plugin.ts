@@ -39,11 +39,15 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     const isOwner=owner(g,s);
     if(!isOwner&&(typeof capability!=='string'||capability.length>128||hash(capability)!==g.capability_hash))throw new CloudError(403,'room_forbidden','没有这张房间卡的访问权限。');
     const row=store.db.prepare('SELECT id,qq,extra_slots FROM accounts WHERE id=(SELECT owner_id FROM cards WHERE id=?)').get(g.card_id)!;
-    return {isOwner,account:{id:String(row.id),qq:row.qq===null?null:String(row.qq),extra_slots:Number(row.extra_slots)}};
+    const isEditor=!!s&&store.db.prepare('SELECT 1 FROM account_editors WHERE card_id=? AND account_id=?').get(g.card_id,s.account.id)!==undefined;
+    return {isOwner,isEditor,account:{id:String(row.id),qq:row.qq===null?null:String(row.qq),extra_slots:Number(row.extra_slots)}};
   }
-  function roomResult(g:Grant,isOwner:boolean,account:Session['account']){
-    const card=store.read(g.card_id,account),document=normalizeLegacyUpload(card.character);
-    return {id:g.id,cardId:g.card_id,room:g.room,revision:card.revision,locked:!!g.locked,owner:isOwner,write:isOwner||!g.locked,character:card.character,document:{...document,_suiteRevision:card.revision}};
+  function roomResult(g:Grant,isOwner:boolean,account:Session['account'],isEditor=false,since?:string|null){
+    const card=store.read(g.card_id,account);
+    const info={id:g.id,cardId:g.card_id,room:g.room,name:card.character.name,revision:card.revision,locked:!!g.locked,owner:isOwner,editor:isEditor,ownerAccountId:account.id,ownerNickname:store.qqProfile(account.id)?.nickname||'卡主',editors:isOwner?card.editors:undefined,write:isOwner||isEditor||!g.locked};
+    if(since===String(card.revision))return {...info,unchanged:true};
+    const document=normalizeLegacyUpload(card.character);
+    return {...info,character:card.character,document:{...document,_suiteRevision:card.revision}};
   }
   return {session,cors,async handle(request:IncomingMessage,response:ServerResponse,url:URL,s:Session|undefined,cookieToken:string|undefined,body:()=>Promise<Record<string,unknown>>,send:(status:number,value:unknown)=>void){
     const method=request.method;
@@ -89,7 +93,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     const match=/^\/api\/room-cards\/([a-f0-9-]{36})(?:\/(lock))?$/.exec(url.pathname);
     if(!match)return false;
     const g=grant(match[1]),auth=authorized(g,request,s);
-    if(method==='GET'&&!match[2]){send(200,roomResult(g,auth.isOwner,auth.account));return true;}
+    if(method==='GET'&&!match[2]){send(200,roomResult(g,auth.isOwner,auth.account,auth.isEditor,url.searchParams.get('since')));return true;}
     if(!allowed.has(request.headers.origin||''))throw new CloudError(403,'origin','请从已配置的枭熊插件操作。');
     if(match[2]&&method==='PUT'){
       if(!auth.isOwner||request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'owner_only','只有卡主可以解锁或重新锁定房间卡。');
@@ -98,14 +102,14 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
       send(200,roomResult(grant(g.id),true,auth.account));return true;
     }
     if(method==='PUT'&&!match[2]){
-      if(auth.isOwner&&request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'csrf','登录状态已改变，请重新连接。');
+      if((auth.isOwner||auth.isEditor)&&request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'csrf','登录状态已改变，请重新连接。');
       const data=await body();
       // Read permissions again after receiving the body: locking revokes an in-flight write.
-      const fresh=grant(g.id);authorized(fresh,request,s);if(!auth.isOwner&&fresh.locked)throw new CloudError(403,'room_locked','卡主已锁定这张卡，本机草稿保留。');
+      const fresh=grant(g.id),permission=authorized(fresh,request,s);if(!permission.isOwner&&!permission.isEditor&&fresh.locked)throw new CloudError(403,'room_locked','卡主未授予当前账号编辑权限，本机草稿保留。');
       const native=(data.document as {dnd_card_web?:unknown}|undefined)?.dnd_card_web??data.character;
       const before=store.read(g.card_id,auth.account);if(!native||typeof native!=='object'||(native as {id?:string}).id!==before.character.id)throw new CloudError(422,'identity_changed','房间改动不能更换云端原卡的身份。');
       store.update(g.card_id,auth.account,data.revision,native);
-      send(200,roomResult(grant(g.id),auth.isOwner,auth.account));return true;
+      send(200,roomResult(grant(g.id),auth.isOwner,auth.account,auth.isEditor));return true;
     }
     if(method==='DELETE'&&!match[2]){
       if(!auth.isOwner||request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'owner_only','只有卡主可以移除房间授权。');

@@ -24,6 +24,21 @@ async function setup(options:{accountPrivate?:boolean;temporaryUpload?:boolean}=
   return {store,server,base,owner,other,issued,second,origin,pluginOrigin,headers,request,connect};
 }
 describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
+  it('keeps locked room cards readonly for an ungranted DM, permits verified editors and immediately revokes them',async()=>{
+    const s=await setup(),card=s.store.create(s.owner,newCharacter()),owner=await s.connect(),editor=await s.connect(s.second);
+    const room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'permission-room',confirmRoomSync:true},owner.h)).json();
+    const member={Origin:s.pluginOrigin,'Content-Type':'application/json','X-Room-Capability':room.capability,'X-Role':'GM'},path='room-cards/'+room.id;
+    let info=await(await s.request(path,'GET',undefined,member)).json();expect(info.owner).toBe(false);expect(info.write).toBe(false);
+    expect((await s.request(path,'PUT',{revision:1,character:{...card.character,name:'forged DM write'}},member)).status).toBe(403);
+    const unchanged=await(await s.request(path+'?since=1','GET',undefined,member)).json();expect(unchanged.unchanged).toBe(true);expect(unchanged.document).toBeUndefined();expect(unchanged.character).toBeUndefined();
+    await s.request('cards/'+card.id+'/editors','POST',{accountId:s.other.id});
+    const named={...editor.h,'X-Room-Capability':room.capability};info=await(await s.request(path,'GET',undefined,named)).json();expect(info.editor).toBe(true);expect(info.write).toBe(true);expect(info.owner).toBe(false);
+    expect((await s.request(path+'/lock','PUT',{locked:false},named)).status).toBe(403);
+    expect((await s.request(path,'PUT',{revision:1,character:{...card.character,name:'verified editor change'}},named)).status).toBe(200);
+    await s.request('cards/'+card.id+'/editors/'+s.other.id,'DELETE');
+    expect((await s.request(path,'PUT',{revision:2,character:{...card.character,name:'revoked editor change'}},named)).status).toBe(403);
+    expect(s.store.read(card.id,s.owner).character.name).toBe('verified editor change');
+  });
   it('isolates signed-in directories and denies guessed private IDs in temporary mode',async()=>{
     const s=await setup(),a=s.store.create(s.owner,newCharacter()),b=s.store.create(s.other,newCharacter()),tmp=s.store.issueTemporarySession();s.store.createTemporary(tmp.owner,'127.0.0.1',newCharacter());
     const mine=await(await s.request('cards')).json();expect(mine.cards.map((row:any)=>row.id)).toEqual([a.id]);
