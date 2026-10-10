@@ -48,12 +48,14 @@ test('class grants appear in the feat region; optional learning drag saves witho
 
 test('a background origin feat unlocks the level-four source feat and persists through reload',async({page})=>{
  await ready(page,true);await page.getByRole('tab',{name:'特性',exact:true}).click();
- const grant=page.locator('[data-class-choice]').filter({hasText:'职业 4 级'});
- await grant.getByRole('button').first().click();
+ const grant=page.getByRole('region',{name:'职业特性',exact:true}).getByRole('button',{name:/^原创提升（职业 4 级）/});
+ await grant.click();
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({hasText:'原创前置后续'}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();
  const from=await row.boundingBox();await page.mouse.move(from!.x+20,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+30,from!.y+from!.height/2,{steps:3});
  const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();
  await expect(slot).toContainText('原创前置后续');await page.getByRole('button',{name:'收起选择',exact:true}).click();
- await expect(grant).toContainText('原创前置后续');await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(grant).toContainText('原创前置后续');
+ if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'功能页',exact:true}).click();
+ await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
+ await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
 });

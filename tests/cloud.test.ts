@@ -2,6 +2,7 @@ import {afterEach,describe,expect,it} from 'vitest';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {randomInt} from 'node:crypto';
 import {CloudStore} from '../server/cloud/store';
 import {createCloudServer} from '../server/cloud/server';
 import {newCharacter} from '../src/core/model';
@@ -10,6 +11,21 @@ const stores:CloudStore[]=[],paths:string[]=[];
 afterEach(()=>{stores.splice(0).forEach(store=>store.close());paths.splice(0).forEach(path=>rmSync(path,{recursive:true,force:true}));});
 const setup=()=>{const store=new CloudStore(':memory:');stores.push(store);const owner=store.provisionVerifiedAccount('provider:owner','1234567'),editor=store.provisionVerifiedAccount('provider:editor','2345678'),stranger=store.provisionVerifiedAccount('provider:stranger','3456789');return {store,owner,editor,stranger};};
 const completeCard=()=>{const card=newCharacter('2014');card.name='完整测试冒险者';card.biography={story:'五页故事，保留未知内容。'};card.notes='背景与手工记录';card.runtime.resources={custom:{current:2,max:9,name:'已消耗资源'}};card.externalSnapshot={unknown:{value:'未映射原文'}};card.automation={protocol:2,rulesVersion:'equipment.1',defaultsVersion:1,enabled:false};return card;};
+
+// A custom OS ephemeral range can include ports rejected by native fetch.
+// Bind loopback in the high dynamic range, retaining real HTTP assertions.
+async function listenForFetch(server:ReturnType<typeof createCloudServer>){
+ for(let attempt=0;attempt<20;attempt++){
+  try{
+   await new Promise<void>((resolve,reject)=>{
+    const ready=()=>{server.off('error',failed);resolve();};
+    const failed=(error:NodeJS.ErrnoException)=>{server.off('listening',ready);reject(error);};
+    server.once('error',failed);server.once('listening',ready);server.listen(randomInt(49152,65536),'127.0.0.1');
+   });return;
+  }catch(error){if(!['EADDRINUSE','EACCES'].includes((error as NodeJS.ErrnoException).code||''))throw error;}
+ }
+ throw Error('Unable to bind a fetch-compatible loopback test port');
+}
 
 describe('authoritative cloud storage',()=>{
  it('stores the whole original document without regranting or changing edition',()=>{const {store,owner}=setup(),input=completeCard();const saved=store.create(owner,input);expect(saved.id).not.toBe(input.id);expect(store.read(saved.id).character).toEqual(input);expect(store.read(saved.id).role).toBeUndefined();expect(store.read(saved.id)).not.toHaveProperty('editors');});
@@ -25,7 +41,7 @@ describe('authoritative cloud storage',()=>{
 
 describe('real HTTP, pending identity and mutation protection',()=>{
  async function run(action:(base:string,store:CloudStore,owner:ReturnType<CloudStore['provisionVerifiedAccount']>,headers:Record<string,string>)=>Promise<void>){
-  const {store,owner}=setup(),session=store.issueVerifiedSession(owner.id),origin='https://dnd.center',server=createCloudServer(store,origin);await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address() as {port:number};
+  const {store,owner}=setup(),session=store.issueVerifiedSession(owner.id),origin='https://dnd.center',server=createCloudServer(store,origin);await listenForFetch(server);const address=server.address() as {port:number};
   try{await action('http://127.0.0.1:'+address.port,store,owner,{'Content-Type':'application/json',Origin:origin,Cookie:'dnd_cloud='+session.token,'X-CSRF-Token':session.csrf});}finally{await new Promise<void>(resolve=>server.close(()=>resolve()));}
  }
  it('guest by-ID access works, global directory is denied and mock QQ routes do not exist',()=>run(async(base,store,owner)=>{const card=store.create(owner,newCharacter());expect((await fetch(base+'/api/cards/'+card.id)).status).toBe(200);expect((await fetch(base+'/api/cards')).status).toBe(401);for(const path of ['/api/auth/mock','/api/auth/qq/mock','/api/register'])expect((await fetch(base+path)).status).toBe(404);expect((await fetch(base+'/api/auth/qq/login')).status).toBe(503);expect((await fetch(base+'/api/auth/qq/callback?qq=1234567')).status).toBe(503);expect(await (await fetch(base+'/api/session')).json()).toMatchObject({authenticated:false,qqLogin:'pending'});}));
@@ -38,7 +54,7 @@ describe('real HTTP, pending identity and mutation protection',()=>{
 
 describe('temporary public upload with authoritative IP quota',()=>{
  async function run(action:(base:string,store:CloudStore,client:(ip?:string)=>Promise<Record<string,string>>)=>Promise<void>,freeBytes?:()=>number){
-  const store=new CloudStore(':memory:');stores.push(store);const origin='https://dnd.center',server=createCloudServer(store,origin,{temporaryUpload:true,trustedLoopbackProxy:true,freeBytes});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
+  const store=new CloudStore(':memory:');stores.push(store);const origin='https://dnd.center',server=createCloudServer(store,origin,{temporaryUpload:true,trustedLoopbackProxy:true,freeBytes});await listenForFetch(server);const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
   const client=async(ip='198.51.100.8')=>{const response=await fetch(base+'/api/session',{headers:{'X-Real-IP':ip}}),data=await response.json();expect(data.authenticated).toBe(false);expect(data.uploadOwner.id).toMatch(/^temporary:/);return {'Content-Type':'application/json',Origin:origin,'X-Real-IP':ip,Cookie:response.headers.get('set-cookie')!.split(';')[0],'X-CSRF-Token':data.csrf};};
   try{await action(base,store,client);}finally{await new Promise<void>(resolve=>server.close(()=>resolve()));}
  }
