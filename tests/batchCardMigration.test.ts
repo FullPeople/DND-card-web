@@ -19,7 +19,7 @@ function fixture(){
 }
 describe('one-review rule migration',()=>{
  it('keeps imported class grant acknowledgements through legacy identity reconciliation without extending the level boundary',()=>{
-  const {c,catalog}=fixture();c.selections[0].level=8;c.featureLayout={ignoredClassGrants:{mage:{entryId:'Mage:24',level:4}}};
+  const {c,catalog}=fixture();c.selections[0].level=8;c.featureLayout={order:[],expanded:[],ignoredClassGrants:{mage:{entryId:'Mage:24',level:4}}};
   const migrated=planBatchCardMigration(c,catalog,suggestedBatchRoots(c,catalog),{},identity).plan.card;
   expect(migrated.featureLayout?.ignoredClassGrants?.mage).toEqual({entryId:'Mage:14',level:4});
   expect(c.featureLayout.ignoredClassGrants?.mage).toEqual({entryId:'Mage:24',level:4});
