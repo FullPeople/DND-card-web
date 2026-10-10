@@ -26,7 +26,7 @@ import {DMConsole} from './WorkbenchConsole';
 export {DMConsole};
 import type {Entry} from '../core/model';
 import './workbench.css';
-import {CloudIcon} from './CloudRoomControl';
+import {CloudIcon} from './CloudIcon';
 import {PlayerPermissionButton} from './PlayerPermissionButton';
 export function WorkbenchBar({classWarnings,online,target,message,page,change}:{classWarnings?:Set<string>;online:boolean;target?:Target;message:string;page:string;change:(page:string)=>void;save:()=>void}){
  const wb=useWorkbench(),ordered=useCharacterBookOrder(wb.cards),[context,setContext]=useState<{id:string;x:number;y:number}>(),strip=useRef<HTMLDivElement>(null),gesture=useRef<{id:number;x:number;left:number;moved:boolean}|undefined>(undefined),suppress=useRef(false);

@@ -27,7 +27,7 @@ for(const count of [2,4,5,7])test(`previous and both edge transitions remain con
 
 for(const width of [1440,390])test(`account dialog and library-only controls at ${width}px`,async({page,context})=>{
  const fixture=JSON.parse(readFileSync('evidence/cloud-fixture.json','utf8'));
- await context.addCookies([{name:'dnd_cloud',value:(width===390?fixture.editorLogoutSession:fixture.ownerSession).token,url:'http://127.0.0.1:5320/api/',httpOnly:true,sameSite:'Strict'}]);
+ await context.addCookies([{name:'dnd_cloud',value:(width===390?fixture.editorProfileSession:fixture.ownerSession).token,url:'http://127.0.0.1:5320/api/',httpOnly:true,sameSite:'Strict'}]);
  await page.route('**/api/session',async route=>{const response=await route.fetch(),value=await response.json();if(value.account)value.account.nickname='一位名字很长的角色卡玩家';await route.fulfill({response,json:value});});
  await page.setViewportSize({width,height:900});await page.goto('/library/');
  const trigger=page.getByRole('button',{name:'账号',exact:true});await expect(trigger).toBeVisible();await expect(page.locator('.cloud-sidebar .qq-account')).toHaveCount(0);await expect(page.getByRole('button',{name:'公告',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:/调色盘/})).toHaveCount(0);await expect(page.getByRole('button',{name:'退出登录',exact:true})).toHaveCount(0);

@@ -10,7 +10,7 @@ const LocateButton=lazy(()=>import('./LocateButton').then(module=>({default:modu
 const CharacterLocateMenu=lazy(()=>import('./LocateButton').then(module=>({default:module.CharacterLocateMenu})));
 import {CloudSaveControl,useCloudSaveAvailable} from '../cloud/CloudSave';
 
-import {CloudIcon} from './CloudRoomControl';
+import {CloudIcon} from './CloudIcon';
 export type CharacterRow={cloudRoom?:boolean;id:string;name:string;player?:string;edition?:string;classes?:string;hp?:number;maxHp?:number;ac?:number;level?:number;write:boolean;locked?:boolean;inScene?:boolean};
 export {localCharacterRow} from './characterRows';
 

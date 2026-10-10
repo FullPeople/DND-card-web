@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {useWorkbench,workbenchRequest} from '../platform/workbench';
+import {CloudIcon} from './CloudIcon';
 import './cloudRoomControl.css';
-export function CloudIcon(){return <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" aria-label="云端同步卡" role="img"><path d="M7 18h11a4 4 0 000-8 6 6 0 00-11.5-1A4.5 4.5 0 007 18Z"/></svg>;}
 type Info={cardId:string;name:string;owner:boolean;editor:boolean;write:boolean;locked:boolean;ownerNickname:string;ownerAccountId:string;editors?:string[]};
 export function CloudRoomControl(){
  const wb=useWorkbench(),target=wb.target,[open,setOpen]=useState(false),[info,setInfo]=useState<Info>(),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[account,setAccount]=useState(''),dialog=useRef<HTMLDialogElement>(null),current=useRef(target?.key);current.current=target?.key;
