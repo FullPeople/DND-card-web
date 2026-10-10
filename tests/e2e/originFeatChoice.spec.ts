@@ -5,6 +5,7 @@ import {exportCharacter} from '../../src/core/export';
 import {newCharacter,type Character} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {dragWiki} from './automationChoiceFixture';
+import {restoreAuthoredChoices} from './authoredChoicesFixture';
 
 async function ready(page:Page){
  await mockSource(page);await suppressAnnouncement(page);
@@ -16,6 +17,7 @@ async function ready(page:Page){
  await page.getByTestId('character-file').setInputFiles({name:'origin-choice.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  await expect(page.getByRole('tab',{name:'起源专长验收（导入）',exact:true})).toHaveAttribute('aria-selected','true');
  await page.keyboard.press('Escape');await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ await restoreAuthoredChoices(page,'dnd-card-standalone');
  await page.locator('[data-feature-id="origin-race:trait:0"] .feature-caption').click();
  await expect(page.getByRole('region',{name:'选择起源选择验收',exact:true})).toBeVisible();
 }

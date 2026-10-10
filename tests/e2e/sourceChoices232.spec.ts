@@ -3,6 +3,7 @@ import {newCharacter,type Character,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
 import {mockSource,suppressAnnouncement} from './fixtures';
+import {restoreAuthoredChoices} from './authoredChoicesFixture';
 
 const data={background:[{name:'气泡背景验收',source:'XPHB',ability:[{choose:{weighted:{from:['int','wis','cha'],weights:[2,1]}}}],startingEquipment:[{_:[{item:'固定旅行包|XPHB'},{value:500}],A:[{item:'可选旅行杖|XPHB'},{value:300}],B:[{value:1200}]}],entries:['原创来源选择验收。']}],item:[{name:'固定旅行包',source:'XPHB',weight:1},{name:'可选旅行杖',source:'XPHB',weight:2}]};
 const entries:Entry[]=Object.entries(data).flatMap(([kind,rows])=>rows.map(raw=>({id:`fixture:${kind}:${raw.source}:${raw.name}`,kind:kind as Entry['kind'],name:raw.name,english:raw.name,source:raw.source,edition:'2024',packId:'test',revision:'1',entries:'entries' in raw?raw.entries:[],raw}))),background=entries.find(entry=>entry.kind==='background')!;
@@ -21,6 +22,7 @@ async function ready(page:Page,c=character()){
  const selected=page.locator('.character-tabs [role="tab"]').filter({hasText:c.name});await expect(selected).toHaveAttribute('title',c.name+'（导入）');await expect(selected).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
  await expect(page.locator('.save-status')).toContainText('已保存到本机');const persisted=await saved(page);expect(persisted.name).toBe(c.name+'（导入）');expect(persisted.edition).toBe(c.edition);expect(persisted.racialAbilityMode).toBe(c.racialAbilityMode);
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ await restoreAuthoredChoices(page,'dnd-card-standalone');
 }
 /** This spec is served by playwright.wiki232 in standalone mode. Reject an
  * absent database/store explicitly: opening the integrated DB would create an
