@@ -22,7 +22,9 @@ def database():
 def snapshot():
     current=(SERVICE/'current').resolve();require(current.parent==SERVICE/'releases','Unexpected backend pointer')
     stat=DB.stat()
-    return {'protected':protected(),'frontend':tree(ROOT),'backendTarget':str(current),'backend':tree(current),'unit':sha(UNIT),'databaseIdentity':[stat.st_dev,stat.st_ino]}
+    health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'))
+    return {'protected':protected(),'frontend':tree(ROOT),'backendTarget':str(current),'backend':tree(current),'unit':sha(UNIT),'databaseIdentity':[stat.st_dev,stat.st_ino],
+      'privacyReady':health.get('accountLibrariesPrivate') is True and health.get('permissionsVersion')==1}
 def write(path,data):
     path.parent.mkdir(parents=True,exist_ok=True);fd,name=tempfile.mkstemp(dir=path.parent,prefix='.'+path.name)
     with os.fdopen(fd,'w') as stream:json.dump(data,stream,ensure_ascii=False,indent=2);stream.write('\n');stream.flush();os.fsync(stream.fileno())
@@ -68,6 +70,8 @@ def apply(package,seal):
         require(protected()==b['protected'] and tree(ROOT)==b['frontend'] and tree(release)==d['backendFiles'],'Protected drift after switch')
         record.update(status='published',protectedAfter=protected(),frontendPreserved=True,newUnit=sha(UNIT),backendFiles=d['backendFiles'],databaseAfter=database(),qqLogin=health['qqLogin'],cloudMode=d.get('cloudMode','temporary-ip'),finishedAt=datetime.now(timezone.utc).isoformat());write(receipt,record)
     except Exception:
+        if switched and not b.get('privacyReady',False) and database()['cards']>0:
+            record.update(status='recovery-required',privacyBackendRetained=True,reason='Account cards prevent rollback to a public predecessor');write(receipt,record);raise
         shutil.copy2(backup/'cloud.service',UNIT)
         if switched:switch(Path(b['backendTarget']),key+'-restore')
         restart();m.wait_http('http://127.0.0.1:5014/api/health');require(protected()==b['protected'] and tree(ROOT)==b['frontend'],'Failure recovery drift')
@@ -76,6 +80,7 @@ def apply(package,seal):
 def rollback(package,seal):
     d,b=bind(package,seal);receipt=RECEIPTS/(d['release']+'.json');r=json.loads(receipt.read_text())
     require(r['status']=='published' and protected()==r['protectedAfter'],'Rollback protection drift')
+    require(b.get('privacyReady',False) or database()['cards']==0,'Account cards prevent rollback to a public predecessor')
     require(tree(ROOT)==b['frontend'] and tree((SERVICE/'current').resolve())==r['backendFiles'] and sha(UNIT)==r['newUnit'],'Rollback live drift')
     require(tree(Path(b['backendTarget']))==b['backend'] and sha(package/'backup/cloud.service')==b['unit'],'Rollback backup drift')
     shutil.copy2(package/'backup/cloud.service',UNIT);switch(Path(b['backendTarget']),d['release']+'-rollback');restart();m.wait_http('http://127.0.0.1:5014/api/health')

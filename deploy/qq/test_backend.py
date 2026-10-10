@@ -32,6 +32,22 @@ class BackendTests(unittest.TestCase):
    package,seal=self.fixture(Path(folder));self.verify.side_effect=RuntimeError('not ready')
    with self.assertRaisesRegex(RuntimeError,'not ready'):u.apply(package,seal)
    self.assertEqual((u.SERVICE/'current/server.mjs').read_text(),'old server');self.assertEqual(u.UNIT.read_text(),'old unit');self.assertEqual(u.database()['temporary_cards'],1)
+ def test_private_cards_prevent_rollback_to_public_predecessor(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,seal=self.fixture(Path(folder));u.apply(package,seal)
+   with sqlite3.connect(u.DB) as db:db.execute('INSERT INTO cards VALUES("new private card")')
+   with self.assertRaisesRegex(RuntimeError,'public predecessor'):u.rollback(package,seal)
+   self.assertEqual((u.SERVICE/'current/server.mjs').read_text(),'new server');self.assertEqual(u.UNIT.read_text(),'new unit')
+ def test_failed_verification_keeps_privacy_backend_when_account_card_arrives(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,seal=self.fixture(Path(folder))
+   def private_write(*args):
+    with sqlite3.connect(u.DB) as db:db.execute('INSERT INTO cards VALUES("new private card")')
+    raise RuntimeError('later verification failed')
+   self.verify.side_effect=private_write
+   with self.assertRaisesRegex(RuntimeError,'later verification failed'):u.apply(package,seal)
+   self.assertEqual((u.SERVICE/'current/server.mjs').read_text(),'new server');self.assertEqual(u.UNIT.read_text(),'new unit')
+   self.assertEqual(json.loads((u.RECEIPTS/'dnd-center-qq-backend-test.json').read_text())['status'],'recovery-required')
  def test_frontend_drift_prevents_switch(self):
   with tempfile.TemporaryDirectory() as folder:
    package,seal=self.fixture(Path(folder));(u.ROOT/'index.html').write_text('concurrent homepage')
