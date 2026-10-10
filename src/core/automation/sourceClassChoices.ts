@@ -1,6 +1,6 @@
 import {ABILITIES,selectionEffectsAllowed,type Character,type Entry,type Selection} from '../model';
 import {candidateReason,evaluate} from '../engine';
-import {resolveEntryReference} from '../entryReferences';
+import {resolveEntryReference,matchesReference} from '../entryReferences';
 import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
 
@@ -9,6 +9,22 @@ const key=(value:unknown)=>String(value??'').trim().toLowerCase();
 const level=(row:Selection)=>Number.isSafeInteger(row.level)&&row.level>=1&&row.level<=20?row.level:0;
 const names=(entry:Entry)=>[entry.name,entry.english,entry.raw.name,entry.raw.ENG_name].map(key);
 const abilityImprovement=(entry:Entry)=>key(entry.raw.category)==='g'&&entry.raw.repeatable===true&&list(entry.raw.ability).some((row:any)=>Array.isArray(row?.choose?.from)&&row.choose.from.length>0&&row.choose.from.every((ability:any)=>ABILITIES.includes(ability))&&(row.choose.amount??1)*(row.choose.count??1)===2);
+function activeOwnedFeat(c:Character,entry:Entry,reference:string):boolean{
+ const parts=reference.split('|');
+ if(parts.length>2||!parts[0].trim())return false;
+ const qualified=`${parts[0]}|${parts[1]?.trim()||'PHB'}`;
+ return c.selections.some(row=>{
+  if(row.entry.kind!=='feat'||row.entry.id===entry.id||!matchesReference(row.entry,qualified)||
+   row.entry.edition!=='both'&&row.entry.edition!==(entry.edition==='both'?c.edition:entry.edition))return false;
+  const seen=new Set<string>();let current:Selection|undefined=row;
+  while(current){
+   if(seen.has(current.id)||!selectionEffectsAllowed(c,current.entry))return false;
+   seen.add(current.id);if(!current.parentId)return true;
+   current=c.selections.find(parent=>parent.id===current!.parentId);
+  }
+  return false;
+ });
+}
 /** The existing typed feat-filter syntax; it is not an additional grant. */
 export function sourceFeatFilterCategory(text:unknown):string|undefined{
  if(typeof text!=='string'||!/(?:获得|选择).*(?:一项|一个|1)/.test(text))return;
@@ -70,6 +86,9 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
     const groups=list(value) as Record<string,unknown>[];
     const current=scores;
     if(!groups.length||!groups.some(group=>Object.entries(group).every(([ability,minimum])=>Object.hasOwn(current,ability)&&typeof minimum==='number'&&current[ability as keyof typeof current]>=minimum)))return '尚未满足属性前置条件。';
+   }else if(field==='feat'&&!optional){
+    if(!Array.isArray(value)||!value.length||value.some(ref=>typeof ref!=='string'||!ref.trim()||!ref.split('|')[0].trim()||ref.split('|').length>2))return '此专长前置结构尚未核对。';
+    if(!value.some(ref=>activeOwnedFeat(c,entry,ref)))return '尚未具备来源和版本匹配且当前有效的所需专长。';
    }else if(field==='feature'&&!optional&&key(entry.raw.category)==='fs'){
     if(!Array.isArray(value)||value.length!==1||typeof value[0]!=='string'||!value[0].trim())return '此特性前置结构尚未核对。';
     if(!ownedFightingStylePrerequisite(c,owner,known,value[0]))return '尚未具备来源明确授予且当前有效的所需职业特性。';
