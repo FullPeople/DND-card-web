@@ -72,6 +72,10 @@ jobs:
           - group: automation-progress
             commands: |
               npx playwright test --config playwright.automation-progress.config.ts
+          - group: excel-import
+            commands: |
+              npx playwright test --config playwright.excel-import.config.ts
+              npx playwright test --config playwright.excel-suite-import.config.ts
           - group: transition-rest
             commands: |
               npx playwright test tests/e2e/transitionRest.spec.ts --project=chromium

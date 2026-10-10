@@ -1,0 +1,912 @@
+{
+  "sourceSha256": "ed1c92d903ee1a0084bda090db188aa6159f9236c839f0cca9b7bd46728c9aab",
+  "layouts": {
+    "legacy": {
+      "version_label": "v1.0.0",
+      "sheets": {
+        "main": "主要",
+        "person": "背景",
+        "spell_db": "法术大全"
+      },
+      "main": {
+        "title": "A1",
+        "character_name": "E3",
+        "player": "E4",
+        "race_name": "T6",
+        "race_subrace": "T7",
+        "alignment": "T8",
+        "faith": "T9",
+        "class_rows": [
+          [
+            "主职",
+            6
+          ],
+          [
+            "兼职1",
+            7
+          ],
+          [
+            "兼职2",
+            8
+          ]
+        ],
+        "class_name_col": "E",
+        "class_sub_col": "I",
+        "class_lv_col": "O",
+        "ability_rows": {
+          "str": 13,
+          "dex": 14,
+          "con": 15,
+          "int": 16,
+          "wis": 17,
+          "cha": 18
+        },
+        "ability_initial_col": "I",
+        "ability_background_col": "K",
+        "ability_growth_col": "M",
+        "ability_misc_col": "O",
+        "ability_total_col": "F",
+        "ability_modifier_col": "R",
+        "ability_save_bonus_col": "T",
+        "ability_save_prof_col": "B",
+        "ability_save_misc_col": "W",
+        "proficiency_bonus": "S3",
+        "initiative": "D22",
+        "ac": "D23",
+        "dc": "D25",
+        "dc_ability": "F26",
+        "passive_perception": "F27",
+        "speed": "V25",
+        "size": "N25",
+        "hp_current": "M22",
+        "hp_max": "Q22",
+        "hp_temp": "U22",
+        "hd_current": "M23",
+        "hd_max": "Q23",
+        "defense_rows": [
+          [
+            24,
+            "resistances"
+          ],
+          [
+            25,
+            "immunities"
+          ],
+          [
+            26,
+            "advantages"
+          ],
+          [
+            27,
+            "disadvantages"
+          ]
+        ],
+        "defense_value_cols": [
+          29,
+          35
+        ],
+        "skill_global_prof": "J30",
+        "skill_global_misc": "E30",
+        "skill_rows": [
+          [
+            "运动",
+            "str",
+            32
+          ],
+          [
+            "特技",
+            "dex",
+            34
+          ],
+          [
+            "巧手",
+            "dex",
+            35
+          ],
+          [
+            "隐匿",
+            "dex",
+            36
+          ],
+          [
+            "调查",
+            "int",
+            38
+          ],
+          [
+            "奥秘",
+            "int",
+            39
+          ],
+          [
+            "历史",
+            "int",
+            40
+          ],
+          [
+            "自然",
+            "int",
+            41
+          ],
+          [
+            "宗教",
+            "int",
+            42
+          ],
+          [
+            "察觉",
+            "wis",
+            44
+          ],
+          [
+            "洞悉",
+            "wis",
+            45
+          ],
+          [
+            "驯兽",
+            "wis",
+            46
+          ],
+          [
+            "医药",
+            "wis",
+            47
+          ],
+          [
+            "求生",
+            "wis",
+            48
+          ],
+          [
+            "游说",
+            "cha",
+            50
+          ],
+          [
+            "欺瞒",
+            "cha",
+            51
+          ],
+          [
+            "威吓",
+            "cha",
+            52
+          ],
+          [
+            "表演",
+            "cha",
+            53
+          ]
+        ],
+        "skill_prof_col": "B",
+        "skill_total_col": "I",
+        "skill_misc_col": "F",
+        "armor_name": "L31",
+        "armor_ac_base": "AD31",
+        "armor_dex_cap": "AG31",
+        "armor_attuned": "AJ31",
+        "armor_weight": "AA31",
+        "shield_ac": "AO31",
+        "shield_attuned": "AL31",
+        "weapon_rows": [
+          33,
+          38
+        ],
+        "weapon_name_col": "L",
+        "weapon_props_col": "U",
+        "weapon_prof_col": "AE",
+        "weapon_atk_col": "AH",
+        "weapon_dmg_die_col": "AJ",
+        "weapon_dmg_plus_col": "AL",
+        "weapon_dmg_type_col": "AN",
+        "weapon_extra_die_col": null,
+        "weapon_extra_type_col": null,
+        "weapon_weight_col": "AP",
+        "weapon_ammo_col": "AR",
+        "spell_active_ability_cell": "F26",
+        "spell_ability_to_row": {
+          "智力": 57,
+          "感知": 58,
+          "魅力": 59
+        },
+        "spell_dc_col": "G",
+        "spell_atk_col": "K",
+        "spell_max_prepared": "F61",
+        "spell_slot_rows": {
+          "1": 63,
+          "2": 64,
+          "3": 65,
+          "4": 66,
+          "5": 67,
+          "6": 68,
+          "7": 69,
+          "8": 70,
+          "9": 71
+        },
+        "spell_slot_cur_col": "E",
+        "spell_slot_max_col": "H",
+        "spell_sorcery_total": "J72",
+        "spell_sorcery_cur": "I72",
+        "spell_always_known_cols": [
+          "P",
+          "Q"
+        ],
+        "spell_always_known_rows": [
+          57,
+          66
+        ],
+        "spell_prepared_group1_cols": [
+          "X",
+          "Y"
+        ],
+        "spell_prepared_group1_rows": [
+          57,
+          66
+        ],
+        "spell_prepared_group23_cols": [
+          [
+            "AF",
+            "AG"
+          ],
+          [
+            "AN",
+            "AO"
+          ]
+        ],
+        "spell_prepared_group23_rows": [
+          57,
+          73
+        ],
+        "spell_cantrip_cols": [
+          [
+            "P",
+            "Q"
+          ],
+          [
+            "X",
+            "Y"
+          ]
+        ],
+        "spell_cantrip_rows": [
+          68,
+          73
+        ],
+        "feat_class_rows": [
+          9,
+          30
+        ],
+        "feat_class_lv_col": "BT",
+        "feat_class_name_col": "BU",
+        "feat_class_desc_col": "BZ",
+        "feat_race_rows": [
+          28,
+          42
+        ],
+        "feat_race_name_col": "AW",
+        "feat_race_desc_col": "BC",
+        "feat_general_rows": [
+          42,
+          54
+        ],
+        "feat_general_lv_col": "AW",
+        "feat_general_name_col": "AX",
+        "feat_general_desc_col": "BC",
+        "currency_gp": "AI50",
+        "currency_pp": "AO50",
+        "currency_ep": "AI51",
+        "currency_sp": "AI52",
+        "currency_cp": "AI53",
+        "currency_total_gp": "AN52",
+        "encumbrance": {
+          "equipment_weight": "L51",
+          "pack1_weight": "O51",
+          "pack2_weight": "R51",
+          "total_weight": "V51",
+          "light_threshold": "L53",
+          "heavy_threshold": "O53",
+          "overloaded_threshold": "R53",
+          "max_capacity": "V53"
+        },
+        "dice_bot_export": "AV1"
+      },
+      "person": {
+        "display_name": "E3",
+        "background_name": "E6",
+        "hometown": "E5",
+        "age": "E8",
+        "gender": "E9",
+        "height": "K8",
+        "weight": "K9",
+        "personality": "S11",
+        "appearance": "B12",
+        "traits": "S12",
+        "ideals": "S13",
+        "bonds": "S14",
+        "flaws": "S15",
+        "story": "S17",
+        "description": "AP4",
+        "languages_rows": [
+          24,
+          28
+        ],
+        "languages_cols": [
+          2,
+          20
+        ],
+        "languages_label": "语言",
+        "tools_rows": [
+          31,
+          36
+        ],
+        "tools_cols": [
+          2,
+          20
+        ],
+        "tools_label": "熟练工具"
+      }
+    },
+    "modern": {
+      "version_label": "v1.0.12",
+      "sheets": {
+        "main": "主要",
+        "person": "起源",
+        "spell_db": "法术大全",
+        "inventory": "背包"
+      },
+      "main": {
+        "title": "A1",
+        "character_name": "E3",
+        "player": "E4",
+        "race_name": "T6",
+        "race_subrace": "T7",
+        "alignment": "T8",
+        "faith": "T9",
+        "class_rows": [
+          [
+            "主职",
+            6
+          ],
+          [
+            "兼职1",
+            7
+          ],
+          [
+            "兼职2",
+            8
+          ]
+        ],
+        "class_name_col": "E",
+        "class_sub_col": "I",
+        "class_lv_col": "O",
+        "ability_rows": {
+          "str": 13,
+          "dex": 14,
+          "con": 15,
+          "int": 16,
+          "wis": 17,
+          "cha": 18
+        },
+        "ability_initial_col": "I",
+        "ability_background_col": "K",
+        "ability_growth_col": "M",
+        "ability_misc_col": "O",
+        "ability_total_col": "F",
+        "ability_modifier_col": "R",
+        "ability_save_bonus_col": "T",
+        "ability_save_prof_col": "B",
+        "ability_save_misc_col": "W",
+        "proficiency_bonus": "S3",
+        "initiative": "D22",
+        "ac": "D23",
+        "dc": "D24",
+        "dc_ability": "L24",
+        "passive_perception": "L23",
+        "speed": "AR24",
+        "size": "AR23",
+        "hp_current": "R22",
+        "hp_max": "V22",
+        "hp_temp": "T24",
+        "hd_current": "R23",
+        "hd_max": "U23",
+        "defense_rows": [
+          [
+            22,
+            "resistances"
+          ],
+          [
+            23,
+            "immunities"
+          ],
+          [
+            24,
+            "advantages"
+          ]
+        ],
+        "defense_value_cols": [
+          31,
+          40
+        ],
+        "skill_global_prof": "H39",
+        "skill_global_misc": "F40",
+        "skill_rows": [
+          [
+            "运动",
+            "str",
+            41
+          ],
+          [
+            "特技",
+            "dex",
+            43
+          ],
+          [
+            "巧手",
+            "dex",
+            44
+          ],
+          [
+            "隐匿",
+            "dex",
+            45
+          ],
+          [
+            "调查",
+            "int",
+            47
+          ],
+          [
+            "奥秘",
+            "int",
+            48
+          ],
+          [
+            "历史",
+            "int",
+            49
+          ],
+          [
+            "自然",
+            "int",
+            50
+          ],
+          [
+            "宗教",
+            "int",
+            51
+          ],
+          [
+            "察觉",
+            "wis",
+            53
+          ],
+          [
+            "洞悉",
+            "wis",
+            54
+          ],
+          [
+            "驯兽",
+            "wis",
+            55
+          ],
+          [
+            "医药",
+            "wis",
+            56
+          ],
+          [
+            "求生",
+            "wis",
+            57
+          ],
+          [
+            "游说",
+            "cha",
+            59
+          ],
+          [
+            "欺瞒",
+            "cha",
+            60
+          ],
+          [
+            "威吓",
+            "cha",
+            61
+          ],
+          [
+            "表演",
+            "cha",
+            62
+          ]
+        ],
+        "skill_prof_col": "B",
+        "skill_total_col": "I",
+        "skill_misc_col": "H",
+        "armor_name": "H40",
+        "armor_ac_base": "AF40",
+        "armor_dex_cap": "AI40",
+        "armor_attuned": "P40",
+        "armor_weight": "AA40",
+        "shield_ac": "AQ40",
+        "shield_attuned": "AP40",
+        "shield_equipped": "AS41",
+        "weapon_rows": [
+          32,
+          37
+        ],
+        "weapon_name_col": "B",
+        "weapon_props_col": "M",
+        "weapon_prof_col": "W",
+        "weapon_atk_col": "Z",
+        "weapon_dmg_die_col": "AB",
+        "weapon_dmg_plus_col": "AD",
+        "weapon_dmg_type_col": "AF",
+        "weapon_extra_die_col": "AH",
+        "weapon_extra_type_col": "AL",
+        "weapon_mastery_col": "AN",
+        "weapon_mastery_effect_col": "AP",
+        "weapon_weight_col": null,
+        "weapon_ammo_col": "AK",
+        "spell_active_ability_cell": "L24",
+        "spell_ability_to_row": {
+          "智力": 66,
+          "感知": 67,
+          "魅力": 68
+        },
+        "spell_dc_col": "G",
+        "spell_atk_col": "K",
+        "spell_max_prepared": "F69",
+        "spell_slot_rows": {
+          "1": 72,
+          "2": 73,
+          "3": 74,
+          "4": 75,
+          "5": 76,
+          "6": 77,
+          "7": 78,
+          "8": 79,
+          "9": 80
+        },
+        "spell_slot_cur_col": "E",
+        "spell_slot_max_col": "H",
+        "spell_sorcery_total": "J81",
+        "spell_sorcery_cur": "I81",
+        "spell_always_known_cols": [
+          "P",
+          "Q"
+        ],
+        "spell_always_known_rows": [
+          66,
+          75
+        ],
+        "spell_prepared_group1_cols": [
+          "X",
+          "Y"
+        ],
+        "spell_prepared_group1_rows": [
+          66,
+          75
+        ],
+        "spell_prepared_group23_cols": [
+          [
+            "AF",
+            "AG"
+          ],
+          [
+            "AN",
+            "AO"
+          ]
+        ],
+        "spell_prepared_group23_rows": [
+          66,
+          82
+        ],
+        "spell_cantrip_cols": [
+          [
+            "P",
+            "Q"
+          ],
+          [
+            "X",
+            "Y"
+          ]
+        ],
+        "spell_cantrip_rows": [
+          77,
+          82
+        ],
+        "feat_class_rows": [
+          17,
+          37
+        ],
+        "feat_class_lv_col": "AW",
+        "feat_class_name_col": "AX",
+        "feat_class_desc_col": "BC",
+        "feat_general_rows": [
+          19,
+          31
+        ],
+        "feat_general_lv_col": "BT",
+        "feat_general_name_col": "BU",
+        "feat_general_desc_col": "BZ",
+        "feat_fighting_style_rows": [
+          33,
+          38
+        ],
+        "feat_fighting_style_name_col": "BT",
+        "feat_fighting_style_desc_col": "BZ",
+        "feat_special_ability_rows": [
+          40,
+          46
+        ],
+        "feat_special_ability_name_col": "BT",
+        "feat_special_ability_desc_col": "BZ",
+        "feat_race_rows": [
+          3,
+          17
+        ],
+        "feat_race_name_col": "BT",
+        "feat_race_desc_col": "BZ",
+        "special_resource_rows": [
+          26,
+          29
+        ],
+        "special_resource_cols": [
+          {
+            "name": "B",
+            "desc": "F",
+            "cur": "J",
+            "max": "M",
+            "recharge": "O"
+          },
+          {
+            "name": "Q",
+            "desc": "U",
+            "cur": "Y",
+            "max": "AB",
+            "recharge": "AD"
+          },
+          {
+            "name": "AF",
+            "desc": "AJ",
+            "cur": "AN",
+            "max": "AQ",
+            "recharge": "AS"
+          }
+        ],
+        "wondrous_rows": [
+          42,
+          52
+        ],
+        "wondrous_qty_col": "I",
+        "wondrous_name_col": "L",
+        "wondrous_attuned_col": "P",
+        "wondrous_rarity_col": "R",
+        "wondrous_slot_col": "U",
+        "wondrous_props_col": "W",
+        "consumable_rows": [
+          53,
+          58
+        ],
+        "consumable_qty_col": "I",
+        "consumable_name_col": "L",
+        "consumable_rarity_col": "R",
+        "consumable_desc_col": "U",
+        "containers": [],
+        "currency_gp": "AG60",
+        "currency_pp": "AN60",
+        "currency_ep": "AG61",
+        "currency_sp": "AG62",
+        "currency_cp": "AG63",
+        "currency_total_gp": "AN61",
+        "encumbrance": {
+          "equipment_weight": "L60",
+          "pack1_weight": "P60",
+          "pack2_weight": "T60",
+          "total_weight": "Y60",
+          "light_threshold": "L62",
+          "heavy_threshold": "P62",
+          "overloaded_threshold": "T62",
+          "max_capacity": "Y62"
+        },
+        "dice_bot_export": "AV1"
+      },
+      "inventory": {
+        "containers": [
+          {
+            "label": "背包 1",
+            "rows": [
+              5,
+              25
+            ],
+            "schema": {
+              "name": "B",
+              "desc": "G",
+              "weight": "S",
+              "qty": "V"
+            }
+          },
+          {
+            "label": "背包 2",
+            "rows": [
+              5,
+              25
+            ],
+            "schema": {
+              "name": "Y",
+              "desc": "AD",
+              "weight": "AP",
+              "qty": "AS"
+            }
+          },
+          {
+            "label": "次元袋 1",
+            "rows": [
+              29,
+              49
+            ],
+            "schema": {
+              "name": "B",
+              "desc": "G",
+              "weight": "S",
+              "qty": "V"
+            }
+          },
+          {
+            "label": "次元袋 2",
+            "rows": [
+              29,
+              49
+            ],
+            "schema": {
+              "name": "Y",
+              "desc": "AD",
+              "weight": "AP",
+              "qty": "AS"
+            }
+          }
+        ]
+      },
+      "person": {
+        "display_name": "E3",
+        "background_name": "E6",
+        "hometown": "E5",
+        "age": "E8",
+        "gender": "E9",
+        "height": "K8",
+        "weight": "K9",
+        "personality": "S11",
+        "appearance": "B12",
+        "traits": "S12",
+        "ideals": "S13",
+        "bonds": "S14",
+        "flaws": "S15",
+        "story": "S17",
+        "description": "AP4",
+        "languages_rows": [
+          24,
+          28
+        ],
+        "languages_cols": [
+          2,
+          20
+        ],
+        "languages_label": "语言",
+        "tools_rows": [
+          31,
+          36
+        ],
+        "tools_cols": [
+          2,
+          20
+        ],
+        "tools_label": "熟练工具"
+      }
+    }
+  },
+  "commonAliases": {
+    "main": [
+      "主要",
+      "Main"
+    ],
+    "spell_db": [
+      "法术大全",
+      "Spell Compendium"
+    ],
+    "inventory": [
+      "背包",
+      "Inventory"
+    ],
+    "equipment": [
+      "装备",
+      "Equipment"
+    ],
+    "data": [
+      "数据表",
+      "Data"
+    ],
+    "areas": [
+      "圆形效应范围",
+      "Areas of Effect"
+    ],
+    "export": [
+      "网页导入",
+      "Web Import",
+      "骰娘导入",
+      "导入"
+    ],
+    "classes": [
+      "职业",
+      "Classes"
+    ],
+    "familiars": [
+      "魔宠",
+      "Familiars"
+    ],
+    "allies": [
+      "盟友与魔宠",
+      "Allies and Familiars"
+    ],
+    "spellbook": [
+      "法术书",
+      "Spellbook"
+    ],
+    "changelog": [
+      "更新",
+      "Changelog"
+    ]
+  },
+  "profileAliases": {
+    "2014": {
+      "person": [
+        "背景",
+        "Background"
+      ],
+      "background_db": [
+        "背景数据",
+        "Background Data"
+      ],
+      "species": [
+        "种族",
+        "Races"
+      ],
+      "strongholds": [
+        "据点",
+        "Strongholds"
+      ],
+      "additional_spells": [
+        "额外法术",
+        "Additional Spells"
+      ]
+    },
+    "2024": {
+      "person": [
+        "起源",
+        "Origin",
+        "Origins"
+      ],
+      "background_db": [
+        "背景",
+        "Background Data"
+      ],
+      "species": [
+        "种族",
+        "Species"
+      ],
+      "strongholds": [
+        "据点",
+        "Bastions"
+      ],
+      "feats": [
+        "专长与据点",
+        "Feats and Bastions"
+      ],
+      "adjustments": [
+        "自定义调整栏",
+        "Custom Adjustments"
+      ]
+    }
+  }
+}

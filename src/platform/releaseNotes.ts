@@ -352,10 +352,15 @@ export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
 const SUITE_RELEASE_266_SECTIONS:ReleaseSection[]=[
  {title:'文字演出效果与配置',items:['文字演出补齐 23 种入场、18 种退场、9 种停留效果和七种正文展开方式，直接在枭熊中播放，不生成 APNG。','滚动设置时预览和播放按钮保持可见；设置分为五页，用高亮按钮选择效果，相关参数按需显示。','新增渐变、双层描边、阴影、副标题、竖排及装饰细节配置；保留已有草稿、预设和原有光芒等画面效果。','保存预设后可直接点选，删除支持撤销。关闭附加窗口并刷新枭熊后重新打开插件；真实多人房间和实体设备仍待验收。']}
 ];
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+const SUITE_RELEASE_270_SECTIONS:ReleaseSection[]=[
  {title:'文字演出',items:['默认演出改为白色衬线标题、细线框和 BATTLE START 副标题，按装饰、标题、副标题依次入场。','移除光晕、光芒、雾气、光点和光环，只保留文字动画与线条、框形等平面装饰；已有自定义文字和预设保留。','预览区和播放按钮固定，设置用高亮选项选择。可先在自己的枭熊画面中预览，再由 DM 向当前房间播放，不生成 APNG。']},
  {title:'音乐板',items:['音乐整理和播放集中在音乐板内，不再打开额外网站或输入配对码。保留外链音频，可编辑名称、背景音乐／音效、循环、分组、标签、收藏、颜色与曲目音量。','播放控制固定在顶部，可搜索和筛选曲库、点选音效、批量加入队列、调整顺序及返回上一首。关闭或缩小音乐板后继续播放。','支持 JSON 文件、外链列表和旧分享码导入；先预览，再合并或替换。可导出完整曲库，房间保存曲目，本机保留上一版备份和添加草稿。','个人音量与房间音量分别调整；DM 可控制玩家操作权限。关闭附加窗口并刷新枭熊后重新打开插件；真实多人房间和实体设备仍待验收。']}
 ];
+const EXCEL_IMPORT_SECTIONS:ReleaseSection[]=[
+ {title:'Excel 角色卡导入',items:['导入与导出支持拖入或点击选择旧版 2014／2024 Excel 角色模板，可与 JSON 备份一起批量导入。','读取后可以选择同步为 5etools 资料，直接进入核对流程；每份 Excel 只生成一张角色卡，不另建同步副本。','取消同步则保留 Excel 内容，作为普通自定义卡使用。数值、资源次数、背包和背景一并保留。']},
+ {title:'同步说明',items:['文字后的圆形 i 图标提供资料说明，仅悬停或聚焦图标时显示；移动到文字上不再弹出提示。','说明默认显示在鼠标上方，并避开底部的下一步按钮。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[...EXCEL_IMPORT_SECTIONS];
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 const standalone264Sections=()=>[
  {title:'QQ 登录',items:['首页、角色卡和仓库增加 QQ 登录入口，登录后显示昵称并可退出。','应用审核通过前，请使用已添加的调试 QQ 号测试登录。','登录保留本机角色和原浏览器的临时上传管理权限。已公开的卡片仍可公开查看，请保留 JSON 备份。','按 QQ 号码分配编辑权限仍待接入。'],supersedes:['QQ 登录与正式账号编辑授权尚未接入。']},
@@ -398,11 +403,12 @@ const STANDALONE_267_SECTIONS:ReleaseSection[]=[
  {title:'自动化进度',items:['进度页更新逐条验证结果。至少有一项计算或选择可用，不代表整条规则已经自动执行。','玩家休息执行入口仍未开放；恢复资源请按来源核对并手动记录。']}
 ];
 
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?SUITE_RELEASE_SECTIONS:[
+const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
-];export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='suite'?[{title:'2026-10-10-270',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-266',sections:SUITE_RELEASE_266_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
+];
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?SUITE_RELEASE_SECTIONS:EXCEL_IMPORT_SECTIONS;export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='suite'?[{title:'2026-10-10-272',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-270',sections:SUITE_RELEASE_270_SECTIONS},{title:'2026-10-10-266',sections:SUITE_RELEASE_266_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:'2026-10-10-272',sections:releaseSectionsFor(mode)},{title:'2026-10-10-268',sections:STANDALONE_268_SECTIONS},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},

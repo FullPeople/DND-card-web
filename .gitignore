@@ -55,3 +55,5 @@ test-results-cloud/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
+test-results-excel-import/
+test-results-excel-suite-import/
