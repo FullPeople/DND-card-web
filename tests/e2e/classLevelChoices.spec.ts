@@ -24,7 +24,7 @@ async function ready(page:Page,withFeatPrerequisite=false){
  c.selections=[{id:'class-owner',entry,level:6,quantity:1,equipped:false}];c.notes='手工记录保留';c.runtime.hp=3;
  if(withFeatPrerequisite){
   c.selections[0].level=4;
-  c.selections.push({id:'origin-background',entry:{id:'origin-background-entry',kind:'background',name:'原创起源背景',source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:[],raw:{feats:[{'原创起源前置|XPHB':true}]}},level:1,quantity:1,equipped:false});
+  c.selections.push({id:'origin-background',entry:{id:'origin-background-entry',kind:'background',name:'原创起源背景',english:'Authored Origin Background',source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:[],raw:{feats:[{'原创起源前置|XPHB':true}]}},level:1,quantity:1,equipped:false});
  }
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
  await page.getByTestId('character-file').setInputFiles({name:'authored-choices.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
