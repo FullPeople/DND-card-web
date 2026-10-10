@@ -26,9 +26,10 @@ async function body(request:IncomingMessage):Promise<Record<string,unknown>> {
 }
 const equal=(a:string,b:string)=>{const left=Buffer.from(a),right=Buffer.from(b);return left.length===right.length&&timingSafeEqual(left,right);};
 export function createCloudServer(store:CloudStore,origin='https://dnd.center',options:CloudServerOptions={}){
+  if(options.accountPrivate&&options.temporaryUpload)throw Error('Private account mode cannot enable temporary anonymous uploads');
   const qq=createQQAuth(store,origin,options.qq),qqLogin=qq.ready?'ready':'pending';
   const plugin=pluginAccess(store,origin,options.pluginOrigins);
-  const currentPolicy={...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',paymentAvailable:false,publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
+  const currentPolicy={permissionsVersion:1,accountLibrariesPrivate:true,accountPrivate:options.accountPrivate===true,quotaScope:'account',temporaryUpload:false,...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',paymentAvailable:false,publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
   const limits=new Map<string,{at:number;count:number}>();
   const send=(response:ServerResponse,status:number,value:unknown)=>{response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'});response.end(JSON.stringify(value));};
   const server=createServer(async(request,response)=>{

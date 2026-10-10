@@ -34,18 +34,25 @@ def bind(package,seal):
     for name,value in d['packageFiles'].items():require(re.fullmatch(r'[a-zA-Z0-9_.-]+',name) and sha(package/name)==value,'Package changed')
     require(d['packageFiles']['publish.py']==sha(Path(m.__file__)),'Guard changed')
     require(set(d['backendFiles'])=={'server.mjs','backup.mjs'} and d['databaseReplaced'] is False,'Invalid scope')
+    require(d.get('cloudMode','temporary-ip') in ['temporary-ip','account-private'],'Invalid cloud mode')
     return d,json.loads((package/'baseline.json').read_text())
 def preflight(package,seal):
     d,b=bind(package,seal);require(not(RECEIPTS/(d['release']+'.json')).exists(),'Existing receipt');require(snapshot()==b,'Live baseline drift')
     require(shutil.disk_usage(ROOT).free>200000000,'Insufficient backup space');require(m.command('systemctl','is-active','dnd-card-cloud')=='active','Backend inactive');database()
+    if d.get('cloudMode')=='account-private':
+        health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'))
+        require(health.get('accountLibrariesPrivate') is True and health.get('permissionsVersion')==1,'Publish the privacy-ready backend in temporary mode first')
     return d,b
 def switch(target,key):
     require(target.parent==SERVICE/'releases' and target.is_dir() and not target.is_symlink(),'Unsafe backend target');pointer=SERVICE/('current-'+key)
     require(not pointer.exists() and not pointer.is_symlink(),'Switch pointer already exists');pointer.symlink_to(target);os.replace(pointer,SERVICE/'current')
 def restart():
     subprocess.run(['systemctl','daemon-reload'],check=True);subprocess.run(['systemctl','restart','dnd-card-cloud'],check=True)
-def verify():
-    health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'));require(health['version']=='1.0.261' and health['qqOAuthSupported'] is True and health['temporaryUpload'] is True,'QQ backend health differs')
+def verify(cloud_mode='temporary-ip'):
+    health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'));require(health['version']=='1.0.261' and health['qqOAuthSupported'] is True,'QQ backend health differs')
+    if cloud_mode=='account-private':
+        require(health.get('qqLogin')=='ready' and health.get('permissionsVersion')==1 and health.get('accountPrivate') is True and health.get('temporaryUpload') is False and health.get('publicDirectory') is False and health.get('quotaScope')=='account','Private account policy differs')
+    else:require(health.get('temporaryUpload') is True,'Temporary upload policy differs')
     return health
 def apply(package,seal):
     d,b=preflight(package,seal);key=d['release'];backup=package/'backup';require(not backup.exists(),'Backup exists');backup.mkdir(mode=0o700)
@@ -57,9 +64,9 @@ def apply(package,seal):
     record={'release':key,'sourceCommit':d['sourceCommit'],'status':'prepared','backup':str(backup),'previousBackend':b['backendTarget'],'databaseReplaced':False,'databaseBefore':database(),'at':datetime.now(timezone.utc).isoformat()};receipt=RECEIPTS/(key+'.json');write(receipt,record)
     switched=False
     try:
-        shutil.copy2(package/'dnd-card-cloud.service',UNIT);switch(release,key);switched=True;restart();health=verify()
+        shutil.copy2(package/'dnd-card-cloud.service',UNIT);switch(release,key);switched=True;restart();health=verify(d.get('cloudMode','temporary-ip'))
         require(protected()==b['protected'] and tree(ROOT)==b['frontend'] and tree(release)==d['backendFiles'],'Protected drift after switch')
-        record.update(status='published',protectedAfter=protected(),frontendPreserved=True,newUnit=sha(UNIT),backendFiles=d['backendFiles'],databaseAfter=database(),qqLogin=health['qqLogin'],finishedAt=datetime.now(timezone.utc).isoformat());write(receipt,record)
+        record.update(status='published',protectedAfter=protected(),frontendPreserved=True,newUnit=sha(UNIT),backendFiles=d['backendFiles'],databaseAfter=database(),qqLogin=health['qqLogin'],cloudMode=d.get('cloudMode','temporary-ip'),finishedAt=datetime.now(timezone.utc).isoformat());write(receipt,record)
     except Exception:
         shutil.copy2(backup/'cloud.service',UNIT)
         if switched:switch(Path(b['backendTarget']),key+'-restore')

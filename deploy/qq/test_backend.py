@@ -50,4 +50,15 @@ class BackendTests(unittest.TestCase):
    package,seal=self.fixture(Path(folder));(package/'dnd-card-cloud.service').write_text('modified unit')
    with self.assertRaisesRegex(RuntimeError,'Package changed'):u.apply(package,seal)
    self.assertFalse((package/'backup').exists())
+ def test_private_activation_requires_privacy_ready_previous_backend(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,seal=self.fixture(Path(folder));manifest=json.loads((package/'manifest.json').read_text());manifest['cloudMode']='account-private';(package/'manifest.json').write_text(json.dumps(manifest));seal=u.sha(package/'manifest.json')
+   with self.assertRaisesRegex(RuntimeError,'privacy-ready'):u.apply(package,seal)
+   self.assertFalse((package/'backup').exists());self.restart.assert_not_called()
+ def test_private_health_requires_closed_guest_directory(self):
+  health={'version':'1.0.261','qqOAuthSupported':True,'qqLogin':'ready','permissionsVersion':1,'accountPrivate':True,'temporaryUpload':False,'publicDirectory':False,'quotaScope':'account'}
+  with patch.object(u.m,'wait_http',return_value=json.dumps(health).encode()):self.assertEqual(u.verify('account-private'),health)
+  for name,value in [('accountPrivate',False),('temporaryUpload',True),('publicDirectory',True),('quotaScope','ip'),('qqLogin','pending')]:
+   with patch.object(u.m,'wait_http',return_value=json.dumps({**health,name:value}).encode()):
+    with self.assertRaisesRegex(RuntimeError,'Private account policy'):u.verify('account-private')
 if __name__=='__main__':unittest.main()
