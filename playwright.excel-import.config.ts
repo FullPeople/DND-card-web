@@ -1,0 +1,3 @@
+import {defineConfig} from '@playwright/test';
+const port=process.env.DND_EXCEL_TEST_PORT||'5196';
+export default defineConfig({testDir:'./tests/e2e',testMatch:['excelImport.spec.ts'],outputDir:'test-results-excel-import',timeout:45000,expect:{timeout:10000},workers:1,reporter:'list',use:{baseURL:`http://127.0.0.1:${port}`,channel:process.env.CI?undefined:'msedge',viewport:{width:1512,height:982},trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:`node node_modules/vite/bin/vite.js --mode standalone --host 127.0.0.1 --port ${port}`,url:`http://127.0.0.1:${port}`,reuseExistingServer:!process.env.CI}});

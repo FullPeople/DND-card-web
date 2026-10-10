@@ -2,6 +2,8 @@ import {CustomCopyDrop} from './CustomCopyDrop';
 import {customCopy} from '../core/customEntries';
 import {useCustomVisibility,customVisibilityAllows,CUSTOM_VISIBILITY_LABELS} from './customVisibility';
 import {JsonFileDrop} from './JsonFileDrop';
+import {readCharacterFiles, type CharacterFiles} from '../platform/characterFiles';
+import {synchronizedImport} from '../platform/importCardSync';
 import './ux260.css';
 import {LocateButton} from './LocateButton';
 import {cardSyncCopies} from '../platform/cardSyncCopies';
@@ -293,6 +295,10 @@ export default function App() {
   useEffect(()=>{if(startupComplete&&!setupDone&&workspace&&c&&!announcement&&!modal&&!readOnly&&(!inWorkbench||wb.online&&wb.target?.kind==='character'&&!!wb.document))setModal('onboarding');},[startupComplete,setupDone,workspace?.activeId,announcement,modal,readOnly,wb.online,wb.document]);
   const [pendingImport,setPendingImport]=useState<{card:Character;review:ReturnType<typeof reviewImport>}>();
   const [pendingBatch,setPendingBatch]=useState<{card:Character;review:ReturnType<typeof reviewImport>}[]>([]);
+  type ExcelBatch=CharacterFiles&{index:number;results:Record<string,Character>;completed:number;uncertain:boolean};
+  const [excelImport,setExcelImport]=useState<ExcelBatch>(),excelBatchRef=useRef<ExcelBatch|undefined>(undefined),excelCommitFlight=useRef(false),fileReadFlight=useRef(false);
+  const [importFilesBusy,setImportFilesBusy]=useState(false),[excelImportBusy,setExcelImportBusy]=useState(false);
+  function stageExcel(batch:ExcelBatch|undefined){excelBatchRef.current=batch;setExcelImport(batch);}
   const [batchBusy,setBatchBusy]=useState(false);
   const [batchUncertain,setBatchUncertain]=useState(false);
   const [reviewTarget,setReviewTarget]=useState<Character>();
@@ -716,9 +722,61 @@ export default function App() {
     return cards;
   }
   async function importTexts(texts:string[]){
-    const cards=readCharacterTransfer(texts),w=workspaceRef.current!;
+    prepareImportBatch(readCharacterTransfer(texts));
+  }
+  function prepareImportBatch(cards:Character[]){
+    const w=workspaceRef.current!;
     const batch=cards.map(card=>{initializeAutomation(card);hydrateImportedCasting(card,allEntries);const effective=inWorkbench&&roomRules?{...card,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(card,w.siteSources,w.packs);return {card,review:reviewImport(card,effective,c?.edition||card.edition)};});
     setPendingBatch(batch);setBatchUncertain(false);setImportError('');setModal('batchImport');
+  }
+  function importedContext(card:Character){
+    const w=workspaceRef.current!;
+    return inWorkbench&&roomRules?{...card,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(card,w.siteSources,w.packs);
+  }
+  async function importFiles(files:File[]){
+    if(fileReadFlight.current||excelCommitFlight.current)throw Error('正在处理角色文件，请等待当前操作完成');
+    fileReadFlight.current=true;setImportFilesBusy(true);setImportError('');
+    try{
+      const parsed=await readCharacterFiles(files);
+      if(!parsed.excelIds.length){prepareImportBatch(parsed.cards);return;}
+      parsed.cards.forEach(card=>initializeAutomation(card));
+      stageExcel({...parsed,index:0,results:{},completed:0,uncertain:false});setModal('excelImportChoice');
+    }finally{fileReadFlight.current=false;setImportFilesBusy(false);}
+  }
+  async function commitExcel(batch:ExcelBatch){
+    if(excelCommitFlight.current||batch.uncertain||excelBatchRef.current!==batch)return;
+    if(!writable.current||readOnly||inWorkbench&&!wb.online)throw Error('当前不可导入，请恢复编辑权限或枭熊连接');
+    excelCommitFlight.current=true;setExcelImportBusy(true);setImportError('');
+    try{
+      const cards=batch.cards.map(card=>batch.results[card.id]||card);
+      if(inWorkbench){
+        for(let index=batch.completed;index<cards.length;index++){
+          await createRemoteCard(cards[index],index===cards.length-1);
+          batch.completed=index+1;
+        }
+      }else{
+        await queue.current;
+        const w=workspaceRef.current!,next={...w,characters:[...w.characters,...cards],activeId:cards[0].id};
+        const operation=persist(next);if(!operation)throw Error('当前标签页不可写，角色尚未导入');
+        try{await operation;}catch(error){if(workspaceRef.current===next){workspaceRef.current=w;setWorkspace(w);}throw error;}
+        batch.completed=cards.length;
+      }
+      stageExcel(undefined);setModal('');setNotice(`已导入 ${batch.completed} 张角色卡，未生成同步副本。`);
+    }catch(error){
+      batch.uncertain=!!(error as {uncertain?:boolean}).uncertain;
+      setExcelImport({...batch});
+      setImportError(`已确认导入 ${batch.completed} 张，其余已停止：${String(error)}${batch.uncertain?' 请先核对枭熊角色簿，不能重复提交。':''}`);
+      throw error;
+    }finally{excelCommitFlight.current=false;setExcelImportBusy(false);}
+  }
+  async function saveImportedSync(plan:ClassMigrationPlan){
+    const batch=excelBatchRef.current;
+    if(!batch||batch.uncertain)throw Error('导入流程已关闭或保存结果尚未确认');
+    const original=batch.cards.find(card=>card.id===batch.excelIds[batch.index]);
+    if(!original)throw Error('没有找到待同步的导入角色');
+    const ready={...batch,results:{...batch.results,[original.id]:synchronizedImport(original,importedContext(original),plan)}};
+    if(batch.index+1<batch.excelIds.length){stageExcel({...ready,index:batch.index+1});return;}
+    stageExcel(ready);await commitExcel(ready);
   }
   async function finishBatch(){
     if(!writable.current){setImportError('当前标签页只读，尚未导入任何角色');return;}
@@ -756,7 +814,8 @@ export default function App() {
   async function importFile(mode: string, file?: File, text?: string) {
     setImportError('');
     try {
-      const selected = text===undefined ? file || await pickFile() : undefined; if (text===undefined && !selected) return;
+      const selected = text===undefined ? file || await pickFile(mode==='character'?'.json,.xlsx':'.json') : undefined; if (text===undefined && !selected) return;
+      if(mode==='character'&&selected&&/\.xlsx$/i.test(selected.name)){await importFiles([selected]);return;}
       const value = parseFile(text ?? await selected!.text()); const w = workspaceRef.current; if (!w) return;
       if (mode === 'pack') {
         const pack = validatePack(value, activePacks);
@@ -889,11 +948,13 @@ export default function App() {
     </main>
       <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||!!wb.target?.write)}/>
     {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<Suspense fallback={<p role="status">正在加载公告…</p>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={!editing&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
-    {modal && <Dialog title={modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}setModal(''); setImportError('');} }}>
+    {modal && <Dialog title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
       <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<p role="status">正在加载面板…</p>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}
       {modal === 'adjust' && <><ArmorAdjustmentReview c={c} edit={edit}/><p className="muted">以下其他数值在特殊规则尚未适配时可填写最终值与原因，持续保留到手动撤回，并列入审卡。</p><div className="adjust-form"><label>数值<select aria-label="人工修正目标" value={adjustTarget} onChange={e => setAdjustTarget(e.target.value)}>{[['hp', '生命值上限'], ['speed', '速度'], ['initiative', '先攻'], ['passive', '被动察觉'], ...Object.entries(SKILLS).map(([key, s]) => [`skill:${key}`, `${s.name}检定`]), ...ABILITIES.map(a => [`save:${a}`, `${ABILITY_LABELS[a]}豁免`])].map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label><label>最终值<NumberInput aria-label="人工修正数值" type="number" min="-9999" max="9999" value={adjustValue} onChange={e => setAdjustValue(clamp(e.target.value, -9999, 9999))}/></label><label className="full-width">原因<input aria-label="人工修正原因" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="例如：DM 允许的生命值修正，或尚未适配的专长"/></label><button disabled={!adjustReason.trim()} onClick={() => { edit(draft => { draft.adjustments = [...(draft.adjustments || []).filter(a => a.target !== adjustTarget), { id: uid(), target: adjustTarget, value: adjustValue, reason: adjustReason.trim() }]; }); setAdjustReason(''); }}>记录修正</button></div>{(c.adjustments || []).filter(a=>a.target!=='ac').map(a => <div className="pack-row" key={a.id}><span><strong>{a.target} → {a.value}</strong><small>{a.reason}</small></span><button onClick={() => edit(draft => { draft.adjustments = draft.adjustments?.filter(x => x.id !== a.id); })}>撤回</button></div>)}<details className="calculation-trace"><summary>展开计算依据</summary>{Object.entries(d.trace).map(([key, items]) => <p key={key}><strong>{choiceLabel(key)}</strong>：{items.join('；')}</p>)}</details></>}
       {modal==='classSync'&&<CardMigration key={c.id} c={c} entries={allEntries} loading={loading} readOnly={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} save={saveClassCopy} busy={classSyncBusy} setBusy={setClassSyncBusy}/>}
+      {modal==='excelImportChoice'&&excelImport&&<section className="excel-import-choice"><h3>是否同步为 5etools 资料？</h3><p>已读取 {excelImport.cards.length} 张角色，其中 {excelImport.excelIds.length} 张来自 Excel。确认后直接核对并同步，每份 Excel 只导入一张对应的角色卡。</p><ul>{excelImport.cards.filter(card=>excelImport.excelIds.includes(card.id)).map(card=><li key={card.id}><strong>{card.name}</strong> · {card.edition}</li>)}</ul><p>取消同步则按 Excel 原内容导入，作为普通自定义卡使用。</p><div className="dialog-actions"><button className="primary" disabled={excelImportBusy||excelImport.uncertain||excelImport.completed>0} onClick={()=>setModal('excelImportSync')}>同步 5etools 资料</button><button disabled={excelImportBusy||excelImport.uncertain} onClick={()=>void commitExcel(excelBatchRef.current!).catch(error=>setImportError(String(error)))}>{excelImportBusy?'正在导入…':'取消同步，导入自定义卡'}</button></div>{excelImport.uncertain&&<p role="alert">保存结果尚未确认，请先核对枭熊角色簿，避免重复导入。</p>}</section>}
+      {modal==='excelImportSync'&&excelImport&&(()=>{const card=excelImport.cards.find(card=>card.id===excelImport.excelIds[excelImport.index]);return card&&<><p>正在核对 {excelImport.index+1} / {excelImport.excelIds.length}：{card.name}</p><CardMigration key={card.id} c={importedContext(card)} entries={allEntries} loading={loading} readOnly={readOnly||inWorkbench&&!wb.online} save={saveImportedSync} busy={classSyncBusy||excelImportBusy} setBusy={setClassSyncBusy} importing/></>;})()}
       {modal==='automation'&&<AutomationPanel c={c} d={d} entries={allEntries} edit={edit} copy={inWorkbench?undefined:()=>create(c.edition,true,true)} writable={!readOnly&&(!inWorkbench||!!wb.target?.write)}/>}
       {modal === 'quickbar' && <QuickbarManager c={c} edit={edit}/>}
       {modal === 'resources' && (editingResource?<ResourceModuleEditor key={editingResource} c={c} id={editingResource} edit={edit} close={()=>setModal('')} disabled={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} gm={!inWorkbench||wb.role==='GM'}/>:<ResourceDashboard onSave={saveDashboard} c={c} d={d} edit={edit} inspect={inspect} viewport={resourceViewport} disabled={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} gm={!inWorkbench||wb.role==='GM'}/>)}
@@ -912,7 +973,7 @@ export default function App() {
         <SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/>
 
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
-      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} capture={capturePages} disabled={readOnly||inWorkbench&&!wb.online} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>单文件导入与本机恢复</h3><JsonFileDrop multiple={false} disabled={readOnly||inWorkbench&&!wb.online} receive={async files=>{await importFile('character',files[0]);}}/><input className="file-input" data-testid="character-file" type="file" accept=".json" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup,true);history.current.clear();setNotice('已读取上一次保存，尚未保存。继续编辑或重试编辑加载时将保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
+      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} importFiles={importFiles} capture={capturePages} disabled={readOnly||inWorkbench&&!wb.online||importFilesBusy} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>单文件导入与本机恢复</h3><JsonFileDrop multiple={false} disabled={readOnly||inWorkbench&&!wb.online||importFilesBusy} receive={async files=>{await importFile('character',files[0]);}}/><input className="file-input" disabled={importFilesBusy} data-testid="character-file" type="file" accept=".json,.xlsx" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup,true);history.current.clear();setNotice('已读取上一次保存，尚未保存。继续编辑或重试编辑加载时将保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
 
       </Suspense></ToolBoundary>
     </Dialog>}
