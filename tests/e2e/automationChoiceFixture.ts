@@ -4,6 +4,7 @@ import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
+import {restoreAuthoredChoices} from './authoredChoicesFixture';
 mkdirSync('evidence',{recursive:true});
 export const raw={class:[{name:'测试职业',ENG_name:'Fixture Class',source:'XPHB',hd:{faces:10},startingProficiencies:{skills:[{choose:{from:['athletics','perception','history'],count:2}}]},startingEquipment:{defaultData:[{A:[{item:'测试剑|XPHB'},{value:400}],B:[{value:15000}]}]},classFeatures:['测试圣职|测试职业|XPHB|1|XPHB','测试回气|测试职业|XPHB|1|XPHB']}],classFeature:[{name:'测试圣职',source:'XPHB',className:'测试职业',classSource:'XPHB',level:1,entries:[{type:'options',count:1,entries:[{type:'entries',name:'保护者',entries:['原创选项：防护。'],effects:[{op:'add',target:'ac',value:2}]},{type:'entries',name:'奇术使',entries:['原创选项：魔法。']}]}]},{name:'测试回气',source:'XPHB',className:'测试职业',classSource:'XPHB',level:1,resources:[{name:'回气',max:'@class.level + 1',formula:'1d10 + @class.level',recovery:{short:1,long:'all'}}],entries:['原创资源验收条目。']}],item:[{name:'测试剑',source:'XPHB',entries:['原创测试装备。']}]};
 export async function ready(page:Page,data:Record<string,any[]>=raw,options:{skillsGate?:Promise<void>;savedSkills?:string[];keepImportIgnored?:boolean}={}){
@@ -18,7 +19,7 @@ export async function ready(page:Page,data:Record<string,any[]>=raw,options:{ski
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'choices.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:/^选择与资源验收（导入）(?:\s*旧卡资料需要核对)?$/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
  // These fixtures exercise new-card authoring. Imported cards now intentionally
  // ignore empty choices, so restore only that presentation state in the fixture.
- if(!options.keepImportIgnored){await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('dnd-card-automation-choices-20261001');r.onsuccess=()=>resolve(r.result);});const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),w=await new Promise<any>(resolve=>{const r=store.get('workspace');r.onsuccess=()=>resolve(r.result);}),card=w.characters.find((row:any)=>row.id===w.activeId);if(card.featureLayout){delete card.featureLayout.ignoredChoices;delete card.featureLayout.ignoredClassGrants;delete card.featureLayout.resumedChoices;delete card.featureLayout.optionsVisible;}store.put(w,'workspace');await new Promise<void>(resolve=>{tx.oncomplete=()=>resolve();});db.close();});await page.reload();await expect(page.locator('.paper')).toBeVisible();}
+ if(!options.keepImportIgnored)await restoreAuthoredChoices(page);
 }
 
 export const workspace=(page:Page,label:string)=>page.getByRole('region',{name:`选择${label}`,exact:true});

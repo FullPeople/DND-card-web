@@ -22,7 +22,7 @@ async function ready(page:Page,c=character()){
  const selected=page.locator('.character-tabs [role="tab"]').filter({hasText:c.name});await expect(selected).toHaveAttribute('title',c.name+'（导入）');await expect(selected).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
  await expect(page.locator('.save-status')).toContainText('已保存到本机');const persisted=await saved(page);expect(persisted.name).toBe(c.name+'（导入）');expect(persisted.edition).toBe(c.edition);expect(persisted.racialAbilityMode).toBe(c.racialAbilityMode);
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
- await restoreAuthoredChoices(page,'dnd-card-standalone');
+ await restoreAuthoredChoices(page,'dnd-card-standalone',c.featureLayout?.optionsVisible);
 }
 /** This spec is served by playwright.wiki232 in standalone mode. Reject an
  * absent database/store explicitly: opening the integrated DB would create an
