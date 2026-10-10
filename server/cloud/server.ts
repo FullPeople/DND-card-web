@@ -10,7 +10,7 @@ import {pluginAccess} from './plugin';
 export {CloudStore} from './store';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const policy={freeSlots:10,permanentSlotPriceYuan:2,paymentAvailable:false,qqLogin:'pending',publicDirectory:false};
+const policy={freeSlots:10,qqLogin:'pending',publicDirectory:false};
 export function canonicalIP(value:string){
   if(value.startsWith('::ffff:')&&isIP(value.slice(7))===4)value=value.slice(7);
   const family=isIP(value);if(!family)throw new CloudError(400,'client_ip','无法识别上传 IP，请稍后重试。');
@@ -29,7 +29,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
   if(options.accountPrivate&&options.temporaryUpload)throw Error('Private account mode cannot enable temporary anonymous uploads');
   const qq=createQQAuth(store,origin,options.qq),qqLogin=qq.ready?'ready':'pending';
   const plugin=pluginAccess(store,origin,options.pluginOrigins);
-  const currentPolicy={permissionsVersion:1,accountLibrariesPrivate:true,accountPrivate:options.accountPrivate===true,quotaScope:'account',temporaryUpload:false,...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',paymentAvailable:false,publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
+  const currentPolicy={permissionsVersion:1,accountLibrariesPrivate:true,accountPrivate:options.accountPrivate===true,quotaScope:'account',temporaryUpload:false,...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
   const limits=new Map<string,{at:number;count:number}>();
   const send=(response:ServerResponse,status:number,value:unknown)=>{response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'});response.end(JSON.stringify(value));};
   const server=createServer(async(request,response)=>{

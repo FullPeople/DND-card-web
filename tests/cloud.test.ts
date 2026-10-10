@@ -2,6 +2,7 @@ import {afterEach,describe,expect,it} from 'vitest';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {randomInt} from 'node:crypto';
 import {CloudStore} from '../server/cloud/store';
 import {createCloudServer} from '../server/cloud/server';
 import {newCharacter} from '../src/core/model';
@@ -10,6 +11,21 @@ const stores:CloudStore[]=[],paths:string[]=[];
 afterEach(()=>{stores.splice(0).forEach(store=>store.close());paths.splice(0).forEach(path=>rmSync(path,{recursive:true,force:true}));});
 const setup=()=>{const store=new CloudStore(':memory:');stores.push(store);const owner=store.provisionVerifiedAccount('provider:owner','1234567'),editor=store.provisionVerifiedAccount('provider:editor','2345678'),stranger=store.provisionVerifiedAccount('provider:stranger','3456789');return {store,owner,editor,stranger};};
 const completeCard=()=>{const card=newCharacter('2014');card.name='完整测试冒险者';card.biography={story:'五页故事，保留未知内容。'};card.notes='背景与手工记录';card.runtime.resources={custom:{current:2,max:9,name:'已消耗资源'}};card.externalSnapshot={unknown:{value:'未映射原文'}};card.automation={protocol:2,rulesVersion:'equipment.1',defaultsVersion:1,enabled:false};return card;};
+
+// A custom OS ephemeral range can include ports rejected by native fetch.
+// Bind loopback in the high dynamic range, retaining real HTTP assertions.
+async function listenForFetch(server:ReturnType<typeof createCloudServer>){
+ for(let attempt=0;attempt<20;attempt++){
+  try{
+   await new Promise<void>((resolve,reject)=>{
+    const ready=()=>{server.off('error',failed);resolve();};
+    const failed=(error:NodeJS.ErrnoException)=>{server.off('listening',ready);reject(error);};
+    server.once('error',failed);server.once('listening',ready);server.listen(randomInt(49152,65536),'127.0.0.1');
+   });return;
+  }catch(error){if(!['EADDRINUSE','EACCES'].includes((error as NodeJS.ErrnoException).code||''))throw error;}
+ }
+ throw Error('Unable to bind a fetch-compatible loopback test port');
+}
 
 describe('authoritative cloud storage',()=>{
  it('stores the whole original document without regranting or changing edition',()=>{const {store,owner}=setup(),input=completeCard();const saved=store.create(owner,input);expect(saved.id).not.toBe(input.id);expect(store.read(saved.id,owner).character).toEqual(input);expect(()=>store.read(saved.id)).toThrow();expect(store.read(saved.id,owner).role).toBe('owner');});
@@ -20,25 +36,25 @@ describe('authoritative cloud storage',()=>{
  it('validates complete imports before mutation',()=>{const {store,owner}=setup();expect(()=>store.create(owner,{name:'仅界面单文件'})).toThrow();expect(store.slots(owner).used).toBe(0);const card=store.create(owner,newCharacter());expect(()=>store.update(card.id,owner,1,{...card.character,abilities:{str:0}})).toThrow();expect(store.read(card.id,owner).revision).toBe(1);});
  it('persistent database recovery retains grants, spent resources and CAS',()=>{const path=mkdtempSync(join(tmpdir(),'dnd-cloud-'));paths.push(path);const filename=join(path,'cards.sqlite');let store=new CloudStore(filename);const owner=store.provisionVerifiedAccount('owner','1234567'),editor=store.provisionVerifiedAccount('editor','2345678');let card;try{card=store.create(owner,completeCard());store.grant(card.id,owner,editor.qq);}finally{store.close();}store=new CloudStore(filename);stores.push(store);expect(store.read(card.id,editor).role).toBe('editor');expect(store.read(card.id,owner).character.runtime.resources.custom.current).toBe(2);expect(()=>store.update(card.id,owner,0,card.character)).toThrow('修订号');});
  it('quota remains atomic across two connections',()=>{const path=mkdtempSync(join(tmpdir(),'dnd-cloud-'));paths.push(path);const filename=join(path,'cards.sqlite'),a=new CloudStore(filename),b=new CloudStore(filename);stores.push(a,b);const account=a.provisionVerifiedAccount('owner');for(let i=0;i<9;i++)a.create(account,newCharacter());b.create(account,newCharacter());expect(()=>a.create(account,newCharacter())).toThrow('槽位');expect(a.slots(account).used).toBe(10);});
- it('permanent slots are server-owned, two yuan each, with payment disabled',()=>{const {store,owner}=setup();store.db.prepare('UPDATE accounts SET extra_slots=2 WHERE id=?').run(owner.id);expect(store.slots(owner)).toMatchObject({free:10,permanent:2,total:12,priceYuan:2,paymentAvailable:false});});
+ it('enforces the fixed account limit independently of historical expansion fields',()=>{const {store,owner}=setup();store.db.prepare('UPDATE accounts SET extra_slots=2 WHERE id=?').run(owner.id);expect(store.slots(owner)).toMatchObject({total:10,used:0});});
 });
 
 describe('real HTTP, pending identity and mutation protection',()=>{
  async function run(action:(base:string,store:CloudStore,owner:ReturnType<CloudStore['provisionVerifiedAccount']>,headers:Record<string,string>)=>Promise<void>){
-  const {store,owner}=setup(),session=store.issueVerifiedSession(owner.id),origin='https://dnd.center',server=createCloudServer(store,origin);await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address() as {port:number};
+  const {store,owner}=setup(),session=store.issueVerifiedSession(owner.id),origin='https://dnd.center',server=createCloudServer(store,origin);await listenForFetch(server);const address=server.address() as {port:number};
   try{await action('http://127.0.0.1:'+address.port,store,owner,{'Content-Type':'application/json',Origin:origin,Cookie:'dnd_cloud='+session.token,'X-CSRF-Token':session.csrf});}finally{await new Promise<void>(resolve=>server.close(()=>resolve()));}
  }
  it('guest by-ID access is denied, global directory is denied and mock QQ routes do not exist',()=>run(async(base,store,owner)=>{const card=store.create(owner,newCharacter());expect((await fetch(base+'/api/cards/'+card.id)).status).toBe(404);expect((await fetch(base+'/api/cards')).status).toBe(401);for(const path of ['/api/auth/mock','/api/auth/qq/mock','/api/register'])expect((await fetch(base+path)).status).toBe(404);expect((await fetch(base+'/api/auth/qq/login')).status).toBe(503);expect((await fetch(base+'/api/auth/qq/callback?qq=1234567')).status).toBe(503);expect(await (await fetch(base+'/api/session')).json()).toMatchObject({authenticated:false,qqLogin:'pending'});}));
  it('requires explicit confirmation, session identity, same origin and CSRF',()=>run(async(base,store,owner,headers)=>{const body=JSON.stringify({character:newCharacter(),confirmUpload:true});expect((await fetch(base+'/api/cards',{method:'POST',headers:{'Content-Type':'application/json'},body})).status).toBe(401);expect((await fetch(base+'/api/cards',{method:'POST',headers:{...headers,Origin:'https://evil.example'},body})).status).toBe(403);expect((await fetch(base+'/api/cards',{method:'POST',headers:{...headers,'X-CSRF-Token':'wrong'},body})).status).toBe(403);expect((await fetch(base+'/api/cards',{method:'POST',headers,body:JSON.stringify({character:newCharacter()})})).status).toBe(400);expect(store.slots(owner).used).toBe(0);expect((await fetch(base+'/api/cards',{method:'POST',headers,body})).status).toBe(201);}));
  it('does not trust a hand-filled QQ or owner/slots field',()=>run(async(base,store,owner,headers)=>{const response=await fetch(base+'/api/cards',{method:'POST',headers,body:JSON.stringify({character:newCharacter(),qq:'2345678',owner_id:'attacker',extra_slots:999,confirmUpload:true})});const card=await response.json();expect(store.read(card.id,owner).role).toBe('owner');expect(store.slots(owner).total).toBe(10);}));
- it('rejects dangerous JSON and has no CORS or API caching',()=>run(async(base,store,owner,headers)=>{const response=await fetch(base+'/api/cards',{method:'POST',headers,body:'{"__proto__":{"admin":true}}'});expect(response.status).toBe(400);const health=await fetch(base+'/api/health');expect(health.headers.get('cache-control')).toBe('no-store');expect(health.headers.get('access-control-allow-origin')).toBeNull();expect(await health.json()).toMatchObject({publicDirectory:false,paymentAvailable:false});}));
+ it('rejects dangerous JSON and has no CORS or API caching',()=>run(async(base,store,owner,headers)=>{const response=await fetch(base+'/api/cards',{method:'POST',headers,body:'{"__proto__":{"admin":true}}'});expect(response.status).toBe(400);const health=await fetch(base+'/api/health');expect(health.headers.get('cache-control')).toBe('no-store');expect(health.headers.get('access-control-allow-origin')).toBeNull();expect(await health.json()).toMatchObject({publicDirectory:false});}));
  it('unknown and deleted IDs are unavailable to guests',()=>run(async(base,store,owner)=>{expect((await fetch(base+'/api/cards/not-an-id')).status).toBe(404);const card=store.create(owner,newCharacter());store.delete(card.id,owner,1);expect((await fetch(base+'/api/cards/'+card.id)).status).toBe(404);}));
  it('expired and logged-out sessions cannot mutate',()=>run(async(base,store,owner,headers)=>{const expired=store.issueVerifiedSession(owner.id,-1);expect(store.session(expired.token)).toBeUndefined();expect((await fetch(base+'/api/logout',{method:'POST',headers})).status).toBe(200);expect((await fetch(base+'/api/cards',{method:'POST',headers,body:JSON.stringify({character:newCharacter(),confirmUpload:true})})).status).toBe(401);}));
 });
 
 describe('temporary public upload with authoritative IP quota',()=>{
  async function run(action:(base:string,store:CloudStore,client:(ip?:string)=>Promise<Record<string,string>>)=>Promise<void>,freeBytes?:()=>number){
-  const store=new CloudStore(':memory:');stores.push(store);const origin='https://dnd.center',server=createCloudServer(store,origin,{temporaryUpload:true,trustedLoopbackProxy:true,freeBytes});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
+  const store=new CloudStore(':memory:');stores.push(store);const origin='https://dnd.center',server=createCloudServer(store,origin,{temporaryUpload:true,trustedLoopbackProxy:true,freeBytes});await listenForFetch(server);const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
   const client=async(ip='198.51.100.8')=>{const response=await fetch(base+'/api/session',{headers:{'X-Real-IP':ip}}),data=await response.json();expect(data.authenticated).toBe(false);expect(data.uploadOwner.id).toMatch(/^temporary:/);return {'Content-Type':'application/json',Origin:origin,'X-Real-IP':ip,Cookie:response.headers.get('set-cookie')!.split(';')[0],'X-CSRF-Token':data.csrf};};
   try{await action(base,store,client);}finally{await new Promise<void>(resolve=>server.close(()=>resolve()));}
  }

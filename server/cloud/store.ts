@@ -62,9 +62,8 @@ export class CloudStore {
   }
   qqProfile(accountId:string){return this.db.prepare('SELECT nickname,avatar FROM qq_profiles WHERE account_id=?').get(accountId) as {nickname:string;avatar:string}|undefined;}
   slots(account:Account){
-    const fresh=this.db.prepare('SELECT extra_slots FROM accounts WHERE id=?').get(account.id) as {extra_slots:number};
     const count=this.db.prepare('SELECT COUNT(*) AS n FROM cards WHERE owner_id=?').get(account.id) as {n:number};
-    return {free:10,permanent:fresh.extra_slots,total:10+fresh.extra_slots,used:count.n,priceYuan:2,paymentAvailable:false};
+    return {total:10,used:count.n};
   }
   private transaction<T>(action:()=>T):T {
     this.db.exec('BEGIN IMMEDIATE');
@@ -107,7 +106,7 @@ export class CloudStore {
   create(account:Account,character:unknown):CloudCard {
     this.checkBody(character);
     return this.transaction(()=>{
-      const quota=this.slots(account);if(quota.used>=quota.total)throw new CloudError(409,'quota_full','免费槽位最多保存 10 张自有角色卡；当前槽位已满。请先导出备份，再移除不需要的云端卡。');
+      const quota=this.slots(account);if(quota.used>=quota.total)throw new CloudError(409,'quota_full','每个账号最多保存 10 张自有角色卡；当前槽位已满。请先导出备份，再移除不需要的云端卡。');
       const id=this.cardID();this.db.prepare('INSERT INTO cards VALUES(?,?,?,?,?)').run(id,account.id,1,JSON.stringify(character),new Date().toISOString());return this.read(id,account);
     });
   }
