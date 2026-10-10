@@ -46,7 +46,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,chi
  async function request(id:string){
   const character=latest.current.characters.find(card=>card.id===id);if(!character||latest.current.disabled)return;
   setConfirmed(false);setTarget({id,name:character.name});
-  try{const session=await cloudSession(),account=session.authenticated?session.account?.id:session.temporaryUpload?session.uploadOwner?.id:undefined;setTarget(old=>old?.id===id?{...old,account,temporary:!session.authenticated,error:account?undefined:'云端暂时无法保存。请保留本机 JSON 备份，稍后重试。'}:old);}
+  try{const session=await cloudSession(),account=session.authenticated?session.account?.id:session.temporaryUpload?session.uploadOwner?.id:undefined;setTarget(old=>old?.id===id?{...old,account,temporary:session.temporaryUpload===true&&!session.authenticated,error:account?undefined:session.qqLogin==='ready'?'请先使用 QQ 登录，再保存到自己的卡库。':'云端暂时无法保存。请保留本机 JSON 备份，稍后重试。'}:old);}
   catch{setTarget(old=>old?.id===id?{...old,error:'云端连接失败。请保留本机 JSON 备份，稍后重试。'}:old);}
  }
  return <CloudSaveContext.Provider value={enabled?{states,request:id=>void request(id),beforeLogin:async id=>{if(!latest.current.disabled)await latest.current.readCharacter(id);},disabled}:undefined}>{children}
@@ -56,8 +56,8 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,chi
 function CloudUploadDialog({target,confirmed,busy,disabled,change,cancel,submit}:{target:{id:string;name:string;account?:string;temporary?:boolean;error?:string};confirmed:boolean;busy:boolean;disabled:boolean;change:(value:boolean)=>void;cancel:()=>void;submit:()=>Promise<void>}){
  const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{ref.current?.showModal();},[]);
  return <dialog ref={ref} className="cloud-save-dialog" aria-label="保存到云端确认" onCancel={event=>{if(busy)event.preventDefault();else cancel();}}>
- <h2>保存“{target.name||'未命名角色'}”到云端</h2><UploadWarning temporary={target.temporary!==false}/>
- <p className="cloud-save-details">上传完整五页；{target.temporary!==false?'同一个 IP 最多 10 张':'每个账号免费保存 10 张自有卡'}。请保留本机完整 JSON 备份。确认后，这张卡的后续修改会自动同步；发生冲突时保留本机草稿。</p>
+ <h2>保存“{target.name||'未命名角色'}”到云端</h2>{target.account&&<UploadWarning temporary={target.temporary!==false}/>}
+ <p className="cloud-save-details">上传完整五页；{target.temporary!==false?'同一个 IP 最多 10 张':'每个账号最多保存 10 张自有卡'}。请保留本机完整 JSON 备份。确认后，这张卡的后续修改会自动同步；发生冲突时保留本机草稿。</p>
  {target.error&&<p role="alert">{target.error}</p>}
  <label className="cloud-save-consent"><input type="checkbox" checked={confirmed} disabled={busy} onChange={event=>change(event.target.checked)}/>{target.temporary!==false?'我真的同意公开这张卡，并确认卡内没有隐私信息。':'我同意将完整角色卡保存到当前账号，并启用后续自动同步。'}</label>
  <div className="cloud-save-actions"><button className="primary" disabled={!confirmed||!target.account||busy||disabled} onClick={()=>void submit()}>{busy?'正在同步...':'确认保存到云端'}</button><button disabled={busy} onClick={cancel}>取消</button></div>

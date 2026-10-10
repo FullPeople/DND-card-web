@@ -85,7 +85,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         return send(response,200,{...store.publicDirectory(offset,limit,session?.account,temporaryOwner),mine:[...(session?store.list(session.account):[]),...(temporaryOwner?store.listTemporary(temporaryOwner):[])],slots:session?store.slots(session.account):store.temporarySlots(clientIP())});
       }
       if(!['/api/cards','/api/logout','/api/slots'].includes(url.pathname)&&!cardMatch)throw new CloudError(404,'not_found','接口不存在。');
-      if(!session&&!temporaryOwner)throw new CloudError(401,'login_required','请刷新卡库后确认上传。QQ 登录仍在申请中。');
+      if(!session&&!temporaryOwner)throw new CloudError(401,'login_required',qqLogin==='ready'?'请先使用 QQ 登录，再读取或保存自己的卡库。':'QQ 登录暂不可用，请保留本机角色备份。');
       if(method!=='GET'){
         if(request.headers.origin!==origin&&!request.headers.authorization)throw new CloudError(403,'origin','请在本站发起操作。');
         if(typeof request.headers['x-csrf-token']!=='string'||!equal(request.headers['x-csrf-token'],(session||temporaryOwner)!.csrf))throw new CloudError(403,'csrf','浏览器状态已改变，请刷新卡库后重试。本机草稿保留。');
