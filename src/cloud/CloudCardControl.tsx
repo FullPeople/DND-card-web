@@ -1,0 +1,23 @@
+import {useContext,useEffect,useRef,useState} from 'react';
+import {CloudSaveContext} from './CloudSaveContext';
+import {cloudMutation,cloudSession,readCloudCard,type CloudCard} from './api';
+import {forgetDeletedCloudCard} from './bindings';
+import {cloudCardLock} from './sync';
+import {CloudIcon} from '../ui/CloudIcon';
+import '../ui/cloudRoomControl.css';
+
+export function CloudCardControl({id,name,locked,lock}:{id:string;name:string;locked:boolean;lock:()=>void}){
+ const context=useContext(CloudSaveContext),state=context?.states[id],cloudId=state?.cloudId,[open,setOpen]=useState(false),[info,setInfo]=useState<CloudCard>(),[actor,setActor]=useState(''),[editor,setEditor]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[copied,setCopied]=useState(false),dialog=useRef<HTMLDialogElement>(null),epoch=useRef(0),key=[id,cloudId,context?.session?.account?.id].join('|'),current=useRef(key);current.current=key;
+ useEffect(()=>{epoch.current++;setOpen(false);setInfo(undefined);setMessage('');setBusy(false);},[id,cloudId,context?.session?.account?.id]);
+ useEffect(()=>{if(open)dialog.current?.showModal();else dialog.current?.close();},[open]);
+ const close=()=>{if(current.current!==key)return;epoch.current++;setOpen(false);};
+ async function read(){
+  const generation=epoch.current,value=await cloudSession();if(!value.authenticated||!value.account)throw Error('请先使用有权限的 QQ 账号登录，再核对云端卡设置。');
+  const card=await readCloudCard(cloudId!);if(generation!==epoch.current||current.current!==key)return;
+  setActor(value.account.id);setInfo(card);
+ }
+ async function act(action:()=>Promise<unknown>){const generation=epoch.current;setBusy(true);setMessage('');try{await action();}catch(error){if(generation===epoch.current&&current.current===key)setMessage(error instanceof Error?error.message:String(error));}finally{if(generation===epoch.current&&current.current===key)setBusy(false);}}
+ function show(){if(!context)return;if(!cloudId){context.request(id);return;}setInfo(undefined);setActor('');setCopied(false);setOpen(true);void act(read);}
+ if(!context||!cloudId&&!context.session?.authenticated)return <button className="card-lock" aria-label={locked?'解锁角色卡':'上锁角色卡'} aria-pressed={locked} disabled={context?.disabled} onClick={lock}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button>;
+ return <><button className="card-lock cloud-card-control" aria-label={cloudId?'云端卡设置':'上传角色卡到云端'} title={cloudId?'云端卡设置':'上传到自己的 QQ 卡库'} disabled={context.disabled} onClick={show}><CloudIcon/></button>{open&&<dialog ref={dialog} className="cloud-room-dialog" aria-label="云端卡设置" onCancel={event=>{if(busy)event.preventDefault();else close();}}><header><h2>云端卡设置</h2><button autoFocus disabled={busy} onClick={close}>关闭</button></header><strong>{name||'未命名角色'}</strong><p>云端卡 ID：<code>{cloudId}</code> <button onClick={()=>void navigator.clipboard.writeText(cloudId!).then(()=>setCopied(true)).catch(()=>setMessage('复制失败，请选中 ID 手动复制。'))}>{copied?'已复制':'复制'}</button></p>{info?<><p role="status">{info.role==='owner'?'你是这张卡的拥有者，可以管理这张卡的编辑授权。':info.role==='editor'?'卡主已授权你的 QQ 账号编辑这张卡；你可以编辑完整角色内容，权限设置由卡主管理。':'你没有编辑权限，只能查看基本信息。'}</p><p>获准的修改会自动写回云端原卡。允许整个房间修改的设置可在枭熊当前房间的云端按钮中调整。</p>{info.role==='owner'&&<><form onSubmit={event=>{event.preventDefault();void act(async()=>{await cloudMutation(actor,'cards/'+cloudId+'/editors','POST',{accountId:editor});setEditor('');await read();});}}><label>编辑者账号 ID<input value={editor} disabled={busy} onChange={event=>setEditor(event.target.value)} pattern="[a-f0-9-]{36}" required/></label><button disabled={busy}>授予编辑权限</button></form><p>填写对方在 QQ 账号弹窗中复制的账号 ID。</p>{info.editors?.map(accountId=><p key={accountId}><code>{accountId}</code> <button disabled={busy} onClick={()=>void act(async()=>{await cloudMutation(actor,'cards/'+cloudId+'/editors/'+encodeURIComponent(accountId),'DELETE');await read();})}>撤销授权</button></p>)}<button disabled={busy} onClick={()=>{if(window.confirm('移除这张云端原卡？云端授权和房间关联会失效，本机角色卡与草稿保留。'))void act(async()=>{await cloudCardLock(id,async()=>{await cloudMutation(actor,'cards/'+cloudId,'DELETE',{revision:info.revision});await forgetDeletedCloudCard(cloudId!);});close();});}}>移除云端卡（本机保留）</button></>}{state&&['error','conflict','uncertain'].includes(state.phase)&&<><p role="alert">{state.message}</p><button disabled={busy||context.disabled||!info.role} onClick={()=>{close();context.request(id);}}>核对并重试同步</button></>}</>:<p role="status">{message?'暂时无法核对这张卡的权限，可以查看上面的本机基本信息。':'正在读取云端卡权限…'}</p>}{message&&<p role="alert">{message}</p>}</dialog>}</>;
+}

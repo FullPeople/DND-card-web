@@ -1,0 +1,11 @@
+.overview-sheet{position:relative}
+.overview-choice-overlay{position:absolute;z-index:12;min-width:0;min-height:0;animation:choice-cover-open .18s ease-out}
+.overview-choice-overlay>.sheet-cell,.overview-choice-overlay>.sheet-cell>.cell-face,.overview-choice-overlay .cell-surface{height:100%;min-height:0}
+.overview-choice-overlay .cell-surface{display:flex;flex-direction:column}
+.overview-choice-overlay .cell-heading{flex:none}
+.overview-choice-overlay .cell-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+.overview-choice-overlay .choice-navigation{flex-wrap:wrap;max-height:120px;overflow:auto}
+.overview-choice-overlay .choice-navigation button{white-space:normal;text-align:left}
+.overview-choice-overlay .choice-footer{position:sticky;bottom:0;background:var(--sheet-content,#ddd);padding-top:8px}
+@keyframes choice-cover-open{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.overview-choice-overlay{animation:none}}

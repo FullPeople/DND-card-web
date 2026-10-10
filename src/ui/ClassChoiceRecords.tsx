@@ -13,7 +13,7 @@ export function ClassChoiceRecords({c,catalog,mode}:{c:Character;catalog:Entry[]
   const show=builtinOptionsVisible(c,owner.id,allChoices);
   if(!show&&!choice.slots?.some(Boolean))return null;
   return <section key={choice.id} data-class-choice={choice.id}>
-   {show?<button type="button" className={`sheet-choice-chip ${sheetChoicePending(c,choice)?'is-pending':''}`} data-choice-id={choice.id} disabled={workspace.canEdit===false} onClick={()=>workspace.open(choice.id)}>{owner.entry.name} · {owner.entry.source} · {choice.label} {choice.count?`${choice.selected.length}/${choice.count}`:'待核对'}{sheetChoiceIgnored(c,choice.id)&&'（已忽略）'}</button>:<strong>{owner.entry.name} · {choice.label}</strong>}
+   {show?<button type="button" className={`sheet-choice-chip ${sheetChoicePending(c,choice)?'is-pending':''}`} data-choice-id={choice.id} disabled={workspace.canEdit===false} onClick={()=>workspace.open(choice.id)}>{owner.entry.name} · {owner.entry.source} · {choice.label} {choice.count?`${choice.selected.length}/${choice.count}`:'待核对'}{sheetChoiceIgnored(c,choice.id,choice)&&'（已忽略）'}</button>:<strong>{owner.entry.name} · {choice.label}</strong>}
    {choice.count===0&&choice.hint&&<small>{choice.hint}</small>}
    {choice.support&&<small>{choice.support.reason} 当前发布验证：待核实。</small>}
    {mode==='optional'&&<small>已学记录；效果和物品操作手动处理</small>}

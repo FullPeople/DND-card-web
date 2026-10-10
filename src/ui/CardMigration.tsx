@@ -1,13 +1,17 @@
-import {useId,useMemo,useRef,useState} from 'react';
+import {memo,useCallback,useDeferredValue,useId,useMemo,useRef,useState} from 'react';
 import {KIND_LABELS,selectionAllowed,uid,type Character,type Entry,type Kind,type Selection} from '../core/model';
 import {MIGRATION_ROOTS,migrationCandidates,migrationOptions,retainedProficiencies} from '../core/cardMigration';
-import {planBatchCardMigration,suggestedBatchRoots} from '../core/batchCardMigration';
+import {prepareBatchCardMigration,suggestedBatchRoots,type BatchRetention} from '../core/batchCardMigration';
 import {migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigrationQuery';
 import {MigrationEntry} from './MigrationEntry';
 import {useSources} from './SourceName';
 import {ClearableSearch} from './ClearableSearch';
 import './cardMigration.css';
 const stages=['基础资料','整卡同步预览'];
+const RetentionTile=memo(function RetentionTile({item,checked,change}:{item:BatchRetention;checked:boolean;change:(id:string,value:boolean)=>void}){
+ const {row,reason}=item;
+ return <label className={'migration-retention-tile '+(checked?'is-kept':'')}><input type="checkbox" aria-label={'保留 '+row.entry.name} checked={checked} onChange={event=>change(row.id,event.target.checked)}/><span><MigrationEntry entry={row.entry}/><small>{KIND_LABELS[row.entry.kind]} · {reason}</small></span></label>;
+});
 function MatchChoices({c,original,candidates,options,value,change,label,meta}:{c:Character;original:Entry;candidates:Entry[];options:(query:string)=>Entry[];value:string;change:(v:string)=>void;label:string;meta?:string}){
  const [query,setQuery]=useState(''),[manual,setManual]=useState(false),group=useId();
  const standard=candidates.some(e=>e.id===value),custom=manual||!!value&&!standard;
@@ -23,13 +27,16 @@ function Mapping({c,row,entries,kinds,value,change}:{c:Character;row:Selection;e
 export function CardMigration({c,entries,loading,readOnly,save,busy,setBusy,importing=false}:{c:Character;entries:Entry[];loading:boolean;readOnly:boolean;save:(plan:ClassMigrationPlan)=>Promise<void>;busy:boolean;setBusy:(v:boolean)=>void;importing?:boolean}){
  const {registry}=useSources(),explain=(text:string)=>text.replace(/\b[A-Z][A-Z0-9-]*\b/g,id=>id==='CUSTOM'||id==='IMPORTED'?'自定义':registry[id]?.name||id);
  const [roots,setRoots]=useState<Record<string,string>>({}),[keep,setKeep]=useState<Record<string,boolean>>({}),[review,setReview]=useState<{original:Character;roots:Record<string,string>;identity:{id:string;now:string}}>(),[error,setError]=useState(''),[uncertain,setUncertain]=useState(false),saving=useRef(false);
+ const changeRetention=useCallback((id:string,value:boolean)=>setKeep(old=>({...old,[id]:value})),[]);
  const suggested=useMemo(()=>suggestedBatchRoots(c,entries,roots),[c,entries,roots]);
  const mappingContext=useMemo(()=>({...c,selections:c.selections.map(row=>({...row,entry:entries.find(e=>e.id===suggested[row.id])||row.entry}))}),[c,entries,suggested]);
  const rootRows=useMemo(()=>c.selections.filter(s=>MIGRATION_ROOTS.includes(s.entry.kind)&&s.entry.kind!=='item'),[c]);
- const result=useMemo(()=>{if(!review)return {};try{return {batch:planBatchCardMigration(review.original,entries,review.roots,keep,review.identity)};}catch(e){return {error:String(e)};}},[review,entries,keep]);
+ const prepared=useMemo(()=>{if(!review)return {};try{return {value:prepareBatchCardMigration(review.original,entries,review.roots,review.identity)};}catch(e){return {error:String(e)};}},[review,entries]);
+ const deferredKeep=useDeferredValue(keep),updating=deferredKeep!==keep;
+ const result=useMemo(()=>{if(!prepared.value)return {error:prepared.error};try{return {batch:prepared.value.finish(deferredKeep)};}catch(e){return {error:String(e)};}},[prepared,deferredKeep]);
  const batch=result.batch,plan=batch?.plan,stale=!!plan&&!migrationStillCurrent(plan,c);
- function next(){try{const snapshot={original:structuredClone(c),roots:{...suggested,...roots},identity:{id:uid(),now:new Date().toISOString()}};planBatchCardMigration(snapshot.original,entries,snapshot.roots,{},snapshot.identity);setKeep({});setReview(snapshot);setError('');}catch(e){setError(String(e));}}
- async function create(){if(!plan||stale||busy||uncertain||readOnly||saving.current)return;saving.current=true;setBusy(true);setError('');try{await save(plan);}catch(e){setError(String(e));setUncertain(!!(e as {uncertain?:boolean}).uncertain);}finally{saving.current=false;setBusy(false);}}
+ function next(){try{const snapshot={original:structuredClone(c),roots:{...suggested,...roots},identity:{id:uid(),now:new Date().toISOString()}};setKeep({});setReview(snapshot);setError('');}catch(e){setError(String(e));}}
+ async function create(){if(!plan||updating||stale||busy||uncertain||readOnly||saving.current)return;saving.current=true;setBusy(true);setError('');try{await save(plan);}catch(e){setError(String(e));setUncertain(!!(e as {uncertain?:boolean}).uncertain);}finally{saving.current=false;setBusy(false);}}
  return <section className="card-migration"><p>核对基础资料后，一次同步 {c.edition} 规则对应的来源气泡、法术与相关内容。最后统一预览，并筛选要保留的自定义内容。</p><p className="muted">{importing?'同步完成后直接导入这张卡，不生成同步副本。':'先保留同步前的旧卡副本，再更新当前卡；当前卡 ID 与棋子绑定保留。'}等级、已有装备、已消耗资源、手动调整和选择记录不会重置；资料不明确的内容默认保留。</p>
  <ol className="migration-steps" aria-label="同步步骤">{stages.map((label,i)=><li key={label} aria-current={Number(!!review)===i?'step':undefined}><span>{i+1}</span>{label}</li>)}</ol>
  {loading&&<p role="status">正在加载资料，完成后才可继续核对。</p>}
@@ -38,8 +45,8 @@ export function CardMigration({c,entries,loading,readOnly,save,busy,setBusy,impo
  {review&&batch&&<div className="migration-preview"><p>来源内容已统一处理。新增资源从 0 开始，已有装备和金钱不会重复领取。{importing?'核对以下变化，确认后导入这张卡。':'核对以下变化，再备份旧卡并同步当前卡。'}</p>
  <div className="migration-batch-counts" aria-label="同步变化汇总"><span>更新 {plan!.refreshed.length}</span><span>新增 {plan!.added.length}</span><span>移除 {plan!.removed.length}</span><span>待筛选 {batch.retained.length}</span></div>
  {([['资料替换',plan!.changed],['数值变化',plan!.stats],['新增内容',plan!.added],['移除内容',plan!.removed],['资源变化',plan!.resources],['保留与待核对',plan!.warnings]] as const).map(([label,items])=>items.length>0&&<details key={label} open={label==='数值变化'||label==='移除内容'}><summary>{label}（{items.length}）</summary><ul>{items.map((item,i)=><li key={i}>{explain(item)}</li>)}</ul></details>)}
- <section className="migration-retention"><h4>自定义与未匹配内容</h4><p>默认全部保留。逐项勾选或取消；{importing?'取消的内容不加入导入后的卡，原 Excel 文件保持原样。':'取消只影响更新后的当前卡，旧卡备份保留原内容。'}</p><div className="migration-retention-grid">{batch.retained.map(({row,reason})=><label className={'migration-retention-tile '+(keep[row.id]!==false?'is-kept':'')} key={row.id}><input type="checkbox" aria-label={'保留 '+row.entry.name} checked={keep[row.id]!==false} onChange={e=>setKeep(old=>({...old,[row.id]:e.target.checked}))}/><span><MigrationEntry entry={row.entry}/><small>{KIND_LABELS[row.entry.kind]} · {reason}</small></span></label>)}</div>{!batch.retained.length&&<p>没有需要筛选的自定义或未匹配内容。</p>}</section>
+ <section className="migration-retention"><h4>自定义与未匹配内容</h4><p>默认全部保留。逐项勾选或取消；{importing?'取消的内容不加入导入后的卡，原 Excel 文件保持原样。':'取消只影响更新后的当前卡，旧卡备份保留原内容。'}</p><div className="migration-retention-actions"><button type="button" disabled={readOnly||!batch.retained.length} onClick={()=>setKeep(Object.fromEntries(batch.retained.map(({row})=>[row.id,true])))}>全选</button><button type="button" disabled={readOnly||!batch.retained.length} onClick={()=>setKeep(Object.fromEntries(batch.retained.map(({row})=>[row.id,false])))}>全取消</button><span role="status">{updating?'正在更新预览…':`保留 ${batch.retained.filter(({row})=>keep[row.id]!==false).length}/${batch.retained.length} 项`}</span></div><div className="migration-retention-grid">{batch.retained.map(item=><RetentionTile key={item.row.id} item={item} checked={keep[item.row.id]!==false} change={changeRetention}/>)}</div>{!batch.retained.length&&<p>没有需要筛选的自定义或未匹配内容。</p>}</section>
  <p>保留熟练：{retainedProficiencies(review.original).join('、')||'无手动记录'}</p>{stale&&<p role="alert">角色记录已变化，请返回重新核对并预览。</p>}</div>}
- <div className="migration-actions">{review&&<button onClick={()=>{setReview(undefined);setKeep({});setError('');}}>上一步</button>}{!review?<button className="primary" disabled={loading||busy} onClick={next}>确认并继续</button>:<button className="primary" disabled={loading||readOnly||stale||!plan||busy||uncertain} onClick={()=>void create()}>{busy?'正在保存…':importing?'确认同步并导入':'备份旧卡并同步当前卡'}</button>}</div></fieldset>
+ <div className="migration-actions">{review&&<button onClick={()=>{setReview(undefined);setKeep({});setError('');}}>上一步</button>}{!review?<button className="primary" disabled={loading||busy} onClick={next}>确认并继续</button>:<button className="primary" disabled={loading||readOnly||updating||stale||!plan||busy||uncertain} onClick={()=>void create()}>{busy?'正在保存…':importing?'确认同步并导入':'备份旧卡并同步当前卡'}</button>}</div></fieldset>
  {(error||result.error)&&<p className="inline-error" role="alert">{error||result.error}</p>}{uncertain&&<p>同步结果尚未确认，本机草稿已保留。请先重新读取角色簿核对备份和当前卡，避免重复提交。</p>}</section>;
 }

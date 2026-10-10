@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {newCharacter,type Character,type Entry,type Kind,type Selection} from '../src/core/model';
-import {planBatchCardMigration,suggestedBatchRoots} from '../src/core/batchCardMigration';
+import {planBatchCardMigration,prepareBatchCardMigration,suggestedBatchRoots} from '../src/core/batchCardMigration';
 import {migrationStillCurrent} from '../src/core/classMigration';
 import {spellState} from '../src/core/characterDetails';
 import {readCharacter} from '../src/core/validation';
@@ -18,6 +18,17 @@ function fixture(){
  const catalog=[cls24,cls14,f24,f14,oldOnly,newOnly,spell24,spell14];return {c,catalog,cls14,f14,spell14};
 }
 describe('one-review rule migration',()=>{
+ it('reuses one source review while retention changes preserve descendants and spent state independently',()=>{
+  const {c,catalog}=fixture(),custom={...entry('Custom:keep','feature','2024'),source:'CUSTOM',raw:{_custom:true}};
+  c.selections.push(row('custom',custom,{parentId:'mage'}),row('child',entry('Child:manual','item','2024'),{parentId:'custom',quantity:4,equipped:true}));
+  const original=structuredClone(c),prepared=prepareBatchCardMigration(c,catalog,suggestedBatchRoots(c,catalog),identity);
+  const kept=prepared.finish({}),removed=prepared.finish({custom:false}),restored=prepared.finish({});
+  expect(removed.plan.card.selections.some(row=>row.id==='custom')).toBe(false);
+  expect(removed.plan.card.selections.find(row=>row.id==='child')).toMatchObject({quantity:4,equipped:true});
+  expect(removed.plan.card.selections.find(row=>row.id==='child')?.parentId).toBeUndefined();
+  expect(restored.plan).toEqual(kept.plan);expect(c).toEqual(original);
+  removed.plan.card.name='Unrelated consumer change';expect(prepared.finish({}).plan).toEqual(kept.plan);
+ });
  it('reconciles all linked features and ordinary spells when switching 2024 class to 2014',()=>{
   const {c,catalog}=fixture(),before=structuredClone(c),roots=suggestedBatchRoots(c,catalog),review=planBatchCardMigration(c,catalog,roots,{},identity),copy=review.plan.card;
   expect(roots.mage).toBe('Mage:14');expect(copy.selections.find(s=>s.id==='mage')?.entry.source).toBe('PHB');expect(copy.selections.find(s=>s.id==='recovery')).toMatchObject({entry:{id:'Recovery:14'},parentId:'mage',grantKey:'ref:Recovery|Mage|PHB|1'});

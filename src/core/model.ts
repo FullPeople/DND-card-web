@@ -76,7 +76,7 @@ export interface Character {
   skillBonuses?: Record<string, number>;
   saveBonuses?: Partial<Record<Ability, number>>;
   dismissedFeatures?: string[];
-  featureLayout?: { detailsExpanded?:string[]; optionsVisible?:Record<string,boolean>; ignoredChoices?:string[]; order: string[]; expanded: string[] };
+  featureLayout?: { detailsExpanded?:string[]; optionsVisible?:Record<string,boolean>; ignoredChoices?:string[]; ignoredClassGrants?:Record<string,{entryId:string;level:number}>; resumedChoices?:string[]; order: string[]; expanded: string[] };
   adjustments?: { id: string; target: string; value: number; reason: string }[];
   /** Evidence retained when the user explicitly resolves a legacy AC override. */
   armorAdjustmentHistory?: {version:1;action:'restore'|'convert';records:{id:string;target:'ac'|string;value:number;reason:string}[];previousBonus:number;previousTotal:number;ruleTotal:number;resultingBonus:number}[];

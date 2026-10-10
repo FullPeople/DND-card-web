@@ -145,7 +145,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
      const id=`${owner.id}:class-feat:${index}:${step}:${slot}`;
      const aliases=Number(value)===1?linkedClassFeatFilters(c,owner,known,group,grantedAt):[];
      if(grantedAt>at&&!c.answers[id]?.some(Boolean)&&!aliases.some(alias=>c.answers[alias]?.some(Boolean)))continue;
-     add(id,`${group.name||'职业专长'}（职业 ${step} 级）`,grantedAt<=at?1:0,candidates,false,undefined,false,undefined,aliases);
+     add(id,`${group.name||'职业专长'}（职业 ${step} 级）`,grantedAt<=at?1:0,candidates,false,undefined,false,undefined,aliases);out.at(-1)!.grantLevel=grantedAt;
     }
    }
   });
@@ -161,14 +161,15 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升（手动填写）',english:'Recorded ability improvement',entries:['保存本次属性提升方案；请在卡面手动填写属性，不重复叠加。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
     const feats=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
     add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。这里只保存方案；属性及专长效果仍手动处理。',true,legacyRecordSupport);
-    out.at(-1)!.evidenceEntries=[feature];
+    out.at(-1)!.evidenceEntries=[feature];out.at(-1)!.grantLevel=atGrant;
     continue;
    }
    const typed=feature.entries.flatMap(node=>typeof node==='string'?[...node.matchAll(/\{@feat ([^}]+)\}/g)].map(match=>resolveEntryReference(match[1],known,'feat')):[]).filter((entry):entry is Entry=>!!entry);
    const grant=typed.find(abilityImprovement);
    if(!grant){
-    if(atGrant<=at&&feature.entries.some(node=>typeof node==='string'&&/\{@5etools [^|}]+\|feats\.html\}/.test(node))&&typed.length===0)
-     add(`${owner.id}:class-untyped-feat:${feature.id}`,`${feature.name}（职业 ${atGrant} 级，待核对）`,0,[],false,'此来源只有专长目录链接。2014 属性提升与替换专长需手动核对和填写，本入口不会授予能力或改写属性。');
+    if(atGrant<=at&&feature.entries.some(node=>typeof node==='string'&&/\{@5etools [^|}]+\|feats\.html\}/.test(node))&&typed.length===0){
+     add(`${owner.id}:class-untyped-feat:${feature.id}`,`${feature.name}（职业 ${atGrant} 级，待核对）`,0,[],false,'此来源只有专长目录链接。2014 属性提升与替换专长需手动核对和填写，本入口不会授予能力或改写属性。');out.at(-1)!.grantLevel=atGrant;
+    }
     continue;
    }
    const id=`${owner.id}:class-typed-feat:${feature.id}`;
@@ -177,7 +178,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；只有既有已适配机制生效。ASI 属性分配仍手动填写，不会重复改变卡面基础属性。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；仅既有已适配机制生效，ASI 属性仍手动填写。'});
    // The chosen feat can differ from the typed ASI identity. Preserve both
    // references so catalog absence cannot turn a confirmed grant into no grant.
-   out.at(-1)!.evidenceEntries=[feature,grant];
+   out.at(-1)!.evidenceEntries=[feature,grant];out.at(-1)!.grantLevel=atGrant;
   }
  }
  // Record-only legacy feats do not enter selections. Their active answers must

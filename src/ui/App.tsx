@@ -42,6 +42,7 @@ import {useUiLanguage} from './UiLanguage';
 import {uiEntryLabel} from './uiText';
 import {useEntryMenuActions} from './EntrySharing';
 import type {CharacterRow} from './CharacterManager';
+import {CloudCardControl} from '../cloud/CloudCardControl';
 import {CloudSaveProvider,CloudSaveControl} from '../cloud/CloudSave';
 import {localCharacterRow} from './characterRows';
 const CharacterManager=lazy(()=>import('./CharacterManager').then(m=>({default:m.CharacterManager})));
@@ -92,6 +93,7 @@ import {WorkbenchBar,DicePage,WorkbenchMonster,DMConsole} from './Workbench';
 const DetailHeader=lazy(()=>import('./CharacterPages').then(m=>({default:m.DetailHeader})));
 const FeaturesPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.FeaturesPage})));
 const BackgroundPage=lazy(()=>import('./CharacterPages').then(m=>({default:m.BackgroundPage})));
+import {ignoreUnfilledSheetChoices} from '../core/automation/choices';
 import {ChoiceWorkspaceContext} from './ChoiceWorkspaceContext';
 import {usePointerStableValue} from './usePointerStableValue';
 import {sheetChoices,setSheetChoiceSlot} from '../core/automation/choices';
@@ -743,7 +745,7 @@ export default function App() {
   function prepareImportBatch(cards:Character[]){
     if(qqRoom)throw Error('房间卡只编辑云端原卡，不能导入其他角色');
     const w=workspaceRef.current!;
-    const batch=cards.map(card=>{initializeAutomation(card);hydrateImportedCasting(card,allEntries);const effective=inWorkbench&&roomRules?{...card,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(card,w.siteSources,w.packs);return {card,review:reviewImport(card,effective,c?.edition||card.edition)};});
+    const batch=cards.map(card=>{initializeAutomation(card);hydrateImportedCasting(card,allEntries);ignoreUnfilledSheetChoices(card,allEntries);const effective=inWorkbench&&roomRules?{...card,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:withSiteSources(card,w.siteSources,w.packs);return {card,review:reviewImport(card,effective,c?.edition||card.edition)};});
     setPendingBatch(batch);setBatchUncertain(false);setImportError('');setModal('batchImport');
   }
   function importedContext(card:Character){
@@ -767,7 +769,7 @@ export default function App() {
     if(!writable.current||readOnly||inWorkbench&&!wb.online)throw Error('当前不可导入，请恢复编辑权限或枭熊连接');
     excelCommitFlight.current=true;setExcelImportBusy(true);setImportError('');
     try{
-      const cards=batch.cards.map(card=>batch.results[card.id]||card);
+      const cards=batch.cards.map(card=>{const result=batch.results[card.id]||card;ignoreUnfilledSheetChoices(result,allEntries);return result;});
       if(inWorkbench){
         for(let index=batch.completed;index<cards.length;index++){
           await createRemoteCard(cards[index],index===cards.length-1);
@@ -793,7 +795,7 @@ export default function App() {
     if(!batch||batch.uncertain)throw Error('导入流程已关闭或保存结果尚未确认');
     const original=batch.cards.find(card=>card.id===batch.excelIds[batch.index]);
     if(!original)throw Error('没有找到待同步的导入角色');
-    const ready={...batch,results:{...batch.results,[original.id]:synchronizedImport(original,importedContext(original),plan)}};
+    const ready={...batch,results:{...batch.results,[original.id]:synchronizedImport(original,importedContext(original),plan,allEntries)}};
     if(batch.index+1<batch.excelIds.length){stageExcel({...ready,index:batch.index+1});return;}
     stageExcel(ready);await commitExcel(ready);
   }
@@ -880,7 +882,7 @@ export default function App() {
     finally{pendingSaves.current--;}
   }
   async function finishImport(character:Character){
-    initializeAutomation(character);
+    initializeAutomation(character);ignoreUnfilledSheetChoices(character,allEntries);
     if(inWorkbench)await createRemoteCard(character);else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,character],activeId:character.id});setModal('export');}
     setPendingImport(undefined);setNotice(inWorkbench?'角色已导入枭熊角色簿。':'角色已作为新副本导入。');
   }
@@ -915,7 +917,7 @@ export default function App() {
     workbenchUncertain.current.has(c.id)?'上一项修改尚未确认，请先核对枭熊数据。':undefined;
   const managerId=inWorkbench?wb.target?.cardId||'':c.id;
   const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,cloudRoom:row.cloudRoom,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!readOnly}));
-  return <CloudSaveProvider enabled={standalone&&!inWorkbench&&!qqRoom} disabled={readOnly} characters={workspace.characters} readCharacter={async id=>{await queue.current;if(saveFailed.current||!writable.current)throw Error('本机保存尚未成功，云端同步已暂停。请先导出备份。');return (await readCards([id]))[0];}}><OverviewDashboardHost><SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,host:choiceRoute?.host,canEdit:!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write),browse:()=>{exitSheetFullscreen();setTab('wiki');},open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
+  return <CloudSaveProvider enabled={standalone&&!inWorkbench&&!qqRoom} disabled={readOnly} characters={workspace.characters} readCharacter={async id=>{await queue.current;if(saveFailed.current||!writable.current)throw Error('本机保存尚未成功，云端同步已暂停。请先导出备份。');return (await readCards([id]))[0];}}><OverviewDashboardHost><SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,host:choiceRoute?.host,coverOverview:sheetPage==='主要',canEdit:!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write),browse:()=>{exitSheetFullscreen();setTab('wiki');},open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src={standalone?'./dnd-center-icon.png':startupComplete?'./exe_icon.png':'./favicon.svg'} alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
       <div className="header-tools">{inWorkbench&&<WorkbenchQQAccount/>}{qqRoom&&<button onClick={()=>{if(window.confirm('导出本机草稿并重新读取云端版本？当前草稿会保留在恢复记录中。'))void(async()=>{await queue.current;download((c.name||'角色')+'-房间草稿.json',exportCharacter(c));await archiveRoomDraft();const next=await readRoom();saveFailed.current=false;acceptWorkspace({schemaVersion:1,characters:[next.character],activeId:next.character.id,packs:next.character.rulePacks||[]});})().catch(error=>setNotice(String(error)));}}>核对云端版本</button>}<PaletteButton open={paletteOpen} toggle={()=>setPaletteOpen(value=>!value)}/>{standalone&&<CloudSaveControl id={c.id}/>} {standalone&&<a className="suite-website-link" href="https://dnd.center/library/" target="_blank" rel="noopener noreferrer">云端存储</a>}{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<a className="suite-website-link" href="https://dnd.center/3-dragon/" target="_blank" rel="noopener noreferrer">{t('threeDragon')}</a>}{inWorkbench&&<button aria-pressed={workbenchPage==='features'} onClick={()=>{toggleWorkbenchPanel('features');setTab('sheet');}}>{t('featuresToggle')}</button>}{inWorkbench&&<button aria-pressed={workbenchPage==='settings'} onClick={()=>{toggleWorkbenchPanel('settings');setTab('sheet');}}>{t('settings')}</button>}{(standalone||inWorkbench)&&<button onClick={()=>setAnnouncement(true)}>{t('announcements')}</button>}{!qqRoom&&<button onClick={() => setModal('characters')}>{t('characters')} <span>{inWorkbench?wb.cards.length:workspace.characters.length}</span></button>}<button onClick={() => setModal('rules')}>{t('rules')}</button><button className="primary" onClick={() => setModal('export')}>{t('transfer')}</button></div>
     </header>
@@ -932,7 +934,7 @@ export default function App() {
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {inWorkbench&&<WorkbenchPermissionNotice/>}{showClassReview&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
         <SheetEditContext.Provider value={editing&&!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}><PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
-          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{inWorkbench&&wb.target?.cloudRoom?<CloudRoomControl/>:!standalone&&<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button>}</span></div>
+          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{inWorkbench&&wb.target?.cloudRoom?<CloudRoomControl/>:standalone?<CloudCardControl id={c.id} name={c.name} locked={!!c.locked} lock={()=>edit(draft=>{draft.locked=!draft.locked;})}/>:<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={inWorkbench&&(!wb.online||!wb.target?.write)} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="10" width="14" height="11" rx="1"/><path d={c.locked?'M8 10V6a4 4 0 018 0v4':'M8 10V6a4 4 0 018 0'}/><path d="M12 14v3"/></svg></button>}</span></div>
           {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
 </> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><Suspense fallback={<p role="status">正在加载这一页…</p>}><div className="sheet-details">
           <div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
