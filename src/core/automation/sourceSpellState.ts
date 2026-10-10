@@ -3,9 +3,10 @@ import {selectionAllowed,type Character,type Selection} from '../model';
 import {automationEnabled} from './state';
 
 export function sourceSpellEnabled(c:Character,id:string):boolean{
+ let row=c.selections.find(s=>s.id===id);if(!row)return false;
  const config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;if(!grant&&!config?.manualSource)return true;
  if(grant&&(!automationEnabled(c)||!grant.active))return false;
- let row=c.selections.find(s=>s.id===id);const seen=new Set<string>();
+ const seen=new Set<string>();
  while(row){if(seen.has(row.id)||!selectionAllowed(c,row.entry))return false;seen.add(row.id);if(!row.parentId)return true;row=c.selections.find(s=>s.id===row!.parentId);}
  return false;
 }
