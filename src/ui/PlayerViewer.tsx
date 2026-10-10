@@ -44,7 +44,7 @@ export default function PlayerViewer(){
   if(cloud&&!/^[A-Z]{6}$/.test(cloud)&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(cloud))throw new Error('云端卡 ID 格式不正确。');
   const target=cloud?'/api/cards/'+cloud:params.get('data_url');if(!target)throw new ViewerLoadError('readerMissing');
   const url=new URL(target,location.href);if(!['https:','http:'].includes(url.protocol)||/\.(?:xlsx?|xlsm)(?:$|[?#])/i.test(url.href))throw new ViewerLoadError('readerJsonOnly');
-  const response=await fetch(url.href,{signal:abort.signal,credentials:'omit',cache:cloud?'no-store':'no-cache'});if(!response.ok){if(cloud&&response.status===404)throw new Error('这张云端卡已删除或不存在。请返回角色卡库刷新列表。');throw new ViewerLoadError('readerHttp',{status:response.status});}
+  const response=await fetch(url.href,{signal:abort.signal,credentials:cloud?'same-origin':'omit',cache:cloud?'no-store':'no-cache'});if(!response.ok){if(cloud&&response.status===404)throw new Error('这张云端卡已删除或不存在。请返回角色卡库刷新列表。');throw new ViewerLoadError('readerHttp',{status:response.status});}
   if(Number(response.headers.get('content-length')||0)>20_000_000)throw new ViewerLoadError('readerLarge');
   const text=await response.text(),next=readViewerCharacter(parseFile(text));if(!abort.signal.aborted){setCard(next);setOriginalJson(text);}
  })().catch(e=>{if(!abort.signal.aborted)setError(e instanceof Error?e:new Error(String(e)));});return()=>abort.abort();},[reload]);
