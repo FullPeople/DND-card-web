@@ -9,3 +9,5 @@
 发布仅替换 `migration-notice.js`，其余 1,324 项旧站文件和 123 项服务／网站保护值保持一致。运行脚本 SHA-256 为 `32da5f551f95be7fdf83db4d1fed7192a48545bcbb23adfbd4c840fe326cf1bf`。备份为 `/root/codex-release-packages/legacy-notice273-20261010/before/migration-notice.js`，发布回执为 `/root/codex-release-receipts/legacy-notice273-20261010.json`。
 
 该独立发布先于导入入口 273，后续网站和 Suite 的保护基线已经包含新提示。整批回滚应先网站、再 Suite、最后旧站提示；旧站回滚工具会检查当前保护值，不能绕过后续发布引起的变化。原站脚本使用一小时 HTTP 缓存，旧浏览器可强制刷新获取新提示。
+
+发布期间首页由另一批已授权更新独立上线。首次 273 插件包的只读检查因此停止，未切换目标；核对首页独立回执及 11 项文件后，建立新包 `import-entry273-20261010-r2`，原包和原始保护基线完整保留。整批恢复时，网站和新版插件须先回到各自发布前状态，然后使用新包中的 `legacy-notice-recovery.py --apply` 恢复提示；该工具只接受已核验首页这一项变化，其余保护值仍须完整匹配，保留新版首页。旧提示包自身的严格恢复工具会拒绝这项后续变化。
