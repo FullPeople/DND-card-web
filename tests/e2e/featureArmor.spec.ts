@@ -4,6 +4,7 @@ import {dragWiki} from './automationChoiceFixture';
 import {armorFeatureFixture} from '../fixtures/featureArmor';
 import type {Character,Entry} from '../../src/core/model';
 import {exportCharacter} from '../../src/core/export';
+import {restoreAuthoredChoices} from './authoredChoicesFixture';
 
 async function saved(page:Page):Promise<Character>{return page.evaluate(async()=>{
  const request=indexedDB.open('dnd-card-standalone');
@@ -27,6 +28,7 @@ async function ready(page:Page,edition:'2014'|'2024'){
  await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
  await expect.poll(async()=>(await saved(page)).edition).toBe(edition);
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ await restoreAuthoredChoices(page,'dnd-card-standalone');
 }
 async function choose(page:Page,name:string){
  await page.getByRole('tab',{name:'特性',exact:true}).click();

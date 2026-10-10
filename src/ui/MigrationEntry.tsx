@@ -1,4 +1,5 @@
-import {useEffect,useId,useRef,type ReactNode} from 'react';
+import {memo,useEffect,useId,useRef,useState,type ReactNode} from 'react';
+import {flushSync} from 'react-dom';
 import type {Entry} from '../core/model';
 import {KIND_LABELS} from '../core/model';
 import {useSources} from './SourceName';
@@ -7,12 +8,14 @@ import {EntryFacts} from './EntryFacts';
 
 export function useMigrationSource(){const {registry}=useSources();return (entry:Entry)=>entry.raw._custom||entry.packId==='imported'||['CUSTOM','IMPORTED'].includes(entry.source)?'自定义':registry[entry.source]?.name||`未收录资料来源（${entry.source}）`;}
 /** Native popover stays above the migration dialog without changing the card. */
-export function MigrationEntry({entry,children}:{entry:Entry;children?:ReactNode}){
+export const MigrationEntry=memo(function MigrationEntry({entry,children}:{entry:Entry;children?:ReactNode}){
  const id=useId(),tip=useRef<HTMLDivElement>(null),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),source=useMigrationSource();
+ const [visible,setVisible]=useState(false);
  const keep=()=>clearTimeout(timer.current),hide=()=>{keep();timer.current=setTimeout(()=>tip.current?.hidePopover(),120);};
  useEffect(()=>()=>clearTimeout(timer.current),[]);
  const show=(anchor:HTMLElement,point?:{x:number;y:number})=>{
   keep();const node=tip.current;if(!node)return;
+  flushSync(()=>setVisible(true));
   document.querySelectorAll<HTMLElement>('.migration-entry-tooltip:popover-open').forEach(other=>{if(other!==node)other.hidePopover();});
   const b=anchor.getBoundingClientRect(),x=point?.x??b.left+b.width/2,y=point?.y??b.top,w=Math.min(440,innerWidth-24);
   const footer=anchor.closest('.card-migration')?.querySelector('.migration-actions')?.getBoundingClientRect();
@@ -28,6 +31,6 @@ export function MigrationEntry({entry,children}:{entry:Entry;children?:ReactNode
   <button type="button" className="migration-info" aria-label={`查看${entry.name}的资料说明`} aria-describedby={id}
    onMouseEnter={e=>show(e.currentTarget,{x:e.clientX,y:e.clientY})} onMouseLeave={hide} onFocus={e=>show(e.currentTarget)} onBlur={hide}
    onClick={e=>{e.preventDefault();e.stopPropagation();show(e.currentTarget);}} onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();keep();tip.current?.hidePopover();}}}><span aria-hidden="true">i</span></button>
-  <div ref={tip} id={id} popover="manual" role="tooltip" className="migration-entry-tooltip" onClick={e=>{e.preventDefault();e.stopPropagation();}} onMouseEnter={keep} onMouseLeave={hide}><header><strong>{entry.name}</strong><small>{source(entry)} · {KIND_LABELS[entry.kind]} · {entry.edition==='both'?'通用':entry.edition}</small></header><div className="rules-prose"><EntryFacts entry={entry} onLink={()=>{}}/><Entries value={entry.entries}/></div></div>
+  <div ref={tip} id={id} popover="manual" role="tooltip" className="migration-entry-tooltip" onToggle={event=>{if((event.nativeEvent as ToggleEvent).newState==='closed')setVisible(false);}} onClick={e=>{e.preventDefault();e.stopPropagation();}} onMouseEnter={keep} onMouseLeave={hide}><header><strong>{entry.name}</strong><small>{source(entry)} · {KIND_LABELS[entry.kind]} · {entry.edition==='both'?'通用':entry.edition}</small></header>{visible&&<div className="rules-prose"><EntryFacts entry={entry} onLink={()=>{}}/><Entries value={entry.entries}/></div>}</div>
  </span>;
-}
+});

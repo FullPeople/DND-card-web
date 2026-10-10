@@ -4,6 +4,7 @@ import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {source,warforgedToolEntries} from '../helpers/warforgedToolFixture';
+import {restoreAuthoredChoices} from './authoredChoicesFixture';
 async function saved(page:Page){return page.evaluate(async()=>{
  const req=indexedDB.open('dnd-card-standalone'),db=await new Promise<IDBDatabase>((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
  try{return await new Promise<Character>((resolve,reject)=>{const get=db.transaction('documents').objectStore('documents').get('workspace');get.onsuccess=()=>resolve(get.result.characters.find((c:Character)=>c.id===get.result.activeId));get.onerror=()=>reject(get.error);});}finally{db.close();}
@@ -17,7 +18,7 @@ async function ready(page:Page,book:'ERLW'|'EFA',mobile=false){
  await page.goto('/');if(mobile)await page.getByRole('button',{name:'Wiki',exact:true}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();if(mobile)await page.getByRole('button',{name:'功能页',exact:true}).click();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'synthetic-warforged-tools.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  if(book==='ERLW')await page.getByRole('dialog',{name:'导入前核对',exact:true}).getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
- const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();return c;
+ const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();await restoreAuthoredChoices(page,'dnd-card-standalone');return c;
 }
 async function dragToSlot(page:Page,name:string,slot:Locator){
  // Fixed drag coordinates must start away from the frame's auto-scroll edge.

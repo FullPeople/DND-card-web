@@ -3,6 +3,7 @@ import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
+import {restoreAuthoredChoices} from './authoredChoicesFixture';
 
 // Authored fixtures carry the source schema, without publisher prose or players.
 const cls={name:'原创成长职业',ENG_name:'Authored Progression',source:'XPHB',edition:'one',hd:{faces:8},
@@ -30,6 +31,7 @@ async function ready(page:Page,withFeatPrerequisite=false){
  await page.getByTestId('character-file').setInputFiles({name:'authored-choices.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  await expect(page.getByRole('tab',{name:/原创职业选择验收（导入）/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ await restoreAuthoredChoices(page,'dnd-card-standalone');
 }
 test('class grants appear in the feat region; optional learning drag saves without activation',async({page},info)=>{
  await ready(page);

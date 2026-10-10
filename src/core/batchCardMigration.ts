@@ -35,6 +35,10 @@ export function suggestedBatchRoots(c:Character,entries:Entry[],overrides:Record
 export type BatchRetention={row:Selection;reason:string};
 /** One review transaction. Never infer choice answers, refill resources, or claim equipment. */
 export function planBatchCardMigration(original:Character,entries:Entry[],roots:Record<string,string>,keep:Record<string,boolean>,identity:{id:string;now:string}){
+ return prepareBatchCardMigration(original,entries,roots,identity).finish(keep);
+}
+/** Match source declarations once; retention changes reuse the reviewed snapshot. */
+export function prepareBatchCardMigration(original:Character,entries:Entry[],roots:Record<string,string>,identity:{id:string;now:string}){
  const choices=emptyMigrationChoices();choices.roots={...roots};
  // Inventory is included in the batch without turning every stack into a separate step.
  for(const row of original.selections.filter(s=>s.entry.kind==='item'))choices.roots[row.id]??=automaticTarget(original,row,entries);
@@ -104,6 +108,14 @@ export function planBatchCardMigration(original:Character,entries:Entry[],roots:
  for(const t of draft.training){const id=suggestedMigrationTarget(card,t.candidates);if(id)choices.training[t.id]=id;}
  const training=migrationDraft(original,entries,{...emptyMigrationChoices(),training:choices.training},5).card.training;
  if(training)card.training=training;
+ // Source reconciliation keeps the imported class's presentation acknowledgement
+ // while replacing its legacy entry identity. Later levels remain outside it.
+ for(const old of original.selections){const scope=card.featureLayout?.ignoredClassGrants?.[old.id],current=card.selections.find(row=>row.id===old.id&&row.entry.kind==='class');
+  if(old.entry.kind==='class'&&scope?.entryId===old.entry.id&&current)scope.entryId=current.entry.id;
+ }
+ const snapshot={...draft,card:structuredClone(card),changed:[...draft.changed],warnings:[...draft.warnings]},automaticRemovals=[...removed];
+ return {retained,finish(keep:Record<string,boolean>){
+ const draft={...snapshot,card:structuredClone(snapshot.card),changed:[...snapshot.changed],warnings:[...snapshot.warnings]},card=draft.card,removed=new Set(automaticRemovals);
  // Unchecking means only this reviewed record. Its unrelated/manual descendants survive.
  for(const item of retained)if(keep[item.row.id]===false){removed.add(item.row.id);if(item.row.parentId&&item.row.grantKey?.startsWith('source-spell:'))card.dismissedFeatures=[...new Set([...(card.dismissedFeatures||[]),item.row.parentId+'|'+item.row.grantKey])];}
  rememberSourceSpellUses(card);rememberFeatureResources(card);rememberSourceEquipment(card);
@@ -132,4 +144,5 @@ export function planBatchCardMigration(original:Character,entries:Entry[],roots:
  }
  const plan=finalizeCardMigration(original,entries,card,draft.changed,draft.warnings,identity);
  return {plan,retained};
+ }};
 }

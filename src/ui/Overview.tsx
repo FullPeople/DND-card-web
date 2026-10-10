@@ -1,3 +1,4 @@
+import {OverviewChoiceOverlay} from './OverviewChoiceOverlay';
 import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {useSheetChoices} from './SheetChoicesContext';
 import {displayCharacterEdit} from '../core/displayCharacterEdit';
@@ -125,7 +126,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const featuresCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>['class','subclass','race'].includes(row.entry.kind))} receive={entry => addEntry(entry, 'features')} c={c} rows={classFeatures} edit={edit} browse={() => browse('feature')} onLink={onLink}/>;
   const spellsHidden=c.overviewSpellsHidden===true;
   const spellCell = spellsHidden&&!editing?null:contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spellIsReady(c,s)), ['spell'], `overview-spells spells-box ${spellsHidden?'overview-spells-hidden':''}`,editing?<button type="button" className="overview-spells-visibility" aria-label="隐藏主要页法术框" aria-pressed={spellsHidden} title={spellsHidden?'退出编辑后隐藏法术框':'隐藏主要页法术框'} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();edit(displayCharacterEdit('overviewSpellsHidden',!spellsHidden));}}><VisibilityEye hidden={spellsHidden}/></button>:undefined);
-  if(screen)return <div className={`overview-sheet screen-overview ${spellsHidden&&!editing?'overview-spells-collapsed':''}`}><div className="screen-status">{statusRibbon}</div><div className="screen-layout"><div className="screen-summary">{identity}<ScreenAbilities items={[{id:'initiative',node:initiative},{id:'passive',node:passive},...(['str','int','dex','wis','con','cha'] as Ability[]).map(a=>({id:a,node:abilityCell(a)})),{id:'speed',node:speed},{id:'size',node:sizeCell},{id:'proficiency',node:proficiency},{id:'saves',node:death}]}/>{trainingCell}</div><div className="screen-actions"><div className="screen-vitals">{ratings}{health}<Portrait c={c} edit={edit}/></div>{quickbar}{featuresCell}{spellCell}{heritageCell}</div></div></div>;
+  if(screen)return <div className={`overview-sheet screen-overview ${spellsHidden&&!editing?'overview-spells-collapsed':''}`}><div className="screen-status">{statusRibbon}</div><div className="screen-layout"><div className="screen-summary">{identity}<ScreenAbilities items={[{id:'initiative',node:initiative},{id:'passive',node:passive},...(['str','int','dex','wis','con','cha'] as Ability[]).map(a=>({id:a,node:abilityCell(a)})),{id:'speed',node:speed},{id:'size',node:sizeCell},{id:'proficiency',node:proficiency},{id:'saves',node:death}]}/>{trainingCell}</div><div className="screen-actions"><div className="screen-vitals">{ratings}{health}<Portrait c={c} edit={edit}/></div>{quickbar}{featuresCell}{spellCell}{heritageCell}</div></div><OverviewChoiceOverlay c={c} catalog={catalog} edit={edit}/></div>;
   return <div className="overview-sheet">
     <div className="overview-top">
       {identity}
@@ -147,5 +148,6 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
         <div className={`overview-lower ${spellsHidden&&!editing?'overview-spells-collapsed':''}`}>{heritageCell}{spellCell}</div>
       </div>
     </div>
+    <OverviewChoiceOverlay c={c} catalog={catalog} edit={edit}/>
   </div>;
 }
