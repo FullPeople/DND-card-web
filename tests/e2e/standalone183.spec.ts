@@ -1,10 +1,11 @@
 import {test,expect} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 
-test('standalone has no room transport, survives offline reload and rolls without a host',async({page,context})=>{
- const errors:string[]=[],forbidden:string[]=[],sockets:string[]=[];
+test('standalone has no room transport, survives offline reload and rolls without a host',async({page,context,baseURL})=>{
+ const errors:string[]=[],forbidden:string[]=[],sockets:string[]=[],sessionReads:string[]=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('websocket',s=>sockets.push(s.url()));
- page.on('request',r=>{if(/owlbear|obr\.dnd|\/relay|\/characters\/|\/api\//i.test(r.url()))forbidden.push(r.url());});
+ // QQ account discovery is allowed; local editing must not use cloud writes or room transport.
+ page.on('request',r=>{const url=new URL(r.url()),session=url.origin===new URL(baseURL!).origin&&url.pathname==='/api/session'&&r.method()==='GET';if(session)sessionReads.push(r.url());else if(/owlbear|obr\.dnd|\/relay|\/characters\/|\/api\//i.test(r.url()))forbidden.push(r.url());});
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/#suite=ignored&bridge=http%3A%2F%2F127.0.0.1%3A5194');
  await expect(page.locator('.brand')).toContainText('DND 角色卡');
  await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
@@ -45,5 +46,5 @@ test('standalone has no room transport, survives offline reload and rolls withou
  await page.locator('.catalog-row').first().click();await expect(page.locator('.entry-detail')).toContainText('测试法师');
  await page.screenshot({path:test.info().outputPath('standalone-desktop.png')});
  await page.setViewportSize({width:420,height:900});await page.getByRole('button',{name:'功能页',exact:true}).click();await page.screenshot({path:test.info().outputPath('standalone-mobile.png')});
- expect(forbidden).toEqual([]);expect(sockets).toEqual([]);expect(errors).toEqual([]);
+ expect(sessionReads.length).toBeGreaterThan(0);expect(forbidden).toEqual([]);expect(sockets).toEqual([]);expect(errors).toEqual([]);
 });
