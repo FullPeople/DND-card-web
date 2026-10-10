@@ -199,6 +199,15 @@ class FrontendTests(unittest.TestCase):
    self.assertEqual(before,u.tree(u.ROOT));self.assertFalse((package/'backup').exists())
 
 class PolicyTests(unittest.TestCase):
+ def test_private_manifest_requires_each_privacy_guard_and_rejects_mode_drift(self):
+  health={'version':'1.0.273','qqLogin':'ready','permissionsVersion':1,'accountLibrariesPrivate':True,'accountPrivate':True,'temporaryUpload':False,'publicDirectory':False,'quotaScope':'account'}
+  manifest={'backendVersion':'1.0.273','qqLogin':'ready','cloudMode':'account-private'}
+  with patch.object(u.m,'wait_http',return_value=json.dumps(health).encode()):u.verify_policy(manifest)
+  for field,value in [('permissionsVersion',0),('accountLibrariesPrivate',False),('accountPrivate',False),('temporaryUpload',True),('publicDirectory',True),('quotaScope','ip')]:
+   with self.subTest(field=field),patch.object(u.m,'wait_http',return_value=json.dumps({**health,field:value}).encode()):
+    with self.assertRaisesRegex(RuntimeError,'Private API policy changed'):u.verify_policy(manifest)
+  with patch.object(u.m,'wait_http',return_value=json.dumps(health).encode()):
+   with self.assertRaisesRegex(RuntimeError,'API policy changed'):u.verify_policy({**manifest,'cloudMode':'temporary-ip'})
  def health(self,state):
   return {'version':'1.0.261','temporaryUpload':True,'quotaScope':'ip','qqLogin':state}
  def test_matching_pending_and_ready_policies(self):

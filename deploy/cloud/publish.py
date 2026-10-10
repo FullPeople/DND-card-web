@@ -41,7 +41,7 @@ def protected():
         if path.is_dir(): result['static:'+name]=digest(tree(path))
     for file in OLD.parent.iterdir():
         if file.is_file(): result[str(file)]=sha(file)
-    for path in [Path('/etc/nginx/sites-enabled/obr-plugins'),Path('/etc/ssh/sshd_config'),Path('/root/.ssh/authorized_keys'),Path('/usr/local/libexec/obr-deploy/server_preflight.py'),Path('/etc/sudoers.d/obr-deploy-preflight'),*[Path('/etc/systemd/system')/(name+'.service') for name in ['obr-character-cards','obr-three-dragon','obr-workbench-relay-dev']],*[Path('/opt/obr-workbench-relay-dev')/name for name in ['server.mjs','documents.mjs','patches.mjs']],Path('/opt/obr-three-dragon/server.mjs'),Path('/opt/obr-three-dragon/service.mjs')]:
+    for path in [Path('/etc/dnd-card-cloud-qq.env'),Path('/etc/nginx/sites-enabled/obr-plugins'),Path('/etc/ssh/sshd_config'),Path('/root/.ssh/authorized_keys'),Path('/usr/local/libexec/obr-deploy/server_preflight.py'),Path('/etc/sudoers.d/obr-deploy-preflight'),*[Path('/etc/systemd/system')/(name+'.service') for name in ['obr-character-cards','obr-three-dragon','obr-workbench-relay-dev']],*[Path('/opt/obr-workbench-relay-dev')/name for name in ['server.mjs','documents.mjs','patches.mjs']],Path('/opt/obr-three-dragon/server.mjs'),Path('/opt/obr-three-dragon/service.mjs')]:
         if path.exists(): result[str(path)]=sha(path)
     for path in Path('/etc/nginx/sites-enabled').iterdir():
         if path.resolve()!=CONFIG.resolve() and path.is_file(): result['nginx:'+str(path)]=sha(path)

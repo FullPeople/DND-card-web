@@ -54,10 +54,11 @@ def source_zip(sha='a' * 40, content=b'license'):
     return output.getvalue()
 
 
-def archive_data(path, extra=None, symlink=False, duplicate=False, omitted=None, qq_login=None, metadata_overrides=None):
+def archive_data(path, extra=None, symlink=False, duplicate=False, omitted=None, qq_login=None, metadata_overrides=None, cloud_mode=None):
     release_fields = {'version': 'standalone-1.0.257', 'sourceCommit': 'a' * 40}
     if qq_login is not None:
         release_fields.update(backendVersion='1.0.253', qqLogin=qq_login)
+    if cloud_mode is not None:release_fields.update(cloudMode=cloud_mode)
     release = json.dumps(release_fields).encode()
     files = {'card/index.html': b'new card', 'library/index.html': b'new library',
              'card/release.json': release, 'library/release.json': release,
@@ -77,6 +78,7 @@ def archive_data(path, extra=None, symlink=False, duplicate=False, omitted=None,
         metadata.update(format=2, qqLogin=qq_login)
     if metadata_overrides:
         metadata.update(metadata_overrides)
+    if cloud_mode is not None:metadata.update(format=3,cloudMode=cloud_mode)
     with tarfile.open(path, 'w:gz') as archive:
         for name, data in {'artifact.json': json.dumps(metadata).encode(), **files}.items():
             member = tarfile.TarInfo(name); member.size = len(data)
@@ -214,7 +216,7 @@ class ArtifactTests(unittest.TestCase):
 
 
 class PublicationTests(unittest.TestCase):
-    def fixture(self, root, qq_login='pending', artifact_qq=None):
+    def fixture(self, root, qq_login='pending', artifact_qq=None, cloud_mode=None):
         front = root / 'site'; front.mkdir()
         for name in c.TARGETS:
             (front / name).mkdir(); (front / name / 'index.html').write_text('old ' + name)
@@ -237,12 +239,13 @@ class PublicationTests(unittest.TestCase):
         stack.enter_context(patch.object(publisher.m, 'command', return_value='active'))
         self.health = {'version': '1.0.253', 'temporaryUpload': True,
                        'quotaScope': 'ip', 'qqLogin': qq_login}
+        if cloud_mode=='account-private':self.health.update(permissionsVersion=1,accountLibrariesPrivate=True,accountPrivate=True,temporaryUpload=False,publicDirectory=False,quotaScope='account')
         stack.enter_context(patch.object(publisher.m, 'wait_http',
                            side_effect=lambda url, *args: json.dumps(self.health).encode() if url.endswith('/api/health') else b'old card'))
         self.verify = stack.enter_context(patch.object(publisher, 'verify'))
         stack.enter_context(patch.object(server.c, 'load', return_value=publisher))
         stack.enter_context(patch.object(server.c, 'verify_ci', return_value={'exactSha': 'a' * 40, 'runs': []}))
-        archive = root / 'incoming.tgz'; archive_data(archive, qq_login=artifact_qq)
+        archive = root / 'incoming.tgz'; archive_data(archive, qq_login=artifact_qq,cloud_mode=cloud_mode)
         data = request(); data.update(archive_bytes=archive.stat().st_size, archive_sha256=c.sha_file(archive),
                                       expected_release_sha256=c.sha_file(front / 'card/release.json'))
         commit = {'sha': 'a' * 40, 'tree': {'sha': 'b' * 40}}
@@ -257,6 +260,22 @@ class PublicationTests(unittest.TestCase):
                     prepared_manifest_sha256=result['manifestSha256'])
         identity = claims(int(time.time())); identity['run_id'] = '457'
         return identity
+
+    def test_private_artifact_publishes_and_rejects_later_public_policy_before_switch(self):
+        for drift in (False,True):
+            with self.subTest(drift=drift),tempfile.TemporaryDirectory() as directory:
+                publisher,data,archive=self.fixture(Path(directory),'ready','ready','account-private')
+                identity=self.approved(data,archive)
+                before=publisher.tree(publisher.ROOT)
+                if drift:
+                    self.health.update(temporaryUpload=True,publicDirectory=True,quotaScope='ip',accountPrivate=False)
+                    with self.assertRaisesRegex(RuntimeError,'Private API policy changed'):server.publish(data,identity,io.BytesIO(archive.read_bytes()))
+                    self.assertEqual(publisher.tree(publisher.ROOT),before)
+                    self.assertFalse((server.package_for('456','1')/'backup').exists())
+                else:
+                    self.assertEqual(server.publish(data,identity,io.BytesIO(archive.read_bytes()))['status'],'published')
+                    manifest=json.loads((server.package_for('456','1')/'manifest.json').read_text())
+                    self.assertEqual(manifest['cloudMode'],'account-private')
 
     def test_both_real_qq_states_flow_from_archive_to_preflight_and_publication(self):
         for policy in ('pending', 'ready'):

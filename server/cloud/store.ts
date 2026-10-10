@@ -24,6 +24,7 @@ export class CloudStore {
       CREATE INDEX IF NOT EXISTS cards_owner ON cards(owner_id);
       CREATE TABLE IF NOT EXISTS editors(card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,qq TEXT NOT NULL,PRIMARY KEY(card_id,qq));
       CREATE INDEX IF NOT EXISTS editors_qq ON editors(qq);
+      CREATE TABLE IF NOT EXISTS account_editors(card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,account_id TEXT NOT NULL REFERENCES accounts(id),PRIMARY KEY(card_id,account_id));
       CREATE TABLE IF NOT EXISTS temporary_owners(id TEXT PRIMARY KEY,token_hash TEXT UNIQUE NOT NULL,csrf TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS temporary_cards(id TEXT PRIMARY KEY,owner_id TEXT NOT NULL REFERENCES temporary_owners(id),ip_hash TEXT NOT NULL,revision INTEGER NOT NULL,body TEXT NOT NULL,updated_at TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS temporary_cards_ip ON temporary_cards(ip_hash);
@@ -61,9 +62,8 @@ export class CloudStore {
   }
   qqProfile(accountId:string){return this.db.prepare('SELECT nickname,avatar FROM qq_profiles WHERE account_id=?').get(accountId) as {nickname:string;avatar:string}|undefined;}
   slots(account:Account){
-    const fresh=this.db.prepare('SELECT extra_slots FROM accounts WHERE id=?').get(account.id) as {extra_slots:number};
     const count=this.db.prepare('SELECT COUNT(*) AS n FROM cards WHERE owner_id=?').get(account.id) as {n:number};
-    return {free:10,permanent:fresh.extra_slots,total:10+fresh.extra_slots,used:count.n,priceYuan:2,paymentAvailable:false};
+    return {total:10,used:count.n};
   }
   private transaction<T>(action:()=>T):T {
     this.db.exec('BEGIN IMMEDIATE');
@@ -83,6 +83,7 @@ export class CloudStore {
   }
   private role(row:{id:string;owner_id:string},account?:Account):'owner'|'editor'|undefined {
     if(row.owner_id===account?.id)return 'owner';
+    if(account&&this.db.prepare('SELECT 1 FROM account_editors WHERE card_id=? AND account_id=?').get(row.id,account.id))return 'editor';
     if(account?.qq&&this.db.prepare('SELECT 1 FROM editors WHERE card_id=? AND qq=?').get(row.id,account.qq))return 'editor';
   }
   private checkBody(character:unknown):asserts character is Character {
@@ -95,16 +96,17 @@ export class CloudStore {
     const temporary=this.db.prepare('SELECT * FROM temporary_cards WHERE id=?').get(id) as {id:string;owner_id:string;revision:number;body:string;updated_at:string}|undefined;
     if(temporary)return {id,revision:temporary.revision,character:JSON.parse(temporary.body),updatedAt:temporary.updated_at,...(temporary.owner_id===temporaryOwner?.id?{role:'owner' as const}:{})};
     const row=this.row(id),role=this.role(row,account);
-    return {id:row.id,revision:row.revision,character:JSON.parse(row.body),updatedAt:row.updated_at,...(role?{role}:{}),...(role==='owner'?{editors:this.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(id).map(row=>String(row.qq))}:{})};
+    if(!role)throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
+    return {id:row.id,revision:row.revision,character:JSON.parse(row.body),updatedAt:row.updated_at,role,...(role==='owner'?{editors:[...this.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(id).map(row=>String(row.qq)),...this.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(id).map(row=>String(row.account_id))]}:{})};
   }
   list(account:Account){
-    const rows=this.db.prepare('SELECT DISTINCT c.id FROM cards c LEFT JOIN editors e ON e.card_id=c.id WHERE c.owner_id=? OR (e.qq=? AND ? IS NOT NULL) ORDER BY c.updated_at DESC').all(account.id,account.qq,account.qq);
+    const rows=this.db.prepare('SELECT DISTINCT c.id FROM cards c LEFT JOIN editors e ON e.card_id=c.id LEFT JOIN account_editors ae ON ae.card_id=c.id WHERE c.owner_id=? OR ae.account_id=? OR (e.qq=? AND ? IS NOT NULL) ORDER BY c.updated_at DESC').all(account.id,account.id,account.qq,account.qq);
     return rows.map(row=>{const card=this.read(String(row.id),account);return {id:card.id,revision:card.revision,name:card.character.name,edition:card.character.edition,updatedAt:card.updatedAt,role:card.role};});
   }
   create(account:Account,character:unknown):CloudCard {
     this.checkBody(character);
     return this.transaction(()=>{
-      const quota=this.slots(account);if(quota.used>=quota.total)throw new CloudError(409,'quota_full','免费槽位最多保存 10 张自有角色卡；当前槽位已满。请先导出备份，再移除不需要的云端卡。');
+      const quota=this.slots(account);if(quota.used>=quota.total)throw new CloudError(409,'quota_full','每个账号最多保存 10 张自有角色卡；当前槽位已满。请先导出备份，再移除不需要的云端卡。');
       const id=this.cardID();this.db.prepare('INSERT INTO cards VALUES(?,?,?,?,?)').run(id,account.id,1,JSON.stringify(character),new Date().toISOString());return this.read(id,account);
     });
   }
@@ -123,6 +125,25 @@ export class CloudStore {
       const row=this.row(id);if(row.owner_id!==account.id)throw new CloudError(403,'owner_only','只有卡主可以管理编辑授权。');
       if(remove)this.db.prepare('DELETE FROM editors WHERE card_id=? AND qq=?').run(id,qq);
       else {const count=this.db.prepare('SELECT COUNT(*) n FROM editors WHERE card_id=?').get(id) as {n:number};if(count.n>=100&&!this.db.prepare('SELECT 1 FROM editors WHERE card_id=? AND qq=?').get(id,qq))throw new CloudError(400,'too_many_editors','每张卡最多指定 100 个编辑者。');this.db.prepare('INSERT OR IGNORE INTO editors VALUES(?,?)').run(id,qq);}
+      return this.read(id,account);
+    });
+  }
+  grantAccount(id:string,account:Account,target:unknown,remove=false){
+    if(typeof target!=='string'||!this.db.prepare('SELECT 1 FROM accounts WHERE id=?').get(target))throw new CloudError(400,'invalid_account','没有找到该账号，请对方复制登录后的账号 ID。');
+    return this.transaction(()=>{
+      const row=this.row(id);if(row.owner_id!==account.id)throw new CloudError(403,'owner_only','只有卡主可以管理编辑授权。');
+      if(remove)this.db.prepare('DELETE FROM account_editors WHERE card_id=? AND account_id=?').run(id,target);
+      else {const count=Number(this.db.prepare('SELECT COUNT(*) n FROM account_editors WHERE card_id=?').get(id)!.n);if(count>=100&&!this.db.prepare('SELECT 1 FROM account_editors WHERE card_id=? AND account_id=?').get(id,target))throw new CloudError(400,'too_many_editors','每张卡最多指定 100 个编辑者。');this.db.prepare('INSERT OR IGNORE INTO account_editors VALUES(?,?)').run(id,target);}
+      return this.read(id,account);
+    });
+  }
+  claimTemporary(id:string,account:Account,owner:TemporaryOwner,expected:unknown){
+    return this.transaction(()=>{
+      const row=this.temporaryRow(id,owner);if(row.revision!==expected)throw new CloudError(409,'conflict','临时卡版本已改变，请重新核对后迁移。');
+      const quota=this.slots(account);if(quota.used>=quota.total)throw new CloudError(409,'quota_full','账号槽位已满，临时卡保留。');
+      const full=this.db.prepare('SELECT body,updated_at FROM temporary_cards WHERE id=?').get(id)!;
+      this.db.prepare('INSERT INTO cards VALUES(?,?,?,?,?)').run(id,account.id,row.revision,String(full.body),String(full.updated_at));
+      this.db.prepare('DELETE FROM temporary_cards WHERE id=?').run(id);
       return this.read(id,account);
     });
   }
@@ -150,8 +171,8 @@ export class CloudStore {
     return {scope:'ip' as const,used:row.n,total:10};
   }
   publicDirectory(offset:number,limit:number,account?:Account,owner?:TemporaryOwner){
-    const total=Number((this.db.prepare('SELECT (SELECT COUNT(*) FROM cards)+(SELECT COUNT(*) FROM temporary_cards) n').get() as {n:number}).n);
-    const rows=this.db.prepare("SELECT id,owner_id,revision,json_extract(body,'$.name') name,json_extract(body,'$.edition') edition,updated_at,0 temporary FROM cards UNION ALL SELECT id,owner_id,revision,json_extract(body,'$.name') name,json_extract(body,'$.edition') edition,updated_at,1 temporary FROM temporary_cards ORDER BY updated_at DESC,id LIMIT ? OFFSET ?").all(limit,offset);
+    const total=Number((this.db.prepare('SELECT COUNT(*) n FROM temporary_cards').get() as {n:number}).n);
+    const rows=this.db.prepare("SELECT id,owner_id,revision,json_extract(body,'$.name') name,json_extract(body,'$.edition') edition,updated_at,1 temporary FROM temporary_cards ORDER BY updated_at DESC,id LIMIT ? OFFSET ?").all(limit,offset);
     const cards=rows.map(row=>({id:String(row.id),revision:Number(row.revision),name:String(row.name),edition:String(row.edition),updatedAt:String(row.updated_at),role:row.temporary?(row.owner_id===owner?.id?'owner' as const:undefined):this.role({id:String(row.id),owner_id:String(row.owner_id)},account)}));
     return {cards,total,offset,hasMore:offset+cards.length<total};
   }

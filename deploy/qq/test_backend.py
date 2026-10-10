@@ -32,6 +32,22 @@ class BackendTests(unittest.TestCase):
    package,seal=self.fixture(Path(folder));self.verify.side_effect=RuntimeError('not ready')
    with self.assertRaisesRegex(RuntimeError,'not ready'):u.apply(package,seal)
    self.assertEqual((u.SERVICE/'current/server.mjs').read_text(),'old server');self.assertEqual(u.UNIT.read_text(),'old unit');self.assertEqual(u.database()['temporary_cards'],1)
+ def test_private_cards_prevent_rollback_to_public_predecessor(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,seal=self.fixture(Path(folder));u.apply(package,seal)
+   with sqlite3.connect(u.DB) as db:db.execute('INSERT INTO cards VALUES("new private card")')
+   with self.assertRaisesRegex(RuntimeError,'public predecessor'):u.rollback(package,seal)
+   self.assertEqual((u.SERVICE/'current/server.mjs').read_text(),'new server');self.assertEqual(u.UNIT.read_text(),'new unit')
+ def test_failed_verification_keeps_privacy_backend_when_account_card_arrives(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,seal=self.fixture(Path(folder))
+   def private_write(*args):
+    with sqlite3.connect(u.DB) as db:db.execute('INSERT INTO cards VALUES("new private card")')
+    raise RuntimeError('later verification failed')
+   self.verify.side_effect=private_write
+   with self.assertRaisesRegex(RuntimeError,'later verification failed'):u.apply(package,seal)
+   self.assertEqual((u.SERVICE/'current/server.mjs').read_text(),'new server');self.assertEqual(u.UNIT.read_text(),'new unit')
+   self.assertEqual(json.loads((u.RECEIPTS/'dnd-center-qq-backend-test.json').read_text())['status'],'recovery-required')
  def test_frontend_drift_prevents_switch(self):
   with tempfile.TemporaryDirectory() as folder:
    package,seal=self.fixture(Path(folder));(u.ROOT/'index.html').write_text('concurrent homepage')
@@ -50,4 +66,15 @@ class BackendTests(unittest.TestCase):
    package,seal=self.fixture(Path(folder));(package/'dnd-card-cloud.service').write_text('modified unit')
    with self.assertRaisesRegex(RuntimeError,'Package changed'):u.apply(package,seal)
    self.assertFalse((package/'backup').exists())
+ def test_private_activation_requires_privacy_ready_previous_backend(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,seal=self.fixture(Path(folder));manifest=json.loads((package/'manifest.json').read_text());manifest['cloudMode']='account-private';(package/'manifest.json').write_text(json.dumps(manifest));seal=u.sha(package/'manifest.json')
+   with self.assertRaisesRegex(RuntimeError,'privacy-ready'):u.apply(package,seal)
+   self.assertFalse((package/'backup').exists());self.restart.assert_not_called()
+ def test_private_health_requires_closed_guest_directory(self):
+  health={'version':'1.0.261','qqOAuthSupported':True,'qqLogin':'ready','permissionsVersion':1,'accountPrivate':True,'temporaryUpload':False,'publicDirectory':False,'quotaScope':'account'}
+  with patch.object(u.m,'wait_http',return_value=json.dumps(health).encode()):self.assertEqual(u.verify('account-private'),health)
+  for name,value in [('accountPrivate',False),('temporaryUpload',True),('publicDirectory',True),('quotaScope','ip'),('qqLogin','pending')]:
+   with patch.object(u.m,'wait_http',return_value=json.dumps({**health,name:value}).encode()):
+    with self.assertRaisesRegex(RuntimeError,'Private account policy'):u.verify('account-private')
 if __name__=='__main__':unittest.main()

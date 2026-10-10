@@ -37,9 +37,10 @@ def validate_context(source, ci, baseline, version):
     return c.verify_ci(request, os.environ.get('GITHUB_TOKEN'))
 
 
-def package(root, output, source, version, backend_version, qq_login='pending'):
+def package(root, output, source, version, backend_version, qq_login='pending', cloud_mode='temporary-ip'):
     c.require(c.SHA.fullmatch(source) and c.VERSION.fullmatch(version), 'invalid-release-input')
     c.require(qq_login in ('pending', 'ready'), 'invalid-qq-login-policy')
+    c.require(cloud_mode in ('temporary-ip','account-private') and (cloud_mode!='account-private' or qq_login=='ready'),'invalid-cloud-mode')
     c.require(subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip() == source,
               'checkout-source-mismatch')
     c.require(not subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], cwd=root, text=True).strip(),
@@ -57,6 +58,7 @@ def package(root, output, source, version, backend_version, qq_login='pending'):
         (candidate / name / 'release.json').write_text(json.dumps({
             'version': version, 'sourceCommit': source, 'sourceRepository': c.REPOSITORY,
             'targets': list(c.TARGETS), 'backendVersion': backend_version, 'qqLogin': qq_login,
+            **({'cloudMode':cloud_mode} if cloud_mode=='account-private' else {}),
         }, sort_keys=True) + '\n')
     source_zip = candidate / 'card/source.zip'
     subprocess.run(['git', 'archive', '--format=zip', '--output=' + str(source_zip), source], cwd=root, check=True)
@@ -71,6 +73,7 @@ def package(root, output, source, version, backend_version, qq_login='pending'):
                 'sourceRepository': c.REPOSITORY, 'version': version, 'backendVersion': backend_version,
                 'qqLogin': qq_login, 'files': files, 'publisherHashes': {
                     name: c.sha_file(root / 'deploy/cloud' / name) for name in ('frontend.py', 'publish.py')}}
+    if cloud_mode=='account-private':metadata.update(format=3,cloudMode=cloud_mode)
     (candidate / 'artifact.json').write_text(json.dumps(metadata, sort_keys=True) + '\n')
     archive = output / 'deployment.tar.gz'
     with archive.open('xb') as raw, gzip.GzipFile(fileobj=raw, mode='wb', filename='', mtime=0) as compressed:
@@ -129,9 +132,14 @@ def main():
     _, raw = public_json('https://dnd.center/card/release.json')
     c.require(hashlib.sha256(raw).hexdigest() == baseline, 'online-baseline-changed')
     health, _ = public_json('https://dnd.center/api/health')
-    c.require(health.get('temporaryUpload') is True and health.get('quotaScope') == 'ip'
-              and health.get('qqLogin') in ('pending', 'ready'), 'backend-policy-changed')
-    result = package(Path.cwd(), Path.cwd() / '.deployment', source, version, health['version'], health['qqLogin'])
+    mode='account-private' if health.get('accountPrivate') is True else 'temporary-ip'
+    private=(health.get('permissionsVersion')==1 and health.get('accountLibrariesPrivate') is True
+             and health.get('temporaryUpload') is False and health.get('publicDirectory') is False
+             and health.get('quotaScope')=='account' and health.get('qqLogin')=='ready')
+    c.require(health.get('qqLogin') in ('pending','ready') and
+              (private if mode=='account-private' else health.get('temporaryUpload') is True and health.get('quotaScope')=='ip'), 'backend-policy-changed')
+    args=(Path.cwd(),Path.cwd()/'.deployment',source,version,health['version'],health['qqLogin'])
+    result=package(*args,cloud_mode=mode) if mode=='account-private' else package(*args)
     with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
         output.write('archive_sha256=' + result['sha256'] + '\narchive_bytes=' + str(result['bytes']) + '\n')
     print(json.dumps(result))
