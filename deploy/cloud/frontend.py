@@ -105,8 +105,14 @@ def verify_policy(manifest):
     expected=manifest.get('qqLogin','pending')
     require(expected in ('pending','ready'),'Invalid sealed QQ login state')
     health=json.loads(m.wait_http('https://dnd.center/api/health',['--resolve','dnd.center:443:127.0.0.1']))
-    require(health['version']==manifest['backendVersion'] and health.get('temporaryUpload') is True
-      and health.get('quotaScope')=='ip' and health.get('qqLogin')==expected,'API policy changed')
+    mode=manifest.get('cloudMode','temporary-ip')
+    require(mode in ('temporary-ip','account-private'),'Invalid sealed cloud mode')
+    require(health['version']==manifest['backendVersion'] and health.get('qqLogin')==expected,'API policy changed')
+    if mode=='account-private':
+        require(expected=='ready' and health.get('permissionsVersion')==1 and health.get('accountLibrariesPrivate') is True
+          and health.get('accountPrivate') is True and health.get('temporaryUpload') is False
+          and health.get('publicDirectory') is False and health.get('quotaScope')=='account','Private API policy changed')
+    else:require(health.get('temporaryUpload') is True and health.get('quotaScope')=='ip','API policy changed')
 
 def verify(manifest):
     resolve=['--resolve','dnd.center:443:127.0.0.1']

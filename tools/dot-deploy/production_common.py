@@ -149,6 +149,14 @@ def qq_policy(metadata):
     return value
 
 
+def cloud_policy(metadata):
+    value=metadata.get('cloudMode','temporary-ip')
+    require(value in ('temporary-ip','account-private'),'invalid-cloud-mode')
+    require(metadata.get('format')==3 or value=='temporary-ip','legacy-private-mode-denied')
+    require(value!='account-private' or qq_policy(metadata)=='ready','private-qq-not-ready')
+    return value
+
+
 def inspect_archive(archive, expected_sha=None):
     """Validate every regular member before creating files; never use extractall."""
     if expected_sha is not None:
@@ -182,8 +190,10 @@ def inspect_archive(archive, expected_sha=None):
         'backendVersion', 'files', 'publisherHashes'}
     require(isinstance(metadata, dict) and type(metadata.get('format')) is int
             and ((metadata['format'] == 1 and set(metadata) == fields)
-                 or (metadata['format'] == 2 and set(metadata) == fields | {'qqLogin'})), 'invalid-artifact-metadata')
+                 or (metadata['format'] == 2 and set(metadata) == fields | {'qqLogin'})
+                 or (metadata['format'] == 3 and set(metadata) == fields | {'qqLogin','cloudMode'})), 'invalid-artifact-metadata')
     qq_policy(metadata)
+    cloud_policy(metadata)
     require(metadata['targets'] == list(TARGETS)
             and metadata['sourceRepository'] == REPOSITORY, 'artifact-scope-denied')
     require(isinstance(metadata['sourceCommit'], str) and SHA.fullmatch(metadata['sourceCommit']), 'invalid-artifact-sha')

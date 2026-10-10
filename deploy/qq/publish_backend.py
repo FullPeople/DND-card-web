@@ -48,8 +48,8 @@ def switch(target,key):
     require(not pointer.exists() and not pointer.is_symlink(),'Switch pointer already exists');pointer.symlink_to(target);os.replace(pointer,SERVICE/'current')
 def restart():
     subprocess.run(['systemctl','daemon-reload'],check=True);subprocess.run(['systemctl','restart','dnd-card-cloud'],check=True)
-def verify(cloud_mode='temporary-ip'):
-    health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'));require(health['version']=='1.0.261' and health['qqOAuthSupported'] is True,'QQ backend health differs')
+def verify(cloud_mode='temporary-ip',backend_version='1.0.261'):
+    health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'));require(health['version']==backend_version and health['qqOAuthSupported'] is True,'QQ backend health differs')
     if cloud_mode=='account-private':
         require(health.get('qqLogin')=='ready' and health.get('permissionsVersion')==1 and health.get('accountPrivate') is True and health.get('temporaryUpload') is False and health.get('publicDirectory') is False and health.get('quotaScope')=='account','Private account policy differs')
     else:require(health.get('temporaryUpload') is True,'Temporary upload policy differs')
@@ -64,7 +64,7 @@ def apply(package,seal):
     record={'release':key,'sourceCommit':d['sourceCommit'],'status':'prepared','backup':str(backup),'previousBackend':b['backendTarget'],'databaseReplaced':False,'databaseBefore':database(),'at':datetime.now(timezone.utc).isoformat()};receipt=RECEIPTS/(key+'.json');write(receipt,record)
     switched=False
     try:
-        shutil.copy2(package/'dnd-card-cloud.service',UNIT);switch(release,key);switched=True;restart();health=verify(d.get('cloudMode','temporary-ip'))
+        shutil.copy2(package/'dnd-card-cloud.service',UNIT);switch(release,key);switched=True;restart();health=verify(d.get('cloudMode','temporary-ip'),d.get('backendVersion','1.0.261'))
         require(protected()==b['protected'] and tree(ROOT)==b['frontend'] and tree(release)==d['backendFiles'],'Protected drift after switch')
         record.update(status='published',protectedAfter=protected(),frontendPreserved=True,newUnit=sha(UNIT),backendFiles=d['backendFiles'],databaseAfter=database(),qqLogin=health['qqLogin'],cloudMode=d.get('cloudMode','temporary-ip'),finishedAt=datetime.now(timezone.utc).isoformat());write(receipt,record)
     except Exception:

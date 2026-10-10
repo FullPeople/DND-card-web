@@ -39,9 +39,11 @@ def check_application(frontends, metadata):
         release = c.json_unique((frontends / name / 'release.json').read_bytes())
         require(release.get('sourceCommit') == metadata['sourceCommit']
                 and release.get('version') == metadata['version'], 'application-binding-mismatch')
-        if metadata['format'] == 2:
+        if metadata['format'] >= 2:
             require(release.get('backendVersion') == metadata['backendVersion']
                     and release.get('qqLogin') == c.qq_policy(metadata), 'application-policy-binding-mismatch')
+        if metadata['format']==3:
+            require(release.get('cloudMode')==c.cloud_policy(metadata),'application-cloud-binding-mismatch')
     audit = c.json_unique((frontends / 'card/standalone-audit.json').read_bytes())
     require(audit.get('singlePlayer') is True and audit.get('multiplayerModules') == [], 'standalone-audit-failed')
     require(c.sha_file(frontends / 'card/source.zip') == c.sha_file(frontends / 'library/source.zip'), 'source-archives-differ')
@@ -108,6 +110,7 @@ def make_package(package, frontends, metadata, baseline, publisher, request):
         'previousVersion': baseline['release']['version'], 'previousSourceCommit': baseline['release']['sourceCommit'],
         'sourceCommit': request['sha'], 'backendVersion': metadata['backendVersion'],
         'qqLogin': c.qq_policy(metadata),
+        **({'cloudMode':c.cloud_policy(metadata)} if metadata['format']==3 else {}),
         'backendChanged': False, 'playerDataChanged': False,
         'publisherSha256': c.sha_file(PUBLISHER_DIR / 'frontend.py'),
         'baselineSha256': c.sha_file(package / 'baseline.json'),
