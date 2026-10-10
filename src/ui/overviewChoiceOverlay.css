@@ -9,3 +9,5 @@
 .overview-choice-overlay .choice-footer{position:sticky;bottom:0;background:var(--sheet-content,#ddd);padding-top:8px}
 @keyframes choice-cover-open{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.overview-choice-overlay{animation:none}}
+.sheet-export .overview-choice-overlay{display:none!important}
+@media print{.overview-choice-overlay{display:none!important}}
