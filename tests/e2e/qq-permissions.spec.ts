@@ -10,7 +10,7 @@ test('signed-in library, account switching and logout clear cards and owner cont
   await expect(page.locator('.cloud-sidebar-warning')).toContainText('个人卡库');await expect(page.locator('.cloud-gallery-item.is-active .paper')).toBeVisible();
   await page.getByRole('button',{name:'管理这张卡'}).click();await expect(page.getByLabel('编辑者账号 ID')).toBeVisible();
   await signIn(context,'editorLogout');await page.getByRole('button',{name:'刷新卡库',exact:true}).click();await expect(page.getByRole('dialog',{name:'管理云端角色卡'})).toHaveCount(0);await expect(page.getByRole('button',{name:'管理这张卡'})).toHaveCount(0);
-  const buttons=page.getByRole('button',{name:'退出登录',exact:true});await buttons.first().click();await expect(page.locator('header').getByRole('link',{name:'QQ 登录',exact:true})).toBeVisible();await expect(page.locator('.cloud-gallery-item[data-card-id="'+fixture().card.id+'"]')).toHaveCount(0);
+  await page.getByRole('button',{name:'账号',exact:true}).click();const buttons=page.getByRole('button',{name:'退出登录',exact:true});await buttons.first().click();await expect(page.locator('header').getByRole('link',{name:'QQ 登录',exact:true})).toBeVisible();await expect(page.locator('.cloud-gallery-item[data-card-id="'+fixture().card.id+'"]')).toHaveCount(0);
 });
 test('QQ connection remains usable when the provider has removed window.opener',async({page,request,context})=>{
   const verifier='p'.repeat(43),challenge=createHash('sha256').update(verifier).digest('base64url'),start=await request.post('/api/plugin/start',{headers:{Origin:base},data:{challenge}}),{connection}=await start.json();

@@ -21,6 +21,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     const a=store.db.prepare('SELECT id,qq,extra_slots FROM accounts WHERE id=?').get(String(row.account_id));
     return a?{account:{id:String(a.id),qq:a.qq===null?null:String(a.qq),extra_slots:Number(a.extra_slots)},csrf:String(row.csrf)}:undefined;
   }
+  const liveSession=(request:IncomingMessage,cookieToken:string|undefined)=>request.headers.authorization?session(request):store.session(cookieToken);
   function cors(request:IncomingMessage,response:ServerResponse){
     const source=request.headers.origin;
     if(!source||source===origin)return;
@@ -85,6 +86,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
       if(!s||request.headers['x-csrf-token']!==s.csrf)throw new CloudError(403,'login_required','请先完成 QQ 登录。');
       const card=store.read(load[1],s.account);if(card.role!=='owner')throw new CloudError(403,'owner_only','只有卡主可以把原卡加载到房间。');
       const data=await body();if(data.confirmRoomSync!==true||typeof data.room!=='string'||!/^[A-Za-z0-9_-]{1,100}$/.test(data.room))throw new CloudError(400,'room_request','需要确认房间改动自动写回云端原卡。');
+      const live=liveSession(request,cookieToken);if(!live||live.account.id!==s.account.id||request.headers['x-csrf-token']!==live.csrf)throw new CloudError(403,'login_required','登录状态已改变，请重新连接。');
       const existing=store.db.prepare('SELECT id FROM room_cards WHERE card_id=? AND room=?').get(card.id,data.room);
       const id=existing?String(existing.id):randomUUID(),capability=secret(),expires=Date.now()+7*86400000;
       store.db.prepare('INSERT INTO room_cards VALUES(?,?,?,?,1,?) ON CONFLICT(card_id,room) DO UPDATE SET capability_hash=excluded.capability_hash,expires=excluded.expires').run(id,card.id,data.room,hash(capability),expires);
@@ -98,6 +100,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     if(match[2]&&method==='PUT'){
       if(!auth.isOwner||request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'owner_only','只有卡主可以解锁或重新锁定房间卡。');
       const data=await body();if(typeof data.locked!=='boolean')throw new CloudError(400,'lock_required','请选择锁定或解锁。');
+      const live=liveSession(request,cookieToken);if(!owner(g,live)||request.headers['x-csrf-token']!==live!.csrf)throw new CloudError(403,'owner_only','登录状态已改变，请卡主重新连接。');
       store.db.prepare('UPDATE room_cards SET locked=? WHERE id=?').run(data.locked?1:0,g.id);
       send(200,roomResult(grant(g.id),true,auth.account));return true;
     }
@@ -105,8 +108,8 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
       if((auth.isOwner||auth.isEditor)&&request.headers['x-csrf-token']!==s!.csrf)throw new CloudError(403,'csrf','登录状态已改变，请重新连接。');
       const data=await body();
       // Read permissions again after receiving the body: locking revokes an in-flight write.
-      const fresh=grant(g.id),liveSession=request.headers.authorization?session(request):store.session(cookieToken),permission=authorized(fresh,request,liveSession);if(!permission.isOwner&&!permission.isEditor&&fresh.locked)throw new CloudError(403,'room_locked','卡主未授予当前账号编辑权限，本机草稿保留。');
-      if((permission.isOwner||permission.isEditor)&&request.headers['x-csrf-token']!==liveSession!.csrf)throw new CloudError(403,'csrf','登录状态已改变，请重新连接。');
+      const fresh=grant(g.id),live=liveSession(request,cookieToken),permission=authorized(fresh,request,live);if(!permission.isOwner&&!permission.isEditor&&fresh.locked)throw new CloudError(403,'room_locked','卡主未授予当前账号编辑权限，本机草稿保留。');
+      if((permission.isOwner||permission.isEditor)&&request.headers['x-csrf-token']!==live!.csrf)throw new CloudError(403,'csrf','登录状态已改变，请重新连接。');
       const native=(data.document as {dnd_card_web?:unknown}|undefined)?.dnd_card_web??data.character;
       const before=store.read(g.card_id,auth.account);if(!native||typeof native!=='object'||(native as {id?:string}).id!==before.character.id)throw new CloudError(422,'identity_changed','房间改动不能更换云端原卡的身份。');
       store.update(g.card_id,auth.account,data.revision,native);

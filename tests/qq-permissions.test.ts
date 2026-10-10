@@ -103,12 +103,12 @@ describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
       expect(await response).toBe(403);expect(s.store.read(card.id,s.owner).character.name).toBe(card.character.name);
     }
   });
-  it('rejects a slow owner write after the personal plugin session is logged out',async()=>{
-    const s=await setup(),card=s.store.create(s.owner,newCharacter()),p=await s.connect(),room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'logout-inflight',confirmRoomSync:true},p.h)).json();
+  it('rejects slow owner writes and unlocks after the personal plugin session is logged out',async()=>{
+    for(const unlock of [false,true]){const s=await setup(),card=s.store.create(s.owner,newCharacter()),p=await s.connect(),room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'logout-inflight',confirmRoomSync:true},p.h)).json();
     const started=new Promise(resolve=>s.server.once('request',resolve));let stream:ReturnType<typeof httpRequest>;
-    const response=new Promise<number>((resolve,reject)=>{stream=httpRequest(s.base+'/api/room-cards/'+room.id,{method:'PUT',headers:p.h},res=>{res.resume();res.on('end',()=>resolve(res.statusCode!));});stream.on('error',reject);stream.write('{');});
-    await started;expect((await s.request('plugin/logout','POST',{},p.h)).status).toBe(200);stream!.end(JSON.stringify({character:{...card.character,name:'logged-out write'},revision:1}).slice(1));
-    expect(await response).toBe(403);expect(s.store.read(card.id,s.owner).character.name).toBe(card.character.name);
+    const response=new Promise<number>((resolve,reject)=>{stream=httpRequest(s.base+'/api/room-cards/'+room.id+(unlock?'/lock':''),{method:'PUT',headers:p.h},res=>{res.resume();res.on('end',()=>resolve(res.statusCode!));});stream.on('error',reject);stream.write('{');});
+    await started;expect((await s.request('plugin/logout','POST',{},p.h)).status).toBe(200);stream!.end(JSON.stringify(unlock?{locked:false}:{character:{...card.character,name:'logged-out write'},revision:1}).slice(1));
+    expect(await response).toBe(403);expect(s.store.read(card.id,s.owner).character.name).toBe(card.character.name);expect(s.store.db.prepare('SELECT locked FROM room_cards WHERE id=?').get(room.id)!.locked).toBe(1);}
   });
   it('private mode closes guest directory and new anonymous uploads while retaining original-browser migration access',async()=>{
     const s=await setup({temporaryUpload:false,accountPrivate:true}),temp=s.store.issueTemporarySession(),card=s.store.createTemporary(temp.owner,'127.0.0.1',newCharacter()),guest={'Content-Type':'application/json',Origin:s.origin,Cookie:'dnd_temporary='+temp.token,'X-CSRF-Token':temp.owner.csrf};
