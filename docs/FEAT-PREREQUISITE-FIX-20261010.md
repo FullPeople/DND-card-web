@@ -8,4 +8,6 @@ Data [PR #22](https://github.com/FullPeople/dnd5e-automation-data/pull/22) 已�
 
 本机动态端口范围含请求库禁止的端口，完整检查曾因此出现 `bad port`。云端 HTTP 测试改为在高位动态范围内启动真实回环服务，对占用或保留端口进行有限重试；原有身份、额度、Origin 和 CSRF 断言均保留。文件证据检查曾因并发复制超时，单独复验 54 项通过；本机通过验证工具已支持的 `VITEST_MAX_WORKERS=1` 限制并发，未修改证据断言或等待上限。
 
+远端 Excel 导入 PR 47 先行合入后，本轮保留其代码与状态记录，以整合提交 `b0a868992122b773d16c2c134ddad76cbb60d9c0` 再次完整重跑 229 份资料。全部逐项状态、见证、输入和审阅快照均保持不变；62 个消费者模块的工作文件与 Git blob 核验通过，实际消费者的 8 个正反场景通过。最终报告提交在 Data [PR #24](https://github.com/FullPeople/dnd5e-automation-data/pull/24)，当前锁定报告提交 `0970cddfb266ed5a9668f5ebcab14a69aed9ba27` 的原始 Git blob，SHA-256 为 `47ba8385f2b2a0faa987537aadadd7ac353eba094d3ef3c64ceac51b420522e6`。
+
 本轮为代码修复与验证，公开网站尚未更新。最终检查及合入状态见 [Web PR #46](https://github.com/FullPeople/DND-card-web/pull/46)。浏览器检查不代替真实玩家、实体手机或枭熊房间验收。
