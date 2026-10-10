@@ -25,5 +25,5 @@ function OpenOverlay({c,catalog,edit,id,close}:{c:Character;catalog:Entry[];edit
   return()=>{observer.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);for(const {node,inert} of originals)node.inert=inert;};
  },[]);
  useLayoutEffect(()=>{if(bounds)ref.current?.querySelector<HTMLButtonElement>('.choice-exit')?.focus({preventScroll:true});},[!!bounds]);
- return <div ref={ref} className="overview-choice-overlay" style={bounds||{visibility:'hidden'}} role="region" aria-label="角色卡填写"><ChoiceWorkspace key={id} c={c} catalog={catalog} edit={edit} id={id} close={close}/></div>;
+ return <div ref={ref} className="overview-choice-overlay" style={bounds||{visibility:'hidden'}} role="region" aria-label="角色卡填写"><ChoiceWorkspace embedded key={id} c={c} catalog={catalog} edit={edit} id={id} close={close}/></div>;
 }
