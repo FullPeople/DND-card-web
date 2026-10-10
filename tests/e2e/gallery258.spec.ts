@@ -1,9 +1,10 @@
 import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
-test('wheel and continuous drag wrap; side taps select; fullscreen keeps A4 proportions and cached reads',async({page,request})=>{
+test('wheel and continuous drag wrap; side taps select; fullscreen keeps A4 proportions and cached reads',async({page,request,context})=>{
  const fixture=JSON.parse(readFileSync('evidence/cloud-fixture.json','utf8')),ids:string[]=[],reads:string[]=[],errors:string[]=[];
  const headers={Origin:'http://127.0.0.1:5320','X-CSRF-Token':fixture.ownerSession.csrf,Cookie:'dnd_cloud='+fixture.ownerSession.token};
  for(let i=0;i<3;i++){const response=await request.post('/api/cards',{headers,data:{character:{...fixture.card.character,id:crypto.randomUUID(),name:'循环交互验收 '+i},confirmUpload:true}});expect(response.status()).toBe(201);ids.push((await response.json()).id);}
+ await context.addCookies([{name:'dnd_cloud',value:fixture.ownerSession.token,url:'http://127.0.0.1:5320/api/',httpOnly:true,sameSite:'Strict'}]);
  try{
   page.on('request',r=>{if(/\/api\/cards\/[A-Z]{6}$/.test(r.url())&&r.method()==='GET')reads.push(r.url());});page.on('pageerror',error=>errors.push(error.message));await page.goto('/library/?q=循环交互验收');const active=page.locator('.cloud-gallery-item.is-active'),stage=page.locator('.cloud-gallery-stage'),full=page.getByRole('dialog',{name:'全屏角色卡'});await expect(active.locator('.paper')).toBeVisible();await expect.poll(()=>reads.length).toBe(3);const first=(await active.getAttribute('data-card-id'))!;
   await stage.hover();for(let i=0;i<9;i++){const previous=await active.getAttribute('data-card-id');await page.mouse.wheel(0,70);await expect(active).not.toHaveAttribute('data-card-id',previous!);}await expect(active).toHaveAttribute('data-card-id',first);await expect(full).toHaveCount(0);

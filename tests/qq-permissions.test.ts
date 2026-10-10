@@ -1,12 +1,13 @@
 import {afterEach,describe,expect,it} from 'vitest';
 import {createHash} from 'node:crypto';
+import {request as httpRequest} from 'node:http';
 import {CloudStore,createCloudServer} from '../server/cloud/server';
 import {newCharacter} from '../src/core/model';
 const cleanups:Array<()=>Promise<void>>=[];
 afterEach(async()=>{for(const stop of cleanups.splice(0))await stop();});
-async function setup(){
+async function setup(options:{accountPrivate?:boolean;temporaryUpload?:boolean}={}){
   const store=new CloudStore(':memory:'),owner=store.provisionVerifiedAccount('verified:owner'),other=store.provisionVerifiedAccount('verified:other'),issued=store.issueVerifiedSession(owner.id),second=store.issueVerifiedSession(other.id);
-  const origin='https://dnd.center',pluginOrigin='https://obr.dnd.center',server=createCloudServer(store,origin,{temporaryUpload:true});
+  const origin='https://dnd.center',pluginOrigin='https://obr.dnd.center',server=createCloudServer(store,origin,{temporaryUpload:true,...options});
   await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));cleanups.push(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));store.close();});
   const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
   const headers=(s=issued)=>({Cookie:'dnd_cloud='+s.token,Origin:origin,'X-CSRF-Token':s.csrf,'Content-Type':'application/json'});
@@ -20,7 +21,7 @@ async function setup(){
     const poll=await request('plugin/poll','POST',{connection,verifier},source);expect(poll.status).toBe(200);const {token}=await poll.json();
     return {connection,verifier,token,h:{...source,Authorization:'Bearer '+token,'X-CSRF-Token':s.csrf}};
   }
-  return {store,owner,other,issued,second,origin,pluginOrigin,headers,request,connect};
+  return {store,server,base,owner,other,issued,second,origin,pluginOrigin,headers,request,connect};
 }
 describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
   it('isolates signed-in directories and denies guessed private IDs in temporary mode',async()=>{
@@ -71,6 +72,36 @@ describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
     const next=await(await load()).json();expect(next.id).toBe(first.id);expect(next.locked).toBe(true);
     expect((await s.request(path,'GET',undefined,{...source,'X-Room-Capability':first.capability})).status).toBe(403);
     expect((await s.request(path,'GET',undefined,{...source,'X-Room-Capability':next.capability})).status).toBe(200);
+  });
+  it('revokes a member write already receiving its body when the owner locks or replaces the grant',async()=>{
+    const s=await setup(),card=s.store.create(s.owner,newCharacter()),p=await s.connect();
+    const load=()=>s.request('cards/'+card.id+'/rooms','POST',{room:'inflight',confirmRoomSync:true},p.h);
+    let room=await(await load()).json();
+    for(const rotate of [false,true]){
+      const path='room-cards/'+room.id;await s.request(path+'/lock','PUT',{locked:false},p.h);
+      const started=new Promise(resolve=>s.server.once('request',resolve));
+      let stream:ReturnType<typeof httpRequest>;
+      const response=new Promise<number>((resolve,reject)=>{stream=httpRequest(s.base+'/api/'+path,{method:'PUT',headers:{Origin:s.pluginOrigin,'Content-Type':'application/json','X-Room-Capability':room.capability}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode!));});stream.on('error',reject);stream.write('{');});
+      await started;
+      if(rotate)room=await(await load()).json();else await s.request(path+'/lock','PUT',{locked:true},p.h);
+      stream!.end(JSON.stringify({character:{...card.character,name:'不可写入'},revision:1}).slice(1));
+      expect(await response).toBe(403);expect(s.store.read(card.id,s.owner).character.name).toBe(card.character.name);
+    }
+  });
+  it('private mode closes guest directory and new anonymous uploads while retaining original-browser migration access',async()=>{
+    const s=await setup({temporaryUpload:false,accountPrivate:true}),temp=s.store.issueTemporarySession(),card=s.store.createTemporary(temp.owner,'127.0.0.1',newCharacter()),guest={'Content-Type':'application/json',Origin:s.origin,Cookie:'dnd_temporary='+temp.token,'X-CSRF-Token':temp.owner.csrf};
+    expect((await(await s.request('session','GET',undefined,{})).json()).libraryMode).toBe('account');
+    expect((await s.request('cards','GET',undefined,{})).status).toBe(401);
+    expect((await s.request('cards/'+card.id,'GET',undefined,{})).status).toBe(404);
+    expect((await s.request('cards','POST',{character:newCharacter(),confirmUpload:true,confirmPublicTemporary:true},guest)).status).toBe(401);
+    expect((await s.request('cards/'+card.id,'GET',undefined,guest)).status).toBe(200);
+  });
+  it('keeps a temporary card untouched when the target account quota is full',async()=>{
+    const s=await setup(),temp=s.store.issueTemporarySession(),card=s.store.createTemporary(temp.owner,'127.0.0.1',newCharacter());
+    for(let i=0;i<10;i++)s.store.create(s.owner,newCharacter());
+    const own={...s.headers(),Cookie:s.headers().Cookie+'; dnd_temporary='+temp.token};
+    expect((await s.request('cards/'+card.id+'/claim','POST',{revision:1,confirmClaim:true},own)).status).toBe(409);
+    expect(s.store.isTemporaryCard(card.id)).toBe(true);expect(s.store.read(card.id,undefined,temp.owner).character).toEqual(card.character);expect(s.store.slots(s.owner).used).toBe(10);
   });
   it('only migrates original-browser temporary cards, retaining ID, content and atomic account quota',async()=>{
     const s=await setup(),temp=s.store.issueTemporarySession(),card=s.store.createTemporary(temp.owner,'127.0.0.1',newCharacter());
