@@ -97,7 +97,7 @@ export class CloudStore {
     const temporary=this.db.prepare('SELECT * FROM temporary_cards WHERE id=?').get(id) as {id:string;owner_id:string;revision:number;body:string;updated_at:string}|undefined;
     if(temporary)return {id,revision:temporary.revision,character:JSON.parse(temporary.body),updatedAt:temporary.updated_at,...(temporary.owner_id===temporaryOwner?.id?{role:'owner' as const}:{})};
     const row=this.row(id),role=this.role(row,account);
-    if(!role)throw new CloudError(404,'not_found','没有找到这张云端角色卡或尚未获得阅读权限。');
+    if(!role)throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
     return {id:row.id,revision:row.revision,character:JSON.parse(row.body),updatedAt:row.updated_at,role,...(role==='owner'?{editors:[...this.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(id).map(row=>String(row.qq)),...this.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(id).map(row=>String(row.account_id))]}:{})};
   }
   list(account:Account){

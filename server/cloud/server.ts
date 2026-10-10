@@ -74,7 +74,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       if(cardMatch&&!UUID.test(cardMatch[1])&&!/^[A-Z]{6}$/.test(cardMatch[1]))throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
       if(method==='GET'&&cardMatch&&!cardMatch[2]){
         const card=store.read(cardMatch[1],session?.account,temporaryOwner);
-        if((session||options.accountPrivate)&&store.isTemporaryCard(card.id)&&card.role!=='owner')throw new CloudError(404,'not_found','没有找到这张卡或尚未获得阅读权限。');
+        if((session||options.accountPrivate)&&store.isTemporaryCard(card.id)&&card.role!=='owner')throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
         return send(response,200,card);
       }
       if(method==='GET'&&url.pathname==='/api/cards'&&session){const cards=store.list(session.account);return send(response,200,{cards,mine:cards,temporary:temporaryOwner?store.listTemporary(temporaryOwner):[],slots:store.slots(session.account),total:cards.length,hasMore:false});}
