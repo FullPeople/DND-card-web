@@ -102,7 +102,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         if(method==='DELETE'&&cardMatch){store.deleteTemporary(cardMatch[1],temporaryOwner,(await body(request)).revision);return send(response,200,{ok:true});}
         throw new CloudError(405,'method','此接口不支持该操作。');
       }
-      if(!session)throw new CloudError(401,'login_required','请刷新卡库。');
+      if(!session)throw new CloudError(401,'login_required','请先通过 QQ 登录后再打开卡库。');
       if(url.pathname==='/api/cards'&&method==='GET')return send(response,200,{cards:store.list(session.account),slots:store.slots(session.account)});
       if(url.pathname==='/api/slots'&&method==='GET')return send(response,200,store.slots(session.account));
       if(url.pathname==='/api/logout'&&method==='POST'){store.logout(token!);response.setHeader('Set-Cookie','dnd_cloud=; Path=/api/; Secure; HttpOnly; SameSite=Strict; Max-Age=0');return send(response,200,{ok:true});}
