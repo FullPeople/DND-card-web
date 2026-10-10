@@ -11,7 +11,7 @@ export const validQQ=(value:unknown):value is string=>typeof value==='string'&&/
 export interface Account {id:string;qq:string|null;extra_slots:number}
 export interface Session {account:Account;csrf:string}
 export interface TemporaryOwner {id:string;csrf:string}
-export interface CloudCard {id:string;revision:number;character:Character;updatedAt:string;role?:'owner'|'editor';editors?:string[]}
+export interface CloudCard {id:string;revision:number;character:Character;updatedAt:string;role?:'owner'|'editor';editors?:string[];ownerNickname?:string;ownerAccountId?:string}
 
 export class CloudStore {
   readonly db:DatabaseSync;
@@ -97,7 +97,7 @@ export class CloudStore {
     if(temporary)return {id,revision:temporary.revision,character:JSON.parse(temporary.body),updatedAt:temporary.updated_at,...(temporary.owner_id===temporaryOwner?.id?{role:'owner' as const}:{})};
     const row=this.row(id),role=this.role(row,account);
     if(!role)throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
-    return {id:row.id,revision:row.revision,character:JSON.parse(row.body),updatedAt:row.updated_at,role,...(role==='owner'?{editors:[...this.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(id).map(row=>String(row.qq)),...this.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(id).map(row=>String(row.account_id))]}:{})};
+    return {id:row.id,revision:row.revision,character:JSON.parse(row.body),updatedAt:row.updated_at,role,ownerAccountId:row.owner_id,ownerNickname:this.qqProfile(row.owner_id)?.nickname||'卡主',...(role==='owner'?{editors:[...this.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(id).map(row=>String(row.qq)),...this.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(id).map(row=>String(row.account_id))]}:{})};
   }
   list(account:Account){
     const rows=this.db.prepare('SELECT DISTINCT c.id FROM cards c LEFT JOIN editors e ON e.card_id=c.id LEFT JOIN account_editors ae ON ae.card_id=c.id WHERE c.owner_id=? OR ae.account_id=? OR (e.qq=? AND ? IS NOT NULL) ORDER BY c.updated_at DESC').all(account.id,account.id,account.qq,account.qq);
