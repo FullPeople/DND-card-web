@@ -6,6 +6,8 @@ import {sheetChoices,setSheetChoiceSlot,syncChoiceContent} from '../src/core/aut
 import {syncFeatures} from '../src/core/sheet';
 import {exportCharacter} from '../src/core/export';
 import {validateCharacter} from '../src/core/validation';
+import {readFileSync} from 'node:fs';
+import {join} from 'node:path';
 
 const catalog=normalizeData({
  class:[{name:'原创职业',source:'XPHB',featProgression:[{name:'原创四级选择',category:['G'],progression:{4:1}}]}],
@@ -56,4 +58,24 @@ describe('source-qualified feat prerequisites',()=>{
   const c=setup(),alternative={...target,raw:{...target.raw,prerequisite:[{level:4,feat:['原创未拥有|FRHoF','Authored Origin|frhof']}]}};
   expect(sheetChoices(c,[...catalog.filter(e=>e.id!==target.id),alternative]).find(r=>r.sourceProgression==='feat')!.options.find(o=>o.value===target.id)!.unavailable).toBeUndefined();
  });
+});
+
+const cache=process.env.DND_FEAT_PREREQUISITE_CACHE;
+it.skipIf(!cache)('uses the stored Harper background and Harper Teamwork prerequisite without a name-specific implementation',()=>{
+ const index=JSON.parse(readFileSync(join(cache!,'index.json'),'utf8'));
+ const data:Record<string,unknown[]>={};
+ for(const row of index.rows.filter((r:{url:string})=>/\/(?:feats\.json|backgrounds\.json|class\/class-fighter\.json)$/.test(r.url))){
+  for(const [kind,items] of Object.entries(JSON.parse(readFileSync(join(cache!,row.path),'utf8'))))if(Array.isArray(items))data[kind]=[...(data[kind]||[]),...items];
+ }
+ const entries=normalizeData(data,'external-feat-prerequisite'),c=newCharacter();c.automation=newAutomationState();
+ c.profile.enabledSources=[...new Set(entries.map(e=>e.source))];
+ const classEntry=entries.find(e=>e.kind==='class'&&e.english==='Fighter'&&e.source==='XPHB')!;
+ const background=entries.find(e=>e.kind==='background'&&e.english==='Harper'&&e.source==='FRHOF')!;
+ const later=entries.find(e=>e.kind==='feat'&&e.english==='Harper Teamwork'&&e.source==='FRHOF')!;
+ expect(classEntry).toBeDefined();expect(background).toBeDefined();expect(later).toBeDefined();
+ c.selections=[{id:'real-class',entry:classEntry,level:4,quantity:1,equipped:false},{id:'real-background',entry:background,level:1,quantity:1,equipped:false}];
+ syncFeatures(c,entries);const choice=sheetChoices(c,entries).find(r=>r.sourceProgression==='feat'&&r.options.some(o=>o.value===later.id))!;
+ expect(choice.options.find(o=>o.value===later.id)?.unavailable).toBeUndefined();
+ setSheetChoiceSlot(c,choice.id,0,later.id,entries);syncChoiceContent(c,entries);
+ expect(c.selections.some(s=>s.entry.id===later.id)).toBe(true);
 });
