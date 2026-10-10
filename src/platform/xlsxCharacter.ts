@@ -195,8 +195,8 @@ export async function readXlsxCharacter(file: File): Promise<Character> {
   for (const container of data.inventory.containers) for (const item of container.items) addItem(item, {_xlsxContainer: container.label});
   for (const item of [...data.inventory.wondrous_items, ...data.inventory.consumables]) addItem(item);
   const armor = data.combat.armor;
-  if (armor.name) addItem(armor, {armor: true, ac: armor.ac_base, dexterityMax: armor.dex_bonus_cap, _xlsxArmor: true}, true);
-  if (data.combat.shield.ac_bonus) addItem({name: '盾牌', attuned: data.combat.shield.attuned}, {armor: true, type: 'S', ac: data.combat.shield.ac_bonus}, data.combat.shield.equipped);
+  if (armor.name) addItem(armor, {_xlsxArmor: armor}, true);
+  if (data.combat.shield.ac_bonus) addItem({name: '盾牌', attuned: data.combat.shield.attuned}, {_xlsxShield: data.combat.shield}, data.combat.shield.equipped);
   for (const weapon of data.combat.weapons) addItem(weapon, {_xlsxWeapon: weapon}, true);
   const resources = [...data.special_resources, ...(data.spellcasting.sorcery_points ? [{...data.spellcasting.sorcery_points, name: '术法点'}] : [])];
   resources.forEach((resource: Raw, index: number) => {const max = Math.max(0, Number(resource.max) || 0); card.runtime.resources[`xlsx:resource:${index}`] = {name: resource.name, current: Math.max(0, Math.min(max, Number(resource.current) || 0)), max, type: 'count'};});
