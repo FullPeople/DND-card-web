@@ -349,8 +349,11 @@ const SUITE_RELEASE_265_SECTIONS:ReleaseSection[]=[
  {title:'文字演出',items:['音乐板右侧新增独立的“文字演出”按钮，可配置标题、副标题、正文、字体、颜色、背景、动画和时长。','面板中可即时预览，也可只在自己的枭熊画面中预览；DM 可以直接向当前房间播放文字和效果。','支持自定义预设、长正文分页和停止本次演出，不生成 APNG。配置和预设保存在本机。','保留 Wiki 收藏、就地填写及小批次骰子修复。关闭附加窗口并刷新枭熊房间后重新打开插件；真实多人房间和实体设备仍待验收。']}
 ];
 export const RELEASE_NOTES=RELEASE_SECTIONS.flatMap(section=>section.items);
-export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+const SUITE_RELEASE_266_SECTIONS:ReleaseSection[]=[
  {title:'文字演出效果与配置',items:['文字演出补齐 23 种入场、18 种退场、9 种停留效果和七种正文展开方式，直接在枭熊中播放，不生成 APNG。','滚动设置时预览和播放按钮保持可见；设置分为五页，用高亮按钮选择效果，相关参数按需显示。','新增渐变、双层描边、阴影、副标题、竖排及装饰细节配置；保留已有草稿、预设和原有光芒等画面效果。','保存预设后可直接点选，删除支持撤销。关闭附加窗口并刷新枭熊后重新打开插件；真实多人房间和实体设备仍待验收。']}
+];
+export const SUITE_RELEASE_SECTIONS:ReleaseSection[]=[
+ {title:'音乐板',items:['音乐整理和播放集中在音乐板内，不再打开额外网站或输入配对码。保留外链音频，可编辑名称、背景音乐／音效、循环、分组、标签、收藏、颜色与曲目音量。','播放控制固定在顶部，可搜索和筛选曲库、点选音效、批量加入队列、调整顺序及返回上一首。关闭或缩小音乐板后继续播放。','支持 JSON 文件、外链列表和旧分享码导入；先预览，再合并或替换。可导出完整曲库，房间保存曲目，本机保留上一版备份和添加草稿。','个人音量与房间音量分别调整；DM 可控制玩家操作权限。关闭附加窗口并刷新枭熊后重新打开插件；真实多人房间和实体设备仍待验收。']}
 ];
 export const SUITE_RELEASE_NOTES=SUITE_RELEASE_SECTIONS.flatMap(section=>section.items);
 const standalone264Sections=()=>[
@@ -398,7 +401,7 @@ export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mo
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='suite'?[{title:'2026-10-10-266',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
+ ...(mode==='suite'?[{title:'2026-10-10-267',sections:SUITE_RELEASE_SECTIONS},{title:'2026-10-10-266',sections:SUITE_RELEASE_266_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:RELEASE_DATE,sections:releaseSectionsFor(mode)},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},
  {title:'2026-10-08',sections:[{title:'调色盘操作',items:['调色盘支持保存和导入配色文件，角色卡组件改为平铺按钮。','悬停颜色圆钮可高亮对应区域；点击或按住并拖动都可选色，松开后应用。','选色时只预览，结束后保存；Esc 取消未提交的配色。']},...(mode==='standalone'?[{title:'卡库交互',items:['卡库支持滚轮和循环拖拽切换。点击旁边的卡只切换，单击当前卡打开完整五页。','修复全屏打开时的比例变化，保持完整 A4 并复用已读取卡片。']}]:[])]},
