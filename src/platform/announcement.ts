@@ -1,12 +1,12 @@
 // 单机网站公告以这个版本号为准：勾选“下次版本更新之前不再弹出”后，
 // 只有版本号变化才会再次弹出。发布时与 package.json 的 version 一起修改。
-export const APP_VERSION = '0.1.55';
+export const APP_VERSION = '0.1.56';
 export const ANNOUNCEMENT_KEY = 'dnd-card:announcement-ack';
 
 export const announcementPending = (stored: string, version = APP_VERSION) => stored !== version;
 
 export type AnnouncementMode='standalone'|'suite';
-export const announcementVersionFor=(mode:AnnouncementMode)=>mode==='suite'?'1.0.270-dev':APP_VERSION;
+export const announcementVersionFor=(mode:AnnouncementMode)=>mode==='suite'?'1.0.272-dev':APP_VERSION;
 const keyFor=(mode:AnnouncementMode)=>mode==='suite'?`${ANNOUNCEMENT_KEY}:suite`:ANNOUNCEMENT_KEY;
 export function readAnnouncementPreference(mode:AnnouncementMode='standalone'):boolean {
  try{const stored=localStorage.getItem(`${keyFor(mode)}:remember`);return stored===null?!!localStorage.getItem(keyFor(mode)):stored==='true';}catch{return false;}
