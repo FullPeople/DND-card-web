@@ -5,6 +5,7 @@ export const inWorkbench=false;
 const state:ReturnType<typeof originalState>={cards:[],monsters:[],enabled:{},online:false,message:'',rolls:[]};
 export const useWorkbench=()=>state;
 export const getWorkbench=()=>state;
+export const flushWorkbenchSaves=async(_key:string)=>{};
 export const workbenchDiagnostics=()=>({transport:'local',pending:[],recent:[]});
 export const chooseWorkbench=()=>{};
 export const pinWorkbench=()=>{};

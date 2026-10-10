@@ -285,7 +285,7 @@ export async function retryWorkbenchRead(){
 export async function refreshWorkbenchCatalog(){await workbenchRequest('refreshCatalog',{key:undefined,itemId:undefined});}
 export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},()=>state);}
 export function pinWorkbench(pinned:boolean){if(!state.online||!state.target)return;const target=state.target;update({target:{...target,pinned}});send('pin',{pinned,itemId:target.targetId||target.itemId});}
-const cardMutationTypes=new Set(['save','stats','resource','monsterSave','assignName','lock','statsLock','delete']);
+const cardMutationTypes=new Set(['save','stats','resource','monsterSave','assignName','lock','statsLock','delete','cloudUpload']);
 function writeTarget(type:string,extra:Record<string,unknown>):string|undefined {
  if(type==='inventory'){
   if(snapshotCache.currentAccess&&!snapshotCache.accessConfirmed)throw permissionChanged();
@@ -330,6 +330,9 @@ export const workbenchCharacterId=(target:Target)=>`suite:${target.key}`;
 const saves=new Map<string,{queuedAfter?:Promise<any>;validate:()=>void;observed:any;before:Character;beforeDerived:Derived;after:Character;derived:Derived;projection?:{before:Character;after:Character};target:Target;timer:ReturnType<typeof setTimeout>;waiters:{resolve:(value?:any)=>void;reject:(e:Error)=>void}[]}>();
 const saveChains=new Map<string,Promise<any>>();
 const characterQueue=mutationQueue();
+export async function flushWorkbenchSaves(key:string){
+ for(;;){const batch=saves.get(key),flight=saveChains.get(key);if(batch)await new Promise<void>((resolve,reject)=>batch.waiters.push({resolve,reject}));else if(flight)await flight;else return;}
+}
 export function patchWorkbenchStats(before:Character,after:Character,_previous:Derived,next:Derived,target=state.target,projection?:{before:Character;after:Character}){
  if(!inWorkbench||!target||after.id!==workbenchCharacterId(target))return;
  return new Promise<void>((resolve,reject)=>{

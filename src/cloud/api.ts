@@ -1,6 +1,6 @@
 import type {Character} from '../core/model';
 import {withRequestTimeout} from '../platform/requestTimeout';
-export interface CloudCard {id:string;revision:number;character:Character;updatedAt:string;role?:'owner'|'editor';editors?:string[]}
+export interface CloudCard {id:string;revision:number;character:Character;updatedAt:string;role?:'owner'|'editor';editors?:string[];ownerNickname?:string;ownerAccountId?:string}
 export interface CardSummary {id:string;revision:number;name:string;edition:string;updatedAt:string;role?:'owner'|'editor'}
 export interface Slots {total:number;used:number}
 export interface IPSlots {scope:'ip';total:number;used:number}
