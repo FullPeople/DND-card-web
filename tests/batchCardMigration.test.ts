@@ -18,6 +18,12 @@ function fixture(){
  const catalog=[cls24,cls14,f24,f14,oldOnly,newOnly,spell24,spell14];return {c,catalog,cls14,f14,spell14};
 }
 describe('one-review rule migration',()=>{
+ it('keeps imported class grant acknowledgements through legacy identity reconciliation without extending the level boundary',()=>{
+  const {c,catalog}=fixture();c.selections[0].level=8;c.featureLayout={ignoredClassGrants:{mage:{entryId:'Mage:24',level:4}}};
+  const migrated=planBatchCardMigration(c,catalog,suggestedBatchRoots(c,catalog),{},identity).plan.card;
+  expect(migrated.featureLayout?.ignoredClassGrants?.mage).toEqual({entryId:'Mage:14',level:4});
+  expect(c.featureLayout.ignoredClassGrants?.mage).toEqual({entryId:'Mage:24',level:4});
+ });
  it('reuses one source review while retention changes preserve descendants and spent state independently',()=>{
   const {c,catalog}=fixture(),custom={...entry('Custom:keep','feature','2024'),source:'CUSTOM',raw:{_custom:true}};
   c.selections.push(row('custom',custom,{parentId:'mage'}),row('child',entry('Child:manual','item','2024'),{parentId:'custom',quantity:4,equipped:true}));

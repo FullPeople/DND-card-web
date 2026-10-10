@@ -30,6 +30,7 @@ async function ready(page:Page,withFeatPrerequisite=false){
  await page.getByTestId('character-file').setInputFiles({name:'authored-choices.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  await expect(page.getByRole('tab',{name:/原创职业选择验收（导入）/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ await page.locator('.class-features .feature-group h4').getByRole('button',{name:'职业 原创成长职业 Lv.'+(withFeatPrerequisite?'4':'6'),exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'显示自带选项',exact:true}).click();
 }
 test('class grants appear in the feat region; optional learning drag saves without activation',async({page},info)=>{
  await ready(page);

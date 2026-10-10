@@ -108,6 +108,11 @@ export function prepareBatchCardMigration(original:Character,entries:Entry[],roo
  for(const t of draft.training){const id=suggestedMigrationTarget(card,t.candidates);if(id)choices.training[t.id]=id;}
  const training=migrationDraft(original,entries,{...emptyMigrationChoices(),training:choices.training},5).card.training;
  if(training)card.training=training;
+ // Source reconciliation keeps the imported class's presentation acknowledgement
+ // while replacing its legacy entry identity. Later levels remain outside it.
+ for(const old of original.selections){const scope=card.featureLayout?.ignoredClassGrants?.[old.id],current=card.selections.find(row=>row.id===old.id&&row.entry.kind==='class');
+  if(old.entry.kind==='class'&&scope?.entryId===old.entry.id&&current)scope.entryId=current.entry.id;
+ }
  const snapshot={...draft,card:structuredClone(card),changed:[...draft.changed],warnings:[...draft.warnings]},automaticRemovals=[...removed];
  return {retained,finish(keep:Record<string,boolean>){
  const draft={...snapshot,card:structuredClone(snapshot.card),changed:[...snapshot.changed],warnings:[...snapshot.warnings]},card=draft.card,removed=new Set(automaticRemovals);
