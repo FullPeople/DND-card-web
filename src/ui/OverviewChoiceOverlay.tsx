@@ -22,8 +22,8 @@ function OpenOverlay({c,catalog,edit,id,close}:{c:Character;catalog:Entry[];edit
   };
   const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
   measure();const observer=new ResizeObserver(schedule);observer.observe(root);for(const panel of panels)observer.observe(panel);window.addEventListener('resize',schedule);
-  ref.current?.querySelector<HTMLButtonElement>('.choice-exit')?.focus({preventScroll:true});
   return()=>{observer.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);for(const {node,inert} of originals)node.inert=inert;};
  },[]);
+ useLayoutEffect(()=>{if(bounds)ref.current?.querySelector<HTMLButtonElement>('.choice-exit')?.focus({preventScroll:true});},[!!bounds]);
  return <div ref={ref} className="overview-choice-overlay" style={bounds||{visibility:'hidden'}} role="region" aria-label="角色卡填写"><ChoiceWorkspace key={id} c={c} catalog={catalog} edit={edit} id={id} close={close}/></div>;
 }
