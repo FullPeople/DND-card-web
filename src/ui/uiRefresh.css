@@ -29,7 +29,7 @@ button,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=
 .app-shell :is(.app-header,.pane-toolbar,.dialog,.character-tabs,.workbench-bar,.workbench-modes,.cloud-header) :is(button,.suite-website-link){border:1px solid var(--ui-buttonLine)!important;border-radius:4px;background:var(--ui-button)!important;color:var(--ui-buttonInk)!important;min-height:28px;line-height:1.2}
 .app-shell :is(.app-header,.pane-toolbar,.dialog,.character-tabs,.workbench-bar,.workbench-modes) :is(button,.suite-website-link):hover:not(:disabled){filter:brightness(.95);border-color:var(--ui-selected)!important}
 .app-shell :is(.app-header,.pane-toolbar,.dialog,.character-tabs,.workbench-bar,.workbench-modes) :is(button,.suite-website-link):focus-visible{outline:2px solid var(--ui-selected);outline-offset:1px}
-.app-shell :is(.app-header,.character-tabs,.workbench-bar,.workbench-modes,.dialog) :is(button.primary,[aria-pressed=true],[aria-selected=true],.workbench-mode.active){background:var(--ui-selected)!important;color:var(--ui-selectedInk)!important;border-color:var(--ui-selected)!important}
+.app-shell :is(.app-header,.character-tabs,.workbench-bar,.workbench-modes,.dialog) :is(button.primary,button[aria-checked=true],[aria-pressed=true],[aria-selected=true],.workbench-mode.active){background:var(--ui-selected)!important;color:var(--ui-selectedInk)!important;border-color:var(--ui-selected)!important}
 .app-shell button:disabled{opacity:.55;cursor:not-allowed}
 .app-header .header-tools{gap:6px;flex-wrap:nowrap;min-width:0}
 .app-header .header-tools button,.app-header .header-tools .suite-website-link{padding:3px 10px;font-size:12px}
