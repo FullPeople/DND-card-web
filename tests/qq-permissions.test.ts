@@ -140,5 +140,34 @@ describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
     expect((await s.request('cards/'+card.id+'/claim','POST',{revision:1,confirmClaim:true})).status).toBe(403);
     const own={...s.headers(),Cookie:s.headers().Cookie+'; dnd_temporary='+temp.token};expect((await s.request('cards/'+card.id+'/claim','POST',{revision:2,confirmClaim:true},own)).status).toBe(409);
     expect((await s.request('cards/'+card.id+'/claim','POST',{revision:1,confirmClaim:true},own)).status).toBe(200);expect(s.store.read(card.id,s.owner).character).toEqual(card.character);expect(s.store.isTemporaryCard(card.id)).toBe(false);expect(s.store.slots(s.owner).used).toBe(1);
+  });  it('limits a paired plugin to library and room operations: no original-card deletion, no claim, no cookie logout',async()=>{
+    const s=await setup(),card=s.store.create(s.owner,newCharacter()),p=await s.connect();
+    const blocked=await s.request('cards/'+card.id,'DELETE',{revision:card.revision},p.h);expect(blocked.status).toBe(403);expect((await blocked.json()).error).toBe('plugin_scope');
+    expect((await s.request('logout','POST',{},p.h)).status).toBe(400);
+    expect((await s.request('plugin/logout','POST',{})).status).toBe(400);
+    expect((await s.request('cards/'+card.id,'GET',undefined,p.h)).status).toBe(200);
+    expect((await s.request('cards/'+card.id,'DELETE',{revision:card.revision})).status).toBe(200);
   });
+  it('closes grants by QQ number while account grants keep working',async()=>{
+    const s=await setup(),card=s.store.create(s.owner,newCharacter());
+    const qq=await s.request('cards/'+card.id+'/editors','POST',{qq:'12345678'});expect(qq.status).toBe(400);expect((await qq.json()).error).toBe('qq_grants_closed');
+    expect((await s.request('cards/'+card.id+'/editors','POST',{accountId:s.other.id})).status).toBe(200);
+  });
+  it('answers strangers with 404 on every card mutation, so mutations reveal no more than GET does',async()=>{
+    const s=await setup(),card=s.store.create(s.owner,newCharacter()),stranger=s.headers(s.second);
+    expect((await s.request('cards/'+card.id,'PUT',{confirmUpload:true,revision:card.revision,character:card.character},stranger)).status).toBe(404);
+    expect((await s.request('cards/'+card.id,'DELETE',{revision:card.revision},stranger)).status).toBe(404);
+    expect((await s.request('cards/'+card.id+'/editors','POST',{accountId:s.owner.id},stranger)).status).toBe(404);
+    expect((await s.request('cards/'+card.id+'/editors/'+s.owner.id,'DELETE',undefined,stranger)).status).toBe(404);
+    expect((await s.request('cards/'+card.id+'/editors','POST',{accountId:'00000000-0000-4000-8000-000000000000'})).status).toBe(400);
+    await s.request('cards/'+card.id+'/editors','POST',{accountId:s.other.id});
+    const editor=await s.request('cards/'+card.id,'DELETE',{revision:card.revision},stranger);expect(editor.status).toBe(403);expect((await editor.json()).error).toBe('owner_only');
+    expect((await s.request('cards/'+card.id+'/editors','POST',{accountId:s.owner.id},stranger)).status).toBe(403);
+  });
+  it('caps pending plugin pairings per client before the global table fills',async()=>{
+    const s=await setup(),source={Origin:s.pluginOrigin,'Content-Type':'application/json'};
+    for(let i=0;i<20;i++)expect((await s.request('plugin/start','POST',{challenge:'c'.repeat(43)},source)).status).toBe(201);
+    const extra=await s.request('plugin/start','POST',{challenge:'c'.repeat(43)},source);expect(extra.status).toBe(429);
+  });
+
 });

@@ -286,7 +286,11 @@ export async function refreshWorkbenchCatalog(){await workbenchRequest('refreshC
 export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},()=>state);}
 export function pinWorkbench(pinned:boolean){if(!state.online||!state.target)return;const target=state.target;update({target:{...target,pinned}});send('pin',{pinned,itemId:target.targetId||target.itemId});}
 const cardMutationTypes=new Set(['save','stats','resource','monsterSave','assignName','lock','statsLock','delete','cloudUpload']);
+// The editor tab lock (App) is the only thing that keeps two tabs of one player
+// from racing on the host; a view-only tab must not mutate through the console either.
+let tabWritable=true;export function setWorkbenchTabWritable(value:boolean){tabWritable=value;}
 function writeTarget(type:string,extra:Record<string,unknown>):string|undefined {
+ if(!tabWritable&&(cardMutationTypes.has(type)||type==='inventory'||type==='condition'||type==='groupRoll'))throw Object.assign(Error('此标签页仅供查阅；请在正在编辑的标签页操作。'),{permissionChanged:true});
  if(type==='inventory'){
   if(snapshotCache.currentAccess&&!snapshotCache.accessConfirmed)throw permissionChanged();
   const operation=extra.operation as any,source=operation?.container||operation?.from;

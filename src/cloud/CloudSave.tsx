@@ -16,6 +16,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
  const sessionEpoch=useRef(0);
  const refreshSession=useCallback(async()=>{const epoch=++sessionEpoch.current,value=await cloudSession();if(!disposed.current&&epoch===sessionEpoch.current)setSession(value);},[]);
  const latest=useRef({readCharacter,disabled,characters,receive,importCard,access});latest.current={readCharacter,disabled,characters,receive,importCard,access};
+ const rightsRef=useRef<Record<string,string|undefined>>({});
  const disposed=useRef(false),terminal=useRef<Record<string,SyncState>>({}),engine=useRef<ReturnType<typeof createCloudSync>|undefined>(undefined);
  if(!engine.current)engine.current=createCloudSync({readCharacter:async id=>{
   if(latest.current.disabled)throw Error('当前标签页只读，本机草稿保留。');
@@ -34,7 +35,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
     const value=await cloudSession();if(!alive)return;setSession(value);
     const receipts=await readSyncReceipts(latest.current.characters.map(card=>card.id));
     const bindings=Object.entries(receipts).filter(([,receipt])=>receipt.binding);
-    if(!bindings.length)return;
+    if(!bindings.length){rightsRef.current={};latest.current.access?.({});return;}
     const account=value.authenticated?value.account?.id:value.uploadOwner?.id;
     const rows=account?await cloudCards():undefined;if(!alive)return;
     const directory=new Map((rows?.mine||rows?.cards||[]).map(card=>[card.id,card]));
@@ -42,7 +43,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
     for(const [id,receipt] of bindings){const row=directory.get(receipt.binding!.cloudId);
      rights[id]=account!==receipt.binding!.accountId?'请使用导入这张卡时的 QQ 账号登录。':!row?.role?'云端卡已移除或卡主已撤销你的权限，本机草稿保留。':undefined;
     }
-    latest.current.access?.(rights);
+    rightsRef.current=rights;latest.current.access?.(rights);
     // Directory polling transfers names and revisions only. Download the full
     // five-page document only when it changed; portraits are not polled.
     for(const [id,receipt] of bindings){if(!alive)return;const row=directory.get(receipt.binding!.cloudId);
@@ -75,7 +76,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
  useEffect(()=>{
   if(!enabled||disabled||!auto||!session?.authenticated&&!session?.temporaryUpload)return;
   let alive=true;
-  const timer=setTimeout(()=>{void (async()=>{const receipts=await readSyncReceipts(characters.map(character=>character.id));for(const character of characters){const receipt=receipts[character.id];if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
+  const timer=setTimeout(()=>{void (async()=>{const receipts=await readSyncReceipts(characters.map(character=>character.id));for(const character of characters){const receipt=receipts[character.id];if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!rightsRef.current[character.id]&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
   return()=>{alive=false;clearTimeout(timer);};
  },[enabled,disabled,characters,auto,readCharacter,session?.authenticated,session?.temporaryUpload,session?.account?.id]);
  async function request(id:string){

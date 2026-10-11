@@ -31,7 +31,7 @@ export function StockBoard({container,targets=[],gm=false,disabled=false,operati
  const positions=useRef(new Map<string,{x:number;y:number}>()),grid=useRef<HTMLDivElement>(null),latest=useRef(container);latest.current=container;
  useEffect(()=>{try{localStorage.setItem('inventory-view:'+container.id,view);}catch{}},[container.id,view]);
  const selectionCleanup=useRef<()=>void>(undefined);useEffect(()=>()=>selectionCleanup.current?.(),[]);
- const canEdit=gm||(container.kind==='public'?!container.locked:container.write),allowed=(row:Stock|undefined)=>!!row&&!disabled&&canEdit&&(gm||!row.locked);
+ const canEdit=container.kind==='public'?gm||!container.locked:container.write,allowed=(row:Stock|undefined)=>!!row&&!disabled&&canEdit&&(gm||!row.locked);
  const rows=container.items.filter(row=>row.kind!=='resource'&&(container.kind==='public'||row.kind!=='condition'));
  const columns=container.kind==='public'?4:container.kind==='card'?5:container.columns,slots=Math.ceil(Math.max(container.kind==='public'?20:container.kind==='card'?25:24,Math.max(-1,...rows.map(row=>row.slot))+1)/columns)*columns;
  useCardGravity(grid,falling,view,container.id,rows.map(row=>row.id+':'+row.slot).join('|'),4);

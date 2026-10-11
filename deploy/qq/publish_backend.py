@@ -44,6 +44,9 @@ def preflight(package,seal):
     if d.get('cloudMode')=='account-private':
         health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'))
         require(health.get('accountLibrariesPrivate') is True and health.get('permissionsVersion')==1,'Publish the privacy-ready backend in temporary mode first')
+    else:
+        health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'))
+        require(health.get('accountPrivate') is not True,'Refusing to downgrade the private backend to temporary mode')
     return d,b
 def switch(target,key):
     require(target.parent==SERVICE/'releases' and target.is_dir() and not target.is_symlink(),'Unsafe backend target');pointer=SERVICE/('current-'+key)
@@ -53,7 +56,7 @@ def restart():
 def verify(cloud_mode='temporary-ip',backend_version='1.0.261'):
     health=json.loads(m.wait_http('http://127.0.0.1:5014/api/health'));require(health['version']==backend_version and health['qqOAuthSupported'] is True,'QQ backend health differs')
     if cloud_mode=='account-private':
-        require(health.get('qqLogin')=='ready' and health.get('permissionsVersion')==1 and health.get('accountPrivate') is True and health.get('temporaryUpload') is False and health.get('publicDirectory') is False and health.get('quotaScope')=='account','Private account policy differs')
+        require(health.get('qqLogin')=='ready' and health.get('permissionsVersion')==1 and health.get('accountPrivate') is True and health.get('accountLibrariesPrivate') is True and health.get('temporaryUpload') is False and health.get('publicDirectory') is False and health.get('quotaScope')=='account','Private account policy differs')
     else:require(health.get('temporaryUpload') is True,'Temporary upload policy differs')
     return health
 def apply(package,seal):

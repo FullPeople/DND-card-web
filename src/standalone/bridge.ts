@@ -19,3 +19,4 @@ export function composeRoll(expression:string,label=''){window.dispatchEvent(new
 
 // Integrated workbench profiling has no standalone transport.
 export function markWorkbenchView(_stage:'prepare'|'prepared'|'committed',_key:string,_reused?:boolean){}
+export function setWorkbenchTabWritable(_value:boolean){}

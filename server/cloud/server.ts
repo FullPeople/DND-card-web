@@ -1,9 +1,8 @@
 import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
-import {timingSafeEqual} from 'node:crypto';
 import {mkdirSync,statfsSync} from 'node:fs';
 import {isIP} from 'node:net';
 import {dirname} from 'node:path';
-import {CloudError,CloudStore} from './store';
+import {CloudError,CloudStore,safeEqual} from './store';
 import {createQQAuth,type QQConfig} from './qq';
 import {parseFile} from '../../src/core/validation';
 import {pluginAccess} from './plugin';
@@ -24,19 +23,22 @@ async function body(request:IncomingMessage):Promise<Record<string,unknown>> {
   try {const value=parseFile(Buffer.concat(parts).toString('utf8'));if(!value||typeof value!=='object'||Array.isArray(value))throw Error();return value as Record<string,unknown>;}
   catch {throw new CloudError(400,'invalid_json','JSON 格式不正确或包含不允许的字段。');}
 }
-const equal=(a:string,b:string)=>{const left=Buffer.from(a),right=Buffer.from(b);return left.length===right.length&&timingSafeEqual(left,right);};
 export function createCloudServer(store:CloudStore,origin='https://dnd.center',options:CloudServerOptions={}){
   if(options.accountPrivate&&options.temporaryUpload)throw Error('Private account mode cannot enable temporary anonymous uploads');
-  const qq=createQQAuth(store,origin,options.qq),qqLogin=qq.ready?'ready':'pending';
-  const plugin=pluginAccess(store,origin,options.pluginOrigins);
+  // Rate keys and pairing caps follow the real client: the canonical X-Real-IP
+  // behind the trusted loopback proxy, otherwise the socket address.
+  const clientKey=(request:IncomingMessage)=>{if(options.trustedLoopbackProxy){const header=request.headers['x-real-ip'];if(typeof header==='string')try{return canonicalIP(header);}catch{}return 'proxy';}return request.socket.remoteAddress||'unknown';};
+  const reserveDisk=()=>{if(options.freeBytes&&options.freeBytes()<128*1024*1024)throw new CloudError(507,'storage_full','服务器存储空间不足，请保留本机完整 JSON 备份。');};
+  const qq=createQQAuth(store,origin,options.qq,clientKey),qqLogin=qq.ready?'ready':'pending';
+  const plugin=pluginAccess(store,origin,options.pluginOrigins,{freeBytes:options.freeBytes,clientKey});
   const currentPolicy={permissionsVersion:1,accountLibrariesPrivate:true,accountPrivate:options.accountPrivate===true,quotaScope:'account',temporaryUpload:false,...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
   const limits=new Map<string,{at:number;count:number}>();
   const send=(response:ServerResponse,status:number,value:unknown)=>{response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'});response.end(JSON.stringify(value));};
   const server=createServer(async(request,response)=>{
     try {
-      const key=request.socket.remoteAddress||'unknown',now=Date.now();
-      // Requests arrive through the loopback proxy. Global bounded rate guard
-      // complements nginx's per-IP request limits without trusting XFF headers.
+      const key=clientKey(request),now=Date.now();
+      // Requests arrive through the loopback proxy. The per-client guard uses the
+      // proxy's X-Real-IP, never XFF, so one client cannot exhaust a shared bucket.
       let counter=limits.get(key);if(!counter||now-counter.at>60_000){counter={at:now,count:0};limits.set(key,counter);}if(++counter.count>3000)throw new CloudError(429,'rate_limit','请求过于频繁，请稍后再试。');
       if(limits.size>10000)for(const [ip,row] of limits)if(now-row.at>60_000)limits.delete(ip);
       const url=new URL(request.url||'/',origin),method=request.method||'GET';
@@ -50,9 +52,10 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       if(await plugin.handle(request,response,url,session,token,()=>body(request),(status,value)=>send(response,status,value)))return;
       const claim=/^\/api\/cards\/([A-Z]{6})\/claim$/.exec(url.pathname);
       if(claim&&method==='POST'){
-        if(!session||!temporaryOwner||request.headers.origin!==origin||request.headers['x-csrf-token']!==session.csrf)throw new CloudError(403,'owner_only','请用原上传浏览器登录后迁移。');
+        if(!session||!temporaryOwner||request.headers.origin!==origin||!safeEqual(request.headers['x-csrf-token'],session.csrf))throw new CloudError(403,'owner_only','请用原上传浏览器登录后迁移。');
+        if(session.scope==='plugin')throw new CloudError(403,'plugin_scope','插件连接不能迁移临时卡，请在网站卡库操作。');
         const data=await body(request);if(data.confirmClaim!==true)throw new CloudError(400,'confirmation_required','请确认迁移至当前账号。');
-        return send(response,200,store.claimTemporary(claim[1],session.account,temporaryOwner,data.revision));
+        reserveDisk();return send(response,200,store.claimTemporary(claim[1],session.account,temporaryOwner,data.revision));
       }
       const clientIP=()=>{
         const socketIP=canonicalIP(request.socket.remoteAddress||'');
@@ -88,7 +91,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       if(!session&&!temporaryOwner)throw new CloudError(401,'login_required',qqLogin==='ready'?'请先使用 QQ 登录，再读取或保存自己的卡库。':'QQ 登录暂不可用，请保留本机角色备份。');
       if(method!=='GET'){
         if(request.headers.origin!==origin&&!request.headers.authorization)throw new CloudError(403,'origin','请在本站发起操作。');
-        if(typeof request.headers['x-csrf-token']!=='string'||!equal(request.headers['x-csrf-token'],(session||temporaryOwner)!.csrf))throw new CloudError(403,'csrf','浏览器状态已改变，请刷新卡库后重试。本机草稿保留。');
+        if(!safeEqual(request.headers['x-csrf-token'],(session||temporaryOwner)!.csrf))throw new CloudError(403,'csrf','浏览器状态已改变，请刷新卡库后重试。本机草稿保留。');
       }
       if(temporaryOwner&&(options.temporaryUpload||cardMatch&&store.isTemporaryCard(cardMatch[1]))&&(!session||cardMatch&&store.isTemporaryCard(cardMatch[1]))){
         if(method==='GET'&&url.pathname==='/api/slots')return send(response,200,store.temporarySlots(clientIP()));
@@ -96,21 +99,22 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         if(method==='POST'&&url.pathname==='/api/cards'||method==='PUT'&&cardMatch){
           const data=await body(request);
           if(data.confirmUpload!==true||data.confirmPublicTemporary!==true)throw new CloudError(400,'confirmation_required','必须明确确认：QQ 登录接入前，所有卡片不会安全保存，所有人都可以在云端看到所有卡。');
-          if(options.freeBytes&&options.freeBytes()<128*1024*1024)throw new CloudError(507,'storage_full','服务器存储空间不足，请保留本机完整 JSON 备份。');
+          reserveDisk();
           return send(response,method==='POST'?201:200,method==='POST'?store.createTemporary(temporaryOwner,clientIP(),data.character):store.updateTemporary(cardMatch![1],temporaryOwner,data.revision,data.character));
         }
         if(method==='DELETE'&&cardMatch){store.deleteTemporary(cardMatch[1],temporaryOwner,(await body(request)).revision);return send(response,200,{ok:true});}
         throw new CloudError(405,'method','此接口不支持该操作。');
       }
       if(!session)throw new CloudError(401,'login_required','请先通过 QQ 登录后再打开卡库。');
-      if(url.pathname==='/api/cards'&&method==='GET')return send(response,200,{cards:store.list(session.account),slots:store.slots(session.account)});
       if(url.pathname==='/api/slots'&&method==='GET')return send(response,200,store.slots(session.account));
-      if(url.pathname==='/api/logout'&&method==='POST'){store.logout(token!);response.setHeader('Set-Cookie','dnd_cloud=; Path=/api/; Secure; HttpOnly; SameSite=Strict; Max-Age=0');return send(response,200,{ok:true});}
-      if(url.pathname==='/api/cards'&&method==='POST'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认上传完整角色卡。');if(options.freeBytes&&options.freeBytes()<128*1024*1024)throw new CloudError(507,'storage_full','服务器存储空间不足，请保留本机完整 JSON 备份。');return send(response,201,store.create(session.account,data.character));}
+      if(url.pathname==='/api/logout'&&method==='POST'){if(session.scope==='plugin'||!token)throw new CloudError(400,'cookie_required','插件连接请使用插件的退出；此接口只注销网站登录。');store.logout(token);response.setHeader('Set-Cookie','dnd_cloud=; Path=/api/; Secure; HttpOnly; SameSite=Strict; Max-Age=0');return send(response,200,{ok:true});}
+      if(url.pathname==='/api/cards'&&method==='POST'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认上传完整角色卡。');reserveDisk();return send(response,201,store.create(session.account,data.character));}
       if(cardMatch){const [,id,editors,qq]=cardMatch;
-        if(!editors&&method==='PUT'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认保存完整角色卡。');return send(response,200,store.update(id,session.account,data.revision,data.character));}
-        if(!editors&&method==='DELETE'){const data=await body(request);store.delete(id,session.account,data.revision);return send(response,200,{ok:true});}
-        if(editors&&!qq&&method==='POST'){const data=await body(request);return send(response,200,data.accountId?store.grantAccount(id,session.account,data.accountId):store.grant(id,session.account,data.qq));}
+        if(!editors&&method==='PUT'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认保存完整角色卡。');reserveDisk();return send(response,200,store.update(id,session.account,data.revision,data.character));}
+        // Deleting the original is a library decision made on the site; a paired plugin keeps room and library rights only.
+        if(!editors&&method==='DELETE'){if(session.scope==='plugin')throw new CloudError(403,'plugin_scope','插件连接不能删除云端原卡，请在网站卡库操作。');const data=await body(request);store.delete(id,session.account,data.revision);return send(response,200,{ok:true});}
+        // Grants by QQ number are closed: QQ Connect verifies no number, so such a grant could never match an account.
+        if(editors&&!qq&&method==='POST'){const data=await body(request);if(data.accountId===undefined)throw new CloudError(400,'qq_grants_closed','按 QQ 号授权尚未开放，请使用对方登录后复制的账号 ID。');return send(response,200,store.grantAccount(id,session.account,data.accountId));}
         if(editors&&qq&&method==='DELETE')return send(response,200,UUID.test(qq)?store.grantAccount(id,session.account,qq,true):store.grant(id,session.account,qq,true));
       }
       throw new CloudError(405,'method','此接口不支持该操作。');

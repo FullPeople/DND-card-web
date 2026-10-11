@@ -5,6 +5,7 @@ import {withRequestTimeout} from '../platform/requestTimeout';
 import './cloudRoomControl.css';
 import '../cloud/qqLogin.css';
 import {ChevronDownIcon} from './icons';
+import {pairingCode} from '../cloud/pairing';
 const origin='https://dnd.center';
 const random=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 export function WorkbenchQQAccount(){
@@ -16,9 +17,10 @@ export function WorkbenchQQAccount(){
  async function connect(popup:Window|null,signal:AbortSignal){
   if(!popup)throw Error('浏览器阻止了登录窗口，请允许弹出窗口后重试。');
   const verifier=random(),nonce=random(),bytes=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))),challenge=btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  if(active.current)setMessage('请在授权页核对校验码 '+pairingCode(challenge)+' 后再点击连接。');
   const {connection}=await request('start',{challenge},signal);popup.location.href=origin+'/library/?'+new URLSearchParams({pluginAuth:'1',origin:location.origin,challenge,nonce,connection});
   const deadline=Date.now()+600000;
-  while(active.current&&!signal.aborted&&Date.now()<deadline){const value=await request('poll',{connection,verifier},signal);if(!value.pending){if(signal.aborted)return;await rpc('account.attach',value);popup.close();setOpen(true);return;}await new Promise(resolve=>setTimeout(resolve,1200));}
+  while(active.current&&!signal.aborted&&Date.now()<deadline){const value=await request('poll',{connection,verifier},signal);if(!value.pending){if(signal.aborted)return;await rpc('account.attach',value);popup.close();if(active.current)setMessage('');setOpen(true);return;}await new Promise(resolve=>setTimeout(resolve,1200));}
   throw Error('QQ 登录连接已超时，请重试。');
  }
  function begin(){if(busy)return;setBusy(true);setMessage('');const controller=new AbortController();login.current=controller;const popup=window.open('about:blank','dnd-qq-login','popup,width=620,height=720');void connect(popup,controller.signal).catch(error=>{popup?.close();if(active.current)setMessage(controller.signal.aborted?'已取消登录。':error instanceof Error?error.message:String(error));}).finally(()=>{if(login.current===controller){login.current=undefined;if(active.current)setBusy(false);}});}
