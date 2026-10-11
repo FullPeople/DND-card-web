@@ -2,6 +2,7 @@ import {useCallback,useContext,useEffect,useRef,useState,type ReactNode} from 'r
 import type {Character} from '../core/model';
 import {cloudCards,cloudMutation,cloudSession,readCloudCard,subscribeCloudSessionChanges,type CloudSession,type CloudCard} from './api';
 import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
+import {readPersistedCharacter} from './persistedCharacter';
 import {UploadWarning} from './UploadWarning';
 import './cloudSave.css';
 import {QQLogin} from './QQLogin';
@@ -23,8 +24,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
   if(latest.current.disabled)throw Error('当前标签页只读，本机草稿保留。');
   // A new edit can extend App's local save queue while the first read waits.
   // Read again until the previously observed content has also been persisted.
-  let before=await latest.current.readCharacter(id);
-  for(;;){const after=await latest.current.readCharacter(id);if(await characterHash(before)===await characterHash(after))return before;before=after;}
+  return readPersistedCharacter(()=>latest.current.readCharacter(id),characterHash);
  },receive:(...args)=>latest.current.receive?.(...args)||Promise.resolve(false),readReceipt:readSyncReceipt,writeReceipt:writeSyncReceipt,session:cloudSession,read:readCloudCard,directory:cloudCards,mutation:cloudMutation,hash:characterHash,lock:cloudCardLock,changed:(id,state)=>{terminal.current[id]=state;if(!disposed.current)setStates(old=>({...old,[id]:state}));}});
  useEffect(()=>{disposed.current=false;return()=>{disposed.current=true;};},[]);
  useEffect(()=>{if(!enabled)return;const refresh=()=>{if(document.visibilityState==='visible')void refreshSession().catch(()=>{});};refresh();window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);return()=>{window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};},[enabled,refreshSession]);
