@@ -1,12 +1,16 @@
-import {standalone,automationDevelopment} from './buildMode';
+import {standalone} from './buildMode';
 import { openDB } from 'idb';
 import type { Character, Entry, Raw, RulePack } from '../core/model';
 import type {SiteSources} from '../core/siteSources';
 import {qqRoom,readRoom,saveRoom,roomState} from '../cloud/room';
 import {characterHash} from '../cloud/sync';
+import {workspaceIdentity} from './workspaceIdentity';
 export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[]; siteSources?:SiteSources; legacySourceProfiles?:Record<string,SiteSources> }
 let connection: ReturnType<typeof openDB> | undefined;
-const db = () => connection ??= openDB(qqRoom?'dnd-card-qq-room:'+qqRoom:automationDevelopment?'dnd-card-automation-choices-20261001':standalone?'dnd-card-standalone':'dnd-card-workspace', 1, { upgrade(db) { db.createObjectStore('documents'); db.createObjectStore('cache'); } });
+let cacheConnection:ReturnType<typeof openDB>|undefined;
+const openWorkspace=(name:string)=>openDB(name,1,{upgrade(db){db.createObjectStore('documents');db.createObjectStore('cache');}});
+const db = () => connection ??= openWorkspace(workspaceIdentity.database);
+const cacheDb=()=>workspaceIdentity.cacheDatabase===workspaceIdentity.database?db():cacheConnection??=openWorkspace(workspaceIdentity.cacheDatabase);
 export async function loadWorkspace(): Promise<Workspace | undefined> {
   if(!qqRoom)return (await db()).get('documents','workspace');
   const remote=await readRoom(),database=await db(),draft=await database.get('documents','room-pending') as {workspace:Workspace;revision:number}|undefined;
@@ -29,8 +33,8 @@ export async function saveWorkspace(workspace: Workspace): Promise<void> {
 export async function hasRoomDraft(){return qqRoom?!!await (await db()).get('documents','room-pending'):false;}
 export async function archiveRoomDraft(){if(!qqRoom)return;const database=await db(),tx=database.transaction('documents','readwrite'),draft=await tx.store.get('room-pending');if(draft)await tx.store.put(draft,'room-recovery:'+Date.now());await tx.store.delete('room-pending');await tx.done;}
 export async function restoreBackup(): Promise<Workspace | undefined> { return (await db()).get('documents', 'backup'); }
-export async function readCache(key: string): Promise<{ body: Raw; revision: string } | undefined> { return (await db()).get('cache', key); }
-export async function writeCache(key: string, data: { body: Raw; revision: string }): Promise<void> { await (await db()).put('cache', data, key); }
+export async function readCache(key: string): Promise<{ body: Raw; revision: string } | undefined> { return (await cacheDb()).get('cache', key); }
+export async function writeCache(key: string, data: { body: Raw; revision: string }): Promise<void> { await (await cacheDb()).put('cache', data, key); }
 export function download(name: string, value: unknown, type = 'application/json'): void {
   const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   downloadBlob(name,new Blob([text], { type: `${type};charset=utf-8` }));
@@ -55,7 +59,16 @@ export function pickFile(accept = '.json'): Promise<File | undefined> {
 
 /** A single recoverable draft per remote identity, separate from the character book. */
 export async function saveRecovery(character:Character){const database=await db();const key='recovery:'+character.id;const tx=database.transaction('documents','readwrite');const old=await tx.store.get(key);if(!old||old.revision<=character.revision)await tx.store.put(structuredClone(character),key);await tx.done;}
-export async function loadRecoveries():Promise<Character[]>{const database=await db();const keys=await database.getAllKeys('documents');return Promise.all(keys.filter(k=>String(k).startsWith('recovery:')).map(k=>database.get('documents',k)));}
+export async function loadRecoveries(legacyIds:readonly string[]=[]):Promise<Character[]>{
+ const database=await db(),keys=await database.getAllKeys('documents');
+ const own=await Promise.all(keys.filter(key=>String(key).startsWith('recovery:')).map(key=>database.get('documents',key) as Promise<Character>));
+ if(!workspaceIdentity.legacyRecoveries||!legacyIds.length)return own;
+ const legacy=await cacheDb(),allowed=new Set(legacyIds);
+ const old=await Promise.all([...allowed].map(id=>legacy.get('documents','recovery:'+id) as Promise<Character|undefined>));
+ // Keep distinct revisions as separate export records. Never merge old drafts
+ // into the current book or overwrite an authoritative remote document.
+ return [...own,...old.filter((card):card is Character=>!!card&&allowed.has(card.id))];
+}
 
 export interface CloudBinding {accountId:string;cloudId:string;revision:number}
 export async function loadCloudBindings():Promise<Record<string,CloudBinding>>{

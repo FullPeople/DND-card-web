@@ -1,10 +1,11 @@
 import type {Character} from '../core/model';
 import {withRequestTimeout} from '../platform/requestTimeout';
+import {workspaceIdentity} from '../platform/workspaceIdentity';
 export const qqRoom=typeof location==='undefined'?null:new URLSearchParams(location.search).get('qqRoom');
 export type RoomState={id:string;cardId:string;revision:number;locked:boolean;owner:boolean;write:boolean;character:Character};
 let current:RoomState|undefined;
 export const roomState=()=>current;
-export const roomEditorLock=qqRoom?'dnd-qq-room-editor:'+qqRoom:'dnd-card-editor';
+export const roomEditorLock=workspaceIdentity.editorLock;
 const listeners=new Set<()=>void>();
 export const subscribeRoom=(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};};
 function update(value:RoomState){current=value;listeners.forEach(listener=>listener());return value;}

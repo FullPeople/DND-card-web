@@ -1,0 +1,6 @@
+.panel-loading{display:grid;gap:14px;padding:12px 0;color:var(--suite-muted,#667085)}
+.panel-loading p{margin:0;font-size:14px}
+.panel-loading-lines{display:grid;gap:10px}
+.panel-loading-lines i{display:block;height:12px;background:currentColor;opacity:.12;max-width:86%}
+.panel-loading-lines i:nth-child(2){max-width:62%}
+.sheet-details-loading{min-height:350px;align-content:start;padding-top:20px}
