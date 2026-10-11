@@ -19,11 +19,11 @@ async function stored(page:Page){return page.evaluate(async()=>{
 test('source toggles belong to the website across new cards, switches, imports and reload',async({page,baseURL})=>{
  await ready(page,baseURL!);await rules(page);await expect(xge(page).getByRole('checkbox')).toBeChecked();await xge(page).getByRole('checkbox').uncheck();await close(page);
  await newCard(page);await rules(page);await expect(xge(page).getByRole('checkbox')).not.toBeChecked();
- await expect(page.getByRole('radio',{name:'2014',exact:true})).toBeChecked();await close(page);
+ await expect(page.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2014',exact:true})).toBeChecked();await close(page);
  await page.getByRole('button',{name:'装备',exact:true}).click();await page.getByLabel('资料版本').selectOption('all');
  await expect(page.locator('.catalog-row').filter({hasText:'全站测试物品'})).toHaveCount(0);
  await page.getByRole('tablist',{name:'当前角色'}).getByRole('tab').first().click();
- await expect(page.getByLabel('资料版本')).toHaveValue('all');await rules(page);await expect(xge(page).getByRole('checkbox')).not.toBeChecked();await expect(page.getByRole('radio',{name:'2024',exact:true})).toBeChecked();
+ await expect(page.getByLabel('资料版本')).toHaveValue('all');await rules(page);await expect(xge(page).getByRole('checkbox')).not.toBeChecked();await expect(page.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2024',exact:true})).toBeChecked();
  await close(page);await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const snapshot=await stored(page),imported=structuredClone(snapshot.characters[0]);imported.profile.enabledSources=['XGE'];imported.name='异配置角色';
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
@@ -40,7 +40,7 @@ test('per-entry disabled marks are shared and remain searchable; rule toggles an
  await page.getByRole('button',{name:'设置来源 XGE',exact:true}).click();await page.getByRole('checkbox',{name:'启用条目 全站测试物品',exact:true}).uncheck();
  await page.getByRole('button',{name:'关闭来源设置',exact:true}).click();await close(page);
  await page.getByRole('tablist',{name:'当前角色'}).getByRole('tab').first().click();await rules(page);
- await expect(page.getByRole('checkbox',{name:/专长规则/})).toBeChecked();await expect(page.getByRole('radio',{name:'2024',exact:true})).toBeChecked();await close(page);
+ await expect(page.getByRole('checkbox',{name:/专长规则/})).toBeChecked();await expect(page.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2024',exact:true})).toBeChecked();await close(page);
  await page.getByRole('button',{name:'装备',exact:true}).click();const row=page.locator('.catalog-row').filter({hasText:'全站测试物品'});
  await expect(row).toHaveClass(/entry-disabled/);await row.click();await expect(page.locator('.entry-detail')).toHaveClass(/entry-disabled/);
  await page.getByLabel('搜索规则资料').fill('全站测试物品');await expect(page.locator('.global-result').filter({hasText:'全站测试物品'})).toHaveClass(/entry-disabled/);
@@ -70,5 +70,5 @@ test('source configuration code changes sources without changing card version or
  await expect(page.getByLabel('规则配置码')).not.toHaveValue('');const code=await page.getByLabel('规则配置码').inputValue();await close(page);await newCard(page);await rules(page);
  await page.getByRole('checkbox',{name:/专长规则/}).uncheck();await page.getByRole('button',{name:'全部禁用',exact:true}).click();
  await page.getByLabel('规则配置码').fill(code);await page.getByRole('button',{name:'导入配置',exact:true}).click();
- await expect(xge(page).getByRole('checkbox')).toBeChecked();await expect(page.getByRole('radio',{name:'2014',exact:true})).toBeChecked();await expect(page.getByRole('checkbox',{name:/专长规则/})).not.toBeChecked();
+ await expect(xge(page).getByRole('checkbox')).toBeChecked();await expect(page.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2014',exact:true})).toBeChecked();await expect(page.getByRole('checkbox',{name:/专长规则/})).not.toBeChecked();
 });

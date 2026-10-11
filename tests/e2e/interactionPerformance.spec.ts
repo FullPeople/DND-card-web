@@ -49,7 +49,7 @@ test('record first and thirty warm interaction samples without real account or c
  if(corpusOrigin){const origin=new URL(corpusOrigin);if(origin.protocol!=='https:'||origin.hostname!=='127.0.0.1'||origin.pathname!=='/'||origin.search||origin.hash)throw Error('Corpus transport must use a local HTTPS origin');}
  const f=JSON.parse(readFileSync('evidence/cloud-fixture.json','utf8'));
  await context.addCookies([{name:'dnd_cloud',value:f.ownerSession.token,url:'http://127.0.0.1:5320/api/',httpOnly:true,sameSite:'Strict'}]);
- await mockSource(page);await suppressAnnouncement(page);
+ await mockSource(page);await suppressAnnouncement(page,process.env.PERF_ANNOUNCEMENT_VERSION);
  await context.addInitScript(()=>{
   const w=window as any;w.__startupSample={paperMs:null,catalogMs:null,longTasks:[]};const row=w.__startupSample;
   new PerformanceObserver(list=>row.longTasks.push(...list.getEntries().map(e=>({at:e.startTime,duration:e.duration})))).observe({type:'longtask'});

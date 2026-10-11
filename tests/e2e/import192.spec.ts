@@ -27,7 +27,7 @@ for(const legacy of [false,true])test(legacy?'Owlbear pasted JSON creates a shar
 });
 test('host rejection keeps import open, reports failure and creates no hidden local copy',async({page,baseURL})=>{
  await setup(page,baseURL!);await upload(page);await expect.poll(()=>page.evaluate(()=>(window as any).creates.length)).toBe(1);await page.evaluate(()=>(window as any).finish(true));await expect(page.getByRole('alert')).toContainText('测试拒绝创建');await expect(page.getByText('角色已作为新副本导入。',{exact:true})).toHaveCount(0);
- const names=await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const req=indexedDB.open('dnd-card-workspace');req.onsuccess=()=>resolve(req.result);});return new Promise<string[]>(resolve=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{db.close();resolve(req.result.characters.map((c:any)=>c.name));};});});expect(names).not.toContain('导入验收角色（导入）');
+ const names=await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const req=indexedDB.open('dnd-card-workbench:import192');req.onsuccess=()=>resolve(req.result);});return new Promise<string[]>(resolve=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>{db.close();resolve(req.result.characters.map((c:any)=>c.name));};});});expect(names).not.toContain('导入验收角色（导入）');
 });
 test('disconnected import reports failure instead of local success',async({page,baseURL})=>{
  await setup(page,baseURL!,'PLAYER',false);await upload(page);await expect(page.getByRole('alert')).toContainText('枭熊未连接');expect(await page.evaluate(()=>(window as any).creates.length)).toBe(0);

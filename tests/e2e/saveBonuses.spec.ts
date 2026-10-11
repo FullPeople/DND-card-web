@@ -35,7 +35,7 @@ test('six saving throws accept signed offsets, cancel blank/invalid drafts, undo
 });
 
 test('a read-only second tab retains totals without exposing saving-throw editors',async({page,context})=>{
- await load(page);await editMode(page);const viewer=await context.newPage();await mockSource(viewer);await suppressAnnouncement(viewer);await viewer.goto('/');await expect(viewer.locator('.read-only-banner')).toBeVisible();await expect(viewer.locator('.save-extra-adjustment')).toHaveCount(0);await expect(viewer.locator('.ability-str .ability-save b')).toHaveText('+8');expect((await saved(viewer)).saveBonuses).toEqual({str:2,dex:-1});await viewer.close();
+ await load(page);await editMode(page);const viewer=await context.newPage();await mockSource(viewer);await suppressAnnouncement(viewer);await viewer.goto('/');await expect(viewer.locator('.card-permission-banner').first()).toContainText('另一标签页正在编辑');await expect(viewer.locator('.save-extra-adjustment')).toHaveCount(0);await expect(viewer.locator('.ability-str .ability-save b')).toHaveText('+8');expect((await saved(viewer)).saveBonuses).toEqual({str:2,dex:-1});await viewer.close();
 });
 
 for(const mode of ['a4','screen'] as const)test(`${mode} save adjustments align with skill adjustments at desktop and narrow widths`,async({page})=>{

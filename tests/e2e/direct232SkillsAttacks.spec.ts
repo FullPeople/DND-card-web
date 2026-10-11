@@ -33,7 +33,7 @@ test('manual skills supplement source grants, recalculate, undo and survive auto
 
 test('another tab retains read-only skill controls and saved manual values',async({page,context})=>{
  await load(page);await editMode(page);await page.getByRole('checkbox',{name:'运动专精',exact:true}).check();await expect.poll(async()=>(await saved(page)).expertise?.athletics).toBe(true);
- const viewer=await context.newPage();await mockSource(viewer);await suppressAnnouncement(viewer);await viewer.goto('/');await expect(viewer.locator('.read-only-banner')).toBeVisible();await expect(viewer.locator('.ability-skill input[type=checkbox]')).toHaveCount(0);await expect(viewer.locator('[aria-label="运动专精"]')).toBeVisible();expect((await saved(viewer)).expertise?.athletics).toBe(true);await viewer.close();
+ const viewer=await context.newPage();await mockSource(viewer);await suppressAnnouncement(viewer);await viewer.goto('/');await expect(viewer.locator('.card-permission-banner').first()).toContainText('另一标签页正在编辑');await expect(viewer.locator('.ability-skill input[type=checkbox]')).toHaveCount(0);await expect(viewer.locator('[aria-label="运动专精"]')).toBeVisible();expect((await saved(viewer)).expertise?.athletics).toBe(true);await viewer.close();
 });
 
 for(const mode of ['a4','screen'] as const)test(`${mode} save and skill columns align in both modes at desktop and narrow zoom`,async({page})=>{

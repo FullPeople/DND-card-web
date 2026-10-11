@@ -8,7 +8,7 @@ import {evaluate} from '../../src/core/engine';
 async function feedbackStorage(page:Page){
  return page.evaluate(()=>new Promise<{workspace:any;backup:any}>((resolve,reject)=>{
   // This release configuration runs the integrated app, whose storage.ts uses this database.
-  const open=indexedDB.open('dnd-card-workspace',1);
+  const open=indexedDB.open('dnd-card-workbench:feedback205',1);
   open.onupgradeneeded=()=>{open.transaction?.abort();reject(new Error('Expected existing integrated workspace database'));};
   open.onerror=()=>reject(open.error);
   open.onsuccess=()=>{const db=open.result;try{

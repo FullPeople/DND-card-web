@@ -5,7 +5,7 @@ test('global search follows the rule base version even when the category shows a
  await ready(page,{...raw,class:[...raw.class,{...raw.class[0],source:'PHB',ENG_name:'Edition 2014 Marker',classFeatures:[]}]});
  await page.locator('.category-tabs').getByRole('button',{name:'职业',exact:true}).click();await page.getByRole('combobox',{name:'资料版本',exact:true}).selectOption('all');await expect(page.locator('.catalog-row').filter({hasText:'测试职业'})).toHaveCount(2);
  const search=page.getByRole('textbox',{name:'搜索规则资料',exact:true});await search.fill('测试职业');await expect(page.locator('.global-result')).toHaveCount(1);await expect(page.locator('.global-result')).toContainText('Fixture Class');
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await page.getByRole('radio',{name:'2014',exact:true}).click();await page.keyboard.press('Escape');await search.click();await expect(page.locator('.global-result')).toHaveCount(1);await expect(page.locator('.global-result')).toContainText('Edition 2014 Marker');
+ await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await page.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2014',exact:true}).click();await page.keyboard.press('Escape');await search.click();await expect(page.locator('.global-result')).toHaveCount(1);await expect(page.locator('.global-result')).toContainText('Edition 2014 Marker');
 });
 
 test('selected filter and class navigation remain animated with readable contrast after the click ends',async({page},info)=>{

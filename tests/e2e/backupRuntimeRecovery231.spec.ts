@@ -72,7 +72,7 @@ test('a read-only tab keeps its restored preview without overwriting the writabl
  const data=await fixture(page),viewer=await context.newPage();
  try{
   await mockSource(viewer,{displayMode:'default'});await suppressAnnouncement(viewer);await viewer.route('**/assets/cardRuntime-*.js',route=>route.abort('connectionreset'));await viewer.goto('/');
-  await expect(viewer.locator('.editing-load-error')).toBeVisible();await expect(viewer.locator('.read-only-banner').filter({hasText:'另一标签页'})).toBeVisible();
+  await expect(viewer.locator('.editing-load-error')).toBeVisible();await expect(viewer.locator('.card-permission-banner').filter({hasText:'另一标签页'})).toBeVisible();
   await restore(viewer);let navigations=0;viewer.on('framenavigated',frame=>{if(frame===viewer.mainFrame())navigations++;});
   await viewer.getByRole('button',{name:'保存后重新加载编辑功能',exact:true}).click();await expect(viewer.getByText('此标签页为只读，恢复的备份尚未保存。请先导出角色备份。',{exact:true})).toBeVisible();
   expect(navigations).toBe(0);await expect(viewer.locator('.character-tabs [aria-selected=true]')).toContainText('已读取的旧备份');expect(await records(page)).toEqual({workspace:data.current,backup:data.backup,draft:data.draft});
