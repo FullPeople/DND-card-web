@@ -6,6 +6,7 @@ import {CloudError,CloudStore,safeEqual} from './store';
 import {createQQAuth,type QQConfig} from './qq';
 import {parseFile} from '../../src/core/validation';
 import {pluginAccess} from './plugin';
+import {CloudChanges} from './changes';
 export {CloudStore} from './store';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -15,11 +16,11 @@ export function canonicalIP(value:string){
   const family=isIP(value);if(!family)throw new CloudError(400,'client_ip','无法识别上传 IP，请稍后重试。');
   return family===6?new URL('http://['+value+']/').hostname.slice(1,-1):value;
 }
-export interface CloudServerOptions {temporaryUpload?:boolean;accountPrivate?:boolean;pluginOrigins?:string[];trustedLoopbackProxy?:boolean;freeBytes?:()=>number;qq?:QQConfig}
-async function body(request:IncomingMessage):Promise<Record<string,unknown>> {
+export interface CloudServerOptions {temporaryUpload?:boolean;accountPrivate?:boolean;pluginOrigins?:string[];trustedLoopbackProxy?:boolean;freeBytes?:()=>number;qq?:QQConfig;changesWaitMs?:number}
+async function body(request:IncomingMessage,maxBytes=20_100_000):Promise<Record<string,unknown>> {
   if(!/^application\/json(?:;|$)/i.test(request.headers['content-type']||''))throw new CloudError(415,'json_required','请求必须使用 JSON。');
   let size=0;const parts:Buffer[]=[];
-  for await(const part of request){size+=part.length;if(size>20_100_000)throw new CloudError(413,'too_large','单次上传不能超过 20 MB。');parts.push(part);}
+  for await(const part of request){size+=part.length;if(size>maxBytes)throw new CloudError(413,'too_large',maxBytes===20_100_000?'单次上传不能超过 20 MB。':'变更读取请求不能超过 16 KiB。');parts.push(part);}
   try {const value=parseFile(Buffer.concat(parts).toString('utf8'));if(!value||typeof value!=='object'||Array.isArray(value))throw Error();return value as Record<string,unknown>;}
   catch {throw new CloudError(400,'invalid_json','JSON 格式不正确或包含不允许的字段。');}
 }
@@ -31,6 +32,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
   const reserveDisk=()=>{if(options.freeBytes&&options.freeBytes()<128*1024*1024)throw new CloudError(507,'storage_full','服务器存储空间不足，请保留本机完整 JSON 备份。');};
   const qq=createQQAuth(store,origin,options.qq,clientKey),qqLogin=qq.ready?'ready':'pending';
   const plugin=pluginAccess(store,origin,options.pluginOrigins,{freeBytes:options.freeBytes,clientKey});
+  const changes=new CloudChanges(options.changesWaitMs),stopChanges=store.observeChanges(audience=>changes.invalidate([...audience.accountIds.map(id=>'account:'+id),...audience.roomIds.map(id=>'room:'+id)]),()=>changes.stats().scopes>0);
   const currentPolicy={permissionsVersion:1,accountLibrariesPrivate:true,accountPrivate:options.accountPrivate===true,quotaScope:'account',temporaryUpload:false,...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
   const limits=new Map<string,{at:number;count:number}>();
   const send=(response:ServerResponse,status:number,value:unknown)=>{response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'});response.end(JSON.stringify(value));};
@@ -46,10 +48,24 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       if(method==='OPTIONS'){response.writeHead(204);response.end();return;}
       if(await qq.handle(request,response,url))return;
       const token=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('dnd_cloud='))?.slice('dnd_cloud='.length);
-      const session=request.headers.authorization?plugin.session(request):request.headers.origin&&request.headers.origin!==origin?undefined:store.session(token);
+      const liveSession=()=>request.headers.authorization?plugin.session(request):request.headers.origin&&request.headers.origin!==origin?undefined:store.session(token);
+      const session=liveSession();
       const temporaryToken=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('dnd_temporary='))?.slice('dnd_temporary='.length);
       let temporaryOwner=store.temporarySession(temporaryToken);
       if(await plugin.handle(request,response,url,session,token,()=>body(request),(status,value)=>send(response,status,value)))return;
+      if(url.pathname==='/api/changes'&&method==='POST'){
+        const data=await body(request,16384),actor=liveSession(),scopes=plugin.changeScopes(request,actor,data.rooms);
+        if(response.destroyed)return;
+        const wait=changes.wait(scopes,data.cursor,clientKey(request),actor?.account.id);
+        const cancel=()=>wait.cancel();response.once('close',cancel);
+        try{
+          const result=await wait.promise;if(response.destroyed)return;
+          if(result.cancelled)throw new CloudError(503,'changes_closed','变更读取正在重新连接。');
+          const fresh=liveSession(),currentScopes=plugin.changeScopes(request,fresh,data.rooms);
+          if(JSON.stringify(currentScopes)!==JSON.stringify(scopes))throw new CloudError(401,'account_changed','账号或房间授权已改变，请重新连接。');
+          return send(response,200,{accountId:fresh?.account.id||null,cursor:result.cursor,changed:result.changed});
+        }finally{response.off('close',cancel);wait.cancel();}
+      }
       const claim=/^\/api\/cards\/([A-Z]{6})\/claim$/.exec(url.pathname);
       if(claim&&method==='POST'){
         if(!session||!temporaryOwner||request.headers.origin!==origin||!safeEqual(request.headers['x-csrf-token'],session.csrf))throw new CloudError(403,'owner_only','请用原上传浏览器登录后迁移。');
@@ -65,7 +81,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         }
         return socketIP;
       };
-      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.285',...currentPolicy});
+      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.285',changeNotifications:'bounded-wait',...currentPolicy});
       if(method==='GET'&&url.pathname==='/api/session'){
         if(options.temporaryUpload&&!session){
           if(!temporaryOwner){const issued=store.issueTemporarySession();temporaryOwner=issued.owner;response.setHeader('Set-Cookie','dnd_temporary='+issued.token+'; Path=/api/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=31536000');}
@@ -120,7 +136,8 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       throw new CloudError(405,'method','此接口不支持该操作。');
     } catch(error){const failure=error instanceof CloudError?error:new CloudError(500,'internal','云端服务暂时无法完成操作。本机草稿保留。');if(!(error instanceof CloudError))console.error('Cloud request failed:',error instanceof Error?error.name:'unknown');if(!response.headersSent)send(response,failure.status,{error:failure.code,message:failure.message});else response.end();}
   });
-  server.requestTimeout=30_000;server.headersTimeout=15_000;return server;
+  server.on('close',()=>{stopChanges();changes.close();});
+  server.requestTimeout=30_000;server.headersTimeout=15_000;return Object.assign(server,{closeChanges:()=>changes.close()});
 }
 
 // OAuth uses only Tencent's verified response. No public mock-login route exists.
@@ -133,5 +150,5 @@ if(process.env.DND_CLOUD_RUN==='1'){
   if(!!process.env.QQ_APPID!==!!process.env.QQ_APPKEY)throw Error('Incomplete QQ configuration');
   const store=new CloudStore(path),server=createCloudServer(store,origin,{temporaryUpload:mode==='temporary-ip',accountPrivate:mode==='account-private',trustedLoopbackProxy:true,qq:process.env.QQ_APPID?{appId:process.env.QQ_APPID,appKey:process.env.QQ_APPKEY!,callback:process.env.QQ_CALLBACK||origin+'/api/auth/qq/callback'}:undefined,freeBytes:()=>{const disk=statfsSync(dirname(path));return disk.bavail*disk.bsize;}});
   server.listen(Number(process.env.DND_CLOUD_PORT||5014),'127.0.0.1',()=>console.log('DND card cloud ready'));
-  const stop=()=>server.close(()=>{store.close();process.exit(0);});process.on('SIGTERM',stop);process.on('SIGINT',stop);
+  const stop=()=>{server.closeChanges();server.close(()=>{store.close();process.exit(0);});};process.on('SIGTERM',stop);process.on('SIGINT',stop);
 }

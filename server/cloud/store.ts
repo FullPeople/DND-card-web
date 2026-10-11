@@ -16,9 +16,21 @@ export const safeEqual=(a:unknown,b:unknown)=>{if(typeof a!=='string'||typeof b!
 const HIDDEN='没有找到这张云端角色卡，或你的访问权限已被撤销。本机草稿保留。';
 export interface TemporaryOwner {id:string;csrf:string}
 export interface CloudCard {id:string;revision:number;character:Character;updatedAt:string;role?:'owner'|'editor';editors?:string[];ownerNickname?:string;ownerAccountId?:string}
+export interface ChangeAudience {accountIds:string[];roomIds:string[]}
 
 export class CloudStore {
   readonly db:DatabaseSync;
+  private readonly changeListeners=new Map<(audience:ChangeAudience)=>void,()=>boolean>();
+  observeChanges(listener:(audience:ChangeAudience)=>void,active=()=>true){this.changeListeners.set(listener,active);return()=>{this.changeListeners.delete(listener);};}
+  private emitChanges(audience:ChangeAudience){for(const [listener,active] of this.changeListeners)try{if(active())listener(audience);}catch{/* A notification failure cannot turn a committed save into an apparent failure. */}}
+  roomChanged(id:string){this.emitChanges({accountIds:[],roomIds:[id]});}
+  accountChanged(id:string){this.emitChanges({accountIds:[id],roomIds:[]});}
+  private audience(id:string):ChangeAudience{
+    const owner=this.db.prepare('SELECT owner_id FROM cards WHERE id=?').get(id);
+    const accountIds=[...(owner?[String(owner.owner_id)]:[]),...this.db.prepare('SELECT account_id FROM account_editors WHERE card_id=?').all(id).map(row=>String(row.account_id)),...this.db.prepare('SELECT a.id FROM accounts a JOIN editors e ON e.qq=a.qq WHERE e.card_id=?').all(id).map(row=>String(row.id))];
+    const roomIds=this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='room_cards'").get()?this.db.prepare('SELECT id FROM room_cards WHERE card_id=?').all(id).map(row=>String(row.id)):[];
+    return {accountIds:[...new Set(accountIds)],roomIds};
+  }
   constructor(path:string){
     this.db=new DatabaseSync(path);
     this.db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000;
@@ -76,20 +88,27 @@ export class CloudStore {
     const row=this.db.prepare('SELECT a.id,a.qq,a.extra_slots,s.csrf FROM sessions s JOIN accounts a ON a.id=s.account_id WHERE s.token_hash=? AND s.expires>?').get(hash(token),Date.now()) as unknown as (Account&{csrf:string})|undefined;
     if(row)return {account:{id:row.id,qq:row.qq,extra_slots:row.extra_slots},csrf:row.csrf};
   }
-  logout(token:string){this.db.prepare('DELETE FROM sessions WHERE token_hash=?').run(hash(token));}
+  logout(token:string){const account=this.session(token)?.account.id;this.db.prepare('DELETE FROM sessions WHERE token_hash=?').run(hash(token));if(account)this.accountChanged(account);}
   saveQQProfile(accountId:string,nickname:unknown,avatar:unknown){
     let safeAvatar='';try{const url=new URL(String(avatar));if(['http:','https:'].includes(url.protocol)&&/(^|\.)(qlogo\.cn|qq\.com)$/.test(url.hostname)&&!url.username&&!url.password){url.protocol='https:';safeAvatar=url.href;}}catch{}
     this.db.prepare('INSERT INTO qq_profiles VALUES(?,?,?) ON CONFLICT(account_id) DO UPDATE SET nickname=excluded.nickname,avatar=excluded.avatar').run(accountId,typeof nickname==='string'?nickname.slice(0,80):'',safeAvatar);
+    this.accountChanged(accountId);
   }
   qqProfile(accountId:string){return this.db.prepare('SELECT nickname,avatar FROM qq_profiles WHERE account_id=?').get(accountId) as {nickname:string;avatar:string}|undefined;}
   slots(account:Account){
     const count=this.db.prepare('SELECT COUNT(*) AS n FROM cards WHERE owner_id=?').get(account.id) as {n:number};
     return {total:10,used:count.n};
   }
-  private transaction<T>(action:()=>T):T {
+  private transaction<T>(action:()=>T,change?:string|((result:T)=>string)):T {
+    let result:T;let before:ChangeAudience|undefined;
+    const observed=!!change&&[...this.changeListeners.values()].some(active=>{try{return active();}catch{return false;}});
     this.db.exec('BEGIN IMMEDIATE');
-    try {const result=action();this.db.exec('COMMIT');return result;}
+    try {if(observed&&typeof change==='string')try{before=this.audience(change);}catch{}result=action();this.db.exec('COMMIT');}
     catch(error){this.db.exec('ROLLBACK');throw error;}
+    if(observed){
+      try{const id=typeof change==='function'?change(result):change!;const after=this.audience(id);this.emitChanges({accountIds:[...new Set([...(before?.accountIds||[]),...after.accountIds])],roomIds:[...new Set([...(before?.roomIds||[]),...after.roomIds])]});}catch{/* The database commit remains authoritative when notification collection fails. */}
+    }
+    return result;
   }
   private cardID(){
     for(let attempt=0;attempt<100;attempt++){
@@ -137,7 +156,7 @@ export class CloudStore {
     return this.transaction(()=>{
       const quota=this.slots(account);if(quota.used>=quota.total)throw new CloudError(409,'quota_full','每个账号最多保存 10 张自有角色卡；当前槽位已满。请先导出备份，再移除不需要的云端卡。');
       const id=this.cardID();this.db.prepare('INSERT INTO cards VALUES(?,?,?,?,?)').run(id,account.id,1,JSON.stringify(character),new Date().toISOString());return this.read(id,account);
-    });
+    },card=>card.id);
   }
   update(id:string,account:Account,expected:unknown,character:unknown):CloudCard {
     this.checkBody(character);
@@ -146,7 +165,7 @@ export class CloudStore {
       const row=this.row(id);if(!this.role(row,account))throw new CloudError(404,'not_found',HIDDEN);
       if(row.revision!==expected)throw new CloudError(409,'conflict','云端卡已被其他人修改。本机草稿保留，请先导出备份并核对新版本。');
       this.db.prepare('UPDATE cards SET body=?,revision=revision+1,updated_at=? WHERE id=? AND revision=?').run(JSON.stringify(character),new Date().toISOString(),id,Number(expected));return this.read(id,account);
-    });
+    },id);
   }
   grant(id:string,account:Account,qq:unknown,remove=false){
     if(!validQQ(qq))throw new CloudError(400,'invalid_qq','请输入 5 至 12 位、首位非零的 QQ 号。');
@@ -155,7 +174,7 @@ export class CloudStore {
       if(remove)this.db.prepare('DELETE FROM editors WHERE card_id=? AND qq=?').run(id,qq);
       else {const count=this.db.prepare('SELECT COUNT(*) n FROM editors WHERE card_id=?').get(id) as {n:number};if(count.n>=100&&!this.db.prepare('SELECT 1 FROM editors WHERE card_id=? AND qq=?').get(id,qq))throw new CloudError(400,'too_many_editors','每张卡最多指定 100 个编辑者。');this.db.prepare('INSERT OR IGNORE INTO editors VALUES(?,?)').run(id,qq);}
       return this.read(id,account);
-    });
+    },id);
   }
   grantAccount(id:string,account:Account,target:unknown,remove=false){
     if(typeof target!=='string'||target.length>64)throw new CloudError(400,'invalid_account','没有找到该账号，请对方复制登录后的账号 ID。');
@@ -166,7 +185,7 @@ export class CloudStore {
       if(remove)this.db.prepare('DELETE FROM account_editors WHERE card_id=? AND account_id=?').run(id,target);
       else {const count=Number(this.db.prepare('SELECT COUNT(*) n FROM account_editors WHERE card_id=?').get(id)!.n);if(count>=100&&!this.db.prepare('SELECT 1 FROM account_editors WHERE card_id=? AND account_id=?').get(id,target))throw new CloudError(400,'too_many_editors','每张卡最多指定 100 个编辑者。');this.db.prepare('INSERT OR IGNORE INTO account_editors VALUES(?,?)').run(id,target);}
       return this.read(id,account);
-    });
+    },id);
   }
   claimTemporary(id:string,account:Account,owner:TemporaryOwner,expected:unknown){
     return this.transaction(()=>{
@@ -176,14 +195,14 @@ export class CloudStore {
       this.db.prepare('INSERT INTO cards VALUES(?,?,?,?,?)').run(id,account.id,row.revision,String(full.body),String(full.updated_at));
       this.db.prepare('DELETE FROM temporary_cards WHERE id=?').run(id);
       return this.read(id,account);
-    });
+    },id);
   }
   delete(id:string,account:Account,expected:unknown){
     return this.transaction(()=>{
       const row=this.row(id),role=this.role(row,account);if(!role)throw new CloudError(404,'not_found',HIDDEN);if(role!=='owner')throw new CloudError(403,'owner_only','只有卡主可以删除云端卡。');
       if(row.revision!==expected)throw new CloudError(409,'conflict','云端卡版本已改变，未删除。请重新核对。');
       this.db.prepare('DELETE FROM cards WHERE id=?').run(id);
-    });
+    },id);
   }
   temporarySession(token?:string):TemporaryOwner|undefined {
     if(!token||token.length>128)return;
@@ -233,5 +252,5 @@ export class CloudStore {
   deleteTemporary(id:string,owner:TemporaryOwner,expected:unknown){
     return this.transaction(()=>{const row=this.temporaryRow(id,owner);if(row.revision!==expected)throw new CloudError(409,'conflict','云端卡版本已改变，未删除。请重新核对。');this.db.prepare('DELETE FROM temporary_cards WHERE id=?').run(id);});
   }
-  close(){this.db.close();}
+  close(){this.changeListeners.clear();this.db.close();}
 }
