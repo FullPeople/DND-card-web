@@ -17,6 +17,7 @@ import {useStartupComplete} from '../platform/startup';
 import {entryNameIndex} from '../core/entryNameIndex';
 import {classEditionSuffix} from '../core/classEdition';
 import {wikiEditionAllows} from './wikiEdition';
+import {LibraryDisplaySettings} from './LibraryDisplaySettings';
 import {CharacterTabs} from './CharacterTabs';
 import {applyDisplayCharacterEdit,sameCharacterMechanics} from '../core/displayCharacterEdit';
 import {ToolBoundary} from './ToolBoundary';
@@ -215,7 +216,9 @@ export default function App() {
   const [cloudAccess,setCloudAccess]=useState<Record<string,string|undefined>>({});
   // Read by persist/edit, which run from timers and key handlers with stale closures.
   const cloudAccessRef=useRef<Record<string,string|undefined>>({});cloudAccessRef.current=cloudAccess;
-  const readOnly=workspaceReadOnly||!!cloudAccess[workspace?.activeId||''];
+  const cloudRestriction=cloudAccess[workspace?.activeId||''];
+  const readOnlyReason=cloudRestriction||(workspaceReadOnly?(qqRoom?'房间卡已锁定或登录已失效，此页仅供查阅和导出。':'另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。'):undefined);
+  const readOnly=!!readOnlyReason;
   const [activateUpdate, setActivateUpdate] = useState<(() => void)>();
   const writable = useRef(false);
   const deleteUncertain=useRef(new Map<string,string>()),deleteFlight=useRef(deleteBatchGuard());
@@ -296,7 +299,7 @@ export default function App() {
   const { edition: editionFilter, filters, sort, descending, query:categoryQuery } = libraryState;
   const libraryEntries=useMemo(()=>sourceEntries.filter(entry=>customVisibilityAllows(entry,customVisibility.mode)),[sourceEntries,customVisibility.mode]);
   const { globalQuery:query, setGlobalQuery:setQuery } = library;
-  const setEditionFilter = (edition: string) => library.patch({ edition });
+  const setEditionFilter = library.setEdition;
   const detailPane = useRef<HTMLElement>(null);
   const previewCommit=useRef<{id:string;top:number}|undefined>(undefined);
   const startupComplete=useStartupComplete();
@@ -969,7 +972,7 @@ export default function App() {
   void historyTick;
   const blocked = detail ? candidateReason(c, detail) : '';
   const dragDisabledReason=
-    readOnly?'当前标签页只读，另一标签页正在编辑。关闭另一编辑页并刷新后可继续。':
+     readOnly?readOnlyReason:
     inWorkbench&&!wb.online?'枭熊连接已断开，请等待重连后再拖入。':
     inWorkbench&&!wb.target?.write?'当前棋子没有编辑权限，请选择可编辑的角色卡。':
     inWorkbench&&c.id.startsWith('suite:')&&wb.target&&workbenchCharacterId(wb.target)!==c.id?'选中的棋子已经切换，请等待角色资料加载完成。':
@@ -986,7 +989,7 @@ export default function App() {
  <PaletteButton open={paletteOpen} title="调色盘" toggle={()=>setPaletteOpen(value=>!value)}/></div>
     </header>
     {inWorkbench&&<><WorkbenchBar classWarnings={roomClassWarnings} online={wb.online} target={wb.target} message={wb.message} page={workbenchPage} change={page=>{setWorkbenchPage(page);setTab('sheet');}} save={()=>{if(!wb.target||c.id!==workbenchCharacterId(wb.target)){setNotice('当前角色与选中的棋子不一致');return;}void workbenchRequest('save',{native:c,data:exportOwlbear(c,d)}).then(()=>{workbenchDirty.current.delete(c.id);setNotice('已保存角色资料到枭熊');}).catch(e=>setNotice(String(e)));}}/></>}
-    {readOnly && <div className="read-only-banner" role="status">{qqRoom?'房间卡已锁定或登录已失效，此页仅供查阅和导出。':'另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。'}<button onClick={() => location.reload()}>重新检查</button></div>}
+    {workspaceReadOnly&&!cloudRestriction && <aside className="class-compatibility-banner card-permission-banner" role="status"><p>{readOnlyReason}</p><button onClick={() => location.reload()}>重新检查</button></aside>}
     {activateUpdate && <div className="read-only-banner" role="status">网页有新版本。<button onClick={async () => { await queue.current; if (saveFailed.current) { setNotice('保存未成功，请先导出角色备份，再重新打开网页。'); return; } navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true }); activateUpdate(); }}>保存后更新</button></div>}
     <nav className="mobile-tabs" aria-label={t('workspace')}><button className={tab === 'sheet' ? 'active' : ''} onClick={() => setTab('sheet')}>{t('functionalPage')}</button><button className={tab === 'wiki' ? 'active' : ''} onClick={() => setTab('wiki')} hidden={!wikiVisible}>Wiki</button></nav>
     <main className={`workspace ${wikiVisible?'':'wiki-hidden'}`}>
@@ -1031,7 +1034,7 @@ export default function App() {
         <footer className="wiki-footer">{inWorkbench&&<a href="https://dnd.center/card/" target="_blank" rel="noreferrer">单机版 ↗</a>}<a href={inWorkbench?'./source.zip':'https://github.com/FullPeople/DND-card-web'} target="_blank" rel="noreferrer">源码 ↗</a><a href="https://github.com/FullPeople/DND-card-web/blob/main/LICENSE" target="_blank" rel="noreferrer">非商用共享许可 ↗</a></footer>
       </section></>}
     </main>
-      <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||!!wb.target?.write)}/>
+      <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)} disabledReason={readOnlyReason||(inWorkbench?wb.online?'卡主未授予当前玩家编辑这张卡的权限。':'房间连接尚未恢复，暂时无法修改角色卡配色。':undefined)}/>
     {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<Suspense fallback={<p role="status">正在加载公告…</p>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
     {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
       <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<p role="status">正在加载面板…</p>}>
@@ -1051,10 +1054,10 @@ export default function App() {
       {modal === 'characters' && !qqRoom && <><div className="dialog-actions">{inWorkbench?<button disabled={creatingCard||!wb.online} onClick={()=>void createRemote(c.edition)}>＋ 空白角色卡</button>:<><button onClick={()=>create('2024')}>＋ 2024 角色</button><button onClick={()=>create('2014')}>＋ 2014 角色</button><button onClick={()=>create(c.edition,true)}>复制当前角色</button></>}</div><CharacterManager refresh={inWorkbench?refreshWorkbenchCatalog:undefined} blockedDeleteIds={blockedDeleteIds} pendingDeleteIds={pendingDeleteIds} rows={managerRows} currentId={managerId} disabled={workspaceReadOnly||inWorkbench&&!wb.online} open={id=>{if(inWorkbench)chooseWorkbench(`card:${id}`);else persist({...workspace,activeId:id});setModal('');}} read={readCards} remove={removeCards} create={createCards} review={card=>{setReviewTarget(card);setModal('review');}}/>{inWorkbench&&<button onClick={async()=>download('本机恢复记录.json',{recoveries:await loadRecoveries()})}>导出本机恢复记录</button>}</>}
       {modal==='review'&&reviewTarget&&<CharacterReview c={reviewTarget} ruleContext={inWorkbench&&roomRules?{edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:undefined} inspect={entry=>{setModal('');inspect(entry);}}/>}
       {modal==='batchImport'&&<section><p>已校验 {pendingBatch.length} 张。确认后创建新副本，原有角色保留。</p>{pendingBatch.map(({card,review})=><article key={card.id}><h3>{card.name} · {card.edition}</h3>{review.editionMismatch&&<p role="alert">版本不同：当前 {c.edition}，导入 {card.edition}。保留原卡版本与条目身份，房间来源限制仍生效。</p>}{review.totalLevel!==review.effectiveLevel&&<p>记录等级 {review.totalLevel}；当前来源下生效等级 {review.effectiveLevel}。</p>}{review.disabled.length>0&&<details open><summary>{review.disabled.length} 项来源或规则禁用；保留内容，暂停效果</summary><ul>{review.disabled.map(row=><li key={row.id}>{row.entry.name} · <SourceName id={row.entry.source}/></li>)}</ul></details>}</article>)}<div className="dialog-actions"><button disabled={batchBusy||batchUncertain||!pendingBatch.length} onClick={()=>void finishBatch()}>确认导入这批角色</button><button disabled={batchBusy} onClick={()=>{setPendingBatch([]);setModal('export');}}>取消</button></div></section>}
-      {modal==='onboarding'&&<section className="rules-onboarding"><p className="setup-intro">你随时可以在右上角“规则与扩展”处打开并调整这些设置。</p>{inWorkbench&&wb.role!=='GM'?<><p>房间规则与扩展由 DM 管理；你可以选择自己的资料显示方式。</p><RoomRulesSummary character={c} entries={allEntries} scope={wb.shared?.scope}/></>:<><RuleOptions c={c} edit={editRules} readOnly={rulesReadonly}/><SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/></>}<div className="dialog-actions"><button className="primary" disabled={rulesBusy} onClick={completeSetup}>完成设置</button></div></section>}
-      {modal === 'rules' && <><fieldset className="rules-fieldset" disabled={rulesBusy} aria-busy={rulesBusy}>{inWorkbench&&wb.role!=='GM'?<RoomRulesSummary character={c} entries={allEntries} scope={wb.shared?.scope}/>:<>
+      {modal==='onboarding'&&<section className="rules-onboarding"><p className="setup-intro">你随时可以在右上角“规则与扩展”处打开并调整这些设置。</p><LibraryDisplaySettings edition={editionFilter} characterEdition={c.edition} changeEdition={setEditionFilter}/>{inWorkbench&&wb.role!=='GM'?<><p>房间规则与扩展由 DM 管理；你可以选择自己的资料显示方式。</p><RoomRulesSummary character={c} entries={allEntries} scope={wb.shared?.scope}/></>:<><RuleOptions c={c} edit={editRules} readOnly={rulesReadonly||!inWorkbench&&readOnly}/><SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/></>}<div className="dialog-actions"><button className="primary" disabled={rulesBusy} onClick={completeSetup}>完成设置</button></div></section>}
+      {modal === 'rules' && <><LibraryDisplaySettings edition={editionFilter} characterEdition={c.edition} changeEdition={setEditionFilter}/><fieldset className="rules-fieldset" disabled={rulesBusy} aria-busy={rulesBusy}>{inWorkbench&&wb.role!=='GM'?<RoomRulesSummary character={c} entries={allEntries} scope={wb.shared?.scope}/>:<>
         <section className="settings-section"><h3>自定义扩展包</h3><p>以 JSON 声明条目、效果与选择。导入前检查格式、依赖和冲突；更新包不会替换角色内已选的旧快照。</p><div className="dialog-actions"><button disabled={rulesReadonly} onClick={() => importFile('pack')}>导入扩展包</button><button onClick={() => download('我的扩展-示例.json', RULE_PACK_EXAMPLE)}>下载编写示例</button></div><JsonFileDrop kind="pack" multiple={false} disabled={rulesReadonly||rulesBusy} receive={async files=>{await importFile('pack',files[0]);}}/><input className="file-input" disabled={rulesReadonly||rulesBusy} data-testid="pack-file" type="file" accept=".json" aria-label="导入扩展包文件" onChange={e => { if (e.target.files?.[0]) importFile('pack', e.target.files[0]); e.target.value = ''; }}/>{activePacks.map(pack => <div className="pack-row" key={pack.id}><span><strong>{pack.name}</strong><small>{pack.id} · {pack.version} · {pack.entries.length} 条</small></span><button onClick={() => download(`${pack.id}-${pack.version}.json`, exportRulePack(pack))}>导出</button><button disabled={rulesReadonly} onClick={() => { const dependent = activePacks.find(p => p.requires.some(dep => dep.id === pack.id)); if (dependent) { setImportError(`「${dependent.name}」依赖这个包，请先移除依赖方。`); return; } editSources(draft=>{draft.rulePacks=activePacks.filter(p=>p.id!==pack.id);}); setNotice('已移除资料包；角色中的条目快照仍保留。可关闭其来源以暂停效果。'); }}>移除</button></div>)}</section>
-        <RuleOptions c={c} edit={editRules} readOnly={rulesReadonly} title={inWorkbench?(wb.shared?.scope==='room'?'房间规则':'场景规则'):'当前角色的规则'}/>
+        <RuleOptions c={c} edit={editRules} readOnly={rulesReadonly||!inWorkbench&&readOnly} title={inWorkbench?(wb.shared?.scope==='room'?'房间规则':'场景规则'):'当前角色的规则'}/>
         <SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/>
 
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}

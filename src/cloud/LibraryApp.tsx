@@ -2,7 +2,7 @@ import {useEffect,useRef,useState,type ReactNode} from 'react';
 import type {Character} from '../core/model';
 import {exportCharacter} from '../core/export';
 import {download,loadWorkspace,loadCloudBindings,stageCloudDraft,type CloudBinding} from '../platform/storage';
-import {cloudCards,cloudMutation,cloudSession,cloudViewUrl,readCloudCard,type CardSummary,type CloudCard,type CloudSession} from './api';
+import {cloudCards,cloudMutation,cloudSession,subscribeCloudSessionChanges,cloudViewUrl,readCloudCard,type CardSummary,type CloudCard,type CloudSession} from './api';
 import './library.css';
 import {QQLogin} from './QQLogin';
 import {forgetDeletedCloudCard} from './bindings';
@@ -66,7 +66,7 @@ export default function LibraryApp(){
     setCards(old=>old.filter(row=>row.id!==id));setMine(old=>old.filter(row=>row.id!==id));
     setMessage('一张卡已删除或不存在，已移出画廊并刷新列表。');void refresh();
   }
-  useEffect(()=>{void refresh();let timer:ReturnType<typeof setTimeout>;const update=()=>{if(document.visibilityState==='visible')void refresh();};const changed=(event:Event|MessageEvent)=>{const detail='data' in event?event.data:(event as CustomEvent).detail;if(detail?.pending||detail?.failed)return;clearTimeout(timer);timer=setTimeout(()=>void refresh(),250);};const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('dnd-card-cloud'):undefined;channel?.addEventListener('message',changed);window.addEventListener('cloud-binding-changed',changed);document.addEventListener('visibilitychange',update);return()=>{clearTimeout(timer);channel?.close();window.removeEventListener('cloud-binding-changed',changed);document.removeEventListener('visibilitychange',update);};},[]);
+  useEffect(()=>{const stopSession=subscribeCloudSessionChanges(()=>void refresh());void refresh();let timer:ReturnType<typeof setTimeout>;const update=()=>{if(document.visibilityState==='visible')void refresh();};const changed=(event:Event|MessageEvent)=>{const detail='data' in event?event.data:(event as CustomEvent).detail;if(detail?.pending||detail?.failed)return;clearTimeout(timer);timer=setTimeout(()=>void refresh(),250);};const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('dnd-card-cloud'):undefined;channel?.addEventListener('message',changed);window.addEventListener('cloud-binding-changed',changed);document.addEventListener('visibilitychange',update);return()=>{stopSession();clearTimeout(timer);channel?.close();window.removeEventListener('cloud-binding-changed',changed);document.removeEventListener('visibilitychange',update);};},[]);
 
   async function act(action:()=>Promise<void>){setBusy(true);setMessage('');try{await action();}catch(error){setMessage(error instanceof Error?error.message:String(error));}finally{setBusy(false);}}
   useEffect(()=>{

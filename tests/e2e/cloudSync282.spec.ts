@@ -41,6 +41,6 @@ test('independent room and standalone pages exchange edits through the original 
   const remote=await(await request.get('/api/cards/'+card.id,{headers})).json();expect(remote.character.id).toBe(card.character.id);expect(remote.character.runtime.resources.custom.current).toBe(2);
   expect((await request.put('/api/room-cards/'+room.id+'/lock',{headers,data:{locked:true}})).status()).toBe(200);
   const restricted=await(await roomContext.request.get(base+'/api/room-cards/'+room.id,{headers:{Origin:base,'X-Room-Capability':room.capability}})).json();expect(restricted.owner).toBe(false);expect(restricted.locked).toBe(true);expect(restricted.write).toBe(false);
-  await roomPage.bringToFront();await expect(roomPage.getByRole('switch',{name:'编辑模式'})).toBeDisabled({timeout:10000});await expect(roomPage.locator('.read-only-banner')).toContainText('房间卡已锁定');await expect(page.getByRole('switch',{name:'编辑模式'})).toBeEnabled();
+  await roomPage.bringToFront();await expect(roomPage.getByRole('switch',{name:'编辑模式'})).toBeDisabled({timeout:10000});await expect(roomPage.locator('.card-permission-banner').first()).toContainText('房间卡已锁定');await expect(page.getByRole('switch',{name:'编辑模式'})).toBeEnabled();
  }finally{await roomContext.close();const latest=await(await request.get('/api/cards/'+card.id,{headers})).json();await request.delete('/api/cards/'+card.id,{headers,data:{revision:latest.revision}});}
 });

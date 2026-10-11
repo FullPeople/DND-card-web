@@ -3,6 +3,21 @@
 .cloud-room-toggle{display:flex;align-items:center;gap:7px}
 .cloud-room-toggle input{width:auto}
 .cloud-room-dialog .qq-account-id:first-child{border-top:0;padding-top:8px}
+dialog.cloud-room-dialog.cloud-modal{width:min(560px,calc(100vw - 24px));font-size:14px}
+.cloud-room-dialog.cloud-modal .cloud-modal-section>h3{font-size:15px}
+.cloud-room-dialog.cloud-modal .cloud-modal-section>p,.cloud-room-dialog.cloud-modal .cloud-modal-status,.cloud-room-dialog.cloud-modal .cloud-modal-alert{font-size:14px}
+.cloud-room-name{display:block;font-size:17px;overflow-wrap:anywhere;margin:0 0 10px}
+.cloud-room-fields{margin:0;display:grid;gap:8px}
+.cloud-room-fields>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:12px;align-items:baseline}
+.cloud-room-fields dt{color:var(--ui-muted,#666)}
+.cloud-room-fields dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.cloud-room-editor-form{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-top:10px}
+.cloud-room-editor-form label{display:grid;gap:5px;flex:1;min-width:180px}
+.cloud-room-editor-form input{width:100%;box-sizing:border-box;padding:7px;font:inherit}
+.cloud-room-editors{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
+.cloud-room-editors li{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cloud-room-editors code{min-width:0;overflow-wrap:anywhere}
+.cloud-room-editors button{flex:none}
 .workbench-qq-entry{display:inline-flex;padding:0!important;border:0!important;background:transparent!important;clip-path:none;box-shadow:none;flex:none;line-height:0}
 .workbench-qq-entry::before{display:none!important}
 .workbench-qq-entry img{display:block;width:170px;height:32px;object-fit:contain;filter:none}

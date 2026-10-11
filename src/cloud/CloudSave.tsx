@@ -1,6 +1,6 @@
 import {useCallback,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
 import type {Character} from '../core/model';
-import {cloudCards,cloudMutation,cloudSession,readCloudCard,type CloudSession,type CloudCard} from './api';
+import {cloudCards,cloudMutation,cloudSession,readCloudCard,subscribeCloudSessionChanges,type CloudSession,type CloudCard} from './api';
 import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
 import {UploadWarning} from './UploadWarning';
 import './cloudSave.css';
@@ -30,15 +30,17 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
  useEffect(()=>{if(!enabled)return;const refresh=()=>{if(document.visibilityState==='visible')void refreshSession().catch(()=>{});};refresh();window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);return()=>{window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};},[enabled,refreshSession]);
  useEffect(()=>{
   if(!enabled)return;
-  let alive=true,flight=false;const refresh=async()=>{
+  let alive=true,flight=false,refreshEpoch=0;const refresh=async()=>{
    if(flight||document.visibilityState==='hidden'||!navigator.onLine)return;flight=true;
+   const epoch=++refreshEpoch;
    try{
-    const value=await cloudSession();if(!alive)return;setSession(value);
+    const value=await cloudSession();if(!alive||epoch!==refreshEpoch)return;setSession(value);
     const receipts=await readSyncReceipts(latest.current.characters.map(card=>card.id));
+    if(!alive||epoch!==refreshEpoch)return;
     const bindings=Object.entries(receipts).filter(([,receipt])=>receipt.binding);
     if(!bindings.length){rightsRef.current={};latest.current.access?.({});return;}
     const account=value.authenticated?value.account?.id:value.uploadOwner?.id;
-    const rows=account?await cloudCards():undefined;if(!alive)return;
+    const rows=account?await cloudCards():undefined;if(!alive||epoch!==refreshEpoch)return;
     const directory=new Map((rows?.mine||rows?.cards||[]).map(card=>[card.id,card]));
     const rights:Record<string,string|undefined>={};
     for(const [id,receipt] of bindings){const row=directory.get(receipt.binding!.cloudId);
@@ -47,14 +49,15 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
     rightsRef.current=rights;latest.current.access?.(rights);
     // Directory polling transfers names and revisions only. Download the full
     // five-page document only when it changed; portraits are not polled.
-    for(const [id,receipt] of bindings){if(!alive)return;const row=directory.get(receipt.binding!.cloudId);
+    for(const [id,receipt] of bindings){if(!alive||epoch!==refreshEpoch)return;const row=directory.get(receipt.binding!.cloudId);
      if(!latest.current.disabled&&!rights[id]&&row&&(!receipt.hash||row.revision!==receipt.binding!.revision))await engine.current!.pull(id);
     }
-   }catch{}finally{flight=false;}
+   }catch{}finally{if(epoch===refreshEpoch)flight=false;}
   };
   void refresh();const timer=setInterval(()=>void refresh(),5000);
+  const sessionChanged=()=>{refreshEpoch++;flight=false;const checking=Object.fromEntries(Object.keys(rightsRef.current).map(id=>[id,'正在核对 QQ 账号和云端卡权限，暂时无法修改。']));rightsRef.current=checking;latest.current.access?.(checking);void refresh();},stop=subscribeCloudSessionChanges(sessionChanged);
   window.addEventListener('focus',refresh);window.addEventListener('online',refresh);
-  return()=>{alive=false;clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);};
+  return()=>{alive=false;stop();clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);};
  },[enabled]);
  useEffect(()=>{
   if(!enabled)return;
@@ -79,7 +82,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
   let alive=true;
   const timer=setTimeout(()=>{void (async()=>{const receipts=await readSyncReceipts(characters.map(character=>character.id));for(const character of characters){const receipt=receipts[character.id];if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!rightsRef.current[character.id]&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
   return()=>{alive=false;clearTimeout(timer);};
- },[enabled,disabled,characters,auto,readCharacter,session?.authenticated,session?.temporaryUpload,session?.account?.id]);
+ },[enabled,disabled,characters,auto,session?.authenticated,session?.temporaryUpload,session?.account?.id]);
  async function request(id:string){
   const character=latest.current.characters.find(card=>card.id===id);if(!character||latest.current.disabled)return;
   setConfirmed(false);setTarget({id,name:character.name});

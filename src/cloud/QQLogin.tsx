@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState,type ReactNode} from 'react';
-import {cloudMutation,cloudSession,type CloudSession} from './api';
+import {cloudMutation,cloudSession,subscribeCloudSessionChanges,type CloudSession} from './api';
 import './qqLogin.css';
 import {CheckIcon,ChevronDownIcon,CloseIcon,CloudCheckIcon,CopyIcon,FolderOpenIcon,LogOutIcon,SheetIcon,UserIcon,WarningIcon} from '../ui/icons';
 
@@ -17,8 +17,8 @@ function OnlineQQLogin({session:managedSession,managed=false,beforeLogin,refresh
   useEffect(()=>{
     if(managed)return;
     let active=true;const update=()=>{if(document.visibilityState==='visible')void cloudSession().then(value=>{if(active)setLocal(value);}).catch(()=>{});};
-    update();window.addEventListener('focus',update);document.addEventListener('visibilitychange',update);
-    return()=>{active=false;window.removeEventListener('focus',update);document.removeEventListener('visibilitychange',update);};
+    const stop=subscribeCloudSessionChanges(update);update();window.addEventListener('focus',update);document.addEventListener('visibilitychange',update);
+    return()=>{active=false;stop();window.removeEventListener('focus',update);document.removeEventListener('visibilitychange',update);};
   },[managed]);
   useEffect(()=>{if(open&&session?.authenticated)dialog.current?.showModal();else {dialog.current?.close();setOpen(false);}},[open,session?.authenticated]);
   function close(){dialog.current?.close();setOpen(false);trigger.current?.focus();}

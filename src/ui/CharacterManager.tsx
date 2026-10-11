@@ -42,14 +42,17 @@ export function CharacterManager({rows,currentId,disabled,open,read,remove,creat
  // browser's drag image). The list reorders live under the pointer and the
  // order is persisted on release; Escape or a cancelled pointer restores it.
  const [drag,setDrag]=useState<{id:string;target?:string;after?:boolean;ids?:string[]}>();
- const dragRef=useRef<{id:string;pointer:number;startX:number;startY:number;active:boolean;ghost?:HTMLElement;target?:string;after?:boolean}>(undefined),listRef=useRef<HTMLUListElement>(null),latest=useRef({rows,visible});latest.current={rows,visible};
+ const dragRef=useRef<{id:string;pointer:number;startX:number;startY:number;offsetX?:number;offsetY?:number;active:boolean;ghost?:HTMLElement;target?:string;after?:boolean}>(undefined),listRef=useRef<HTMLUListElement>(null),latest=useRef({rows,visible});latest.current={rows,visible};
  const beginDrag=(event:ReactPointerEvent<HTMLButtonElement>,id:string)=>{if(event.button!==0||!event.isPrimary||busy||sort!=='manual')return;event.preventDefault();dragRef.current={id,pointer:event.pointerId,startX:event.clientX,startY:event.clientY,active:false};};
  useEffect(()=>{
   const finish=(commit:boolean)=>{const d=dragRef.current;if(!d)return;dragRef.current=undefined;d.ghost?.remove();document.body.classList.remove('book-dragging');if(commit&&d.active&&d.target&&d.target!==d.id)placeCharacter(latest.current.rows,d.id,d.target,!!d.after);setDrag(undefined);};
   const move=(event:PointerEvent)=>{const d=dragRef.current;if(!d||event.pointerId!==d.pointer)return;
    if(!d.active){if(Math.hypot(event.clientX-d.startX,event.clientY-d.startY)<5)return;d.active=true;document.body.classList.add('book-dragging');
-    const source=listRef.current?.querySelector<HTMLElement>(`[data-book-id="${CSS.escape(d.id)}"] .book-name`),ghost=document.createElement('div');ghost.className='book-drag-ghost';ghost.setAttribute('aria-hidden','true');ghost.textContent=source?.querySelector('strong')?.textContent||'';(listRef.current?.closest('dialog[open]')||document.body).append(ghost);d.ghost=ghost;}
-   event.preventDefault();if(d.ghost)d.ghost.style.transform=`translate3d(${event.clientX+12}px,${event.clientY-14}px,0) rotate(2deg)`;
+    const source=listRef.current?.querySelector<HTMLElement>(`[data-book-id="${CSS.escape(d.id)}"]`);if(!source){finish(false);return;}
+    const box=source.getBoundingClientRect(),ghost=document.createElement('div'),list=document.createElement('ul'),clone=source.cloneNode(true) as HTMLElement;
+    ghost.className='character-manager book-drag-ghost';ghost.setAttribute('aria-hidden','true');ghost.inert=true;ghost.style.width=`${box.width}px`;list.className='book-list';clone.classList.remove('is-dragging');clone.removeAttribute('id');clone.removeAttribute('data-book-id');for(const node of clone.querySelectorAll('[id]'))node.removeAttribute('id');list.append(clone);ghost.append(list);
+    d.offsetX=d.startX-box.left;d.offsetY=d.startY-box.top;(listRef.current?.closest('dialog[open]')||document.body).append(ghost);d.ghost=ghost;}
+   event.preventDefault();if(d.ghost)d.ghost.style.transform=`translate3d(${event.clientX-(d.offsetX||0)}px,${event.clientY-(d.offsetY||0)}px,0)`;
    const over=document.elementFromPoint(event.clientX,event.clientY)?.closest<HTMLElement>('[data-book-id]');if(!over||over.dataset.bookId===d.id)return;
    const box=over.getBoundingClientRect(),after=event.clientY>box.top+box.height/2,target=over.dataset.bookId!;if(target===d.target&&after===d.after)return;d.target=target;d.after=after;
    setDrag(current=>({id:d.id,target,after,ids:(()=>{const ids=(current?.ids||latest.current.visible.map(row=>row.id)).filter(key=>key!==d.id),at=ids.indexOf(target);if(at<0)return current?.ids;ids.splice(after?at+1:at,0,d.id);return ids;})()}));

@@ -175,7 +175,9 @@ body.book-dragging .book-row{transition:transform .12s}
 .book-row .row-actions button{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:28px;height:28px;padding:0 8px;font-size:12px}
 .book-row .row-actions button:not(.icon-button){width:28px;padding:0}
 .book-row .row-actions .ui-icon{--icon:15px}
-.book-drag-ghost{position:fixed;left:0;top:0;z-index:2147483000;pointer-events:none;padding:6px 12px;border-radius:7px;background:var(--ui-selected,#4d5a6b);color:var(--ui-selectedInk,#fff);font-size:13px;font-weight:600;box-shadow:0 10px 24px #0006;will-change:transform;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.book-drag-ghost{position:fixed;left:0;top:0;z-index:2147483000;pointer-events:none;padding:0;max-width:none;will-change:transform}
+.book-drag-ghost>.book-list{margin:0;padding:0;max-height:none;overflow:visible;border:0}
+.book-drag-ghost .book-row{margin:0;opacity:1}
 .book-empty{display:grid;justify-items:center;gap:8px;padding:26px 12px;color:var(--ui-muted,#625b4f);border:1px dashed var(--ui-line,#b8ad9b);border-radius:8px;text-align:center}
 .book-empty .ui-icon{--icon:28px}
 .book-empty p{margin:0;max-width:360px}
