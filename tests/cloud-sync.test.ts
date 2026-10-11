@@ -67,4 +67,7 @@ describe('cloud draft synchronization',()=>{
   s.deps.session=async()=>({authenticated:true,qqLogin:'ready',account:{id:'other',qq:null}});await s.engine.pull(s.character.id);expect(s.character.name).toBe('本机草稿');
   s.deps.session=async()=>({authenticated:false,qqLogin:'pending',temporaryUpload:true,uploadOwner:{id:'owner'}});s.receipt={...s.receipt,pending:{accountId:'owner',hash:'unknown',startedAt:Date.now()}};await s.engine.pull(s.character.id);expect(s.character.name).toBe('本机草稿');expect(s.receipt.pending).toBeTruthy();
  });
+ it('keeps the original cloud character identity when a staged local ID differs',async()=>{
+  const s=setup();await s.engine.run(s.character.id,'owner');const original=s.remote.character.id;s.character.id='cloud:owner:ABCDEF';s.character.notes='本机导入后编辑';await s.engine.run(s.character.id);expect(s.remote.character.id).toBe(original);expect(s.remote.character.notes).toBe('本机导入后编辑');
+ });
 });

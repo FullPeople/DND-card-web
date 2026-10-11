@@ -17,7 +17,7 @@ test('QQ account imports in place, receives inactive cards and mirrors to a seco
  await expect(name).toHaveValue('另一端自动传来的名字',{timeout:20000});await expect(second.getByRole('textbox',{name:'角色姓名',exact:true})).toHaveValue('另一端自动传来的名字');
  if(await page.getByRole('switch',{name:'编辑模式'}).getAttribute('aria-checked')!=='true')await page.getByRole('switch',{name:'编辑模式'}).click();await name.fill('接收后继续自动写回');
  await expect.poll(async()=>(await(await request.get('/api/cards/'+card.id,{headers})).json()).character.name).toBe('接收后继续自动写回');
- const remote=await(await request.get('/api/cards/'+card.id,{headers})).json();expect(remote.character.notes).toBe('其他端笔记');expect(remote.character.runtime.hp).toBe(8);
+ const remote=await(await request.get('/api/cards/'+card.id,{headers})).json();expect(remote.character.id).toBe(card.character.id);expect(remote.character.notes).toBe('其他端笔记');expect(remote.character.runtime.hp).toBe(8);
  await page.getByRole('tab',{name:/未命名的冒险者/}).first().click();
  expect((await request.put('/api/cards/'+card.id,{headers,data:{revision:remote.revision,character:{...remote.character,name:'未选中卡也接收更新'},confirmUpload:true}})).status()).toBe(200);
  await expect(page.getByRole('tab',{name:/未选中卡也接收更新/})).toBeVisible({timeout:20000});await page.getByRole('tab',{name:/未选中卡也接收更新/}).click();await expect(name).toHaveValue('未选中卡也接收更新');

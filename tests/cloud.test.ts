@@ -28,6 +28,11 @@ async function listenForFetch(server:ReturnType<typeof createCloudServer>){
 }
 
 describe('authoritative cloud storage',()=>{
+ it('returns polling summaries without loading complete card bodies or disclosing strangers',()=>{
+  const {store,owner,editor,stranger}=setup(),input=completeCard();input.notes='大段角色正文'.repeat(50000);const saved=store.create(owner,input);store.grantAccount(saved.id,owner,editor.id);
+  store.read=()=>{throw Error('Directory must not load complete documents');};
+  expect(store.list(owner)).toEqual([{id:saved.id,revision:1,name:input.name,edition:input.edition,updatedAt:saved.updatedAt,role:'owner'}]);expect(store.list(editor)[0].role).toBe('editor');expect(store.list(stranger)).toEqual([]);expect(JSON.stringify(store.list(owner)).length).toBeLessThan(400);
+ });
  it('authorized cloud information names the actual owner without granting strangers access',()=>{const {store,owner,editor,stranger}=setup();store.saveQQProfile(owner.id,'原卡拥有者','https://qlogo.cn/owner.png');const card=store.create(owner,newCharacter());store.grantAccount(card.id,owner,editor.id);expect(store.read(card.id,editor)).toMatchObject({role:'editor',ownerAccountId:owner.id,ownerNickname:'原卡拥有者'});expect(()=>store.read(card.id,stranger)).toThrow('没有找到');});
  it('stores the whole original document without regranting or changing edition',()=>{const {store,owner}=setup(),input=completeCard();const saved=store.create(owner,input);expect(saved.id).not.toBe(input.id);expect(store.read(saved.id,owner).character).toEqual(input);expect(()=>store.read(saved.id)).toThrow();expect(store.read(saved.id,owner).role).toBe('owner');});
  it('server enforces ten owned cards and recovers a slot on owner delete',()=>{const {store,owner}=setup();const cards=Array.from({length:10},()=>store.create(owner,newCharacter()));expect(()=>store.create(owner,newCharacter())).toThrow('槽位');expect(store.slots(owner).used).toBe(10);store.delete(cards[0].id,owner,1);expect(store.create(owner,newCharacter()).id).not.toBe(cards[0].id);});
