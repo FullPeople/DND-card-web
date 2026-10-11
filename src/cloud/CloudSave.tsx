@@ -40,7 +40,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
     const bindings=Object.entries(receipts).filter(([,receipt])=>receipt.binding);
     if(!bindings.length){rightsRef.current={};latest.current.access?.({});return;}
     const account=value.authenticated?value.account?.id:value.uploadOwner?.id;
-    const rows=account?await cloudCards():undefined;if(!alive||epoch!==refreshEpoch)return;
+    const rows=account?await cloudCards(0,account):undefined;if(!alive||epoch!==refreshEpoch)return;
     const directory=new Map((rows?.mine||rows?.cards||[]).map(card=>[card.id,card]));
     const rights:Record<string,string|undefined>={};
     for(const [id,receipt] of bindings){const row=directory.get(receipt.binding!.cloudId);

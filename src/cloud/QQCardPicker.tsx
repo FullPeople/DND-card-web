@@ -8,7 +8,7 @@ export function QQCardPicker(){
  const [cards,setCards]=useState<CardSummary[]>([]),[query,setQuery]=useState(''),[edition,setEdition]=useState('all'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
  const generation=useRef(0),current=useRef(account),busyRef=useRef(busy),loading=useRef(false);current.current=account;busyRef.current=busy;
  async function refresh(quiet=false){if(loading.current||quiet&&(busyRef.current||document.visibilityState==='hidden'||!navigator.onLine))return;loading.current=true;const epoch=++generation.current;if(!quiet){setBusy(true);setError('');}try{
-  const rows=await cloudCards(),session=await cloudSession();
+  const rows=await cloudCards(0,account),session=await cloudSession();
   if(epoch!==generation.current||account!==current.current)return;
   if(session.account?.id!==account)throw Error('账号已改变，请关闭弹窗后重新打开。');
   setCards((rows.mine||rows.cards).filter(card=>card.role));

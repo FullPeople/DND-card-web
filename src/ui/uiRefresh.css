@@ -80,6 +80,7 @@ button,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=
 /* Narrow header: icon buttons keep their names, labels are hidden. */
 @media(max-width:700px){
  .app-header .header-tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;gap:5px;padding:2px 0}
+ .app-header .header-tools>.palette-toggle{position:sticky;right:0;z-index:1;flex:0 0 auto;box-shadow:-4px 0 4px var(--ui-heading)}
  .app-header .header-tools .icon-button .label{display:none}
  .app-header .header-tools .icon-button{padding:3px 7px;min-height:30px}
  .app-header .header-tools .icon-button.primary .label{display:inline}

@@ -3,7 +3,7 @@ import {readFileSync,existsSync,statSync,mkdirSync,writeFileSync,mkdtempSync} fr
 import {resolve,extname,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {CloudStore,createCloudServer} from '../dist-cloud-server/server.mjs';
-const port=5320,origin='http://127.0.0.1:'+port,root=resolve('dist-cloud');
+const port=5320,origin='http://127.0.0.1:'+port,root=resolve(process.env.CLOUD_PREVIEW_ROOT||'dist-cloud');
 const folder=mkdtempSync(join(tmpdir(),'dnd-cloud-browser-')),store=new CloudStore(join(folder,'fixture.sqlite'));
 const owner=store.provisionVerifiedAccount('local-fixture:owner','1234567'),editor=store.provisionVerifiedAccount('local-fixture:editor','2345678');
 const ownerSession=store.issueVerifiedSession(owner.id),editorSession=store.issueVerifiedSession(editor.id),editorLogoutSession=store.issueVerifiedSession(editor.id),editorProfileSession=store.issueVerifiedSession(editor.id);

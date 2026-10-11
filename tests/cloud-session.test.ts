@@ -6,6 +6,14 @@ const response=(id:string)=>new Response(JSON.stringify(session(id)),{headers:{'
 afterEach(()=>{vi.unstubAllGlobals();vi.resetModules();});
 
 describe('cloud session request ordering',()=>{
+ it('rejects a directory belonging to another account after a session switch',async()=>{
+  vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({accountId:'old-account',cards:[{id:'old-card'}],slots:{total:10,used:1}}))));
+  const api=await import('../src/cloud/api'),changed=vi.fn(),stop=api.subscribeCloudSessionChanges(changed);await expect(api.cloudCards(0,'new-account')).rejects.toMatchObject({code:'account_changed'});expect(changed).toHaveBeenCalledOnce();stop();
+ });
+ it('accepts a directory from the expected account',async()=>{
+  vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({accountId:'account',cards:[{id:'own-card'}],slots:{total:10,used:1}}))));
+  const api=await import('../src/cloud/api');expect((await api.cloudCards(0,'account')).cards).toEqual([{id:'own-card'}]);
+ });
  it('shares concurrent display reads and rechecks after they finish',async()=>{
   const first=deferred<Response>(),fetcher=vi.fn().mockReturnValueOnce(first.promise).mockResolvedValue(response('next-account'));vi.stubGlobal('fetch',fetcher);
   const api=await import('../src/cloud/api'),one=api.cloudSession(),two=api.cloudSession();expect(fetcher).toHaveBeenCalledTimes(1);

@@ -81,7 +81,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         if((session||options.accountPrivate)&&store.isTemporaryCard(card.id)&&card.role!=='owner')throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
         return send(response,200,card);
       }
-      if(method==='GET'&&url.pathname==='/api/cards'&&session){const cards=store.list(session.account);return send(response,200,{cards,mine:cards,temporary:temporaryOwner?store.listTemporary(temporaryOwner):[],slots:store.slots(session.account),total:cards.length,hasMore:false});}
+      if(method==='GET'&&url.pathname==='/api/cards'&&session){const cards=store.list(session.account);return send(response,200,{accountId:session.account.id,cards,mine:cards,temporary:temporaryOwner?store.listTemporary(temporaryOwner):[],slots:store.slots(session.account),total:cards.length,hasMore:false});}
       if(method==='GET'&&url.pathname==='/api/cards'&&options.temporaryUpload&&!options.accountPrivate){
         const offset=Number(url.searchParams.get('offset')||0),limit=Number(url.searchParams.get('limit')||50);
         if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(limit)||limit<1||limit>100)throw new CloudError(400,'pagination','分页参数无效。');

@@ -35,7 +35,7 @@ export default function LibraryApp(){
         const actor=next.authenticated?next.account?.id:next.uploadOwner?.id;
         if(actor!==latestAccount.current){await refresh();return;}
         if(!actor)return;
-        const rows=await cloudCards();if(!alive||epoch!==refreshGeneration.current)return;
+        const rows=await cloudCards(0,actor);if(!alive||epoch!==refreshGeneration.current)return;
         const update=<T,>(before:T,after:T)=>JSON.stringify(before)===JSON.stringify(after)?before:after;
         setSession(before=>update(before,{...next,slots:rows.slots}));setCards(before=>{const incoming=new Map(rows.cards.map(row=>[row.id,row])),ordered=before.flatMap(row=>{const current=incoming.get(row.id);incoming.delete(row.id);return current?[current]:[];});return update(before,[...ordered,...incoming.values()]);});setMine(before=>update(before,rows.mine||rows.cards.filter(row=>row.role)));setTemporary(before=>update(before,rows.temporary||[]));
         setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);
@@ -56,7 +56,7 @@ export default function LibraryApp(){
     const generation=++refreshGeneration.current;setCards([]);setMine([]);setTemporary([]);setManage(undefined);
     try{
       const next=await cloudSession();if(generation!==refreshGeneration.current)return;setSession(next);
-      if(next.authenticated||next.temporaryUpload){const rows=await cloudCards();if(generation!==refreshGeneration.current)return;setTemporary(rows.temporary||[]);setCards(rows.cards);setMine(rows.mine||rows.cards.filter(row=>row.role));setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);setSession({...next,slots:rows.slots});}
+      if(next.authenticated||next.temporaryUpload){const rows=await cloudCards(0,next.account?.id||next.uploadOwner?.id);if(generation!==refreshGeneration.current)return;setTemporary(rows.temporary||[]);setCards(rows.cards);setMine(rows.mine||rows.cards.filter(row=>row.role));setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);setSession({...next,slots:rows.slots});}
       else {setCards([]);setMine([]);}
     }catch{if(generation!==refreshGeneration.current)return;setSession(undefined);setCards([]);setMine([]);setTemporary([]);setMessage('云端服务暂时无法连接。本机角色和 JSON 导出仍可使用，可稍后刷新重试。');}
   }
