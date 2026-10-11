@@ -1,5 +1,6 @@
 import type {Character,Entry} from '../core/model';
 import {ignoreUnfilledSheetChoices} from '../core/automation/choices';
+import {recordReviewedRoots} from './choiceReview';
 import type {ClassMigrationPlan} from '../core/classMigrationQuery';
 import {migrationStillCurrent} from '../core/classMigrationQuery';
 import {validateCharacter} from '../core/validation';
@@ -10,6 +11,6 @@ export function synchronizedImport(original: Character, reviewed: Character, pla
   const result = structuredClone(plan.card);
   result.id = original.id; result.name = original.name; result.createdAt = original.createdAt;
   result.updatedAt = new Date().toISOString(); result.revision = 1;
-  ignoreUnfilledSheetChoices(result,catalog);
+  ignoreUnfilledSheetChoices(result,catalog);recordReviewedRoots(result);
   return validateCharacter(result);
 }

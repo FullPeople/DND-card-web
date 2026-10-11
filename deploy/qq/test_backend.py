@@ -72,9 +72,17 @@ class BackendTests(unittest.TestCase):
    with self.assertRaisesRegex(RuntimeError,'privacy-ready'):u.apply(package,seal)
    self.assertFalse((package/'backup').exists());self.restart.assert_not_called()
  def test_private_health_requires_closed_guest_directory(self):
-  health={'version':'1.0.261','qqOAuthSupported':True,'qqLogin':'ready','permissionsVersion':1,'accountPrivate':True,'temporaryUpload':False,'publicDirectory':False,'quotaScope':'account'}
+  health={'version':'1.0.261','qqOAuthSupported':True,'qqLogin':'ready','permissionsVersion':1,'accountPrivate':True,'accountLibrariesPrivate':True,'temporaryUpload':False,'publicDirectory':False,'quotaScope':'account'}
   with patch.object(u.m,'wait_http',return_value=json.dumps(health).encode()):self.assertEqual(u.verify('account-private'),health)
-  for name,value in [('accountPrivate',False),('temporaryUpload',True),('publicDirectory',True),('quotaScope','ip'),('qqLogin','pending')]:
+  for name,value in [('accountPrivate',False),('accountLibrariesPrivate',False),('temporaryUpload',True),('publicDirectory',True),('quotaScope','ip'),('qqLogin','pending')]:
    with patch.object(u.m,'wait_http',return_value=json.dumps({**health,name:value}).encode()):
     with self.assertRaisesRegex(RuntimeError,'Private account policy'):u.verify('account-private')
+ def test_temporary_package_cannot_downgrade_private_backend(self):
+  with tempfile.TemporaryDirectory() as folder:
+   package,seal=self.fixture(Path(folder))
+   private=json.dumps({'version':'1.0.282','qqOAuthSupported':True,'qqLogin':'ready','permissionsVersion':1,'accountLibrariesPrivate':True,'accountPrivate':True,'temporaryUpload':False,'publicDirectory':False,'quotaScope':'account'}).encode()
+   with patch.object(u.m,'wait_http',return_value=private):
+    (package/'baseline.json').write_text(json.dumps(u.snapshot()));manifest=json.loads((package/'manifest.json').read_text());manifest['baselineSha256']=u.sha(package/'baseline.json');(package/'manifest.json').write_text(json.dumps(manifest));seal=u.sha(package/'manifest.json')
+    with self.assertRaisesRegex(RuntimeError,'downgrade'):u.apply(package,seal)
+   self.assertFalse((package/'backup').exists());self.restart.assert_not_called()
 if __name__=='__main__':unittest.main()

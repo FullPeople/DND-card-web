@@ -10,7 +10,7 @@ import {ANNOUNCEMENT_KEY,announcementVersionFor} from '../../src/platform/announ
 async function closeImportedCard(page:Page,name:string){
  // File.text() completes asynchronously; the import selects its card and reopens this dialog.
  await expect(page.locator('.character-tabs').getByRole('tab',{name:name+'（导入）'})).toHaveAttribute('aria-selected','true');
- const dialog=page.getByRole('dialog',{name:'导入与导出',exact:true});await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
+ const dialog=page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/});await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
 }
 test('suite notice shows a collapsed red Owner explanation near the front and requires acknowledgement',async({page,baseURL})=>{
  await mockSource(page,{suiteAnnouncement:true});const url=new URL(baseURL!);url.hash='suite=notice197&bridge='+encodeURIComponent(url.origin);await page.goto(url.href);

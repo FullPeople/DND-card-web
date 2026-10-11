@@ -13,7 +13,7 @@ async function openCard(page:Page,c:Character){
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.getByRole('button',{name:'导入 / 导出',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'authored-ac-test-card.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  if(c.edition==='2014'){const review=page.getByRole('dialog',{name:'导入前核对',exact:true});await expect(review).toContainText('导入后保留该角色自己的规则版本');await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();}
- await expect(page.getByRole('tab',{name:c.name+'（导入）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ await expect(page.getByRole('tab',{name:c.name+'（导入）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
  await page.getByRole('button',{name:'自动化设置',exact:true}).click();
 }
 async function assertSaved(page:Page,c:Character){

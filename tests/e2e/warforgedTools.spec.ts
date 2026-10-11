@@ -17,7 +17,7 @@ async function ready(page:Page,book:'ERLW'|'EFA',mobile=false){
  const c=newCharacter(book==='ERLW'?'2014':'2024');c.name='战俑工具入口 '+book;c.automation=newAutomationState();c.profile.enabledSources.push(book);c.training={tools:'手工工具记录',languages:'手工语言'};c.runtime.hp=7;c.runtime.resources={spent:{current:1,max:4}};c.selections=[{id:'race',entry:warforgedToolEntries().find(e=>e.kind==='race'&&e.source===book)!,quantity:1,level:1,equipped:false}];
  await page.goto('/');if(mobile)await page.getByRole('button',{name:'Wiki',exact:true}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();if(mobile)await page.getByRole('button',{name:'功能页',exact:true}).click();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'synthetic-warforged-tools.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
- if(book==='ERLW')await page.getByRole('dialog',{name:'导入前核对',exact:true}).getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ if(book==='ERLW')await page.getByRole('dialog',{name:'导入前核对',exact:true}).getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
  const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();await restoreAuthoredChoices(page,'dnd-card-standalone');return c;
 }
 async function dragToSlot(page:Page,name:string,slot:Locator){

@@ -1,0 +1,2 @@
+/** Six characters both ends derive from the PKCE challenge, so the person approving a plugin pairing can check that it is the one their plugin started. Mirrored in obr-suite qq-account.ts. */
+export function pairingCode(challenge:string){let h=2166136261;for(let i=0;i<challenge.length;i++){h^=challenge.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let out='';for(let i=0;i<6;i++){out+=alphabet[h%32];h=Math.floor(h/32);}return out;}

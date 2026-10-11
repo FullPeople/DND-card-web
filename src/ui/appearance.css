@@ -1,4 +1,7 @@
 /* Shared browser preferences; card colors remain part of each character. */
+/* Token defaults (platform/appearance.ts overrides them inline once it runs), so pages that
+   load this sheet before the palette module never resolve a token to nothing. */
+:root{--ui-background:#e4ddd0;--ui-surface:#f7f3ea;--ui-heading:#ece6d8;--ui-band:#6e5a46;--ui-bandInk:#fff8ec;--ui-ink:#2d2a25;--ui-muted:#625b4f;--ui-line:#b8ad9b;--ui-accent:#8a5a2b;--ui-button:#fbf8f1;--ui-buttonInk:#2f2b25;--ui-buttonLine:#857a68;--ui-selected:#4d5a6b;--ui-selectedInk:#ffffff;--wiki-background:#fbf8f1;--wiki-ink:#2d2a25;--wiki-muted:#625b4f;--wiki-title:#3f362c;--wiki-link:#8a5a2b;--wiki-area:#f0eadd;--wiki-line:#bfb4a1;--wiki-entry:#f7f3ea;--wiki-entryInk:#2d2a25;--wiki-selected:#e0d6c2;--wiki-selectedInk:#221f1a;--wiki-feature:#f1ebdf;--wiki-featureInk:#2d2a25;--wiki-tableHeading:#e3dac8;--wiki-tableHeadingInk:#2d2a25;--wiki-tableCell:#fbf8f1;--wiki-tableAlternate:#f1ebdf;--wiki-tableInk:#2d2a25;--wiki-tableLine:#bfb4a1;}
 :root{--suite-paper:var(--ui-surface);--suite-surface:var(--ui-heading);--suite-ink:var(--ui-ink);--suite-muted:var(--ui-muted);--suite-line:var(--ui-line);--ink:var(--ui-ink);--muted:var(--ui-muted);--line:var(--ui-line);--accent:var(--ui-accent)}
 body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(--ui-background);color:var(--ui-ink)}
 .app-header,.cloud-header,.dialog,.dm-console{background:var(--ui-surface);color:var(--ui-ink);border-color:var(--ui-line)}

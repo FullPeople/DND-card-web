@@ -1,5 +1,5 @@
 import {DatabaseSync} from 'node:sqlite';
-import {createHash,createHmac,randomBytes,randomInt,randomUUID} from 'node:crypto';
+import {createHash,createHmac,randomBytes,randomInt,randomUUID,timingSafeEqual} from 'node:crypto';
 import {validateCharacter} from '../../src/core/validation';
 import type {Character} from '../../src/core/model';
 
@@ -9,7 +9,11 @@ export class CloudError extends Error {
 const hash=(value:string)=>createHash('sha256').update(value).digest('hex');
 export const validQQ=(value:unknown):value is string=>typeof value==='string'&&/^[1-9]\d{4,11}$/.test(value);
 export interface Account {id:string;qq:string|null;extra_slots:number}
-export interface Session {account:Account;csrf:string}
+export interface Session {account:Account;csrf:string;scope?:'plugin'}
+/** Constant-time comparison for secrets carried in headers; non-strings never match. */
+export const safeEqual=(a:unknown,b:unknown)=>{if(typeof a!=='string'||typeof b!=='string')return false;const left=Buffer.from(a),right=Buffer.from(b);return left.length===right.length&&timingSafeEqual(left,right);};
+/** A card the caller may not touch looks exactly like a missing card, as it does on GET. */
+const HIDDEN='没有找到这张云端角色卡，或你的访问权限已被撤销。本机草稿保留。';
 export interface TemporaryOwner {id:string;csrf:string}
 export interface CloudCard {id:string;revision:number;character:Character;updatedAt:string;role?:'owner'|'editor';editors?:string[];ownerNickname?:string;ownerAccountId?:string}
 
@@ -122,7 +126,7 @@ export class CloudStore {
     this.checkBody(character);
     if(!Number.isSafeInteger(expected)||Number(expected)<1)throw new CloudError(400,'revision_required','更新需要云端修订号。');
     return this.transaction(()=>{
-      const row=this.row(id);if(!this.role(row,account))throw new CloudError(403,'forbidden','编辑权限已撤销或尚未授予。本机草稿保留。');
+      const row=this.row(id);if(!this.role(row,account))throw new CloudError(404,'not_found',HIDDEN);
       if(row.revision!==expected)throw new CloudError(409,'conflict','云端卡已被其他人修改。本机草稿保留，请先导出备份并核对新版本。');
       this.db.prepare('UPDATE cards SET body=?,revision=revision+1,updated_at=? WHERE id=? AND revision=?').run(JSON.stringify(character),new Date().toISOString(),id,Number(expected));return this.read(id,account);
     });
@@ -130,16 +134,18 @@ export class CloudStore {
   grant(id:string,account:Account,qq:unknown,remove=false){
     if(!validQQ(qq))throw new CloudError(400,'invalid_qq','请输入 5 至 12 位、首位非零的 QQ 号。');
     return this.transaction(()=>{
-      const row=this.row(id);if(row.owner_id!==account.id)throw new CloudError(403,'owner_only','只有卡主可以管理编辑授权。');
+      const row=this.row(id),role=this.role(row,account);if(!role)throw new CloudError(404,'not_found',HIDDEN);if(role!=='owner')throw new CloudError(403,'owner_only','只有卡主可以管理编辑授权。');
       if(remove)this.db.prepare('DELETE FROM editors WHERE card_id=? AND qq=?').run(id,qq);
       else {const count=this.db.prepare('SELECT COUNT(*) n FROM editors WHERE card_id=?').get(id) as {n:number};if(count.n>=100&&!this.db.prepare('SELECT 1 FROM editors WHERE card_id=? AND qq=?').get(id,qq))throw new CloudError(400,'too_many_editors','每张卡最多指定 100 个编辑者。');this.db.prepare('INSERT OR IGNORE INTO editors VALUES(?,?)').run(id,qq);}
       return this.read(id,account);
     });
   }
   grantAccount(id:string,account:Account,target:unknown,remove=false){
-    if(typeof target!=='string'||!this.db.prepare('SELECT 1 FROM accounts WHERE id=?').get(target))throw new CloudError(400,'invalid_account','没有找到该账号，请对方复制登录后的账号 ID。');
+    if(typeof target!=='string'||target.length>64)throw new CloudError(400,'invalid_account','没有找到该账号，请对方复制登录后的账号 ID。');
     return this.transaction(()=>{
-      const row=this.row(id);if(row.owner_id!==account.id)throw new CloudError(403,'owner_only','只有卡主可以管理编辑授权。');
+      const row=this.row(id),role=this.role(row,account);if(!role)throw new CloudError(404,'not_found',HIDDEN);if(role!=='owner')throw new CloudError(403,'owner_only','只有卡主可以管理编辑授权。');
+      // Only the owner learns whether a target account exists.
+      if(!this.db.prepare('SELECT 1 FROM accounts WHERE id=?').get(target))throw new CloudError(400,'invalid_account','没有找到该账号，请对方复制登录后的账号 ID。');
       if(remove)this.db.prepare('DELETE FROM account_editors WHERE card_id=? AND account_id=?').run(id,target);
       else {const count=Number(this.db.prepare('SELECT COUNT(*) n FROM account_editors WHERE card_id=?').get(id)!.n);if(count>=100&&!this.db.prepare('SELECT 1 FROM account_editors WHERE card_id=? AND account_id=?').get(id,target))throw new CloudError(400,'too_many_editors','每张卡最多指定 100 个编辑者。');this.db.prepare('INSERT OR IGNORE INTO account_editors VALUES(?,?)').run(id,target);}
       return this.read(id,account);
@@ -157,7 +163,7 @@ export class CloudStore {
   }
   delete(id:string,account:Account,expected:unknown){
     return this.transaction(()=>{
-      const row=this.row(id);if(row.owner_id!==account.id)throw new CloudError(403,'owner_only','只有卡主可以删除云端卡。');
+      const row=this.row(id),role=this.role(row,account);if(!role)throw new CloudError(404,'not_found',HIDDEN);if(role!=='owner')throw new CloudError(403,'owner_only','只有卡主可以删除云端卡。');
       if(row.revision!==expected)throw new CloudError(409,'conflict','云端卡版本已改变，未删除。请重新核对。');
       this.db.prepare('DELETE FROM cards WHERE id=?').run(id);
     });

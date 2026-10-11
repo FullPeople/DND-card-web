@@ -31,6 +31,6 @@ test('explicit point binding and paid casts survive native import and leveling w
 });
 test('narrow resource-column selection stays usable and keeps its saved binding after reload',async({page})=>{
  await page.setViewportSize({width:390,height:844});await ready(page);await bind(page);await page.reload();await page.getByRole('button',{name:'自动化设置',exact:true}).click();
- const dialog=page.getByRole('dialog',{name:'基础自动化',exact:true});await expect(dialog.getByRole('combobox',{name:'原创引火法的Authored Sparks资源',exact:true})).toHaveValue('原创星火');expect(await dialog.evaluate(node=>node.scrollWidth<=node.clientWidth+1)).toBe(true);
+ const dialog=page.getByRole('dialog',{name:/^基础自动化(?:\s|$)/});await expect(dialog.getByRole('combobox',{name:'原创引火法的Authored Sparks资源',exact:true})).toHaveValue('原创星火');expect(await dialog.evaluate(node=>node.scrollWidth<=node.clientWidth+1)).toBe(true);
  await expect(page.getByRole('button',{name:/短休|长休|恢复以上/})).toHaveCount(0);expect(await points(page)).toMatchObject({max:6,current:6});
 });

@@ -24,7 +24,7 @@ async function fixture(page:Page){
 }
 async function restore(page:Page){
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByRole('button',{name:'读取上一次保存',exact:true}).click();
- await expect(page.getByRole('dialog',{name:'导入与导出',exact:true})).toHaveCount(0);await expect(page.locator('.character-tabs [aria-selected=true]')).toContainText('已读取的旧备份');
+ await expect(page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/})).toHaveCount(0);await expect(page.locator('.character-tabs [aria-selected=true]')).toContainText('已读取的旧备份');
 }
 function accepted(state:{workspace:Workspace;backup:Workspace;draft:Character},data:Awaited<ReturnType<typeof fixture>>){
  const actual=state.workspace.characters.find(card=>card.id===state.workspace.activeId)!,expected=data.backup.characters.find(card=>card.id===data.backup.activeId)!;

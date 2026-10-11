@@ -19,6 +19,9 @@ export function offlineShell(): Plugin {
     const files=[...first];
     const html=bundle['index.html'];
     const revision = createHash('sha256').update('on-demand-shell-v5:'+JSON.stringify(assets)).update(html?.type==='asset'?html.source:'').digest('hex').slice(0, 12);
+    // The page carries its own build id, so a page that already came from the
+    // network as this build can let the waiting worker activate silently.
+    if(html?.type==='asset'&&typeof html.source==='string'&&!html.source.includes('name="dnd-card-build"'))html.source=html.source.replace('<head>',`<head><meta name="dnd-card-build" content="${revision}"/>`);
     this.emitFile({ type: 'asset', fileName: 'sw.js', source: `
 const PREFIX = 'dnd-card-shell:' + new URL('./', self.location.href).pathname + ':';
 const CACHE = PREFIX + ${JSON.stringify(revision)};
@@ -37,6 +40,7 @@ self.addEventListener('install', event => event.waitUntil(installShell()));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('message', event => {
   if (event.data === 'activate-update') self.skipWaiting();
+  if (event.data?.type === 'shell-revision') event.ports?.[0]?.postMessage(CACHE);
   if(event.data?.type==='cache-used-assets'&&Array.isArray(event.data.urls))event.waitUntil(caches.open(CACHE).then(async cache=>{
     // First-visit tools may finish before this worker takes control. Backfill
     // those used files only, and never cache documents or arbitrary URLs.

@@ -16,7 +16,7 @@ async function ready(page:Page){await mockSource(page);await suppressAnnouncemen
 async function finishCharacterImport(page:Page,name:string){
  const label=new RegExp('^'+name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\s*旧卡资料需要核对)?$');
  await expect(page.getByRole('tab',{name:label})).toHaveAttribute('aria-selected','true');
- const dialog=page.getByRole('dialog',{name:'导入与导出',exact:true});
+ const dialog=page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/});
  await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
 }
 async function importManual(page:Page){await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'manual.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(manual())))});await finishCharacterImport(page,'自动化迁移验收（导入）');}
@@ -63,7 +63,7 @@ test('imported manual card automatically enables automation; armor replaces, shi
  await page.getByRole('checkbox',{name:'启用自动计算',exact:true}).uncheck();await expect(page.getByTestId('automation-ac')).toHaveText('13');await page.getByRole('checkbox',{name:'启用自动计算',exact:true}).check();await expect(page.getByTestId('automation-ac')).toHaveText('18');expect(errors).toEqual([]);
 });
 test('narrow screen keeps settings readable and uses isolated storage',async({page})=>{
- await page.setViewportSize({width:390,height:844});await ready(page);await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('dialog',{name:'基础自动化',exact:true})).toBeVisible();
+ await page.setViewportSize({width:390,height:844});await ready(page);await page.getByRole('button',{name:'自动化设置'}).click();await expect(page.getByRole('dialog',{name:/^基础自动化(?:\s|$)/})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);const names=await page.evaluate(async()=>(await indexedDB.databases()).map(d=>d.name));expect(names).toContain(process.env.DND_AUTOMATION_TEST_MODE==='standalone'?'dnd-card-standalone':'dnd-card-automation-209');expect(names).not.toContain('dnd-card-workspace');await page.screenshot({path:test.info().outputPath('automation-mobile.png')});
 });
 test('failed equipment save preserves the previous database and the current draft, then a later save commits both actions once',async({page})=>{

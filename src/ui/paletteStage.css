@@ -1,0 +1,67 @@
+/* Example screen inside the palette drawer. It is built from CSS boxes that
+   read the live palette variables, so a hovered swatch lights the matching
+   component here instead of on the real page (which may not show it). */
+.palette-stage{flex:0 0 auto;width:min(100%,420px);min-width:0;user-select:none;pointer-events:none}
+.pstage{font:10px/1.35 system-ui,"Microsoft YaHei",sans-serif;border:1px solid var(--ui-buttonLine,#6f6f6f);border-radius:6px;overflow:hidden;box-shadow:0 2px 10px #0002}
+.pstage .ui-icon{--icon:11px;vertical-align:-.15em;margin-right:2px}
+.ps-spacer{flex:1}
+.is-hot{position:relative;z-index:1;outline:2px solid #d29125;outline-offset:1px;box-shadow:0 0 0 3px #ffd65c55,0 0 10px #e5ad4a99;transition:box-shadow .12s}
+i.is-hot,b.is-hot,span.is-hot,a.is-hot,small.is-hot{outline-offset:2px;border-radius:2px}
+
+/* Base UI */
+.pstage-ui .ps-page{background:var(--ui-background,#d1d1d1);padding:6px;display:grid;gap:5px}
+.ps-header{display:flex;align-items:center;gap:5px;padding:4px 6px;background:var(--ui-heading,#e5e5e5);color:var(--ui-ink,#343532);border-radius:4px}
+.ps-brand{font-weight:700;color:var(--ui-ink,#343532)}
+.ps-btn{display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border:1px solid var(--ui-buttonLine,#6f6f6f);border-radius:3px;background:var(--ui-button,#f7f7f5);color:var(--ui-buttonInk,#303239);white-space:nowrap}
+.ps-btn.is-selected,.ps-tab.is-selected{background:var(--ui-selected,#50525b);color:var(--ui-selectedInk,#fff);border-color:var(--ui-selected,#50525b)}
+.ps-btn.is-icon{padding:2px 4px}.ps-btn.is-small{font-size:9px;padding:1px 5px}
+.ps-toolbar{display:flex;align-items:center;gap:6px;padding:3px 6px;background:var(--ui-heading,#e5e5e5);color:var(--ui-ink,#343532);border-radius:4px}
+.ps-sep{width:1px;height:12px;background:var(--ui-line,#a5a5a5)}
+.ps-row{display:grid;grid-template-columns:1fr 92px;gap:5px;min-width:0}
+.ps-surface{display:grid;gap:4px;padding:6px;background:var(--ui-surface,#f5f5f3);color:var(--ui-ink,#343532);border:1px solid var(--ui-line,#a5a5a5);border-radius:4px;min-width:0}
+.ps-band{padding:2px 6px;background:var(--ui-band,#747474);color:var(--ui-bandInk,#fff);font-weight:700;letter-spacing:1px;clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px)}
+.ps-text{color:var(--ui-ink,#343532);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-text.is-muted{color:var(--ui-muted,#666)}
+.pstage-ui .ps-line,.pstage .ps-line{display:block;height:1px;background:var(--ui-line,#a5a5a5)}
+.ps-link{color:var(--ui-accent,#50525b);text-decoration:underline}
+.ps-tab{padding:2px 6px;border:1px solid var(--ui-buttonLine,#6f6f6f);border-radius:3px;background:var(--ui-button,#f7f7f5);color:var(--ui-buttonInk,#303239);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Wiki */
+.pstage-wiki .ps-page{background:var(--wiki-background,#fafaf8);color:var(--wiki-ink,#343532);padding:6px;display:grid;gap:5px}
+.ps-wiki-head{display:flex;align-items:center;gap:5px;padding:3px 6px;background:var(--wiki-area,#eeeeec);border:1px solid var(--wiki-line,#b8b8b4);border-radius:4px;color:var(--wiki-title,#454545)}
+.ps-wiki-head .ps-btn{background:var(--wiki-area,#eeeeec);color:var(--wiki-ink,#343532);border-color:var(--wiki-line,#b8b8b4)}
+.pstage-wiki .ps-row{grid-template-columns:96px 1fr}
+.ps-wiki-list{display:grid;gap:3px;padding:4px;background:var(--wiki-area,#eeeeec);border:1px solid var(--wiki-line,#b8b8b4);border-radius:4px;align-content:start}
+.ps-entry{padding:2px 5px;background:var(--wiki-entry,#f5f5f3);color:var(--wiki-entryInk,#343532);border:1px solid var(--wiki-line,#b8b8b4);border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-entry small{color:var(--wiki-muted,#606060);font-size:8px}
+.ps-entry.is-selected{background:var(--wiki-selected,#d8d8d4);color:var(--wiki-selectedInk,#252525)}.ps-entry.is-selected small{color:inherit}
+.ps-wiki-detail{display:grid;gap:3px;min-width:0;padding:2px}
+.ps-wiki-title{color:var(--wiki-title,#454545);font-size:11px}
+.pstage-wiki .ps-text{color:var(--wiki-ink,#343532);white-space:normal}
+.pstage-wiki .ps-text.is-muted{color:var(--wiki-muted,#606060)}
+.pstage-wiki .ps-link{color:var(--wiki-link,#50525b)}
+.ps-feature{padding:3px 5px;background:var(--wiki-feature,#eeeeea);color:var(--wiki-featureInk,#343532);border:1px solid var(--wiki-line,#b8b8b4);border-left-width:3px;border-radius:3px}
+.ps-table{border-collapse:collapse;width:100%;border:1px solid var(--wiki-tableLine,#b2b2ad)}
+.ps-table th,.ps-table td{padding:2px 5px;border:1px solid var(--wiki-tableLine,#b2b2ad);text-align:left}
+.ps-table th{background:var(--wiki-tableHeading,#deded9);color:var(--wiki-tableHeadingInk,#343532)}
+.ps-table td{background:var(--wiki-tableCell,#fafaf8);color:var(--wiki-tableInk,#343532)}
+.ps-table tr:nth-child(3) td{background:var(--wiki-tableAlternate,#eeeee9)}
+
+/* Character card */
+.pstage-card{border:0;box-shadow:none;overflow:visible}
+.ps-sheet{padding:6px;background:var(--card-all-paper,#ededeb);border:2px solid var(--card-all-frame,#595959);clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px)}
+.ps-sheet.is-hot{clip-path:none}
+.ps-sheet-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.ps-cell{display:grid;grid-template-rows:auto 1fr;min-width:0;border:1.5px solid var(--ps-frame);background:var(--ps-surface);color:var(--ps-ink);border-radius:2px;overflow:hidden}
+.ps-cell.ps-wide{grid-column:span 2}
+.ps-cell-heading{display:flex;align-items:center;justify-content:space-between;gap:3px;padding:1px 4px;background:var(--ps-heading);color:var(--ps-headingInk,#fff);font-weight:700;font-size:9px;letter-spacing:.5px;white-space:nowrap}
+.ps-cell-heading .ps-badge{display:inline-flex;color:var(--ps-badge);background:#fff3;border-radius:2px;padding:0 1px}
+.ps-cell-heading .ps-badge .ui-icon{margin:0;--icon:10px}
+.ps-cell-content{padding:3px 4px;background:var(--ps-surface);color:var(--ps-ink);min-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-cell-ink{color:var(--ps-ink)}
+.ps-dots{display:inline-flex;gap:2px}.ps-dots b{display:inline-grid;place-items:center;width:12px;height:12px;border:1px solid var(--ps-frame);border-radius:50%;font-size:8px;font-weight:600}
+.ps-portrait{display:grid;place-items:center;height:20px;color:var(--ps-badge)}
+.ps-caption{margin:5px 0 0;font-size:11px;color:var(--ui-muted,#666)}
+
+@media(max-width:650px){.palette-stage{width:100%}.pstage{font-size:9px}.ps-row{grid-template-columns:1fr 80px}.pstage-wiki .ps-row{grid-template-columns:80px 1fr}}
+@media(prefers-reduced-motion:reduce){.is-hot{transition:none}}

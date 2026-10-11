@@ -15,7 +15,7 @@ test.beforeEach(async({page})=>{
 
 test('source radio display, per-entry exclusion and opaque configuration survive import and refresh',async({page})=>{
  await page.getByRole('button',{name:'规则与扩展',exact:true}).click();
- const dialog=page.getByRole('dialog',{name:'规则与扩展',exact:true});await dialog.getByRole('radio',{name:'纯文本',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:/^规则与扩展(?:\s|$)/});await dialog.getByRole('radio',{name:'纯文本',exact:true}).click();
  await dialog.getByRole('button',{name:'设置来源 XPHB'}).click();
  await dialog.getByLabel('搜索来源内条目').fill('微光术');await dialog.getByRole('checkbox',{name:'启用条目 微光术',exact:true}).uncheck();
  await page.getByRole('button',{name:'关闭来源设置'}).click();await dialog.getByRole('button',{name:'导出配置',exact:true}).click();await expect(dialog.getByLabel('规则配置码')).toHaveValue(/^DND1\.[\w-]+$/);

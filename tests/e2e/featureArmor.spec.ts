@@ -25,7 +25,7 @@ async function ready(page:Page,edition:'2014'|'2024'){
   await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await expect(review).toHaveCount(0);
  }
  await expect(page.getByRole('tab',{name:new RegExp(`^护甲来源${edition}（导入）`)})).toHaveAttribute('aria-selected','true');
- await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ await page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
  await expect.poll(async()=>(await saved(page)).edition).toBe(edition);
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
  await restoreAuthoredChoices(page,'dnd-card-standalone');
