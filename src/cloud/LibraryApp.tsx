@@ -31,7 +31,7 @@ export default function LibraryApp(){
         if(!actor)return;
         const rows=await cloudCards();if(!alive||epoch!==refreshGeneration.current)return;
         const update=<T,>(before:T,after:T)=>JSON.stringify(before)===JSON.stringify(after)?before:after;
-        setSession(before=>update(before,{...next,slots:rows.slots}));setCards(before=>update(before,rows.cards));setMine(before=>update(before,rows.mine||rows.cards.filter(row=>row.role)));setTemporary(before=>update(before,rows.temporary||[]));
+        setSession(before=>update(before,{...next,slots:rows.slots}));setCards(before=>{const incoming=new Map(rows.cards.map(row=>[row.id,row])),ordered=before.flatMap(row=>{const current=incoming.get(row.id);incoming.delete(row.id);return current?[current]:[];});return update(before,[...ordered,...incoming.values()]);});setMine(before=>update(before,rows.mine||rows.cards.filter(row=>row.role)));setTemporary(before=>update(before,rows.temporary||[]));
         setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);
       }catch{}finally{flight=false;}
     };
