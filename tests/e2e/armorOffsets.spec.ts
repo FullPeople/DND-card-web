@@ -9,7 +9,7 @@ async function seed(page:Page,card:Character){
 }
 async function saved(page:Page){return page.evaluate(async()=>{const request=indexedDB.open('dnd-card-workspace');const db=await new Promise<IDBDatabase>(resolve=>request.onsuccess=()=>resolve(request.result));try{return await new Promise<Character>(resolve=>{const get=db.transaction('documents').objectStore('documents').get('workspace');get.onsuccess=()=>resolve(get.result.characters.find((c:Character)=>c.id===get.result.activeId));});}finally{db.close();}});}
 function legacy(){const card=newCharacter();card.name='旧护甲核对';card.abilities.dex=14;card.sheetBonuses={ac:2};card.adjustments=[{id:'suite-ac',target:'ac',value:16,reason:'枭熊场景'}];return card;}
-const open=async(page:Page)=>{await page.getByRole('button',{name:'自动化设置',exact:true}).click();return page.getByRole('dialog',{name:'基础自动化',exact:true});};
+const open=async(page:Page)=>{await page.getByRole('button',{name:'自动化设置',exact:true}).click();return page.getByRole('dialog',{name:/^基础自动化(?:\s|$)/});};
 
 test('new manual AC changes are offsets and clearing them restores the calculation',async({page})=>{
  const card=newCharacter();card.abilities.dex=14;await seed(page,card);const value=page.locator('.armor-cell [data-stat="ac"]');await expect(value).toHaveText('12');

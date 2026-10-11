@@ -7,7 +7,7 @@
 a.qq-login-button{display:inline-flex;align-items:center;padding:0;border:0;background:none;clip-path:none;line-height:0;flex-shrink:0;min-height:32px;text-decoration:none}
 .qq-login-button picture{display:block;line-height:0}
 .qq-account .qq-login-button img{display:block;width:170px;height:32px;max-width:none;object-fit:contain;image-rendering:auto;filter:none;border:0;padding:0}
-.qq-account-trigger{display:inline-flex;align-items:center;gap:6px;max-width:200px;min-height:30px;padding:2px 8px 2px 5px;font-size:12px;flex:none}
+.qq-account-trigger{display:inline-flex;align-items:center;gap:6px;max-width:190px;box-sizing:border-box;min-height:30px;padding:2px 8px 2px 5px;font-size:12px;flex:none}
 .qq-profile{display:flex;align-items:center;gap:6px;min-width:0;max-width:150px}
 .qq-profile>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .qq-account .qq-profile>img,.qq-account-trigger .qq-profile>img{width:22px;height:22px;object-fit:cover;image-rendering:auto;border-radius:50%;flex:none;filter:none}

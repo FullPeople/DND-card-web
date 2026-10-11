@@ -15,7 +15,7 @@ function card(){const c=newCharacter();c.name='法师法术布局验收';c.autom
 async function closeImportedCard(page:Page,name:string){
  // File.text() completes asynchronously; the import selects its card and reopens this dialog.
  await expect(page.locator('.character-tabs').getByRole('tab',{name:name+'（导入）'})).toHaveAttribute('aria-selected','true');
- const dialog=page.getByRole('dialog',{name:'导入与导出',exact:true});await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
+ const dialog=page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/});await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
 }
 async function load(page:Page,c=card(),prepare?:()=>Promise<void>){
  await mockSource(page);await suppressAnnouncement(page);await prepare?.();await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();

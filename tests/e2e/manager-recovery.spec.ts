@@ -15,7 +15,7 @@ test('a pending parent-owned delete stays blocked after dialog reopen until its 
  await page.getByRole('button',{name:'切换角色簿',exact:true}).click();await page.getByRole('button',{name:'切换角色簿',exact:true}).click();
  await page.getByRole('checkbox',{name:'选择当前搜索结果'}).check();
  await expect(page.getByRole('button',{name:'删除所选',exact:true})).toBeDisabled();
- await expect(page.getByText('可编辑 · 删除处理中',{exact:true})).toHaveCount(3);
+ await expect(page.locator('.book-row').filter({has:page.getByText('可编辑',{exact:true})}).filter({has:page.getByText('删除处理中',{exact:true})})).toHaveCount(3);
  expect(await page.evaluate(()=>(window as any).removeCalls)).toEqual([['a','b','c']]);
  await page.getByRole('button',{name:'完成在途删除',exact:true}).click();
  await expect(page.getByRole('checkbox',{name:'选择测试 a',exact:true})).toHaveCount(0);

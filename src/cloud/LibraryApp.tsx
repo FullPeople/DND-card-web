@@ -23,7 +23,7 @@ export function classLine(character:Pick<Character,'selections'>){return (charac
 export function updatedLabel(iso:string,now=Date.now()){const time=Date.parse(iso);if(!Number.isFinite(time))return '';const minutes=Math.round((now-time)/60000);if(minutes<1)return '刚刚更新';if(minutes<60)return minutes+' 分钟前更新';if(minutes<60*24)return Math.round(minutes/60)+' 小时前更新';if(minutes<60*24*7)return Math.round(minutes/1440)+' 天前更新';return new Date(time).toISOString().slice(0,10)+' 更新';}
 export default function LibraryApp(){
   const [session,setSession]=useState<CloudSession>(),[cards,setCards]=useState<CardSummary[]>([]),[mine,setMine]=useState<CardSummary[]>([]),[temporary,setTemporary]=useState<CardSummary[]>([]),[local,setLocal]=useState<Character[]>([]),[bindings,setBindings]=useState<Record<string,CloudBinding>>({}),[rights,setRights]=useState<Record<string,string|undefined>>({}),[query,setQuery]=useState(()=>new URLSearchParams(location.search).get('q')||''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[manage,setManage]=useState<CloudCard>(),[qq,setQQ]=useState(''),[view,setView]=useState<View>('all'),[total,setTotal]=useState(0),[hasMore,setHasMore]=useState(false),[nextOffset,setNextOffset]=useState(0);
-  const [sidebarOpen,setSidebarOpen]=useState(false);
+  const [sidebarOpen,setSidebarOpen]=useState(false),[localLoaded,setLocalLoaded]=useState(false);
   const account=session?.authenticated?session.account?.id:session?.uploadOwner?.id;
   const privateLibrary=session?.authenticated||session?.libraryMode==='account';
   const refreshGeneration=useRef(0);
@@ -48,7 +48,7 @@ export default function LibraryApp(){
   useEffect(()=>{if(!sidebarOpen)return;const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setSidebarOpen(false);};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[sidebarOpen]);
   async function refreshLocal(){
     const results=await Promise.allSettled([loadWorkspace(),loadCloudBindings()]);
-    if(results[0].status==='fulfilled')setLocal(results[0].value?.characters||[]);else setMessage('本机角色读取失败，原记录保留。请回到在线车卡导出备份。');
+    if(results[0].status==='fulfilled'){setLocal(results[0].value?.characters||[]);setLocalLoaded(true);}else setMessage('本机角色读取失败，原记录保留。请回到在线车卡导出备份。');
     if(results[1].status==='fulfilled')setBindings(results[1].value);
   }
   async function refresh(){
@@ -60,8 +60,7 @@ export default function LibraryApp(){
       else {setCards([]);setMine([]);}
     }catch{if(generation!==refreshGeneration.current)return;setSession(undefined);setCards([]);setMine([]);setTemporary([]);setMessage('云端服务暂时无法连接。本机角色和 JSON 导出仍可使用，可稍后刷新重试。');}
   }
-  // The sidebar count needs the local roster from the start; the list itself re-reads it whenever it is shown.
-  useEffect(()=>{void refreshLocal();},[]);
+  // Read local characters only when the person opens the local-card view.
   useEffect(()=>{if(view==='local')void refreshLocal();},[view]);
   function missing(id:string){
     setCards(old=>old.filter(row=>row.id!==id));setMine(old=>old.filter(row=>row.id!==id));
@@ -87,7 +86,7 @@ export default function LibraryApp(){
   const matches=(name:string,id:string,edition:string)=>`${name} ${id} ${edition}`.toLowerCase().includes(query.trim().toLowerCase());
   const visible=(view==='mine'?mine:cards).filter(row=>matches(row.name,row.id,row.edition));
   const localVisible=local.filter(row=>matches(row.name,bindings[row.id]?.cloudId||'',row.edition));
-  const counts:Partial<Record<View,number>>={all:privateLibrary?cards.length:Math.max(total,cards.length),local:local.length,mine:mine.length};
+  const counts:Partial<Record<View,number>>={all:privateLibrary?cards.length:Math.max(total,cards.length),local:localLoaded?local.length:undefined,mine:mine.length};
   const slots=session?.slots,slotRatio=slots&&slots.total>0?Math.min(1,slots.used/slots.total):0;
   const links=<><a href="/card/?intro=0"><EditIcon size={15}/><span>在线车卡</span></a><a href="/"><HouseIcon size={15}/><span>首页</span></a></>;
   return <CloudSaveProvider enabled={view==='local'&&local.length>0} disabled={busy} characters={local} access={setRights} readCharacter={async id=>{const w=await loadWorkspace(),card=w?.characters.find(row=>row.id===id);if(!card)throw Error('本机角色已不存在，未上传。');return withSiteSources(card,w?.siteSources,w?.packs||[]);}}><main className={`cloud-library ${view==='all'||view==='mine'?'has-gallery':''} ${sidebarOpen?'sidebar-open':''}`}>

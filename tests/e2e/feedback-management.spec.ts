@@ -1,18 +1,18 @@
 import {readFileSync} from 'node:fs';
 import {test,expect} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 import {exportCharacters} from '../../src/core/export';
 import {APP_VERSION} from '../../src/platform/announcement';
 
-test.beforeEach(async({page},info)=>{await mockSource(page,{suiteAnnouncement:info.title.startsWith('Suite announcement')});await page.goto('/');await expect(page.locator('.paper')).toBeVisible();});
+test.beforeEach(async({page},info)=>{await mockSource(page,{suiteAnnouncement:info.title.startsWith('Suite announcement')});await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.paper')).toBeVisible();});
 test('global edit switch, batch cards, unselected export, JSON import and DM review',async({page},info)=>{
  const toggle=page.getByRole('switch',{name:'编辑模式'});await toggle.click();await expect(page.locator('.toolbar-actions').getByRole('switch')).toHaveAttribute('aria-checked','true');
  expect(await toggle.evaluate(node=>node.getBoundingClientRect().right<=node.closest('.sheet-pane')!.getBoundingClientRect().right)).toBe(true);
  await page.getByRole('button',{name:/^角色簿/}).click();await page.getByText('批量创建角色',{exact:true}).click();await page.getByRole('textbox',{name:'批量角色名'}).fill('星港测试者\n北岸测试者');await page.getByRole('button',{name:'创建这些角色'}).click();
- await expect(page.locator('.book-row')).toHaveCount(3);await page.getByRole('button',{name:/星港测试者/}).click();await expect(toggle).toHaveAttribute('aria-checked','true');await page.reload();await expect(toggle).toHaveAttribute('aria-checked','true');
+ await expect(page.locator('.book-row')).toHaveCount(3);await page.locator('.book-title').filter({hasText:'星港测试者'}).click();await expect(toggle).toHaveAttribute('aria-checked','true');await page.reload();await expect(toggle).toHaveAttribute('aria-checked','true');
  await page.getByRole('button',{name:/^角色簿/}).click();const target=page.locator('.book-row').filter({hasText:'北岸测试者'});const downloaded=page.waitForEvent('download');await target.getByRole('button',{name:'JSON',exact:true}).click();const download=await downloaded;expect(download.suggestedFilename()).toContain('北岸');const backup=JSON.parse(readFileSync((await download.path())!,'utf8'));expect(backup.format).toBe('dnd-card-web');expect(backup.character.name).toBe('北岸测试者');
- await target.getByRole('button',{name:'审卡',exact:true}).click();await expect(page.getByRole('heading',{name:'DM 审卡',exact:true})).toBeVisible();await page.screenshot({path:info.outputPath('dm-review.png')});await page.getByRole('button',{name:'关闭弹窗'}).click();
+ await target.getByRole('button',{name:'审卡',exact:true}).click();await expect(page.getByRole('heading',{name:/^DM 审卡(?:\s|$)/})).toBeVisible();await page.screenshot({path:info.outputPath('dm-review.png')});await page.getByRole('button',{name:'关闭弹窗'}).click();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();const a=newCharacter('2014');a.name='旧版测试客';const b=newCharacter('2024');b.name='新版测试客';await page.getByRole('textbox',{name:'角色 JSON 文本'}).fill(JSON.stringify(exportCharacters([a,b])));await page.getByRole('button',{name:'校验并导入 JSON 文本'}).click();await expect(page.getByText(/版本不同：当前 2024，导入 2014/)).toBeVisible();await page.getByRole('button',{name:'确认导入这批角色'}).click();await expect(page.locator('.book-row')).toHaveCount(5);await page.screenshot({path:info.outputPath('character-manager.png')});
  await page.getByRole('checkbox',{name:'选择旧版测试客',exact:true}).check();await page.getByRole('checkbox',{name:'选择新版测试客',exact:true}).check();await page.getByRole('button',{name:'删除所选',exact:true}).click();await page.getByRole('button',{name:'确认批量删除'}).click();await expect(page.locator('.book-row')).toHaveCount(3);
 });
@@ -49,6 +49,12 @@ test('editing and exporting a 2014 card in a 2024 room preserves native edition 
  await expect.poll(()=>page.evaluate(()=>(window as any).nativeSaves.length)).toBe(1);const changes=await page.evaluate(()=>(window as any).nativeSaves[0].delta.native);expect(changes.some((change:any)=>['edition','profile','rulePacks'].includes(change.path[0]))).toBe(false);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByRole('button',{name:'生成并复制 JSON'}).click();const exported=JSON.parse(await page.getByRole('textbox',{name:'角色 JSON 文本'}).inputValue());expect(exported.character.edition).toBe('2014');expect(exported.character.profile.enabledSources).toEqual(['PHB']);expect(exported.character.runtime.hp).toBe(7);
  await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
- await page.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{source:window,origin:location.origin,data:{protocol:'full-suite-workbench/v1',session:'identity',hostStarted:197,type:'selection',sequence:3,state:{key:'room:monster:one',itemId:'monster-one',cardId:'',kind:'monster',name:'测试卫士',role:'GM',write:true,stats:{health:10,'max health':20},resources:[],conditions:[]},document:{name:'测试卫士',source:'CUSTOM',ac:[12],hp:{average:20},speed:{walk:30},str:12,dex:10,con:10,int:10,wis:10,cha:10}}})));
+ await page.evaluate(()=>{
+  const emit=(type:string,payload:any)=>window.dispatchEvent(new MessageEvent('message',{source:window,origin:location.origin,data:{protocol:'full-suite-workbench/v1',session:'identity',hostStarted:197,type,...payload}}));
+  const state={key:'room:monster:one',itemId:'monster-one',cardId:'',kind:'monster',name:'测试卫士',role:'GM',write:true,stats:{health:10,'max health':20},resources:[],conditions:[]};
+  emit('directory',{sequence:3,role:'GM',cards:[],monsters:[{...state,locked:false}],enabled:{}});
+  emit('navigate',{itemId:'monster-one'});
+  emit('selection',{sequence:4,state,document:{name:'测试卫士',source:'CUSTOM',ac:[12],hp:{average:20},speed:{walk:30},str:12,dex:10,con:10,int:10,wis:10,cha:10}});
+ });
  await expect(page.locator('.toolbar-actions').getByRole('switch',{name:'怪物编辑模式'})).toHaveAttribute('aria-checked','true');await expect(page.locator('.monster-editor')).toBeVisible();
 });

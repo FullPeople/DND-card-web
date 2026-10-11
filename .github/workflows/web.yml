@@ -163,7 +163,10 @@ jobs:
               npx playwright test --config playwright.followup-ui231.config.ts
           - group: interface-284
             commands: |
-              npx playwright test tests/e2e/authoring260.spec.ts tests/e2e/feedback-management.spec.ts tests/e2e/import192.spec.ts tests/e2e/palette258.spec.ts tests/e2e/ux259.spec.ts --project=chromium
+              npm run build:cloud
+              npx playwright test --config playwright.cloud.config.ts tests/e2e/authoring260.spec.ts tests/e2e/palette258.spec.ts tests/e2e/ux259.spec.ts
+              npx playwright test --config playwright.feedback.config.ts
+              npx playwright test --config playwright.import192.config.ts
     steps:
       - uses: actions/checkout@v6
         with:

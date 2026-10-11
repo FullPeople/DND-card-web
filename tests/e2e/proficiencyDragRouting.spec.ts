@@ -11,7 +11,7 @@ async function ready(page:Page,editing=true){
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  const c=newCharacter();c.name='熟练拖拽验收';c.training={tools:'',armor:'',weapons:'',languages:''};
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'proficiency-drag.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
- await expect(page.locator('.character-tabs').getByRole('tab',{name:c.name+'（导入）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ await expect(page.locator('.character-tabs').getByRole('tab',{name:c.name+'（导入）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
  if(editing)await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
 }
 async function source(page:Page,tab='装备词条'){
@@ -22,7 +22,7 @@ async function lift(page:Page,row:Locator){
 }
 async function land(page:Page,target:Locator){const b=(await target.boundingBox())!;await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:12});await page.mouse.up();await expect(page.locator('.pointer-ghost')).toHaveCount(0);}
 async function exported(page:Page):Promise<Character>{
- await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByRole('button',{name:'生成并复制 JSON',exact:true}).click();const c=JSON.parse(await page.getByLabel('角色 JSON 文本').inputValue()).character;await page.getByRole('dialog',{name:'导入与导出',exact:true}).getByRole('button',{name:'关闭弹窗',exact:true}).click();return c;
+ await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByRole('button',{name:'生成并复制 JSON',exact:true}).click();const c=JSON.parse(await page.getByLabel('角色 JSON 文本').inputValue()).character;await page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/}).getByRole('button',{name:'关闭弹窗',exact:true}).click();return c;
 }
 for(const origin of ['list','detail'] as const)test(`equipment training ${origin} drag stays on main, deduplicates and survives reload without inventory`,async({page})=>{
  await ready(page);let row=await source(page);if(origin==='detail'){await row.click();await expect(page.getByLabel('装备词条分类搜索',{exact:true})).toBeVisible();row=page.locator('.detail-title');}
