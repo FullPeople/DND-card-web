@@ -1,0 +1,129 @@
+/* UI refresh: readable controls, one icon family, compact chrome.
+   Loaded last so it settles the layered toolbar rules; colours stay on the
+   user palette tokens (see platform/appearance.ts). */
+:root{--ui-buttonLine:#6f6f6f}
+
+/* --- icons ------------------------------------------------------------ */
+.ui-icon{display:inline-block;width:1em;height:1em;flex:none;vertical-align:-.15em}
+.icon-button{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.icon-button .ui-icon{width:16px;height:16px}
+.icon-button .button-count{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;font-size:10px;font-weight:700;line-height:1;background:var(--ui-selected,#50525b);color:var(--ui-selectedInk,#fff)!important}
+.app-shell :is(.app-header,.dialog) button[aria-pressed=true] .button-count,.app-shell .app-header button.primary .button-count{background:var(--ui-selectedInk,#fff);color:var(--ui-selected,#50525b)!important}
+
+/* --- buttons, inputs: visible boundaries everywhere ------------------- */
+button,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{border-color:var(--ui-buttonLine)}
+.app-shell :is(.app-header,.pane-toolbar,.dialog,.character-tabs,.workbench-bar,.workbench-modes,.cloud-header) :is(button,.suite-website-link){border:1px solid var(--ui-buttonLine)!important;border-radius:4px;background:var(--ui-button)!important;color:var(--ui-buttonInk)!important;min-height:28px;line-height:1.2}
+.app-shell :is(.app-header,.pane-toolbar,.dialog,.character-tabs,.workbench-bar,.workbench-modes) :is(button,.suite-website-link):hover:not(:disabled){filter:brightness(.95);border-color:var(--ui-selected)!important}
+.app-shell :is(.app-header,.pane-toolbar,.dialog,.character-tabs,.workbench-bar,.workbench-modes) :is(button,.suite-website-link):focus-visible{outline:2px solid var(--ui-selected);outline-offset:1px}
+.app-shell :is(.app-header,.character-tabs,.workbench-bar,.workbench-modes,.dialog) :is(button.primary,[aria-pressed=true],[aria-selected=true],.workbench-mode.active){background:var(--ui-selected)!important;color:var(--ui-selectedInk)!important;border-color:var(--ui-selected)!important}
+.app-shell button:disabled{opacity:.55;cursor:not-allowed}
+.app-header .header-tools{gap:6px;flex-wrap:nowrap;min-width:0}
+.app-header .header-tools button,.app-header .header-tools .suite-website-link{padding:3px 10px;font-size:12px}
+.app-header .header-tools .header-group{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
+.app-header .header-tools .header-group>*{flex:0 0 auto}
+.app-header .header-tools .header-group+.header-group{margin-left:6px;padding-left:8px;border-left:1px solid var(--ui-line,#a5a5a5)}
+.app-header .header-tools .suite-website-link{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font:inherit;font-size:12px;padding:3px 10px;background:var(--ui-button)!important;color:var(--ui-buttonInk)!important;border:1px solid var(--ui-buttonLine)!important;border-radius:4px}
+.app-header .header-tools .suite-website-link:hover{filter:brightness(.95);border-color:var(--ui-selected)!important}
+.app-header .header-tools .suite-website-link:focus-visible{outline:2px solid var(--ui-selected);outline-offset:1px}
+.app-header .palette-toggle{padding:3px 7px!important}
+.app-header .header-tools .qq-account-trigger{max-width:200px}
+.app-header .header-tools .workbench-qq-entry{border:0!important;background:transparent!important;padding:0!important;min-height:0}
+/* Links in the QQ dialog inherit the palette ink, not the header link colour. */
+.app-header .qq-account-dialog a,.app-header .qq-cloud-card-details a{color:var(--ui-accent,#50525b)}
+.app-header .qq-account-dialog button{font-size:12px;padding:3px 10px}
+
+/* Sheet toolbar actions read as controls, at one height. */
+.pane-toolbar .toolbar-actions{gap:4px!important}
+.pane-toolbar .toolbar-actions button{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:26px;min-height:26px;padding:0 7px;font-size:11px;line-height:1;border:1px solid var(--ui-buttonLine)!important;border-radius:4px;background:var(--ui-button)!important;color:var(--ui-buttonInk)!important}
+.pane-toolbar .toolbar-actions button .ui-icon{width:15px;height:15px}
+.pane-toolbar .toolbar-actions button[aria-pressed=true]:not(.sheet-display-toggle),.pane-toolbar .toolbar-actions .edit-mode-toggle[aria-checked=true]{background:var(--ui-selected)!important;color:var(--ui-selectedInk)!important;border-color:var(--ui-selected)!important}
+.pane-toolbar .toolbar-actions .edit-mode-toggle .edit-switch-track{border-color:currentColor}
+.pane-toolbar .toolbar-actions .sheet-display-toggle{font-size:11px!important;line-height:1!important;min-height:26px!important;padding:0 7px!important}
+.compact-layout .toolbar-actions button{height:24px;min-height:24px;font-size:11px}
+
+/* Workbench connection status keeps its traffic-light colour. */
+.app-shell .workbench-bar button.linked{color:#1f6b3a!important;border-color:#1f6b3a!important;background:var(--ui-button)!important}
+.app-shell .workbench-bar button.disconnected{color:#9b2f1f!important;border-color:#9b2f1f!important;background:var(--ui-button)!important}
+.app-shell .workbench-bar button[role=status]{font-weight:600}
+
+/* Dialog header close is an icon button. */
+.dialog .dialog-head>button{display:inline-grid;place-items:center;width:30px;height:30px;min-height:30px;padding:0!important;font-size:16px;border-radius:50%}
+.dialog .dialog-head>button .ui-icon{width:18px;height:18px}
+.cloud-room-dialog,.qq-account-dialog,.cloud-save-dialog{border-color:var(--ui-selected,#50525b);background:var(--ui-surface,#f5f5f3);color:var(--ui-ink,#343532)}
+.cloud-room-dialog>header button,.qq-account-dialog>header button{display:inline-flex;align-items:center;gap:4px;min-height:28px;border:1px solid var(--ui-buttonLine);border-radius:4px;background:var(--ui-button);color:var(--ui-buttonInk)}
+
+/* Segmented groups replace short drop-downs. */
+.seg-group{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;min-width:0}
+.seg-group>span{font-size:12px;color:var(--ui-muted,#666)}
+.seg-options{display:inline-flex;border:1px solid var(--ui-buttonLine);border-radius:5px;overflow:hidden;background:var(--ui-button,#f7f7f5)}
+.seg-options button{border:0!important;border-radius:0!important;min-height:26px;padding:3px 10px!important;font-size:12px;background:transparent!important;color:var(--ui-buttonInk,#303239)!important}
+.seg-options button+button{border-left:1px solid var(--ui-buttonLine)!important}
+.seg-options button[aria-pressed=true]{background:var(--ui-selected,#50525b)!important;color:var(--ui-selectedInk,#fff)!important}
+.seg-options button:focus-visible{outline:2px solid var(--ui-selected);outline-offset:-2px}
+
+/* Character book: toolbar and responsive list. */
+.character-manager .manager-tools{gap:8px 10px}
+.character-manager .manager-tools input{flex:1 1 180px;min-width:140px;border:1px solid var(--ui-buttonLine);border-radius:4px;padding:5px 8px}
+.character-manager .manager-summary{font-size:12px;color:var(--ui-muted,#666);white-space:nowrap}
+.character-manager .manager-actions{display:inline-flex;gap:6px;flex-wrap:wrap}
+.manager-table td .row-actions{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center}
+.manager-table td .row-actions button{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-height:26px;padding:2px 7px}
+.manager-table td .row-actions button .ui-icon{width:14px;height:14px}
+.manager-table .character-title{display:grid;gap:1px;text-align:left;width:100%;padding:4px 6px}
+.manager-table .character-title strong{display:inline-flex;align-items:center;gap:4px;font-size:13px}
+.manager-table .character-title small{font-size:11px;color:var(--ui-muted,#666)}
+.manager-table td[data-label]{min-width:0}
+@media(max-width:640px){
+ .manager-table,.manager-table tbody{display:block;width:100%}
+ .manager-table thead{display:none}
+ .manager-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;padding:8px 4px;border-bottom:1px solid var(--ui-line,#a5a5a5);align-items:center}
+ .manager-table td,.manager-table th{display:block;padding:0;border:0}
+ .manager-table td:first-child{grid-row:1/span 2;align-self:start;padding-top:4px}
+ .manager-table td.cell-title{grid-column:2}
+ .manager-table td[data-label]{grid-column:2;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ui-ink,#343532)}
+ .manager-table td[data-label]::before{content:attr(data-label);color:var(--ui-muted,#666);flex:none}
+ .manager-table td[data-label] small{display:inline;font-size:11px}
+ .manager-table td.cell-actions{grid-column:1/-1;padding-top:4px}
+ .manager-table td .row-actions{width:100%}
+ .manager-table .character-title{padding:0}
+ .character-manager .manager-tools>input{flex-basis:100%}
+}
+
+/* Narrow header: icon buttons keep their names, labels are hidden. */
+@media(max-width:700px){
+ .app-header .header-tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;gap:5px;padding:2px 0}
+ .app-header .header-tools .icon-button .label{display:none}
+ .app-header .header-tools .icon-button{padding:3px 7px;min-height:30px}
+ .app-header .header-tools .icon-button .ui-icon{width:18px;height:18px}
+ .app-header .header-tools .icon-button.primary .label{display:inline}
+ .app-header .header-tools .header-group+.header-group{margin-left:2px;padding-left:5px}
+ .app-header .header-tools .qq-account-trigger{max-width:120px}
+ .app-header .header-tools button span.qq-profile,.app-header .header-tools button span.qq-profile>span,.app-header .header-tools .button-count{display:inline-flex;font-size:10px}
+ .app-header .header-tools .qq-account-chevron{display:none}
+ .pane-toolbar .toolbar-actions{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+ .pane-toolbar .toolbar-actions button{height:24px;min-height:24px;padding:0 6px;font-size:10px}
+ .pane-toolbar .toolbar-actions .automation-toggle .label-long{display:none}
+}
+@media(max-width:520px){.header-tools button span.qq-profile{display:inline-flex}.header-tools .icon-button .button-count{display:inline-grid}}
+
+/* Night mode tokens for the controls above. */
+:root[data-suite-night=true]{--ui-buttonLine:#8a94a6}
+:root[data-suite-night=true] .help-hint{box-shadow:0 10px 28px #000a}
+
+/* Small text that fell below 4.5:1 on the paper. The StyleBox look stays. */
+.paper-heading{color:#5f5f5b}
+.paper-footer{color:#60615c}
+.life-fields{color:#5e6358}
+.hp-maximum>span{color:#5f625a}
+.remove{color:#5c5c55}
+.empty-state{color:#606657}
+.wiki-pane .eyebrow,.wiki-pane .wiki-source{color:var(--wiki-muted,#5f5f5f)}
+.mobile-tabs button{color:var(--ui-muted,#5a6150)}
+.sheet-pages button,.sheet-viewport.screen-mode .sheet-pages button{border-color:#73756e}
+.app-shell .wiki-pane :is(.load-errors,.empty-state,.reading-placeholder) button{border:1px solid var(--ui-buttonLine);border-radius:4px;background:var(--wiki-entry,#f5f5f3)}
+/* Wiki toolbars: controls with boundaries, readable status text. */
+.app-shell .wiki-pane :is(.wiki-header,.wiki-filters,.library-toolbar,.catalog-status,.custom-create) :is(button,select,input:not([type=checkbox]):not([type=radio])){border:1px solid var(--ui-buttonLine);border-radius:4px;background:var(--wiki-entry,#f5f5f3);color:var(--wiki-entryInk,#343532);min-height:24px}
+.app-shell .wiki-pane :is(.wiki-header,.wiki-filters,.library-toolbar) button[aria-pressed=true]{background:var(--wiki-selected,#d8d8d4);color:var(--wiki-selectedInk,#252525);border-color:var(--ui-buttonLine)}
+.app-shell .wiki-pane .wiki-search input{border:1px solid var(--ui-buttonLine)}
+.app-shell .load-errors summary{color:#525a3f}.app-shell .load-errors p{color:#6a5222}
+.app-shell .dialog :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select){border:1px solid var(--ui-buttonLine);border-radius:4px}

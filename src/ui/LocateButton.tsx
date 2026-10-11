@@ -2,8 +2,9 @@ import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {inWorkbench,useWorkbench,workbenchRequest} from '../platform/workbench';
 import {reportWorkbenchError} from './CopyDiagnostic';
+import {LocateIconGlyph} from './icons';
 
-export function LocateIcon(){return <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4" stroke="currentColor" strokeWidth="2"/></svg>;}
+export function LocateIcon(){return <LocateIconGlyph size={18}/>;}
 export function useCharacterLocation(id?:string){
  const wb=useWorkbench();
  const selected=wb.target,card=id?wb.cards.find(c=>c.id===id)||wb.monsters.find(c=>c.id===id):selected?.cardId?wb.cards.find(c=>c.id===selected.cardId):wb.monsters.find(c=>c.itemId===selected?.itemId)||(selected&&wb.access?.monsters.some(c=>c.itemId===selected.itemId)?{...selected,id:selected.itemId,inScene:true}:undefined);

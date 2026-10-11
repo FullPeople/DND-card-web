@@ -1,4 +1,4 @@
-export const CARD_COLORS = {paper:'#ededeb',surface:'#e8e8e8',frame:'#595959',heading:'#7c7c7c',headingInk:'#ffffff',ink:'#343532',badge:'#555555'};
+export const CARD_COLORS = {paper:'#ededeb',surface:'#e8e8e8',frame:'#595959',heading:'#747474',headingInk:'#ffffff',ink:'#343532',badge:'#555555'};
 export type CardColor = keyof typeof CARD_COLORS;
 export type CardPalette = Partial<Record<CardColor,string>>;
 export const CARD_COMPONENTS = ['identity','abilities','skills','vitals','features','spells','inventory','background','resources','portrait'] as const;

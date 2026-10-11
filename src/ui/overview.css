@@ -13,7 +13,7 @@
 .cell-missing{background:transparent;cursor:pointer}
 .cell-missing:focus-within>.cell-perimeter path,.cell-missing:hover>.cell-perimeter path{stroke:#20221e}
 @keyframes missing-perimeter{to{stroke-dashoffset:-22}}
-.cell-heading{flex:none;display:flex;align-items:center;justify-content:center;position:relative;margin:0;padding:0 7px;background:#7c7c7c;color:#f3f3f3;min-height:20px;gap:4px}
+.cell-heading{flex:none;display:flex;align-items:center;justify-content:center;position:relative;margin:0;padding:0 7px;background:#747474;color:#f3f3f3;min-height:20px;gap:4px}
 .cell-heading h3{margin:0;font-size:12px;font-weight:600;line-height:1;letter-spacing:.3px}
 .cell-heading .cell-add{position:absolute;right:5px;top:50%;transform:translateY(-50%);border:0;padding:0 2px;font-size:9px;background:transparent;color:#f3f3f3;line-height:17px}
 .cell-content{min-height:0;min-width:0;flex:1;overflow:auto;padding:3px 5px;scrollbar-width:thin;scrollbar-color:#b3b5a9 transparent;overscroll-behavior:contain}
