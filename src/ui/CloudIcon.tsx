@@ -1,3 +1,3 @@
 import {CloudIconGlyph} from './icons';
-/** Cloud mark used inside already-labelled buttons and tabs; decorative. */
-export function CloudIcon(){return <CloudIconGlyph className="cloud-icon" size={17}/>;}
+/** This mark identifies a synchronized card, including in character tabs. */
+export function CloudIcon(){return <CloudIconGlyph className="cloud-icon" size={17} role="img" aria-label="云端同步卡" aria-hidden={false}/>;}

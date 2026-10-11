@@ -19,7 +19,8 @@ button,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=
 .app-shell button:disabled{opacity:.55;cursor:not-allowed}
 .app-header .header-tools{gap:6px;flex-wrap:nowrap;min-width:0}
 .app-header .header-tools button,.app-header .header-tools .suite-website-link{padding:3px 10px;font-size:12px}
-.app-header .header-tools .header-group{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.app-header .header-tools .header-group{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
+.app-header .header-tools .header-group>*{flex:0 0 auto}
 .app-header .header-tools .header-group+.header-group{margin-left:6px;padding-left:8px;border-left:1px solid var(--ui-line,#a5a5a5)}
 .app-header .header-tools .suite-website-link{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font:inherit;font-size:12px;padding:3px 10px;background:var(--ui-button)!important;color:var(--ui-buttonInk)!important;border:1px solid var(--ui-buttonLine)!important;border-radius:4px}
 .app-header .header-tools .suite-website-link:hover{filter:brightness(.95);border-color:var(--ui-selected)!important}
