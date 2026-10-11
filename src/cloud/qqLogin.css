@@ -1,14 +1,101 @@
-.qq-account{display:flex;align-items:center;gap:6px;flex-shrink:0;font-size:12px}
+/* Account control and the shared .cloud-modal dialog shell used by the account, card picker, cloud save, cloud card settings and workbench account dialogs. Loaded in the library and in the card app; colours are palette tokens with fallbacks. Selectors carry an extra element or class so the host app's generic dialog rules (style.css, libraryRefine.css, uiRefresh.css) cannot outrank them. */
+:root{--cloud-danger:#a8261a;--cloud-danger-soft:#f3dcd8;--cloud-ok:#2e6b3a;--cloud-ok-soft:#dcebdf;--cloud-warn:#6b5305;--cloud-warn-soft:#f3ead0}
+:root[data-suite-night=true]{--cloud-danger:#ffa198;--cloud-danger-soft:#4a2622;--cloud-ok:#9ad6a6;--cloud-ok-soft:#1f3a27;--cloud-warn:#f2dc92;--cloud-warn-soft:#3d3519}
+
+/* Header control. */
+.qq-account{display:flex;align-items:center;gap:6px;flex-shrink:0;min-width:0;font-size:12px}
 a.qq-login-button{display:inline-flex;align-items:center;padding:0;border:0;background:none;clip-path:none;line-height:0;flex-shrink:0;min-height:32px;text-decoration:none}
 .qq-login-button picture{display:block;line-height:0}
 .qq-account .qq-login-button img{display:block;width:170px;height:32px;max-width:none;object-fit:contain;image-rendering:auto;filter:none;border:0;padding:0}
-.qq-profile{display:flex;align-items:center;gap:5px;max-width:140px;overflow:hidden}
-.qq-profile>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.qq-account .qq-profile>img{width:24px;height:24px;object-fit:cover;image-rendering:auto;border-radius:50%}
-.qq-account-error{max-width:160px;white-space:normal;color:#d24a3b}
-@media(max-width:640px){.qq-account .qq-login-button img{width:120px;height:24px}.qq-profile{max-width:96px}}
-.qq-account-trigger{display:inline-flex;align-items:center;gap:5px;max-width:190px;min-height:28px;padding:2px 7px;font-size:12px;flex:none}.qq-account-trigger .qq-profile{min-width:0;max-width:160px}.qq-account-chevron{flex:none}.qq-account-dialog{position:fixed;inset:0;margin:auto;width:min(360px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;padding:16px;border:3px solid #50525b;background:#e5e5e5;color:#292a2d;box-shadow:0 8px 30px #0003;text-align:left;font:13px/1.7 system-ui,"Microsoft YaHei",sans-serif;white-space:normal}.qq-account-dialog::backdrop{background:#0006}.qq-account-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.qq-account-dialog h2{margin:0;font-size:16px}.qq-account-dialog button{font:inherit}.qq-account-details{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}.qq-account-dialog .qq-profile{max-width:100%;overflow:visible}.qq-account-dialog .qq-profile>span{white-space:normal;overflow-wrap:anywhere}.qq-account-dialog .qq-profile>img{width:40px;height:40px}.qq-account-dialog code{user-select:all;overflow-wrap:anywhere;max-width:100%;font-size:12px}.qq-account-dialog label{font-size:12px;color:#56575d;margin-top:8px}.qq-account-dialog>footer{margin-top:18px;padding-top:12px;border-top:1px solid #aaa}.qq-account-dialog .qq-account-error{max-width:none;white-space:normal}.cloud-header-tools .qq-account-dialog span{display:inline;color:inherit;font-size:inherit}.cloud-header-tools .qq-account-trigger .qq-profile>span{display:inline;color:inherit;font-size:inherit}.cloud-header-tools{min-width:0}.cloud-header-tools .qq-account-trigger{max-width:min(190px,30vw)}
-@media(max-width:640px){.qq-account-trigger{max-width:130px}.qq-account-trigger .qq-profile{max-width:105px}.cloud-header-tools .qq-account-trigger{max-width:110px}.cloud-header-tools .qq-account-chevron{display:none}}
+.qq-account-trigger{display:inline-flex;align-items:center;gap:6px;max-width:200px;min-height:30px;padding:2px 8px 2px 5px;font-size:12px;flex:none}
+.qq-profile{display:flex;align-items:center;gap:6px;min-width:0;max-width:150px}
+.qq-profile>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qq-account .qq-profile>img,.qq-account-trigger .qq-profile>img{width:22px;height:22px;object-fit:cover;image-rendering:auto;border-radius:50%;flex:none;filter:none}
+.qq-account-chevron{flex:none;display:inline-flex;line-height:0}
+.qq-account-error{max-width:200px;white-space:normal;font-size:11px;color:var(--cloud-danger)}
+.cloud-header-tools{min-width:0}
 
-.qq-account-trigger .qq-profile>img{width:24px;height:24px;object-fit:cover;border-radius:50%;filter:none}.qq-cloud-card-details{display:flex;flex-direction:column;align-items:flex-start;gap:7px;border-top:1px solid #aaa;margin-top:14px;padding-top:10px}.qq-cloud-card-details h3,.qq-cloud-card-details p{margin:0}.qq-cloud-card-details h3{font-size:13px}.qq-account-dialog{width:min(430px,calc(100vw - 28px))}
-.qq-card-picker{border-top:1px solid #aaa;margin-top:14px;padding-top:10px}.qq-card-picker>header{display:flex;align-items:center;justify-content:space-between;gap:8px}.qq-card-picker h3{margin:0;font-size:13px}.qq-card-picker input{box-sizing:border-box;width:100%;margin:8px 0}.qq-card-picker-list{max-height:240px;overflow:auto}.qq-card-picker-list>div{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #bbb}.qq-card-picker-list>div>span{flex:1;min-width:0;overflow-wrap:anywhere}.qq-card-picker-list svg{width:16px;height:16px;vertical-align:middle;margin-right:5px}.qq-card-picker-list small{display:block;font-size:11px}.qq-card-picker-list button{flex:none}
+/* Modal shell. */
+dialog.cloud-modal{position:fixed;inset:0;margin:auto;width:min(460px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;overflow:auto;border:3px solid var(--ui-accent,#50525b);border-radius:0;background:var(--ui-surface,#f5f5f3);color:var(--ui-ink,#343532);box-shadow:0 12px 40px #0005;font:13px/1.5 system-ui,"Microsoft YaHei",sans-serif;text-align:left;white-space:normal}
+dialog.cloud-modal[open]{display:flex;flex-direction:column}
+dialog.cloud-modal::backdrop{background:#0006}
+dialog.cloud-modal.is-wide{width:min(600px,calc(100vw - 24px))}
+dialog.cloud-modal code{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:all;overflow-wrap:anywhere}
+dialog.cloud-modal a{color:var(--ui-accent,#50525b)}
+dialog.cloud-modal>header,.cloud-modal-head{display:flex;align-items:center;gap:10px;padding:12px 14px;flex-shrink:0;margin:0;background:var(--ui-heading,#e5e5e5);border-bottom:1px solid var(--ui-line,#a5a5a5)}
+.cloud-modal-icon{display:inline-grid;place-items:center;width:34px;height:34px;flex:none;border-radius:50%;background:var(--ui-selected,#50525b);color:var(--ui-selectedInk,#fff)}
+.cloud-modal-heading{flex:1;min-width:0}
+dialog.cloud-modal h2{margin:0;font-size:15px;line-height:1.3;font-weight:700;overflow-wrap:anywhere}
+.cloud-modal-heading p{margin:2px 0 0;font-size:12px;line-height:1.4;color:var(--ui-muted,#666);overflow-wrap:anywhere}
+.cloud-modal-heading code{font-size:12px;letter-spacing:1px}
+dialog.cloud-modal>header .cloud-modal-close{display:inline-grid;place-items:center;width:32px;height:32px;min-height:32px;margin-left:auto;padding:0!important;flex:none;font-size:12px}
+.cloud-modal-body{display:flex;flex-direction:column;flex:1;min-height:0;padding:2px 14px 12px}
+.cloud-modal-section{padding:12px 0;border-top:1px solid var(--ui-line,#a5a5a5)}
+.cloud-modal-body>.cloud-modal-section:first-child,.cloud-modal-body>.qq-account-card:first-child{border-top:0}
+.cloud-modal-section>h3,.qq-card-picker h3{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:13px;line-height:1.3}
+.cloud-modal-help{margin:0 0 8px;font-size:12px;line-height:1.6;color:var(--ui-muted,#666)}
+.cloud-modal-section>p:last-child,.cloud-modal-help:last-child{margin-bottom:0}
+.cloud-modal-section>p{margin:0 0 6px;font-size:13px;line-height:1.5}
+.cloud-modal-danger{margin-top:10px;padding:10px 12px;border:2px solid var(--cloud-danger);background:var(--cloud-danger-soft)}
+.cloud-modal-danger>h3{color:var(--cloud-danger)}
+.cloud-modal-danger .cloud-modal-help{color:var(--ui-ink,#343532)}
+dialog.cloud-modal>footer,.cloud-modal-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;margin:0;padding:10px 14px;flex-shrink:0;background:var(--ui-heading,#e5e5e5);border-top:1px solid var(--ui-line,#a5a5a5)}
+.cloud-modal-foot .qq-help{margin-right:auto}
+.cloud-modal-alert,.cloud-modal-status{display:flex;align-items:flex-start;gap:6px;margin:8px 0 0;padding:8px 10px;font-size:12px;line-height:1.5}
+.cloud-modal-alert .ui-icon,.cloud-modal-status .ui-icon{flex:none;margin-top:2px}
+.cloud-modal-alert{color:var(--cloud-danger);background:var(--cloud-danger-soft);border-left:3px solid var(--cloud-danger)}
+.cloud-modal-status{color:var(--ui-ink,#343532);background:var(--ui-heading,#e5e5e5);border-left:3px solid var(--ui-line,#a5a5a5)}
+dialog.cloud-modal .cloud-modal-body button,dialog.cloud-modal>footer button,dialog.cloud-modal .cloud-modal-body .cloud-button,dialog.cloud-modal>footer .cloud-button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:30px;padding:4px 10px;font:inherit;font-size:12px;line-height:1.3;white-space:nowrap;text-decoration:none}
+dialog.cloud-modal .cloud-modal-body button .ui-icon,dialog.cloud-modal>footer .ui-icon{flex:none}
+.cloud-editor-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;margin:0 0 8px}
+.cloud-editor-form label{flex:1;min-width:200px;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ui-muted,#666)}
+dialog.cloud-modal .cloud-modal-body input:not([type=checkbox]):not([type=radio]){display:block;width:100%;min-height:32px;margin:0;padding:5px 8px;font:inherit;font-size:13px;color:var(--ui-ink,#343532);background:var(--ui-surface,#f5f5f3);border:2px solid var(--ui-buttonLine,#6f6f6f);border-radius:0}
+dialog.cloud-modal .cloud-modal-body input:not([type=checkbox]):not([type=radio]):focus-visible{outline:2px solid var(--ui-selected,#50525b);outline-offset:1px}
+dialog.cloud-modal input::placeholder{color:var(--ui-muted,#666);opacity:1}
+.cloud-editor-list{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cloud-editor-list li{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:12px;background:var(--ui-heading,#e5e5e5)}
+.cloud-editor-list li .ui-icon{flex:none;color:var(--ui-muted,#666)}
+.cloud-editor-list code{flex:1;min-width:0;letter-spacing:.5px}
+.cloud-muted{margin:0;font-size:12px;color:var(--ui-muted,#666)}
+.cloud-spin{animation:cloud-spin 1s linear infinite}
+@keyframes cloud-spin{to{transform:rotate(360deg)}}
+
+/* Account summary, ID row, chips. */
+.qq-account-card{display:flex;align-items:center;gap:12px;padding:12px 0}
+.qq-avatar{display:inline-grid;place-items:center;width:44px;height:44px;flex:none;overflow:hidden;border-radius:50%;background:var(--ui-selected,#50525b);color:var(--ui-selectedInk,#fff);font-size:18px;font-weight:700;line-height:1}
+.qq-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.qq-avatar-small{width:22px;height:22px;font-size:11px}
+.qq-account-name{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.qq-account-name strong{font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.qq-chips{display:flex;flex-wrap:wrap;gap:4px;margin:0}
+.qq-chip{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;font-size:11px;line-height:1;border:1px solid var(--ui-line,#a5a5a5);border-radius:2px;color:var(--ui-muted,#666);background:var(--ui-heading,#e5e5e5)}
+.qq-chip.is-on{color:var(--cloud-ok);background:var(--cloud-ok-soft);border-color:transparent}
+.qq-account-id{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-top:1px solid var(--ui-line,#a5a5a5)}
+.qq-field-label{font-size:12px;color:var(--ui-muted,#666)}
+.qq-id-row{display:flex;align-items:center;gap:6px;padding:3px 3px 3px 10px;background:var(--ui-heading,#e5e5e5);border:1px solid var(--ui-line,#a5a5a5)}
+.qq-id-row code{flex:1;min-width:0;font-size:12px;letter-spacing:.5px}
+dialog.cloud-modal .qq-id-row button{min-height:26px;padding:2px 8px;font-size:11px}
+.qq-help{margin:0;font-size:12px;line-height:1.6;color:var(--ui-muted,#666)}
+.qq-cloud-card-details .qq-account-id{border-top:0;padding-top:4px}
+
+/* Card picker inside the account dialog. */
+.qq-card-picker{padding:12px 0;border-top:1px solid var(--ui-line,#a5a5a5)}
+.qq-card-picker>header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.qq-card-picker>header h3{margin:0}
+.qq-picker-search{display:flex;align-items:center;gap:6px;min-height:32px;margin:0 0 6px;padding:0 8px;color:var(--ui-muted,#666);background:var(--ui-surface,#f5f5f3);border:2px solid var(--ui-buttonLine,#6f6f6f)}
+.qq-picker-search:focus-within{border-color:var(--ui-selected,#50525b)}
+dialog.cloud-modal .qq-picker-search input{flex:1;min-width:0;min-height:0;margin:0;padding:4px 0;border:0!important;border-radius:0!important;background:transparent!important;color:var(--ui-ink,#343532)!important;outline:none}
+.qq-card-picker-list{max-height:240px;overflow:auto;display:flex;flex-direction:column}
+.qq-card-picker-list>div{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--ui-line,#a5a5a5)}
+.qq-card-picker-list>div:first-child{border-top:0}
+.qq-picker-info{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.qq-picker-info>.ui-icon{flex:none;color:var(--ui-muted,#666)}
+.qq-picker-info>span{min-width:0;display:flex;flex-direction:column;gap:1px}
+.qq-picker-info strong{font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+.qq-picker-info small{font-size:11px;line-height:1.4;color:var(--ui-muted,#666);overflow-wrap:anywhere}
+.qq-picker-info code{letter-spacing:.5px;font-size:11px}
+.qq-card-picker-list button{flex:none}
+.qq-picker-empty,.qq-picker-status{display:flex;align-items:center;gap:6px;margin:6px 0 0;font-size:12px;color:var(--ui-muted,#666)}
+
+@media(max-width:640px){.qq-account .qq-login-button img{width:120px;height:24px}.qq-account-trigger{max-width:132px;padding-right:6px}.qq-profile{max-width:104px}.qq-account-chevron{display:none}dialog.cloud-modal>header,.cloud-modal-head{padding:10px 12px}.cloud-modal-body{padding:2px 12px 10px}dialog.cloud-modal>footer,.cloud-modal-foot{padding:8px 12px}.cloud-editor-form label{min-width:100%}}
+@media(prefers-reduced-motion:reduce){.cloud-spin{animation:none}}

@@ -1,3 +1,4 @@
+import {ICON_CREDIT} from './icons';
 import {releaseLogFor,type ReleaseSection} from '../platform/releaseNotes';
 import {Fragment,lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {announcementVersionFor,forgetAnnouncementVersion,readAnnouncementPreference,rememberAnnouncementPreference,rememberAnnouncementVersion,type AnnouncementMode} from '../platform/announcement';
@@ -70,6 +71,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
     </div>
     <footer className="announcement-foot">
       <label><input type="checkbox" checked={remember} onChange={event=>{setRemember(event.target.checked);rememberAnnouncementPreference(event.target.checked,mode);}}/>{t('rememberVersion')}</label>
+      <small className="announcement-credit">{ICON_CREDIT} · <a href="./third-party-licenses.txt" target="_blank" rel="noopener noreferrer">第三方许可</a></small>
       <button ref={confirmRef} className="primary" onClick={confirm}>{t('gotIt')}</button>
     </footer>
     </div>
