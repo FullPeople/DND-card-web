@@ -1,5 +1,6 @@
 import type {SourceMeta} from '../core/sourceCatalog';
-import {catalogNormalizer,type CatalogOperation} from './catalogNormalizer';
+import {catalogNormalizer,type CatalogOperation,type PreparedCatalog} from './catalogNormalizer';
+import {hashCatalogJson} from './catalogHash';
 import {correctSourceData} from '../core/sourceCorrections';
 import {catalogTransport,CatalogPausedError} from './catalogTransport';
 import {EQUIPMENT_TRAINING_ENTRIES} from './weaponTraining';
@@ -51,7 +52,7 @@ export function normalizeCatalogData(body:Raw,revision:string,packId='kiwee',ope
  if(operation==='magicItems')return normalizeData({item:specificMagicItems(prepareBody(body))},revision,packId);
  return normalizeData(body,revision,packId);
 }
-async function fetchJson(base: string, path: string, signal: AbortSignal, refresh: boolean,transport:ReturnType<typeof catalogTransport>,retry:ReadonlySet<string>): Promise<{ body: Raw; revision: string; cached: boolean; warning?: string }> {
+async function fetchJson(base: string, path: string, signal: AbortSignal, refresh: boolean,transport:ReturnType<typeof catalogTransport>,retry:ReadonlySet<string>,prepare?:(body:Raw,revision:string|null)=>Promise<PreparedCatalog>): Promise<{ body: Raw; revision: string; cached: boolean; warning?: string;entries?:Entry[] }> {
   const key = `${base}/${path}`;
   // Wiki caching is optional. A denied/full cache must not discard a valid network response.
   const cached = await readCache(key).catch(()=>undefined);
@@ -62,10 +63,13 @@ async function fetchJson(base: string, path: string, signal: AbortSignal, refres
     const {body,etag}=await transport.json(key);
     if(signal.aborted)throw signal.reason;
     if(!valid(body))throw Error('资料索引为空，请重试');
-    const revision = etag || await hashJson(body);
+    const prepared=prepare?await prepare(body,etag):undefined;
+    if(signal.aborted)throw signal.reason;
+    const revision = etag || prepared?.revision || await hashJson(body);
     const result={body,revision,cached:false};
-    try{await writeCache(key,result);}catch{return {...result,warning:'资料已加载，但浏览器未能保存资料缓存。'};}
-    return result;
+    const loaded=prepared?{...result,entries:prepared.entries}:result;
+    try{await writeCache(key,result);}catch{return {...loaded,warning:'资料已加载，但浏览器未能保存资料缓存。'};}
+    return loaded;
   } catch (error) {
     if (signal.aborted || error instanceof CatalogPausedError) throw error;
     if (prior) return { ...prior, cached: true, warning: `更新失败，正在使用旧缓存：${String(error)}` };
@@ -73,15 +77,14 @@ async function fetchJson(base: string, path: string, signal: AbortSignal, refres
   }
 }
 export async function hashJson(body: unknown): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(body)));
-  return [...new Uint8Array(digest)].map(n => n.toString(16).padStart(2, '0')).join('');
+  return hashCatalogJson(body);
 }
 export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgress: (p: LoadProgress) => void, signal: AbortSignal, refresh = false, base = DEFAULT_SOURCE, onSources?: (names: Record<string, SourceMeta>) => void,retryKeys:readonly string[]=[]): Promise<void> {
   const url = new URL(base); if (url.protocol !== 'https:' && url.hostname !== 'localhost') throw new Error('资料源需要 HTTPS 地址');
   base = base.replace(/\/$/, '');
   const normalizer=catalogNormalizer(signal,normalizeCatalogData);
   const transport=catalogTransport(signal),retry=new Set(retryKeys);
-  const read=(path:string,source=base)=>fetchJson(source,path,signal,refresh,transport,retry);
+  const read=(path:string,source=base,prepare=false)=>fetchJson(source,path,signal,refresh,transport,retry,prepare?normalizer.prepare:undefined);
   try {
   onBatch(EQUIPMENT_TRAINING_ENTRIES);
   const paths = ['data/bestiary/template.json','data/bestiary/legendarygroups.json','data/generated/gendata-variantrules.json', 'data/magicvariants.json', 'data/charcreationoptions.json', 'data/rewards.json', 'data/psionics.json', 'data/deities.json', 'data/cultsboons.json', 'data/bastions.json', 'data/tables.json', 'data/generated/gendata-tables.json', 'data/races.json', 'data/backgrounds.json', 'data/feats.json', 'data/items-base.json', 'data/items.json', 'data/optionalfeatures.json', 'data/conditionsdiseases.json', 'data/books.json', 'data/adventures.json', 'data/variantrules.json', 'data/actions.json', 'data/skills.json', 'data/senses.json', 'data/languages.json'];
@@ -122,7 +125,7 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
     while (cursor < paths.length && !signal.aborted && !transport.paused) {
       const path = paths[cursor++];
       try {
-        const result = await read(path);
+        const result = await read(path,base,true);
         if (signal.aborted) return;
         if (result.cached) progress.cached++;
         if (result.warning) failed(path,path,result.warning);
@@ -132,7 +135,7 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
         if(result.body.monster||result.body.monsterTemplate||result.body.legendaryGroup)monsterRevisions.push(`${path}:${result.revision}`);
         if(result.body.monsterTemplate)monsterTemplates=result.body.monsterTemplate;
         if(result.body.legendaryGroup)legendaryGroups=result.body.legendaryGroup;
-        const normalized = await normalizer.normalize(result.body, result.revision);
+        const normalized = result.entries || await normalizer.normalize(result.body, result.revision);
         for (const entry of normalized) if (entry.kind === 'spell') {
           const lookup = spellLookup[entry.source.toLowerCase()]?.[entry.name.toLowerCase()] || spellLookup[entry.source.toLowerCase()]?.[entry.english.toLowerCase()];
           entry.raw._spellClasses = lookup?.class;

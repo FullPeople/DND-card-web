@@ -1,6 +1,7 @@
 import {normalizeCatalogData} from './catalog';
-self.onmessage=(event:MessageEvent)=>{
- const {id,body,revision,packId,operation}=event.data;
- try{self.postMessage({id,entries:normalizeCatalogData(body,revision,packId,operation)});}
+import {hashCatalogJson} from './catalogHash';
+self.onmessage=async(event:MessageEvent)=>{
+ const {id,body,revision,packId,operation,prepare}=event.data;
+ try{const resolved=prepare?(revision||await hashCatalogJson(body)):revision;self.postMessage({id,revision:resolved,entries:normalizeCatalogData(body,resolved,packId,operation)});}
  catch(error){self.postMessage({id,error:error instanceof Error?error.message:String(error)});}
 };

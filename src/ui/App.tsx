@@ -52,7 +52,7 @@ import {characterHash,writeSyncReceipt} from '../cloud/sync';
 import {cloudCardLock} from '../cloud/sync';
 import {cloudSession,type CloudCard} from '../cloud/api';
 import {loadCloudBindings} from '../platform/storage';
-import {localCharacterRow} from './characterRows';
+import {createCharacterRowReader} from './characterRows';
 const CharacterManager=lazy(()=>import('./CharacterManager').then(m=>({default:m.CharacterManager})));
 const TransferPanel=lazy(()=>import('./TransferPanel').then(module=>({default:module.TransferPanel})));
 const CharacterReview=lazy(()=>import('./CharacterReview').then(module=>({default:module.CharacterReview})));
@@ -213,6 +213,7 @@ export default function App() {
   const workbenchUncertain=useRef(new Map<string,{requestId:string;before:Character;after:Character}>());
   const workbenchPending=useRef(new Map<string,number>());
   const [workspace, setWorkspace] = useState<Workspace>();
+  const readCharacterRow=useMemo(()=>createCharacterRowReader(),[]);
   const workspaceRef = useRef<Workspace | undefined>(undefined);
   const [startupError, setStartupError] = useState('');
   const [workspaceReadOnly, setReadOnly] = useState(false);
@@ -981,7 +982,7 @@ export default function App() {
     inWorkbench&&c.id.startsWith('suite:')&&wb.target&&workbenchCharacterId(wb.target)!==c.id?'选中的棋子已经切换，请等待角色资料加载完成。':
     workbenchUncertain.current.has(c.id)?'上一项修改尚未确认，请先核对枭熊数据。':undefined;
   const managerId=inWorkbench?wb.target?.cardId||'':c.id;
-  const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,cloudRoom:row.cloudRoom,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!workspaceReadOnly,cloudReadOnly:!!cloudAccess[row.id]}));
+  const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,cloudRoom:row.cloudRoom,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...readCharacterRow(row,workspace.siteSources,workspace.packs),write:!workspaceReadOnly,cloudReadOnly:!!cloudAccess[row.id]}));
   return <CloudSaveProvider enabled={standalone&&!inWorkbench&&!qqRoom} disabled={workspaceReadOnly} characters={workspace.characters} receive={receiveCloudCard} importCard={importCloudCard} access={rights=>setCloudAccess(old=>sameValue(old,rights)?old:rights)} readCharacter={async id=>{await queue.current;if(saveFailed.current||!writable.current)throw Error('本机保存尚未成功，云端同步已暂停。请先导出备份。');const card=workspaceRef.current?.characters.find(row=>row.id===id);if(!card)throw Error('角色已不存在');return card;}}><OverviewDashboardHost><SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,host:choiceRoute?.host,coverOverview:sheetPage==='主要',canEdit:!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write),browse:()=>{exitSheetFullscreen();setTab('wiki');},open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src={standalone?'./dnd-center-icon.png':startupComplete?'./exe_icon.png':'./favicon.svg'} alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
       <div className="header-tools">
