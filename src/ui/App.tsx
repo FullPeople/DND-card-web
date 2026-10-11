@@ -420,8 +420,10 @@ export default function App() {
       if(existing){const operation=persist({...current,activeId:existing.id});if(!operation)throw Error('当前标签页只读。');await operation;}
       else{
         const id='cloud:'+account+':'+card.id,character={...structuredClone(card.character),id};validateCharacter(character);
-        const next={...current,characters:[...current.characters,character],activeId:id,packs:cloudPacks(character,current)};
+        cloudPacks(character,current);
         await writeSyncReceipt(id,{binding:{accountId:account,cloudId:card.id,revision:card.revision},hash:await characterHash(character)});
+        if(!writable.current||(await cloudSession()).account?.id!==account)throw Error('QQ 账号或本机编辑权限已改变，未导入角色卡。');
+        const latest=workspaceRef.current!,next={...latest,characters:[...latest.characters,character],activeId:id,packs:cloudPacks(character,latest)};
         const operation=persist(next);if(!operation)throw Error('当前标签页只读。');await operation;
       }
       setSheetPage('主要');setTab('sheet');
