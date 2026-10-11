@@ -1,0 +1,9 @@
+{
+ "schemaVersion": 1,
+ "note": "运行覆盖审计（Data 仓库 scripts/audit_runtime_coverage.ts）会固定一批消费者模块的散列。这里列出的模块只承载界面装配、构建渠道或网络封装，改动不会改变任何规则计算或可用选择，因此它们的散列漂移只记录在清单的 runtimeAudit.consumerDrift 里并显示在进度页上，不要求重新跑整库审计。src/core 与 src/data 下的模块永远不能列入；src/platform/storage.ts 与 src/cloud/room.ts 处在资料读入路径上，故意不列入。新增条目要在评审中说明理由。",
+ "shell": [
+  {"path": "src/ui/App.tsx", "reason": "顶层壳：顶栏、对话框、工作区装配；规则计算与可用选择都在 core/automation 与各面板模块里"},
+  {"path": "src/platform/buildMode.ts", "reason": "构建渠道标记（standalone / suite / cloud），不参与计算"},
+  {"path": "src/platform/requestTimeout.ts", "reason": "网络请求超时封装，不触碰资料内容"}
+ ]
+}

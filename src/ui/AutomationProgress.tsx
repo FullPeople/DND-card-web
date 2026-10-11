@@ -20,6 +20,7 @@ export default function AutomationProgress(_props:{release:unknown;mode:Announce
   <p className="automation-progress-summary">最近更新时间：<time>{date}</time><br/>
    规则条目（含第三方）已核对：{reviewed===undefined?'待核实':`${reviewed}/${total}`}，<span title="已有实际自动计算或选择功能就计入；其余未实现效果仍需手动处理。">已实装{manifest.runtimeAudit?`${manifest.runtimeAudit.implemented}/${total}`:'待核实'}</span>
   </p>
+  {manifest.runtimeAudit?.consumerDrift?.length?<p className="automation-progress-drift" title="这些文件只承载界面、构建或存储，不参与规则计算；规则与资料模块一旦改动，审计会被拒绝而不是标注。">实装统计审计于源码 {manifest.runtimeAudit.consumerRevision.slice(0,7)}，此后仅外壳文件有改动：{manifest.runtimeAudit.consumerDrift.join('、')}。</p>:null}
   <ul className="automation-progress-books" aria-label="各扩展实装进度">{books.map(book=>{
    const count=sourceRuleCounts(manifest,book.id,'all')!,implemented=book.runtimeImplemented;
    const percent=implemented===undefined||implemented===null?null:implemented/count.total*100;

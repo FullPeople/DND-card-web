@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {generateProgress,progressInputs,verificationFiles,VERIFICATION_PATH,VERIFICATION_SCHEMA} from '../tools/automationProgress';
 import {filterProgress,sourceRuleCounts,publicationFor,validProgress,loadProgress,PROGRESS_LIMIT} from '../src/platform/automationProgress';
-import {RUNTIME_COVERAGE,RUNTIME_LOCK,runtimeCoverage} from '../tools/automationRuntimeCoverage';
+import {RUNTIME_COVERAGE,RUNTIME_LOCK,RUNTIME_SHELL,runtimeCoverage,shellModules} from '../tools/automationRuntimeCoverage';
 const root=process.cwd();
 const manifest=()=>generateProgress(root,'standalone');
 function fixture(runtime=false){const path=mkdtempSync(join(tmpdir(),'automation-progress-'));for(const p of ['src','tools','tests','prototype','docs/data','.github/workflows'])cpSync(join(root,p),join(path,p),{recursive:true});for(const p of readdirSync(root))if(/\.config\.[cm]?[jt]s$/.test(p)||/^tsconfig.*\.json$/.test(p)||['package.json','package-lock.json','index.html','.npmrc','.nvmrc','.node-version'].includes(p))cpSync(join(root,p),join(path,p));writeFileSync(join(path,'.git'),'gitdir: '+execFileSync('git',['rev-parse','--absolute-git-dir'],{cwd:root,encoding:'utf8'}));if(!runtime)for(const p of [RUNTIME_COVERAGE,RUNTIME_LOCK])rmSync(join(path,p),{force:true});return path;}
@@ -21,7 +21,21 @@ function proof(m=verified()){
 // latency separate from the assertion result on slower Windows temp volumes.
 describe('automation progress evidence boundary',{timeout:process.platform==='win32'?60000:15000},()=>{
  it('shows actual partial functions separately from the historical whole-rule flags',()=>{const m=manifest(),r=JSON.parse(readFileSync(join(root,RUNTIME_COVERAGE),'utf8'));expect(m.runtimeAudit?.implemented).toBe(r.records.filter((x:any)=>x.status==='implemented').length);expect(m.audit.snapshot?.localMarkedComplete).toBe(162);expect(m.audit.counts?.implementedVerified).toBe(0);expect(validProgress(m)).toBe(true);expect(Buffer.byteLength(JSON.stringify(m))).toBeLessThan(PROGRESS_LIMIT);});
- it('refuses an old runtime audit after any audited consumer module changes',()=>{const path=fixture(true);try{const r=JSON.parse(readFileSync(join(path,RUNTIME_COVERAGE),'utf8')),module=r.consumer.modules[0].path;writeFileSync(join(path,module),readFileSync(join(path,module),'utf8')+'\n');expect(()=>generateProgress(path,'standalone')).toThrow('stale for current consumer');}finally{rmSync(path,{recursive:true,force:true});}});
+ it('records shell-only drift in the manifest but refuses an old runtime audit after rule code changes',()=>{const path=fixture(true);try{
+  const r=JSON.parse(readFileSync(join(path,RUNTIME_COVERAGE),'utf8')),core=r.consumer.modules.map((m:any)=>m.path).find((p:string)=>p.startsWith('src/core/automation/'));
+  expect(shellModules(path).has('src/ui/App.tsx')).toBe(true);expect(typeof core).toBe('string');
+  writeFileSync(join(path,'src/ui/App.tsx'),readFileSync(join(path,'src/ui/App.tsx'),'utf8')+'\n');
+  const m=generateProgress(path,'standalone');expect(m.runtimeAudit?.consumerDrift).toEqual(['src/ui/App.tsx']);expect(m.runtimeAudit?.implemented).toBe(r.implemented);expect(validProgress(m)).toBe(true);
+  expect(validProgress({...m,runtimeAudit:{...m.runtimeAudit!,consumerDrift:['../secret']}})).toBe(false);expect(validProgress({...m,runtimeAudit:{...m.runtimeAudit!,consumerDrift:'src/ui/App.tsx'}})).toBe(false);
+  writeFileSync(join(path,core),readFileSync(join(path,core),'utf8')+'\n');expect(()=>generateProgress(path,'standalone')).toThrow('stale for current consumer');
+ }finally{rmSync(path,{recursive:true,force:true});}});
+ it('the shell policy can never exempt rule or data modules, and without it any drift is refused',()=>{const path=fixture(true);try{
+  const snapshot=()=>readFileSync(join(path,'docs/data/automation-rule-status.json'));
+  writeFileSync(join(path,RUNTIME_SHELL),JSON.stringify({schemaVersion:1,shell:[{path:'src/core/engine.ts',reason:'test'}]}));expect(()=>runtimeCoverage(path,snapshot())).toThrow('cannot be declared shell');
+  writeFileSync(join(path,RUNTIME_SHELL),JSON.stringify({schemaVersion:1,shell:[{path:'src/data/catalog.ts',reason:'test'}]}));expect(()=>runtimeCoverage(path,snapshot())).toThrow('cannot be declared shell');
+  writeFileSync(join(path,RUNTIME_SHELL),JSON.stringify({schemaVersion:1,shell:[{path:'src/ui/App.tsx'}]}));expect(()=>runtimeCoverage(path,snapshot())).toThrow('Invalid runtime shell policy');
+  rmSync(join(path,RUNTIME_SHELL));writeFileSync(join(path,'src/ui/App.tsx'),readFileSync(join(path,'src/ui/App.tsx'),'utf8')+'\n');expect(()=>generateProgress(path,'standalone')).toThrow('stale for current consumer');
+ }finally{rmSync(path,{recursive:true,force:true});}});
  it('rejects fabricated implementation numbers even after their local artifact hash is updated',()=>{const path=fixture(true);try{const r=JSON.parse(readFileSync(join(path,RUNTIME_COVERAGE),'utf8'));r.implemented++;const bytes=Buffer.from(JSON.stringify(r)+'\n'),lock=JSON.parse(readFileSync(join(path,RUNTIME_LOCK),'utf8'));writeFileSync(join(path,RUNTIME_COVERAGE),bytes);lock.sha256=createHash('sha256').update(bytes).digest('hex');writeFileSync(join(path,RUNTIME_LOCK),JSON.stringify(lock));expect(()=>runtimeCoverage(path,readFileSync(join(path,'docs/data/automation-rule-status.json')))).toThrow('not derived from observed');}finally{rmSync(path,{recursive:true,force:true});}});
  it('generates allowlisted compact data with unknown counts when actual rule evidence is missing',()=>{
   const path=fixture();try{rmSync(join(path,'docs/data/automation-rule-status.json'));const m=generateProgress(path,'standalone');expect(validProgress(m)).toBe(true);expect(m.audit.counts).toBeNull();expect(m.missingEvidence).toContain('docs/data/automation-rule-status.json');expect(Buffer.byteLength(JSON.stringify(m))).toBeLessThan(PROGRESS_LIMIT);

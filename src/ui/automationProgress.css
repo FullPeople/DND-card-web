@@ -13,3 +13,4 @@
 .automation-progress-track>span{display:block;height:100%;background:#728860}
 .automation-progress-percent{text-align:right;color:#657257;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media(max-width:520px){.announcement-tabs{margin-inline:-16px}.automation-progress-books li{grid-template-columns:minmax(0,1fr) 44px 46px;gap:8px;font-size:12px}}
+.automation-progress-drift{margin:2px 0 0;font-size:12px;color:#6f7a5f}
