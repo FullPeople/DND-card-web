@@ -51,3 +51,13 @@
 .announcement-changelog li::before{content:'◆';position:absolute;left:0;top:4px;font-size:7px;color:#7b8272}
 
 .announcement-cloud-poster{background:#ddd;border:3px solid #50525b;padding:20px 16px;margin:0 0 16px;text-align:center;color:#393b43}.announcement-cloud-poster strong{display:block;font-size:clamp(23px,3.5vw,35px);font-weight:900;line-height:1.4}.announcement-cloud-poster small{display:block;font-size:12px;margin-top:10px}
+
+.announcement-credit{font-size:11px;color:#6f7a5f;margin-left:auto}.announcement-credit a{color:inherit}
+
+/* Announcement chrome follows the palette tokens like every other dialog. */
+.announcement-head{background:var(--ui-heading,#f4f5ed);border-bottom-color:var(--ui-line,#d8ddcd)}
+.announcement-foot{background:var(--ui-heading,#f4f5ed);border-top-color:var(--ui-line,#d8ddcd)}
+.announcement-foot label,.announcement-credit{color:var(--ui-muted,#6f7a5f)}
+.announcement-tabs button{color:var(--ui-muted,#6f7a5f)}
+.announcement-tabs button[aria-selected=true]{color:var(--ui-ink,#343532);border-bottom-color:var(--ui-selected,#50525b)}
+.announcement-foot button.primary{background:var(--ui-selected,#50525b)!important;color:var(--ui-selectedInk,#fff)!important;border-color:var(--ui-selected,#50525b)!important;border-radius:6px}

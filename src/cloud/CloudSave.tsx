@@ -8,6 +8,7 @@ import {QQLogin} from './QQLogin';
 import {CloudSaveContext} from './CloudSaveContext';
 import {CloudSaveBadge} from './CloudSaveBadge';
 import {QQCardPicker} from './QQCardPicker';
+import {CheckIcon,CloudUploadIcon,CopyIcon,SheetIcon,SpinnerIcon,WarningIcon} from '../ui/icons';
 
 
 export function CloudSaveProvider({enabled,disabled,characters,readCharacter,receive,importCard,access,children,auto=true}:{enabled:boolean;disabled:boolean;auto?:boolean;characters:Character[];readCharacter:(id:string)=>Promise<Character>;receive?:(id:string,card:Character,hash:string)=>Promise<boolean>;importCard?:(card:CloudCard,account:string)=>Promise<void>;access?:(rights:Record<string,string|undefined>)=>void;children:ReactNode}){
@@ -16,6 +17,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
  const sessionEpoch=useRef(0);
  const refreshSession=useCallback(async()=>{const epoch=++sessionEpoch.current,value=await cloudSession();if(!disposed.current&&epoch===sessionEpoch.current)setSession(value);},[]);
  const latest=useRef({readCharacter,disabled,characters,receive,importCard,access});latest.current={readCharacter,disabled,characters,receive,importCard,access};
+ const rightsRef=useRef<Record<string,string|undefined>>({});
  const disposed=useRef(false),terminal=useRef<Record<string,SyncState>>({}),engine=useRef<ReturnType<typeof createCloudSync>|undefined>(undefined);
  if(!engine.current)engine.current=createCloudSync({readCharacter:async id=>{
   if(latest.current.disabled)throw Error('当前标签页只读，本机草稿保留。');
@@ -34,7 +36,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
     const value=await cloudSession();if(!alive)return;setSession(value);
     const receipts=await readSyncReceipts(latest.current.characters.map(card=>card.id));
     const bindings=Object.entries(receipts).filter(([,receipt])=>receipt.binding);
-    if(!bindings.length)return;
+    if(!bindings.length){rightsRef.current={};latest.current.access?.({});return;}
     const account=value.authenticated?value.account?.id:value.uploadOwner?.id;
     const rows=account?await cloudCards():undefined;if(!alive)return;
     const directory=new Map((rows?.mine||rows?.cards||[]).map(card=>[card.id,card]));
@@ -42,7 +44,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
     for(const [id,receipt] of bindings){const row=directory.get(receipt.binding!.cloudId);
      rights[id]=account!==receipt.binding!.accountId?'请使用导入这张卡时的 QQ 账号登录。':!row?.role?'云端卡已移除或卡主已撤销你的权限，本机草稿保留。':undefined;
     }
-    latest.current.access?.(rights);
+    rightsRef.current=rights;latest.current.access?.(rights);
     // Directory polling transfers names and revisions only. Download the full
     // five-page document only when it changed; portraits are not polled.
     for(const [id,receipt] of bindings){if(!alive)return;const row=directory.get(receipt.binding!.cloudId);
@@ -75,7 +77,7 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
  useEffect(()=>{
   if(!enabled||disabled||!auto||!session?.authenticated&&!session?.temporaryUpload)return;
   let alive=true;
-  const timer=setTimeout(()=>{void (async()=>{const receipts=await readSyncReceipts(characters.map(character=>character.id));for(const character of characters){const receipt=receipts[character.id];if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
+  const timer=setTimeout(()=>{void (async()=>{const receipts=await readSyncReceipts(characters.map(character=>character.id));for(const character of characters){const receipt=receipts[character.id];if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!rightsRef.current[character.id]&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
   return()=>{alive=false;clearTimeout(timer);};
  },[enabled,disabled,characters,auto,readCharacter,session?.authenticated,session?.temporaryUpload,session?.account?.id]);
  async function request(id:string){
@@ -96,12 +98,14 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
 }
 function CloudUploadDialog({target,confirmed,busy,disabled,change,cancel,submit}:{target:{id:string;name:string;account?:string;temporary?:boolean;error?:string};confirmed:boolean;busy:boolean;disabled:boolean;change:(value:boolean)=>void;cancel:()=>void;submit:()=>Promise<void>}){
  const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{ref.current?.showModal();},[]);
- return <dialog ref={ref} className="cloud-save-dialog" aria-label="保存到云端确认" onCancel={event=>{if(busy)event.preventDefault();else cancel();}}>
- <h2>保存“{target.name||'未命名角色'}”到云端</h2>{target.account&&<UploadWarning temporary={target.temporary!==false}/>}
- <p className="cloud-save-details">上传完整五页到{target.temporary!==false?'临时卡库':'当前 QQ 账号的私人卡库'}。请保留本机完整 JSON 备份。确认后，这张卡的后续修改会自动同步；发生冲突时保留本机草稿。</p>
- {target.error&&<p role="alert">{target.error}</p>}
- <label className="cloud-save-consent"><input type="checkbox" checked={confirmed} disabled={busy} onChange={event=>change(event.target.checked)}/>{target.temporary!==false?'我真的同意公开这张卡，并确认卡内没有隐私信息。':'我同意将完整角色卡保存到当前账号，并启用后续自动同步。'}</label>
- <div className="cloud-save-actions"><button className="primary" disabled={!confirmed||!target.account||busy||disabled} onClick={()=>void submit()}>{busy?'正在同步...':'确认保存到云端'}</button><button disabled={busy} onClick={cancel}>取消</button></div>
+ const temporary=target.temporary!==false;
+ return <dialog ref={ref} className="cloud-save-dialog cloud-modal dialog" aria-label="保存到云端确认" onCancel={event=>{if(busy)event.preventDefault();else cancel();}}>
+ <header className="cloud-modal-head"><span className="cloud-modal-icon"><CloudUploadIcon size={18}/></span><div className="cloud-modal-heading"><h2>保存到云端</h2><p>“{target.name||'未命名角色'}” → {temporary?'临时卡库':'当前 QQ 账号的私人卡库'}</p></div></header>
+ <div className="cloud-modal-body">{target.account&&<UploadWarning temporary={temporary}/>}
+ <p className="cloud-save-details">上传完整五页到{temporary?'临时卡库':'当前 QQ 账号的私人卡库'}。请保留本机完整 JSON 备份。确认后，这张卡的后续修改会自动同步；发生冲突时保留本机草稿。</p>
+ {target.error&&<p role="alert" className="cloud-modal-alert"><WarningIcon size={15}/><span>{target.error}</span></p>}
+ <label className="cloud-save-consent"><input type="checkbox" checked={confirmed} disabled={busy} onChange={event=>change(event.target.checked)}/><span>{temporary?'我真的同意公开这张卡，并确认卡内没有隐私信息。':'我同意将完整角色卡保存到当前账号，并启用后续自动同步。'}</span></label></div>
+ <footer className="cloud-modal-foot cloud-save-actions"><button type="button" disabled={busy} onClick={cancel}>取消</button><button type="button" className="primary cloud-primary" disabled={!confirmed||!target.account||busy||disabled} onClick={()=>void submit()}>{busy?<SpinnerIcon size={15} className="cloud-spin"/>:<CloudUploadIcon size={15}/>}<span>{busy?'正在同步...':'确认保存到云端'}</span></button></footer>
  </dialog>;
 }
 export function useCloudSaveAvailable(){return !!useContext(CloudSaveContext);}
@@ -110,8 +114,8 @@ export function CloudSaveControl({id,disabled=false,book=false,library=false}:{i
  useEffect(()=>{setCopied(false);setCopyError(false);},[id,context?.states[id]?.cloudId]);
  if(!context)return null;
  const state=context.states[id]||{phase:'local'},failed=['error','conflict','uncertain'].includes(state.phase);
- if(library)return <span className="cloud-save-control cloud-save-book" data-cloud-phase={state.phase}><CloudSaveBadge id={id}/>{state.phase==='syncing'?<span role="status">正在同步...</span>:<>{state.cloudId?<span className="cloud-id-box"><code aria-label="云端卡 ID">{state.cloudId}</code><button aria-label={`复制云端卡 ID ${state.cloudId}`} onClick={()=>void navigator.clipboard.writeText(state.cloudId!).then(()=>setCopied(true)).catch(()=>setCopyError(true))}>{copied?'已复制':'复制'}</button></span>:<><button disabled={disabled||context.disabled} onClick={()=>context.request(id)}>保存到云端</button><small>仅本机保存</small></>}{failed&&<button disabled={disabled||context.disabled} title={state.message} onClick={()=>context.request(id)}>{state.phase==='conflict'?'同步冲突':state.phase==='uncertain'?'核对同步结果':'同步失败'} · 重试</button>}</>}{failed&&<small role="alert">{state.message} 本机草稿保留。</small>}{copyError&&<small role="alert">复制失败，请选中 ID 手动复制。</small>}</span>;
- const details=<section className="qq-cloud-card-details"><h3>当前角色卡</h3>{state.cloudId?<><label>云端卡 ID</label><code>{state.cloudId}</code><button onClick={()=>void navigator.clipboard.writeText(state.cloudId!).then(()=>{setCopied(true);setCopyError(false);}).catch(()=>setCopyError(true))}>{copied?'已复制':'复制云端卡 ID'}</button></>:<p>这张卡保存在本机，可通过卡片右上角的云端按钮上传。</p>}{state.phase==='syncing'&&<p role="status">正在同步…</p>}{failed&&<p role="alert">{state.message} 本机草稿保留。</p>}{copyError&&<p role="alert">复制失败，请选中 ID 手动复制。</p>}<p><a href="/library/">打开我的 QQ 卡库</a></p></section>;
+ if(library)return <span className="cloud-save-control cloud-save-book" data-cloud-phase={state.phase}>{state.phase==='syncing'?<span role="status" className="cloud-sync-status"><SpinnerIcon size={14} className="cloud-spin"/>正在同步...</span>:<>{state.cloudId?<span className="cloud-id-box"><code aria-label="云端卡 ID">{state.cloudId}</code><button aria-label={`复制云端卡 ID ${state.cloudId}`} onClick={()=>void navigator.clipboard.writeText(state.cloudId!).then(()=>setCopied(true)).catch(()=>setCopyError(true))}>{copied?'已复制':'复制'}</button></span>:<button disabled={disabled||context.disabled} onClick={()=>context.request(id)}><CloudUploadIcon size={15}/><span>保存到云端</span></button>}{failed&&<button className="cloud-sync-retry" disabled={disabled||context.disabled} title={state.message} onClick={()=>context.request(id)}><WarningIcon size={14}/><span>{state.phase==='conflict'?'同步冲突':state.phase==='uncertain'?'核对同步结果':'同步失败'} · 重试</span></button>}</>}{failed&&<small role="alert">{state.message} 本机草稿保留。</small>}{copyError&&<small role="alert">复制失败，请选中 ID 手动复制。</small>}</span>;
+ const details=<section className="qq-cloud-card-details cloud-modal-section"><h3><SheetIcon size={15}/>当前角色卡</h3>{state.cloudId?<div className="qq-account-id"><span className="qq-field-label">云端卡 ID</span><div className="qq-id-row"><code>{state.cloudId}</code><button type="button" aria-label="复制云端卡 ID" onClick={()=>void navigator.clipboard.writeText(state.cloudId!).then(()=>{setCopied(true);setCopyError(false);}).catch(()=>setCopyError(true))}>{copied?<CheckIcon size={14}/>:<CopyIcon size={14}/>}<span>{copied?'已复制':'复制'}</span></button></div><p className="qq-help">已保存到云端，后续修改会自动同步。</p></div>:<p className="qq-help">这张卡只保存在本机，可通过卡片右上角的云端按钮上传到你的卡库。</p>}{state.phase==='syncing'&&<p role="status" className="cloud-modal-status"><SpinnerIcon size={15} className="cloud-spin"/><span>正在同步…</span></p>}{failed&&<p role="alert" className="cloud-modal-alert"><WarningIcon size={15}/><span>{state.message} 本机草稿保留。</span></p>}{copyError&&<p role="alert" className="cloud-modal-alert"><WarningIcon size={15}/><span>复制失败，请选中 ID 手动复制。</span></p>}</section>;
  if(!book)return <QQLogin managed session={context.session} refresh={context.refreshSession} beforeLogin={()=>context.beforeLogin(id)}><QQCardPicker/>{details}</QQLogin>;
- return <span className="cloud-save-control cloud-save-book" data-cloud-phase={state.phase}><CloudSaveBadge id={id}/>{state.cloudId?<small>{state.phase==='syncing'?'正在同步…':failed?'云端同步待核对':'云端卡'}</small>:<button disabled={disabled||context.disabled||!context.session?.authenticated} onClick={()=>context.request(id)}>{context.session?.authenticated?'上传到云端':'仅本机保存'}</button>}{failed&&<button disabled={disabled||context.disabled} title={state.message} onClick={()=>context.request(id)}>核对同步</button>}</span>;
+ return <span className="cloud-save-control cloud-save-book" data-cloud-phase={state.phase}><CloudSaveBadge id={id}/>{state.cloudId?<small>{state.phase==='syncing'?'正在同步…':failed?'云端同步待核对':'云端卡'}</small>:<button disabled={disabled||context.disabled||!context.session?.authenticated} onClick={()=>context.request(id)}><CloudUploadIcon size={14}/><span>{context.session?.authenticated?'上传到云端':'仅本机保存'}</span></button>}{failed&&<button className="cloud-sync-retry" disabled={disabled||context.disabled} title={state.message} onClick={()=>context.request(id)}>核对同步</button>}</span>;
 }

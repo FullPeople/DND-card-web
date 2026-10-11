@@ -22,7 +22,7 @@ for(const legacy of [false,true])test(legacy?'Owlbear pasted JSON creates a shar
  await expect.poll(()=>page.evaluate(()=>(window as any).creates.length)).toBe(1);await expect(page.getByText('角色已导入枭熊角色簿。',{exact:true})).toHaveCount(0);
  const sent=await page.evaluate(()=>(window as any).creates[0]);expect(sent.key).toBeUndefined();expect(sent.itemId).toBeUndefined();expect(sent.data.dnd_card_web.abilities.int).toBe(18);expect(sent.data.dnd_card_web.runtime.hp).toBe(17);expect(sent.data.dnd_card_web.id).not.toBe(card.id);
  if(!legacy)expect(sent.data.dnd_card_web.runtime.resources.test.current).toBe(2);
- await page.evaluate(()=>(window as any).finish());const name=legacy?'导入验收角色':'导入验收角色（导入）';if(legacy){await page.locator('.character-title').filter({hasText:'导入验收角色'}).click();}await expect(page.getByRole('tab',{name,exact:true})).toBeVisible();await expect(page.getByRole('region',{name:'角色名',exact:true}).getByRole('button',{name,exact:true})).toBeVisible();await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('17');
+ await page.evaluate(()=>(window as any).finish());const name=legacy?'导入验收角色':'导入验收角色（导入）';if(legacy){await page.locator('.book-title').filter({hasText:'导入验收角色'}).click();}await expect(page.getByRole('tab',{name,exact:true})).toBeVisible();await expect(page.getByRole('region',{name:'角色名',exact:true}).getByRole('button',{name,exact:true})).toBeVisible();await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('17');
  await page.getByRole('button',{name:/角色簿/}).click();await expect(page.locator('.character-manager')).toContainText(name);
 });
 test('host rejection keeps import open, reports failure and creates no hidden local copy',async({page,baseURL})=>{

@@ -15,10 +15,10 @@ export function qqPage(response:ServerResponse,status:number,message:string,back
   response.writeHead(status,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"});
   response.end(`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QQ 登录 · 弗人城堡</title><style>body{font:16px/1.8 system-ui,sans-serif;max-width:32rem;margin:12vh auto;padding:24px;color:#333;background:#f5f2e9}a{color:#245a84}</style><h1>QQ 登录</h1><p>${escape(message)}</p><a href="${escape(back)}">返回网站</a></html>`);
 }
-export function createQQAuth(store:CloudStore,origin:string,config?:QQConfig){
+export function createQQAuth(store:CloudStore,origin:string,config?:QQConfig,clientKey?:(request:IncomingMessage)=>string){
   const ready=!!config?.appId&&!!config?.appKey;
   if(ready){const callback=new URL(config!.callback);if(callback.origin!==origin||callback.pathname!=='/api/auth/qq/callback'||callback.search||callback.hash||!/^\d{5,20}$/.test(config!.appId))throw Error('Invalid QQ OAuth configuration');}
-  const pending=new Map<string,{nonce:string;returnTo:string;expires:number}>();
+  const pending=new Map<string,{nonce:string;returnTo:string;expires:number;key:string}>();
   const flags='; Path=/api/auth/qq/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Lax';
   async function provider(path:string,params:Record<string,string>){
     const url=new URL(path,'https://graph.qq.com');url.search=new URLSearchParams(params).toString();
@@ -37,7 +37,8 @@ export function createQQAuth(store:CloudStore,origin:string,config?:QQConfig){
     if(url.pathname.endsWith('/login')){
       const now=Date.now();for(const [state,row] of pending)if(row.expires<now)pending.delete(state);
       if(pending.size>=1000)throw new CloudError(429,'qq_busy','登录请求过多，请稍后重试。');
-      const state=randomBytes(32).toString('base64url'),nonce=randomBytes(32).toString('base64url');pending.set(state,{nonce,returnTo:back,expires:now+600000});
+      const key=clientKey?clientKey(request):request.socket.remoteAddress||'unknown';let mine=0;for(const row of pending.values())if(row.key===key&&++mine>=20)throw new CloudError(429,'qq_busy','登录请求过多，请稍后重试。');
+      const state=randomBytes(32).toString('base64url'),nonce=randomBytes(32).toString('base64url');pending.set(state,{nonce,returnTo:back,expires:now+600000,key});
       const target=new URL('https://graph.qq.com/oauth2.0/authorize');target.search=new URLSearchParams({response_type:'code',client_id:config!.appId,redirect_uri:config!.callback,scope:'get_user_info',state}).toString();
       response.writeHead(302,{'Location':target.href,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','Set-Cookie':'dnd_qq_state='+nonce+flags+'; Max-Age=600'});response.end();return true;
     }
