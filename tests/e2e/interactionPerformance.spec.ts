@@ -13,7 +13,7 @@ let corpusProof:{files:number;fulfilledFiles:number;indexSha256:string;unmatched
 let startup:unknown,testFailure:string|undefined;
 let cardScenario:unknown={count:1,mixture:'default empty card'};
 let profiler:CDPSession|undefined;
-async function stopProfiler(){if(!profiler)return;const session=profiler;profiler=undefined;const {profile}=await session.send('Profiler.stop'),bytes=JSON.stringify(profile);if(Buffer.byteLength(bytes)>100*1024*1024)throw Error('CPU evidence exceeds the per-run evidence budget');writeFileSync(output+'.cpuprofile',bytes);}
+async function stopProfiler(){if(!profiler)return;const session=profiler;profiler=undefined;const {profile}=await session.send('Profiler.stop'),bytes=JSON.stringify(profile);if(Buffer.byteLength(bytes)>100*1024*1024)throw Error('CPU evidence exceeds the per-run evidence budget');mkdirSync(resolve(output,'..'),{recursive:true});writeFileSync(output+'.cpuprofile',bytes);}
 function save(){
  const operations=[...new Set(samples.map(s=>s.operation))].map(operation=>{
   const rows=samples.filter(s=>s.operation===operation),warm=rows.filter(s=>s.phase==='warm'),values=warm.filter(s=>!s.error&&s.readyMs!==null).map(s=>s.readyMs!).sort((a,b)=>a-b);
