@@ -23,6 +23,6 @@ export function catalogNormalizer(signal:AbortSignal,fallback:(body:Raw,revision
   if(signal.aborted)throw new Error('资料处理已中止');
   const resolved=revision||await hashCatalogJson(body);
   if(signal.aborted)throw new Error('资料处理已中止');
-  return {revision:resolved,entries:fallback(body,resolved,packId,'normalize')};
+  return {revision:resolved,entries:fallback(structuredClone(body),resolved,packId,'normalize')};
  },dispose(){signal.removeEventListener('abort',stop);stop();}};
 }

@@ -20,6 +20,14 @@ describe('catalog preparation preserves source identity',()=>{
   try{const result=await processor.prepare(body,'"source-etag"');expect(result.revision).toBe('"source-etag"');expect(result.entries).toEqual(normalizeCatalogData(body,'"source-etag"'));}
   finally{processor.dispose();}
  });
+ it('keeps the original network snapshot intact when class normalization annotates its copy',async()=>{
+  vi.stubGlobal('Worker',undefined);
+  const source={class:[{name:'Fixture class',source:'XPHB',edition:'one'}],classFeature:[{name:'Fixture feature',className:'Fixture class',classSource:'XPHB',source:'XPHB',level:1}]};
+  const original=structuredClone(source),hash=createHash('sha256').update(JSON.stringify(original)).digest('hex');
+  const processor=catalogNormalizer(new AbortController().signal,normalizeCatalogData);
+  try{const result=await processor.prepare(source,null);expect(result.revision).toBe(hash);expect(source).toEqual(original);expect(result.entries.find(entry=>entry.kind==='feature')?.raw._classEdition).toBe('2024');}
+  finally{processor.dispose();}
+ });
  it('a broken worker falls back without losing the source revision or body',async()=>{
   class BrokenWorker{
    onerror?:()=>void;terminated=false;
