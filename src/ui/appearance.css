@@ -57,7 +57,7 @@ body,.app-shell,.sheet-pane,.cloud-library,.cloud-gallery-stage{background:var(-
 .paper.page-3 .cell-heading,.paper.page-3 .cell-heading h3{color:var(--card-spells-headingInk,var(--card-all-headingInk,#fff))}
 .paper.page-4 .cell-heading,.paper.page-4 .cell-heading h3{color:var(--card-inventory-headingInk,var(--card-all-headingInk,#fff))}
 
-.cloud-library :is(.cloud-frame>h2,.cloud-gallery-title){background:var(--ui-band,#7c7c7c);color:var(--ui-bandInk,#ffffff)}.cloud-gallery-title>.cloud-stack-id{color:var(--ui-bandInk,#ffffff)}
+.cloud-library :is(.cloud-frame>h2,.cloud-gallery-title){background:var(--ui-band,#747474);color:var(--ui-bandInk,#ffffff)}.cloud-gallery-title>.cloud-stack-id{color:var(--ui-bandInk,#ffffff)}
 
 /* Theme authority for actual catalog/document nodes, including legacy night rules. */
 .app-header,.cloud-header{background:var(--ui-heading);color:var(--ui-ink)}

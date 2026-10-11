@@ -6,7 +6,9 @@ describe('online Three Dragon link stays independent of card recovery',()=>{
   expect(app).toContain('href="https://dnd.center/3-dragon/" target="_blank" rel="noopener noreferrer"');
   expect(app).toContain("import './threeDragonLink.css'");
   expect(app).not.toMatch(/ThreeDragonFullscreen|tableOpen|setTableOpen|workbench-underlay|workbench-content/);
-  expect(app).toContain("wb.enabled.threeDragonAnte!==false&&<a");
+  // The link now carries hover help; it is still a plain anchor rendered only when the module is enabled.
+  expect(app).toContain("wb.enabled.threeDragonAnte!==false&&<HelpHint");
+  expect(app).toMatch(/threeDragonAnte!==false&&<HelpHint[^>]*><a className="suite-website-link icon-button" href="https:\/\/dnd\.center\/3-dragon\/" target="_blank" rel="noopener noreferrer"/);
  });
  it('keeps current main startup isolation and recovery UI together',()=>{
   expect(app).toContain("from './overviewConditionEntry'");

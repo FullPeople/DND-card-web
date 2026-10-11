@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react';
+import {ArrowDownIcon,ArrowUpIcon,CloseIcon} from './icons';
 import {uid,KIND_LABELS,type Character} from '../core/model';
 import {quickbarEntries,removePin} from '../core/quickbar';
 import {weaponAttacks} from '../core/weaponAttacks';
@@ -51,7 +52,7 @@ export function QuickbarManager({c,edit}:{c:Character;edit:(f:(c:Character)=>voi
     return <li key={attack.key} className="quickbar-organizer-row" data-organizer-key={attack.key}>
      <span className="quickbar-organizer-index" aria-hidden="true">{String(index+1).padStart(2,'0')}</span>
      <div className="quickbar-organizer-description"><strong>{name}{attack.modeLabel&&<small> · {attack.modeLabel}</small>}</strong><div className="quickbar-organizer-meta"><span>{manual?'手填攻击':attack.entry?'装备攻击':'原有攻击'}</span><span>命中 <b>{attack.attack_bonus??'—'}</b></span><span>伤害 <b>{[attack.damage,attack.extra_damage].filter(Boolean).join(' + ')||'—'}</b>{attack.damage_type&&' '+attack.damage_type}</span></div></div>
-     <div className="quickbar-organizer-actions">{manual&&<button type="button" className="quickbar-organizer-edit" aria-label={'编辑'+name} onClick={()=>{setRow({...manual});setError('');}}>编辑</button>}<button type="button" aria-label={'上移'+name} title="上移" disabled={index===0} onClick={()=>moveAttack(attack.key,-1)}>↑</button><button type="button" aria-label={'下移'+name} title="下移" disabled={index===attacks.length-1} onClick={()=>moveAttack(attack.key,1)}>↓</button><button type="button" className="quickbar-organizer-remove" aria-label={'从快捷栏移除'+name} title="从快捷栏移除" onClick={()=>hideAttack(attack.key)}>×</button></div>
+     <div className="quickbar-organizer-actions">{manual&&<button type="button" className="quickbar-organizer-edit" aria-label={'编辑'+name} onClick={()=>{setRow({...manual});setError('');}}>编辑</button>}<button type="button" aria-label={'上移'+name} title="上移" disabled={index===0} onClick={()=>moveAttack(attack.key,-1)}><ArrowUpIcon/></button><button type="button" aria-label={'下移'+name} title="下移" disabled={index===attacks.length-1} onClick={()=>moveAttack(attack.key,1)}><ArrowDownIcon/></button><button type="button" className="quickbar-organizer-remove" aria-label={'从快捷栏移除'+name} title="从快捷栏移除" onClick={()=>hideAttack(attack.key)}><CloseIcon/></button></div>
     </li>;
    })}</ol>:<p className="quickbar-organizer-empty">还没有武器或手填攻击。</p>}
   </section>
@@ -61,13 +62,13 @@ export function QuickbarManager({c,edit}:{c:Character;edit:(f:(c:Character)=>voi
     const name=entryLabel(pin.entry);return <li key={pin.id} className="quickbar-organizer-row" data-organizer-key={'pin:'+pin.id}>
      <span className="quickbar-organizer-index" aria-hidden="true">{String(index+1).padStart(2,'0')}</span>
      <div className="quickbar-organizer-description"><strong>{name}</strong><div className="quickbar-organizer-meta"><span>{KIND_LABELS[pin.entry.kind]}</span><span>{pin.entry.source==='CUSTOM'?'自定义':pin.entry.source}</span></div></div>
-     <div className="quickbar-organizer-actions"><button type="button" aria-label={'上移'+name} title="上移" disabled={index===0} onClick={()=>movePin(pin.id,-1)}>↑</button><button type="button" aria-label={'下移'+name} title="下移" disabled={index===pins.length-1} onClick={()=>movePin(pin.id,1)}>↓</button><button type="button" className="quickbar-organizer-remove" aria-label={'取消固定'+name} title="取消固定" onClick={()=>edit(d=>removePin(d,pin.id))}>×</button></div>
+     <div className="quickbar-organizer-actions"><button type="button" aria-label={'上移'+name} title="上移" disabled={index===0} onClick={()=>movePin(pin.id,-1)}><ArrowUpIcon/></button><button type="button" aria-label={'下移'+name} title="下移" disabled={index===pins.length-1} onClick={()=>movePin(pin.id,1)}><ArrowDownIcon/></button><button type="button" className="quickbar-organizer-remove" aria-label={'取消固定'+name} title="取消固定" onClick={()=>edit(d=>removePin(d,pin.id))}><CloseIcon/></button></div>
     </li>;
    })}</ol>:<p className="quickbar-organizer-empty">把常用法术、能力或物品拖到快捷栏，便可在这里整理。</p>}
   </section>
   <footer className="quickbar-organizer-footer"><span>移除快捷入口会保留卡上的原条目。</span><div>{hidden.length>0&&<button type="button" onClick={restoreAttacks}>显示已隐藏攻击（{hidden.length}）</button>}<button type="button" onClick={()=>{setRow(blank());setError('');}}>＋ 新建手填攻击</button></div></footer>
   {row&&<form className="quickbar-organizer-editor" aria-label={row.id?'编辑手填攻击':'新建手填攻击'} onSubmit={e=>{e.preventDefault();save();}}>
-   <header><h3>{row.id?'编辑手填攻击':'新建手填攻击'}</h3><button type="button" aria-label="取消编辑手填攻击" onClick={()=>{setRow(undefined);setError('');}}>×</button></header>
+   <header><h3>{row.id?'编辑手填攻击':'新建手填攻击'}</h3><button type="button" aria-label="取消编辑手填攻击" onClick={()=>{setRow(undefined);setError('');}}><CloseIcon/></button></header>
    <div className="quickbar-organizer-fields"><label>名字<input autoFocus required maxLength={120} value={row.name} onChange={e=>setRow({...row,name:e.target.value})}/></label><label>命中加值<input maxLength={160} placeholder="+5" value={row.attack} onChange={e=>setRow({...row,attack:e.target.value})}/></label><label>伤害<input maxLength={160} placeholder="1d8+3" value={row.damage} onChange={e=>setRow({...row,damage:e.target.value})}/></label></div>
    {error&&<p role="alert">{error}</p>}<div className="quickbar-organizer-editor-actions"><button type="button" onClick={()=>{setRow(undefined);setError('');}}>取消</button><button type="submit" className="primary">{row.id?'保存':'添加'}</button></div>
   </form>}

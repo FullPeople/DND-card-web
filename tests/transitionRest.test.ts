@@ -19,7 +19,7 @@ function fixture(){
  const useRef=(initial:any)=>{const i=index++;if(!(i in slots))slots[i]={current:initial};return slots[i];};
  const request=vi.fn(()=>Promise.resolve({}));
  const React={createElement:(type:any,props:any,...children:any[]):Node=>({type,props:props||{},children})};
- const renderComponent=new Function('React','useState','useRef','useWorkbench','useActionHistory','workbenchRequest','travelHistory','GroupRollArea','PreferenceSwitch','WorkbenchInventory','PublicResources','ResourceOverview',code+';return ConsoleContent;')(React,useState,useRef,()=>wb,()=>({}),request,vi.fn(),()=>null,()=>null,()=>null,()=>null,()=>null);
+ const renderComponent=new Function('React','useState','useRef','useWorkbench','useActionHistory','workbenchRequest','travelHistory','GroupRollArea','PreferenceSwitch','WorkbenchInventory','PublicResources','ResourceOverview','UndoIcon','RedoIcon',code+';return ConsoleContent;')(React,useState,useRef,()=>wb,()=>({}),request,vi.fn(),()=>null,()=>null,()=>null,()=>null,()=>null,()=>null,()=>null);
  const render=()=>{index=0;return renderComponent() as Node;};
  const nodes=(value:any):Node[]=>Array.isArray(value)?value.flatMap(nodes):value&&typeof value==='object'&&value.props?[value,...nodes(value.children)]:[];
  const label=(value:any):string=>Array.isArray(value)?value.map(label).join(''):value&&typeof value==='object'?label(value.children):String(value??'');

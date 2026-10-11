@@ -20,8 +20,11 @@ export function WorkspaceSplitter(){
  // existing header, without coupling character/rules state to panel visibility.
  useLayoutEffect(()=>{
   const workspace=ref.current!.parentElement!,shell=workspace.closest('.app-shell')!,tabs=shell.querySelector<HTMLElement>('.mobile-tabs'),tools=shell.querySelector('.header-tools')!;
-  const notice=Array.from(tools.querySelectorAll('button')).find(button=>button.textContent===t('announcements'));
-  const mount=document.createElement('span');mount.className='workspace-reset-mount';tools.insertBefore(mount,notice||tools.firstChild);setResetMount(mount);
+  // The header groups its buttons; insert before the group that holds the
+  // announcement button (or the explicit slot), never inside a React-managed span.
+  const slot=tools.querySelector('.workspace-reset-slot'),notice=Array.from(tools.querySelectorAll('button')).find(button=>button.getAttribute('aria-label')===t('announcements')||button.textContent===t('announcements'));
+  let before:Element|null=slot||notice||null;while(before&&before.parentElement&&before.parentElement!==tools)before=before.parentElement;
+  const mount=document.createElement('span');mount.className='workspace-reset-mount';tools.insertBefore(mount,before||tools.firstChild);setResetMount(mount);
   return()=>{mount.remove();delete workspace.dataset.hiddenSide;if(tabs)delete tabs.dataset.hiddenSide;};
  },[]);
  useLayoutEffect(()=>{

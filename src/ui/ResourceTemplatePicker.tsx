@@ -1,4 +1,5 @@
 import {useState,useRef,type PointerEvent,type CSSProperties} from 'react';
+import {CloseIcon} from './icons';
 import {sameValue} from '../core/merge';
 import {useResourceDraftGuard} from './resourceDraftGuard';
 import {createPortal} from 'react-dom';
@@ -37,7 +38,7 @@ export function ResourceTemplatePicker({choose,disabled=false,hidden=0,restore,d
     <label><span>子项 {i+1}</span><input aria-label={`子项 ${i+1} 名称`} maxLength={100} value={r.name} onChange={e=>child(i,{name:e.target.value})}/></label>
     <label><span>当前值</span>{numberField(`子项 ${i+1} 当前值`,r.current,n=>child(i,{current:n}))}</label>
     <label><span><input aria-label={`子项 ${i+1} 有上限`} type="checkbox" checked={!r.unlimited} onChange={e=>child(i,{unlimited:!e.target.checked})}/>上限</span>{numberField(`子项 ${i+1} 上限`,r.max,n=>child(i,{max:n}),{max:99999,disabled:r.unlimited})}</label>
-    <button type="button" className="resource-child-remove" aria-label={`删除子项 ${i+1}`} disabled={children.length<=2} onClick={()=>setChildren(rows=>rows.filter((_,n)=>n!==i))}>×</button>
+    <button type="button" className="resource-child-remove" aria-label={`删除子项 ${i+1}`} disabled={children.length<=2} onClick={()=>setChildren(rows=>rows.filter((_,n)=>n!==i))}><CloseIcon/></button>
    </div>)}
    <button type="button" className="resource-child-add" disabled={children.length>=12} onClick={()=>setChildren(rows=>[...rows,newChild(rows.length+1)])}>添加子项</button>
   </div>}
