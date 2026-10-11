@@ -10,7 +10,7 @@ function setup(){
   writes.push({account,path,method,value});const body=value as any;
   if(method==='PUT'&&body.revision!==remote!.revision)throw new CloudRequestError(409,'revision_conflict','本机草稿保留。');
   remote={id:'ABCDEF',revision:(remote?.revision||0)+1,character:structuredClone(body.character),updatedAt:'now',role:'owner'};return structuredClone(remote) as T;
- },hash:characterHash,lock:async(_,fn)=>fn(),changed:(_,row)=>states.push(row)};
+ },receive:async(_,incoming,expected)=>{if(await characterHash(character)!==expected)return false;character=structuredClone(incoming);return true;},hash:characterHash,lock:async(_,fn)=>fn(),changed:(_,row)=>states.push(row)};
  return {deps,engine:createCloudSync(deps),states,writes,get character(){return character;},get receipt(){return receipt;},get remote(){return remote!;},set receipt(row:SyncReceipt){receipt=row;}};
 }
 describe('cloud draft synchronization',()=>{
@@ -46,5 +46,25 @@ describe('cloud draft synchronization',()=>{
  it('ignores local bookkeeping while hashing every persisted character field',async()=>{
   const s=setup(),original=await characterHash(s.character),copy={...s.character,id:'staged-id',revision:100,updatedAt:'later'};expect(await characterHash(copy)).toBe(original);
   copy.runtime={...copy.runtime,hp:123};expect(await characterHash(copy)).not.toBe(original);
+ });
+ it('receives another client’s full card and continues writing from its revision',async()=>{
+  const s=setup();await s.engine.run(s.character.id,'owner');const id=s.character.id;
+  s.remote.revision++;s.remote.character={...s.remote.character,name:'其他端的新名字',notes:'远端笔记',runtime:{...s.remote.character.runtime,hp:7}};
+  await s.engine.pull(id);expect(s.character.name).toBe('其他端的新名字');expect(s.character.runtime.hp).toBe(7);expect(s.character.id).toBe(id);expect(s.receipt.binding?.revision).toBe(2);
+  s.character.player='接收后继续编辑';await s.engine.run(id);expect(s.remote.revision).toBe(3);expect(s.remote.character.notes).toBe('远端笔记');expect(s.remote.character.player).toBe('接收后继续编辑');
+ });
+ it('does not replace local edits with a newer cloud document',async()=>{
+  const s=setup();await s.engine.run(s.character.id,'owner');s.character.notes='未提交的本机笔记';s.remote.revision++;s.remote.character.name='其他端的修改';
+  await s.engine.pull(s.character.id);expect(s.character.notes).toBe('未提交的本机笔记');expect(s.character.name).toBe('本机草稿');expect(s.receipt.binding?.revision).toBe(1);expect(s.receipt.lastError?.phase).toBe('conflict');
+ });
+ it('keeps an edit made while installing an incoming card',async()=>{
+  const s=setup();await s.engine.run(s.character.id,'owner');s.remote.revision++;s.remote.character.name='远端改名';
+  s.deps.receive=async()=>{s.character.notes='读取期间的本机修改';return false;};await s.engine.pull(s.character.id);
+  expect(s.character.notes).toBe('读取期间的本机修改');expect(s.receipt.binding?.revision).toBe(1);expect(s.writes).toHaveLength(1);
+ });
+ it('does not receive under a different account or during an uncertain write',async()=>{
+  const s=setup();await s.engine.run(s.character.id,'owner');s.remote.revision++;s.remote.character.name='远端';
+  s.deps.session=async()=>({authenticated:true,qqLogin:'ready',account:{id:'other',qq:null}});await s.engine.pull(s.character.id);expect(s.character.name).toBe('本机草稿');
+  s.deps.session=async()=>({authenticated:false,qqLogin:'pending',temporaryUpload:true,uploadOwner:{id:'owner'}});s.receipt={...s.receipt,pending:{accountId:'owner',hash:'unknown',startedAt:Date.now()}};await s.engine.pull(s.character.id);expect(s.character.name).toBe('本机草稿');expect(s.receipt.pending).toBeTruthy();
  });
 });

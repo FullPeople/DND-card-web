@@ -14,6 +14,7 @@ export interface SyncDependencies {
  hash:(character:Character)=>Promise<string>;
  lock:<T>(id:string,action:()=>Promise<T>)=>Promise<T>;
  changed:(id:string,state:SyncState)=>void;
+ receive?:(id:string,character:Character,expectedHash:string)=>Promise<boolean>;
 }
 // The persisted pending operation prevents an unknown network outcome from
 // becoming a duplicate upload or a blind overwrite after reopening the page.
@@ -71,7 +72,39 @@ export function createCloudSync(deps:SyncDependencies){
   }).catch(error=>deps.changed(id,{phase:'error',message:error instanceof Error?error.message:String(error)})).finally(()=>flights.delete(id));
   flights.set(id,task);return task;
  }
- return {run};
+ async function pull(id:string){
+  const receive=deps.receive;if(!receive||flights.has(id))return;
+  return deps.lock(id,async()=>{
+   let receipt=await deps.readReceipt(id);
+   if(!receipt.binding||receipt.pending||receipt.lastError?.phase==='uncertain')return;
+   try{
+    const binding=receipt.binding,session=await deps.session();
+    if((session.account?.id||session.uploadOwner?.id)!==binding.accountId)return;
+    const remote=await deps.read(binding.cloudId),hash=await deps.hash(remote.character);
+    const currentSession=await deps.session();if((currentSession.account?.id||currentSession.uploadOwner?.id)!==binding.accountId)return;
+    if(remote.revision<binding.revision)return;
+    if(remote.revision===binding.revision){
+     if(!receipt.hash){receipt={...receipt,hash};await deps.writeReceipt(id,receipt);}
+     return;
+    }
+    const local=await deps.readCharacter(id),localHash=await deps.hash(local);
+    if(!receipt.hash||localHash!==receipt.hash){
+     if(localHash!==hash)throw new CloudRequestError(409,'revision_conflict','本机与云端都有修改，已保留本机草稿。请先核对两端版本。');
+    }else if(!await receive(id,{...remote.character,id},localHash))return;
+    // Installation rechecks the current local object after hashing and waiting
+    // for persistence. A local edit during the GET never gets replaced.
+    const current=await deps.readReceipt(id);
+    if(current.pending||current.binding?.cloudId!==binding.cloudId||current.binding.revision!==binding.revision)return;
+    receipt={binding:{...binding,revision:remote.revision},hash};
+    await deps.writeReceipt(id,receipt);state(id,'saved',receipt);
+   }catch(error){
+    const phase=error instanceof CloudRequestError&&error.status===409?'conflict':'error';
+    receipt={...receipt,lastError:{phase,message:error instanceof Error?error.message:String(error)}};
+    await deps.writeReceipt(id,receipt);state(id,phase,receipt,receipt.lastError!.message);
+   }
+  });
+ }
+ return {run,pull};
 }
 
 export async function characterHash(character:Character){
