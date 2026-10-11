@@ -5,6 +5,20 @@ import {automationEnabled} from './automation/state';
 export type CasterProfile={owner:Selection;casting:Selection;mode:'known'|'prepared';pool:'learned'|'book'|'list';maxLevel:number};
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
 
+/** Explicit class filters declared by a subclass can replace the parent class list. */
+function expandedSpellClasses(raw:Entry['raw']):string[]{
+ const names:string[]=[];
+ const visit=(value:unknown)=>{
+  if(Array.isArray(value)){value.forEach(visit);return;}
+  if(!value||typeof value!=='object')return;
+  const filter=(value as any).all;
+  if(typeof filter==='string')for(const part of filter.split('|'))if(part.startsWith('class='))names.push(...part.slice(6).split(';'));
+  for(const child of Object.values(value))if(child!==filter)visit(child);
+ };
+ for(const block of Array.isArray(raw.additionalSpells)?raw.additionalSpells:[])visit(block?.expanded);
+ return names.map(key).filter(Boolean);
+}
+
 /** The source declares *when* preparation changes, not merely whether its table says Prepared. */
 export function casterProfiles(c:Character):CasterProfile[]{
  return c.selections.filter(s=>s.entry.kind==='class'&&selectionAllowed(c,s.entry)).flatMap(owner=>{
@@ -32,7 +46,7 @@ export function inferredSpellMode(c:Character):'known'|'prepared'|undefined{
 
 /** Match the upstream class lookup by source and either language; never merge translated names. */
 export function spellOnClassList(entry:Entry,profile:CasterProfile):boolean{
- const raw=entry.raw,names=[profile.owner.entry.name,profile.owner.entry.english,profile.owner.entry.raw.name,profile.owner.entry.raw.ENG_name,profile.owner.entry.raw._castingSource?.name,profile.owner.entry.raw._castingSource?.english].map(key).filter(Boolean);
+ const raw=entry.raw,names=[profile.owner.entry.name,profile.owner.entry.english,profile.owner.entry.raw.name,profile.owner.entry.raw.ENG_name,profile.owner.entry.raw._castingSource?.name,profile.owner.entry.raw._castingSource?.english,...expandedSpellClasses(profile.casting.entry.raw)].map(key).filter(Boolean);
  const source=key(profile.owner.entry.raw._castingSource?.source||profile.owner.entry.source),lookup=raw._spellClasses;
  // Expansion books often predate the 2024 lookup. Their class list remains usable
  // with either PHB class, while the spell's own source-qualified identity stays intact.
