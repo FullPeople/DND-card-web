@@ -161,6 +161,9 @@ jobs:
             commands: |
               npx playwright test --config playwright.followup231.config.ts
               npx playwright test --config playwright.followup-ui231.config.ts
+          - group: interface-284
+            commands: |
+              npx playwright test tests/e2e/authoring260.spec.ts tests/e2e/feedback-management.spec.ts tests/e2e/import192.spec.ts tests/e2e/palette258.spec.ts tests/e2e/ux259.spec.ts --project=chromium
     steps:
       - uses: actions/checkout@v6
         with:
