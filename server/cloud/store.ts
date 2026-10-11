@@ -37,6 +37,23 @@ export class CloudStore {
       CREATE TABLE IF NOT EXISTS qq_profiles(account_id TEXT PRIMARY KEY REFERENCES accounts(id),nickname TEXT NOT NULL,avatar TEXT NOT NULL);
       INSERT OR IGNORE INTO cloud_ids SELECT id FROM cards;
       INSERT OR IGNORE INTO cloud_ids SELECT id FROM temporary_cards;`);
+    // A separate directory keeps the legacy five-column card table compatible.
+    // Triggers also maintain summaries when a previous server writes a card.
+    this.transaction(()=>this.db.exec(`
+      CREATE TABLE IF NOT EXISTS card_directory(card_id TEXT PRIMARY KEY REFERENCES cards(id) ON DELETE CASCADE,owner_id TEXT NOT NULL REFERENCES accounts(id),revision INTEGER NOT NULL,name TEXT,edition TEXT,updated_at TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS card_directory_owner ON card_directory(owner_id);
+      CREATE TRIGGER IF NOT EXISTS card_directory_insert_v1 AFTER INSERT ON cards BEGIN
+        INSERT INTO card_directory(card_id,owner_id,revision,name,edition,updated_at) VALUES(NEW.id,NEW.owner_id,NEW.revision,json_extract(NEW.body,'$.name'),json_extract(NEW.body,'$.edition'),NEW.updated_at)
+        ON CONFLICT(card_id) DO UPDATE SET owner_id=excluded.owner_id,revision=excluded.revision,name=excluded.name,edition=excluded.edition,updated_at=excluded.updated_at;
+      END;
+      CREATE TRIGGER IF NOT EXISTS card_directory_update_v1 AFTER UPDATE ON cards BEGIN
+        INSERT INTO card_directory(card_id,owner_id,revision,name,edition,updated_at) VALUES(NEW.id,NEW.owner_id,NEW.revision,json_extract(NEW.body,'$.name'),json_extract(NEW.body,'$.edition'),NEW.updated_at)
+        ON CONFLICT(card_id) DO UPDATE SET owner_id=excluded.owner_id,revision=excluded.revision,name=excluded.name,edition=excluded.edition,updated_at=excluded.updated_at;
+      END;
+      INSERT OR IGNORE INTO card_directory(card_id,owner_id,revision,name,edition,updated_at)
+        SELECT id,owner_id,revision,json_extract(body,'$.name'),json_extract(body,'$.edition'),updated_at FROM cards
+        WHERE NOT EXISTS(SELECT 1 FROM card_directory WHERE card_id=cards.id);
+    `));
     this.db.prepare('INSERT OR IGNORE INTO cloud_settings VALUES(?,?)').run('ip_hash_secret',randomBytes(32).toString('hex'));
   }
   // Server-only boundary for a future identity provider. Never exposed by HTTP.
@@ -104,13 +121,13 @@ export class CloudStore {
     return {id:row.id,revision:row.revision,character:JSON.parse(row.body),updatedAt:row.updated_at,role,ownerAccountId:row.owner_id,ownerNickname:this.qqProfile(row.owner_id)?.nickname||'卡主',...(role==='owner'?{editors:[...this.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(id).map(row=>String(row.qq)),...this.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(id).map(row=>String(row.account_id))]}:{})};
   }
   summary(id:string,account:Account){
-    const row=this.db.prepare("SELECT id,owner_id,revision,json_extract(body,'$.name') name,json_extract(body,'$.edition') edition,updated_at FROM cards WHERE id=?").get(id);
+    const row=this.db.prepare('SELECT card_id id,owner_id,revision,name,edition,updated_at FROM card_directory WHERE card_id=?').get(id);
     const role=row&&this.role({id:String(row.id),owner_id:String(row.owner_id)},account);
     if(!row||!role)throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
     return {id:String(row.id),revision:Number(row.revision),name:String(row.name),edition:String(row.edition),updatedAt:String(row.updated_at),role};
   }
   list(account:Account){
-    const rows=this.db.prepare("SELECT DISTINCT c.id,c.owner_id,c.revision,json_extract(c.body,'$.name') name,json_extract(c.body,'$.edition') edition,c.updated_at FROM cards c LEFT JOIN editors e ON e.card_id=c.id LEFT JOIN account_editors ae ON ae.card_id=c.id WHERE c.owner_id=? OR ae.account_id=? OR (e.qq=? AND ? IS NOT NULL) ORDER BY c.updated_at DESC").all(account.id,account.id,account.qq,account.qq);
+    const rows=this.db.prepare('SELECT DISTINCT d.card_id id,d.owner_id,d.revision,d.name,d.edition,d.updated_at FROM card_directory d LEFT JOIN editors e ON e.card_id=d.card_id LEFT JOIN account_editors ae ON ae.card_id=d.card_id WHERE d.owner_id=? OR ae.account_id=? OR (e.qq=? AND ? IS NOT NULL) ORDER BY d.updated_at DESC').all(account.id,account.id,account.qq,account.qq);
     // Polling needs only a directory. Do not deserialize every five-page card
     // and embedded portrait merely to return names and revision numbers.
     return rows.map(row=>({id:String(row.id),revision:Number(row.revision),name:String(row.name),edition:String(row.edition),updatedAt:String(row.updated_at),role:this.role({id:String(row.id),owner_id:String(row.owner_id)},account)}));

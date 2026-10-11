@@ -15,6 +15,6 @@ test('cloud settings describe granted editors and refuse stale account or revisi
  const updated=await context.request.put('/api/cards/'+card.id,{headers,data:{revision:card.revision,character:{...card.character,name:'另一页的新版本'},confirmUpload:true}});expect(updated.status()).toBe(200);
  page.once('dialog',confirmation=>confirmation.accept());await dialog.getByRole('button',{name:'移除云端卡（本机保留）'}).click();await expect(dialog.getByRole('alert')).toContainText('版本已改变');expect((await context.request.get('/api/cards/'+card.id,{headers})).status()).toBe(200);
  // The visible old owner's controls cannot authorize a newly signed-in editor.
- await context.addCookies([{name:'dnd_cloud',value:f.editorSession.token,url:base+'/api/',httpOnly:true,sameSite:'Strict'}]);await dialog.getByRole('textbox',{name:'编辑者账号 ID'}).fill(f.owner.id);await dialog.getByRole('button',{name:'授予编辑权限'}).click();await expect(dialog.getByRole('alert')).toContainText('登录账号或上传浏览器已改变');
- const current=await(await context.request.get('/api/cards/'+card.id,{headers})).json();await context.request.delete('/api/cards/'+card.id,{headers,data:{revision:current.revision}});
+ await context.addCookies([{name:'dnd_cloud',value:f.editorSession.token,url:base+'/api/',httpOnly:true,sameSite:'Strict'}]);await dialog.getByRole('textbox',{name:'编辑者账号 ID'}).fill(f.owner.id);await dialog.getByRole('button',{name:'授予编辑权限'}).click();await expect(dialog).not.toBeVisible();await expect(page.getByRole('button',{name:'账号',exact:true})).toContainText('编辑者测试昵称');
+ const current=await(await context.request.get('/api/cards/'+card.id,{headers})).json();expect(current.editors).toEqual([f.editor.id]);await context.request.delete('/api/cards/'+card.id,{headers,data:{revision:current.revision}});
 });
