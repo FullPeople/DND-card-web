@@ -1,5 +1,5 @@
 import {afterEach,describe,expect,it} from 'vitest';
-import {createHash} from 'node:crypto';
+import {createHash,randomInt} from 'node:crypto';
 import {request as httpRequest} from 'node:http';
 import {CloudStore,createCloudServer} from '../server/cloud/server';
 import {newCharacter} from '../src/core/model';
@@ -8,7 +8,10 @@ afterEach(async()=>{for(const stop of cleanups.splice(0))await stop();});
 async function setup(options:{accountPrivate?:boolean;temporaryUpload?:boolean}={}){
   const store=new CloudStore(':memory:'),owner=store.provisionVerifiedAccount('verified:owner'),other=store.provisionVerifiedAccount('verified:other'),issued=store.issueVerifiedSession(owner.id),second=store.issueVerifiedSession(other.id);
   const origin='https://dnd.center',pluginOrigin='https://obr.dnd.center',server=createCloudServer(store,origin,{temporaryUpload:true,...options});
-  await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));cleanups.push(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));store.close();});
+  for(let attempt=0;;attempt++)try{
+    await new Promise<void>((resolve,reject)=>{const failed=(error:NodeJS.ErrnoException)=>{server.off('listening',ready);reject(error);};const ready=()=>{server.off('error',failed);resolve();};server.once('error',failed);server.once('listening',ready);server.listen(randomInt(49152,65536),'127.0.0.1');});break;
+  }catch(error){if(attempt>=19||!['EADDRINUSE','EACCES'].includes((error as NodeJS.ErrnoException).code||''))throw error;}
+  cleanups.push(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));store.close();});
   const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
   const headers=(s=issued)=>({Cookie:'dnd_cloud='+s.token,Origin:origin,'X-CSRF-Token':s.csrf,'Content-Type':'application/json'});
   const request=(path:string,method='GET',data?:unknown,h:Record<string,string>=headers())=>fetch(base+'/api/'+path,{method,headers:h,...data===undefined?{}:{body:JSON.stringify(data)}});
@@ -24,6 +27,13 @@ async function setup(options:{accountPrivate?:boolean;temporaryUpload?:boolean}=
   return {store,server,base,owner,other,issued,second,origin,pluginOrigin,headers,request,connect};
 }
 describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
+  it('polls unchanged room revisions and current permissions without decoding the full card',async()=>{
+    const s=await setup(),card=s.store.create(s.owner,newCharacter()),owner=await s.connect();s.store.grantAccount(card.id,s.owner,s.other.id);
+    const room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'lightweight-poll',confirmRoomSync:true},owner.h)).json();
+    s.store.read=()=>{throw Error('Unchanged polling must not load full card bodies');};
+    const response=await s.request('room-cards/'+room.id+'?since=1','GET',undefined,owner.h);expect(response.status).toBe(200);const value=await response.json();expect(value.unchanged).toBe(true);expect(value.editors).toContain(s.other.id);expect(value.character).toBeUndefined();expect(value.document).toBeUndefined();
+    const member={Origin:s.pluginOrigin,'X-Room-Capability':room.capability};const read=await s.request('room-cards/'+room.id+'?since=1','GET',undefined,member);expect(read.status).toBe(200);expect(await read.json()).toMatchObject({unchanged:true,owner:false,locked:true,write:false});expect(()=>s.store.summary(card.id,s.other)).not.toThrow();
+  });
   it('keeps locked room cards readonly for an ungranted DM, permits verified editors and immediately revokes them',async()=>{
     const s=await setup(),card=s.store.create(s.owner,newCharacter()),owner=await s.connect(),editor=await s.connect(s.second);
     const room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'permission-room',confirmRoomSync:true},owner.h)).json();
