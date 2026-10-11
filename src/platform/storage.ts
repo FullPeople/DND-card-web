@@ -3,6 +3,7 @@ import { openDB } from 'idb';
 import type { Character, Entry, Raw, RulePack } from '../core/model';
 import type {SiteSources} from '../core/siteSources';
 import {qqRoom,readRoom,saveRoom,roomState} from '../cloud/room';
+import {characterHash} from '../cloud/sync';
 export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[]; siteSources?:SiteSources; legacySourceProfiles?:Record<string,SiteSources> }
 let connection: ReturnType<typeof openDB> | undefined;
 const db = () => connection ??= openDB(qqRoom?'dnd-card-qq-room:'+qqRoom:automationDevelopment?'dnd-card-automation-choices-20261001':standalone?'dnd-card-standalone':'dnd-card-workspace', 1, { upgrade(db) { db.createObjectStore('documents'); db.createObjectStore('cache'); } });
@@ -17,6 +18,7 @@ export async function saveWorkspace(workspace: Workspace): Promise<void> {
   const previous = await tx.store.get('workspace');
   if (previous) await tx.store.put(previous, 'backup');
   await tx.store.put(workspace, 'workspace'); await tx.done;
+  if(standalone&&!qqRoom&&typeof BroadcastChannel!=='undefined'){const channel=new BroadcastChannel('dnd-card-workspace');channel.postMessage({saved:true});channel.close();}
   if(qqRoom){
     if(workspace.characters.length!==1||workspace.activeId!==roomState()?.character.id)throw Error('房间卡不能创建、替换或删除云端原卡。');
     const database=await db(),pending=await database.get('documents','room-pending') as {revision:number}|undefined,revision=pending?.revision??roomState()!.revision;
@@ -62,12 +64,13 @@ export async function loadCloudBindings():Promise<Record<string,CloudBinding>>{
 }
 export async function saveCloudBinding(localId:string,binding:CloudBinding){await (await db()).put('documents',binding,'cloud-binding:'+localId);}
 export async function stageCloudDraft(character:Character,binding:CloudBinding):Promise<string>{
- const id='cloud:'+binding.accountId+':'+binding.cloudId,database=await db(),tx=database.transaction('documents','readwrite');
+ const hash=await characterHash(character),id='cloud:'+binding.accountId+':'+binding.cloudId,database=await db(),tx=database.transaction('documents','readwrite');
  const workspace=await tx.store.get('workspace') as Workspace|undefined;
  // Reopening a cloud card always keeps its existing local draft and baseline.
  // A conflicting or revoked save must not be erased by opening the editor.
  if(!workspace?.characters.some(card=>card.id===id)&&!await tx.store.get('cloud-staged:'+id)){
   await tx.store.put({...structuredClone(character),id},'cloud-staged:'+id);await tx.store.put(binding,'cloud-binding:'+id);
+  await tx.store.put({binding,hash},'cloud-sync:'+id);
  }
  await tx.done;return id;
 }

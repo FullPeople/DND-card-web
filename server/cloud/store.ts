@@ -99,9 +99,17 @@ export class CloudStore {
     if(!role)throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
     return {id:row.id,revision:row.revision,character:JSON.parse(row.body),updatedAt:row.updated_at,role,ownerAccountId:row.owner_id,ownerNickname:this.qqProfile(row.owner_id)?.nickname||'卡主',...(role==='owner'?{editors:[...this.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(id).map(row=>String(row.qq)),...this.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(id).map(row=>String(row.account_id))]}:{})};
   }
+  summary(id:string,account:Account){
+    const row=this.db.prepare("SELECT id,owner_id,revision,json_extract(body,'$.name') name,json_extract(body,'$.edition') edition,updated_at FROM cards WHERE id=?").get(id);
+    const role=row&&this.role({id:String(row.id),owner_id:String(row.owner_id)},account);
+    if(!row||!role)throw new CloudError(404,'not_found','没有找到这张云端角色卡。');
+    return {id:String(row.id),revision:Number(row.revision),name:String(row.name),edition:String(row.edition),updatedAt:String(row.updated_at),role};
+  }
   list(account:Account){
-    const rows=this.db.prepare('SELECT DISTINCT c.id FROM cards c LEFT JOIN editors e ON e.card_id=c.id LEFT JOIN account_editors ae ON ae.card_id=c.id WHERE c.owner_id=? OR ae.account_id=? OR (e.qq=? AND ? IS NOT NULL) ORDER BY c.updated_at DESC').all(account.id,account.id,account.qq,account.qq);
-    return rows.map(row=>{const card=this.read(String(row.id),account);return {id:card.id,revision:card.revision,name:card.character.name,edition:card.character.edition,updatedAt:card.updatedAt,role:card.role};});
+    const rows=this.db.prepare("SELECT DISTINCT c.id,c.owner_id,c.revision,json_extract(c.body,'$.name') name,json_extract(c.body,'$.edition') edition,c.updated_at FROM cards c LEFT JOIN editors e ON e.card_id=c.id LEFT JOIN account_editors ae ON ae.card_id=c.id WHERE c.owner_id=? OR ae.account_id=? OR (e.qq=? AND ? IS NOT NULL) ORDER BY c.updated_at DESC").all(account.id,account.id,account.qq,account.qq);
+    // Polling needs only a directory. Do not deserialize every five-page card
+    // and embedded portrait merely to return names and revision numbers.
+    return rows.map(row=>({id:String(row.id),revision:Number(row.revision),name:String(row.name),edition:String(row.edition),updatedAt:String(row.updated_at),role:this.role({id:String(row.id),owner_id:String(row.owner_id)},account)}));
   }
   create(account:Account,character:unknown):CloudCard {
     this.checkBody(character);

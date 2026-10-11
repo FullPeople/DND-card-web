@@ -44,9 +44,11 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     return {isOwner,isEditor,account:{id:String(row.id),qq:row.qq===null?null:String(row.qq),extra_slots:Number(row.extra_slots)}};
   }
   function roomResult(g:Grant,isOwner:boolean,account:Session['account'],isEditor=false,since?:string|null){
+    const summary=store.summary(g.card_id,account);
+    const editors=isOwner?[...store.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(g.card_id).map(row=>String(row.qq)),...store.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(g.card_id).map(row=>String(row.account_id))]:undefined;
+    const info={id:g.id,cardId:g.card_id,room:g.room,name:summary.name,revision:summary.revision,locked:!!g.locked,owner:isOwner,editor:isEditor,ownerAccountId:account.id,ownerNickname:store.qqProfile(account.id)?.nickname||'卡主',editors,write:isOwner||isEditor||!g.locked};
+    if(since===String(summary.revision))return {...info,unchanged:true};
     const card=store.read(g.card_id,account);
-    const info={id:g.id,cardId:g.card_id,room:g.room,name:card.character.name,revision:card.revision,locked:!!g.locked,owner:isOwner,editor:isEditor,ownerAccountId:account.id,ownerNickname:store.qqProfile(account.id)?.nickname||'卡主',editors:isOwner?card.editors:undefined,write:isOwner||isEditor||!g.locked};
-    if(since===String(card.revision))return {...info,unchanged:true};
     const document=normalizeLegacyUpload(card.character);
     return {...info,character:card.character,document:{...document,_suiteRevision:card.revision}};
   }

@@ -14,6 +14,6 @@ describe('native Owlbear owner UI contract',()=>{
   expect(text).not.toContain('点击工具栏“分配玩家”');
  });
  it('retains the independent write guard on the edit mode switch',()=>{
-  expect(source('src/ui/App.tsx')).toContain('disabled={!automationRuntime||inWorkbench&&!wb.target?.write}');
+  expect(source('src/ui/App.tsx')).toContain('disabled={readOnly||!automationRuntime||inWorkbench&&!wb.target?.write}');
  });
 });
