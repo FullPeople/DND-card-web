@@ -1,11 +1,11 @@
 import {readFileSync} from 'node:fs';
 import {test,expect} from '@playwright/test';
-import {mockSource,suppressAnnouncement} from './fixtures';
+import {mockSource} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 import {exportCharacters} from '../../src/core/export';
 import {APP_VERSION} from '../../src/platform/announcement';
 
-test.beforeEach(async({page},info)=>{await mockSource(page,{suiteAnnouncement:info.title.startsWith('Suite announcement')});await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.paper')).toBeVisible();});
+test.beforeEach(async({page},info)=>{await mockSource(page,{suiteAnnouncement:info.title.startsWith('Suite announcement')});await page.goto('/');await expect(page.locator('.paper')).toBeVisible();});
 test('global edit switch, batch cards, unselected export, JSON import and DM review',async({page},info)=>{
  const toggle=page.getByRole('switch',{name:'编辑模式'});await toggle.click();await expect(page.locator('.toolbar-actions').getByRole('switch')).toHaveAttribute('aria-checked','true');
  expect(await toggle.evaluate(node=>node.getBoundingClientRect().right<=node.closest('.sheet-pane')!.getBoundingClientRect().right)).toBe(true);
