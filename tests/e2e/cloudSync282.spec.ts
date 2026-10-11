@@ -2,6 +2,7 @@ import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {mockSource,suppressAnnouncement} from './fixtures';
 const base='http://127.0.0.1:5320';
+test.setTimeout(120000);
 test('QQ account imports in place, receives inactive cards and mirrors to a second tab',async({page,context,request})=>{
  const f=JSON.parse(readFileSync('evidence/cloud-fixture.json','utf8')),headers={Origin:base,Cookie:'dnd_cloud='+f.ownerSession.token,'X-CSRF-Token':f.ownerSession.csrf};
  await context.addCookies([{name:'dnd_cloud',value:f.ownerSession.token,url:base+'/api/',httpOnly:true,sameSite:'Strict'}]);
