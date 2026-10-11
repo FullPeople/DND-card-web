@@ -21,6 +21,23 @@ export default function LibraryApp(){
   const account=session?.authenticated?session.account?.id:session?.uploadOwner?.id;
   const privateLibrary=session?.authenticated||session?.libraryMode==='account';
   const refreshGeneration=useRef(0);
+  const latestAccount=useRef(account);latestAccount.current=account;
+  useEffect(()=>{
+    let alive=true,flight=false;const poll=async()=>{
+      if(flight||document.visibilityState==='hidden'||!navigator.onLine)return;flight=true;const epoch=refreshGeneration.current;
+      try{const next=await cloudSession();if(!alive||epoch!==refreshGeneration.current)return;
+        const actor=next.authenticated?next.account?.id:next.uploadOwner?.id;
+        if(actor!==latestAccount.current){await refresh();return;}
+        if(!actor)return;
+        const rows=await cloudCards();if(!alive||epoch!==refreshGeneration.current)return;
+        const update=<T,>(before:T,after:T)=>JSON.stringify(before)===JSON.stringify(after)?before:after;
+        setSession(before=>update(before,{...next,slots:rows.slots}));setCards(before=>{const incoming=new Map(rows.cards.map(row=>[row.id,row])),ordered=before.flatMap(row=>{const current=incoming.get(row.id);incoming.delete(row.id);return current?[current]:[];});return update(before,[...ordered,...incoming.values()]);});setMine(before=>update(before,rows.mine||rows.cards.filter(row=>row.role)));setTemporary(before=>update(before,rows.temporary||[]));
+        setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);
+      }catch{}finally{flight=false;}
+    };
+    const timer=setInterval(()=>void poll(),5000);window.addEventListener('online',poll);
+    return()=>{alive=false;clearInterval(timer);window.removeEventListener('online',poll);};
+  },[]);
   const latestView=useRef(view);latestView.current=view;
   useEffect(()=>{if(!sidebarOpen)return;const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setSidebarOpen(false);};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[sidebarOpen]);
   async function refreshLocal(){
