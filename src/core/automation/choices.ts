@@ -33,6 +33,8 @@ function resolve(c:Character,owner:Entry,ref:string,kind:string,catalog:Entry[])
 export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
  if(!automationEnabled(c))return [];
  const out:SheetChoice[]=[],known=[...c.selections.map(s=>s.entry),...catalog];
+ let skillEntries:Entry[]|undefined;
+ const findSkill=(value:string)=>(skillEntries??=known.filter(entry=>entry.kind==='rule'&&entry.raw._category==='skill'&&entry.source===(c.edition==='2024'?'XPHB':'PHB'))).find(entry=>[entry.name,entry.english,entry.raw.ENG_name].some(name=>typeof name==='string'&&skillKey(name)===value));
  for(const row of c.selections){
   const raw=row.entry.raw,restricted=!selectionActive(c,row);
   const push=(path:string,label:string,count:number,options:ChoiceOption[],channel:SheetChoice['channel'],equipmentIndex?:number)=>{
@@ -62,7 +64,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
     const values=choose?.from??(field==='skills'?Object.keys(SKILLS):[...new Set(known.filter(e=>field==='languages'?e.raw._category==='language':e.kind==='item'&&(e.raw.tool||['AT','T','INS','GS'].includes(String(e.raw.type||'').split('|')[0]))).map(e=>e.id))]);
     const options=(values||[]).map((v:string)=>{
      const value=field==='skills'?skillKey(v):v,label=SKILLS[value]?.name||known.find(e=>e.id===v)?.name||v;
-     const found=field==='skills'?known.find(e=>e.kind==='rule'&&e.raw._category==='skill'&&e.source===(c.edition==='2024'?'XPHB':'PHB')&&[e.name,e.english,e.raw.ENG_name].some(n=>typeof n==='string'&&skillKey(n)===value)):known.find(e=>e.id===v)||known.find(e=>e.source===row.entry.source&&[e.name,e.english].some(n=>n.toLowerCase()===label.toLowerCase()));
+     const found=field==='skills'?findSkill(value):known.find(e=>e.id===v)||known.find(e=>e.source===row.entry.source&&[e.name,e.english].some(n=>n.toLowerCase()===label.toLowerCase()));
      return {value,label,entry:found||concept(row.entry,value,label,[`${label}熟练：相关检定加入熟练加值；专精及其他修正另行计算。`]),unavailable:field==='tools'&&found&&!selectionAllowed(c,found)?'此选项来源或版本当前不可用，已有记录保留。':undefined};
     });
     push(`${channel}:${index}`,`${row.entry.kind==='class'?'起始':''}${label}`,count,options,channel);

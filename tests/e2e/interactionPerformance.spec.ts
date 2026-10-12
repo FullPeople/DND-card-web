@@ -1,5 +1,5 @@
 import {test,expect,type Page,type Locator,type CDPSession} from '@playwright/test';
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,copyFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 import {mockSource,suppressAnnouncement} from './fixtures';
@@ -69,6 +69,31 @@ test('record bounded interaction samples using disposable cards and accounts',as
   if(PerformanceObserver.supportedEntryTypes.includes('event'))new PerformanceObserver(list=>{for(const e of list.getEntries() as PerformanceEventTiming[]){if(row.eventTimings.length===1000)row.eventTimings.shift();row.eventTimings.push({name:e.name,at:e.startTime,inputDelayMs:e.processingStart-e.startTime,processingMs:e.processingEnd-e.processingStart,durationMs:e.duration,interactionId:e.interactionId});}}).observe({type:'event',durationThreshold:16} as PerformanceObserverInit);
   const observer=new MutationObserver(()=>{if(row.paperMs===null&&document.querySelector('.paper'))row.paperMs=performance.now();if(row.catalogMs===null&&document.querySelector('.wiki-header-actions button[title="重新检查上游资料"]:not([disabled])')){row.catalogMs=performance.now();observer.disconnect();}});observer.observe(document,{subtree:true,childList:true,attributes:true});
  });
+ if(process.env.PERF_CAPTURE_CATALOG==='1')await context.addInitScript(()=>{
+  const report={cacheReads:[] as any[],workerJobs:[] as any[],boundary:'Read elapsed time and main-thread send cost; worker elapsed includes queueing and delivery, not CPU time.'};
+  Object.defineProperty(window,'__catalogDiagnostics',{value:report});
+  const cacheGet=IDBObjectStore.prototype.get;
+  IDBObjectStore.prototype.get=function(key){
+   const started=performance.now(),request=cacheGet.call(this,key);
+   if(this.name==='cache')request.addEventListener('success',()=>{if(report.cacheReads.length<1000)report.cacheReads.push({key:String(key),started,elapsedMs:performance.now()-started});},{once:true});
+   return request;
+  };
+  const jobs=new WeakMap<Worker,Map<number,any>>(),send=Worker.prototype.postMessage;
+  (Worker.prototype as any).postMessage=function(this:Worker,...args:any[]){
+   const data=args[0];let queue=jobs.get(this);
+   if(!queue){queue=new Map();jobs.set(this,queue);this.addEventListener('message',event=>{
+    const result=event.data,job=queue!.get(result?.id);if(!job)return;
+    job.outputCount+=Array.isArray(result.entries)?result.entries.length:0;
+    if(job.firstReplyMs===null)job.firstReplyMs=performance.now()-job.started;
+    if(!result.chunk){job.elapsedMs=performance.now()-job.started;job.failed=!!result.error;queue!.delete(result.id);if(report.workerJobs.length<1000)report.workerJobs.push(job);}
+   });}
+   const measured=typeof data?.id==='number'&&data.body&&typeof data.body==='object';
+   const job=measured?{id:data.id,started:performance.now(),operation:data.operation||'normalize',prepare:!!data.prepare,inputCounts:Object.fromEntries(Object.entries(data.body).filter(([,value])=>Array.isArray(value)).map(([key,value])=>[key,(value as any[]).length])),outputCount:0,firstReplyMs:null,sendMs:0}:undefined;
+   if(job)queue.set(data.id,job);
+   const value=send.apply(this,args as any);if(job)job.sendMs=performance.now()-job.started;return value;
+  };
+  window.addEventListener('DOMContentLoaded',()=>{(window as any).__startupSample.catalogDiagnostics=report;},{once:true});
+ });
  if(corpusRoot){
   const indexBytes=readFileSync(resolve(corpusRoot,'index.json')),index=JSON.parse(indexBytes.toString()),bodies=new Map<string,string>(),paths=new Map<string,string>();
   for(const [ordinal,row] of index.rows.entries()){const body=JSON.parse(readFileSync(resolve(corpusRoot,row.path),'utf8')),json=JSON.stringify(body);expect(createHash('sha256').update(json).digest('hex'),row.url).toBe(row.sha256);bodies.set(row.url,json);paths.set(row.url,'/corpus/'+ordinal);}
@@ -103,6 +128,8 @@ test('record bounded interaction samples using disposable cards and accounts',as
  }
  if(process.env.PERF_WARM_RELOAD==='1'){
   await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled({timeout:90000});coldStartup=await page.evaluate(()=>(window as any).__startupSample);
+  if(profiler&&!profileInteractions){await stopProfiler();copyFileSync(output+'.cpuprofile',output+'.cold.cpuprofile');}
+  if(process.env.PERF_CAPTURE_CPU==='1'&&!profileInteractions){profiler=await context.newCDPSession(page);await profiler.send('Profiler.enable');await profiler.send('Profiler.start');}
   await page.reload();await expect(page.locator('.paper')).toBeVisible();await expect(page.getByRole('button',{name:'账号',exact:true})).toBeVisible();
   if(process.env.PERF_INTERACT_EARLY!=='1')await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled({timeout:90000});
  }
