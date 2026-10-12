@@ -44,6 +44,7 @@ export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): En
 }
 export {resolveEntryReference as resolveReference} from '../core/entryReferences';
 export function normalizeCatalogData(body:Raw,revision:string,packId='kiwee',operation:CatalogOperation='normalize'):Entry[]{
+ if(operation==='homebrew')return normalizeData(homebrewBody(body),revision,packId);
  if(operation==='monsters'){
   const groups=expandCopies(body.legendaryGroup||[]),templates=expandCopies(body.monsterTemplate||[]);
   const expanded=expandCopies(body.monster||[],templates).map(raw=>{const group=raw.legendaryGroup&&groups.find(g=>[g.name,g.ENG_name].includes(raw.legendaryGroup.name)&&g.source===raw.legendaryGroup.source);return group?{...raw,_legendaryGroup:group}:raw;});
@@ -84,7 +85,7 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
   base = base.replace(/\/$/, '');
   const normalizer=catalogNormalizer(signal,normalizeCatalogData);
   const transport=catalogTransport(signal),retry=new Set(retryKeys);
-  const read=(path:string,source=base,prepare=false)=>fetchJson(source,path,signal,refresh,transport,retry,prepare?normalizer.prepare:undefined);
+  const read=(path:string,source=base,prepare=true)=>fetchJson(source,path,signal,refresh,transport,retry,prepare?(body,revision)=>normalizer.prepare(body,revision,source===DEFAULT_HOMEBREW?'kiwee-homebrew':undefined,source===DEFAULT_HOMEBREW?'homebrew':'normalize'):undefined);
   try {
   onBatch(EQUIPMENT_TRAINING_ENTRIES);
   const paths = ['data/bestiary/template.json','data/bestiary/legendarygroups.json','data/generated/gendata-variantrules.json', 'data/magicvariants.json', 'data/charcreationoptions.json', 'data/rewards.json', 'data/psionics.json', 'data/deities.json', 'data/cultsboons.json', 'data/bastions.json', 'data/tables.json', 'data/generated/gendata-tables.json', 'data/races.json', 'data/backgrounds.json', 'data/feats.json', 'data/items-base.json', 'data/items.json', 'data/optionalfeatures.json', 'data/conditionsdiseases.json', 'data/books.json', 'data/adventures.json', 'data/variantrules.json', 'data/actions.json', 'data/skills.json', 'data/senses.json', 'data/languages.json'];
@@ -173,7 +174,7 @@ export async function loadCatalog(onBatch: (entries: Entry[]) => void, onProgres
         if(signal.aborted)return;if(result.cached)progress.cached++;if(result.warning)failed(encodedPath,path,result.warning,DEFAULT_HOMEBREW);
         onSources?.(homebrewMetadata(result.body));
         const body=homebrewBody(result.body);
-        onBatch(await normalizer.normalize(body,result.revision,'kiwee-homebrew'));
+        onBatch(result.entries||await normalizer.normalize(body,result.revision,'kiwee-homebrew'));
         if(body.magicvariant?.length&&body.baseitem?.length)onBatch(await normalizer.normalize(body,result.revision,'kiwee-homebrew','magicItems'));
       }catch(error){if(signal.aborted || error instanceof CatalogPausedError)return;failed(path.split('/').map(encodeURIComponent).join('/'),path,error,DEFAULT_HOMEBREW);}
       progress.done++;progress.label=path;publish();

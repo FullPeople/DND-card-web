@@ -1,4 +1,5 @@
 import './loadingPanel.css';
+import './announcement.css';
 import {legacyRecoveryIds} from '../platform/workspaceNamespace';
 import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock} from '../cloud/room';
 import {localGm} from '../cloud/localRights';
@@ -118,7 +119,7 @@ import type {SheetCaptureOptions} from '../platform/sheetImage';
 
 
 
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionEffectsAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
@@ -167,6 +168,11 @@ function Box({ label, children, className = '', hint }: { label: string; childre
 }
 function RawDetails({entry}:{entry:Entry}){const [open,setOpen]=useState(false);return <details className="raw-details" onToggle={e=>setOpen(e.currentTarget.open)}><summary>数据与追溯</summary>{open&&<><dl><dt>条目身份</dt><dd>{entry.id}</dd><dt>资料修订</dt><dd>{entry.revision}</dd></dl><pre>{JSON.stringify(entry.raw,null,2)}</pre></>}</details>;}
 function PanelLoading({label,sheet=false}:{label:string;sheet?:boolean}){return <div className={`panel-loading${sheet?' sheet-details-loading':''}`} role="status"><p>{label}</p><div className="panel-loading-lines" aria-hidden="true"><i/><i/><i/></div></div>;}
+function AnnouncementLoading({mode}:{mode:'standalone'|'suite'}){
+ const {t}=useUiLanguage(),ref=useRef<HTMLDialogElement>(null);
+ useLayoutEffect(()=>{const node=ref.current!;node.showModal();return()=>node.close();},[]);
+ return <dialog className="announcement" ref={ref} aria-labelledby="announcement-title" aria-busy="true" onCancel={event=>event.preventDefault()}><div className="announcement-panel"><header className="announcement-head"><h2 id="announcement-title">{t(mode==='suite'?'welcomeSuite':'welcomeSite')}</h2><p className="announcement-version">{t('version',{version:announcementVersionFor(mode)})}</p></header><div className="announcement-body"><PanelLoading label="正在加载公告…"/></div><footer className="announcement-foot"><button className="primary" disabled>{t('gotIt')}</button></footer></div></dialog>;
+}
 function Dialog({ title, icon, subtitle, children, close }: { title: string; icon?: ReactNode; subtitle?: string; children: ReactNode; close: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => { ref.current?.showModal(); }, []);
@@ -529,11 +535,11 @@ export default function App() {
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e));
-        if(performance.now()-lastPublish>500){lastPublish=performance.now();setEntries([...catalogRef.current.values()]);}
-      }, setProgress, controller.signal, refresh, DEFAULT_SOURCE, sourceDisplay.merge,retryKeys);
-      if(!controller.signal.aborted)setEntries([...catalogRef.current.values()]);
+        if(performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
+      }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
+      if(!controller.signal.aborted)startTransition(()=>setEntries([...catalogRef.current.values()]));
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
-    finally { if (!controller.signal.aborted) setLoading(false); }
+    finally { if (!controller.signal.aborted) startTransition(()=>setLoading(false)); }
   }
   const [wikiUiError,setWikiUiError]=useState('');
   const [wikiUi,setWikiUi]=useState<typeof import('./WikiUi')>();
@@ -1039,7 +1045,7 @@ export default function App() {
       </section></>}
     </main>
       <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)} disabledReason={readOnlyReason||(inWorkbench?wb.online?'卡主未授予当前玩家编辑这张卡的权限。':'房间连接尚未恢复，暂时无法修改角色卡配色。':undefined)}/>
-    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<Suspense fallback={<p role="status">正在加载公告…</p>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
+    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<Suspense fallback={<AnnouncementLoading mode={inWorkbench?'suite':'standalone'}/>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
     {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
       <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<PanelLoading label="正在加载面板…"/>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}

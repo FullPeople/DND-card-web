@@ -20,6 +20,30 @@ describe('catalog preparation preserves source identity',()=>{
   try{const result=await processor.prepare(body,'"source-etag"');expect(result.revision).toBe('"source-etag"');expect(result.entries).toEqual(normalizeCatalogData(body,'"source-etag"'));}
   finally{processor.dispose();}
  });
+ it('hashes the original homebrew snapshot while preserving inherited edition and source metadata',async()=>{
+  vi.stubGlobal('Worker',undefined);
+  const source={_meta:{edition:'one'},feat:body.feat},original=structuredClone(source),hash=createHash('sha256').update(JSON.stringify(source)).digest('hex');
+  const processor=catalogNormalizer(new AbortController().signal,normalizeCatalogData);
+  try{const result=await processor.prepare(source,null,'kiwee-homebrew','homebrew');expect(result.revision).toBe(hash);expect(source).toEqual(original);expect(result.entries[0]).toMatchObject({packId:'kiwee-homebrew',edition:'2024',raw:{_homebrew:true}});}
+  finally{processor.dispose();}
+ });
+ it('interleaved worker chunks remain private to each job and do not publish partial results',async()=>{
+  let worker:ChunkWorker;
+  class ChunkWorker{
+   onmessage?:({data}:{data:unknown})=>void;requests:{id:number}[]=[];
+   constructor(){worker=this;}
+   postMessage(request:{id:number}){this.requests.push(request);}
+   emit(data:unknown){this.onmessage?.({data});}
+   terminate(){}
+  }
+  vi.stubGlobal('Worker',ChunkWorker);
+  const processor=catalogNormalizer(new AbortController().signal,normalizeCatalogData),a=normalizeCatalogData(body,'a'),b=normalizeCatalogData(body,'b','kiwee-homebrew');
+  const first=processor.prepare(body,'a'),second=processor.normalize(body,'b','kiwee-homebrew'),completed=vi.fn();void first.then(completed);
+  const [one,two]=worker!.requests;
+  try{worker!.emit({id:two.id,chunk:true,entries:b});worker!.emit({id:one.id,chunk:true,entries:a});await Promise.resolve();expect(completed).not.toHaveBeenCalled();
+   worker!.emit({id:two.id,revision:'b',entries:[]});expect(await second).toEqual(b);worker!.emit({id:one.id,revision:'a',entries:[]});expect(await first).toEqual({revision:'a',entries:a});
+  }finally{processor.dispose();}
+ });
  it('keeps the original network snapshot intact when class normalization annotates its copy',async()=>{
   vi.stubGlobal('Worker',undefined);
   const source={class:[{name:'Fixture class',source:'XPHB',edition:'one'}],classFeature:[{name:'Fixture feature',className:'Fixture class',classSource:'XPHB',source:'XPHB',level:1}]};

@@ -10,6 +10,8 @@ async function open(page:Page){
  await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete',{timeout:12000});
  await expect(page.locator('.paper')).toBeVisible();
  await expect(dialog(page)).toBeVisible();
+ // The visible loading frame precedes the actual notice body.
+ await expect(dialog(page).locator('.announcement-faq details')).toHaveCount(4);
 }
 async function finger(page:Page){
  const cdp=await page.context().newCDPSession(page);

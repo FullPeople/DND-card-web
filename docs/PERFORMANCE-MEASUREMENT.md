@@ -12,7 +12,11 @@
 | `PERF_SAMPLES` | 热切换次数，默认 30；1 仅用于工具自检，最多 100 |
 | `PERF_CORPUS_ROOT` | 使用已有公开资料快照目录；逐份验证内容哈希，记录可用文件、实际回应文件、缺失请求和索引哈希 |
 | `PERF_CONSUMER_ADAPTER` | 本轮真实消费者适配器，用于生成复杂测试卡；须保留其源码与核对身份 |
-| `PERF_CARD_COUNT` | 1–300 张隔离测试卡，要求已有快照和适配器；依次扩大，不能直接跳到最大档 |
+| `PERF_CARD_COUNT` | 要求已有快照和适配器；当前按 1 张、4 张复现，以 10 张为基础验收，暂停更大规模 |
+| `PERF_BROWSER` | 本机默认使用安装的 Chrome；记录实际版本，独立运行环境，未接管用户当前浏览器 |
+| `PERF_CARD_KIND` | `mixed`、`typical`、`large`；1 张卡复现应包含典型或复杂卡，不能只测空白卡 |
+| `PERF_CLOUD_ACTIVE` | 为 1 时通过原生云端按钮上传当前测试卡，实际进入隔离后端的保存回执和同步流程；账号及网络仍为隔离条件 |
+| `PERF_EXTENDED_CONTROLS` | 为 1 时额外记录资料版本与简写按钮切换，确认可见选中态 |
 | `PERF_INTERACT_EARLY` | 为 1 时在资料尚未完成加载时开始操作，逐样本记录是否仍在加载 |
 | `PERF_PROFILE` | `normal`、`standard150`、`network150`、`network300`、`cpu4`；分别为回环网络、150 ms／10 Mbps、150 ms／1 Mbps、300 ms／1 Mbps 和 4 倍 CPU 限速 |
 | `PERF_SOURCE_ORIGIN` | 已校准的本机 HTTPS 资料服务地址；网络测量必须设置，禁止用直接回应冒充限速下载 |
