@@ -1,7 +1,10 @@
 import {useCallback,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
 import type {Character} from '../core/model';
 import {cloudCards,cloudMutation,cloudSession,readCloudCard,subscribeCloudSessionChanges,type CloudSession,type CloudCard} from './api';
+import {subscribeAccountChanges} from './accountChanges';
+import {queuedRefresh} from './queuedRefresh';
 import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
+import {readPersistedCharacter} from './persistedCharacter';
 import {UploadWarning} from './UploadWarning';
 import './cloudSave.css';
 import {QQLogin} from './QQLogin';
@@ -12,6 +15,7 @@ import {CheckIcon,CloudUploadIcon,CopyIcon,SheetIcon,SpinnerIcon,WarningIcon} fr
 
 
 export function CloudSaveProvider({enabled,disabled,characters,readCharacter,receive,importCard,access,children,auto=true}:{enabled:boolean;disabled:boolean;auto?:boolean;characters:Character[];readCharacter:(id:string)=>Promise<Character>;receive?:(id:string,card:Character,hash:string)=>Promise<boolean>;importCard?:(card:CloudCard,account:string)=>Promise<void>;access?:(rights:Record<string,string|undefined>)=>void;children:ReactNode}){
+ const directoryRefresh=useRef<()=>Promise<void>>(()=>Promise.resolve());
  const [states,setStates]=useState<Record<string,SyncState>>({}),[target,setTarget]=useState<{id:string;name:string;account?:string;temporary?:boolean;error?:string}>(),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false);
  const [session,setSession]=useState<CloudSession>();
  const sessionEpoch=useRef(0);
@@ -23,16 +27,15 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
   if(latest.current.disabled)throw Error('当前标签页只读，本机草稿保留。');
   // A new edit can extend App's local save queue while the first read waits.
   // Read again until the previously observed content has also been persisted.
-  let before=await latest.current.readCharacter(id);
-  for(;;){const after=await latest.current.readCharacter(id);if(await characterHash(before)===await characterHash(after))return before;before=after;}
+  return readPersistedCharacter(()=>latest.current.readCharacter(id),characterHash);
  },receive:(...args)=>latest.current.receive?.(...args)||Promise.resolve(false),readReceipt:readSyncReceipt,writeReceipt:writeSyncReceipt,session:cloudSession,read:readCloudCard,directory:cloudCards,mutation:cloudMutation,hash:characterHash,lock:cloudCardLock,changed:(id,state)=>{terminal.current[id]=state;if(!disposed.current)setStates(old=>({...old,[id]:state}));}});
  useEffect(()=>{disposed.current=false;return()=>{disposed.current=true;};},[]);
  useEffect(()=>{if(!enabled)return;const refresh=()=>{if(document.visibilityState==='visible')void refreshSession().catch(()=>{});};refresh();window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);return()=>{window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};},[enabled,refreshSession]);
  useEffect(()=>{
   if(!enabled)return;
-  let alive=true,flight=false,refreshEpoch=0;const refresh=async()=>{
-   if(flight||document.visibilityState==='hidden'||!navigator.onLine)return;flight=true;
-   const epoch=++refreshEpoch;
+  let alive=true,refreshEpoch=0;const refreshQueue=queuedRefresh(async()=>{
+   if(!alive||document.visibilityState==='hidden'||!navigator.onLine)return;
+   const epoch=refreshEpoch;
    try{
     const value=await cloudSession();if(!alive||epoch!==refreshEpoch)return;setSession(value);
     const receipts=await readSyncReceipts(latest.current.characters.map(card=>card.id));
@@ -52,13 +55,19 @@ export function CloudSaveProvider({enabled,disabled,characters,readCharacter,rec
     for(const [id,receipt] of bindings){if(!alive||epoch!==refreshEpoch)return;const row=directory.get(receipt.binding!.cloudId);
      if(!latest.current.disabled&&!rights[id]&&row&&(!receipt.hash||row.revision!==receipt.binding!.revision))await engine.current!.pull(id);
     }
-   }catch{}finally{if(epoch===refreshEpoch)flight=false;}
-  };
-  void refresh();const timer=setInterval(()=>void refresh(),5000);
-  const sessionChanged=()=>{refreshEpoch++;flight=false;const checking=Object.fromEntries(Object.keys(rightsRef.current).map(id=>[id,'正在核对 QQ 账号和云端卡权限，暂时无法修改。']));rightsRef.current=checking;latest.current.access?.(checking);void refresh();},stop=subscribeCloudSessionChanges(sessionChanged);
+   }catch(error){throw error;}
+  });
+  directoryRefresh.current=refreshQueue.request;
+  const refresh=()=>{void refreshQueue.request().catch(()=>{});};
+  refresh();const timer=setInterval(refresh,5000);
+  const sessionChanged=()=>{refreshEpoch++;const checking=Object.fromEntries(Object.keys(rightsRef.current).map(id=>[id,'正在核对 QQ 账号和云端卡权限，暂时无法修改。']));rightsRef.current=checking;latest.current.access?.(checking);refresh();},stop=subscribeCloudSessionChanges(sessionChanged);
   window.addEventListener('focus',refresh);window.addEventListener('online',refresh);
-  return()=>{alive=false;stop();clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);};
+  return()=>{alive=false;refreshQueue.stop();directoryRefresh.current=()=>Promise.resolve();stop();clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);};
  },[enabled]);
+ useEffect(()=>{
+  const account=session?.authenticated?session.account?.id:undefined;if(!enabled||!account)return;
+  return subscribeAccountChanges(account,()=>directoryRefresh.current());
+ },[enabled,session?.authenticated,session?.account?.id]);
  useEffect(()=>{
   if(!enabled)return;
   let alive=true,refreshEpoch=0,pendingDeadline:ReturnType<typeof setTimeout>|undefined;

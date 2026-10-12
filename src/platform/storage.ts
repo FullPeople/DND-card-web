@@ -2,7 +2,7 @@ import {standalone} from './buildMode';
 import { openDB } from 'idb';
 import type { Character, Entry, Raw, RulePack } from '../core/model';
 import type {SiteSources} from '../core/siteSources';
-import {qqRoom,readRoom,saveRoom,roomState} from '../cloud/room';
+import {qqRoom,readRoom,saveRoom,roomState,beginRoomWrite,roomScopeKey,roomWriteReceipt,roomChangeScope} from '../cloud/room';
 import {characterHash} from '../cloud/sync';
 import {workspaceIdentity} from './workspaceIdentity';
 export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[]; siteSources?:SiteSources; legacySourceProfiles?:Record<string,SiteSources> }
@@ -13,24 +13,32 @@ const db = () => connection ??= openWorkspace(workspaceIdentity.database);
 const cacheDb=()=>workspaceIdentity.cacheDatabase===workspaceIdentity.database?db():cacheConnection??=openWorkspace(workspaceIdentity.cacheDatabase);
 export async function loadWorkspace(): Promise<Workspace | undefined> {
   if(!qqRoom)return (await db()).get('documents','workspace');
-  const remote=await readRoom(),database=await db(),draft=await database.get('documents','room-pending') as {workspace:Workspace;revision:number}|undefined;
-  if(draft)return draft.workspace;
+  const remote=await readRoom(),database=await db(),scopeKey=await roomScopeKey(),draft=await database.get('documents','room-pending') as {workspace:Workspace;revision:number;scopeKey?:string}|undefined;
+  if(draft&&(!draft.scopeKey||draft.scopeKey===scopeKey))return draft.workspace;
   return {schemaVersion:1,characters:[remote.character],activeId:remote.character.id,packs:remote.character.rulePacks||[]};
 }
 export async function saveWorkspace(workspace: Workspace): Promise<void> {
+  const operation=qqRoom?beginRoomWrite(roomState()?.revision??0):undefined;
   const database = await db(); const tx = database.transaction('documents', 'readwrite');
   const previous = await tx.store.get('workspace');
   if (previous) await tx.store.put(previous, 'backup');
   await tx.store.put(workspace, 'workspace'); await tx.done;
   if(standalone&&!qqRoom&&typeof BroadcastChannel!=='undefined'){const channel=new BroadcastChannel('dnd-card-workspace');channel.postMessage({saved:true});channel.close();}
   if(qqRoom){
-    if(workspace.characters.length!==1||workspace.activeId!==roomState()?.character.id)throw Error('房间卡不能创建、替换或删除云端原卡。');
-    const database=await db(),pending=await database.get('documents','room-pending') as {revision:number}|undefined,revision=pending?.revision??roomState()!.revision;
-    await database.put('documents',{workspace,revision},'room-pending');
-    await saveRoom(workspace.characters[0],revision);await database.delete('documents','room-pending');
+    if(workspace.characters.length!==1||workspace.activeId!==operation!.characterId)throw Error('房间卡不能创建、替换或删除云端原卡。');
+    const database=await db(),scopeKey=await roomScopeKey(operation!.scope),pending=await database.get('documents','room-pending') as {revision:number;scopeKey?:string;operationId?:string;workspace:Workspace}|undefined;
+    if(pending&&!pending.scopeKey)throw Error('旧房间草稿尚未核对，请先导出草稿并核对云端版本。');
+    if(pending&&pending.scopeKey!==scopeKey)await database.put('documents',pending,'room-recovery:'+crypto.randomUUID());
+    if(pending?.scopeKey===scopeKey)operation!.revision=pending.revision;
+    await database.put('documents',{workspace,revision:operation!.revision,scopeKey,operationId:operation!.id},'room-pending');
+    try{await saveRoom(workspace.characters[0],operation!.revision,operation);}finally{
+      const receipt=await roomWriteReceipt(operation!);await database.put('documents',receipt,'room-write:'+operation!.id);
+      const tx=database.transaction('documents','readwrite'),latest=await tx.store.get('room-pending') as {operationId?:string;workspace:Workspace}|undefined;
+      if(latest?.operationId===operation!.id){if(operation!.phase==='confirmed'&&operation!.scope===roomChangeScope())await tx.store.delete('room-pending');else await tx.store.put({...latest,receipt},'room-pending');}await tx.done;
+    }
   }
 }
-export async function hasRoomDraft(){return qqRoom?!!await (await db()).get('documents','room-pending'):false;}
+export async function hasRoomDraft(){if(!qqRoom)return false;const scopeKey=await roomScopeKey(),draft=await (await db()).get('documents','room-pending');return !!draft&&(!draft.scopeKey||draft.scopeKey===scopeKey);}
 export async function archiveRoomDraft(){if(!qqRoom)return;const database=await db(),tx=database.transaction('documents','readwrite'),draft=await tx.store.get('room-pending');if(draft)await tx.store.put(draft,'room-recovery:'+Date.now());await tx.store.delete('room-pending');await tx.done;}
 export async function restoreBackup(): Promise<Workspace | undefined> { return (await db()).get('documents', 'backup'); }
 export async function readCache(key: string): Promise<{ body: Raw; revision: string } | undefined> { return (await cacheDb()).get('cache', key); }

@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:'cloudChangeNotifications.spec.ts',workers:1,timeout:120000,reporter:'list',outputDir:'test-results-cloud-notifications',use:{baseURL:'http://127.0.0.1:5320',channel:process.env.CI?undefined:'chrome',viewport:{width:1440,height:960},trace:'retain-on-failure'},webServer:{command:'node tools/cloudPreview.mjs',url:'http://127.0.0.1:5320',reuseExistingServer:false}});
