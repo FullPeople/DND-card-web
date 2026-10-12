@@ -7,10 +7,10 @@ export interface IPSlots {scope:'ip';total:number;used:number}
 export interface CloudSession {authenticated:boolean;qqLogin:'pending'|'ready';libraryMode?:'account'|'temporary';temporaryUpload?:boolean;uploadOwner?:{id:string};account?:{id:string;qq:string|null;nickname?:string;avatar?:string};csrf?:string;slots?:Slots|IPSlots}
 export interface Directory {cards:CardSummary[];mine?:CardSummary[];temporary?:CardSummary[];slots:Slots|IPSlots;accountId?:string;total?:number;offset?:number;hasMore?:boolean}
 export class CloudRequestError extends Error {constructor(public status:number,public code:string,message:string){super(message);}}
-async function request<T>(path:string,method='GET',value?:unknown,csrf?:string):Promise<T>{
+async function request<T>(path:string,method='GET',value?:unknown,csrf?:string,parentSignal?:AbortSignal):Promise<T>{
   // The library build targets Safari 15.4, which lacks AbortSignal.timeout; the
   // shared helper keeps the deadline alive through body consumption everywhere.
-  return withRequestTimeout(30_000,undefined,async signal=>{
+  return withRequestTimeout(30_000,parentSignal,async signal=>{
     const response=await fetch('/api/'+path,{method,credentials:'same-origin',cache:'no-store',signal,headers:{...(value===undefined?{}:{'Content-Type':'application/json'}),...(csrf?{'X-CSRF-Token':csrf}:{})},...(value===undefined?{}:{body:JSON.stringify(value)})});
     const data=await response.json();if(!response.ok)throw new CloudRequestError(response.status,data.error||'request_failed',data.message||'云端操作失败，本机草稿保留。');return data as T;
   });
@@ -45,6 +45,7 @@ export function cloudSession({fresh=false}:{fresh?:boolean}={}):Promise<CloudSes
 }
 export async function cloudCards(offset=0,expectedAccountId?:string){const rows=await request<Directory>('cards?offset='+offset);if(expectedAccountId&&rows.accountId&&rows.accountId!==expectedAccountId){announceCloudSessionChange();throw new CloudRequestError(401,'account_changed','账号已改变，正在重新读取当前账号的卡库。');}return rows;}
 export const readCloudCard=(id:string)=>request<CloudCard>('cards/'+encodeURIComponent(id));
+export const cloudChangeNotice=(cursor:string|undefined,signal:AbortSignal)=>request<{accountId:string|null;cursor:string;changed:boolean}>('changes','POST',{cursor},undefined,signal);
 // Re-read the authoritative session before every mutation. A tab from a former
 // account must never save its pending operation under a newly signed-in account.
 export async function cloudMutation<T>(accountId:string,path:string,method:string,value?:unknown){

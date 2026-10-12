@@ -1,7 +1,9 @@
 import './loadingPanel.css';
 import './announcement.css';
 import {legacyRecoveryIds} from '../platform/workspaceNamespace';
-import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock} from '../cloud/room';
+import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock,roomChangeScope,roomChangeNotice} from '../cloud/room';
+import {watchCloudChanges} from '../cloud/changeWatch';
+import {queuedRefresh} from '../cloud/queuedRefresh';
 import {localGm} from '../cloud/localRights';
 import {CustomCopyDrop} from './CustomCopyDrop';
 import {customCopy} from '../core/customEntries';
@@ -511,15 +513,20 @@ export default function App() {
   }, []);
   useEffect(()=>{
     if(!qqRoom)return;
-    let active=true,flight=false;
+    let active=true;
     const permissions=()=>{if(active)setReadOnly(!writable.current||!roomState()?.write);};
     const stop=subscribeRoom(permissions);
-    const refresh=async()=>{if(flight||document.visibilityState==='hidden')return;flight=true;try{
+    const refreshQueue=queuedRefresh(async()=>{if(!active||document.visibilityState==='hidden'||!navigator.onLine)return;try{
       const before=roomState()?.revision,next=await readRoom();permissions();
       if(active&&before!==undefined&&before!==next.revision&&pendingSaves.current===0&&!saveFailed.current&&!await hasRoomDraft())acceptWorkspace({schemaVersion:1,characters:[next.character],activeId:next.character.id,packs:next.character.rulePacks||[]});
-    }catch(error){if(active)setNotice(String(error));}finally{flight=false;}};
-    const timer=setInterval(()=>void refresh(),2500);window.addEventListener('focus',refresh);
-    return()=>{active=false;clearInterval(timer);stop();window.removeEventListener('focus',refresh);};
+    }catch(error){if(active)setNotice(String(error));throw error;}});
+    const refresh=()=>{void refreshQueue.request().catch(()=>{});};
+    const watcher=watchCloudChanges({scope:roomChangeScope,active:()=>document.visibilityState==='visible'&&navigator.onLine,request:roomChangeNotice,changed:refreshQueue.request,failed:()=>refresh()});
+    const wake=()=>{watcher.wake();refresh();};
+    const accountChanged=(event:StorageEvent)=>{if(event.key==='dnd-qq-plugin')wake();};
+    const timer=setInterval(refresh,2500);window.addEventListener('focus',wake);window.addEventListener('online',wake);document.addEventListener('visibilitychange',wake);
+    window.addEventListener('storage',accountChanged);window.addEventListener('hashchange',wake);
+    return()=>{active=false;watcher.stop();refreshQueue.stop();clearInterval(timer);stop();window.removeEventListener('focus',wake);window.removeEventListener('online',wake);document.removeEventListener('visibilitychange',wake);window.removeEventListener('storage',accountChanged);window.removeEventListener('hashchange',wake);};
   },[]);
   useEffect(()=>{
     if(!standalone||qqRoom||inWorkbench)return;

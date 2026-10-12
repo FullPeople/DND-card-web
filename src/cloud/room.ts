@@ -14,6 +14,14 @@ function credentials(){
   const capability=new URLSearchParams(location.hash.slice(1)).get('cap')||'';
   return {...token?{Authorization:'Bearer '+token}:{},'X-Room-Capability':capability};
 }
+export const roomChangeScope=()=>JSON.stringify([qqRoom,credentials()]);
+export async function roomChangeNotice(cursor:string|undefined,signal:AbortSignal){
+ const headers=credentials();
+ return withRequestTimeout(30000,signal,async requestSignal=>{
+  const response=await fetch('https://dnd.center/api/changes',{method:'POST',headers:{...headers,'Content-Type':'application/json'},credentials:'omit',cache:'no-store',signal:requestSignal,body:JSON.stringify({cursor,rooms:[{id:qqRoom,capability:headers['X-Room-Capability']}]})});
+  const data=await response.json();if(!response.ok)throw Object.assign(Error(data.message||'房间变更读取失败。'),{status:response.status});return data;
+ });
+}
 export async function readRoom(){
   return withRequestTimeout(30000,undefined,async signal=>{
     const response=await fetch('https://dnd.center/api/room-cards/'+encodeURIComponent(qqRoom!),{headers:credentials(),credentials:'omit',cache:'no-store',signal});
