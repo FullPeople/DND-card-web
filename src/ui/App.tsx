@@ -1,7 +1,7 @@
 import './loadingPanel.css';
 import './announcement.css';
 import {legacyRecoveryIds} from '../platform/workspaceNamespace';
-import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock,roomChangeScope,roomChangeNotice} from '../cloud/room';
+import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock,roomChangeScope,roomChangeNotice,invalidateRoomAuthorization} from '../cloud/room';
 import {watchCloudChanges} from '../cloud/changeWatch';
 import {queuedRefresh} from '../cloud/queuedRefresh';
 import {localGm} from '../cloud/localRights';
@@ -50,6 +50,7 @@ import {uiEntryLabel} from './uiText';
 import {useEntryMenuActions} from './EntrySharing';
 import type {CharacterRow} from './CharacterManager';
 import {CloudCardControl} from '../cloud/CloudCardControl';
+import {RoomCardControl} from './RoomCardControl';
 import {CloudSaveProvider,CloudSaveControl} from '../cloud/CloudSave';
 import {characterHash,writeSyncReceipt} from '../cloud/sync';
 import {cloudCardLock} from '../cloud/sync';
@@ -229,7 +230,7 @@ export default function App() {
   // Read by persist/edit, which run from timers and key handlers with stale closures.
   const cloudAccessRef=useRef<Record<string,string|undefined>>({});cloudAccessRef.current=cloudAccess;
   const cloudRestriction=cloudAccess[workspace?.activeId||''];
-  const readOnlyReason=cloudRestriction||(workspaceReadOnly?(qqRoom?'房间卡已锁定或登录已失效，此页仅供查阅和导出。':'另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。'):undefined);
+  const readOnlyReason=cloudRestriction||(workspaceReadOnly?(qqRoom?['checking','expired'].includes(roomState()?.authorization||'')?'云端权限尚未核验或已过期，暂时不能写回。本机草稿保留，可查阅和导出。':'房间卡已锁定或登录已失效，此页仅供查阅和导出。':'另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。'):undefined);
   const readOnly=!!readOnlyReason;
   const [activateUpdate, setActivateUpdate] = useState<(() => void)>();
   const writable = useRef(false);
@@ -522,7 +523,7 @@ export default function App() {
     }catch(error){if(active)setNotice(String(error));throw error;}});
     const refresh=()=>{void refreshQueue.request().catch(()=>{});};
     const watcher=watchCloudChanges({scope:roomChangeScope,active:()=>document.visibilityState==='visible'&&navigator.onLine,request:roomChangeNotice,changed:refreshQueue.request,failed:()=>refresh()});
-    const wake=()=>{watcher.wake();refresh();};
+    const wake=()=>{invalidateRoomAuthorization();watcher.wake();refresh();};
     const accountChanged=(event:StorageEvent)=>{if(event.key==='dnd-qq-plugin')wake();};
     const timer=setInterval(refresh,2500);window.addEventListener('focus',wake);window.addEventListener('online',wake);document.addEventListener('visibilitychange',wake);
     window.addEventListener('storage',accountChanged);window.addEventListener('hashchange',wake);
@@ -1018,7 +1019,7 @@ export default function App() {
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {inWorkbench&&<WorkbenchPermissionNotice/>}{showClassReview&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
         <SheetEditContext.Provider value={editing&&!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}>{cloudAccess[c.id]&&<aside className="class-compatibility-banner card-permission-banner" role="status"><p>{cloudAccess[c.id]}</p></aside>}<PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
-          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{inWorkbench&&(wb.target?.cloudRoom||wb.qqAccount?.id)?<CloudRoomControl upload={async()=>{const key=wb.target?.key,account=wb.qqAccount?.id;let saved;do{saved=queue.current;await saved;}while(saved!==queue.current);if(key)await flushWorkbenchSaves(key);if(saveFailed.current||pendingSaves.current>0)throw Error('保存尚未成功，请先核对角色卡。');const latest=getWorkbench(),workspace=workspaceRef.current,native=workspace?.characters.find(row=>row.id===workspace.activeId);if(latest.target?.key!==key||latest.qqAccount?.id!==account||!native||!latest.target?.write||native.id!==c.id)throw Error('当前角色卡或编辑权限已改变，请重新打开云端设置。');return workbenchRequest('cloudUpload',{key,itemId:wb.target?.targetId||wb.target?.itemId,native,accountId:account});}}/>:standalone?<CloudCardControl id={c.id} name={c.name} locked={!!c.locked} lock={()=>edit(draft=>{draft.locked=!draft.locked;})}/>:<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={!!qqRoom||inWorkbench&&(!wb.online||!wb.target?.write)} title={qqRoom?'房间卡的锁定由卡主在枭熊插件的 QQ 卡库中管理':undefined} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}>{c.locked?<LockClosedIcon size={18}/>:<LockOpenIcon size={18}/>}</button>}</span></div>
+          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{qqRoom?<RoomCardControl flush={async()=>{await queue.current;if(saveFailed.current&&!await hasRoomDraft())throw Error('本机草稿尚未保存，请先导出备份。');}}/>:inWorkbench&&(wb.target?.cloudRoom||wb.qqAccount?.id)?<CloudRoomControl upload={async()=>{const key=wb.target?.key,account=wb.qqAccount?.id;let saved;do{saved=queue.current;await saved;}while(saved!==queue.current);if(key)await flushWorkbenchSaves(key);if(saveFailed.current||pendingSaves.current>0)throw Error('保存尚未成功，请先核对角色卡。');const latest=getWorkbench(),workspace=workspaceRef.current,native=workspace?.characters.find(row=>row.id===workspace.activeId);if(latest.target?.key!==key||latest.qqAccount?.id!==account||!native||!latest.target?.write||native.id!==c.id)throw Error('当前角色卡或编辑权限已改变，请重新打开云端设置。');return workbenchRequest('cloudUpload',{key,itemId:wb.target?.targetId||wb.target?.itemId,native,accountId:account});}}/>:standalone?<CloudCardControl id={c.id} name={c.name} locked={!!c.locked} lock={()=>edit(draft=>{draft.locked=!draft.locked;})}/>:<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={!!qqRoom||inWorkbench&&(!wb.online||!wb.target?.write)} title={qqRoom?'房间卡的锁定由卡主在枭熊插件的 QQ 卡库中管理':undefined} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}>{c.locked?<LockClosedIcon size={18}/>:<LockOpenIcon size={18}/>}</button>}</span></div>
           {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
 </> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><Suspense fallback={<PanelLoading label={`正在加载${sheetPage}…`} sheet/>}><div className="sheet-details">
           <div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>

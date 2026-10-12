@@ -53,6 +53,7 @@ dist-cloud-server/
 dist-library/
 test-results-cloud/
 test-results-cloud-notifications/
+test-results-audit-room/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm

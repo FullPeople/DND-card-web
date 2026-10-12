@@ -32,6 +32,7 @@ describe('QQ accounts, plugin access and room writes over real HTTP',()=>{
     const room=await(await s.request('cards/'+card.id+'/rooms','POST',{room:'lightweight-poll',confirmRoomSync:true},owner.h)).json();
     s.store.read=()=>{throw Error('Unchanged polling must not load full card bodies');};
     const response=await s.request('room-cards/'+room.id+'?since=1','GET',undefined,owner.h);expect(response.status).toBe(200);const value=await response.json();expect(value.unchanged).toBe(true);expect(value.editors).toContain(s.other.id);expect(value.character).toBeUndefined();expect(value.document).toBeUndefined();
+    const summary=await s.request('room-cards/'+room.id+'?summary=1','GET',undefined,owner.h);expect(summary.status).toBe(200);const info=await summary.json();expect(info).toMatchObject({summary:true,owner:true,write:true});expect(info.character).toBeUndefined();expect(info.document).toBeUndefined();
     const member={Origin:s.pluginOrigin,'X-Room-Capability':room.capability};const read=await s.request('room-cards/'+room.id+'?since=1','GET',undefined,member);expect(read.status).toBe(200);expect(await read.json()).toMatchObject({unchanged:true,owner:false,locked:true,write:false});expect(()=>s.store.summary(card.id,s.other)).not.toThrow();
   });
   it('keeps locked room cards readonly for an ungranted DM, permits verified editors and immediately revokes them',async()=>{

@@ -50,10 +50,11 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     const isEditor=!!s&&store.db.prepare('SELECT 1 FROM account_editors WHERE card_id=? AND account_id=?').get(g.card_id,s.account.id)!==undefined;
     return {isOwner,isEditor,account:{id:String(row.id),qq:row.qq===null?null:String(row.qq),extra_slots:Number(row.extra_slots)}};
   }
-  function roomResult(g:Grant,isOwner:boolean,account:Session['account'],isEditor=false,since?:string|null){
+  function roomResult(g:Grant,isOwner:boolean,account:Session['account'],isEditor=false,since?:string|null,summaryOnly=false){
     const summary=store.summary(g.card_id,account);
     const editors=isOwner?[...store.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(g.card_id).map(row=>String(row.qq)),...store.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(g.card_id).map(row=>String(row.account_id))]:undefined;
     const info={id:g.id,cardId:g.card_id,room:g.room,name:summary.name,revision:summary.revision,locked:!!g.locked,owner:isOwner,editor:isEditor,ownerAccountId:account.id,ownerNickname:store.qqProfile(account.id)?.nickname||'卡主',editors,write:isOwner||isEditor||!g.locked};
+    if(summaryOnly)return {...info,summary:true};
     if(since===String(summary.revision))return {...info,unchanged:true};
     const card=store.read(g.card_id,account);
     const document=normalizeLegacyUpload(card.character);
@@ -119,7 +120,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     const match=/^\/api\/room-cards\/([a-f0-9-]{36})(?:\/(lock))?$/.exec(url.pathname);
     if(!match)return false;
     const g=grant(match[1]),auth=authorized(g,request,s);
-    if(method==='GET'&&!match[2]){send(200,roomResult(g,auth.isOwner,auth.account,auth.isEditor,url.searchParams.get('since')));return true;}
+    if(method==='GET'&&!match[2]){send(200,roomResult(g,auth.isOwner,auth.account,auth.isEditor,url.searchParams.get('since'),url.searchParams.get('summary')==='1'));return true;}
     if(!allowed.has(request.headers.origin||''))throw new CloudError(403,'origin','请从已配置的枭熊插件操作。');
     if(match[2]&&method==='PUT'){
       if(!auth.isOwner||!safeEqual(request.headers['x-csrf-token'],s!.csrf))throw new CloudError(403,'owner_only','只有卡主可以解锁或重新锁定房间卡。');
