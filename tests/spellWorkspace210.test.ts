@@ -60,6 +60,17 @@ describe('one prepared workspace with independent source, cantrip and ordinary g
   expect(spellOnClassList(allowed,profile)).toBe(true);expect(chooseCantrip(c,allowed,fighter.id).error).toBeUndefined();
   expect(chooseCantrip(c,wrong,fighter.id).error).toContain('法表');
  });
+ it('does not widen an expanded cantrip filter to higher spells or locked levels',()=>{
+  const c=newCharacter(),fighter=add(c,entry('Fighter','class',{}));fighter.level=3;
+  add(c,entry('Authored study','subclass',{className:'Fighter',classSource:'XPHB',casterProgression:'1/3',spellcastingAbility:'int',additionalSpells:[{expanded:{3:[{all:'level=0|class=Source Mage'}],7:[{all:'level=2|class=Source Mage'}]}}]}));
+  expect(spellOnClassList(spell('Allowed cantrip',0),casterProfiles(c)[0])).toBe(true);
+  expect(spellOnClassList(spell('Wrong spell level',1),casterProfiles(c)[0])).toBe(false);
+  expect(spellOnClassList(spell('Locked spell level',2),casterProfiles(c)[0])).toBe(false);
+  fighter.level=7;
+  expect(spellOnClassList(spell('Unlocked spell level',2),casterProfiles(c)[0])).toBe(true);
+  c.selections[1].entry.raw.additionalSpells=[{expanded:{3:[{all:'level=0|class=Source Mage|unknown=yes'}]}}];
+  expect(spellOnClassList(spell('Unsupported condition',0),casterProfiles(c)[0])).toBe(false);
+ });
  it('shows a source-shaped artificer library and hides a learned-only caster library without name branching',()=>{
   const c=newCharacter();add(c,entry('Renamed crafter','class',{casterProgression:'artificer',spellcastingAbility:'int',cantripProgression:[2],preparedSpellsProgression:[2],preparedSpellsChange:'restLong'}));
   expect(hasKnownLibrary(casterProfiles(c)[0])).toBe(true);expect(spellLibrary(c,[spell('Tool spark',0,'Renamed crafter')])).toHaveLength(1);
