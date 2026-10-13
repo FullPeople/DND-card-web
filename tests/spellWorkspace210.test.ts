@@ -3,7 +3,7 @@ import {newCharacter,type Character,type Entry} from '../src/core/model';
 import {spellState} from '../src/core/characterDetails';
 import {prepareSpellEntry,spellLibrary} from '../src/core/spells';
 import {cantripGroups,chooseCantrip,clearCantrip,spellIsReady,ordinaryPrepared} from '../src/core/spellWorkspace';
-import {casterProfiles,hasKnownLibrary} from '../src/core/spellcastingRules';
+import {casterProfiles,hasKnownLibrary,spellOnClassList} from '../src/core/spellcastingRules';
 import {setSpecialSpell,changeSpecialSpellUses,specialSpellResource} from '../src/core/specialSpells';
 import {validateCharacter} from '../src/core/validation';
 import {exportOwlbear} from '../src/core/export';
@@ -51,6 +51,14 @@ describe('one prepared workspace with independent source, cantrip and ordinary g
   const c=setup();add(c,entry('Other','class',{casterProgression:'full',spellcastingAbility:'cha',cantripProgression:[1],spellsKnownProgression:[2]}));
   const a=chooseCantrip(c,spell('One',0),'Source Mage',0).id!,b=chooseCantrip(c,spell('Other spell',0,'Other'),'Other',0).id!;
   expect(cantripGroups(c).map(g=>g.slots.filter(Boolean))).toEqual([[a],[b]]);const before=JSON.stringify(c);expect(chooseCantrip(c,spell('Wrong',0,'Other'),'Source Mage',1).error).toContain('法表');expect(JSON.stringify(c)).toBe(before);
+ });
+ it('uses a subclass expanded class filter instead of rejecting its cantrips against the parent list',()=>{
+  const c=newCharacter(),fighter=add(c,entry('Fighter','class',{}));fighter.level=3;
+  add(c,entry('Eldritch study','subclass',{className:'Fighter',classSource:'XPHB',casterProgression:'1/3',spellcastingAbility:'int',additionalSpells:[{expanded:{3:[{all:'level=0|class=Source Mage'},{all:'level=1|class=Source Mage'}]}}]}));
+  c.spellSettings=spellState(c);c.spellSettings.cantripCapacityAdjustments={[fighter.id]:2};
+  const profile=casterProfiles(c)[0],allowed=spell('Subclass cantrip',0,'Source Mage'),wrong=spell('Other cantrip',0,'Other');
+  expect(spellOnClassList(allowed,profile)).toBe(true);expect(chooseCantrip(c,allowed,fighter.id).error).toBeUndefined();
+  expect(chooseCantrip(c,wrong,fighter.id).error).toContain('法表');
  });
  it('shows a source-shaped artificer library and hides a learned-only caster library without name branching',()=>{
   const c=newCharacter();add(c,entry('Renamed crafter','class',{casterProgression:'artificer',spellcastingAbility:'int',cantripProgression:[2],preparedSpellsProgression:[2],preparedSpellsChange:'restLong'}));
