@@ -8,6 +8,8 @@ import { EntryDraggable } from './DragEntry';
 import { SourceName, compareSources, useSources } from './SourceName';
 import { wikiEditionAllows } from './wikiEdition';
 import {useReadingHighlight} from './useReadingHighlight';
+import {EntryReadingExtras} from './EntryReadingExtras';
+import {SubclassComparison} from './SubclassComparison';
 
 type Section = { id: string; name: string; english?: string; level?: number; source?: string; page?: number; body: unknown; depth: number; reference?: Entry; excluded?:boolean; subclassHeading?:boolean; starting?:boolean; training?:boolean };
 export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false,editionFilter='character' }: { editionFilter?:string;subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void }) {
@@ -97,6 +99,8 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
   const focusSection=sections.find(s=>s.reference?.id===focus||focus===`name:${s.name}`||s.id===focus)?.id;
   const highlightOverlay = useReadingHighlight(ref, focusSection, !!preview);
   return <div className="library-document" ref={ref}>
+    <EntryReadingExtras key={entry.id} entry={entry} entries={entries} inspect={inspect} onLink={onLink}/>
+    <SubclassComparison key={'compare:'+entry.id} entry={entry} entries={entries} character={character} editionFilter={editionFilter} onLink={onLink}/>
     <div ref={highlightOverlay} className="reading-focus-overlay" aria-hidden="true"/>
     {navigation.length > 0 && <nav className="document-nav" aria-label="正文目录"><strong>目录</strong><div>{navigation.map((s, index) => <div key={s.id}>{s.level && s.level !== navigation[index - 1]?.level && <span className="nav-level">等级 {s.level}</span>}<button data-nav-section={s.id} title={s.name} onClick={() => go(s.id)}>{s.name}{s.subclassHeading&&s.source&&<small> <SourceName id={s.source}/></small>}</button></div>)}</div></nav>}
     <div className={`document-prose rules-prose ${navigation.length ? 'with-nav' : ''}`}><ContentBoundary key={entry.id}>{sections.filter(s => !hidden.has(s.id)).map(s => <section key={s.id} data-entry-drag-intent={s.training?'training':undefined} data-anchor={s===sections.find(x=>x.id!=='progression')?'body':undefined} data-section={s.name ? s.id : undefined} data-entry-id={s.reference?.id} data-described-entry={s.reference?.id} className={`document-section ${s.id===focusSection && (preview||highlight) ? preview?'reading-highlight':'reading-highlight-fade' : ''} depth-${Math.min(s.depth, 2)} ${s.excluded ? 'entry-disabled' : ''}`}>

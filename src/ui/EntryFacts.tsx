@@ -1,6 +1,7 @@
 import { ABILITY_LABELS, type Ability, type Entry } from '../core/model';
 import { speedText, abilityText, hasSpellcasting, prerequisiteText, translate as translateRule } from './libraryData';
 import { Inline } from './Entries';
+import {extraFacts} from './wikiMetadata';
 const units: Record<string, string> = { action: '动作', bonus: '附赠动作', reaction: '反应', minute: '分钟', hour: '小时', day: '日', round: '轮', turn: '回合', feet: '尺', miles: '里', self: '自身', touch: '触及', sight: '视线', unlimited: '无限', special: '特殊' };
 const schools: Record<string, string> = { A: '防护', C: '咒法', D: '预言', E: '惑控', V: '塑能', I: '幻术', N: '死灵', T: '变化' };
 const shapes: Record<string, string> = { cone: '锥状', line: '线状', sphere: '球状', cube: '立方', radius: '半径', hemisphere: '半球', cylinder: '柱状' };
@@ -55,6 +56,7 @@ export function EntryFacts({ entry, onLink, onEdit }: { entry: Entry; onLink: (r
     if (r.script) facts.push(['文字', r.script]);
     if (Array.isArray(r.typicalSpeakers)) facts.push(['典型使用者', r.typicalSpeakers.join('、')]);
   }
+  if(!onEdit)facts.push(...extraFacts(entry));
   if (!facts.length) return null;
   const editKeys:Record<string,string>={'学派':'school','施法时间':'time','施法距离':'range','法术成分':'components','持续时间':'duration','生命骰':'hd','豁免熟练':'proficiency','施法属性':'spellcastingAbility','速度':'speed','属性值加成':'ability','体型':'size','护甲基础值':'ac','武器伤害':'dmg1','同调':'reqAttune','专长类别':'category','先决条件':'prerequisite','获得等级':'level','类别':'typeRawLanguage','文字':'script','典型使用者':'typicalSpeakers'};
   return <dl className="entry-facts">{facts.map(([label, value]) => <div key={label} className={onEdit?'canvas-region':undefined} role={onEdit?'button':undefined} tabIndex={onEdit?0:undefined} aria-label={onEdit?`修改${label}`:undefined} onClickCapture={onEdit?event=>{event.preventDefault();event.stopPropagation();onEdit(editKeys[label]||label,label,event.currentTarget,{x:event.clientX,y:event.clientY});}:undefined} onKeyDown={onEdit?event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onEdit(editKeys[label]||label,label,event.currentTarget);}}:undefined}><dt>{label}</dt><dd><Inline text={value} onLink={onLink}/></dd></div>)}</dl>;
