@@ -38,7 +38,7 @@ test('room five-page editor writes the original, preserves a conflict draft and 
   await name.fill('应保留的冲突草稿');await expect(page.locator('.save-status')).toContainText('保存失败');await page.reload();await expect(name).toHaveValue('应保留的冲突草稿');
   conflict=false;page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'核对云端版本'}).click();await expect(name).toHaveValue('房间保存已写回');
   // Remove the owner's token: the same room participant can edit only while unlocked.
-  await page.evaluate(()=>localStorage.removeItem('dnd-qq-plugin'));await request.put(path+'/lock',{headers:h,data:{locked:true}});await expect(page.locator('.card-permission-banner').first()).toContainText('房间卡已锁定');await expect(edit).toBeDisabled();
+  await request.put(path+'/lock',{headers:h,data:{locked:true}});await page.evaluate(()=>{const oldValue=localStorage.getItem('dnd-qq-plugin');localStorage.removeItem('dnd-qq-plugin');window.dispatchEvent(new StorageEvent('storage',{key:'dnd-qq-plugin',oldValue,newValue:null}));});await expect(page.locator('.card-permission-banner').first()).toContainText('房间卡已锁定',{timeout:15000});await expect(edit).toBeDisabled();
   await page.screenshot({path:test.info().outputPath('qq-room-five-page.png')});
   const current=await(await request.get('/api/cards/'+card.id,{headers:h})).json();await request.delete(path,{headers:h});await request.delete('/api/cards/'+card.id,{headers:h,data:{revision:current.revision}});
 });

@@ -8,6 +8,8 @@ dist/
 !.env.example
 work/
 test-results/
+test-results-pr-issues/
+test-results-pr-issues-public/
 playwright-report/
 *.log
 *.tsbuildinfo
