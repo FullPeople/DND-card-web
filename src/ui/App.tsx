@@ -119,7 +119,7 @@ import type {SheetCaptureOptions} from '../platform/sheetImage';
 
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionEffectsAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
+import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, classMatches, newCharacter, selectionEffectsAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
 import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
@@ -737,7 +737,7 @@ export default function App() {
     if(parent && selected?.grantKey?.startsWith('inline:'))return {entry:libraryEntries.find(e=>e.id===parent.entry.id)||parent.entry,focus:`name:${entry.name}`};
     if(entry.kind==='feature' && entry.raw.subclassShortName){const subclass=libraryEntries.find(e=>ownsSubclassFeature(e,entry));if(subclass)return {entry:subclass,focus:entry.id};}
     if(entry.kind==='feature' && entry.raw._category!=='itemMastery'){
-      const owner=libraryEntries.find(e=>e.kind==='class' && (entry.raw.className ? [e.name,e.english].includes(entry.raw.className) && (entry.raw.classSource||'PHB').toUpperCase()===e.source : e.edition===entry.edition && e.raw.optionalfeatureProgression?.some((p:any)=>p.featureType?.some((t:string)=>entry.raw.featureType?.includes(t)))));
+      const owner=libraryEntries.find(e=>e.kind==='class' && (entry.raw.className ? classMatches(entry,e) : e.edition===entry.edition && e.raw.optionalfeatureProgression?.some((p:any)=>p.featureType?.some((t:string)=>entry.raw.featureType?.includes(t)))));
       if(owner)return {entry:owner,focus:entry.id};
     }
     return {entry};
