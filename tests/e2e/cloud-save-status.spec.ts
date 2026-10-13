@@ -26,7 +26,7 @@ test('QQ profile, per-card upload, moved ID controls, autosync and deletion pres
 });
 
 test('announcement poster appears on notice tab with the requested wording',async({page})=>{
- await mockSource(page);await page.goto('/card/');const dialog=page.getByRole('dialog').filter({has:page.locator('.announcement-cloud-poster')});await expect(dialog.locator('.announcement-cloud-poster strong')).toHaveText('现在支持云端存储/分享角色卡了！！！');await expect(dialog.locator('.announcement-cloud-poster small')).toHaveText('详情请打开右上角的云端存储。');await page.screenshot({path:test.info().outputPath('cloud-announcement-desktop.png')});await page.setViewportSize({width:390,height:844});await page.screenshot({path:test.info().outputPath('cloud-announcement-mobile.png')});
+ await mockSource(page);await page.goto('/card/');const dialog=page.getByRole('dialog').filter({has:page.locator('.announcement-cloud-poster')});await expect(dialog.locator('.announcement-cloud-poster strong')).toHaveText('若有bug请发送到邮箱！');await expect(dialog.locator('.announcement-cloud-poster small')).toHaveText('每天中午都会处理邮件和issue！你的反馈能让该项目真的变得更好！');await page.screenshot({path:test.info().outputPath('cloud-announcement-desktop.png')});await page.setViewportSize({width:390,height:844});await page.screenshot({path:test.info().outputPath('cloud-announcement-mobile.png')});
 });
 test('search, sidebar warning, complete circular A4 gallery, drag switching and source footer',async({page,context})=>{
  const session=await(await context.request.get('/api/session')).json();const ids=[];
