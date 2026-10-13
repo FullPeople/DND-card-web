@@ -1,4 +1,6 @@
 node_modules/
+test-results-audit-room/
+test-results-cloud-notifications/
 .cache/
 dist/
 .env

@@ -7,6 +7,8 @@ import './library.css';
 import {QQLogin} from './QQLogin';
 import {forgetDeletedCloudCard} from './bindings';
 import {CloudSaveProvider,CloudSaveControl} from './CloudSave';
+import {subscribeAccountChanges} from './accountChanges';
+import {queuedRefresh} from './queuedRefresh';
 import {CardStack} from './CardStack';
 import {withSiteSources} from '../core/siteSources';
 import './galleryPresentation.css';
@@ -28,9 +30,10 @@ export default function LibraryApp(){
   const privateLibrary=session?.authenticated||session?.libraryMode==='account';
   const refreshGeneration=useRef(0);
   const latestAccount=useRef(account);latestAccount.current=account;
+  const pollRefresh=useRef<()=>Promise<void>>(()=>Promise.resolve());
   useEffect(()=>{
-    let alive=true,flight=false;const poll=async()=>{
-      if(flight||document.visibilityState==='hidden'||!navigator.onLine)return;flight=true;const epoch=refreshGeneration.current;
+    let alive=true;const queue=queuedRefresh(async()=>{
+      if(!alive||document.visibilityState==='hidden'||!navigator.onLine)return;const epoch=refreshGeneration.current;
       try{const next=await cloudSession();if(!alive||epoch!==refreshGeneration.current)return;
         const actor=next.authenticated?next.account?.id:next.uploadOwner?.id;
         if(actor!==latestAccount.current){await refresh();return;}
@@ -39,11 +42,12 @@ export default function LibraryApp(){
         const update=<T,>(before:T,after:T)=>JSON.stringify(before)===JSON.stringify(after)?before:after;
         setSession(before=>update(before,{...next,slots:rows.slots}));setCards(before=>{const incoming=new Map(rows.cards.map(row=>[row.id,row])),ordered=before.flatMap(row=>{const current=incoming.get(row.id);incoming.delete(row.id);return current?[current]:[];});return update(before,[...ordered,...incoming.values()]);});setMine(before=>update(before,rows.mine||rows.cards.filter(row=>row.role)));setTemporary(before=>update(before,rows.temporary||[]));
         setTotal(rows.total??rows.cards.length);setHasMore(!!rows.hasMore);setNextOffset(rows.cards.length);
-      }catch{}finally{flight=false;}
-    };
+      }catch(error){throw error;}
+    });pollRefresh.current=queue.request;const poll=()=>{void queue.request().catch(()=>{});};
     const timer=setInterval(()=>void poll(),5000);window.addEventListener('online',poll);
-    return()=>{alive=false;clearInterval(timer);window.removeEventListener('online',poll);};
+    return()=>{alive=false;queue.stop();pollRefresh.current=()=>Promise.resolve();clearInterval(timer);window.removeEventListener('online',poll);};
   },[]);
+  useEffect(()=>{if(!session?.authenticated||!account)return;return subscribeAccountChanges(account,()=>pollRefresh.current());},[session?.authenticated,account]);
   const latestView=useRef(view);latestView.current=view;
   useEffect(()=>{if(!sidebarOpen)return;const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setSidebarOpen(false);};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[sidebarOpen]);
   async function refreshLocal(){

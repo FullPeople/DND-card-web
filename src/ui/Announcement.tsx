@@ -1,6 +1,6 @@
 import {ICON_CREDIT} from './icons';
 import {releaseLogFor,type ReleaseSection} from '../platform/releaseNotes';
-import {Fragment,lazy,Suspense,useEffect,useRef,useState} from 'react';
+import {Fragment,lazy,Suspense,startTransition,useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {announcementVersionFor,forgetAnnouncementVersion,readAnnouncementPreference,rememberAnnouncementPreference,rememberAnnouncementVersion,type AnnouncementMode} from '../platform/announcement';
 import './announcement.css';
 import {useUiLanguage} from './UiLanguage';
@@ -21,19 +21,20 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
   const [release,setRelease]=useState<unknown>();
   const [tab,setTab]=useState(0);
   const [progressOpened,setProgressOpened]=useState(false);
+  const [changelogOpened,setChangelogOpened]=useState(false);
   const releases=releaseLogFor(mode);
   const tabs=['公告内容','自动化进度','更新日志'];
   const englishTabs=['Notice','Automation progress','Changelog'];
   const bodyRef=useRef<HTMLDivElement>(null);
   const tabRefs=useRef<(HTMLButtonElement|null)[]>([]);
-  const selectTab=(index:number)=>{setTab(index);if(index===1)setProgressOpened(true);if(bodyRef.current)bodyRef.current.scrollTop=0;};
+  const selectTab=(index:number)=>{setTab(index);if(index===1)setProgressOpened(true);if(index===2)startTransition(()=>setChangelogOpened(true));if(bodyRef.current)bodyRef.current.scrollTop=0;};
   const releaseValue=release as {version?:unknown}|undefined;
   const releaseVersion=typeof releaseValue?.version==='string'&&/^(?:standalone-)?\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/i.test(releaseValue.version)?releaseValue.version:undefined;
   useEffect(()=>{if(mode!=='standalone')return;let current=true;void fetch('./release.json',{cache:'no-store'}).then(response=>response.ok?response.json():undefined).then(value=>{if(current)setRelease(value);}).catch(()=>{});return()=>{current=false;};},[mode]);
   const ref=useRef<HTMLDialogElement>(null);
   const confirmRef=useRef<HTMLButtonElement>(null);
   const [remember,setRemember]=useState(()=>readAnnouncementPreference(mode));
-  useEffect(()=>{ref.current?.showModal();confirmRef.current?.focus();},[]);
+  useLayoutEffect(()=>{ref.current?.showModal();confirmRef.current?.focus();},[]);
   const confirm=()=>{
     if(remember)rememberAnnouncementVersion(version,mode);
     else forgetAnnouncementVersion(mode);
@@ -67,7 +68,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
       </details>
       </section>
       <section id="announcement-panel-1" role="tabpanel" aria-labelledby="announcement-tab-1" hidden={tab!==1}>{progressOpened&&<ToolBoundary label="自动化进度" close={confirm}><Suspense fallback={<p role="status">正在读取自动化进度…</p>}><AutomationProgress release={release} mode={mode}/></Suspense></ToolBoundary>}</section>
-      <section id="announcement-panel-2" className="announcement-changelog" role="tabpanel" aria-labelledby="announcement-tab-2" hidden={tab!==2}>{releases.map((release,index)=><section className={`announcement-log-day ${index===0?'announcement-current':'announcement-history'}`} key={release.title}><h3>{release.title}{language==='en'&&release.title!=='2026-09-28'&&` · ${t('chineseOriginal')}`}</h3>{sections(language==='en'&&release.title==='2026-09-28'?englishCurrent:release.sections)}</section>)}</section>
+      <section id="announcement-panel-2" className="announcement-changelog" role="tabpanel" aria-labelledby="announcement-tab-2" hidden={tab!==2}>{changelogOpened?releases.map((release,index)=><section className={`announcement-log-day ${index===0?'announcement-current':'announcement-history'}`} key={release.title}><h3>{release.title}{language==='en'&&release.title!=='2026-09-28'&&` · ${t('chineseOriginal')}`}</h3>{sections(language==='en'&&release.title==='2026-09-28'?englishCurrent:release.sections)}</section>):tab===2?<p role="status">正在读取更新日志…</p>:null}</section>
     </div>
     <footer className="announcement-foot">
       <label><input type="checkbox" checked={remember} onChange={event=>{setRemember(event.target.checked);rememberAnnouncementPreference(event.target.checked,mode);}}/>{t('rememberVersion')}</label>
