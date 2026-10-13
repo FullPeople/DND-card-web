@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {mockSource,suppressAnnouncement} from './fixtures';
 const base='http://127.0.0.1:5320';
@@ -28,7 +28,10 @@ test('room five-page editor writes the original, preserves a conflict draft and 
   await request.put(path+'/lock',{headers:h,data:{locked:false}});
   await page.addInitScript(value=>localStorage.setItem('dnd-qq-plugin',JSON.stringify(value)),{...auth,accountId:f.owner.id,csrf:f.ownerSession.csrf});
   const reads:Array<{method:string;status:number;owner:boolean;write:boolean;locked:boolean;duration:number;authenticated:boolean}>=[];
-  await page.route('https://dnd.center/api/**',async route=>{const original=route.request(),url=new URL(original.url()),started=Date.now();try{const response=await request.fetch(base+url.pathname,{method:original.method(),headers:{...original.headers(),Origin:base},data:original.postData()||undefined});if(url.pathname===path&&original.method()==='GET'){const data=await response.json();reads.push({method:original.method(),status:response.status(),owner:data.owner,write:data.write,locked:data.locked,duration:Date.now()-started,authenticated:!!original.headers().authorization});}await route.fulfill({response,headers:{...response.headers(),'access-control-allow-origin':base}});}catch(error){if(!original.failure())throw error;await route.abort().catch(()=>{});}});
+  const diagnostic=test.info().outputPath('room-authorization-reads.json');
+  let environment:unknown;
+  const saveReads=()=>writeFileSync(diagnostic,JSON.stringify({reads:reads.slice(-20),environment},null,2));
+  await page.route('https://dnd.center/api/**',async route=>{const original=route.request(),url=new URL(original.url()),started=Date.now();try{const response=await request.fetch(base+url.pathname,{method:original.method(),headers:{...original.headers(),Origin:base},data:original.postData()||undefined});if(url.pathname===path&&original.method()==='GET'){const data=await response.json();reads.push({method:original.method(),status:response.status(),owner:data.owner,write:data.write,locked:data.locked,duration:Date.now()-started,authenticated:!!original.headers().authorization});saveReads();}await route.fulfill({response,headers:{...response.headers(),'access-control-allow-origin':base}});}catch(error){if(!original.failure())throw error;await route.abort().catch(()=>{});}});
   await mockSource(page);await suppressAnnouncement(page);await page.goto('/card/?intro=0&qqRoom='+room.id+'#cap='+room.capability);
   const edit=page.getByRole('switch',{name:'编辑模式'});if(await edit.getAttribute('aria-checked')!=='true')await edit.click();
   const name=page.getByRole('textbox',{name:'角色姓名',exact:true});await expect(name).toHaveValue('QQ 房间自动同步验收');await name.fill('房间保存已写回');
@@ -39,7 +42,7 @@ test('room five-page editor writes the original, preserves a conflict draft and 
   await name.fill('应保留的冲突草稿');await expect(page.locator('.save-status')).toContainText('保存失败');await page.reload();await expect(name).toHaveValue('应保留的冲突草稿');
   conflict=false;page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'核对云端版本'}).click();await expect(name).toHaveValue('房间保存已写回');
   // Remove the owner's token: the same room participant can edit only while unlocked.
-  await request.put(path+'/lock',{headers:h,data:{locked:true}});await page.evaluate(()=>{const oldValue=localStorage.getItem('dnd-qq-plugin');localStorage.removeItem('dnd-qq-plugin');window.dispatchEvent(new StorageEvent('storage',{key:'dnd-qq-plugin',oldValue,newValue:null}));});try{await expect(page.locator('.card-permission-banner').first()).toContainText('房间卡已锁定',{timeout:15000});await expect(edit).toBeDisabled();}finally{await test.info().attach('room-authorization-reads',{body:Buffer.from(JSON.stringify({reads:reads.slice(-20),visibility:await page.evaluate(()=>document.visibilityState),online:await page.evaluate(()=>navigator.onLine)})),contentType:'application/json'});}
+  await request.put(path+'/lock',{headers:h,data:{locked:true}});await page.bringToFront();environment=await page.evaluate(()=>({visibility:document.visibilityState,online:navigator.onLine,focused:document.hasFocus()}));saveReads();await page.evaluate(()=>{const oldValue=localStorage.getItem('dnd-qq-plugin');localStorage.removeItem('dnd-qq-plugin');window.dispatchEvent(new StorageEvent('storage',{key:'dnd-qq-plugin',oldValue,newValue:null}));});try{await expect(page.locator('.card-permission-banner').first()).toContainText('房间卡已锁定',{timeout:15000});await expect(edit).toBeDisabled();}finally{saveReads();await test.info().attach('room-authorization-reads',{path:diagnostic,contentType:'application/json'});}
   await page.screenshot({path:test.info().outputPath('qq-room-five-page.png')});
   const current=await(await request.get('/api/cards/'+card.id,{headers:h})).json();await request.delete(path,{headers:h});await request.delete('/api/cards/'+card.id,{headers:h,data:{revision:current.revision}});
 });
