@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import {automationProgressPlugin} from './tools/automationProgressPlugin.ts';
+import {qqReleaseProgress as automationProgressPlugin} from './tools/qqReleaseProgress.ts';
 import {offlineShell} from './tools/offlineShell.ts';
 import react from '@vitejs/plugin-react';
 import {startupPreload} from './tools/startupPreload.ts';

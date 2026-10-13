@@ -36,30 +36,42 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     response.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type, X-CSRF-Token, X-Room-Capability');
     response.setHeader('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
   }
+  let lastPrune=0;
   function grant(id:string){
-    store.db.prepare('DELETE FROM room_cards WHERE expires<=?').run(Date.now());
+    const now=Date.now();if(now-lastPrune>=60000){store.db.prepare('DELETE FROM room_cards WHERE expires<=?').run(now);lastPrune=now;}
     const row=store.db.prepare('SELECT * FROM room_cards WHERE id=? AND expires>?').get(id,Date.now()) as Grant|undefined;
     if(!row)throw new CloudError(404,'room_missing','房间卡已过期或被移除，请卡主重新加载。');return row;
   }
   const owner=(g:Grant,s?:Session)=>!!s&&store.db.prepare('SELECT 1 FROM cards WHERE id=? AND owner_id=?').get(g.card_id,s.account.id)!==undefined;
-  function authorized(g:Grant,request:IncomingMessage,s?:Session){
-    const capability=request.headers['x-room-capability'];
+  function authorized(g:Grant,request:IncomingMessage,s?:Session,capability:unknown=request.headers['x-room-capability']){
     const isOwner=owner(g,s);
     if(!isOwner&&(typeof capability!=='string'||capability.length>128||hash(capability)!==g.capability_hash))throw new CloudError(403,'room_forbidden','没有这张房间卡的访问权限。');
     const row=store.db.prepare('SELECT id,qq,extra_slots FROM accounts WHERE id=(SELECT owner_id FROM cards WHERE id=?)').get(g.card_id)!;
     const isEditor=!!s&&store.db.prepare('SELECT 1 FROM account_editors WHERE card_id=? AND account_id=?').get(g.card_id,s.account.id)!==undefined;
     return {isOwner,isEditor,account:{id:String(row.id),qq:row.qq===null?null:String(row.qq),extra_slots:Number(row.extra_slots)}};
   }
-  function roomResult(g:Grant,isOwner:boolean,account:Session['account'],isEditor=false,since?:string|null){
+  function roomResult(g:Grant,isOwner:boolean,account:Session['account'],isEditor=false,since?:string|null,summaryOnly=false){
     const summary=store.summary(g.card_id,account);
     const editors=isOwner?[...store.db.prepare('SELECT qq FROM editors WHERE card_id=? ORDER BY qq').all(g.card_id).map(row=>String(row.qq)),...store.db.prepare('SELECT account_id FROM account_editors WHERE card_id=? ORDER BY account_id').all(g.card_id).map(row=>String(row.account_id))]:undefined;
     const info={id:g.id,cardId:g.card_id,room:g.room,name:summary.name,revision:summary.revision,locked:!!g.locked,owner:isOwner,editor:isEditor,ownerAccountId:account.id,ownerNickname:store.qqProfile(account.id)?.nickname||'卡主',editors,write:isOwner||isEditor||!g.locked};
+    if(summaryOnly)return {...info,summary:true};
     if(since===String(summary.revision))return {...info,unchanged:true};
     const card=store.read(g.card_id,account);
     const document=normalizeLegacyUpload(card.character);
     return {...info,character:card.character,document:{...document,_suiteRevision:card.revision}};
   }
-  return {session,cors,async handle(request:IncomingMessage,response:ServerResponse,url:URL,s:Session|undefined,cookieToken:string|undefined,body:()=>Promise<Record<string,unknown>>,send:(status:number,value:unknown)=>void){
+  const changeScopes=(request:IncomingMessage,s:Session|undefined,rooms:unknown)=>{
+    if(!allowed.has(request.headers.origin||''))throw new CloudError(403,'origin','请从已配置的网站或枭熊插件读取变更。');
+    if(rooms!==undefined&&(!Array.isArray(rooms)||rooms.length>32))throw new CloudError(400,'changes_scope','一次最多读取 32 张房间卡的变更。');
+    const keys=s?['account:'+s.account.id]:[];
+    for(const room of (rooms||[]) as unknown[]){
+      if(!room||typeof room!=='object'||typeof (room as {id?:unknown}).id!=='string'||!/^[a-f0-9-]{36}$/.test((room as {id:string}).id))throw new CloudError(400,'changes_scope','房间卡变更范围无效。');
+      const row=room as {id:string;capability?:unknown},g=grant(row.id);authorized(g,request,s,row.capability);keys.push('room:'+g.id);
+    }
+    if(!keys.length)throw new CloudError(401,'login_required','请先登录 QQ，或使用当前房间卡的有效授权。');
+    return [...new Set(keys)].sort();
+  };
+  return {session,cors,changeScopes,async handle(request:IncomingMessage,response:ServerResponse,url:URL,s:Session|undefined,cookieToken:string|undefined,body:()=>Promise<Record<string,unknown>>,send:(status:number,value:unknown)=>void){
     const method=request.method;
     if(url.pathname==='/api/plugin/start'&&method==='POST'){
       const data=await body(),source=request.headers.origin||origin;
@@ -91,7 +103,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     if(url.pathname==='/api/plugin/logout'&&method==='POST'){
       const header=request.headers.authorization;if(!header?.startsWith('Bearer '))throw new CloudError(400,'plugin_required','请从插件发起退出；网站登录请使用网站的退出。');
       if(!s||!safeEqual(request.headers['x-csrf-token'],s.csrf))throw new CloudError(403,'login_required','登录已失效。');
-      store.db.prepare('DELETE FROM plugin_sessions WHERE token_hash=?').run(hash(header.slice(7)));send(200,{ok:true});return true;
+      store.db.prepare('DELETE FROM plugin_sessions WHERE token_hash=?').run(hash(header.slice(7)));store.accountChanged(s.account.id);send(200,{ok:true});return true;
     }
     const load=/^\/api\/cards\/([A-Z]{6}|[a-f0-9-]{36})\/rooms$/.exec(url.pathname);
     if(load&&method==='POST'){
@@ -102,18 +114,20 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
       const existing=store.db.prepare('SELECT id FROM room_cards WHERE card_id=? AND room=?').get(card.id,data.room);
       const id=existing?String(existing.id):randomUUID(),capability=secret(),expires=Date.now()+7*86400000;
       store.db.prepare('INSERT INTO room_cards VALUES(?,?,?,?,1,?) ON CONFLICT(card_id,room) DO UPDATE SET capability_hash=excluded.capability_hash,expires=excluded.expires').run(id,card.id,data.room,hash(capability),expires);
+      store.roomChanged(id);
       send(201,{...roomResult(grant(id),true,s.account),capability,expiresAt:expires});return true;
     }
     const match=/^\/api\/room-cards\/([a-f0-9-]{36})(?:\/(lock))?$/.exec(url.pathname);
     if(!match)return false;
     const g=grant(match[1]),auth=authorized(g,request,s);
-    if(method==='GET'&&!match[2]){send(200,roomResult(g,auth.isOwner,auth.account,auth.isEditor,url.searchParams.get('since')));return true;}
+    if(method==='GET'&&!match[2]){send(200,roomResult(g,auth.isOwner,auth.account,auth.isEditor,url.searchParams.get('since'),url.searchParams.get('summary')==='1'));return true;}
     if(!allowed.has(request.headers.origin||''))throw new CloudError(403,'origin','请从已配置的枭熊插件操作。');
     if(match[2]&&method==='PUT'){
       if(!auth.isOwner||!safeEqual(request.headers['x-csrf-token'],s!.csrf))throw new CloudError(403,'owner_only','只有卡主可以解锁或重新锁定房间卡。');
       const data=await body();if(typeof data.locked!=='boolean')throw new CloudError(400,'lock_required','请选择锁定或解锁。');
       const live=liveSession(request,cookieToken);if(!owner(g,live)||!safeEqual(request.headers['x-csrf-token'],live!.csrf))throw new CloudError(403,'owner_only','登录状态已改变，请卡主重新连接。');
       store.db.prepare('UPDATE room_cards SET locked=? WHERE id=?').run(data.locked?1:0,g.id);
+      store.roomChanged(g.id);
       send(200,roomResult(grant(g.id),true,auth.account));return true;
     }
     if(method==='PUT'&&!match[2]){
@@ -129,7 +143,7 @@ export function pluginAccess(store:CloudStore,origin:string,extraOrigins:string[
     }
     if(method==='DELETE'&&!match[2]){
       if(!auth.isOwner||!safeEqual(request.headers['x-csrf-token'],s!.csrf))throw new CloudError(403,'owner_only','只有卡主可以移除房间授权。');
-      store.db.prepare('DELETE FROM room_cards WHERE id=?').run(g.id);send(200,{ok:true});return true;
+      store.db.prepare('DELETE FROM room_cards WHERE id=?').run(g.id);store.roomChanged(g.id);send(200,{ok:true});return true;
     }
     throw new CloudError(405,'method','此接口不支持该操作。');
   }};

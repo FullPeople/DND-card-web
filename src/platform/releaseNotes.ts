@@ -1,7 +1,13 @@
-export const RELEASE_DATE='2026-10-12';
+export const RELEASE_DATE='2026-10-13';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
+const RELEASE_287_SECTIONS:ReleaseSection[]=[
+ {title:'扩展资料与阅读修复',items:['从职业等分类打开自定义扩展条目时，保留当前分类并显示正文。','修复含小写字母的扩展来源无法显示子职的问题。','神祇、职业和子职特性引用现在显示名称或别名，不再误显示来源代码。']},
+ {title:'法术与起始装备修复',items:['取消或替换赠送法术的选择后，角色卡仍能保存和重新打开；已消耗次数保留。','施法子职可以选择来源声明的扩展法表，法术环级和解锁等级继续生效。','起始装备中的赌具、工匠工具和乐器现在可以选择并领取。']},
+ {title:'问题反馈',items:['公告中的 GitHub Issues 链接已修正，打开后进入当前网站仓库的问题列表。']}
+];
 
 const SHARED_SECTIONS:ReleaseSection[]=[
+ {title:'云端权限与同步修复',items:['切换账号、返回前台或卡主撤回权限后，迟到的旧回复不会重新开放编辑；未获授权的 DM 继续只读。','云端修改通过轻量通知接收，正文未变时仍核对权限；本机草稿与未确认的保存结果继续保留。','单个房间连接失效时，其他卡继续同步；恢复连接后重新核验权限。']},
  {title:'资料浏览与响应修复',items:['资料浏览可同时显示 2014 与 2024，只读卡也能切换资料版本和简写；角色计算规则仍按原权限修改。','修正云端卡的只读原因提示，房间工作区分别持有编辑锁和恢复库。','单选按钮清楚标出选中项；个人配色更改立即显示，角色卡无配色修改权时说明原因。','角色簿拖影显示完整角色行，云端设置弹窗统一排版；首次加载页签保留原区域的加载反馈。','减少 QQ 会话和大卡目录的重复处理，切换账号后旧请求不能复用上一账号的目录。']},
  {title:'账号权限与界面更新',items:['撤回云端卡编辑权限后，编辑、快捷修改和自动写回会一起停止；卡主未授权的房间成员继续只读。','QQ 配对登录增加双方核对码；云端原卡的删除操作集中在独立网站。','调色盘增加六套配色和实时示例，角色簿支持拖动排序，统一常用图标与弹窗。','优化卡库切换动画，修复导入卡稍后加载的未填项再次出现，以及相同版本重复提示更新的问题。']},
  {title:'界面与通信更新',items:['提高界面文字和按钮边界的对比度，统一常用操作图标；短选项使用分段按钮。','减少重复读取和直连消息的中继副本，中继支持 WebSocket 推送并保留断线回退。']},
@@ -423,7 +429,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?SUITE_RELEASE_SECTIONS:QQ_ACCOUNT_SECTIONS;export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+export const releaseSectionsFor=(_mode:'standalone'|'suite'):ReleaseSection[]=>RELEASE_287_SECTIONS;export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE,sections:RELEASE_287_SECTIONS},
  ...(mode==='suite'?[{title:'2026-10-10-273',sections:IMPORT_ENTRY_SECTIONS},{title:'2026-10-10-272',sections:EXCEL_IMPORT_SECTIONS},{title:'2026-10-10-270',sections:SUITE_RELEASE_270_SECTIONS},{title:'2026-10-10-266',sections:SUITE_RELEASE_266_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:'2026-10-10-273',sections:IMPORT_ENTRY_SECTIONS},{title:'2026-10-10-272',sections:EXCEL_IMPORT_SECTIONS},{title:'2026-10-10-268',sections:STANDALONE_268_SECTIONS},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},

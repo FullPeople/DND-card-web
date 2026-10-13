@@ -5,7 +5,7 @@ import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
 import {APP_VERSION,ANNOUNCEMENT_KEY} from '../../src/platform/announcement';
 
-const feedbackUrl='https://github.com/FullPeople/DND-card/issues';
+const feedbackUrl='https://github.com/FullPeople/DND-card-web/issues';
 const languageKey='dnd-card:ui-language';
 function card(){
  const c=newCharacter();c.name='语言验收角色';c.abilities.str=18;c.abilities.wis=16;c.baseHp=22;c.runtime.hp=9;c.automation=newAutomationState();c.training={weapons:'简易武器'};c.runtime.resources.fixture={name:'保持已用次数',max:3,current:1};

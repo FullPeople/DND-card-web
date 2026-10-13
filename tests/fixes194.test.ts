@@ -22,6 +22,14 @@ describe('194 reported regressions',()=>{
   expect(plainText('仍处于{@quickref 掩护||3||全身掩护}状态。')).toBe('仍处于全身掩护状态。');
   expect(inlineLabel('spell','测试|PHB|别名')).toBe('别名');expect(inlineLabel('dice','1d6|测试骰')).toBe('测试骰');
  });
+ it('uses each reference tag schema instead of displaying a source code',()=>{
+  expect(inlineLabel('deity','班恩|费伦|FRHoF')).toBe('班恩');
+  expect(inlineLabel('deity','班恩|费伦|FRHoF|暴君')).toBe('暴君');
+  expect(inlineLabel('classFeature','诡诈打击|游荡者|XPHB|5|XPHB')).toBe('诡诈打击');
+  expect(inlineLabel('classFeature','诡诈打击|游荡者|XPHB|5|XPHB|狡诈打击')).toBe('狡诈打击');
+  expect(inlineLabel('subclassFeature','嗜血|游荡者|XPHB|三神门徒|FRHoF|3|FRHoF')).toBe('嗜血');
+  expect(inlineLabel('subclassFeature','嗜血|游荡者|XPHB|三神门徒|FRHoF|3|FRHoF|血之渴望')).toBe('血之渴望');
+ });
  it('enforces multiclass only on new additions, retaining existing class levels',()=>{
   const c=newCharacter('2014');add(c,entry('class','甲',{hd:{faces:8}}),8);const b=entry('class','乙',{hd:{faces:6}});
   expect(candidateReason(c,b)).toContain('兼职');c.profile.optional.multiclass=true;expect(candidateReason(c,b)).toBeUndefined();add(c,b,3);c.profile.optional.multiclass=false;expect(evaluate(c).level).toBe(11);

@@ -1,0 +1,332 @@
+{
+  "character": {
+    "schemaVersion": 1,
+    "id": "authored-source-spell-287",
+    "revision": 1,
+    "name": "赠送法术保存回归",
+    "player": "",
+    "edition": "2024",
+    "createdAt": "2026-10-13T00:00:00.000Z",
+    "updatedAt": "2026-10-13T00:00:00.000Z",
+    "abilities": {
+      "str": 10,
+      "dex": 10,
+      "con": 10,
+      "int": 10,
+      "wis": 10,
+      "cha": 10
+    },
+    "racialAbilityMode": "separate-v1",
+    "baseHp": 0,
+    "identity": {
+      "gender": "",
+      "alignment": "",
+      "age": "",
+      "description": ""
+    },
+    "selections": [
+      {
+        "id": "gift-owner",
+        "entry": {
+          "id": "kiwee:class:xphb:authored%20gift%20owner::::::",
+          "kind": "class",
+          "name": "原创赠送职业",
+          "english": "Authored Gift Owner",
+          "source": "XPHB",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "fixture",
+          "entries": [],
+          "raw": {
+            "name": "原创赠送职业",
+            "ENG_name": "Authored Gift Owner",
+            "source": "XPHB",
+            "hd": {
+              "faces": 8
+            },
+            "classFeatures": [],
+            "featProgression": [
+              {
+                "name": "原创赠送选择",
+                "category": [
+                  "G"
+                ],
+                "progression": {
+                  "4": 1
+                }
+              }
+            ],
+            "_category": "class"
+          }
+        },
+        "level": 4,
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "id": "chosen:2459378780-458860026",
+        "entry": {
+          "id": "kiwee:feat:xphb:authored%20gift%20feat::::::",
+          "kind": "feat",
+          "name": "原创赠送专长",
+          "english": "Authored Gift Feat",
+          "source": "XPHB",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "fixture",
+          "entries": [
+            "原创保存回归专长。"
+          ],
+          "raw": {
+            "name": "原创赠送专长",
+            "ENG_name": "Authored Gift Feat",
+            "source": "XPHB",
+            "category": "G",
+            "additionalSpells": [
+              {
+                "ability": "int",
+                "innate": {
+                  "_": {
+                    "daily": {
+                      "2": [
+                        "原创赠送术|XPHB"
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "entries": [
+              "原创保存回归专长。"
+            ],
+            "_category": "feat"
+          }
+        },
+        "level": 1,
+        "quantity": 1,
+        "equipped": false,
+        "parentId": "gift-owner",
+        "grantKey": "choice:gift-owner:class-feat:0:4:0:kiwee:feat:xphb:authored%20gift%20feat::::::",
+        "requirementId": "gift-owner:class-feat:0:4:0"
+      },
+      {
+        "id": "auto-spell:chosen:2459378780-458860026:source-spell%3A0%2Finnate%2F_%2Fdaily%2F2%2F%E5%8E%9F%E5%88%9B%E8%B5%A0%E9%80%81%E6%9C%AF%7Cxphb",
+        "entry": {
+          "id": "kiwee:spell:xphb:authored%20gift%20spell::::::",
+          "kind": "spell",
+          "name": "原创赠送术",
+          "english": "Authored Gift Spell",
+          "source": "XPHB",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "fixture",
+          "entries": [
+            "原创保存回归法术。"
+          ],
+          "raw": {
+            "name": "原创赠送术",
+            "ENG_name": "Authored Gift Spell",
+            "source": "XPHB",
+            "level": 1,
+            "school": "A",
+            "entries": [
+              "原创保存回归法术。"
+            ],
+            "_category": "spell"
+          }
+        },
+        "quantity": 1,
+        "level": 1,
+        "equipped": false,
+        "parentId": "chosen:2459378780-458860026",
+        "grantKey": "source-spell:0/innate/_/daily/2/原创赠送术|xphb"
+      }
+    ],
+    "answers": {
+      "gift-owner:class-feat:0:4:0": [
+        "kiwee:feat:xphb:authored%20gift%20feat::::::"
+      ]
+    },
+    "reviewed": [],
+    "notes": "保存前的独立笔记",
+    "profile": {
+      "enabledSources": [
+        "PHB",
+        "XPHB"
+      ],
+      "optional": {
+        "feats": true,
+        "multiclass": false,
+        "legacy": false
+      },
+      "exceptions": {}
+    },
+    "runtime": {
+      "hp": 0,
+      "tempHp": 0,
+      "inspiration": 0,
+      "resources": {
+        "innate-spell:auto-spell:chosen:2459378780-458860026:source-spell%3A0%2Finnate%2F_%2Fdaily%2F2%2F%E5%8E%9F%E5%88%9B%E8%B5%A0%E9%80%81%E6%9C%AF%7Cxphb": {
+          "name": "原创赠送术 · 原创赠送专长",
+          "max": 2,
+          "current": 1,
+          "type": "count"
+        },
+        "hit-die:8": {
+          "name": "生命骰 d8",
+          "max": 4,
+          "current": 4,
+          "type": "count",
+          "icon": "gem",
+          "automatic": true
+        }
+      },
+      "sourceSpellSpent": {
+        "[\"[\\\"gift-owner\\\",\\\"choice:gift-owner:class-feat:0:4:0:kiwee:feat:xphb:authored%20gift%20feat::::::\\\"]\",\"source-spell:0/innate/_/daily/2/原创赠送术|xphb\"]": 0
+      }
+    },
+    "automation": {
+      "protocol": 2,
+      "enabled": true,
+      "defaultsVersion": 1,
+      "rulesVersion": "equipment.1"
+    },
+    "classChoiceSnapshots": {
+      "kiwee:feat:xphb:authored%20gift%20feat::::::": {
+        "id": "kiwee:feat:xphb:authored%20gift%20feat::::::",
+        "kind": "feat",
+        "name": "原创赠送专长",
+        "english": "Authored Gift Feat",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "fixture",
+        "entries": [
+          "原创保存回归专长。"
+        ],
+        "raw": {
+          "name": "原创赠送专长",
+          "ENG_name": "Authored Gift Feat",
+          "source": "XPHB",
+          "category": "G",
+          "additionalSpells": [
+            {
+              "ability": "int",
+              "innate": {
+                "_": {
+                  "daily": {
+                    "2": [
+                      "原创赠送术|XPHB"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "entries": [
+            "原创保存回归专长。"
+          ],
+          "_category": "feat"
+        }
+      }
+    },
+    "spellSettings": {
+      "mode": "prepared",
+      "ability": "int",
+      "capacity": 0,
+      "attackBonus": 0,
+      "dcBonus": 0,
+      "prepared": [],
+      "slots": {},
+      "capacityAdjustment": 0,
+      "special": {
+        "auto-spell:chosen:2459378780-458860026:source-spell%3A0%2Finnate%2F_%2Fdaily%2F2%2F%E5%8E%9F%E5%88%9B%E8%B5%A0%E9%80%81%E6%9C%AF%7Cxphb": {
+          "mode": "uses",
+          "max": 2,
+          "recovery": "long",
+          "label": "来源次数施法",
+          "sourceGrant": {
+            "ownerId": "chosen:2459378780-458860026",
+            "key": "source-spell:0/innate/_/daily/2/原创赠送术|xphb",
+            "usageKey": "[\"[\\\"gift-owner\\\",\\\"choice:gift-owner:class-feat:0:4:0:kiwee:feat:xphb:authored%20gift%20feat::::::\\\"]\",\"source-spell:0/innate/_/daily/2/原创赠送术|xphb\"]",
+            "canUseSlots": false,
+            "ability": "int",
+            "active": true,
+            "usage": "free"
+          }
+        }
+      }
+    }
+  },
+  "sourceBodies": {
+    "classBody": {
+      "class": [
+        {
+          "name": "原创赠送职业",
+          "ENG_name": "Authored Gift Owner",
+          "source": "XPHB",
+          "hd": {
+            "faces": 8
+          },
+          "classFeatures": [],
+          "featProgression": [
+            {
+              "name": "原创赠送选择",
+              "category": [
+                "G"
+              ],
+              "progression": {
+                "4": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "featBody": {
+      "feat": [
+        {
+          "name": "原创赠送专长",
+          "ENG_name": "Authored Gift Feat",
+          "source": "XPHB",
+          "category": "G",
+          "additionalSpells": [
+            {
+              "ability": "int",
+              "innate": {
+                "_": {
+                  "daily": {
+                    "2": [
+                      "原创赠送术|XPHB"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "entries": [
+            "原创保存回归专长。"
+          ]
+        }
+      ]
+    },
+    "spellBody": {
+      "spell": [
+        {
+          "name": "原创赠送术",
+          "ENG_name": "Authored Gift Spell",
+          "source": "XPHB",
+          "level": 1,
+          "school": "A",
+          "entries": [
+            "原创保存回归法术。"
+          ]
+        }
+      ]
+    }
+  },
+  "expected": {
+    "grantedId": "auto-spell:chosen:2459378780-458860026:source-spell%3A0%2Finnate%2F_%2Fdaily%2F2%2F%E5%8E%9F%E5%88%9B%E8%B5%A0%E9%80%81%E6%9C%AF%7Cxphb",
+    "resource": "innate-spell:auto-spell:chosen:2459378780-458860026:source-spell%3A0%2Finnate%2F_%2Fdaily%2F2%2F%E5%8E%9F%E5%88%9B%E8%B5%A0%E9%80%81%E6%9C%AF%7Cxphb"
+  }
+}

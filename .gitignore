@@ -1,4 +1,6 @@
 node_modules/
+test-results-audit-room/
+test-results-cloud-notifications/
 .cache/
 dist/
 .env
@@ -6,6 +8,8 @@ dist/
 !.env.example
 work/
 test-results/
+test-results-pr-issues/
+test-results-pr-issues-public/
 playwright-report/
 *.log
 *.tsbuildinfo

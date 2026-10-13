@@ -1,6 +1,9 @@
 import './loadingPanel.css';
+import './announcement.css';
 import {legacyRecoveryIds} from '../platform/workspaceNamespace';
-import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock} from '../cloud/room';
+import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock,roomChangeScope,roomChangeNotice,invalidateRoomAuthorization} from '../cloud/room';
+import {watchCloudChanges} from '../cloud/changeWatch';
+import {queuedRefresh} from '../cloud/queuedRefresh';
 import {localGm} from '../cloud/localRights';
 import {CustomCopyDrop} from './CustomCopyDrop';
 import {customCopy} from '../core/customEntries';
@@ -47,12 +50,13 @@ import {uiEntryLabel} from './uiText';
 import {useEntryMenuActions} from './EntrySharing';
 import type {CharacterRow} from './CharacterManager';
 import {CloudCardControl} from '../cloud/CloudCardControl';
+import {RoomCardControl} from './RoomCardControl';
 import {CloudSaveProvider,CloudSaveControl} from '../cloud/CloudSave';
 import {characterHash,writeSyncReceipt} from '../cloud/sync';
 import {cloudCardLock} from '../cloud/sync';
 import {cloudSession,type CloudCard} from '../cloud/api';
 import {loadCloudBindings} from '../platform/storage';
-import {localCharacterRow} from './characterRows';
+import {createCharacterRowReader} from './characterRows';
 const CharacterManager=lazy(()=>import('./CharacterManager').then(m=>({default:m.CharacterManager})));
 const TransferPanel=lazy(()=>import('./TransferPanel').then(module=>({default:module.TransferPanel})));
 const CharacterReview=lazy(()=>import('./CharacterReview').then(module=>({default:module.CharacterReview})));
@@ -118,8 +122,8 @@ import type {SheetCaptureOptions} from '../platform/sheetImage';
 
 
 
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, newCharacter, selectionEffectsAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
+import { lazy, Suspense, startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, classMatches, newCharacter, selectionEffectsAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
 import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
 import { importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
 import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
@@ -167,6 +171,11 @@ function Box({ label, children, className = '', hint }: { label: string; childre
 }
 function RawDetails({entry}:{entry:Entry}){const [open,setOpen]=useState(false);return <details className="raw-details" onToggle={e=>setOpen(e.currentTarget.open)}><summary>数据与追溯</summary>{open&&<><dl><dt>条目身份</dt><dd>{entry.id}</dd><dt>资料修订</dt><dd>{entry.revision}</dd></dl><pre>{JSON.stringify(entry.raw,null,2)}</pre></>}</details>;}
 function PanelLoading({label,sheet=false}:{label:string;sheet?:boolean}){return <div className={`panel-loading${sheet?' sheet-details-loading':''}`} role="status"><p>{label}</p><div className="panel-loading-lines" aria-hidden="true"><i/><i/><i/></div></div>;}
+function AnnouncementLoading({mode}:{mode:'standalone'|'suite'}){
+ const {t}=useUiLanguage(),ref=useRef<HTMLDialogElement>(null);
+ useLayoutEffect(()=>{const node=ref.current!;node.showModal();return()=>node.close();},[]);
+ return <dialog className="announcement" ref={ref} aria-labelledby="announcement-title" aria-busy="true" onCancel={event=>event.preventDefault()}><div className="announcement-panel"><header className="announcement-head"><h2 id="announcement-title">{t(mode==='suite'?'welcomeSuite':'welcomeSite')}</h2><p className="announcement-version">{t('version',{version:announcementVersionFor(mode)})}</p></header><div className="announcement-body"><PanelLoading label="正在加载公告…"/></div><footer className="announcement-foot"><button className="primary" disabled>{t('gotIt')}</button></footer></div></dialog>;
+}
 function Dialog({ title, icon, subtitle, children, close }: { title: string; icon?: ReactNode; subtitle?: string; children: ReactNode; close: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => { ref.current?.showModal(); }, []);
@@ -213,6 +222,7 @@ export default function App() {
   const workbenchUncertain=useRef(new Map<string,{requestId:string;before:Character;after:Character}>());
   const workbenchPending=useRef(new Map<string,number>());
   const [workspace, setWorkspace] = useState<Workspace>();
+  const readCharacterRow=useMemo(()=>createCharacterRowReader(),[]);
   const workspaceRef = useRef<Workspace | undefined>(undefined);
   const [startupError, setStartupError] = useState('');
   const [workspaceReadOnly, setReadOnly] = useState(false);
@@ -220,7 +230,7 @@ export default function App() {
   // Read by persist/edit, which run from timers and key handlers with stale closures.
   const cloudAccessRef=useRef<Record<string,string|undefined>>({});cloudAccessRef.current=cloudAccess;
   const cloudRestriction=cloudAccess[workspace?.activeId||''];
-  const readOnlyReason=cloudRestriction||(workspaceReadOnly?(qqRoom?'房间卡已锁定或登录已失效，此页仅供查阅和导出。':'另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。'):undefined);
+  const readOnlyReason=cloudRestriction||(workspaceReadOnly?(qqRoom?['checking','expired'].includes(roomState()?.authorization||'')?'云端权限尚未核验或已过期，暂时不能写回。本机草稿保留，可查阅和导出。':'房间卡已锁定或登录已失效，此页仅供查阅和导出。':'另一标签页正在编辑，此页仅供查阅和导出。关闭另一页后将自动读取最新记录并接手。'):undefined);
   const readOnly=!!readOnlyReason;
   const [activateUpdate, setActivateUpdate] = useState<(() => void)>();
   const writable = useRef(false);
@@ -504,15 +514,20 @@ export default function App() {
   }, []);
   useEffect(()=>{
     if(!qqRoom)return;
-    let active=true,flight=false;
+    let active=true;
     const permissions=()=>{if(active)setReadOnly(!writable.current||!roomState()?.write);};
     const stop=subscribeRoom(permissions);
-    const refresh=async()=>{if(flight||document.visibilityState==='hidden')return;flight=true;try{
+    const refreshQueue=queuedRefresh(async()=>{if(!active||document.visibilityState==='hidden'||!navigator.onLine)return;try{
       const before=roomState()?.revision,next=await readRoom();permissions();
       if(active&&before!==undefined&&before!==next.revision&&pendingSaves.current===0&&!saveFailed.current&&!await hasRoomDraft())acceptWorkspace({schemaVersion:1,characters:[next.character],activeId:next.character.id,packs:next.character.rulePacks||[]});
-    }catch(error){if(active)setNotice(String(error));}finally{flight=false;}};
-    const timer=setInterval(()=>void refresh(),2500);window.addEventListener('focus',refresh);
-    return()=>{active=false;clearInterval(timer);stop();window.removeEventListener('focus',refresh);};
+    }catch(error){if(active)setNotice(String(error));throw error;}});
+    const refresh=()=>{void refreshQueue.request().catch(()=>{});};
+    const watcher=watchCloudChanges({scope:roomChangeScope,active:()=>document.visibilityState==='visible'&&navigator.onLine,request:roomChangeNotice,changed:refreshQueue.request,failed:()=>refresh()});
+    const wake=()=>{invalidateRoomAuthorization();watcher.wake();refresh();};
+    const accountChanged=(event:StorageEvent)=>{if(event.key==='dnd-qq-plugin')wake();};
+    const timer=setInterval(refresh,2500);window.addEventListener('focus',wake);window.addEventListener('online',wake);document.addEventListener('visibilitychange',wake);
+    window.addEventListener('storage',accountChanged);window.addEventListener('hashchange',wake);
+    return()=>{active=false;watcher.stop();refreshQueue.stop();clearInterval(timer);stop();window.removeEventListener('focus',wake);window.removeEventListener('online',wake);document.removeEventListener('visibilitychange',wake);window.removeEventListener('storage',accountChanged);window.removeEventListener('hashchange',wake);};
   },[]);
   useEffect(()=>{
     if(!standalone||qqRoom||inWorkbench)return;
@@ -528,11 +543,11 @@ export default function App() {
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e));
-        if(performance.now()-lastPublish>500){lastPublish=performance.now();setEntries([...catalogRef.current.values()]);}
-      }, setProgress, controller.signal, refresh, DEFAULT_SOURCE, sourceDisplay.merge,retryKeys);
-      if(!controller.signal.aborted)setEntries([...catalogRef.current.values()]);
+        if(performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
+      }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
+      if(!controller.signal.aborted)startTransition(()=>setEntries([...catalogRef.current.values()]));
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
-    finally { if (!controller.signal.aborted) setLoading(false); }
+    finally { if (!controller.signal.aborted) startTransition(()=>setLoading(false)); }
   }
   const [wikiUiError,setWikiUiError]=useState('');
   const [wikiUi,setWikiUi]=useState<typeof import('./WikiUi')>();
@@ -737,7 +752,7 @@ export default function App() {
     if(parent && selected?.grantKey?.startsWith('inline:'))return {entry:libraryEntries.find(e=>e.id===parent.entry.id)||parent.entry,focus:`name:${entry.name}`};
     if(entry.kind==='feature' && entry.raw.subclassShortName){const subclass=libraryEntries.find(e=>ownsSubclassFeature(e,entry));if(subclass)return {entry:subclass,focus:entry.id};}
     if(entry.kind==='feature' && entry.raw._category!=='itemMastery'){
-      const owner=libraryEntries.find(e=>e.kind==='class' && (entry.raw.className ? [e.name,e.english].includes(entry.raw.className) && (entry.raw.classSource||'PHB').toUpperCase()===e.source : e.edition===entry.edition && e.raw.optionalfeatureProgression?.some((p:any)=>p.featureType?.some((t:string)=>entry.raw.featureType?.includes(t)))));
+      const owner=libraryEntries.find(e=>e.kind==='class' && (entry.raw.className ? classMatches(entry,e) : e.edition===entry.edition && e.raw.optionalfeatureProgression?.some((p:any)=>p.featureType?.some((t:string)=>entry.raw.featureType?.includes(t)))));
       if(owner)return {entry:owner,focus:entry.id};
     }
     return {entry};
@@ -981,7 +996,7 @@ export default function App() {
     inWorkbench&&c.id.startsWith('suite:')&&wb.target&&workbenchCharacterId(wb.target)!==c.id?'选中的棋子已经切换，请等待角色资料加载完成。':
     workbenchUncertain.current.has(c.id)?'上一项修改尚未确认，请先核对枭熊数据。':undefined;
   const managerId=inWorkbench?wb.target?.cardId||'':c.id;
-  const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,cloudRoom:row.cloudRoom,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...localCharacterRow(withSiteSources(row,workspace.siteSources,workspace.packs)),write:!workspaceReadOnly,cloudReadOnly:!!cloudAccess[row.id]}));
+  const managerRows:CharacterRow[]=!['characters','export'].includes(modal)?[]:inWorkbench?wb.cards.map(row=>({id:row.id,name:row.name,cloudRoom:row.cloudRoom,player:row.player,write:row.write,locked:row.locked,inScene:row.inScene,hp:row.stats?.health,maxHp:row.stats?.['max health'],ac:row.stats?.['armor class']})):workspace.characters.map(row=>({...readCharacterRow(row,workspace.siteSources,workspace.packs),write:!workspaceReadOnly,cloudReadOnly:!!cloudAccess[row.id]}));
   return <CloudSaveProvider enabled={standalone&&!inWorkbench&&!qqRoom} disabled={workspaceReadOnly} characters={workspace.characters} receive={receiveCloudCard} importCard={importCloudCard} access={rights=>setCloudAccess(old=>sameValue(old,rights)?old:rights)} readCharacter={async id=>{await queue.current;if(saveFailed.current||!writable.current)throw Error('本机保存尚未成功，云端同步已暂停。请先导出备份。');const card=workspaceRef.current?.characters.find(row=>row.id===id);if(!card)throw Error('角色已不存在');return card;}}><OverviewDashboardHost><SheetChoicesContext.Provider value={choicesSnapshot}><ChoiceWorkspaceContext.Provider value={{id:activeChoice?.id,host:choiceRoute?.host,coverOverview:sheetPage==='主要',canEdit:!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write),browse:()=>{exitSheetFullscreen();setTab('wiki');},open:openChoice,close:closeChoice}}><KeywordPreview readableEntry={inWorkbench?entry=>{const same=(row:Entry)=>row.id===entry.id&&row.source===entry.source&&row.packId===entry.packId&&row.edition===entry.edition;return selectedEntries.find(same)||allEntries.find(same);}:undefined} isExcluded={entry=>explicitlyExcluded(c,entry)} resolve={resolveReference} open={link} sheetPreview={entry=>library.preview(entry&&librarySourceEnabled(c,entry)?readingTarget(entry):undefined)} sheetCommit={entry=>inspect(entry)}><EntryDragProvider preservePage={!!activeChoice} editing={editing&&(!inWorkbench||!!wb.target?.write)} disabledReason={dragDisabledReason} character={c} receive={entry => add(entry)}><div className="app-shell compact-layout" data-workbench-page={inWorkbench?workbenchPage:undefined} onDragStart={event => event.preventDefault()}>
     <header className="app-header"><a className="brand" href="#" onClick={e => { e.preventDefault();setTab('sheet');if(inWorkbench)setWorkbenchPage('console'); }}><img className="brand-logo" src={standalone?'./dnd-center-icon.png':startupComplete?'./exe_icon.png':'./favicon.svg'} alt=""/><strong>{standalone?t('cardBrand'):'Full Suite'}</strong></a>
       <div className="header-tools">
@@ -1004,7 +1019,7 @@ export default function App() {
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {inWorkbench&&<WorkbenchPermissionNotice/>}{showClassReview&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
         <SheetEditContext.Provider value={editing&&!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}>{cloudAccess[c.id]&&<aside className="class-compatibility-banner card-permission-banner" role="status"><p>{cloudAccess[c.id]}</p></aside>}<PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
-          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{inWorkbench&&(wb.target?.cloudRoom||wb.qqAccount?.id)?<CloudRoomControl upload={async()=>{const key=wb.target?.key,account=wb.qqAccount?.id;let saved;do{saved=queue.current;await saved;}while(saved!==queue.current);if(key)await flushWorkbenchSaves(key);if(saveFailed.current||pendingSaves.current>0)throw Error('保存尚未成功，请先核对角色卡。');const latest=getWorkbench(),workspace=workspaceRef.current,native=workspace?.characters.find(row=>row.id===workspace.activeId);if(latest.target?.key!==key||latest.qqAccount?.id!==account||!native||!latest.target?.write||native.id!==c.id)throw Error('当前角色卡或编辑权限已改变，请重新打开云端设置。');return workbenchRequest('cloudUpload',{key,itemId:wb.target?.targetId||wb.target?.itemId,native,accountId:account});}}/>:standalone?<CloudCardControl id={c.id} name={c.name} locked={!!c.locked} lock={()=>edit(draft=>{draft.locked=!draft.locked;})}/>:<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={!!qqRoom||inWorkbench&&(!wb.online||!wb.target?.write)} title={qqRoom?'房间卡的锁定由卡主在枭熊插件的 QQ 卡库中管理':undefined} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}>{c.locked?<LockClosedIcon size={18}/>:<LockOpenIcon size={18}/>}</button>}</span></div>
+          <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{qqRoom?<RoomCardControl flush={async()=>{await queue.current;if(saveFailed.current&&!await hasRoomDraft())throw Error('本机草稿尚未保存，请先导出备份。');}}/>:inWorkbench&&(wb.target?.cloudRoom||wb.qqAccount?.id)?<CloudRoomControl upload={async()=>{const key=wb.target?.key,account=wb.qqAccount?.id;let saved;do{saved=queue.current;await saved;}while(saved!==queue.current);if(key)await flushWorkbenchSaves(key);if(saveFailed.current||pendingSaves.current>0)throw Error('保存尚未成功，请先核对角色卡。');const latest=getWorkbench(),workspace=workspaceRef.current,native=workspace?.characters.find(row=>row.id===workspace.activeId);if(latest.target?.key!==key||latest.qqAccount?.id!==account||!native||!latest.target?.write||native.id!==c.id)throw Error('当前角色卡或编辑权限已改变，请重新打开云端设置。');return workbenchRequest('cloudUpload',{key,itemId:wb.target?.targetId||wb.target?.itemId,native,accountId:account});}}/>:standalone?<CloudCardControl id={c.id} name={c.name} locked={!!c.locked} lock={()=>edit(draft=>{draft.locked=!draft.locked;})}/>:<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={!!qqRoom||inWorkbench&&(!wb.online||!wb.target?.write)} title={qqRoom?'房间卡的锁定由卡主在枭熊插件的 QQ 卡库中管理':undefined} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}>{c.locked?<LockClosedIcon size={18}/>:<LockOpenIcon size={18}/>}</button>}</span></div>
           {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
 </> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><Suspense fallback={<PanelLoading label={`正在加载${sheetPage}…`} sheet/>}><div className="sheet-details">
           <div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
@@ -1038,7 +1053,7 @@ export default function App() {
       </section></>}
     </main>
       <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)} disabledReason={readOnlyReason||(inWorkbench?wb.online?'卡主未授予当前玩家编辑这张卡的权限。':'房间连接尚未恢复，暂时无法修改角色卡配色。':undefined)}/>
-    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<Suspense fallback={<p role="status">正在加载公告…</p>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
+    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<Suspense fallback={<AnnouncementLoading mode={inWorkbench?'suite':'standalone'}/>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
     {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
       <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<PanelLoading label="正在加载面板…"/>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}

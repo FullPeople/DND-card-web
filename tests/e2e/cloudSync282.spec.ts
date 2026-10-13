@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 import {mockSource,suppressAnnouncement} from './fixtures';
 const base='http://127.0.0.1:5320';
 test.setTimeout(120000);
@@ -42,5 +42,26 @@ test('independent room and standalone pages exchange edits through the original 
   expect((await request.put('/api/room-cards/'+room.id+'/lock',{headers,data:{locked:true}})).status()).toBe(200);
   const restricted=await(await roomContext.request.get(base+'/api/room-cards/'+room.id,{headers:{Origin:base,'X-Room-Capability':room.capability}})).json();expect(restricted.owner).toBe(false);expect(restricted.locked).toBe(true);expect(restricted.write).toBe(false);
   await roomPage.bringToFront();await expect(roomPage.getByRole('switch',{name:'编辑模式'})).toBeDisabled({timeout:10000});await expect(roomPage.locator('.card-permission-banner').first()).toContainText('房间卡已锁定');await expect(page.getByRole('switch',{name:'编辑模式'})).toBeEnabled();
- }finally{await roomContext.close();const latest=await(await request.get('/api/cards/'+card.id,{headers})).json();await request.delete('/api/cards/'+card.id,{headers,data:{revision:latest.revision}});}
+ }finally{for(const roomPage of roomContext.pages())await roomPage.unrouteAll({behavior:'ignoreErrors'});await roomContext.close();const latest=await(await request.get('/api/cards/'+card.id,{headers})).json();await request.delete('/api/cards/'+card.id,{headers,data:{revision:latest.revision}});}
+});
+test('foreground invalidation keeps editing disabled after an old GET until a new authorization GET completes',async({page})=>{
+ const f=JSON.parse(readFileSync('evidence/cloud-fixture.json','utf8')),id=crypto.randomUUID(),state={id,cardId:'synthetic-original',revision:1,locked:false,owner:false,write:true,character:{...f.card.character,id:crypto.randomUUID(),name:'前台核验回归'}};
+ let stage='normal',releaseOld:(()=>void)|undefined,releaseNew:(()=>void)|undefined;const events:{stage:string;at:number}[]=[];
+ await mockSource(page);await suppressAnnouncement(page);
+ await page.route('https://dnd.center/api/**',async route=>{
+  const url=new URL(route.request().url());if(url.pathname==='/api/changes'){await new Promise(resolve=>setTimeout(resolve,400));await route.fulfill({json:{accountId:null,cursor:'a'.repeat(64),changed:false}});return;}
+  if(url.pathname.startsWith('/api/room-cards/')){
+   const captured={...state,...url.searchParams.has('since')?{unchanged:true,character:undefined}:{}};
+   if(stage==='hold-old'){events.push({stage:'old GET started',at:Date.now()});await new Promise<void>(resolve=>releaseOld=resolve);}
+   else if(stage==='hold-new'){events.push({stage:'new GET started',at:Date.now()});await new Promise<void>(resolve=>releaseNew=resolve);}
+   await route.fulfill({json:captured});return;
+  }
+  await route.fulfill({json:{authenticated:false}});
+ });
+ try{
+  await page.goto(base+'/card/?intro=0&qqRoom='+id+'#cap=synthetic-proof');const edit=page.getByRole('switch',{name:'编辑模式'});await expect(edit).toBeEnabled();
+  stage='hold-old';await expect.poll(()=>!!releaseOld,{timeout:5000}).toBe(true);await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(edit).toBeDisabled();events.push({stage:'foreground checking disables editor',at:Date.now()});
+  stage='hold-new';releaseOld!();await expect.poll(()=>!!releaseNew).toBe(true);await expect(edit).toBeDisabled();events.push({stage:'old GET cannot reopen editor',at:Date.now()});
+  stage='normal';releaseNew!();await expect(edit).toBeEnabled();events.push({stage:'new GET verifies editor',at:Date.now()});const result=JSON.stringify({events,syntheticHTTP:true,realQQ:false,realRoom:false},null,2);writeFileSync('evidence/foreground-authorization-events.json',result+'\n');await test.info().attach('foreground-authorization-events',{body:result,contentType:'application/json'});
+ }finally{releaseOld?.();releaseNew?.();await page.unrouteAll({behavior:'ignoreErrors'});}
 });
