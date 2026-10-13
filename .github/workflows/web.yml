@@ -69,6 +69,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - group: pr-issue-regressions
+            commands: |
+              npm run build:cloud
+              npx playwright test --config playwright.pr-issues.config.ts
           - group: automation-progress
             commands: |
               npx playwright test --config playwright.automation-progress.config.ts
