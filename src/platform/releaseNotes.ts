@@ -1,5 +1,10 @@
-export const RELEASE_DATE='2026-10-13';
+export const RELEASE_DATE='2026-10-14';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
+const release290=(_mode:'standalone'|'suite'):ReleaseSection[]=>[
+ {title:'Wiki 资料摘要',items:['增加译者与机翻提示、职业兼职和生命值摘要，以及背景、专长和神祇的特殊字段。','来源与版本可查看其他出处、规则开放标记和已载入的重印关联；保留属性及熟练的自选条件。']},
+ {title:'简介、图片与子职阅读',items:['职业、种族、背景、装备和怪物等资料增加按需读取的简介与图片；图片由你主动打开。','支持最多三个子职按等级并排比较，原始资料可展开核对。']},
+ {title:'书籍与冒险',items:['Wiki 新增书籍和冒险阅读入口，支持目录、章节切换、章节链接及本机阅读进度恢复。','章节中的正文、列表、表格和规则引用可以查阅；插图主动打开，加载失败可以重试。']}
+];
 const release288=(mode:'standalone'|'suite'):ReleaseSection[]=>[
  ...(mode==='standalone'?[{title:'独立 Wiki',items:['新增 dnd.center/wiki/，直接查阅规则资料，不需要先打开角色卡。','支持 2014 / 2024 筛选、正文链接分享和收藏；子职、职业能力与其他资料可以按类型查找。']}]:[]),
  {title:'问题反馈',items:['公告大字和说明已改为邮件反馈提示，邮箱和 GitHub Issues 入口保留。']}
@@ -433,9 +438,10 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release288(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:RELEASE_DATE+'-二',sections:release288(mode)},
- {title:RELEASE_DATE,sections:RELEASE_287_SECTIONS},
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release290(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE,sections:release290(mode)},
+ {title:'2026-10-13-二',sections:release288(mode)},
+ {title:'2026-10-13',sections:RELEASE_287_SECTIONS},
  ...(mode==='suite'?[{title:'2026-10-10-273',sections:IMPORT_ENTRY_SECTIONS},{title:'2026-10-10-272',sections:EXCEL_IMPORT_SECTIONS},{title:'2026-10-10-270',sections:SUITE_RELEASE_270_SECTIONS},{title:'2026-10-10-266',sections:SUITE_RELEASE_266_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:'2026-10-10-273',sections:IMPORT_ENTRY_SECTIONS},{title:'2026-10-10-272',sections:EXCEL_IMPORT_SECTIONS},{title:'2026-10-10-268',sections:STANDALONE_268_SECTIONS},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
  {title:'2026-10-09-259',sections:mode==='suite'?SUITE_RELEASE_259_SECTIONS:RELEASE_259_SECTIONS},

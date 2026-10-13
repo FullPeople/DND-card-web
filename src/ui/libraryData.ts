@@ -2,6 +2,7 @@ import { compareSources, SOURCE_SEED, type SourceMeta } from './SourceName';
 const collator = new Intl.Collator('zh-CN', { numeric: true });
 import { entryEdition, ABILITY_LABELS, type Ability, type Character, type Entry, type Kind } from '../core/model';
 import {trainingCategory} from './trainingData';
+import {translationInfo} from './wikiMetadata';
 
 export const LIBRARY_TABS = { class: '职业', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', condition: '状态', rule: '术语汇编', language: '语言', size: '体型', weaponProperty: '装备词条', weaponMastery: '武器精通', monster: '怪物图鉴', reference: '其他资料', custom:'自定义', favorites:'收藏' };
 export type LibraryTab = keyof typeof LIBRARY_TABS;
@@ -85,7 +86,7 @@ export function compareEntries(a: Entry, b: Entry, column: Column, descending: b
 export type Facet = { key: string; label: string; values: (e: Entry) => string[] };
 const array = (v: unknown) => (Array.isArray(v) ? v : v == null ? [] : [v]).filter(v => typeof v === 'string' || typeof v === 'number').map(String);
 export function facetsFor(tab: LibraryTab): Facet[] {
-  const fields: Facet[] = [{ key: 'source', label: '来源', values: e => [e.source] }, { key: 'edition', label: '版本', values: e => [entryEdition(e) === 'both' ? '通用' : entryEdition(e)] }];
+  const fields: Facet[] = [{ key: 'source', label: '来源', values: e => [e.source] }, { key: 'edition', label: '版本', values: e => [entryEdition(e) === 'both' ? '通用' : entryEdition(e)] }, {key:'translation',label:'翻译状态',values:e=>[translationInfo(e.raw).status]}];
   for (const col of columnsFor(tab)) if (!['source', 'name', 'edition', 'weight', 'value'].includes(col.key)) fields.push({ key: col.key, label: col.label, values: e => { const v = col.value(e); return v === '' || v === '—' ? [] : [String(v)]; } });
   fields.push({ key: 'classList', label: '职业法术表', values: e => { const found: string[] = []; const walk = (v: unknown) => { if (!v || typeof v !== 'object') return; for (const [key, value] of Object.entries(v)) { if (value === true) found.push(key); else walk(value); } }; walk(e.raw._spellClasses); for (const item of e.raw.classes?.fromClassList || []) if (item.name) found.push(item.name); return [...new Set(found)]; } },
     { key: 'damage', label: '伤害类型', values: e => array(e.raw.damageInflict).map(translate) },

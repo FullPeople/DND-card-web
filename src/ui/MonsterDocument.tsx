@@ -3,6 +3,7 @@ import { ABILITY_LABELS, type Ability, type Entry } from '../core/model';
 import { Entries, Inline, RollLabelContext } from './Entries';
 import { SourceName } from './SourceName';
 import { speedText, translate } from './libraryData';
+import {EntryReadingExtras} from './EntryReadingExtras';
 
 const signed=(n:number)=>`${n>=0?'+':''}${n}`;
 const sizes:Record<string,string>={T:'微型',S:'小型',M:'中型',L:'大型',H:'巨型',G:'超巨型'};
@@ -34,6 +35,7 @@ export function MonsterDocument({entry,onLink,onEdit}:{entry:Entry;onLink:(refer
  }
  const sections:[string,unknown][]=[['特质',r.trait],['施法',r.spellcasting],['动作',r.action],['附赠动作',r.bonus],['反应',r.reaction],['传奇动作',r.legendary],['神话动作',r.mythic],['变体',r.variant],['巢穴动作',r._legendaryGroup?.lairActions],['区域效应',r._legendaryGroup?.regionalEffects],['神话遭遇',r._legendaryGroup?.mythicEncounter]];
  return <div className="monster-document rules-prose document-prose">
+ <EntryReadingExtras key={entry.id} entry={entry} onLink={onLink}/>
  <p {...area('classification','体型、类型与阵营')} className={`monster-classification ${onEdit?'canvas-region':''}`}><em>{list(r.size).map(s=>sizes[s]||s).join(' / ')} {type}{r.alignment?.length?`，${alignment(r.alignment)}`:''}</em></p>
  <div className="monster-basics"><div><p {...area('ac','怪物 AC')}><strong>AC</strong> {list(r.ac).map((a:any)=>typeof a==='number'?String(a):a.special||`${a.ac}${a.from?.length?`（${a.from.join('、')}）`:''}${a.condition||''}`).map((a:string,i:number)=><span key={i}>{i>0?' / ':''}<Inline text={a} onLink={onLink}/></span>)}</p><p {...area('hp','怪物 HP')}><strong>HP</strong> {r.hp?.special||<>{r.hp?.average??'—'}{r.hp?.formula&&<>（<Inline text={r.hp.formula} onLink={onLink}/>）</>}</>}</p><p {...area('speed','怪物速度')}><strong>速度</strong> {speedText(r.speed)}</p></div><p {...area('initiative','先攻')} className={`monster-initiative ${onEdit?'canvas-region':''}`}><strong>先攻</strong> {signed(initiative)}（{passiveInitiative}）</p></div>
  <div className="monster-abilities" aria-label="怪物属性与豁免">{([['str','int'],['dex','wis'],['con','cha']] as Ability[][]).map((group,i)=><div className="monster-ability-group" key={i}><div className="monster-ability-labels"><span/><span/><span>调整</span><span>豁免</span></div>{group.map(a=><div {...area(a,ABILITY_LABELS[a])} className={`monster-ability-row ${onEdit?'canvas-region':''}`} key={a}><strong>{ABILITY_LABELS[a]}</strong><span>{r[a]??'—'}</span><button className="rollable-stat" disabled={!!onEdit||!inWorkbench||r[a]==null} onClick={()=>composeRoll(`1d20${signed(mod(a))}`,`${ABILITY_LABELS[a]}检定`)}>{r[a]==null?'—':signed(mod(a))}</button><button className="rollable-stat" disabled={!!onEdit||!inWorkbench||r[a]==null} onClick={()=>composeRoll(`1d20${signed(Number(r.save?.[a]??mod(a)))}`,`${ABILITY_LABELS[a]}豁免`)}>{r.save?.[a]??(r[a]==null?'—':signed(mod(a)))}</button></div>)}</div>)}</div>
