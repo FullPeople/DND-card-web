@@ -23,8 +23,9 @@ describe('extension authoring and current-card synchronization',()=>{
   expect(matchesLibraryTab(displayed,'feat')).toBe(true);
   expect(navigationTab(displayed,'feat')).toBe('feat');
   expect(navigationTab(displayed,'favorites')).toBe('favorites');
-  expect(navigationTab(displayed,'spell')).toBe('custom');
-  expect(navigationTab(displayed)).toBe('custom');
+  expect(navigationTab(displayed,'spell')).toBe('feat');
+  expect(navigationTab(displayed)).toBe('feat');
+  expect(navigationTab({...displayed,raw:{...displayed.raw,_workbenchCustom:true}})).toBe('custom');
  });
  it('matches custom-pack class sources without depending on source-id casing',()=>{
   const parent={id:'class',kind:'class',name:'测试职业',english:'Test Class',source:'MyPack',edition:'2024',packId:'test',revision:'1',entries:[],raw:{}} as Entry;

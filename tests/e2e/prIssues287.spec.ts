@@ -13,6 +13,7 @@ for(const edition of ['2014','2024'] as const) test(`imported lowercase class so
  const tabs=page.getByRole('navigation',{name:'资料分类'});await tabs.getByRole('button',{name:'职业',exact:true}).click();await page.getByLabel('资料版本',{exact:true}).selectOption(edition);
  await page.locator('.catalog-row').filter({hasText:'阅读测试职业'}).click();await expect(page.locator('.entry-detail')).toContainText('原创阅读测试职业正文');await expect(page.locator('.custom-entry-editor')).toHaveCount(0);
  await page.getByRole('button',{name:'子职',exact:true}).click();await expect(page.locator('.entry-detail')).toContainText('阅读测试子职');await expect(page.locator('.entry-detail')).toContainText('测试神祇');await expect(page.locator('.entry-detail')).toContainText('测试职业特性');await expect(page.locator('.entry-detail')).toContainText('测试子职特性');await expect(page.locator('.entry-detail')).not.toContainText('TEST');
+ await page.getByRole('button',{name:'主体',exact:true}).click();await expect(page.locator('.custom-entry-editor')).toHaveCount(0);await expect(page.locator('.entry-detail')).toContainText('原创阅读测试职业正文');await page.getByRole('button',{name:'子职',exact:true}).click();
  await page.reload();await expect(page.locator('.entry-detail')).toContainText('阅读测试子职');await page.screenshot({path:test.info().outputPath('imported-class-references.png')});
 });
 
