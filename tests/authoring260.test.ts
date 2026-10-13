@@ -1,10 +1,10 @@
 import {describe,it,expect,vi,afterEach} from 'vitest';
 import {RULE_PACK_EXAMPLE} from '../src/platform/rulePackExample';
 import {validatePack,validateCharacter} from '../src/core/validation';
-import {newCharacter} from '../src/core/model';
+import {classMatches,newCharacter,type Entry} from '../src/core/model';
 import {cardSyncCopies} from '../src/platform/cardSyncCopies';
 import {customVisibilityAllows} from '../src/ui/customVisibility';
-import {matchesLibraryTab} from '../src/ui/libraryData';
+import {matchesLibraryTab,navigationTab} from '../src/ui/libraryData';
 import {rememberAnnouncementPreference,readAnnouncementPreference,rememberAnnouncementVersion,announcementPending,readAnnouncementVersion,forgetAnnouncementVersion} from '../src/platform/announcement';
 
 afterEach(()=>vi.unstubAllGlobals());
@@ -16,6 +16,19 @@ describe('extension authoring and current-card synchronization',()=>{
   expect(pack.entries.find(e=>e.english==='Travel Leather Armor')?.raw).toMatchObject({type:'LA',armor:true,ac:11});
   for(const entry of pack.entries){const displayed={...entry,raw:{...entry.raw,_customPack:true}};expect(customVisibilityAllows(displayed,'custom')).toBe(true);expect(customVisibilityAllows(displayed,'native')).toBe(false);expect(matchesLibraryTab(displayed,'custom')).toBe(true);expect(matchesLibraryTab(displayed,entry.kind==='feat'?'feat':'item')).toBe(true);expect(entry.raw._customPack).toBeUndefined();}
   const character=newCharacter();character.profile.enabledSources.push(pack.id);character.rulePacks=[pack];character.selections=[{id:'selected',entry:pack.entries[1],quantity:1,level:1,equipped:true}];expect(()=>validateCharacter(JSON.parse(JSON.stringify(character)))).not.toThrow();
+ });
+ it('keeps custom-pack entries in their visible native tab while opening details',()=>{
+  const original=validatePack(structuredClone(RULE_PACK_EXAMPLE),[]).entries[0];
+  const displayed={...original,raw:{...original.raw,_customPack:true}};
+  expect(matchesLibraryTab(displayed,'feat')).toBe(true);
+  expect(navigationTab(displayed,'feat')).toBe('feat');
+  expect(navigationTab(displayed,'spell')).toBe('custom');
+  expect(navigationTab(displayed)).toBe('custom');
+ });
+ it('matches custom-pack class sources without depending on source-id casing',()=>{
+  const parent={id:'class',kind:'class',name:'测试职业',english:'Test Class',source:'MyPack',edition:'2024',packId:'test',revision:'1',entries:[],raw:{}} as Entry;
+  const child={id:'subclass',kind:'subclass',name:'测试子职',english:'Test Subclass',source:'MyPack',edition:'2024',packId:'test',revision:'1',entries:[],raw:{className:'测试职业',classSource:'mypack'}} as Entry;
+  expect(classMatches(child,parent)).toBe(true);
  });
  it('backs up the untouched original while updating the existing identity and consumed counters',()=>{
   const original=newCharacter();original.id='existing-binding';original.name='旅行者';original.revision=9;original.createdAt='2025-01-01T00:00:00.000Z';original.runtime.resources={'spent':{name:'已消耗',current:0,max:3}};
