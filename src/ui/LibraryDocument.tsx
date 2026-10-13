@@ -2,7 +2,7 @@ import {resolveEntryReference} from '../core/entryReferences';
 import {SpellLearners} from './SpellLearners';
 import { explicitlyExcluded, librarySourceEnabled } from './libraryData';
 import { useEffect, useMemo, useRef } from 'react';
-import { entryEdition, editionAllows, type Character, type Entry } from '../core/model';
+import { classMatches, entryEdition, editionAllows, type Character, type Entry } from '../core/model';
 import { ContentBoundary, Entries, Inline } from './Entries';
 import { EntryDraggable } from './DragEntry';
 import { SourceName, compareSources, useSources } from './SourceName';
@@ -13,7 +13,7 @@ type Section = { id: string; name: string; english?: string; level?: number; sou
 export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false,editionFilter='character' }: { editionFilter?:string;subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void }) {
   const {registry}=useSources();
   const showSubclasses=subclassesOpen&&['class','subclass'].includes(entry.kind);
-  const roots=useMemo(()=>{if(!showSubclasses||entry.kind==='subclass')return [entry];const parent=entry.kind==='class'?entry:entries.find(e=>e.kind==='class'&&[e.name,e.english].includes(entry.raw.className)&&e.source===(entry.raw.classSource||'PHB').toUpperCase());return parent?entries.filter(e=>e.kind==='subclass'&&[parent.name,parent.english].includes(e.raw.className)&&(e.raw.classSource||'PHB').toUpperCase()===parent.source&&librarySourceEnabled(character,e)&&wikiEditionAllows(e,character,editionFilter)).sort((a,b)=>compareSources(a.source,b.source,registry)||a.name.localeCompare(b.name,'zh')):[entry];},[entry,entries,showSubclasses,registry,character.profile.enabledSources,character.profile.exceptions,character.edition,character.profile.optional.legacy,editionFilter]);
+  const roots=useMemo(()=>{if(!showSubclasses||entry.kind==='subclass')return [entry];const parent=entry.kind==='class'?entry:entries.find(e=>classMatches(entry,e));return parent?entries.filter(e=>e.kind==='subclass'&&classMatches(e,parent)&&librarySourceEnabled(character,e)&&wikiEditionAllows(e,character,editionFilter)).sort((a,b)=>compareSources(a.source,b.source,registry)||a.name.localeCompare(b.name,'zh')):[entry];},[entry,entries,showSubclasses,registry,character.profile.enabledSources,character.profile.exceptions,character.edition,character.profile.optional.legacy,editionFilter]);
   const effectiveCollapsed=focus?[]:collapsed;
   const ref = useRef<HTMLDivElement>(null);
   const sections = useMemo(() => {
