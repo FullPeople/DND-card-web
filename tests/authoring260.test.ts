@@ -26,6 +26,7 @@ describe('extension authoring and current-card synchronization',()=>{
   expect(navigationTab(displayed,'spell')).toBe('feat');
   expect(navigationTab(displayed)).toBe('feat');
   expect(navigationTab({...displayed,raw:{...displayed.raw,_workbenchCustom:true}})).toBe('custom');
+  expect(navigationTab({...displayed,kind:'rule',raw:{...displayed.raw,_category:'size'}})).toBe('size');
  });
  it('matches custom-pack class sources without depending on source-id casing',()=>{
   const parent={id:'class',kind:'class',name:'测试职业',english:'Test Class',source:'MyPack',edition:'2024',packId:'test',revision:'1',entries:[],raw:{}} as Entry;
