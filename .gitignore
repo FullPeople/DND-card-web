@@ -55,6 +55,8 @@ __pycache__/
 dist-cloud/
 dist-cloud-server/
 dist-library/
+dist-wiki/
+test-results-wiki/
 test-results-cloud/
 *.sqlite
 *.sqlite-wal

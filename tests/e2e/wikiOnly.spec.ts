@@ -1,0 +1,22 @@
+import {test,expect} from '@playwright/test';
+import {mockSource} from './fixtures';
+
+test.beforeEach(async({page})=>{await mockSource(page);});
+
+test('independent Wiki reads without touching saved character data and restores shared entry links',async({page,context})=>{
+ let accountRequests=0;page.on('request',request=>{if(new URL(request.url()).pathname.startsWith('/api/'))accountRequests++;});
+ await context.addInitScript(async()=>{const request=indexedDB.open('dnd-card-standalone',1);request.onupgradeneeded=()=>{request.result.createObjectStore('documents');request.result.createObjectStore('cache');};const db=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});const tx=db.transaction('documents','readwrite');if(!await new Promise(resolve=>{const get=tx.objectStore('documents').get('workspace');get.onsuccess=()=>resolve(get.result);}))tx.objectStore('documents').put({protectedWikiFixture:true},'workspace');await new Promise<void>(resolve=>{tx.oncomplete=()=>resolve();});db.close();});
+ await page.goto('/');await expect(page.locator('.wiki-reader-header')).toContainText('DND Wiki');await expect(page.locator('.sheet-pane,.paper,.character-tabs')).toHaveCount(0);await expect(page.getByRole('button',{name:'编辑模式'})).toHaveCount(0);
+ await page.getByRole('combobox',{name:'资料类型'}).selectOption('class');await expect(page.locator('.catalog-row')).toHaveCount(2);await page.locator('.catalog-row').filter({hasText:'测试法师'}).first().click();await expect(page.locator('.entry-detail')).toContainText('初始特性');await expect(page).toHaveURL(/entry=/);
+ const entryUrl=page.url();await page.reload();await expect(page.locator('.entry-detail')).toContainText('初始特性');expect(page.url()).toBe(entryUrl);await page.screenshot({path:test.info().outputPath('wiki-desktop.png')});
+ expect(accountRequests).toBe(0);const workspace=await page.evaluate(async()=>{const request=indexedDB.open('dnd-card-standalone',1);const db=await new Promise<IDBDatabase>(resolve=>{request.onsuccess=()=>resolve(request.result);});const value=await new Promise(resolve=>{const request=db.transaction('documents').objectStore('documents').get('workspace');request.onsuccess=()=>resolve(request.result);});db.close();return value;});expect(workspace).toEqual({protectedWikiFixture:true});
+});
+
+test('version selection, optional feature discovery, cross references and browser back work',async({page})=>{
+ await page.goto('/');await page.getByRole('combobox',{name:'资料版本'}).selectOption('2014');await page.getByRole('combobox',{name:'资料类型'}).selectOption('class');await expect(page.locator('.catalog-row')).toHaveCount(1);await page.getByRole('combobox',{name:'资料版本'}).selectOption('2024');await expect(page.locator('.catalog-row')).toHaveCount(1);
+ await page.getByRole('combobox',{name:'资料类型'}).selectOption('classFeature');await expect(page.locator('.catalog-row')).toContainText('初始特性');await page.locator('.catalog-row').click();await expect(page.locator('.entry-detail')).toContainText('为软件验收创作');await page.locator('.entry-detail').getByRole('button',{name:'微光术',exact:true}).first().click();await expect(page.locator('.entry-detail h1')).toContainText('微光术');await page.goBack();await expect(page.locator('.entry-detail h1')).toContainText('初始特性');
+});
+
+test('reading and favorites remain usable on a narrow screen',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/?tab=spell&edition=all');await page.locator('.catalog-row').filter({hasText:'微光术'}).click();await expect(page.locator('.entry-detail')).toContainText('为测试而创作的一点微光');await page.locator('.entry-detail').getByRole('button',{name:'收藏',exact:true}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'收藏',exact:true}).click();await expect(page.locator('.catalog-row')).toContainText('微光术');await page.locator('.catalog-row').click();await page.reload();await expect(page.locator('.entry-detail')).toContainText('微光术');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);const reader=await page.locator('.entry-detail').boundingBox();expect(reader!.width).toBeGreaterThan(300);expect(reader!.height).toBeGreaterThan(180);await page.screenshot({path:test.info().outputPath('wiki-mobile.png')});
+});

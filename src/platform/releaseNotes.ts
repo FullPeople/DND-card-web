@@ -1,5 +1,9 @@
 export const RELEASE_DATE='2026-10-13';
 export interface ReleaseSection {title:string;items:string[];supersedes?:readonly string[]}
+const release288=(mode:'standalone'|'suite'):ReleaseSection[]=>[
+ ...(mode==='standalone'?[{title:'独立 Wiki',items:['新增 dnd.center/wiki/，直接查阅规则资料，不需要先打开角色卡。','支持 2014 / 2024 筛选、正文链接分享和收藏；子职、职业能力与其他资料可以按类型查找。']}]:[]),
+ {title:'问题反馈',items:['公告大字和说明已改为邮件反馈提示，邮箱和 GitHub Issues 入口保留。']}
+];
 const RELEASE_287_SECTIONS:ReleaseSection[]=[
  {title:'扩展资料与阅读修复',items:['从职业等分类打开自定义扩展条目时，保留当前分类并显示正文。','修复含小写字母的扩展来源无法显示子职的问题。','神祇、职业和子职特性引用现在显示名称或别名，不再误显示来源代码。']},
  {title:'法术与起始装备修复',items:['取消或替换赠送法术的选择后，角色卡仍能保存和重新打开；已消耗次数保留。','施法子职可以选择来源声明的扩展法表，法术环级和解锁等级继续生效。','起始装备中的赌具、工匠工具和乐器现在可以选择并领取。']},
@@ -429,7 +433,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(_mode:'standalone'|'suite'):ReleaseSection[]=>RELEASE_287_SECTIONS;export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release288(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE+'-二',sections:release288(mode)},
  {title:RELEASE_DATE,sections:RELEASE_287_SECTIONS},
  ...(mode==='suite'?[{title:'2026-10-10-273',sections:IMPORT_ENTRY_SECTIONS},{title:'2026-10-10-272',sections:EXCEL_IMPORT_SECTIONS},{title:'2026-10-10-270',sections:SUITE_RELEASE_270_SECTIONS},{title:'2026-10-10-266',sections:SUITE_RELEASE_266_SECTIONS},{title:'2026-10-10-265',sections:SUITE_RELEASE_265_SECTIONS},{title:'2026-10-10-264',sections:SUITE_RELEASE_264_SECTIONS}]:[{title:'2026-10-10-273',sections:IMPORT_ENTRY_SECTIONS},{title:'2026-10-10-272',sections:EXCEL_IMPORT_SECTIONS},{title:'2026-10-10-268',sections:STANDALONE_268_SECTIONS},{title:'2026-10-10-267',sections:STANDALONE_267_SECTIONS},{title:'2026-10-09-264',sections:standalone264Sections()}]),
  {title:'2026-10-09-262',sections:mode==='suite'?SUITE_RELEASE_262_SECTIONS:RELEASE_262_SECTIONS},
