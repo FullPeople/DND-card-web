@@ -39,7 +39,7 @@ test('private account circular gallery shares its renderer, bounds reads and fit
 
 test('a removed directory entry refreshes rather than stranding an authorized reader at HTTP 404',async({page,context})=>{
  await context.addCookies([{name:'dnd_cloud',value:fixture().ownerSession.token,url:'http://127.0.0.1:5320/api/',httpOnly:true,sameSite:'Strict'}]);
- let first=true;await page.route('**/api/cards?offset=0',async route=>{const response=await route.fetch(),data=await response.json();if(first){first=false;data.cards.unshift({id:'AAAAAA',revision:1,name:'已删除的临时验收卡',edition:'2024',updatedAt:new Date().toISOString()});}await route.fulfill({response,json:data});});
- await page.goto('/library/');await expect(page.locator('.cloud-message')).toContainText('已删除或不存在');await expect(page.locator('.cloud-gallery-item.is-active .paper')).toBeVisible();await expect(page.locator('.cloud-gallery-item[data-card-id=AAAAAA]')).toHaveCount(0);await expect(page.getByText('角色读取失败（HTTP 404）',{exact:false})).toHaveCount(0);
+ let observedRecovery=false;await page.route('**/api/cards?offset=0',async route=>{const response=await route.fetch(),data=await response.json();if(!observedRecovery)data.cards.unshift({id:'AAAAAA',revision:1,name:'已删除的临时验收卡',edition:'2024',updatedAt:new Date().toISOString()});await route.fulfill({response,json:data});});
+ await page.goto('/library/');await expect(page.locator('.cloud-message')).toContainText('已删除或不存在');observedRecovery=true;await expect(page.locator('.cloud-gallery-item.is-active .paper')).toBeVisible();await expect(page.locator('.cloud-gallery-item[data-card-id=AAAAAA]')).toHaveCount(0);await expect(page.getByText('角色读取失败（HTTP 404）',{exact:false})).toHaveCount(0);
  await page.goto('/card/?legacyViewer=1&cloud=AAAAAA');await expect(page.getByRole('alert')).toHaveText('这张云端卡已删除或不存在。请返回角色卡库刷新列表。');await expect(page.getByRole('link',{name:'返回角色卡库'})).toHaveAttribute('href','/library/');
 });
