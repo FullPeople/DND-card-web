@@ -34,3 +34,7 @@
 本地检查：独立入口 3 项浏览器流程、公告文案 1 项浏览器流程、公告与历史日志 12 项单元检查、类型检查与完整云端构建通过。资料审计消费者模块字节保持一致，使用原有 229 份输入的完整审计，未改写审计指纹。最终提交 CI 和公网结果以发布回执为准。
 
 参考：[种族](https://5e.kiwee.top/races.html)、[职业](https://5e.kiwee.top/classes.html)、[背景](https://5e.kiwee.top/backgrounds.html)、[专长](https://5e.kiwee.top/feats.html)、[装备](https://5e.kiwee.top/items.html)、[法术](https://5e.kiwee.top/spells.html)、[怪物](https://5e.kiwee.top/bestiary.html)、[书籍](https://5e.kiwee.top/books.html)、[冒险](https://5e.kiwee.top/adventures.html)。翻译标记规则另核对中文站原始渲染器中的 `translator` 条件。
+
+## 公网发布结果
+
+独立 Wiki 已上线，入口 https://dnd.center/wiki/ 。最终源码、CI、独立恢复点、公网浏览器和资源检查见 STATUS.md 的最新记录；上表所列缺项仍为后续改进项。
