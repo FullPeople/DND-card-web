@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {releaseHistoryFor,releaseLogFor} from '../src/platform/releaseNotes';
+import {RELEASE_DATE,releaseHistoryFor,releaseLogFor} from '../src/platform/releaseNotes';
 
 describe('date-grouped changelog',()=>{
  for(const mode of ['standalone','suite'] as const){
@@ -17,20 +17,20 @@ describe('date-grouped changelog',()=>{
   });
  }
  it('adds current history and framing fixes while retaining the previous palette and gallery day',()=>{
-  for(const mode of ['standalone','suite'] as const){const log=releaseLogFor(mode);expect(log[0].title).toBe('2026-10-10');expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('撤回与重做');expect(JSON.stringify(log.find(day=>day.title==='2026-10-08'))).toContain('保存和导入配色文件');}
+  for(const mode of ['standalone','suite'] as const){const log=releaseLogFor(mode);expect(log[0].title).toBe(RELEASE_DATE);expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('撤回与重做');expect(JSON.stringify(log.find(day=>day.title==='2026-10-08'))).toContain('保存和导入配色文件');}
   expect(JSON.stringify(releaseLogFor('standalone').find(day=>day.title==='2026-10-08'))).toContain('点击旁边的卡只切换');
  });
  it('keeps Suite-only changes in the Suite changelog',()=>{
-  expect(JSON.stringify(releaseLogFor('suite')[0])).toContain('文字演出');
-  expect(JSON.stringify(releaseLogFor('suite')[0])).toContain('Wiki 收藏');
+  expect(JSON.stringify(releaseLogFor('suite').find(day=>day.title==='2026-10-10'))).toContain('文字演出');
+  expect(JSON.stringify(releaseLogFor('suite').find(day=>day.title==='2026-10-10'))).toContain('Wiki 收藏');
   expect(JSON.stringify(releaseLogFor('standalone'))).not.toContain('文字演出');
   expect(JSON.stringify(releaseLogFor('suite').find(day=>day.title==='2026-10-07'))).toContain('新旧插件都移除了“编辑地图迷雾”右键入口');
   expect(JSON.stringify(releaseLogFor('standalone').find(day=>day.title==='2026-10-07'))).not.toContain('编辑地图迷雾');
  });
  it('shows the new standalone batch and supersedes the former cloud policy without rewriting history',()=>{
   const raw=JSON.stringify(releaseHistoryFor('standalone')),log=releaseLogFor('standalone');
-  expect(log[0].title).toBe('2026-10-10');
-  expect(JSON.stringify(log[0])).toContain('资源次数与来源');
+  expect(log[0].title).toBe(RELEASE_DATE);
+  expect(JSON.stringify(log.find(day=>day.title==='2026-10-10'))).toContain('资源次数与来源');
   expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('赞助二维码');
   expect(JSON.stringify(log)).toContain('三个标签');
   expect(JSON.stringify(log)).toContain('所有人都可以在云端看到所有卡');
