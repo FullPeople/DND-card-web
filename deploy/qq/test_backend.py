@@ -77,6 +77,12 @@ class BackendTests(unittest.TestCase):
   for name,value in [('accountPrivate',False),('accountLibrariesPrivate',False),('temporaryUpload',True),('publicDirectory',True),('quotaScope','ip'),('qqLogin','pending')]:
    with patch.object(u.m,'wait_http',return_value=json.dumps({**health,name:value}).encode()):
     with self.assertRaisesRegex(RuntimeError,'Private account policy'):u.verify('account-private')
+ def test_paused_health_retains_private_account_policy(self):
+  health={'version':'1.0.295','cloudFeaturesEnabled':False,'qqOAuthSupported':False,'qqLogin':'disabled','permissionsVersion':1,'accountPrivate':True,'accountLibrariesPrivate':True,'temporaryUpload':False,'publicDirectory':False}
+  with patch.object(u.m,'wait_http',return_value=json.dumps(health).encode()):self.assertEqual(u.verify('account-private','1.0.295',False),health)
+  for name,value in [('cloudFeaturesEnabled',True),('qqOAuthSupported',True),('qqLogin','ready'),('accountPrivate',False),('temporaryUpload',True),('publicDirectory',True)]:
+   with patch.object(u.m,'wait_http',return_value=json.dumps({**health,name:value}).encode()):
+    with self.assertRaisesRegex(RuntimeError,'suspension/privacy'):u.verify('account-private','1.0.295',False)
  def test_temporary_package_cannot_downgrade_private_backend(self):
   with tempfile.TemporaryDirectory() as folder:
    package,seal=self.fixture(Path(folder))

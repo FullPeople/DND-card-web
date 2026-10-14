@@ -48,7 +48,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       plugin.cors(request,response);
       if(method==='OPTIONS'){response.writeHead(204);response.end();return;}
       if(options.featuresEnabled===false){
-        if(method==='GET'&&url.pathname==='/api/health')return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.286',cloudFeaturesEnabled:false});
+        if(method==='GET'&&url.pathname==='/api/health')return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.295',...currentPolicy,cloudFeaturesEnabled:false,qqLogin:'disabled',qqOAuthSupported:false});
         throw new CloudError(503,'cloud_disabled',cloudDisabledMessage);
       }
       if(await qq.handle(request,response,url))return;
@@ -86,7 +86,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         }
         return socketIP;
       };
-      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.286',changeNotifications:'bounded-wait',...currentPolicy});
+      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.295',changeNotifications:'bounded-wait',...currentPolicy});
       if(method==='GET'&&url.pathname==='/api/session'){
         if(options.temporaryUpload&&!session){
           if(!temporaryOwner){const issued=store.issueTemporarySession();temporaryOwner=issued.owner;response.setHeader('Set-Cookie','dnd_temporary='+issued.token+'; Path=/api/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=31536000');}

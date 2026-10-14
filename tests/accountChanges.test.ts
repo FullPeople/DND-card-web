@@ -1,6 +1,8 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {cloudChangeNotice} from '../src/cloud/api';
 import {subscribeAccountChanges} from '../src/cloud/accountChanges';
+// Preserve enabled-state lifecycle coverage separately from suspension checks.
+vi.mock('../src/cloud/availability',()=>({cloudFeaturesEnabled:true}));
 vi.mock('../src/cloud/api',()=>({announceCloudSessionChange:vi.fn(),subscribeCloudSessionChanges:vi.fn(()=>()=>{}),cloudChangeNotice:vi.fn()}));
 const stops:(()=>void)[]=[],replies:((value:Awaited<ReturnType<typeof cloudChangeNotice>>)=>void)[]=[];
 beforeEach(()=>{

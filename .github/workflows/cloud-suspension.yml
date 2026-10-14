@@ -1,0 +1,33 @@
+name: Cloud suspension release checks
+on:
+  push:
+    branches: [main, codex/cloud-release295-20261015]
+    paths: ['src/cloud/**', 'src/platform/workbench.ts', 'src/platform/announcement.ts', 'src/platform/releaseNotes.ts', 'server/cloud/**', 'deploy/qq/**', 'tests/cloudSuspension*', 'tests/accountChanges.test.ts', 'package*.json', '.github/workflows/cloud-suspension.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  directed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Disabled cloud, real HTTP denial, deletion, authority and announcement
+        run: npx vitest run tests/cloudSuspension.test.ts tests/cloudSuspensionUi.test.ts tests/workbenchDelete.test.ts tests/workbenchOwnerRevocation.test.ts tests/accountChanges.test.ts tests/changeWatch.test.ts tests/announcement.test.ts tests/releaseLog.test.ts
+      - name: Typecheck and build the actual release entry points
+        run: |
+          npx tsc -b
+          npx tsc -p tsconfig.cloud.json
+          node node_modules/vite/bin/vite.js build
+          node node_modules/vite/bin/vite.js build --mode standalone
+          node node_modules/vite/bin/vite.js build --config vite.library.config.ts --mode cloud-library
+          node node_modules/vite/bin/vite.js build --config vite.cloud.config.ts
+      - name: Backend publication, rollback and suspended health
+        run: python3 deploy/qq/test_backend.py
