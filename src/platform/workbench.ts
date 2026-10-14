@@ -49,7 +49,13 @@ function restrictInventory(inventory:InventoryState|undefined){
  return {...inventory,containers:Object.fromEntries(Object.entries(inventory.containers).flatMap(([id,container])=>{if(container.kind==='public')return [[id,container]];const grant=container.kind==='card'?access.cards.find(card=>id===`card:${card.id}`&&access.enabled.characterCards!==false):access.monsters.find(card=>id===`monster:${card.itemId}`);return grant?[[id,{...container,write:snapshotCache.accessConfirmed&&grant.write}]]:[];}))};
 }
 function update(patch:Partial<State>,authority=true){
- if(authority&&!snapshotCache.currentAccess){const revoked:string[]=[];for(const field of ['cards','monsters'] as const)if(patch[field])for(const old of state[field])if(old.write&&!patch[field]!.some(next=>(field==='cards'?next.id===old.id:next.itemId===old.itemId)&&next.write))revoked.push(field==='cards'?`card:${old.id}`:`monster:${old.itemId}`);if(state.target?.write&&patch.target?.key===state.target.key&&!patch.target.write)revoked.push(state.target.cardId?`card:${state.target.cardId}`:`monster:${state.target.itemId}`);if(revoked.length)invalidateWrites(revoked);}
+ if(authority&&!snapshotCache.currentAccess){
+  const revoked:string[]=[];
+  for(const field of ['cards','monsters'] as const)if(patch[field])for(const old of state[field])if(old.write&&!patch[field]!.some(next=>(field==='cards'?next.id===old.id:next.itemId===old.itemId)&&next.write))revoked.push(field==='cards'?`card:${old.id}`:`monster:${old.itemId}`);
+  if(state.target?.write&&patch.target?.key===state.target.key&&!patch.target.write)revoked.push(state.target.cardId?`card:${state.target.cardId}`:`monster:${state.target.itemId}`);
+  const removedCards=patch.cards&&patch.enabled?.characterCards!==false?state.cards.filter(old=>!patch.cards!.some(next=>next.id===old.id)).map(card=>`card:${card.id}`):[];
+  if(patch.role&&state.role&&patch.role!==state.role)invalidateWrites();else if(revoked.length)invalidateWrites(revoked,true,removedCards);
+ }
  if('inventory' in patch){authoritativeInventory=restrictInventory(currentInventory(authoritativeInventory,patch.inventory));let shown=authoritativeInventory;if(shown)for(const draft of stockDrafts.values())if(draft.before.publicId===shown.publicId)shown=overlayInventory(shown,draft.before,draft.after);patch={...patch,inventory:shown};}state={...state,...patch};if(patch.target&&switchMetric?.key===patch.target.key)switchStage('state');publishUpdate();}
 const inventoryQueue=mutationQueue();
 const inventoryContent=(container:InventoryState['containers'][string])=>JSON.stringify({locked:!!container.locked,items:container.items.map(({revision,...row})=>row).sort((a,b)=>a.id.localeCompare(b.id))});
@@ -153,7 +159,8 @@ function acceptAccess(access:CacheAccess){
  if(confirmed&&previous===access)return true;
  const scopeChanged=previous&&(previous.scope!==access.scope||previous.room!==access.room||previous.role!==access.role);
  const revoked=previous?[...previous.cards.filter(card=>card.write&&!access.cards.some(next=>next.id===card.id&&next.write&&next.grantVersion===card.grantVersion&&access.enabled.characterCards!==false)).map(card=>`card:${card.id}`),...previous.monsters.filter(card=>card.write&&!access.monsters.some(next=>next.itemId===card.itemId&&next.key===card.key&&next.write&&next.grantVersion===card.grantVersion)).map(card=>`monster:${card.itemId}`)]:[];
- if(scopeChanged)invalidateWrites();else if(revoked.length)invalidateWrites(revoked);
+ const removedCards=previous&&access.enabled.characterCards!==false?previous.cards.filter(card=>!access.cards.some(next=>next.id===card.id)).map(card=>`card:${card.id}`):[];
+ if(scopeChanged)invalidateWrites();else if(revoked.length)invalidateWrites(revoked,true,removedCards);
  if(scopeChanged){activeReadRetry=0;readRetry++;resetGroup();revisions=new WorkbenchRevisions();monsterRuntime.reset();observedDocuments.clear();wantedSelection=undefined;pendingSelection=undefined;authoritativeInventory=undefined;update({readFailure:undefined,target:undefined,document:undefined,inventory:undefined,shared:undefined,loading:false});}
  // Write-only revocation still allows reading. Release bodies only after the
  // current access directory has removed their reading grant. Queued saves own
@@ -309,11 +316,19 @@ function writeTarget(type:string,extra:Record<string,unknown>):string|undefined 
  if(!grant?.write||card&&state.enabled.characterCards===false)throw permissionChanged();
  return card?`card:${card.id}`:selected?.cardId?`card:${selected.cardId}`:`monster:${monster?.itemId||selected!.itemId}`;
 }
-function invalidateWrites(ids?:string[],cancelPending=true){
+function invalidateWrites(ids?:string[],cancelPending=true,removedCards:string[]=[]){
  invalidateWriteIntents(ids);
  for(const [key,batch] of saves){if(ids&&!ids.includes(`card:${batch.target.cardId}`))continue;clearTimeout(batch.timer);saves.delete(key);for(const waiter of batch.waiters)waiter.reject(permissionChanged());}
  if(!cancelPending)return;
- for(const [requestId,operation] of pending){if(!operation.writeTargets||operation.cancelled||ids&&!operation.writeTargets.some(id=>ids.includes(id)))continue;operation.cancelled=true;send('cancel',{requestId});operation.reject(Object.assign(permissionChanged(),{requestId,uncertain:true}));}
+ for(const [requestId,operation] of pending){
+  if(!operation.writeTargets||operation.cancelled||ids&&!operation.writeTargets.some(id=>ids.includes(id)))continue;
+  // A delete removes its own grant before its ACK can cross the transport.
+  // Purge permissions/drafts above, but let this already-dispatched request
+  // await the host's terminal receipt. Absence alone never confirms deletion;
+  // status queries, timeouts and full scope/host invalidation still apply.
+  if(ids&&operation.type==='delete'&&operation.writeTargets.length===1&&removedCards.includes(operation.writeTargets[0]))continue;
+  operation.cancelled=true;send('cancel',{requestId});operation.reject(Object.assign(permissionChanged(),{requestId,uncertain:true}));
+ }
 }
 export function workbenchRequest(type:string,extra:Record<string,unknown>={},affectedTargets:string[]=[]){
  if(!state.online||!host&&!relay)return Promise.reject(Error('枭熊未连接'));
