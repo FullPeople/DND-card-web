@@ -7,6 +7,7 @@ on:
       - 'src/platform/warmTools.ts'
       - 'src/main.tsx'
       - 'tests/catalogSnapshot.test.ts'
+      - 'tests/catalogSnapshotIntegration.test.ts'
       - 'tests/preloadQueue.test.ts'
       - 'tests/e2e/bcPerformance296.spec.ts'
       - 'playwright.bc-performance.config.ts'
@@ -24,7 +25,7 @@ jobs:
           node-version: '24.9.0'
           cache: npm
       - run: npm ci
-      - run: npx vitest run tests/catalogSnapshot.test.ts tests/preloadQueue.test.ts tests/catalogTransport.test.ts
+      - run: npx vitest run tests/catalogSnapshot.test.ts tests/preloadQueue.test.ts tests/catalogTransport.test.ts tests/catalogSnapshotIntegration.test.ts
       - run: npm run build
       - run: npm run build:standalone
       - run: npx playwright install --with-deps chromium
