@@ -1,3 +1,4 @@
+import {cloudFeaturesEnabled} from './availability';
 export interface ChangeNotice {accountId:string|null;cursor:string;changed:boolean}
 export interface ChangeWatchOptions {
  request:(cursor:string|undefined,signal:AbortSignal)=>Promise<unknown>;
@@ -10,6 +11,7 @@ export interface ChangeWatchOptions {
 
 /** A single wait per scope; aborted or stale replies never refresh the next account. */
 export function watchCloudChanges(options:ChangeWatchOptions){
+ if(!cloudFeaturesEnabled)return {wake:()=>{},stop:()=>{},done:Promise.resolve()};
  let alive=true,epoch=0,cursor:string|undefined,controller:AbortController|undefined;
  let delayTimer:ReturnType<typeof setTimeout>|undefined,releaseDelay:(()=>void)|undefined;
  const delay=(ms:number)=>new Promise<void>(resolve=>{releaseDelay=resolve;delayTimer=setTimeout(()=>{delayTimer=undefined;releaseDelay=undefined;resolve();},ms);});

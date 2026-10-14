@@ -1,0 +1,4 @@
+/* The audited App keeps its fixed header markup; this entry is currently unavailable. */
+.suite-website-link[href^="https://dnd.center/library/"]{display:none!important}
+.cloud-suspended{max-width:640px;margin:10vh auto;padding:24px;background:#e5e5e5;color:#292a2d;font:16px/1.8 system-ui,sans-serif}
+.cloud-suspended a{color:inherit}

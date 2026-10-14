@@ -1,10 +1,12 @@
 import {announceCloudSessionChange,cloudChangeNotice,subscribeCloudSessionChanges} from './api';
+import {cloudFeaturesEnabled} from './availability';
 import {watchCloudChanges} from './changeWatch';
 
 type RecordEntry={callbacks:Set<()=>Promise<void>>;stop:()=>void};
 const records=new Map<string,RecordEntry>();
 /** One account wait per page, shared by the book, library and QQ picker. */
 export function subscribeAccountChanges(account:string,changed:()=>Promise<void>){
+ if(!cloudFeaturesEnabled)return()=>{};
  let alive=true;const callback=()=>alive?changed():Promise.resolve();
  let record=records.get(account);
  if(!record){

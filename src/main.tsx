@@ -1,4 +1,8 @@
 import {EntryMenuProvider} from './ui/EntrySharing';
+import {cloudFeaturesEnabled} from './cloud/availability';
+import {installCloudSuspension} from './cloud/suspension';
+import {CloudSuspended} from './cloud/CloudSuspended';
+import './cloud/suspended.css';
 import {UiLanguageProvider} from './ui/UiLanguage';
 import './platform/tone';
 import { createRoot } from 'react-dom/client';
@@ -6,6 +10,8 @@ import { SourceProvider } from './ui/SourceName';
 import {lazy,Suspense} from 'react';
 import {StartupBoundary,StartupReady} from './ui/StartupBoundary';
 window.dispatchEvent(new CustomEvent('dnd-card-stage',{detail:'正在加载角色卡界面'}));
+installCloudSuspension(globalThis,location.href);
+const cloudLink=!cloudFeaturesEnabled&&['cloud','qqRoom','cloudDraft','pluginAuth'].some(key=>new URLSearchParams(location.search).has(key));
 const viewer=new URLSearchParams(location.search).get('legacyViewer')==='1';
 // Keep dynamic imports in separate lazy callbacks so the production bundler
 // attaches each entry's own CSS dependencies (including the standalone reader).
@@ -16,7 +22,7 @@ import './ui/workspace.css';
 import './ui/overview.css';
 import './ui/library.css';
 import './ui/cardAtmosphere.css';
-const app=<Suspense fallback={null}>{viewer?<StartupReady><App/></StartupReady>:<App/>}</Suspense>;
+const app=cloudLink?<StartupReady><CloudSuspended/></StartupReady>:<Suspense fallback={null}>{viewer?<StartupReady><App/></StartupReady>:<App/>}</Suspense>;
 createRoot(document.getElementById('root')!).render(<StartupBoundary><UiLanguageProvider><SourceProvider>{viewer?app:<EntryMenuProvider>{app}</EntryMenuProvider>}</SourceProvider></UiLanguageProvider></StartupBoundary>);
 import './ui/libraryRefine.css';
 

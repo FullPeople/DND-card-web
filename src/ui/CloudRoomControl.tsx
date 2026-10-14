@@ -1,11 +1,13 @@
 import {useEffect,useRef,useState} from 'react';
+import {cloudFeaturesEnabled} from '../cloud/availability';
 import {useWorkbench,workbenchRequest} from '../platform/workbench';
 import {CloudIcon} from './CloudIcon';
 import {CloseIcon,CloudIconGlyph,SheetIcon,UsersIcon,WarningIcon} from './icons';
 import '../cloud/qqLogin.css';
 import './cloudRoomControl.css';
 type Info={cardId:string;name:string;owner:boolean;editor:boolean;write:boolean;locked:boolean;ownerNickname:string;ownerAccountId:string;editors?:string[]};
-export function CloudRoomControl({upload}:{upload:()=>Promise<unknown>}){
+export function CloudRoomControl(props:{upload:()=>Promise<unknown>}){return cloudFeaturesEnabled?<EnabledCloudRoomControl {...props}/>:null;}
+function EnabledCloudRoomControl({upload}:{upload:()=>Promise<unknown>}){
  const wb=useWorkbench(),target=wb.target,[open,setOpen]=useState(false),[info,setInfo]=useState<Info>(),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[account,setAccount]=useState(''),dialog=useRef<HTMLDialogElement>(null),identity=JSON.stringify([target?.key,wb.qqAccount?.id]),current=useRef(identity),flight=useRef(false);current.current=identity;
  useEffect(()=>{dialog.current?.close();setOpen(false);setInfo(undefined);setMessage('');setAccount('');setBusy(false);flight.current=false;},[identity]);
  useEffect(()=>{if(open&&!dialog.current?.open)dialog.current?.showModal();},[open]);

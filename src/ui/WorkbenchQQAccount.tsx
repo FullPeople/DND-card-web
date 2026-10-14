@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {cloudFeaturesEnabled} from '../cloud/availability';
 import {workbenchRequest,useWorkbench} from '../platform/workbench';
 import {WorkbenchPanel} from './WorkbenchPanel';
 import {withRequestTimeout} from '../platform/requestTimeout';
@@ -10,6 +11,9 @@ import {avatarInitial} from '../cloud/QQLogin';
 const origin='https://dnd.center';
 const random=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 export function WorkbenchQQAccount(){
+ return cloudFeaturesEnabled?<EnabledWorkbenchQQAccount/>:null;
+}
+function EnabledWorkbenchQQAccount(){
  const wb=useWorkbench(),instance=useMemo(()=>crypto.randomUUID(),[]),[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[copied,setCopied]=useState(false),dialog=useRef<HTMLDialogElement>(null),active=useRef(true),login=useRef<AbortController|undefined>(undefined);
  const rpc=(method:string,...args:unknown[])=>workbenchRequest('panelRpc',{key:undefined,itemId:undefined,panel:'qq',instance,method,args});
  useEffect(()=>{active.current=true;return()=>{active.current=false;login.current?.abort();};},[]);

@@ -1,4 +1,5 @@
 import {startupPhase,subscribeStartup} from './startup';
+import {cloudFeaturesEnabled,cloudDisabledError} from '../cloud/availability';
 import {MonsterRuntime,runtimeFrom} from '../core/workbenchRuntime';
 import {boundedDiceHistory} from './diceHistory';
 import {WorkbenchSnapshotCache,type CacheAccess} from './workbench-cache';
@@ -331,6 +332,7 @@ function invalidateWrites(ids?:string[],cancelPending=true,removedCards:string[]
  }
 }
 export function workbenchRequest(type:string,extra:Record<string,unknown>={},affectedTargets:string[]=[]){
+ if(!cloudFeaturesEnabled&&(['qqLibrary','cloudInfo','cloudEditors','cloudUpload'].includes(type)||type==='panelRpc'&&extra.panel==='qq'))return Promise.reject(cloudDisabledError());
  if(!state.online||!host&&!relay)return Promise.reject(Error('枭熊未连接'));
  let writeId:string|undefined;try{writeId=writeTarget(type,extra);}catch(error){return Promise.reject(error);}
  const requestId=crypto.randomUUID(),target=state.target;

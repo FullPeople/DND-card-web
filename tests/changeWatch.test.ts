@@ -1,5 +1,8 @@
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {watchCloudChanges} from '../src/cloud/changeWatch';
+// Exercise the retained lifecycle engine explicitly; paused entry points have
+// their own zero-request/zero-timer regression in cloudSuspension.test.ts.
+vi.mock('../src/cloud/availability',()=>({cloudFeaturesEnabled:true}));
 
 const notice=(accountId:string|null='a',changed=true)=>({accountId,cursor:'a'.repeat(64),changed});
 afterEach(()=>{vi.useRealTimers();});

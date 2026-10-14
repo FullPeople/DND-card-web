@@ -1,4 +1,5 @@
 import {useCallback,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
+import {cloudFeaturesEnabled} from './availability';
 import type {Character} from '../core/model';
 import {cloudCards,cloudMutation,cloudSession,readCloudCard,subscribeCloudSessionChanges,type CloudSession,type CloudCard} from './api';
 import {subscribeAccountChanges} from './accountChanges';
@@ -14,7 +15,10 @@ import {QQCardPicker} from './QQCardPicker';
 import {CheckIcon,CloudUploadIcon,CopyIcon,SheetIcon,SpinnerIcon,WarningIcon} from '../ui/icons';
 
 
-export function CloudSaveProvider({enabled,disabled,characters,readCharacter,receive,importCard,access,children,auto=true}:{enabled:boolean;disabled:boolean;auto?:boolean;characters:Character[];readCharacter:(id:string)=>Promise<Character>;receive?:(id:string,card:Character,hash:string)=>Promise<boolean>;importCard?:(card:CloudCard,account:string)=>Promise<void>;access?:(rights:Record<string,string|undefined>)=>void;children:ReactNode}){
+export function CloudSaveProvider(props:Parameters<typeof EnabledCloudSaveProvider>[0]){
+ return cloudFeaturesEnabled?<EnabledCloudSaveProvider {...props}/>:<CloudSaveContext.Provider value={undefined}>{props.children}</CloudSaveContext.Provider>;
+}
+function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,receive,importCard,access,children,auto=true}:{enabled:boolean;disabled:boolean;auto?:boolean;characters:Character[];readCharacter:(id:string)=>Promise<Character>;receive?:(id:string,card:Character,hash:string)=>Promise<boolean>;importCard?:(card:CloudCard,account:string)=>Promise<void>;access?:(rights:Record<string,string|undefined>)=>void;children:ReactNode}){
  const directoryRefresh=useRef<()=>Promise<void>>(()=>Promise.resolve());
  const [states,setStates]=useState<Record<string,SyncState>>({}),[target,setTarget]=useState<{id:string;name:string;account?:string;temporary?:boolean;error?:string}>(),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false);
  const [session,setSession]=useState<CloudSession>();

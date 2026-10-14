@@ -7,6 +7,7 @@ import {createQQAuth,type QQConfig} from './qq';
 import {parseFile} from '../../src/core/validation';
 import {pluginAccess} from './plugin';
 import {CloudChanges} from './changes';
+import {cloudFeaturesEnabled,cloudDisabledMessage} from '../../src/cloud/availability';
 export {CloudStore} from './store';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -16,7 +17,7 @@ export function canonicalIP(value:string){
   const family=isIP(value);if(!family)throw new CloudError(400,'client_ip','无法识别上传 IP，请稍后重试。');
   return family===6?new URL('http://['+value+']/').hostname.slice(1,-1):value;
 }
-export interface CloudServerOptions {temporaryUpload?:boolean;accountPrivate?:boolean;pluginOrigins?:string[];trustedLoopbackProxy?:boolean;freeBytes?:()=>number;qq?:QQConfig;changesWaitMs?:number}
+export interface CloudServerOptions {featuresEnabled?:boolean;temporaryUpload?:boolean;accountPrivate?:boolean;pluginOrigins?:string[];trustedLoopbackProxy?:boolean;freeBytes?:()=>number;qq?:QQConfig;changesWaitMs?:number}
 async function body(request:IncomingMessage,maxBytes=20_100_000):Promise<Record<string,unknown>> {
   if(!/^application\/json(?:;|$)/i.test(request.headers['content-type']||''))throw new CloudError(415,'json_required','请求必须使用 JSON。');
   let size=0;const parts:Buffer[]=[];
@@ -46,6 +47,10 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       const url=new URL(request.url||'/',origin),method=request.method||'GET';
       plugin.cors(request,response);
       if(method==='OPTIONS'){response.writeHead(204);response.end();return;}
+      if(options.featuresEnabled===false){
+        if(method==='GET'&&url.pathname==='/api/health')return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.286',cloudFeaturesEnabled:false});
+        throw new CloudError(503,'cloud_disabled',cloudDisabledMessage);
+      }
       if(await qq.handle(request,response,url))return;
       const token=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('dnd_cloud='))?.slice('dnd_cloud='.length);
       const liveSession=()=>request.headers.authorization?plugin.session(request):request.headers.origin&&request.headers.origin!==origin?undefined:store.session(token);
@@ -148,7 +153,7 @@ if(process.env.DND_CLOUD_RUN==='1'){
   const mode=process.env.DND_CLOUD_MODE||'pending';if(!['pending','temporary-ip','account-private'].includes(mode))throw Error('Unsupported cloud mode');
   const origin=process.env.DND_CLOUD_ORIGIN||'https://dnd.center';
   if(!!process.env.QQ_APPID!==!!process.env.QQ_APPKEY)throw Error('Incomplete QQ configuration');
-  const store=new CloudStore(path),server=createCloudServer(store,origin,{temporaryUpload:mode==='temporary-ip',accountPrivate:mode==='account-private',trustedLoopbackProxy:true,qq:process.env.QQ_APPID?{appId:process.env.QQ_APPID,appKey:process.env.QQ_APPKEY!,callback:process.env.QQ_CALLBACK||origin+'/api/auth/qq/callback'}:undefined,freeBytes:()=>{const disk=statfsSync(dirname(path));return disk.bavail*disk.bsize;}});
+  const store=new CloudStore(path),server=createCloudServer(store,origin,{featuresEnabled:cloudFeaturesEnabled,temporaryUpload:mode==='temporary-ip',accountPrivate:mode==='account-private',trustedLoopbackProxy:true,qq:process.env.QQ_APPID?{appId:process.env.QQ_APPID,appKey:process.env.QQ_APPKEY!,callback:process.env.QQ_CALLBACK||origin+'/api/auth/qq/callback'}:undefined,freeBytes:()=>{const disk=statfsSync(dirname(path));return disk.bavail*disk.bsize;}});
   server.listen(Number(process.env.DND_CLOUD_PORT||5014),'127.0.0.1',()=>console.log('DND card cloud ready'));
   const stop=()=>{server.closeChanges();server.close(()=>{store.close();process.exit(0);});};process.on('SIGTERM',stop);process.on('SIGINT',stop);
 }

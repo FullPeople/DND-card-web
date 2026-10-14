@@ -1,10 +1,12 @@
 import {useEffect,useRef,useState,type ReactNode} from 'react';
+import {cloudFeaturesEnabled} from './availability';
 import {cloudMutation,cloudSession,subscribeCloudSessionChanges,type CloudSession} from './api';
 import './qqLogin.css';
 import {CheckIcon,ChevronDownIcon,CloseIcon,CloudCheckIcon,CopyIcon,FolderOpenIcon,LogOutIcon,SheetIcon,UserIcon,WarningIcon} from '../ui/icons';
 
 type QQLoginProps={session?:CloudSession;managed?:boolean;beforeLogin?:()=>Promise<void>;refresh?:()=>Promise<void>;children?:ReactNode};
 export function QQLogin(props:QQLoginProps){
+  if(!cloudFeaturesEnabled)return null;
   if(!['http:','https:'].includes(location.protocol)||!['/card/','/library/'].includes(location.pathname))return null;
   return <OnlineQQLogin {...props}/>;
 }

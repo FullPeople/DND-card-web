@@ -1,8 +1,11 @@
 import {applyTone,applyNightMode} from '../platform/tone';
+import {cloudFeaturesEnabled} from '../cloud/availability';
+import {CloudSuspended} from '../cloud/CloudSuspended';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {workbenchRequest,useWorkbench} from '../platform/workbench';
 import {mirrorWorkbenchAppearance} from '../platform/workbenchAppearance';
-export function WorkbenchPanel({panel,close,section}:{section?:'features';panel:'settings'|'music'|'table'|'permissions'|'textEffects'|'qq';close:()=>void}){
+export function WorkbenchPanel(props:Parameters<typeof EnabledWorkbenchPanel>[0]){return !cloudFeaturesEnabled&&props.panel==='qq'?<CloudSuspended/>:<EnabledWorkbenchPanel {...props}/>;}
+function EnabledWorkbenchPanel({panel,close,section}:{section?:'features';panel:'settings'|'music'|'table'|'permissions'|'textEffects'|'qq';close:()=>void}){
  const [tableMode,setTableMode]=useState<'full'|'compact'>('full');
  const ref=useRef<HTMLIFrameElement>(null),instance=useMemo(()=>crypto.randomUUID(),[]),wb=useWorkbench(),latestClose=useRef(close);latestClose.current=close;
  useEffect(()=>{
