@@ -1,3 +1,4 @@
+import './platform/warmTools';
 import {EntryMenuProvider} from './ui/EntrySharing';
 import {cloudFeaturesEnabled} from './cloud/availability';
 import {installCloudSuspension} from './cloud/suspension';

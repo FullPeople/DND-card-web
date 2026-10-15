@@ -1,0 +1,39 @@
+name: B C loading performance
+on:
+  pull_request:
+    paths:
+      - 'src/data/catalog*'
+      - 'src/platform/preloadQueue.ts'
+      - 'src/platform/warmTools.ts'
+      - 'src/main.tsx'
+      - 'tests/catalogSnapshot.test.ts'
+      - 'tests/catalogSnapshotIntegration.test.ts'
+      - 'tests/preloadQueue.test.ts'
+      - 'tests/e2e/bcPerformance296.spec.ts'
+      - 'playwright.bc-performance.config.ts'
+      - '.github/workflows/bc-performance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run tests/catalogSnapshot.test.ts tests/preloadQueue.test.ts tests/catalogTransport.test.ts tests/catalogSnapshotIntegration.test.ts
+      - run: npm run build
+      - run: npm run build:standalone
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.bc-performance.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bc-performance296-evidence
+          path: .local-evidence/bc-performance296/
+          if-no-files-found: ignore
+          retention-days: 3
