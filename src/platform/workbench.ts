@@ -344,7 +344,7 @@ export function workbenchRequest(type:string,extra:Record<string,unknown>={},aff
   const payload={requestId,expiresAt:Date.now()+30000,key:target?.key,itemId:target?.targetId||target?.itemId,...body,...(snapshotCache.currentAccess?{accessEpoch:snapshotCache.currentAccess.epoch,accessScope:snapshotCache.currentAccess.scope,accessRoom:snapshotCache.currentAccess.room}:{})};
   // A POST transport timeout cannot tell whether the server committed. Query the
   // request receipt, never replay the mutation or roll back an optimistic draft.
-  if(host&&!host.closed){send('ping');send(type,payload);}else if(relay)void relay.send({protocol,type,session,...payload}).catch(error=>{if(error?.status&&error.status<500){clearTimeout(timer);pending.delete(requestId);reject(error);}else send('requestStatus',{requestId});});
+  if(host&&!host.closed){send('ping');send(type,payload);}else if(relay)void relay.send({protocol,type,session,...payload}).catch(error=>{if(error?.notSent||error?.status&&error.status<500){clearTimeout(timer);pending.delete(requestId);reject(error);}else send('requestStatus',{requestId});});
  });
 }
 export const workbenchCharacterId=(target:Target)=>`suite:${target.key}`;
