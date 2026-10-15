@@ -152,6 +152,7 @@ import {optionalFeatureLearningDrop} from './entryDragIntent';
 const SourceSettings=lazy(()=>import('./SourceSettings').then(m=>({default:m.SourceSettings})));
 const RoomRulesSummary=lazy(()=>import('./RoomRulesSummary').then(m=>({default:m.RoomRulesSummary})));
 import {confirmedChanges} from '../core/syncRecovery';
+import {advanceFailedChanges,settleFailedChanges} from '../core/failedChanges';
 import { SourceName, useSources } from './SourceName';
 import { KeywordPreview } from './KeywordPreview';
 import { Reference } from './Reference';
@@ -223,6 +224,7 @@ export default function App() {
   const workbenchFailed=useRef(new Set<string>());
   const workbenchFailedChanges=useRef(new Map<string,{before:Character;after:Character}>());
   function clearWorkbenchFailure(id:string){workbenchFailed.current.delete(id);workbenchFailedChanges.current.delete(id);}
+  function reconcileWorkbenchFailure(id:string,remote:any){const failed=workbenchFailedChanges.current.get(id);if(!failed){clearWorkbenchFailure(id);return;}const remaining=settleFailedChanges(failed,remote);if(remaining)workbenchFailedChanges.current.set(id,remaining);else clearWorkbenchFailure(id);}
   const workbenchUncertain=useRef(new Map<string,{requestId:string;before:Character;after:Character}>());
   const workbenchPending=useRef(new Map<string,number>());
   const [workspace, setWorkspace] = useState<Workspace>();
@@ -253,7 +255,7 @@ export default function App() {
   const restoredWorkspacePendingSave = useRef(false);
   const history = useRef(new Map<string, { past: Character[]; future: Character[]; key?: string; time: number }>());
   const [historyTick, setHistoryTick] = useState(0);
-  useEffect(()=>{const handler=(event:Event)=>{const receipt=(event as CustomEvent).detail;if(receipt.uncertain)return;let changed=false;for(const [id,pending] of workbenchUncertain.current){if(pending.requestId!==receipt.requestId)continue;const remote=receipt.result?.snapshot?.document?.dnd_card_web;if(receipt.ok&&(!remote||!confirmedChanges(pending.before,pending.after,remote)))continue;workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);if(receipt.ok)clearWorkbenchFailure(id);changed=true;}if(changed){appliedWorkbench.current='';setHistoryTick(n=>n+1);}};window.addEventListener('workbench-operation-result',handler);return()=>window.removeEventListener('workbench-operation-result',handler);},[]);
+  useEffect(()=>{const handler=(event:Event)=>{const receipt=(event as CustomEvent).detail;if(receipt.uncertain)return;let changed=false;for(const [id,pending] of workbenchUncertain.current){if(pending.requestId!==receipt.requestId)continue;const remote=receipt.result?.snapshot?.document?.dnd_card_web;if(receipt.ok&&(!remote||!confirmedChanges(pending.before,pending.after,remote)))continue;workbenchUncertain.current.delete(id);if(!workbenchPending.current.get(id))workbenchDirty.current.delete(id);if(receipt.ok)reconcileWorkbenchFailure(id,remote);changed=true;}if(changed){appliedWorkbench.current='';setHistoryTick(n=>n+1);}};window.addEventListener('workbench-operation-result',handler);return()=>window.removeEventListener('workbench-operation-result',handler);},[]);
   const actionHistory=useActionHistory();
   const [entries, setEntries] = useState<Entry[]>([]);
   const sourceDisplay=useSources();
@@ -615,7 +617,7 @@ export default function App() {
       else if(base&&(target.runtimeView||cached?.runtimeView)&&!workbenchDirty.current.has(id)&&!workbenchFailed.current.has(id))next=structuredClone(base);
       else next=structuredClone(next);
       const uncertain=workbenchUncertain.current.get(id);
-      if(uncertain&&wb.document?.dnd_card_web&&confirmedChanges(uncertain.before,uncertain.after,wb.document.dnd_card_web)){window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:uncertain.requestId}}));workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);clearWorkbenchFailure(id);next=structuredClone(readDocument(wb.document.dnd_card_web));next.id=id;base=structuredClone(next);}
+      if(uncertain&&wb.document?.dnd_card_web&&confirmedChanges(uncertain.before,uncertain.after,wb.document.dnd_card_web)){window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:uncertain.requestId}}));workbenchUncertain.current.delete(id);if(!workbenchPending.current.get(id))workbenchDirty.current.delete(id);reconcileWorkbenchFailure(id,wb.document.dnd_card_web);if(!workbenchFailed.current.has(id)&&!workbenchDirty.current.has(id)){next=structuredClone(readDocument(wb.document.dnd_card_web));next.id=id;base=structuredClone(next);}}
       if(workbenchDirty.current.has(id)||workbenchFailed.current.has(id)){if(current.activeId!==id){const visible={...current,activeId:id};workspaceRef.current=visible;setWorkspace(visible);}return;}
       if(stock)applyInventory(next,stock);
       if(wb.document)workbenchDocuments.current.set(id,documentSignature);
@@ -670,10 +672,11 @@ export default function App() {
     const projectedBefore=project(before),projectedAfter=project(after);
     return Promise.resolve(patchWorkbenchStats(before,after,evaluate(projectedBefore),evaluate(projectedAfter),target,{before:projectedBefore,after:projectedAfter})).then(receipt=>{
       const failed=workbenchFailedChanges.current.get(id),remote=receipt?.snapshot?.document?.dnd_card_web;
-      if(!failed||remote&&confirmedChanges(failed.before,failed.after,remote))clearWorkbenchFailure(id);
+      if(failed&&!workbenchUncertain.current.has(id))workbenchFailedChanges.current.set(id,advanceFailedChanges(failed,before,after));
+      reconcileWorkbenchFailure(id,remote);
     }).catch(e=>{
       workbenchFailed.current.add(id);const failed=workbenchFailedChanges.current.get(id);
-      workbenchFailedChanges.current.set(id,{before:failed?.before||before,after:failed&&failed.after.revision>after.revision?failed.after:after});
+      workbenchFailedChanges.current.set(id,advanceFailedChanges(failed,before,after));
       if(e?.uncertain&&!e?.queueBlocked){const old=workbenchUncertain.current.get(id);workbenchUncertain.current.set(id,{requestId:e.requestId,before:old?.before||before,after:old&&old.after.revision>after.revision?old.after:after});}
       void saveRecovery(after).catch(()=>{});setSyncDiagnostic(diagnosticText(e));setNotice(`同步失败，已保留本地备份：${e instanceof Error?e.message:String(e)}`);throw e;
     }).finally(()=>{const pending=Math.max(0,(workbenchPending.current.get(id)||1)-1);workbenchPending.current.set(id,pending);if(!pending&&!workbenchUncertain.current.has(id))workbenchDirty.current.delete(id);appliedWorkbench.current='';setHistoryTick(x=>x+1);});
