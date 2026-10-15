@@ -1,4 +1,4 @@
-name: B C loading performance
+name: F7 loading and transport performance
 on:
   pull_request:
     paths:
@@ -6,6 +6,11 @@ on:
       - 'src/platform/preloadQueue.ts'
       - 'src/platform/warmTools.ts'
       - 'src/main.tsx'
+      - 'src/platform/relay.ts'
+      - 'src/platform/workbench.ts'
+      - 'src/ui/Announcement.tsx'
+      - 'tests/relayCapacity.test.ts'
+      - 'tests/workbenchReadRecovery.test.ts'
       - 'tests/catalogSnapshot.test.ts'
       - 'tests/catalogSnapshotIntegration.test.ts'
       - 'tests/preloadQueue.test.ts'
@@ -25,9 +30,10 @@ jobs:
           node-version: '24.9.0'
           cache: npm
       - run: npm ci
-      - run: npx vitest run tests/catalogSnapshot.test.ts tests/preloadQueue.test.ts tests/catalogTransport.test.ts tests/catalogSnapshotIntegration.test.ts
+      - run: npm run verify:automation-source && npm run verify:automation-runtime
+      - run: npx vitest run tests/catalogSnapshot.test.ts tests/preloadQueue.test.ts tests/catalogTransport.test.ts tests/catalogSnapshotIntegration.test.ts tests/relayCapacity.test.ts tests/relayRecovery.test.ts tests/relaySocket.test.ts tests/relayConflict214.test.ts tests/workbenchHandshake216.test.ts tests/workbenchReadRecovery.test.ts
       - run: npm run build
-      - run: npm run build:standalone
+      - run: npm run build:cloud
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --config playwright.bc-performance.config.ts
       - uses: actions/upload-artifact@v4

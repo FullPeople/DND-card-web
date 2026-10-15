@@ -1,4 +1,8 @@
 export const RELEASE_DATE='2026-10-15';
+const release297=():ReleaseSection[]=>[
+ {title:'中继回执与连续操作',items:['修复大请求繁忙时阻止其他操作回执发送的问题。','回执可以按原标识重新投递；结果未知的扣血、资源消费等写入继续查询原结果，不重复执行。','等待期间失去权限或操作过期时停止发送，未发出的操作明确报告失败。']},
+ {title:'减少无效更新',items:['已变化的上限、护甲和先攻值继续同步，数值未变时不再重复写入棋子。','减少无关变化触发的时停广播；折叠权限说明中的图片延后加载。','本批仍在进行 F7 四端验收；QQ 和 3D 继续停用，已有资料保留。']}
+];
 const release296=(mode:'standalone'|'suite'):ReleaseSection[]=>[
  {title:'页面与资料加载',items:['角色卡可用后提前准备五页及常用编辑功能，减少首次打开时的等待。','Wiki 保存完整的已解析资料；重新打开时复用本地缓存，手动更新和失败重试继续保留。','缓存不可用时继续读取资料，保留人物已保存的选择和已消耗资源。']},
  ...(mode==='suite'?[{title:'联机响应调整',items:['减少无关棋子变化引起的重复读取，不同角色的数值操作可分别处理。','调整本机血条更新与轻量投骰的处理；四端现场同步与延迟仍在验收。','继续只使用轻量 2D 骰子，QQ 登录和云端功能保持暂停。']}]:[{title:'本机存档',items:['保留本机角色、恢复草稿和 JSON 导入导出。QQ 登录和云端功能保持暂停。']}])
@@ -446,7 +450,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release296(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?release297():release296(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='suite'?[{title:RELEASE_DATE+'-三',sections:release297()}]:[]),
  {title:RELEASE_DATE+'-二',sections:release296(mode)},
  {title:'2026-10-15',sections:release295()},
  {title:'2026-10-14',sections:release290(mode)},

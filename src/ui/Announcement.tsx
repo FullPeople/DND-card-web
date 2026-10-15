@@ -61,7 +61,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
       <section id="announcement-panel-0" role="tabpanel" aria-labelledby="announcement-tab-0" hidden={tab!==0}>
       <div className="announcement-cloud-poster"><strong>若有bug请发送到邮箱！</strong><small>每天中午都会处理邮件和issue！你的反馈能让该项目真的变得更好！</small></div>
       <FeedbackSection/><AuthorSupport/>
-      {mode==='suite'&&<details className="announcement-owner" onToggle={reveal}><summary>{t('ownerTitle')}</summary><p>{t('ownerIntro')}</p><ol><li>{t('ownerStep1')}<img src="./owner-step1.png" alt={t('ownerImage1')}/><img src="./owner-step2.png" alt={t('ownerImage2')}/></li><li>{t('ownerStep2')}<img src="./owner-step3.png" alt={t('ownerImage3')}/></li></ol><p>{t('ownerFinish')}</p></details>}
+      {mode==='suite'&&<details className="announcement-owner" onToggle={reveal}><summary>{t('ownerTitle')}</summary><p>{t('ownerIntro')}</p><ol><li>{t('ownerStep1')}<img loading="lazy" fetchPriority="low" decoding="async" src="./owner-step1.png" alt={t('ownerImage1')}/><img loading="lazy" fetchPriority="low" decoding="async" src="./owner-step2.png" alt={t('ownerImage2')}/></li><li>{t('ownerStep2')}<img loading="lazy" fetchPriority="low" decoding="async" src="./owner-step3.png" alt={t('ownerImage3')}/></li></ol><p>{t('ownerFinish')}</p></details>}
       {mode==='suite'&&<p>{t('assignCard')}<a href="https://dnd.center/card/" target="_blank" rel="noreferrer">{t('independentSite')}</a></p>}
       <details className="announcement-faq" open><summary>{t('faq')}</summary>
         {QUESTIONS.map(([question,answer])=><details key={question} onToggle={reveal}><summary>{t(question)}</summary><p>{t(answer)}</p></details>)}
