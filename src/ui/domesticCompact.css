@@ -1,6 +1,7 @@
 /* Shared compact chrome across standalone and Suite. Paper contents and fit math stay unchanged. */
 .compact-layout .brand-logo{image-rendering:auto;object-fit:contain;flex-shrink:0;aspect-ratio:1;display:block}
 .app-shell.compact-layout .save-status{display:none}
+.app-shell.compact-layout .save-status[data-sync-state]:not([data-sync-state="confirmed"]){display:flex;flex-wrap:wrap;gap:6px}
 .compact-layout .pane-toolbar{height:28px;min-height:28px;padding:0 10px;gap:8px}
 .compact-layout .pane-toolbar>div:first-child{flex:1;min-width:0;gap:6px}
 .compact-layout .pane-toolbar .eyebrow{display:none}

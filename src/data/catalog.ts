@@ -1,4 +1,5 @@
 import {loadCatalogSnapshot,CATALOG_SNAPSHOT_SCHEMA} from './catalogSnapshot';
+import {rawCatalogCache} from './catalogCache';
 import type {SourceMeta} from '../core/sourceCatalog';
 import {catalogNormalizer,type CatalogOperation} from './catalogNormalizer';
 import {correctSourceData} from '../core/sourceCorrections';
@@ -56,8 +57,8 @@ async function fetchJson(base: string, path: string, signal: AbortSignal, refres
   const key = `${base}/${path}`;
   // Wiki caching is optional. A denied/full cache must not discard a valid network response.
   const cached = await readCache(key).catch(()=>undefined);
-  const valid=(body:Raw)=>!path.endsWith('/index.json')||Object.values(body).some(v=>typeof v==='string'&&v.endsWith('.json'));
-  const prior=cached&&valid(cached.body)?cached:undefined;
+  const valid=(body:Raw)=>!path.endsWith('/index.json')||Object.values(body).some(v=>typeof v==='string'&&/^[\w.-]+\.json$/.test(v));
+  const prior=rawCatalogCache(cached)&&valid(cached.body)?cached:undefined;
   if (!refresh && !retry.has(key) && prior) return { ...prior, cached: true };
   try {
     const {body,etag}=await transport.json(key);
@@ -183,11 +184,11 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
 }
 
 /** Warm openings reuse parsed Wiki data; update/retry keeps the original per-file recovery path. */
-export async function loadCatalog(onBatch:(entries:Entry[])=>void,onProgress:(p:LoadProgress)=>void,signal:AbortSignal,refresh=false,base=DEFAULT_SOURCE,onSources?:(names:Record<string,SourceMeta>)=>void,retryKeys:readonly string[]=[]):Promise<void>{
+export async function loadCatalog(onBatch:(entries:Entry[])=>void,onProgress:(p:LoadProgress)=>void,signal:AbortSignal,refresh=false,base=DEFAULT_SOURCE,onSources?:(names:Record<string,SourceMeta>)=>void,retryKeys:readonly string[]=[]):Promise<boolean>{
  const url=new URL(base);if(url.protocol!=='https:'&&url.hostname!=='localhost')throw new Error('资料源需要 HTTPS 地址');
  base=base.replace(/\/$/,'');
  const scope=JSON.stringify([base,base===DEFAULT_SOURCE?DEFAULT_HOMEBREW:'']),key=CATALOG_SNAPSHOT_SCHEMA+':'+scope;
- await loadCatalogSnapshot({scope,signal,refresh:refresh||retryKeys.length>0,
+ return loadCatalogSnapshot({scope,signal,refresh:refresh||retryKeys.length>0,
   read:async()=>(await readCache(key))?.body,
   write:snapshot=>writeCache(key,{body:snapshot,revision:CATALOG_SNAPSHOT_SCHEMA}),
   load:(batch,progress,sources)=>loadCatalogSources(batch,progress,signal,refresh,base,sources,retryKeys),

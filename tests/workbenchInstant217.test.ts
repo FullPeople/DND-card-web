@@ -75,6 +75,26 @@ it('pushes a new document into the visible card without a click or mutation',asy
  const api=await ready();receive('selection',{...snapshot('a',2),access:access()});const sent=wire.sent.length;receive('cacheSnapshot',{...snapshot('a',3,2,4),access:access()});
  expect(api.getWorkbench().target?.stats.health).toBe(4);expect(wire.sent).toHaveLength(sent);
 });
+
+const runtimeView=(observation:number,hp:number,revision=1)=>({version:1,observation,documentRevision:revision,tokenRevision:revision,tokenId:'token-a',pending:true,stats:{health:hp},resources:[{id:'slot',name:'slot',current:1,max:4}],conditions:[]});
+it('shows a native runtime directory immediately while retaining the actual document and pending save',async()=>{
+ const api=await ready();receive('selection',{...snapshot('a',2),access:access()});const document=api.getWorkbench().document;
+ let completed=false;void api.workbenchRequest('stats',{stats:{health:7}}).then(()=>{completed=true;});const request=wire.sent.find(m=>m.type==='stats'),sent=wire.sent.length;
+ receive('directory',{sequence:3,access:access(),cards:[{...card('a'),runtimeView:runtimeView(3,8)},card('b')],monsters:[],role:'GM',enabled:{characterCards:true}});
+ expect(api.getWorkbench().target?.stats.health).toBe(8);expect(api.getWorkbench().cards[0].resources[0].current).toBe(1);expect(api.getWorkbench().target?.runtimeView?.pending).toBe(true);
+ expect(api.getWorkbench().document).toBe(document);expect(api.getWorkbench().document.core_stats.hp.current).toBe(10);expect(api.getWorkbench().target?.documentRevision).toBe(1);expect(wire.sent).toHaveLength(sent);expect(completed).toBe(false);
+ receive('ack',{requestId:request.requestId,ok:true,result:{snapshot:{...snapshot('a',4,2,7),access:access()}}});await Promise.resolve();
+ expect(completed).toBe(true);expect(api.getWorkbench().target?.stats.health).toBe(7);expect(api.getWorkbench().target?.runtimeView).toBeUndefined();
+});
+it('orders same-baseline native views independently of full snapshots and clears them after revocation',async()=>{
+ const api=await ready();receive('selection',{...snapshot('a',2),access:access()});
+ receive('directory',{sequence:3,access:access(),cards:[{...card('a'),runtimeView:runtimeView(5,7)}],monsters:[]});
+ receive('cacheSnapshot',{...snapshot('a',4),state:{...snapshot('a',4).state,runtimeView:runtimeView(4,8)},access:access()});
+ expect(api.getWorkbench().target?.stats.health).toBe(7);
+ receive('access',{access:access(2,['b'])});expect(api.getWorkbench().target).toBeUndefined();
+ receive('directory',{sequence:99,access:access(),cards:[{...card('a'),runtimeView:runtimeView(99,99)}],monsters:[]});expect(api.getWorkbench().cards.map(row=>row.id)).toEqual([]);
+ receive('access',{access:access(3)});receive('selection',{...snapshot('a',100),access:access(3)});expect(api.getWorkbench().target?.stats.health).toBe(10);
+});
 it('keeps an ambiguous write pending while cached clicks never replay it',async()=>{
  const api=await ready();receive('selection',{...snapshot('a',2),access:access()});receive('cacheSnapshot',{...snapshot('b',3),access:access()});
  let result='pending';void api.workbenchRequest('save',{native:{synthetic:true}}).then(()=>{result='ack';});const mutation=wire.sent.find(m=>m.type==='save');

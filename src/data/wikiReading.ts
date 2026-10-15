@@ -1,6 +1,7 @@
 import type {Entry,Raw} from '../core/model';
 import {DEFAULT_SOURCE} from './catalogSource';
 import {catalogTransport} from './catalogTransport';
+import {rawCatalogBody} from './catalogCache';
 import {expandCopies} from './expand';
 import {readCache,writeCache} from '../platform/storage';
 
@@ -9,7 +10,7 @@ export async function readingJson(path:string,signal:AbortSignal,refresh=false):
  const url=DEFAULT_SOURCE+'/'+path,key=url;
  const cached=await readCache(key).catch(()=>undefined);
  if(signal.aborted)throw signal.reason;
- if(cached&&!refresh)return cached.body;
+ if(rawCatalogBody(cached?.body)&&!refresh)return cached.body;
  const {body,etag}=await catalogTransport(signal).json(url);
  if(signal.aborted)throw signal.reason;
  await writeCache(key,{body,revision:etag||'reading-v1'}).catch(()=>{});

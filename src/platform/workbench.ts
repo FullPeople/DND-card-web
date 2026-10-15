@@ -1,6 +1,7 @@
 import {startupPhase,subscribeStartup} from './startup';
 import {cloudFeaturesEnabled,cloudDisabledError} from '../cloud/availability';
 import {MonsterRuntime,runtimeFrom} from '../core/workbenchRuntime';
+import {RuntimeViews,type RuntimeView} from './runtimeView';
 import {boundedDiceHistory} from './diceHistory';
 import {WorkbenchSnapshotCache,type CacheAccess} from './workbench-cache';
 import {previewInventory,overlayInventory} from '../core/inventory';
@@ -20,8 +21,8 @@ import type {ResourceWidgetLayout} from '../core/resourceWidgets';
 const protocol='full-suite-workbench/v1',params=new URLSearchParams(location.hash.slice(1));
 const session=params.get('suite'),origin=params.get('bridge');
 export const inWorkbench=!!session&&origin===location.origin;
-export type Target={cloudRoom?:boolean;targetId?:string;tokenPortrait?:{url:string;width?:number;height?:number};projectionPending?:boolean;documentRevision?:number;key:string;itemId:string;name:string;cardId:string;slug:string;kind:'character'|'monster'|'token';stats:Record<string,number>;write:boolean;role:string;pinned:boolean;locked?:boolean;statsLocked?:boolean;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];resources?:any[]};
-export type CardChoice={cloudRoom?:boolean;targetId?:string;resourceHidden?:string[];resourceWidgets?:Record<string,ResourceWidgetLayout>;resourceAttacks?:ResourceWidgetLayout;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
+export type Target={runtimeView?:RuntimeView;cloudRoom?:boolean;targetId?:string;tokenPortrait?:{url:string;width?:number;height?:number};projectionPending?:boolean;documentRevision?:number;key:string;itemId:string;name:string;cardId:string;slug:string;kind:'character'|'monster'|'token';stats:Record<string,number>;write:boolean;role:string;pinned:boolean;locked?:boolean;statsLocked?:boolean;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];resources?:any[]};
+export type CardChoice={runtimeView?:RuntimeView;cloudRoom?:boolean;targetId?:string;resourceHidden?:string[];resourceWidgets?:Record<string,ResourceWidgetLayout>;resourceAttacks?:ResourceWidgetLayout;classSummary?:Character['selections'];owner_ids?:string[];player?:string;documentRevision?:number;kind?:'monster'|'character';passive?:number;coins?:Record<string,number>;conditions?:{id:string;name:string;entry?:Entry;level?:number}[];id:string;name:string;write:boolean;locked:boolean;inScene:boolean;itemId:string;resources:any[];stats:Record<string,any>};
 export type SharedRules={edition:Edition;sourceMode:'full'|'short'|'both';profile:RuleProfile;packs:RulePack[];customEntries:Entry[]};
 export type SharedDocument={key:string;scope:'room'|'scene';revision:number;rules:SharedRules};
 export type WorkbenchReadFailure={targetId:string;message:string;status?:number;diagnostic:ReturnType<typeof safeWorkbenchDiagnostic>};
@@ -31,6 +32,8 @@ const listeners=new Set<()=>void>(),pending=new Map<string,{resolve:(value?:any)
 let authoritativeInventory:InventoryState|undefined;
 let revisions=new WorkbenchRevisions();
 const snapshotCache=new WorkbenchSnapshotCache();
+const runtimeViews=new RuntimeViews();
+let visibleSource:State|undefined,visibleVersion=-1,visibleAccess=false,visibleState:State=state;
 let clientInstance=crypto.randomUUID(),clientStarted=performance.timeOrigin;
 let clientSelection=0,wantedSelection:string|undefined,pendingSelection:string|undefined,readRetry=0,activeReadRetry=0;
 let switchMetric:{id:number;started:number;key?:string;stages:Record<string,number|boolean>}|undefined;
@@ -79,7 +82,14 @@ function acceptInventoryReceipt(incoming:InventoryState){
  if(current&&incoming.access!==current.access)incoming={...incoming,access:current.access,containers:Object.fromEntries(Object.entries(current.containers).map(([id,c])=>[id,incoming.containers[id]?{...incoming.containers[id],name:c.name,write:c.write}:c]))};
  update({inventory:incoming});
 }
-export const getWorkbench=()=>state;
+export function getWorkbench(){
+ const allowed=snapshotCache.accessConfirmed;
+ if(visibleSource!==state||visibleVersion!==runtimeViews.version||visibleAccess!==allowed){
+  visibleSource=state;visibleVersion=runtimeViews.version;visibleAccess=allowed;
+  visibleState={...state,cards:state.cards.map(card=>runtimeViews.project(card,0,allowed)),target:state.target?runtimeViews.project(state.target,documentRevision(state.document,state.target),allowed):undefined};
+ }
+ return visibleState;
+}
 export async function requestInventory(operation:Record<string,unknown>){
  const op:any={operationId:crypto.randomUUID(),...operation};if(op.rows)op.rows=op.rows.map((row:any)=>({...row,newId:row.newId||crypto.randomUUID()}));if(op.action==='split')op.newId||=crypto.randomUUID();
  const affectedTargets=[op.container,op.from,op.to].filter((id):id is string=>typeof id==='string'),validate=captureWriteIntent(...affectedTargets);
@@ -102,13 +112,14 @@ function normalizeSnapshot(m:any,authority=true){
  // directory's presentation fields can supply a different revision fallback.
  if(!revisions.acceptsSnapshot(m))return;
  if(!m.state)return m;
+ runtimeViews.remember(m.state);
  const previous=state.target?.key===m.state.key?state.target:m.state.cardId?state.cards.find(card=>card.id===m.state.cardId):state.monsters.find(card=>card.itemId===m.state.itemId);
  const normalized=m.state.cardId?{...m,state:{...m.state,...runtimeFrom(m.state,previous)}}:monsterRuntime.snapshot(m);
  const access=snapshotCache.currentAccess,grant=access?(m.state.cardId?access.cards.find(card=>card.id===m.state.cardId):access.monsters.find(card=>card.itemId===m.state.itemId)):!authority||m.sequence&&m.sequence<catalogSequence?previous:undefined;
  if(grant)normalized.state={...normalized.state,write:grant.write,locked:grant.locked,...(access?{role:access.role}:{}),...(grant.targetId?{targetId:grant.targetId}:{})};
  return normalized;
 }
-function catalogCards(cards:any){return (Array.isArray(cards)?cards:[]).filter(card=>card&&typeof card.id==='string'&&(!snapshotCache.currentAccess||snapshotCache.currentAccess.enabled.characterCards!==false&&snapshotCache.currentAccess.cards.some(grant=>grant.id===card.id))).map(card=>{const grant=snapshotCache.currentAccess?.cards.find(g=>g.id===card.id);return revisions.card({...card,...runtimeFrom(card,state.cards.find(old=>old.id===card.id)),...(grant?{write:snapshotCache.accessConfirmed&&grant.write,locked:grant.locked}:{})});});}
+function catalogCards(cards:any){return (Array.isArray(cards)?cards:[]).filter(card=>card&&typeof card.id==='string'&&(!snapshotCache.currentAccess||snapshotCache.currentAccess.enabled.characterCards!==false&&snapshotCache.currentAccess.cards.some(grant=>grant.id===card.id))).map(card=>{runtimeViews.remember(card);const grant=snapshotCache.currentAccess?.cards.find(g=>g.id===card.id);return revisions.card({...card,...runtimeFrom(card,state.cards.find(old=>old.id===card.id)),...(grant?{write:snapshotCache.accessConfirmed&&grant.write,locked:grant.locked}:{})});});}
 function catalogMonsters(cards:any,sequence=0){return (Array.isArray(cards)?cards:[]).filter(card=>card&&typeof card.itemId==='string'&&(!snapshotCache.currentAccess||snapshotCache.currentAccess.monsters.some(grant=>grant.itemId===card.itemId))).map(card=>{const grant=snapshotCache.currentAccess?.monsters.find(g=>g.itemId===card.itemId);return {...monsterRuntime.catalog(card,sequence),kind:'monster',...(grant?{write:snapshotCache.accessConfirmed&&grant.write,locked:grant.locked,...(grant.targetId?{targetId:grant.targetId}:{})}:{})};});}
 function receiptCards(cards:any,monsters=false){
  if(snapshotCache.currentAccess)return cards;
@@ -157,6 +168,7 @@ export function chooseWorkbench(itemId:string){activeReadRetry=0;readRetry++;cli
 function acceptAccess(access:CacheAccess){
  const previous=snapshotCache.currentAccess,confirmed=snapshotCache.accessConfirmed;if(!snapshotCache.acceptAccess(access))return false;
  access=snapshotCache.currentAccess!;
+ runtimeViews.restrict(access);
  if(confirmed&&previous===access)return true;
  const scopeChanged=previous&&(previous.scope!==access.scope||previous.room!==access.room||previous.role!==access.role);
  const revoked=previous?[...previous.cards.filter(card=>card.write&&!access.cards.some(next=>next.id===card.id&&next.write&&next.grantVersion===card.grantVersion&&access.enabled.characterCards!==false)).map(card=>`card:${card.id}`),...previous.monsters.filter(card=>card.write&&!access.monsters.some(next=>next.itemId===card.itemId&&next.key===card.key&&next.write&&next.grantVersion===card.grantVersion)).map(card=>`monster:${card.itemId}`)]:[];
@@ -188,11 +200,15 @@ function requestHello(){
 if(inWorkbench){
  subscribeStartup(()=>send('startup',{startupPhase:startupPhase()}));
  startWorkbenchSound();
- function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){invalidateWrites();observedDocuments.clear();hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;followRevision=0;monsterRuntime.reset();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;pendingSelection=undefined;clientSelection=0;activeReadRetry=0;readRetry++;update({readFailure:undefined,access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
+ function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){invalidateWrites();observedDocuments.clear();hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;followRevision=0;monsterRuntime.reset();runtimeViews.reset();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;pendingSelection=undefined;clientSelection=0;activeReadRetry=0;readRetry++;update({readFailure:undefined,access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
   if(!state.online)update({online:true,message:''});
   const cancelledReceipt=m.type==='ack'&&pending.get(m.requestId)?.cancelled;
   const accessAccepted=m.type==='selectionError'?(snapshotCache.currentAccess?!!m.access&&acceptsReceiptAccess(m.access):!m.access):!m.access||(['ack','cacheSnapshot'].includes(m.type)?acceptsReceiptAccess(m.access):acceptAccess(m.access));
   if(m.type==='access'||!accessAccepted&&m.type!=='ack')return;
+  if(m.type==='runtimeView'){
+   if(state.target&&m.access&&acceptsReceiptAccess(m.access)&&snapshotCache.permits(m.state)&&m.state?.key===state.target.key&&m.state.itemId===state.target.itemId){runtimeViews.remember(m.state);publishUpdate();}
+   return;
+  }
   if(m.type==='cacheSnapshot'){if(accessAccepted&&m.state&&(!snapshotCache.currentAccess||snapshotCache.permits(m.state))){const snap=revisions.snapshot(normalizeSnapshot(m,false));if(!snap)return;rememberDocument(snap);if(snap.state)applySnapshotRuntime(snap);if(snap.state?.key===state.target?.key)acceptSnapshot(snap,false);
     else if(pendingSelection&&snapshotCache.get(pendingSelection))previewSelection(pendingSelection);
    }return;}
@@ -291,7 +307,7 @@ export async function retryWorkbenchRead(){
  finally{if(activeReadRetry===id)activeReadRetry=0;}
 }
 export async function refreshWorkbenchCatalog(){await workbenchRequest('refreshCatalog',{key:undefined,itemId:undefined});}
-export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},()=>state);}
+export function useWorkbench(){return useSyncExternalStore(fn=>{listeners.add(fn);return()=>listeners.delete(fn);},getWorkbench);}
 export function pinWorkbench(pinned:boolean){if(!state.online||!state.target)return;const target=state.target;update({target:{...target,pinned}});send('pin',{pinned,itemId:target.targetId||target.itemId});}
 const cardMutationTypes=new Set(['save','stats','resource','monsterSave','assignName','lock','statsLock','delete','cloudUpload']);
 // The editor tab lock (App) is the only thing that keeps two tabs of one player
@@ -356,8 +372,8 @@ export async function flushWorkbenchSaves(key:string){
 }
 export function patchWorkbenchStats(before:Character,after:Character,_previous:Derived,next:Derived,target=state.target,projection?:{before:Character;after:Character}){
  if(!inWorkbench||!target||after.id!==workbenchCharacterId(target))return;
- return new Promise<void>((resolve,reject)=>{
+ return new Promise<any>((resolve,reject)=>{
   let batch=saves.get(target.key);if(!batch){batch={queuedAfter:saveChains.get(target.key),validate:captureWriteIntent(`card:${target.cardId}`),observed:structuredClone(observedDocuments.get(target.key)?.document),before,beforeDerived:_previous,after,derived:next,projection,target,timer:0 as any,waiters:[]};saves.set(target.key,batch);}batch.after=after;batch.derived=next;if(projection)batch.projection={before:batch.projection?.before||projection.before,after:projection.after};batch.waiters.push({resolve,reject});clearTimeout(batch.timer);const current=batch;
-  batch.timer=setTimeout(()=>{saves.delete(target.key);const run=(ack?:any)=>{current.validate();return workbenchRequest('save',{key:current.target.key,itemId:current.target.itemId,observed:ack?.snapshot?.document||current.observed,previous:current.before,previousData:exportOwlbear(current.projection?.before||current.before,current.beforeDerived),native:current.after,data:exportOwlbear(current.projection?.after||current.after,current.derived),expected:{...current.target.stats,'health':current.before.runtime.hp,'temporary health':current.before.runtime.tempHp,'max health':current.beforeDerived.maxHp,'armor class':current.beforeDerived.ac},statPatch:Object.fromEntries(Object.entries({'health':current.after.runtime.hp,'temporary health':current.after.runtime.tempHp,'max health':current.derived.maxHp,'armor class':current.derived.ac}).filter(([key,value])=>value!==({'health':current.before.runtime.hp,'temporary health':current.before.runtime.tempHp,'max health':current.beforeDerived.maxHp,'armor class':current.beforeDerived.ac} as Record<string,number>)[key]))});};const flight=characterQueue.run(current.target.key,run);saveChains.set(current.target.key,flight);void flight.then(()=>current.waiters.forEach(w=>w.resolve())).catch(e=>current.waiters.forEach(w=>w.reject(e))).finally(()=>{if(saveChains.get(current.target.key)===flight)saveChains.delete(current.target.key);});},80);
+  batch.timer=setTimeout(()=>{saves.delete(target.key);const run=(ack?:any)=>{current.validate();return workbenchRequest('save',{key:current.target.key,itemId:current.target.itemId,observed:ack?.snapshot?.document||current.observed,previous:current.before,previousData:exportOwlbear(current.projection?.before||current.before,current.beforeDerived),native:current.after,data:exportOwlbear(current.projection?.after||current.after,current.derived),expected:{...current.target.stats,'health':current.before.runtime.hp,'temporary health':current.before.runtime.tempHp,'max health':current.beforeDerived.maxHp,'armor class':current.beforeDerived.ac},statPatch:Object.fromEntries(Object.entries({'health':current.after.runtime.hp,'temporary health':current.after.runtime.tempHp,'max health':current.derived.maxHp,'armor class':current.derived.ac}).filter(([key,value])=>value!==({'health':current.before.runtime.hp,'temporary health':current.before.runtime.tempHp,'max health':current.beforeDerived.maxHp,'armor class':current.beforeDerived.ac} as Record<string,number>)[key]))});};const flight=characterQueue.run(current.target.key,run);saveChains.set(current.target.key,flight);void flight.then(result=>current.waiters.forEach(w=>w.resolve(result))).catch(e=>current.waiters.forEach(w=>w.reject(e))).finally(()=>{if(saveChains.get(current.target.key)===flight)saveChains.delete(current.target.key);});},80);
  });
 }

@@ -18,6 +18,48 @@ async function pair(host:Page){
  const a=snapshot('a'),b=snapshot('b');await send(host,'ready');await send(host,'catalog',{sequence:1,access:auth(),cards:[a,b].map(s=>({...s.state,id:s.state.cardId,inScene:true})),monsters:[],role:'GM',enabled:{characterCards:true},visibility:{wiki:true,monsters:true}});
  await send(host,'selection',{sequence:2,...a,access:auth()});await send(host,'cacheSnapshot',{sequence:3,...b,access:auth()});await send(host,'navigate');await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('11');return page;
 }
+
+test('native metadata views update the paper before the document GET and never confirm or manufacture a save',async({page:host})=>{
+ const page=await pair(host),base=snapshot('a');
+ const runtimeView={version:1,observation:10,documentRevision:1,tokenRevision:1,tokenId:'token-a',pending:true,stats:{health:8,'max health':40,'temporary health':2,'armor class':10},resources:[{id:'spell-slot:1',name:'一环法术位',current:1,max:4}],conditions:[]};
+ await send(host,'runtimeView',{sequence:10,access:auth(),state:{...base.state,runtimeView}});
+ await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('8');
+ await expect(page.locator('.save-status')).toContainText('等待资料确认');
+ await expect(page.locator('.save-status')).toBeVisible();
+ const original=await page.evaluate(async()=>{const path='/src/platform/workbench.ts',api=await import(/* @vite-ignore */path);const s=api.getWorkbench();return {hp:s.document.dnd_card_web.runtime.hp,revision:s.document._suiteRevision,slot:s.target.resources[0].current};});
+ expect(original).toEqual({hp:11,revision:1,slot:1});expect(await host.evaluate(()=>(window as any).requests.filter((m:any)=>['save','stats','inventory'].includes(m.type)))).toEqual([]);
+ await send(host,'selection',{sequence:11,...base,access:auth()});await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('8');
+ await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await page.getByLabel('角色姓名',{exact:true}).fill('Only rename');
+ await expect.poll(()=>host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='save').length)).toBe(1);
+ const request=await host.evaluate(()=>(window as any).requests.find((m:any)=>m.type==='save'));
+ expect(request.delta.native.some((change:any)=>change.path.join('.')==='name'&&change.after==='Only rename')).toBe(true);
+ expect(request.delta.native.filter((change:any)=>['runtime.hp','runtime.tempHp','runtime.resources','spellSettings.slots','adjustments'].some(path=>change.path.join('.').startsWith(path)))).toEqual([]);
+ await send(host,'runtimeView',{sequence:12,access:auth(),state:{...base.state,runtimeView:{...runtimeView,observation:12,stats:{...runtimeView.stats,health:7}}}});
+ await expect(page.getByLabel('角色姓名',{exact:true})).toHaveValue('Only rename');await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('8');
+ expect(await host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='save').length)).toBe(1);
+ await send(host,'ack',{requestId:request.requestId,ok:false,message:'Synthetic rejected save'});
+ await expect(page.locator('.save-status')).toContainText('同步失败');await expect(page.getByLabel('角色姓名',{exact:true})).toHaveValue('Only rename');
+ await send(host,'runtimeView',{sequence:13,access:auth(),state:{...base.state,runtimeView:{...runtimeView,observation:13,stats:{...runtimeView.stats,health:6}}}});
+ await send(host,'cacheSnapshot',{sequence:14,...snapshot('a',2,5),access:auth()});
+ await expect(page.getByLabel('角色姓名',{exact:true})).toHaveValue('Only rename');await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('8');
+ await page.getByLabel('玩家姓名',{exact:true}).fill('Second field');
+ await expect.poll(()=>host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='save').length)).toBe(2);
+ const second=await host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='save')[1]),accepted=snapshot('a',3,5);accepted.document.dnd_card_web.player='Second field';
+ await send(host,'ack',{requestId:second.requestId,ok:true,result:{snapshot:{sequence:15,...accepted,access:auth()}}});
+ await expect(page.locator('.save-status')).toContainText('同步失败');await expect(page.getByLabel('角色姓名',{exact:true})).toHaveValue('Only rename');
+ await page.getByRole('button',{name:'核对并采用枭熊数据',exact:true}).click();
+ await expect(page.getByLabel('角色姓名',{exact:true})).toHaveValue('缓存验收 a');await expect(page.getByLabel('玩家姓名',{exact:true})).toHaveValue('Second field');await expect(page.locator('.save-status')).not.toContainText('同步失败');
+});
+
+test('a newer durable body retires a preview and revoked runtime messages cannot revive its paper',async({page:host})=>{
+ const page=await pair(host),base=snapshot('a'),runtimeView={version:1,observation:10,documentRevision:1,tokenRevision:2,tokenId:'token-a',pending:true,stats:{health:8,'max health':40},resources:[],conditions:[]};
+ await send(host,'directory',{sequence:10,access:auth(),cards:[{...base.state,id:'a',inScene:true,runtimeView}],monsters:[],role:'GM',enabled:{characterCards:true}});
+ await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('8');await send(host,'cacheSnapshot',{sequence:11,...snapshot('a',3,6),access:auth()});await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('6');
+ await expect(page.locator('.save-status')).not.toContainText('等待资料确认');
+ await send(host,'access',{access:auth(2,['b'])});await expect(page.locator('.paper')).toHaveCount(0);
+ await send(host,'runtimeView',{sequence:99,access:auth(),state:{...base.state,runtimeView:{...runtimeView,observation:99}}});await expect(page.locator('.paper')).toHaveCount(0);
+ expect(await host.evaluate(()=>(window as any).requests.filter((m:any)=>['save','stats'].includes(m.type)))).toEqual([]);
+});
 test('full paper switches cached heavy cards before any select response, then applies push updates and access revocation',async({page:host},info)=>{
  const page=await pair(host);const profiler=await page.context().newCDPSession(page);await profiler.send('Profiler.enable');await profiler.send('Profiler.start');const samples:number[]=[];await page.evaluate(()=>{(window as any).switchStages=[];window.addEventListener('workbench-switch-metric',e=>(window as any).switchStages.push((e as CustomEvent).detail));});
  for(let i=0;i<10;i++){

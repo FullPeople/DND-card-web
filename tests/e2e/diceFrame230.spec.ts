@@ -11,7 +11,7 @@ parent.postMessage({channel,ready:true},location.origin);
 </script>`;
 
 async function send(host:Page,type:string,payload:Record<string,unknown>={}){
- await host.evaluate(({protocol,session,type,payload})=>(window as any).viewer.postMessage({protocol,session,type,hostStarted:230,...payload},location.origin),{protocol,session,type,payload});
+ await host.evaluate(({protocol,session,type,payload})=>{const w=window as any;if(type==='selection')w.selection=payload.state;w.viewer.postMessage({protocol,session,type,hostStarted:230,...payload},location.origin);},{protocol,session,type,payload});
 }
 function target(key:string){return {key,itemId:'token-'+key,name:key,cardId:key,slug:'',kind:'character',stats:{},write:true,role:'GM',pinned:false};}
 async function pair(host:Page){
@@ -22,7 +22,12 @@ async function pair(host:Page){
   const w=window as any;w.requests=[];w.held=[];w.pause=false;w.holdInit=false;
   window.addEventListener('message',e=>{const m=e.data;if(m?.protocol!==protocol||m.session!==session)return;w.requests.push(m);const reply=(type:string,payload:any={})=>(e.source as Window).postMessage({protocol,session,type,hostStarted:230,...payload},location.origin);
    if(m.type==='hello'||m.type==='ping'){if(!w.pause)reply(m.type==='hello'?'ready':'pong');return;}
-   if(m.type==='diceRpc'){const answer=()=>reply('ack',{requestId:m.requestId,ok:true,result:m.method==='init'?{roomId:'synthetic',reads:{'player.getRole':'GM','player.getSelection':[m.itemId]},target:m.key}:{forwarded:m.args}});if(w.holdInit&&m.method==='init')w.held.push({key:m.key,answer});else answer();}
+   if(m.type==='diceRpc'){
+    // Init reads the host's selection without loading a character. Capture it when
+    // this request arrives so delayed replies still represent the old selection.
+    const selection=w.selection,answer=()=>reply('ack',{requestId:m.requestId,ok:true,result:m.method==='init'?{roomId:'synthetic',reads:{'player.getRole':'GM','player.getSelection':selection?[selection.itemId]:[]},target:selection?.key}:{forwarded:m.args}});
+    if(w.holdInit&&m.method==='init')w.held.push({key:selection?.key,requestId:m.requestId,answer});else answer();
+   }
   });
  },{protocol,session});
  const waiting=host.context().waitForEvent('page');await host.evaluate(session=>{(window as any).viewer=window.open('/dice-frame230#suite='+session+'&bridge='+encodeURIComponent(location.origin),'dice-frame230');},session);const page=await waiting;
@@ -54,6 +59,9 @@ test('dice snapshot bridge discards a delayed old target and refreshes after an 
  const {page,frame}=await pair(host);await host.evaluate(()=>{(window as any).holdInit=true;});
  await send(host,'selection',{sequence:2,state:target('a')});await expect.poll(()=>host.evaluate(()=>(window as any).held.filter((m:any)=>m.key==='a').length)).toBe(1);
  await send(host,'selection',{sequence:3,state:target('b')});await expect.poll(()=>host.evaluate(()=>(window as any).held.filter((m:any)=>m.key==='b').length)).toBe(1);
+ const initializations=await host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='diceRpc'&&m.method==='init'));
+ expect(initializations.every((m:any)=>m.key===undefined&&m.itemId===undefined)).toBe(true);
+ expect(new Set(initializations.map((m:any)=>m.requestId)).size).toBe(initializations.length);
  await host.evaluate(()=>{const w=window as any;w.held.find((m:any)=>m.key==='b').answer();w.held.find((m:any)=>m.key==='a').answer();w.holdInit=false;});
  await expect.poll(()=>frame.locator('#snapshots').evaluate(e=>JSON.parse(e.textContent||'[]').at(-1)?.target)).toBe('b');
  expect(await frame.locator('#snapshots').evaluate(e=>JSON.parse(e.textContent||'[]').some((s:any)=>s.target==='a'))).toBe(false);

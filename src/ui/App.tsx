@@ -24,6 +24,8 @@ import {classEditionSuffix} from '../core/classEdition';
 import {wikiEditionAllows} from './wikiEdition';
 import {LibraryDisplaySettings} from './LibraryDisplaySettings';
 import {CharacterTabs} from './CharacterTabs';
+import {ReferenceIndex,indexedReference} from './referenceIndex';
+import {applyCharacterRuntimeView,displayRuntimeDerived} from '../platform/runtimeView';
 import {applyDisplayCharacterEdit,sameCharacterMechanics} from '../core/displayCharacterEdit';
 import {ToolBoundary} from './ToolBoundary';
 import './classCompatibility.css';
@@ -124,7 +126,7 @@ import type {SheetCaptureOptions} from '../platform/sheetImage';
 
 import { lazy, Suspense, startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ABILITIES, ABILITY_LABELS, KIND_LABELS, SKILLS, classMatches, newCharacter, selectionEffectsAllowed, subclassOwner, entryEdition, uid, type Character, type Edition, type Entry, type Kind, type Selection } from '../core/model';
-import { candidateReason, choiceLabel, evaluate, requirementMismatch } from '../core/engine';
+import { candidateReason, choiceLabel, evaluate } from '../core/engine';
 import { importOwlbear, parseFile, readCharacter, validateCharacter, validatePack } from '../core/validation';
 import { exportCharacter, exportOwlbear, exportRulePack } from '../core/export';
 import type {LoadProgress} from '../data/catalog';
@@ -213,12 +215,14 @@ export default function App() {
   useEffect(()=>{if(inWorkbench)document.body.classList.add('suite-workbench');return()=>document.body.classList.remove('suite-workbench');},[]);
   const appliedWorkbench=useRef('');
   const workbenchDocuments=useRef(new Map<string,any>());
-  const workbenchViews=useRef(new Map<string,{signature:string;document:any;character:Character}>());
+  const workbenchViews=useRef(new Map<string,{signature:string;document:any;character:Character;base?:Character;runtimeView?:boolean}>());
   const workbenchQuarantined=useRef(new Map<string,Character>());
   const workbenchAccessScope=useRef('');
   const appliedDocument=useRef<any>(undefined);
   const workbenchDirty=useRef(new Set<string>());
   const workbenchFailed=useRef(new Set<string>());
+  const workbenchFailedChanges=useRef(new Map<string,{before:Character;after:Character}>());
+  function clearWorkbenchFailure(id:string){workbenchFailed.current.delete(id);workbenchFailedChanges.current.delete(id);}
   const workbenchUncertain=useRef(new Map<string,{requestId:string;before:Character;after:Character}>());
   const workbenchPending=useRef(new Map<string,number>());
   const [workspace, setWorkspace] = useState<Workspace>();
@@ -249,7 +253,7 @@ export default function App() {
   const restoredWorkspacePendingSave = useRef(false);
   const history = useRef(new Map<string, { past: Character[]; future: Character[]; key?: string; time: number }>());
   const [historyTick, setHistoryTick] = useState(0);
-  useEffect(()=>{const handler=(event:Event)=>{const receipt=(event as CustomEvent).detail;if(receipt.uncertain)return;let changed=false;for(const [id,pending] of workbenchUncertain.current){if(pending.requestId!==receipt.requestId)continue;const remote=receipt.result?.snapshot?.document?.dnd_card_web;if(receipt.ok&&(!remote||!confirmedChanges(pending.before,pending.after,remote)))continue;workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);if(receipt.ok)workbenchFailed.current.delete(id);changed=true;}if(changed){appliedWorkbench.current='';setHistoryTick(n=>n+1);}};window.addEventListener('workbench-operation-result',handler);return()=>window.removeEventListener('workbench-operation-result',handler);},[]);
+  useEffect(()=>{const handler=(event:Event)=>{const receipt=(event as CustomEvent).detail;if(receipt.uncertain)return;let changed=false;for(const [id,pending] of workbenchUncertain.current){if(pending.requestId!==receipt.requestId)continue;const remote=receipt.result?.snapshot?.document?.dnd_card_web;if(receipt.ok&&(!remote||!confirmedChanges(pending.before,pending.after,remote)))continue;workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);if(receipt.ok)clearWorkbenchFailure(id);changed=true;}if(changed){appliedWorkbench.current='';setHistoryTick(n=>n+1);}};window.addEventListener('workbench-operation-result',handler);return()=>window.removeEventListener('workbench-operation-result',handler);},[]);
   const actionHistory=useActionHistory();
   const [entries, setEntries] = useState<Entry[]>([]);
   const sourceDisplay=useSources();
@@ -301,7 +305,11 @@ export default function App() {
     const profile=includeNewProfileSources(current.siteSources,defaultSources);
     if(profile!==current.siteSources)persist({...current,siteSources:sourceSettings(profile)});
   },[defaultSources,workspace]);
-  const sourceEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
+  // Runtime edits clone the character. Only a source change invalidates the catalog index.
+  const referenceSources=JSON.stringify(c?.profile.enabledSources);
+  const sourceEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,referenceSources]);
+  const references=useMemo(()=>new ReferenceIndex(sourceEntries),[sourceEntries]);
+  const selectedReferences=useMemo(()=>c?.selections.filter(row=>librarySourceEnabled(c,row.entry)).map(row=>row.entry)||[],[c?.selections,c?.profile.enabledSources]);
   const selectedEntries = useMemo(()=>workspace?.characters.filter(row=>!inWorkbench||!row.id.startsWith('suite:')||(wb.access?wb.access.enabled.characterCards!==false&&wb.access.cards.some(card=>row.id===`suite:${wb.access!.room}:card:${card.id}`):!!wb.document&&!!wb.target&&row.id===workbenchCharacterId(wb.target))).flatMap(row=>row.selections.map(s=>s.entry))||[],[workspace?.characters,wb.access,wb.target?.key,wb.document]);
   const favorites=useLibraryFavorites();
   const library = useLibrary(allEntries,selectedEntries,inWorkbench);
@@ -539,13 +547,14 @@ export default function App() {
   async function load(refresh = false,retryKeys:readonly string[] = []) {
     loadController.current?.abort(); const controller = new AbortController(); loadController.current = controller;
     setLoading(true); setProgress(emptyProgress);
-    let lastPublish=0;
+    let lastPublish=0;const received=new Map<string,Entry>();
     try {
-      await (await import('../data/catalog')).loadCatalog(batch => {
-        batch.forEach(e => catalogRef.current.set(e.id, e));
+      const complete=await (await import('../data/catalog')).loadCatalog(batch => {
+        if(controller.signal.aborted)return;
+        batch.forEach(e => {received.set(e.id,e);catalogRef.current.set(e.id,e);});
         if(performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
       }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
-      if(!controller.signal.aborted)startTransition(()=>setEntries([...catalogRef.current.values()]));
+      if(!controller.signal.aborted){if(complete)catalogRef.current=received;startTransition(()=>setEntries([...catalogRef.current.values()]));}
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
     finally { if (!controller.signal.aborted) startTransition(()=>setLoading(false)); }
   }
@@ -555,7 +564,12 @@ export default function App() {
   useEffect(()=>{if(!wikiUi)return;void load();return()=>loadController.current?.abort();},[!!wikiUi]);
   useEffect(() => {if(startupComplete)void registerOffline(activate => setActivateUpdate(() => activate));}, [startupComplete]);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
-  const d = useMemo(() => mechanics ? evaluate(mechanics) : undefined, [mechanics]);
+  const d = useMemo(() => {
+    if(!mechanics)return;
+    const derived=evaluate(mechanics),target=wb.target;
+    return inWorkbench&&target&&mechanics.id===workbenchCharacterId(target)&&!workbenchDirty.current.has(mechanics.id)&&!workbenchFailed.current.has(mechanics.id)
+      ?displayRuntimeDerived(derived,target.runtimeView,wb.document?._suiteRevision||0):derived;
+  }, [mechanics,wb.target?.runtimeView,wb.document,historyTick]);
   // Reveal a fully validated/evaluated read-only card independently of editing.
   // A saved editing preference is restored by loadEditor; its network download
   // must not keep the whole card behind a finished logo.
@@ -592,15 +606,17 @@ export default function App() {
     try{
       markWorkbenchView('prepare',target.key);
       const documentSignature=wb.document,cached=workbenchViews.current.get(id);
-      if(cached&&next===cached.character&&cached.signature===signature&&cached.document===documentSignature&&!workbenchDirty.current.has(id)&&!workbenchUncertain.current.has(id)){
+      let base=cached&&cached.document===documentSignature?cached.base:undefined;
+      if(cached&&next===cached.character&&cached.signature===signature&&cached.document===documentSignature&&!workbenchDirty.current.has(id)&&!workbenchUncertain.current.has(id)&&!workbenchFailed.current.has(id)){
         markWorkbenchView('prepared',target.key,true);appliedWorkbench.current=signature;appliedDocument.current=documentSignature;setWorkbenchReadError(undefined);
         if(current.activeId!==id){const visible={...current,activeId:id};workspaceRef.current=visible;setWorkspace(visible);}return;
       }
-      if(!next||(wb.document&&workbenchDocuments.current.get(id)!==documentSignature&&!workbenchDirty.current.has(id))){if(!wb.document)return;next=wb.document.dnd_card_web?structuredClone(readDocument(wb.document.dnd_card_web)):importOwlbear(wb.document);next.id=id;}
+      if(!next||(wb.document&&workbenchDocuments.current.get(id)!==documentSignature&&!workbenchDirty.current.has(id)&&!workbenchFailed.current.has(id))){if(!wb.document)return;next=wb.document.dnd_card_web?structuredClone(readDocument(wb.document.dnd_card_web)):importOwlbear(wb.document);next.id=id;base=structuredClone(next);}
+      else if(base&&(target.runtimeView||cached?.runtimeView)&&!workbenchDirty.current.has(id)&&!workbenchFailed.current.has(id))next=structuredClone(base);
       else next=structuredClone(next);
       const uncertain=workbenchUncertain.current.get(id);
-      if(uncertain&&wb.document?.dnd_card_web&&confirmedChanges(uncertain.before,uncertain.after,wb.document.dnd_card_web)){window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:uncertain.requestId}}));workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);workbenchFailed.current.delete(id);next=structuredClone(readDocument(wb.document.dnd_card_web));next.id=id;}
-      if(workbenchDirty.current.has(id)){if(current.activeId!==id){const visible={...current,activeId:id};workspaceRef.current=visible;setWorkspace(visible);}return;}
+      if(uncertain&&wb.document?.dnd_card_web&&confirmedChanges(uncertain.before,uncertain.after,wb.document.dnd_card_web)){window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:uncertain.requestId}}));workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);clearWorkbenchFailure(id);next=structuredClone(readDocument(wb.document.dnd_card_web));next.id=id;base=structuredClone(next);}
+      if(workbenchDirty.current.has(id)||workbenchFailed.current.has(id)){if(current.activeId!==id){const visible={...current,activeId:id};workspaceRef.current=visible;setWorkspace(visible);}return;}
       if(stock)applyInventory(next,stock);
       if(wb.document)workbenchDocuments.current.set(id,documentSignature);
       next.locked=target.locked;
@@ -621,7 +637,8 @@ export default function App() {
       // A scene projection must never create a permanent final-value override.
       }
       syncAutoResources(next);
-      workbenchViews.current.set(id,{signature,document:documentSignature,character:next});
+      if(target.runtimeView)applyCharacterRuntimeView(next,target.runtimeView,wb.document);
+      workbenchViews.current.set(id,{signature,document:documentSignature,character:next,base,runtimeView:!!target.runtimeView});
       markWorkbenchView('prepared',target.key,false);
       appliedWorkbench.current=signature;appliedDocument.current=wb.document;setWorkbenchReadError(undefined);
       // Remote reads are already durable on the server. Keep their view in memory;
@@ -651,7 +668,15 @@ export default function App() {
     workbenchDirty.current.add(id);workbenchPending.current.set(id,(workbenchPending.current.get(id)||0)+1);
     const project=(value:Character)=>roomRules?{...value,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:value;
     const projectedBefore=project(before),projectedAfter=project(after);
-    return Promise.resolve(patchWorkbenchStats(before,after,evaluate(projectedBefore),evaluate(projectedAfter),target,{before:projectedBefore,after:projectedAfter})).then(()=>{workbenchFailed.current.delete(id);}).catch(e=>{workbenchFailed.current.add(id);if(e?.uncertain&&!e?.queueBlocked){const old=workbenchUncertain.current.get(id);workbenchUncertain.current.set(id,{requestId:e.requestId,before:old?.before||before,after:old&&old.after.revision>after.revision?old.after:after});}void saveRecovery(after).catch(()=>{});setSyncDiagnostic(diagnosticText(e));setNotice(`同步失败，已保留本地备份：${e instanceof Error?e.message:String(e)}`);throw e;}).finally(()=>{const pending=Math.max(0,(workbenchPending.current.get(id)||1)-1);workbenchPending.current.set(id,pending);if(!pending&&!workbenchUncertain.current.has(id))workbenchDirty.current.delete(id);appliedWorkbench.current='';setHistoryTick(x=>x+1);});
+    return Promise.resolve(patchWorkbenchStats(before,after,evaluate(projectedBefore),evaluate(projectedAfter),target,{before:projectedBefore,after:projectedAfter})).then(receipt=>{
+      const failed=workbenchFailedChanges.current.get(id),remote=receipt?.snapshot?.document?.dnd_card_web;
+      if(!failed||remote&&confirmedChanges(failed.before,failed.after,remote))clearWorkbenchFailure(id);
+    }).catch(e=>{
+      workbenchFailed.current.add(id);const failed=workbenchFailedChanges.current.get(id);
+      workbenchFailedChanges.current.set(id,{before:failed?.before||before,after:failed&&failed.after.revision>after.revision?failed.after:after});
+      if(e?.uncertain&&!e?.queueBlocked){const old=workbenchUncertain.current.get(id);workbenchUncertain.current.set(id,{requestId:e.requestId,before:old?.before||before,after:old&&old.after.revision>after.revision?old.after:after});}
+      void saveRecovery(after).catch(()=>{});setSyncDiagnostic(diagnosticText(e));setNotice(`同步失败，已保留本地备份：${e instanceof Error?e.message:String(e)}`);throw e;
+    }).finally(()=>{const pending=Math.max(0,(workbenchPending.current.get(id)||1)-1);workbenchPending.current.set(id,pending);if(!pending&&!workbenchUncertain.current.has(id))workbenchDirty.current.delete(id);appliedWorkbench.current='';setHistoryTick(x=>x+1);});
   }
   function rememberCharacter(before:Character,after:Character){const target=wb.target;
     const restore=async(from:Character,to:Character)=>{const w=workspaceRef.current!;const live=w.characters.find(c=>c.id===before.id);if(!live)throw Error('角色已经删除');if(inWorkbench){const currentAccess=getWorkbench();if(!target||!currentAccess.online||!currentAccess.cards.some(card=>card.id===target.cardId&&card.write))throw Error('当前角色的写入权限已改变，不能撤销或重做');}const canonical=(value:Character)=>{const result=structuredClone(value);for(const row of result.selections)delete row.entry.raw._suiteStatusId;return result;};const normalize=(value:Character)=>canonical(localSources?withSiteSources(value,w.siteSources,w.packs):value);const restored=applyPatch(normalize(live),normalize(from),normalize(to)) as Character;for(const row of restored.selections){const previous=live.selections.find(s=>s.id===row.id);if(previous?.entry.raw._suiteStatusId)row.entry.raw._suiteStatusId=previous.entry.raw._suiteStatusId;}restored.revision=live.revision+1;restored.updatedAt=new Date().toISOString();persist({...w,characters:w.characters.map(c=>c.id===restored.id?restored:c)});await sendCharacter(live,restored,target);};
@@ -760,17 +785,7 @@ export default function App() {
   function inspect(entry: Entry, push = true, from?:keyof typeof LIBRARY_TABS) { exitSheetFullscreen(); if(detail && !library.hover && detailPane.current)library.savePosition(detail.id,detailPane.current.scrollTop);const target=readingTarget(entry);if(library.hover){previewCommit.current={id:target.entry.id,top:detailPane.current?.scrollTop||0};setReadingFlash(n=>n+1);}else setReadingFlash(0);library.navigate(target.entry,target.focus,push,from);setTab('wiki'); }
   useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){inspect(allEntries.find(e=>e.id===entry.id)||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
   function resolveReference(reference: string, tag?: string) {
-    if (reference.startsWith('entry:')) return c?.selections.find(s => s.entry.id === reference.slice(6)&&librarySourceEnabled(c,s.entry))?.entry || sourceEntries.find(e => e.id === reference.slice(6));
-    const [name, source] = reference.split('|');
-    const tagKind = ['quickref', 'variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
-    const known = [...sourceEntries, ...(c?.selections.filter(s=>librarySourceEnabled(c,s.entry)).map(s => s.entry) || [])];
-    if(tag==='class'){
-      const parts=reference.split('|'),sub=parts[3],subSource=parts[4]||source||'PHB';
-      if(sub){const target=known.find(e=>e.kind==='subclass'&&e.source.toLowerCase()===subSource.toLowerCase()&&[e.name,e.english,e.raw.shortName,e.raw.ENG_shortName].some(n=>typeof n==='string'&&n.toLowerCase()===sub.toLowerCase())&&(e.raw.classSource||'PHB').toLowerCase()===(source||'PHB').toLowerCase()&&[e.raw.className,e.raw.classEnglish].some(n=>typeof n==='string'&&n.toLowerCase()===name.toLowerCase()));if(target)return target;}
-    }
-    const matches = known.filter(e => (!tagKind || e.kind === tagKind) && [e.name, e.english].some(n => n.toLowerCase() === name.toLowerCase()));
-    const found = tagKind === 'feature' ? matches.find(e => !requirementMismatch(e, { refs: [reference] })) : source ? matches.find(e => e.source.toLowerCase() === source.toLowerCase()) : matches.find(e => e.edition === detail?.edition && e.source === (detail?.source || 'PHB')) || matches.find(e => e.source === 'PHB') || matches[0];
-    return found;
+    return indexedReference(references,selectedReferences,reference,tag,detail);
   }
   function link(reference: string, tag?: string) {
     exitSheetFullscreen();
@@ -1006,7 +1021,7 @@ export default function App() {
  <span className="header-group header-group-cards">{!qqRoom&&<button className="icon-button" aria-label={t('characters')} onClick={() => setModal('characters')}><BookIcon/><span className="label">{t('characters')}</span><span className="button-count">{inWorkbench?wb.cards.length:workspace.characters.length}</span></button>}<button className="icon-button" aria-label={t('rules')} onClick={() => setModal('rules')}><SlidersIcon/><span className="label">{t('rules')}</span></button><button className="primary icon-button" title="导入与导出" onClick={() => setModal('export')}><TransferIcon/><span className="label">{t('transfer')}</span></button></span>
  <PaletteButton open={paletteOpen} title="调色盘" toggle={()=>setPaletteOpen(value=>!value)}/></div>
     </header>
-    {inWorkbench&&<><WorkbenchBar classWarnings={roomClassWarnings} online={wb.online} target={wb.target} message={wb.message} page={workbenchPage} change={page=>{setWorkbenchPage(page);setTab('sheet');}} save={()=>{if(!wb.target||c.id!==workbenchCharacterId(wb.target)){setNotice('当前角色与选中的棋子不一致');return;}void workbenchRequest('save',{native:c,data:exportOwlbear(c,d)}).then(()=>{workbenchDirty.current.delete(c.id);setNotice('已保存角色资料到枭熊');}).catch(e=>setNotice(String(e)));}}/></>}
+    {inWorkbench&&<><WorkbenchBar classWarnings={roomClassWarnings} online={wb.online} target={wb.target} message={wb.message} page={workbenchPage} change={page=>{setWorkbenchPage(page);setTab('sheet');}} save={()=>{if(!wb.target||c.id!==workbenchCharacterId(wb.target)){setNotice('当前角色与选中的棋子不一致');return;}void workbenchRequest('save',{native:c,data:exportOwlbear(c,d)}).then(()=>{workbenchDirty.current.delete(c.id);clearWorkbenchFailure(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已保存角色资料到枭熊');}).catch(e=>setNotice(String(e)));}}/></>}
     {workspaceReadOnly&&!cloudRestriction && <aside className="class-compatibility-banner card-permission-banner" role="status"><p>{readOnlyReason}</p><button onClick={() => location.reload()}>重新检查</button></aside>}
     {activateUpdate && <div className="read-only-banner" role="status">网页有新版本。<button onClick={async () => { await queue.current; if (saveFailed.current) { setNotice('保存未成功，请先导出角色备份，再重新打开网页。'); return; } navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true }); activateUpdate(); }}>保存后更新</button></div>}
     <nav className="mobile-tabs" aria-label={t('workspace')}><button className={tab === 'sheet' ? 'active' : ''} onClick={() => setTab('sheet')}>{t('functionalPage')}</button><button className={tab === 'wiki' ? 'active' : ''} onClick={() => setTab('wiki')} hidden={!wikiVisible}>Wiki</button></nav>
@@ -1027,7 +1042,7 @@ export default function App() {
           {sheetPage==='特性'?<FeaturesPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='背景'?<BackgroundPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='法术'?<SpellsPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:inWorkbench&&!wb.target?.cloudRoom?<WorkbenchInventory id={`card:${wb.target!.cardId}`} capacity={<CarryCapacity c={c} d={d} edit={edit}/>}/>:<InventoryPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>}
         </div></Suspense></ToolBoundary>}
           <footer className="paper-footer"><span>{t('cardFooter',{edition:c.edition,level:d.level||'—',revision:c.revision})}</span><span>{t('snapshotSaved')}</span></footer>
-        </PaperFrame></ValueTraceProvider></SheetEditContext.Provider><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} role="status"><span className="status-dot"/>{inWorkbench?(workbenchUncertain.current.has(c.id)?'待核对 · 本地修改已保留':workbenchDirty.current.has(c.id)?'正在同步至枭熊…':workbenchFailed.current.has(c.id)?'同步失败 · 已保留本地备份':wb.target?.projectionPending?'资料已保存 · 棋子显示待同步':wb.online?'与枭熊同步':'等待枭熊重连'):saving}{workbenchUncertain.current.has(c.id)&&wb.document&&<button onClick={()=>{window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:workbenchUncertain.current.get(c.id)?.requestId}}));workbenchUncertain.current.delete(c.id);workbenchDirty.current.delete(c.id);workbenchFailed.current.delete(c.id);workbenchDocuments.current.delete(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已采用枭熊当前数据；未确认的本地修改仍保留在恢复备份中。');}}>核对并采用枭熊数据</button>}{syncDiagnostic&&<CopyDiagnostic text={syncDiagnostic}/>}<span>{inWorkbench?'角色资料自动保存':'资料与角色保存在当前浏览器 · 请定期导出'}</span></div></>}
+        </PaperFrame></ValueTraceProvider></SheetEditContext.Provider><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} data-sync-state={inWorkbench?(workbenchUncertain.current.has(c.id)?'unknown':workbenchDirty.current.has(c.id)?'pending':workbenchFailed.current.has(c.id)?'failed':wb.target?.runtimeView?.pending||wb.target?.projectionPending?'pending':'confirmed'):saving==='保存失败'?'failed':'confirmed'} role="status"><span className="status-dot"/>{inWorkbench?(workbenchUncertain.current.has(c.id)?'待核对 · 本地修改已保留':workbenchDirty.current.has(c.id)?'正在同步至枭熊…':workbenchFailed.current.has(c.id)?'同步失败 · 已保留本地备份':wb.target?.runtimeView?.pending?'已读取棋子变化 · 等待资料确认':wb.target?.projectionPending?'资料已保存 · 棋子显示待同步':wb.online?'与枭熊同步':'等待枭熊重连'):saving}{(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&(!workbenchDirty.current.has(c.id)||workbenchUncertain.current.has(c.id))&&wb.document&&<button onClick={()=>{const pending=workbenchUncertain.current.get(c.id);if(pending)window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:pending.requestId}}));workbenchUncertain.current.delete(c.id);workbenchDirty.current.delete(c.id);clearWorkbenchFailure(c.id);workbenchDocuments.current.delete(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已采用枭熊当前数据；未确认的本地修改仍保留在恢复备份中。');}}>核对并采用枭熊数据</button>}{syncDiagnostic&&<CopyDiagnostic text={syncDiagnostic}/>}<span>{inWorkbench?'角色资料自动保存':'资料与角色保存在当前浏览器 · 请定期导出'}</span></div></>}
       </section>
 
       {wikiVisible&&<><WorkspaceSplitter/><section className={`wiki-pane ${tab === 'wiki' ? 'mobile-active' : ''}`} aria-label="规则资料">{wikiUi?(()=>{const {WikiLayout,WikiEmptyPrompt,GlobalSearch,LibraryFilters,CatalogList,WikiSplitter,CustomEntryEditor,ClassNavigation,MonsterDocument,MonsterPortrait,LibraryDocument}=wikiUi;return <WikiLayout><div className="wiki-header"><div><span className="eyebrow">规则资料</span><span className="wiki-source">5etools 中文站</span></div><div className="wiki-header-actions"><button className="custom-visibility" title="点击切换全部、非自定义和自定义资料" data-mode={customVisibility.mode} aria-pressed={customVisibility.mode!=='all'} onClick={customVisibility.cycle}>{CUSTOM_VISIBILITY_LABELS[customVisibility.mode]}</button><button title="重新检查上游资料" disabled={loading} onClick={() => load(true)}>{loading ? '加载中…' : '更新资料'}</button></div></div>

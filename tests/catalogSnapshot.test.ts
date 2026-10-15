@@ -13,7 +13,7 @@ function fixture(cached:unknown=undefined){
  return{scope:'source',signal:controller.signal,controller,read:vi.fn(async()=>cached),write,load,onBatch,onProgress,onSources};
 }
 test('a complete warm catalog bypasses downloads and normalization and restores source labels',async()=>{
- const f=fixture(snapshot());await loadCatalogSnapshot(f);
+ const f=fixture(snapshot());expect(await loadCatalogSnapshot(f)).toBe(true);
  expect(f.load).not.toHaveBeenCalled();expect(f.write).not.toHaveBeenCalled();
  expect(f.onBatch.mock.calls[0][0][0].id).toBe('retained');
  expect(f.onSources).toHaveBeenCalledWith({TEST:{name:'Test source'}});
@@ -34,7 +34,7 @@ test.each(['different-source','old-parser','malformed-entries','incomplete','fai
  const f=fixture(old);await loadCatalogSnapshot(f);expect(f.load).toHaveBeenCalledOnce();expect(f.onBatch.mock.calls[0][0][0].id).toBe('fresh');
 });
 test('explicit update/retry bypasses a complete view and replaces it only after success',async()=>{
- const f=fixture(snapshot());await loadCatalogSnapshot({...f,refresh:true});
+ const f=fixture(snapshot());expect(await loadCatalogSnapshot({...f,refresh:true})).toBe(true);
  expect(f.read).not.toHaveBeenCalled();expect(f.load).toHaveBeenCalledOnce();
  expect(f.write.mock.calls[0][0].entries[0].id).toBe('fresh');
 });
@@ -42,13 +42,13 @@ test('a failed or paused refresh leaves the prior complete catalog recoverable',
  for(const status of [{failed:['one source failed']},{paused:'offline'}]){
   const old=snapshot(),f=fixture(old);
   f.load.mockImplementation(async(batch,publish)=>{batch([entry('partial')]);publish({...progress,...status});});
-  await loadCatalogSnapshot({...f,refresh:true});expect(f.write).not.toHaveBeenCalled();
+  expect(await loadCatalogSnapshot({...f,refresh:true})).toBe(false);expect(f.write).not.toHaveBeenCalled();
   const warm=fixture(old);await loadCatalogSnapshot(warm);expect(warm.onBatch.mock.calls[0][0][0].id).toBe('retained');
  }
 });
 test('aborting while a cache read is pending publishes nothing',async()=>{
  const f=fixture(snapshot());f.read.mockImplementation(async()=>{f.controller.abort();return snapshot();});
- await loadCatalogSnapshot(f);expect(f.onBatch).not.toHaveBeenCalled();expect(f.onSources).not.toHaveBeenCalled();expect(f.load).not.toHaveBeenCalled();
+ expect(await loadCatalogSnapshot(f)).toBe(false);expect(f.onBatch).not.toHaveBeenCalled();expect(f.onSources).not.toHaveBeenCalled();expect(f.load).not.toHaveBeenCalled();
 });
 test('an aborted partial load cannot publish a supposedly complete snapshot',async()=>{
  const f=fixture();f.load.mockImplementation(async(batch,publish)=>{batch([entry()]);f.controller.abort();publish(progress);});
@@ -56,9 +56,33 @@ test('an aborted partial load cannot publish a supposedly complete snapshot',asy
 });
 test('cache read and write failures retain a usable catalog',async()=>{
  const f=fixture();f.read.mockRejectedValue(new Error('storage unavailable'));f.write.mockRejectedValue(new Error('quota'));
- await expect(loadCatalogSnapshot(f)).resolves.toBeUndefined();expect(f.onBatch).toHaveBeenCalled();expect(f.onProgress).toHaveBeenCalledWith(progress);
+ await expect(loadCatalogSnapshot(f)).resolves.toBe(true);expect(f.onBatch).toHaveBeenCalled();expect(f.onProgress).toHaveBeenCalledWith(progress);
 });
 test('later expanded entries replace preliminary rows in the persisted view',async()=>{
  const f=fixture();f.load.mockImplementation(async(batch,publish)=>{batch([entry()]);batch([{...entry(),revision:'expanded',raw:{name:'expanded'}}]);publish(progress);});
  await loadCatalogSnapshot(f);expect(f.write.mock.calls[0][0].entries).toHaveLength(1);expect(f.write.mock.calls[0][0].entries[0].revision).toBe('expanded');
+});
+
+test.each([
+ ['missing English name',{english:undefined}],['missing source',{source:undefined}],['missing pack identity',{packId:undefined}],
+ ['unknown kind',{kind:'not-a-kind'}],['missing edition',{edition:undefined}],['non-array reading entries',{entries:{}}],['array raw body',{raw:[]}],
+] as const)('a snapshot with %s reloads instead of reaching view consumers',async(_label,patch)=>{
+ const cached=snapshot();Object.assign(cached.entries[0],patch);
+ const f=fixture(cached);expect(await loadCatalogSnapshot(f)).toBe(true);expect(f.load).toHaveBeenCalledOnce();
+ expect(f.onBatch.mock.calls[0][0][0].id).toBe('fresh');
+});
+
+test.each([
+ ['invalid source label',{sources:{TEST:null}}],['pending retry',{progress:{...progress,retry:['missing.json']}}],
+ ['invalid progress count',{progress:{...progress,done:3}}],
+] as const)('a snapshot with %s is recoverable through raw input',async(_label,patch)=>{
+ const f=fixture({...snapshot(),...patch});expect(await loadCatalogSnapshot(f)).toBe(true);expect(f.load).toHaveBeenCalledOnce();
+});
+
+test('source completion waits for expansion, rather than trusting an early final counter',async()=>{
+ const f=fixture();let release!:()=>void;
+ f.load.mockImplementation(async(batch,publish)=>{batch([entry('preliminary')]);publish(progress);await new Promise<void>(resolve=>release=resolve);batch([entry('expanded')]);});
+ const result=loadCatalogSnapshot({...f,refresh:true});let settled=false;void result.then(()=>settled=true);
+ await Promise.resolve();expect(settled).toBe(false);expect(f.write).not.toHaveBeenCalled();
+ release();expect(await result).toBe(true);expect(f.write.mock.calls[0][0].entries.map(row=>row.id)).toEqual(['preliminary','expanded']);
 });

@@ -1,8 +1,9 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {classMatches,type Entry,type Raw} from '../core/model';
 import {resolveEntryReference} from '../core/entryReferences';
 import {DEFAULT_SOURCE} from '../data/catalogSource';
 import {entryFluff,readingImage} from '../data/wikiReading';
+import {ReadingRefresh} from '../data/readingRefresh';
 import {Entries,Inline} from './Entries';
 import {SourceName} from './SourceName';
 import {translationInfo} from './wikiMetadata';
@@ -17,13 +18,15 @@ export function ReadingImages({images}:{images:Raw[]}){
 }
 export function EntryReadingExtras({entry,entries=[],inspect,onLink}:{entry:Entry;entries?:Entry[];inspect?:(entry:Entry)=>void;onLink:(reference:string,kind?:string)=>void}){
  const [tab,setTab]=useState<'rules'|'intro'|'images'>('rules'),[fluff,setFluff]=useState<Raw>(),[error,setError]=useState(''),[loading,setLoading]=useState(false),[retry,setRetry]=useState(0);
+ const refresh=useRef(new ReadingRefresh());
+ const refreshReading=()=>setRetry(refresh.current.request([entry.id]));
  const parentEnglish=entry.kind==='subclass'?entries.find(value=>value.kind==='class'&&classMatches(entry,value))?.english:undefined;
  useEffect(()=>{setTab('rules');setFluff(undefined);setError('');},[entry.id]);
  useEffect(()=>{
   if(tab==='rules')return;
-  const controller=new AbortController();setLoading(true);setError('');
+  const controller=new AbortController(),ticket=refresh.current.pending(entry.id);setLoading(true);setError('');
   const readingEntry=parentEnglish?{...entry,raw:{...entry.raw,classEnglish:parentEnglish}}:entry;
-  entryFluff(readingEntry,controller.signal,retry>0).then(value=>{if(!controller.signal.aborted)setFluff(value);}).catch(error=>{if(!controller.signal.aborted)setError(String(error?.message||error));}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
+  entryFluff(readingEntry,controller.signal,ticket!==undefined).then(value=>{if(!controller.signal.aborted)setFluff(value);}).catch(error=>{if(!controller.signal.aborted)setError(String(error?.message||error));}).finally(()=>{if(!controller.signal.aborted){refresh.current.complete(entry.id,ticket);setLoading(false);}});
   return()=>controller.abort();
  },[entry.id,parentEnglish,tab,retry]);
  const sourceRows:[string,any][]=[['主要来源',[{source:entry.source,page:entry.page}]],...(['additionalSources','otherSources','referenceSources'] as const).filter(key=>Array.isArray(entry.raw[key])).map(key=>[({additionalSources:'其他出处',otherSources:'重印出处',referenceSources:'参考来源'} as Record<string,string>)[key],entry.raw[key]] as [string,any])];
@@ -38,7 +41,7 @@ export function EntryReadingExtras({entry,entries=[],inspect,onLink}:{entry:Entr
   </details>
   {(['class','subclass','race','background','feat','spell','item','monster'].includes(entry.kind)||entry.raw.fluff)&&<>
    <div className="reading-extra-tabs" role="group" aria-label="补充资料"><button aria-pressed={tab==='rules'} onClick={()=>setTab('rules')}>规则</button><button aria-pressed={tab==='intro'} onClick={()=>setTab('intro')}>简介</button><button aria-pressed={tab==='images'} onClick={()=>setTab('images')}>图片</button></div>
-   {tab!=='rules'&&<div className="reading-extra-content" role="region" aria-label={tab==='intro'?'资料简介':'资料图片'}>{loading?<p role="status">正在读取{tab==='intro'?'简介':'图片资料'}…</p>:error?<><p role="alert">资料读取失败：{error}</p><button onClick={()=>setRetry(value=>value+1)}>重试读取</button></>:<>{tab==='intro'?fluff?.entries?<Entries value={fluff.entries} onLink={onLink}/>:<p>资料源没有提供独立简介。</p>:fluff?.images?.length?<ReadingImages images={fluff.images}/>:<p>资料源没有提供独立图片。</p>}<button onClick={()=>setRetry(value=>value+1)}>重新读取补充资料</button></>}</div>}
+   {tab!=='rules'&&<div className="reading-extra-content" role="region" aria-label={tab==='intro'?'资料简介':'资料图片'}>{loading?<p role="status">正在读取{tab==='intro'?'简介':'图片资料'}…</p>:error?<><p role="alert">资料读取失败：{error}</p><button onClick={refreshReading}>重试读取</button></>:<>{tab==='intro'?fluff?.entries?<Entries value={fluff.entries} onLink={onLink}/>:<p>资料源没有提供独立简介。</p>:fluff?.images?.length?<ReadingImages images={fluff.images}/>:<p>资料源没有提供独立图片。</p>}<button onClick={refreshReading}>重新读取补充资料</button></>}</div>}
   </>}
  </section>;
 }

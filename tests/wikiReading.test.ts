@@ -13,6 +13,12 @@ describe('reading metadata retains source choices',()=>{
  it('reads deities with no prose using their own structured fields',()=>{const rows=extraFacts(entry('rule',{_category:'deity',pantheon:'纸页神系',domains:['旅行'],province:'档案',symbol:'折纸',alignment:['N','G']}));expect(rows).toContainEqual(['神系','纸页神系']);expect(rows).toContainEqual(['象征','折纸']);expect(rows).toContainEqual(['阵营','中立、善良']);});
 });
 describe('optional reading data does not replace or write a character',()=>{
+ it.each([null,[],42,'corrupt'])('recovers an invalid cached reading body (%j) through the source',async body=>{
+  storage.read.mockResolvedValue({body});storage.write.mockResolvedValue(undefined);
+  const fetch=vi.fn(async()=>new Response(JSON.stringify({book:[{id:'RECOVERED',name:'Recovered source'}]}),{headers:{etag:'fresh'}}));vi.stubGlobal('fetch',fetch);
+  expect(await readingJson('data/books.json',new AbortController().signal)).toEqual({book:[{id:'RECOVERED',name:'Recovered source'}]});
+  expect(fetch).toHaveBeenCalledOnce();expect(storage.write).toHaveBeenCalledWith('https://5e.kiwee.top/data/books.json',{body:{book:[{id:'RECOVERED',name:'Recovered source'}]},revision:'fresh'});
+ });
  it('rejects traversal before requesting source files',async()=>{const fetch=vi.fn();vi.stubGlobal('fetch',fetch);await expect(readingJson('data/book/../secret.json',new AbortController().signal)).rejects.toThrow('资料地址');expect(fetch).not.toHaveBeenCalled();});
  it('does not return a late cache hit after cancellation',async()=>{const controller=new AbortController();storage.read.mockImplementation(async()=>{controller.abort();return {body:{book:[]}};});await expect(readingJson('data/books.json',controller.signal)).rejects.toBeDefined();expect(storage.write).not.toHaveBeenCalled();});
  it('reads the selected bookData identity and rejects a missing one',async()=>{storage.read.mockResolvedValue({body:{bookData:[{id:'PAPER',data:[{name:'原创章'}]}]}});expect(await volumeChapters('book','paper',new AbortController().signal)).toEqual([{name:'原创章'}]);await expect(volumeChapters('book','OTHER',new AbortController().signal)).rejects.toThrow('没有可读取的章节');});

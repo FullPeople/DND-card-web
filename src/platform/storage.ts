@@ -6,11 +6,23 @@ import {qqRoom,readRoom,saveRoom,roomState,beginRoomWrite,roomScopeKey,roomWrite
 import {characterHash} from '../cloud/sync';
 import {workspaceIdentity} from './workspaceIdentity';
 export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[]; siteSources?:SiteSources; legacySourceProfiles?:Record<string,SiteSources> }
-let connection: ReturnType<typeof openDB> | undefined;
-let cacheConnection:ReturnType<typeof openDB>|undefined;
-const openWorkspace=(name:string)=>openDB(name,1,{upgrade(db){db.createObjectStore('documents');db.createObjectStore('cache');}});
-const db = () => connection ??= openWorkspace(workspaceIdentity.database);
-const cacheDb=()=>workspaceIdentity.cacheDatabase===workspaceIdentity.database?db():cacheConnection??=openWorkspace(workspaceIdentity.cacheDatabase);
+function workspaceConnection(name:string){
+ let current:ReturnType<typeof openDB>|undefined;
+ return()=>{
+  if(!current){
+   const opening=openDB(name,1,{
+    upgrade(db){db.createObjectStore('documents');db.createObjectStore('cache');},
+    terminated(){if(current===opening)current=undefined;},
+   });
+   current=opening;
+   // A temporary storage denial must remain retryable without reloading the page.
+   void opening.catch(()=>{if(current===opening)current=undefined;});
+  }
+  return current;
+ };
+}
+const db=workspaceConnection(workspaceIdentity.database);
+const cacheDb=workspaceIdentity.cacheDatabase===workspaceIdentity.database?db:workspaceConnection(workspaceIdentity.cacheDatabase);
 export async function loadWorkspace(): Promise<Workspace | undefined> {
   if(!qqRoom)return (await db()).get('documents','workspace');
   const remote=await readRoom(),database=await db(),scopeKey=await roomScopeKey(),draft=await database.get('documents','room-pending') as {workspace:Workspace;revision:number;scopeKey?:string}|undefined;
