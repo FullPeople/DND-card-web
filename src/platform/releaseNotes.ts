@@ -1,4 +1,9 @@
-export const RELEASE_DATE='2026-10-15';
+export const RELEASE_DATE='2026-10-16';
+const release298=(mode:'standalone'|'suite'):ReleaseSection[]=>[
+ {title:'职业资源与反馈修复',items:['修复职业表已声明使用次数、快捷栏却没有生成对应资源的问题。','2014 与 2024 分别按原资料读取次数和恢复方式；升级、刷新与导入保留已经消耗的次数。']},
+ ...(mode==='suite'?[{title:'投骰历史',items:['工作台清除历史时同步更新宿主记录，面板不再把旧副本写回。','另一个本机骰子页面清除历史后，已打开的面板同步更新；存储暂不可用时保留当前历史。']}]:[]),
+ {title:'当前范围',items:['QQ 登录与云端功能继续暂停，已有资料保留。','真实多人房间与玩家原设备仍待复核。']}
+];
 const release297=():ReleaseSection[]=>[
  {title:'中继回执与连续操作',items:['修复大请求繁忙时阻止其他操作回执发送的问题。','回执可以按原标识重新投递；结果未知的扣血、资源消费等写入继续查询原结果，不重复执行。','等待期间失去权限或操作过期时停止发送，未发出的操作明确报告失败。']},
  {title:'减少无效更新',items:['已变化的上限、护甲和先攻值继续同步，数值未变时不再重复写入棋子。','减少无关变化触发的时停广播；折叠权限说明中的图片延后加载。','本批仍在进行 F7 四端验收；QQ 和 3D 继续停用，已有资料保留。']}
@@ -451,8 +456,9 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
 export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?release297():release296(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='suite'?[{title:RELEASE_DATE+'-三',sections:release297()}]:[]),
- {title:RELEASE_DATE+'-二',sections:release296(mode)},
+ {title:RELEASE_DATE,sections:release298(mode)},
+ ...(mode==='suite'?[{title:'2026-10-15-三',sections:release297()}]:[]),
+ {title:'2026-10-15-二',sections:release296(mode)},
  {title:'2026-10-15',sections:release295()},
  {title:'2026-10-14',sections:release290(mode)},
  {title:'2026-10-13-二',sections:release288(mode)},

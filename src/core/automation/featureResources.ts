@@ -31,19 +31,24 @@ function proseOnce(text:string){
  }
  return undefined;
 }
-function tableUses(row:Selection,cls:Selection|undefined,level:number):{max:number}|{issue:string}|undefined{
+function tableUses(row:Selection,cls:Selection|undefined,level:number):{max:number;column:string}|{issue:string;columns:string[]}|undefined{
  const names=[row.entry.name,row.entry.english].filter(Boolean).map(name=>clean(name).toLowerCase());
  const labels=new Set(names.flatMap(name=>[name,`${name}次数`,`${name}使用次数`,`${name}施用次数`,`${name}uses`,`${name}s`]));
- const cells:unknown[]=[];
+ const cells:{value:unknown;column:string}[]=[];
  for(const groups of [cls?.entry.raw.classTableGroups,cls?.entry.raw.subclassTableGroups])for(const group of Array.isArray(groups)?groups:[]){
   if(!Array.isArray(group?.colLabels))continue;
   const sourceRow=Array.isArray(group.rows)?group.rows[level-1]:undefined;
-  for(const [i,label] of group.colLabels.entries())if(labels.has(clean(label).toLowerCase()))cells.push(Array.isArray(sourceRow)?sourceRow[i]:undefined);
+  for(const [i,label] of group.colLabels.entries())if(labels.has(clean(label).toLowerCase()))cells.push({value:Array.isArray(sourceRow)?sourceRow[i]:undefined,column:clean(label)});
  }
  if(!cells.length)return undefined;
- if(cells.length!==1)return {issue:'次数表格的对应列不唯一'};
- const cell=cells[0],max=typeof cell==='number'?cell:typeof cell==='string'&&/^\d+$/.test(cell)?Number(cell):NaN;
- return Number.isSafeInteger(max)&&max>=0&&max<=10000?{max}:{issue:'次数表格的数值尚未支持'};
+ if(cells.length!==1)return {issue:'次数表格的对应列不唯一',columns:cells.map(cell=>cell.column)};
+ const cell=cells[0].value,max=typeof cell==='number'?cell:typeof cell==='string'&&/^\d+$/.test(cell)?Number(cell):NaN;
+ return Number.isSafeInteger(max)&&max>=0&&max<=10000?{max,column:cells[0].column}:{issue:'次数表格的数值尚未支持',columns:cells.map(cell=>cell.column)};
+}
+/** A matching numeric column alone does not establish a resource. The source
+ * must explicitly direct its use count to that column in the same sentence. */
+function refersToUsesColumn(text:string,column:string){
+ return clean(text).split(/[。；]/).some(clause=>/(?:次数|数量)/.test(clause)&&/(?:参见|详见|见|列于|列出)/.test(clause)&&/(?:表|一栏|列)/.test(clause)&&clause.includes(column));
 }
 function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
 function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();const classes=c.selections.filter(s=>s.entry.kind==='class'&&selectionActive(c,s)),total=classes.reduce((n,s)=>n+s.level,0);return {cls,classes,total,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,total)-1)/4)+(c.sheetBonuses?.proficiency||0)};}
@@ -78,17 +83,18 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
    const use=text.match(new RegExp(`(?:可以|能够|能)(?:使用|施用)(?:(?:此|本|这项|该)(?:特性|能力)?|${escaped})(?:共计|总计|总共)?([一二两三四五六七八九十\\d]+)次`));
    const oncePlan=proseOnce(text),once=oncePlan?.match;
    if(oncePlan?.issue){issues.push({id:`resource-unadapted:${row.id}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${oncePlan.issue}，请人工核对。`});continue;}
-   if(use||once){
+   const table=tableUses(row,cls,level),sourceTable=table&&('max' in table?refersToUsesColumn(text,table.column):table.columns.some(column=>refersToUsesColumn(text,column)));
+   if(use||once||sourceTable){
     const recovery:Recovery={};
     for(const [key,word] of [['short','短'],['long','长']] as const){
-     const match=text.match(new RegExp(`${word}(?:暂)?(?:休|歇)[^。；，,]{0,90}?(?:恢复|重获|重新获得|再次使用|再度使用|重置)([^。；，,]*)`));
+     const match=clean(text).match(new RegExp(`${word}(?:暂)?(?:休|歇)(?:[或与和/](?:短|长)(?:暂)?(?:休|歇))?(?:(?!(?:短|长)(?:暂)?(?:休|歇))[^。；]){0,90}?(?:恢复|重获|重新获得|再次使用|再度使用|重置)([^。；，,]*)`));
      if(match){const n=match[1].match(/([一二两三四五六七八九十\d]+)次/);recovery[key]=/所有|全部/.test(match[1])?'all':n?count(n[1]):'all';}
     }
     if(once){if(once[1].includes('短'))recovery.short='all';recovery.long='all';}
     if(recovery.short&&!recovery.long)recovery.long='all';
     let max=use?count(use[1]):1;
     for(const upgrade of text.matchAll(/第(\d+)级[^。；]{0,45}?(?:使用|施用)([一二两三四五六七八九十\d]+)次/g))if(level>=Number(upgrade[1]))max=Math.max(max,count(upgrade[2])||0);
-    const table=tableUses(row,cls,level),unknownMaximum=!use&&oncePlan&&/(?:全部|所有|最大|允许的)(?:使用)?次数/.test(oncePlan.clause)&&!table;
+    const unknownMaximum=!use&&oncePlan&&/(?:全部|所有|最大|允许的)(?:使用)?次数/.test(oncePlan.clause)&&!table;
     if(table&&'issue' in table||unknownMaximum){const message=table&&'issue' in table?table.issue:'次数上限未能从来源表格确定';issues.push({id:`resource-unadapted:${row.id}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${message}，未生成资源。`});continue;}
     if(table&&'max' in table)max=table.max;
     const die=text.match(/\{@dice ([\dd+\- ]+)}/)?.[1];

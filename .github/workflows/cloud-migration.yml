@@ -28,7 +28,12 @@ jobs:
       - run: python3 deploy/cloud/test_frontend.py
       - run: python3 deploy/cloud/test_suite_links.py
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:cloud-browser
+      - name: Production cloud suspension core, HTTP and browser protection
+        run: |
+          npx vitest run tests/cloudSuspension.test.ts tests/cloudSuspensionUi.test.ts
+          npx playwright test --config playwright.cloud-suspension.config.ts
+      - name: Retained enabled cloud flows in an isolated test-only build
+        run: npm run test:cloud-browser
       - name: Independent Wiki navigation and protected storage
         run: npx playwright test --config playwright.wiki.config.ts
       - uses: actions/upload-artifact@v4
@@ -37,6 +42,8 @@ jobs:
           name: cloud-migration-evidence
           path: |
             test-results-cloud
+            test-results-cloud-suspension
+            .local-evidence/cloud-enabled-fixture/fixture-profile.json
             test-results-wiki
             dist-cloud
             dist-cloud-server

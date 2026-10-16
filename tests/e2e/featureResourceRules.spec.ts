@@ -36,3 +36,21 @@ test('named class resource spending survives level changes, reload and native JS
  await expect.poll(async()=>Object.values((await stored(page)).runtime.resources).find((r:any)=>r.name==='原创储备次数')).toMatchObject({max:7,current:4});
  await expect(page.getByRole('button',{name:/短休|长休/})).toHaveCount(0);expect(errors).toEqual([]);
 });
+
+
+test('a source-table resource appears in the dashboard and retains spending across leveling and reload',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await mockSource(page);await suppressAnnouncement(page);
+ const c=newCharacter();c.name='原创职业表资源验收';c.automation=newAutomationState();
+ const owner:Entry={id:'authored-table-owner',kind:'class',name:'原创表计数者',english:'Authored Table Keeper',source:'XPHB',edition:'2024',packId:'authored',revision:'1',entries:[],raw:{classTableGroups:[{colLabels:['原创表资源次数'],rows:Array.from({length:20},(_,i)=>[i<5?2:4])}]}};
+ const feature:Entry={...owner,id:'authored-table-feature',kind:'feature',name:'原创表资源',english:'Authored Table Resource',raw:{},entries:['激活次数见职业表中的“原创表资源次数”列。当你完成一次{@variantrule 短休|AUTHORED}时，你重获一次已用次数；当你完成一次{@variantrule 长休|AUTHORED}时，你重获全部次数。']};
+ c.selections=[{id:'owner',entry:owner,level:1,quantity:1,equipped:false},{id:'feature',parentId:'owner',entry:feature,level:1,quantity:1,equipped:false}];
+ await page.goto('/');await expect(page.getByRole('button',{name:'导入 / 导出',exact:true})).toBeEnabled();await importCard(page,exportCharacter(c));
+ const resource=page.locator('.resource-widget[data-resource-name="原创表资源"]');await expect(resource).toBeVisible();
+ await resource.locator('.resource-widget-face').click();await page.getByRole('dialog',{name:'原创表资源资源操作',exact:true}).getByRole('button',{name:'设置原创表资源',exact:true}).click();
+ const editor=page.getByRole('dialog',{name:'资源配置',exact:true});await expect(editor.getByRole('spinbutton',{name:'资源上限',exact:true})).toHaveValue('2');
+ await editor.getByRole('spinbutton',{name:'资源剩余',exact:true}).fill('0');await editor.getByRole('button',{name:'保存',exact:true}).click();await page.keyboard.press('Escape');
+ await page.getByRole('switch',{name:'编辑模式',exact:true}).click();const level=page.getByRole('spinbutton',{name:'原创表计数者等级',exact:true});await level.fill('6');await level.press('Tab');
+ await expect.poll(async()=>Object.values((await stored(page)).runtime.resources).find((r:any)=>r.name==='原创表资源')).toMatchObject({max:4,current:2});
+ await page.reload();await expect(resource).toBeVisible();expect(Object.values((await stored(page)).runtime.resources).find((r:any)=>r.name==='原创表资源')).toMatchObject({max:4,current:2});
+ await expect(page.getByRole('button',{name:/短休|长休/})).toHaveCount(0);expect(errors).toEqual([]);
+});
