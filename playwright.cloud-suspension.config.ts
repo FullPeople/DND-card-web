@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:['cloudSuspension.spec.ts'],outputDir:'test-results-cloud-suspension',timeout:60000,workers:1,reporter:'list',use:{baseURL:'http://127.0.0.1:5320',channel:process.env.CI?undefined:'msedge',viewport:{width:1440,height:960}},webServer:{command:'"'+process.execPath+'" tools/cloudPreview.mjs',url:'http://127.0.0.1:5320',reuseExistingServer:false,env:{CLOUD_PREVIEW_PROFILE:'paused',CLOUD_PREVIEW_ROOT:'dist-cloud'}}});
