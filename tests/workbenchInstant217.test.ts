@@ -62,7 +62,7 @@ it('does not reuse a document or inventory across scene and role changes',async(
 });
 it('requires a fresh permission directory after transport loss and host restart',async()=>{
  const api=await ready();receive('selection',{...snapshot('a',2),access:access()});wire.fault!({state:'retrying',message:'unavailable'});api.chooseWorkbench('card:a');expect(api.getWorkbench().target).toBeUndefined();
- receive('access',{access:access()});api.chooseWorkbench('card:a');expect(api.getWorkbench().target?.cardId).toBe('a');
+ receive('access',{access:access()});api.chooseWorkbench('card:a');expect(api.getWorkbench().target?.cardId).toBe('a');expect(api.getWorkbench().online).toBe(false);expect(api.getWorkbench().target?.write).toBe(false);
  receive('ready',{hostStarted:2});api.chooseWorkbench('card:a');expect(api.getWorkbench().target).toBeUndefined();
  receive('cacheSnapshot',{...snapshot('a',99),access:access(),hostStarted:1});expect(api.getWorkbench().target).toBeUndefined();
 });
