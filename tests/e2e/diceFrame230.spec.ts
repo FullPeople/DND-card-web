@@ -21,7 +21,7 @@ async function pair(host:Page){
  await host.evaluate(({protocol,session})=>{
   const w=window as any;w.requests=[];w.held=[];w.pause=false;w.holdInit=false;w.initSerial=0;
   window.addEventListener('message',e=>{const m=e.data;if(m?.protocol!==protocol||m.session!==session)return;w.requests.push(m);const reply=(type:string,payload:any={})=>(e.source as Window).postMessage({protocol,session,type,hostStarted:230,...payload},location.origin);
-   if(m.type==='hello'||m.type==='ping'){if(!w.pause)reply(m.type==='hello'?'ready':'pong');return;}
+   if(m.type==='hello'||m.type==='ping'){if(!w.pause)reply(m.type==='hello'?'ready':'pong',m.type==='hello'?{controlReady:true,clientInstance:m.clientInstance}:{});return;}
    if(m.type==='diceRpc'){const initId=m.method==='init'?++w.initSerial:undefined;const answer=()=>reply('ack',{requestId:m.requestId,ok:true,result:m.method==='init'?{roomId:'synthetic',reads:{'player.getRole':'GM','player.getSelection':[m.itemId]},snapshotId:initId}:{forwarded:m.args}});if(w.holdInit&&m.method==='init')w.held.push({key:m.key,itemId:m.itemId,initId,answer});else answer();}
   });
  },{protocol,session});
@@ -61,6 +61,6 @@ test('catalog-independent dice snapshots discard stale responses and refresh aft
  expect(await frame.locator('#snapshots').evaluate((e,id)=>JSON.parse(e.textContent||'[]').some((s:any)=>s.snapshotId===id),ids.old)).toBe(false);
  await page.clock.install();await host.evaluate(()=>{(window as any).pause=true;});await page.clock.runFor(47000);await expect(page.getByLabel('桥接连接')).toHaveText('offline');
  const before=await host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='diceRpc'&&m.method==='init').length);
- await host.evaluate(()=>{(window as any).pause=false;});await send(host,'pong');await expect(page.getByLabel('桥接连接')).toHaveText('online');
+ await host.evaluate(()=>{(window as any).pause=false;});await send(host,'pong');await expect(page.getByLabel('桥接连接')).toHaveText('offline');await page.clock.runFor(4000);await expect(page.getByLabel('桥接连接')).toHaveText('online');
  await expect.poll(()=>host.evaluate(()=>(window as any).requests.filter((m:any)=>m.type==='diceRpc'&&m.method==='init').length)).toBe(before+1);
 });
