@@ -1,4 +1,8 @@
 export const RELEASE_DATE='2026-10-16';
+const release299=():ReleaseSection[]=>[
+ {title:'公共仓库空货币格',items:['Full Suite 公共仓库中的钱币全部转回后，可以移除留下的空货币格。','角色钱包和有余额的货币继续保留；仓库锁、条目锁和操作权限仍生效。']},
+ {title:'当前范围',items:['QQ 登录与云端功能继续暂停，已有资料保留。','真实房间和玩家原设备仍待复核。']}
+];
 const release298=(mode:'standalone'|'suite'):ReleaseSection[]=>[
  {title:'职业资源与反馈修复',items:['修复职业表已声明使用次数、快捷栏却没有生成对应资源的问题。','2014 与 2024 分别按原资料读取次数和恢复方式；升级、刷新与导入保留已经消耗的次数。']},
  ...(mode==='suite'?[{title:'投骰历史',items:['工作台清除历史时同步更新宿主记录，面板不再把旧副本写回。','另一个本机骰子页面清除历史后，已打开的面板同步更新；存储暂不可用时保留当前历史。']}]:[]),
@@ -456,7 +460,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
 export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?release297():release296(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:RELEASE_DATE,sections:release298(mode)},
+ {title:RELEASE_DATE,sections:release299()},
+ {title:'2026-10-16-一',sections:release298(mode)},
  ...(mode==='suite'?[{title:'2026-10-15-三',sections:release297()}]:[]),
  {title:'2026-10-15-二',sections:release296(mode)},
  {title:'2026-10-15',sections:release295()},
