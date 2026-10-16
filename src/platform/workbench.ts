@@ -37,7 +37,7 @@ let switchMetric:{id:number;started:number;key?:string;stages:Record<string,numb
 function switchStage(stage:string,reused?:boolean){if(!switchMetric||!params.has('measureSwitch')||stage in switchMetric.stages)return;switchMetric.stages[stage]=Math.round((performance.now()-switchMetric.started)*100)/100;if(reused!==undefined)switchMetric.stages.reused=reused;window.dispatchEvent(new CustomEvent('workbench-switch-metric',{detail:{id:switchMetric.id,...switchMetric.stages}}));}
 export function markWorkbenchView(stage:'prepare'|'prepared'|'committed',key:string,reused?:boolean){if(switchMetric?.key!==key)return;switchStage(stage,reused);if(stage==='committed'){const current=switchMetric;requestAnimationFrame(()=>{if(switchMetric===current)switchStage('nextFrame');});}}
 const operationTimings:any[]=[];
-export function workbenchDiagnostics(){return {online:state.online,cache:snapshotCache.diagnostics(),relayState,transport:host&&!host.closed?'direct':relay?'relay':'offline',hostStarted,pending:[...pending].map(([id,p])=>({id,type:p.type,elapsedMs:Math.round(performance.now()-p.started)})),recent:operationTimings.slice(-24)};}
+export function workbenchDiagnostics(){return {online:state.online,clientInstance,handshakeReady,handshakeCatalog,cache:snapshotCache.diagnostics(),relayState,transport:host&&!host.closed?'direct':relay?'relay':'offline',hostStarted,pending:[...pending].map(([id,p])=>({id,type:p.type,elapsedMs:Math.round(performance.now()-p.started)})),recent:operationTimings.slice(-24)};}
 const observedDocuments=new Map<string,{sequence:number;document:any;target:Pick<Target,'key'|'cardId'|'itemId'|'kind'>}>();
 function rememberDocument(m:any){if(!m.state?.key||m.document===undefined||snapshotCache.currentAccess&&!snapshotCache.permits(m.state))return;snapshotCache.remember(m,snapshotCache.currentAccess);const old=observedDocuments.get(m.state.key),sequence=m.sequence||0;if(!old||documentRevision(m.document,m.state)>=documentRevision(old.document)){const {key,cardId,itemId,kind}=m.state;observedDocuments.set(key,{sequence,document:m.document,target:{key,cardId,itemId,kind}});}}
 const stockDrafts=new Map<string,{before:InventoryState;after:InventoryState}>();
@@ -91,11 +91,12 @@ export async function requestInventory(operation:Record<string,unknown>){
  }catch(error){uncertain=!!(error as any)?.uncertain&&!(error as any)?.queueBlocked;throw error;}finally{if(!uncertain){stockDrafts.delete(op.operationId);inventoryCompletions.delete(op.operationId);}update({inventory:authoritativeInventory});}
 }
 
+let controlReady=false;
 let relayState:RelayState|undefined;
 let relay:Relay|undefined,selectionSequence=0,catalogSequence=0,hostStarted=0,followRevision=0;
 let handshakeReady=false,handshakeCatalog=false,lastHello:number|undefined,helloAttempts=0;
 function resetGroup(disconnected=false){if(hostStarted)window.dispatchEvent(new CustomEvent('workbench-group-roll-reset',{detail:{hostStarted,disconnected}}));}
-function resetHandshake(restartRetries=true,disconnected=true){if(disconnected){resetGroup(true);snapshotCache.suspend();invalidateWrites(undefined,false);update({target:state.target?{...state.target,write:false}:undefined,cards:state.cards.map(card=>({...card,write:false})),monsters:state.monsters.map(card=>({...card,write:false})),inventory:authoritativeInventory},false);}handshakeReady=false;handshakeCatalog=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
+function resetHandshake(restartRetries=true,disconnected=true){if(disconnected){resetGroup(true);snapshotCache.suspend();invalidateWrites(undefined,false);update({target:state.target?{...state.target,write:false}:undefined,cards:state.cards.map(card=>({...card,write:false})),monsters:state.monsters.map(card=>({...card,write:false})),inventory:authoritativeInventory},false);}handshakeReady=false;handshakeCatalog=false;controlReady=false;if(restartRetries){lastHello=undefined;helloAttempts=0;}}
 const monsterRuntime=new MonsterRuntime();
 function normalizeSnapshot(m:any,authority=true){
  // Reject retired older bodies before MonsterRuntime can retain them or a
@@ -140,8 +141,8 @@ function previewSelection(itemId:string){
  update({readFailure:undefined});
  if(pendingSelection!==itemId){lastHello=Date.now();helloAttempts=1;}
  pendingSelection=itemId;
- const card=state.cards.find(card=>itemId===`card:${card.id}`||itemId===card.itemId),cached=state.online?snapshotCache.get(itemId,card?.documentRevision||0):undefined;
- if(cached){pendingSelection=undefined;if(switchMetric)switchMetric.key=cached.state.key;switchStage('memory');update({target:{...cached.state,pinned:state.target?.pinned??cached.state.pinned},document:cached.document,loading:false,message:''});}
+ const card=state.cards.find(card=>itemId===`card:${card.id}`||itemId===card.itemId),cached=(state.online||snapshotCache.accessConfirmed)?snapshotCache.get(itemId,card?.documentRevision||0):undefined;
+ if(cached){pendingSelection=undefined;if(switchMetric)switchMetric.key=cached.state.key;switchStage('memory');update({target:{...cached.state,write:state.online&&cached.state.write,pinned:state.target?.pinned??cached.state.pinned},document:cached.document,loading:false,message:''});}
  else{
   // Older hosts have no access directory and cannot populate the warm cache.
   // Clicking the already displayed, still-listed card need not erase its
@@ -189,16 +190,16 @@ if(inWorkbench){
  subscribeStartup(()=>send('startup',{startupPhase:startupPhase()}));
  startWorkbenchSound();
  function accept(m:any){if(m.protocol!==protocol||m.session!==session||m.hostStarted&&m.hostStarted<hostStarted)return;updateDepth++;try{if(m.hostStarted>hostStarted){invalidateWrites();observedDocuments.clear();hostStarted=m.hostStarted;selectionSequence=0;catalogSequence=0;followRevision=0;monsterRuntime.reset();revisions=new WorkbenchRevisions();snapshotCache.reset();wantedSelection=undefined;pendingSelection=undefined;clientSelection=0;activeReadRetry=0;readRetry++;update({readFailure:undefined,access:undefined,target:undefined,document:undefined,cards:[],monsters:[],role:undefined,enabled:{},inventory:undefined,shared:undefined,settings:undefined,visibility:undefined,console:undefined});resetHandshake();resetGroup();}last=Date.now();
-  if(!state.online)update({online:true,message:''});
+  if(m.type==='ready'&&m.clientInstance&&m.clientInstance!==clientInstance)return;
   const cancelledReceipt=m.type==='ack'&&pending.get(m.requestId)?.cancelled;
   const accessAccepted=m.type==='selectionError'?(snapshotCache.currentAccess?!!m.access&&acceptsReceiptAccess(m.access):!m.access):!m.access||(['ack','cacheSnapshot'].includes(m.type)?acceptsReceiptAccess(m.access):acceptAccess(m.access));
   if(m.type==='access'||!accessAccepted&&m.type!=='ack')return;
   if(m.type==='cacheSnapshot'){if(accessAccepted&&m.state&&(!snapshotCache.currentAccess||snapshotCache.permits(m.state))){const snap=revisions.snapshot(normalizeSnapshot(m,false));if(!snap)return;rememberDocument(snap);if(snap.state)applySnapshotRuntime(snap);if(snap.state?.key===state.target?.key)acceptSnapshot(snap,false);
     else if(pendingSelection&&snapshotCache.get(pendingSelection))previewSelection(pendingSelection);
    }return;}
-  if(m.type==='ready'){handshakeReady=true;if('qqAccount' in m)update({qqAccount:m.qqAccount});}
-  if(m.type==='groupRollState'||m.type==='ready')window.dispatchEvent(new CustomEvent('workbench-group-roll-state',{detail:{group:m.type==='ready'?m.groupRoll??null:m.group,groupRevision:m.groupRevision??0,hostStarted:m.hostStarted||hostStarted,snapshot:m.type==='ready'}}));
-  if(m.type==='ready'||m.type==='rolls')update({rolls:boundedDiceHistory(m.rolls)});
+  if(m.type==='ready'){handshakeReady=true;controlReady=m.controlReady===true&&m.clientInstance===clientInstance;if(m.enabled)update({enabled:m.enabled,role:m.role});if('qqAccount' in m)update({qqAccount:m.qqAccount});}
+  if(m.type==='groupRollState'||m.type==='ready'&&!m.groupDeferred)window.dispatchEvent(new CustomEvent('workbench-group-roll-state',{detail:{group:m.type==='ready'?m.groupRoll??null:m.group,groupRevision:m.groupRevision??0,hostStarted:m.hostStarted||hostStarted,snapshot:m.type==='ready'||m.snapshot===true&&handshakeReady&&m.clientInstance===clientInstance}}));
+  if((m.type==='ready'||m.type==='rolls')&&Array.isArray(m.rolls))update({rolls:boundedDiceHistory(m.rolls)});
   if(m.type==='directory'&&(!m.sequence||m.sequence>=catalogSequence)){catalogSequence=m.sequence||catalogSequence;if('qqAccount' in m)update({qqAccount:m.qqAccount});update({cards:catalogCards(m.cards),monsters:catalogMonsters(m.monsters,m.sequence),role:snapshotCache.currentAccess?.role||m.role,enabled:snapshotCache.currentAccess?.enabled||m.enabled||{}});}
   if(m.type==='catalog'&&(!m.sequence||m.sequence>=catalogSequence)){if('qqAccount' in m)update({qqAccount:m.qqAccount});handshakeCatalog=true;catalogSequence=m.sequence||catalogSequence;update({cards:catalogCards(m.cards),monsters:catalogMonsters(m.monsters,m.sequence),role:snapshotCache.currentAccess?.role||m.role,enabled:snapshotCache.currentAccess?.enabled||m.enabled||{},visibility:m.visibility,console:m.console,inventory:m.inventory?.revision===authoritativeInventory?.revision&&m.inventory?.publicId===authoritativeInventory?.publicId&&m.inventory?.access===authoritativeInventory?.access&&m.role===state.role?authoritativeInventory:m.inventory,shared:m.shared?.key===state.shared?.key&&m.shared?.revision===state.shared?.revision?state.shared:m.shared,settings:m.settings});}
   if((m.type==='catalog'||m.type==='directory')&&state.target){const card=state.target.cardId?state.cards.find(c=>c.id===state.target!.cardId):state.monsters.find(c=>c.itemId===state.target!.itemId);if(card&&card.write!==state.target.write)update({target:{...state.target,write:card.write,locked:card.locked}});}
@@ -252,10 +253,11 @@ if(inWorkbench){
    // rejected promise's recovery handlers settle before reconciling that ACK.
    if(cancelledReceipt)setTimeout(publishReceipt,0);else publishReceipt();
   }
+  if(handshakeReady&&(controlReady||handshakeCatalog)&&!state.online)update({online:true,message:''});
   if(handshakeReady&&handshakeCatalog&&!pendingSelection){lastHello=undefined;helloAttempts=0;}
  }finally{updateDepth--;if(!updateDepth&&updatePending){updatePending=false;publishUpdate();}}}
- if(params.get('relay')){relay=new Relay(new URL('../relay',location.href.split('#')[0]).href,session!,'client',params.get('relay')!,accept,undefined,undefined,undefined,status=>{relayState=status;if(!host){resetHandshake(handshakeReady&&handshakeCatalog);if(!state.online)update({message:status.message});}});requestHello();}
- window.addEventListener('message',e=>{if(e.origin!==origin||e.data?.protocol!==protocol||e.data.session!==session||!e.source||e.data.hostStarted&&e.data.hostStarted<hostStarted)return;if(host&&host!==e.source&&!host.closed&&!(e.data.type==='ready'&&e.data.hostStarted>hostStarted))return;if(!host&&e.data.type!=='ready'&&!(e.source===knownHost&&e.data.type==='pong'&&e.data.hostStarted===hostStarted))return;host=e.source as Window;knownHost=host;lastDirect=Date.now();try{roomWindow=host.top;if(roomWindow)window.opener=roomWindow;}catch{}accept(e.data);});
+ if(params.get('relay')){relay=new Relay(new URL('../relay',location.href.split('#')[0]).href,session!,'client',params.get('relay')!,accept,undefined,undefined,undefined,status=>{relayState=status;if(!host){resetHandshake(handshakeReady||controlReady||handshakeCatalog||state.online);update({online:false,message:status.message});}});requestHello();}
+ window.addEventListener('message',e=>{if(e.data?.type==='ready'&&e.data.clientInstance&&e.data.clientInstance!==clientInstance)return;if(e.origin!==origin||e.data?.protocol!==protocol||e.data.session!==session||!e.source||e.data.hostStarted&&e.data.hostStarted<hostStarted)return;if(host&&host!==e.source&&!host.closed&&!(e.data.type==='ready'&&e.data.hostStarted>hostStarted))return;if(!host&&e.data.type!=='ready'&&!(e.source===knownHost&&e.data.type==='pong'&&e.data.hostStarted===hostStarted))return;host=e.source as Window;knownHost=host;lastDirect=Date.now();try{roomWindow=host.top;if(roomWindow)window.opener=roomWindow;}catch{}accept(e.data);});
  const connect=()=>{const now=Date.now();
   // A short busy/throttled interval must not erase the group or warm cache.
   if(host&&(host.closed||now-lastDirect>15000)){host=null;resetHandshake(true,false);}

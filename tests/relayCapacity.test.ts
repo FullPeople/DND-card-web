@@ -12,9 +12,9 @@ function fixture(post:(body:any)=>Response|Promise<Response>){
  return {sent,changed};
 }
 const capacity=(code='REQUEST_CAPACITY')=>new Response(JSON.stringify({code,error:'capacity'}),{status:503,headers:{'Retry-After':'1'}});
-it('a rejected view cannot pause an otherwise available receipt lane',async()=>{
+it('a rejected expiring view cannot pause an otherwise available receipt lane',async()=>{
  const f=fixture(body=>body.type==='cacheSnapshot'?capacity():new Response('{}'));
- await expect(relay!.send({protocol,type:'cacheSnapshot'})).rejects.toMatchObject({code:'REQUEST_CAPACITY',notSent:true});
+ await expect(relay!.send({protocol,type:'cacheSnapshot',expiresAt:Date.now()+900})).rejects.toMatchObject({code:'REQUEST_CAPACITY',notSent:true});
  await expect(relay!.send({protocol,type:'ack',requestId:'saved',ok:true})).resolves.toEqual({});
  expect(f.changed).not.toHaveBeenCalled();expect(f.sent.map(row=>row.type)).toEqual(['cacheSnapshot','ack']);
 });

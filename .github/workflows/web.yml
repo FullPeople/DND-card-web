@@ -87,6 +87,7 @@ jobs:
             commands: |
               npx playwright test --config playwright.manager-recovery.config.ts
               npx playwright test --config playwright.window-shell.config.ts
+              npx playwright test --config playwright.connection300.config.ts
           - group: public-empty-currency
             commands: |
               npx playwright test --config playwright.public-currency.config.ts
