@@ -463,8 +463,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release300();export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:RELEASE_DATE,sections:release300()},
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?release300():release299();export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='suite'?[{title:RELEASE_DATE,sections:release300()}]:[]),
  {title:'2026-10-16-二',sections:release299()},
  {title:'2026-10-16-一',sections:release298(mode)},
  ...(mode==='suite'?[{title:'2026-10-15-三',sections:release297()}]:[]),
