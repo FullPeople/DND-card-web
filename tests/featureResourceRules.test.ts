@@ -194,3 +194,29 @@ it('a resolved dynamic class formula preserves spending through level changes, i
  expect(restored.runtime.resources[key]).toMatchObject({max:7,current:4});
  for(let i=0;i<10;i++)syncFeatureResources(restored);expect(restored.runtime.resources[key].current).toBe(4);
 });
+
+it('an explicit source-table use count creates a resource with tagged partial short-rest recovery',()=>{
+ const c=card();c.selections[2].entry.raw={};
+ c.selections[2].entry.entries=['激活次数见职业表中的“原创资源次数”列。当你完成一次{@variantrule 短休|AUTHORED}时，你重获一次已用次数；当你完成一次{@variantrule 长休|AUTHORED}时，你重获全部次数。'];
+ c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:Array.from({length:20},(_,i)=>[i<6?2:3])}];
+ const plan=planFeatureResources(c);expect(plan).toMatchObject({grants:[{max:2,recovery:{short:1,long:'all'}}],issues:[]});
+ syncFeatureResources(c);const key=plan.grants[0].key;setResource(c,key,0);syncFeatureResources(c);expect(c.runtime.resources[key].current).toBe(0);
+ restResources(c,'short');expect(c.runtime.resources[key].current).toBe(1);setResource(c,key,0);c.selections[0].level=7;syncFeatureResources(c);
+ expect(c.runtime.resources[key]).toMatchObject({max:3,current:1,featureGrant:{spent:2}});
+ restResources(c,'long');expect(c.runtime.resources[key].current).toBe(3);
+});
+it('a matching numeric table without an explicit use-count reference grants nothing',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['参见职业表了解更多信息。'];
+ c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:[[2],[2]]}];
+ expect(planFeatureResources(c).grants).toEqual([]);
+});
+it('a use-count reference to an unrelated column cannot grant the matching resource',()=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['激活次数见职业表中的“其他资源次数”列。'];
+ c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:[[2],[2]]}];
+ expect(planFeatureResources(c).grants).toEqual([]);
+});
+it.each([['zero',0],['ambiguous',undefined],['symbolic',undefined]])('explicit table references preserve zero and reject uncertain counts: %s',(shape,expected)=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['激活次数见职业表中的“原创资源次数”列。'];
+ c.selections[0].entry.raw.classTableGroups=[{colLabels:shape==='ambiguous'?['原创资源次数','原创资源次数']:['原创资源次数'],rows:Array.from({length:20},()=>shape==='ambiguous'?[2,3]:[shape==='zero'?0:'待裁定'])}];
+ const report=planFeatureResources(c);if(expected===undefined)expect(report.grants).toEqual([]);else expect(report.grants).toMatchObject([{max:expected}]);
+});

@@ -1,0 +1,21 @@
+name: Source-table resource feedback
+on:
+  pull_request:
+    paths:
+      - src/core/automation/featureResources.ts
+      - tests/featureResourceRules.test.ts
+      - .github/workflows/feature-resource-feedback.yml
+permissions:
+  contents: read
+jobs:
+  resource-feedback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+      - run: npm ci --no-audit --no-fund
+      - run: npx tsc --noEmit
+      - run: npx vitest run tests/featureResourceRules.test.ts tests/sourceResourcePools.test.ts tests/sourceResourcePayments.test.ts
