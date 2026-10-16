@@ -220,3 +220,14 @@ it.each([['zero',0],['ambiguous',undefined],['symbolic',undefined]])('explicit t
  c.selections[0].entry.raw.classTableGroups=[{colLabels:shape==='ambiguous'?['原创资源次数','原创资源次数']:['原创资源次数'],rows:Array.from({length:20},()=>shape==='ambiguous'?[2,3]:[shape==='zero'?0:'待裁定'])}];
  const report=planFeatureResources(c);if(expected===undefined)expect(report.grants).toEqual([]);else expect(report.grants).toMatchObject([{max:expected}]);
 });
+
+it.each([
+ ['完成一次短休时，你恢复一次使用次数，完成一次长休时，你恢复全部使用次数。',{short:1,long:'all'}],
+ ['短休时可以整理装备，完成一次长休时，你恢复全部使用次数。',{long:'all'}],
+ ['完成一次短休或长休时，你恢复一次使用次数。',{short:1,long:1}],
+ ['完成一次长休或短休时，你恢复一次使用次数。',{short:1,long:1}]
+])('rest recovery clauses do not borrow another period or its recovery amount: %s',(text,recovery)=>{
+ const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['激活次数见职业表中的“原创资源次数”列。'+text];
+ c.selections[0].entry.raw.classTableGroups=[{colLabels:['原创资源次数'],rows:[[2],[2]]}];
+ expect(planFeatureResources(c)).toMatchObject({grants:[{max:2,recovery}],issues:[]});
+});

@@ -87,7 +87,7 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
    if(use||once||sourceTable){
     const recovery:Recovery={};
     for(const [key,word] of [['short','短'],['long','长']] as const){
-     const match=clean(text).match(new RegExp(`${word}(?:暂)?(?:休|歇)[^。；]{0,90}?(?:恢复|重获|重新获得|再次使用|再度使用|重置)([^。；]*)`));
+     const match=clean(text).match(new RegExp(`${word}(?:暂)?(?:休|歇)(?:[或与和/](?:短|长)(?:暂)?(?:休|歇))?(?:(?!(?:短|长)(?:暂)?(?:休|歇))[^。；]){0,90}?(?:恢复|重获|重新获得|再次使用|再度使用|重置)([^。；，,]*)`));
      if(match){const n=match[1].match(/([一二两三四五六七八九十\d]+)次/);recovery[key]=/所有|全部/.test(match[1])?'all':n?count(n[1]):'all';}
     }
     if(once){if(once[1].includes('短'))recovery.short='all';recovery.long='all';}
