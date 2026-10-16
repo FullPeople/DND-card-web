@@ -31,7 +31,7 @@ function proseOnce(text:string){
  }
  return undefined;
 }
-function tableUses(row:Selection,cls:Selection|undefined,level:number):{max:number;column:string}|{issue:string}|undefined{
+function tableUses(row:Selection,cls:Selection|undefined,level:number):{max:number;column:string}|{issue:string;columns:string[]}|undefined{
  const names=[row.entry.name,row.entry.english].filter(Boolean).map(name=>clean(name).toLowerCase());
  const labels=new Set(names.flatMap(name=>[name,`${name}次数`,`${name}使用次数`,`${name}施用次数`,`${name}uses`,`${name}s`]));
  const cells:{value:unknown;column:string}[]=[];
@@ -41,9 +41,9 @@ function tableUses(row:Selection,cls:Selection|undefined,level:number):{max:numb
   for(const [i,label] of group.colLabels.entries())if(labels.has(clean(label).toLowerCase()))cells.push({value:Array.isArray(sourceRow)?sourceRow[i]:undefined,column:clean(label)});
  }
  if(!cells.length)return undefined;
- if(cells.length!==1)return {issue:'次数表格的对应列不唯一'};
+ if(cells.length!==1)return {issue:'次数表格的对应列不唯一',columns:cells.map(cell=>cell.column)};
  const cell=cells[0].value,max=typeof cell==='number'?cell:typeof cell==='string'&&/^\d+$/.test(cell)?Number(cell):NaN;
- return Number.isSafeInteger(max)&&max>=0&&max<=10000?{max,column:cells[0].column}:{issue:'次数表格的数值尚未支持'};
+ return Number.isSafeInteger(max)&&max>=0&&max<=10000?{max,column:cells[0].column}:{issue:'次数表格的数值尚未支持',columns:cells.map(cell=>cell.column)};
 }
 /** A matching numeric column alone does not establish a resource. The source
  * must explicitly direct its use count to that column in the same sentence. */
@@ -83,7 +83,7 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
    const use=text.match(new RegExp(`(?:可以|能够|能)(?:使用|施用)(?:(?:此|本|这项|该)(?:特性|能力)?|${escaped})(?:共计|总计|总共)?([一二两三四五六七八九十\\d]+)次`));
    const oncePlan=proseOnce(text),once=oncePlan?.match;
    if(oncePlan?.issue){issues.push({id:`resource-unadapted:${row.id}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${oncePlan.issue}，请人工核对。`});continue;}
-   const table=tableUses(row,cls,level),sourceTable=table&&'max' in table&&refersToUsesColumn(text,table.column);
+   const table=tableUses(row,cls,level),sourceTable=table&&('max' in table?refersToUsesColumn(text,table.column):table.columns.some(column=>refersToUsesColumn(text,column)));
    if(use||once||sourceTable){
     const recovery:Recovery={};
     for(const [key,word] of [['short','短'],['long','长']] as const){

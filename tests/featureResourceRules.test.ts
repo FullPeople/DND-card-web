@@ -218,7 +218,7 @@ it('a use-count reference to an unrelated column cannot grant the matching resou
 it.each([['zero',0],['ambiguous',undefined],['symbolic',undefined]])('explicit table references preserve zero and reject uncertain counts: %s',(shape,expected)=>{
  const c=card();c.selections[2].entry.raw={};c.selections[2].entry.entries=['激活次数见职业表中的“原创资源次数”列。'];
  c.selections[0].entry.raw.classTableGroups=[{colLabels:shape==='ambiguous'?['原创资源次数','原创资源次数']:['原创资源次数'],rows:Array.from({length:20},()=>shape==='ambiguous'?[2,3]:[shape==='zero'?0:'待裁定'])}];
- const report=planFeatureResources(c);if(expected===undefined)expect(report.grants).toEqual([]);else expect(report.grants).toMatchObject([{max:expected}]);
+ const report=planFeatureResources(c);if(expected===undefined){expect(report.grants).toEqual([]);expect(report.issues).toHaveLength(1);}else expect(report.grants).toMatchObject([{max:expected}]);
 });
 
 it.each([
