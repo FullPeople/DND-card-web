@@ -1,5 +1,15 @@
 <!doctype html>
-<html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#595959"><meta name="description" content="DND 中文规则资料：查询职业、种族、背景、专长、法术、装备与怪物，独立浏览 2014 和 2024 规则。"><title>DND Wiki · 规则资料</title><link rel="icon" href="./dnd-center-icon.png"></head>
-<body><div id="root"></div><noscript>请启用 JavaScript 后浏览规则资料。</noscript><script type="module" src="../src/wiki/main.tsx"></script></body>
+<html lang="zh-CN" data-wiki-ready="false">
+<head><meta charset="UTF-8"><script>window.addEventListener('error',function(event){if(event.target&&/^(SCRIPT|LINK)$/.test(event.target.tagName))window.__wikiResourceFailed=true;},true);</script><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#595959"><meta name="description" content="DND 中文规则资料：查询职业、种族、背景、专长、法术、装备与怪物，独立浏览 2014 和 2024 规则。"><title>DND Wiki · 规则资料</title><link rel="icon" href="./dnd-center-icon.png"><style>html,body{margin:0;background:#ededeb;color:#343532;font-family:system-ui,sans-serif}html[data-wiki-ready="false"] #root{visibility:hidden}#wiki-boot{position:fixed;inset:0;display:grid;place-content:center;gap:12px;text-align:center}#wiki-boot img{width:48px;height:48px;margin:auto}#wiki-boot p{margin:0;font-size:14px}#wiki-boot button{font:inherit;padding:6px 16px}#wiki-boot[hidden]{display:none}</style></head>
+<body><section id="wiki-boot" role="status"><img src="./dnd-center-icon.png" alt=""><strong>DND Wiki</strong><p id="wiki-boot-message">正在读取规则资料…</p><button id="wiki-boot-retry" type="button" hidden onclick="location.reload()">重新加载</button></section><div id="root"></div><script>
+(function(){
+ var failed=false;
+ function reveal(){if(failed||document.documentElement.dataset.wikiContent!=='ready')return;if(!Array.from(document.querySelectorAll('link[data-wiki-style]')).every(function(link){return link.media==='all'&&!!link.sheet;}))return;document.documentElement.dataset.wikiReady='true';document.getElementById('wiki-boot')?.remove();}
+ function fail(){if(document.documentElement.dataset.wikiReady==='true')return;failed=true;document.getElementById('wiki-boot-message').textContent='规则资料未能加载，请检查网络后重试。';document.getElementById('wiki-boot-retry').hidden=false;}
+ window.addEventListener('dnd-wiki-content-ready',reveal);window.addEventListener('dnd-wiki-style-ready',reveal);
+ window.addEventListener('error',function(event){var target=event.target;if(event.message||target&&/^(SCRIPT|LINK)$/.test(target.tagName))fail();},true);
+ window.addEventListener('unhandledrejection',fail);
+ if(window.__wikiResourceFailed)fail();
+})();
+</script><noscript>请启用 JavaScript 后浏览规则资料。</noscript><script type="module" src="../src/wiki/main.tsx"></script></body>
 </html>

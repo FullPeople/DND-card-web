@@ -95,6 +95,7 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
   const paused=()=>{if(!transport.paused)return false;progress.paused=transport.paused.message;publish();return true;};
   publish();
   let spellLookup: Raw = {}; let lookupRevision = '';
+  const indexes=['class','spells','bestiary'].map(category=>({category,result:read(`data/${category}/index.json`).then(value=>({value}),error=>({error}))}));
   try {
     const lookup = await read('data/generated/gendata-spell-source-lookup.json');
     spellLookup = lookup.body; lookupRevision = lookup.revision; if (lookup.cached) progress.cached++;
@@ -102,9 +103,10 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
   } catch (error) { if (signal.aborted) return; failed('data/generated/gendata-spell-source-lookup.json','法术职业索引',error); }
   progress.done++;publish();
   if(paused())return;
-  for (const category of ['class', 'spells', 'bestiary']) {
+  for (const {category,result} of indexes) {
     try {
-      const { body, cached, warning } = await read(`data/${category}/index.json`);
+      const response=await result;if('error' in response)throw response.error;
+      const { body, cached, warning } = response.value;
       if (warning) failed(`data/${category}/index.json`,`${category} 索引`,warning);
       if (cached) progress.cached++;
       for (const value of Object.values(body)) if (typeof value === 'string' && /^[\w.-]+\.json$/.test(value)) paths.push(`data/${category}/${value}`);
