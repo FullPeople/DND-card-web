@@ -5,11 +5,11 @@ const homeRoot=process.env.DND_HOME_ROOT||fileURLToPath(new URL('./site/homepage
 const home=existsSync(homeRoot+'/package.json');
 export default defineConfig({
  testDir:'./tests',timeout:40000,workers:1,reporter:[['list'],['json',{outputFile:'.local-evidence/loading/browser-results.json'}]],
- outputDir:'test-results-performance-loading',use:{channel:process.env.CI?undefined:'msedge',viewport:{width:1440,height:960},serviceWorkers:'block',trace:'retain-on-failure',launchOptions:process.env.CI?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:undefined},
+ outputDir:'test-results-performance-loading',use:{channel:process.env.CI?undefined:'msedge',viewport:{width:1440,height:960},serviceWorkers:'block',trace:'retain-on-failure'},
  projects:[
   {name:'standalone',testMatch:['**/loadingSmooth.spec.ts','**/startupNoticeOrder.spec.ts','**/startup228.spec.ts','**/startupTail241.spec.ts','**/resourceDashboard220App.spec.ts'],use:{baseURL:'http://127.0.0.1:5311'}},
   {name:'wiki',testMatch:['**/wikiOnly.spec.ts','**/wikiEnrichment.spec.ts','**/wikiLoadingSmooth.spec.ts'],use:{baseURL:'http://127.0.0.1:5312'}},
-  ...(home?[{name:'home',testMatch:'**/homeLoadingSmooth.spec.ts',use:{baseURL:'http://127.0.0.1:5310'}}]:[])
+  ...(home?[{name:'home',testMatch:'**/homeLoadingSmooth.spec.ts',use:{baseURL:'http://127.0.0.1:5310',launchOptions:process.env.CI?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:undefined}}]:[])
  ],
  webServer:[
   {command:'node node_modules/vite/bin/vite.js preview --mode standalone --port 5311 --strictPort',url:'http://127.0.0.1:5311',reuseExistingServer:!process.env.CI},
