@@ -50,11 +50,16 @@ test('a failed deferred page leaves the saved card and navigation available',asy
 test.describe('offline cache',()=>{
  test.use({serviceWorkers:'allow'});
  test('offline installation excludes unused dictionary and editing tools',async({page})=>{
+ let release!:()=>void;const held=new Promise<void>(resolve=>release=resolve);
+ // Inspect installation separately from the intentional post-opening prefetch.
+ await page.route(/\/assets\/(?:search|sheetImage|AutomationPanel|ResourceDashboard|SpellsPage|CardMigration)-[^/]+\.js$/,async route=>{await held;await route.continue().catch(()=>{});});
+ try{
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
  await page.evaluate(async()=>{const registration=await navigator.serviceWorker.ready;if(registration.active?.state!=='activated')await new Promise<void>(done=>registration.active?.addEventListener('statechange',()=>done(),{once:true}));});
  const cached=await page.evaluate(async()=>{const names=await caches.keys(),name=names.find(name=>name.startsWith('dnd-card-shell:'));return (await (await caches.open(name!)).keys()).map(request=>request.url);});
  expect(cached.some(url=>/\/assets\/App-.*\.js/.test(url))).toBe(true);
  for(const tool of ['search','sheetImage','AutomationPanel','ResourceDashboard','SpellsPage','CardMigration'])expect(cached.some(url=>new RegExp('/assets/'+tool+'-.*\\.js').test(url)),tool).toBe(false);
+ }finally{release();}
 });
 
 test('first-visit libraries and used pages are retained for offline reopening',async({page,context,browserName})=>{

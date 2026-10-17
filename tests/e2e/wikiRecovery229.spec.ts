@@ -23,11 +23,13 @@ test('a transient document failure recovers automatically and leaves no error co
 });
 
 test('a sustained source outage pauses the queue, keeps the card editable and resumes the missing files',async({page})=>{
- let attempts=0;await page.route('https://5e.kiwee.top/data/**',route=>{attempts++;return route.abort('connectionreset');});
+ const attempted:string[]=[];await page.route('https://5e.kiwee.top/data/**',route=>{attempted.push(route.request().url());return route.abort('connectionreset');});
  await page.goto('/');await expect(page.locator('.load-paused')).toContainText('尚有资料未读');
  await expect(page.locator('.catalog-status')).toContainText('已暂停');
- const count=attempts;expect(count).toBe(6);await page.waitForTimeout(700);expect(attempts).toBe(count);
- await expect(page.locator('.load-errors summary')).toContainText('2 份资料读取异常');
+ const count=attempted.length;expect(count).toBeLessThanOrEqual(12);expect(new Set(attempted).size).toBe(4);
+ for(const url of new Set(attempted))expect(attempted.filter(value=>value===url).length).toBeLessThanOrEqual(3);
+ await page.waitForTimeout(700);expect(attempted.length).toBe(count);
+ await expect(page.locator('.load-errors summary')).toHaveText(/[2-4] 份资料读取异常/);
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await page.getByRole('textbox',{name:'角色姓名',exact:true}).fill('断线期间仍能保存');
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.screenshot({path:'.local-evidence/wiki-paused-229.png',fullPage:true});

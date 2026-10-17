@@ -77,11 +77,23 @@ test('the first actual App resource gesture waits for the deferred editor instea
   await row(page,'怒气','card').getByRole('button',{name:'怒气 2',exact:true}).click();
   await expect.poll(()=>requested).toBe(true);
   expect(await page.evaluate(()=>(window as any).resource182.requests.length)).toBe(0);
-  release();await requests(page,1);await pips(page,'怒气',1,'card');
+  release();await requests(page,1);await pips(page,'怒气',1,'card');await page.evaluate(()=>(window as any).resource182.samples=[]);
   await page.evaluate(()=>(window as any).resource182.confirmNext());
   await noRebound(page,'怒气',1);
   expect(await page.evaluate(()=>(window as any).resource182.authority().rage.current)).toBe(1);
   expect(await page.evaluate(()=>(window as any).resource182.errors)).toEqual([]);
+ }finally{release();}
+});
+
+for(const action of ['revoke','switchCard'] as const)test(`an early resource gesture rechecks ${action} after the editor loads`,async({page})=>{
+ let release!:()=>void,requested=false;const held=new Promise<void>(resolve=>{release=resolve;});
+ await page.route('**/src/core/automation/cardRuntime.ts*',async route=>{requested=true;await held;await route.continue();});
+ try{
+  await open(page,'card',2);await row(page,'怒气','card').getByRole('button',{name:'怒气 2',exact:true}).click();await expect.poll(()=>requested).toBe(true);
+  await page.evaluate(action=>(window as any).resource182[action](),action);release();
+  await expect(page.getByText(action==='revoke'?'当前棋子不可编辑或已经切换':'角色已切换，加载期间的操作未应用。',{exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>(window as any).resource182.requests.length)).toBe(0);
+  expect(await page.evaluate(()=>(window as any).resource182.authority().rage.current)).toBe(2);
  }finally{release();}
 });
 

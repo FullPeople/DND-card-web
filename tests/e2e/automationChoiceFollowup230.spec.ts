@@ -62,7 +62,7 @@ test('230 large Wiki catalog keeps pointer movement free of character clones',as
 for(const choice of [{label:'起始熟练项',count:2},{label:'起始装备',count:1}])test(`source completion during a pointer press preserves the first ${choice.label} activation`,async({page})=>{
  let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
  try{
-  await ready(page,raw,{skillsGate:gate});await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');await page.getByRole('tab',{name:'特性',exact:true}).click();
+  await ready(page,raw,{skillsGate:gate});await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(page.getByRole('tab',{name:'特性',exact:true})).toHaveAttribute('aria-selected','true');
   const chip=page.getByRole('button',{name:`${choice.label} 0/${choice.count}`,exact:true}),banner=page.locator('.class-compatibility-banner');
   await expect(chip).toBeVisible();await expect(banner).toHaveCount(0);await chip.scrollIntoViewIfNeeded();const before=await chip.boundingBox();expect(before).not.toBeNull();
   await page.mouse.move(before!.x+before!.width/2,before!.y+before!.height/2);await page.mouse.down();

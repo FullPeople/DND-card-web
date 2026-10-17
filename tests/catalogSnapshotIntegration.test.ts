@@ -20,7 +20,7 @@ beforeEach(()=>{
   return new Response(JSON.stringify(body),{headers:{etag:'fixture-revision'}});
  }));
 });
-afterEach(()=>{vi.unstubAllGlobals();});
+afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();});
 async function read(refresh=false,retry:readonly string[]=[]){
  const entries=new Map<string,Entry>(),sources:Record<string,unknown>={};let progress:any;
  await loadCatalog(rows=>rows.forEach(row=>entries.set(row.id,row)),value=>progress=value,new AbortController().signal,refresh,base,rows=>Object.assign(sources,rows),retry);
@@ -45,4 +45,17 @@ test('a partial refresh cannot overwrite the last complete parsed view',async()=
  await read();missing=true;await read(true);
  vi.mocked(fetch).mockClear();const warm=await read();
  expect(fetch).not.toHaveBeenCalled();expect(warm.progress.failed).toEqual([]);expect(warm.entries.some(entry=>entry.name==='Original fixture')).toBe(true);
+});
+
+test('parallel required indexes settle their failures before pausing and can all recover',async()=>{
+ vi.useFakeTimers();const fetcher=vi.mocked(fetch);fetcher.mockRejectedValue(new TypeError('offline'));
+ const pending=read();await vi.runAllTimersAsync();const stopped=await pending;
+ const urls=fetcher.mock.calls.map(([url])=>String(url));expect(new Set(urls).size).toBe(4);expect(urls.length).toBeLessThanOrEqual(12);
+ for(const url of new Set(urls))expect(urls.filter(value=>value===url).length).toBeLessThanOrEqual(3);
+ expect(stopped.progress.paused).toContain('连接持续失败');expect(stopped.progress.failed.length).toBeGreaterThanOrEqual(2);
+ expect(stopped.progress.retry.length).toBe(stopped.progress.failed.length);expect(stopped.progress.done).toBe(4);
+ const count=fetcher.mock.calls.length;await vi.advanceTimersByTimeAsync(700);expect(fetcher).toHaveBeenCalledTimes(count);
+ // The fixture's indexes require at least one actual filename to be valid.
+ fetcher.mockImplementation(async url=>new Response(JSON.stringify(String(url).endsWith('/index.json')?{fixture:'fixture.json'}:{}),{headers:{etag:'restored'}}));
+ vi.useRealTimers();const resumed=await read(false,stopped.progress.retry);expect(resumed.progress.failed).toEqual([]);expect(resumed.progress.paused).toBeUndefined();
 });

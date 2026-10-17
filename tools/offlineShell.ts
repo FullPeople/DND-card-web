@@ -17,8 +17,9 @@ export function offlineShell(): Plugin {
     };
     for(const chunk of Object.values(bundle))if(chunk.type==='chunk'&&(chunk.isEntry||/\/ui\/App\.tsx$/.test(chunk.facadeModuleId?.replaceAll('\\','/')||'')))visit(chunk.fileName);
     const files=[...first];
+    const dependencies=Object.fromEntries(Object.entries(bundle).filter(([,asset])=>asset.type==='chunk').map(([name,asset])=>[name,asset.type==='chunk'?[...asset.imports,...((asset as typeof asset&{viteMetadata?:{importedCss:Set<string>}}).viteMetadata?.importedCss??[])]:[]]));
     const html=bundle['index.html'];
-    const revision = createHash('sha256').update('on-demand-shell-v5:'+JSON.stringify(assets)).update(html?.type==='asset'?html.source:'').digest('hex').slice(0, 12);
+    const revision = createHash('sha256').update('on-demand-shell-v6:'+JSON.stringify(assets)).update(html?.type==='asset'?html.source:'').digest('hex').slice(0, 12);
     // The page carries its own build id, so a page that already came from the
     // network as this build can let the waiting worker activate silently.
     if(html?.type==='asset'&&typeof html.source==='string'&&!html.source.includes('name="dnd-card-build"'))html.source=html.source.replace('<head>',`<head><meta name="dnd-card-build" content="${revision}"/>`);
@@ -27,6 +28,16 @@ const PREFIX = 'dnd-card-shell:' + new URL('./', self.location.href).pathname + 
 const CACHE = PREFIX + ${JSON.stringify(revision)};
 const FILES = ${JSON.stringify(files)};
 const ASSETS = new Set(${JSON.stringify([...assets,'favicon.svg','exe_icon.png','dnd-center-logo.png','dnd-center-icon.png',...startupAssets])}.map(file=>new URL(file,self.location.href).href));
+const DEPENDENCIES = new Map(Object.entries(${JSON.stringify(dependencies)}).map(([file,deps])=>[new URL(file,self.location.href).href,deps.map(dep=>new URL(dep,self.location.href).href)]));
+// A cached deferred entry promises that its entire static graph is available.
+// Commit the entry last, including when a pre-control request is backfilled.
+async function storeComplete(cache,url,response){
+ const seen=new Set([url]),order=[];
+ const visit=file=>{for(const dep of DEPENDENCIES.get(file)||[]){if(seen.has(dep)||!ASSETS.has(dep))continue;seen.add(dep);visit(dep);order.push(dep);}};
+ visit(url);
+ for(const dep of order){if(await cache.match(dep,{ignoreVary:true}))continue;const asset=await fetch(dep,{cache:'force-cache',priority:'low'});if(!asset.ok)throw new Error('Offline dependency unavailable');await cache.put(dep,asset);}
+ await cache.put(url,response);
+}
 // Two low-priority readers reuse the browser HTTP cache without competing
 // with every deferred editor and rules download after the first paint.
 async function installShell(){
@@ -46,7 +57,7 @@ self.addEventListener('message', event => {
     // those used files only, and never cache documents or arbitrary URLs.
     for(const url of new Set(event.data.urls.filter(url=>ASSETS.has(url)))){
       if(await cache.match(url,{ignoreVary:true}))continue;
-      try{const response=await fetch(url,{cache:'force-cache',priority:'low'});if(response.ok)await cache.put(url,response);}catch{}
+      try{const response=await fetch(url,{cache:'force-cache',priority:'low'});if(response.ok)await storeComplete(cache,url,response);}catch{}
     }
   }));
 });
@@ -69,7 +80,7 @@ self.addEventListener('fetch', event => {
     // not download every editor, dictionary and Wiki renderer in parallel.
     const response=caches.open(CACHE).then(async cache => {
       const saved=await cache.match(event.request,{ignoreVary:true});if(saved)return saved;
-      const fresh=await fetch(event.request);if(fresh.ok)await cache.put(event.request,fresh.clone());return fresh;
+      const fresh=await fetch(event.request);if(fresh.ok){try{await storeComplete(cache,url.href,fresh.clone());}catch{/* Preserve the online response without advertising an incomplete offline tool. */}}return fresh;
     });
     event.respondWith(response);event.waitUntil(response.then(()=>{},()=>{}));
   }
