@@ -1,0 +1,17 @@
+#home-qq-account .qq-session{display:flex;align-items:center;gap:8px}
+#home-qq-account #about-open{padding:8px 12px;line-height:1;white-space:nowrap;font-size:13px}
+#about-dialog{width:min(600px,90vw);max-height:calc(100dvh - 60px);padding:30px 36px;border:2px solid #354035;border-radius:22px 16px 25px 15px;background:var(--paper);color:var(--ink);box-shadow:7px 9px 0 #35403538;overflow:auto}
+#about-dialog::backdrop{background:#26302670;backdrop-filter:blur(5px)}
+.about-content{position:relative}
+.about-close{position:absolute;top:0;right:0;width:34px;height:34px;font-size:20px}
+.about-eyebrow{margin:0 0 8px;color:var(--muted);font-size:12px;letter-spacing:.08em}
+#about-title{margin:0;font-size:32px;font-weight:500}
+.about-description{font-size:15px;line-height:1.9;margin:20px 0 24px;color:var(--muted)}
+.about-support-links{display:flex;gap:16px;flex-wrap:wrap}
+.about-support-links a{display:flex;align-items:center;gap:25px;padding:10px 16px;font-size:14px;line-height:1}
+.about-qrs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:28px}
+.about-qrs figure{margin:0;padding:12px;border:1px dashed #91947d80;border-radius:14px;background:#fff;text-align:center}
+.about-qrs img{width:100%;height:200px;object-fit:contain;display:block}
+.about-qrs figcaption{font-size:12px;color:var(--muted);padding-top:10px}
+@media(max-width:640px){#home-qq-account{gap:7px}#home-qq-account #about-open{font-size:12px;padding:7px 9px}#about-dialog{padding:24px 22px}.about-qrs{gap:12px}.about-qrs img{height:160px}}
+@media(max-height:539px){#about-dialog{max-height:calc(100dvh - 24px);width:min(620px,90vw)}.about-qrs img{height:140px}.about-description{margin:12px 0}.about-qrs{margin-top:16px}}

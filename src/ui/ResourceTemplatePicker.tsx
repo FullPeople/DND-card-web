@@ -1,4 +1,4 @@
-import {useState,useRef,type PointerEvent,type CSSProperties} from 'react';
+import {useState,useRef,useEffect,type PointerEvent,type CSSProperties} from 'react';
 import {CloseIcon} from './icons';
 import {sameValue} from '../core/merge';
 import {useResourceDraftGuard} from './resourceDraftGuard';
@@ -23,6 +23,9 @@ export function ResourceTemplatePicker({choose,disabled=false,hidden=0,restore,d
  const [name,setName]=useState('新资源'),[current,setCurrent]=useState(3),[max,setMax]=useState(3),[unlimited,setUnlimited]=useState(false),[multi,setMulti]=useState(false),[children,setChildren]=useState<Child[]>([newChild(1),newChild(2)]);
  const values:ResourceTemplateValues={name,current,max,unlimited,count:children.length,...(multi?{children}:{})};
  const initial=useRef(values);useResourceDraftGuard('new-module',!activeModule&&!sameValue(initial.current,values));
+ // Once the values have become a real module, they are no longer an unsaved
+ // creation form when the player returns to the library after saving layout.
+ useEffect(()=>{if(activeModule)initial.current=values;},[!!activeModule]);
  const validRow=(r:Child)=>!!r.name.trim()&&Number.isInteger(r.current)&&r.current>=0&&r.current<=999999999&&Number.isInteger(r.max)&&r.max>=0&&r.max<=99999&&(r.unlimited||r.current<=r.max);
  const valid=!!name.trim()&&(multi?children.every(validRow):validRow(values)),isMulti=activeModule?activeModule.slots||activeModule.rows.length>1:multi;
  function child(index:number,patch:Partial<Child>){setChildren(rows=>rows.map((row,i)=>i===index?{...row,...patch}:row));}

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <script>
+  window.addEventListener('error',function(event){
+    var target=event.target;if(!target||!(target.tagName==='SCRIPT'||target.tagName==='LINK'&&target.rel==='stylesheet'))return;
+    function recover(){
+      if(document.body.dataset.intro==='complete')return;
+      document.body.dataset.intro='failed';document.body.classList.remove('intro-active');
+      var toast=document.getElementById('toast'),retry=document.getElementById('skip-intro');
+      if(toast){toast.textContent='页面文件未能加载，请重新加载。';toast.setAttribute('role','alert');toast.classList.add('visible');}
+      if(retry){retry.textContent='重新加载';retry.style.visibility='visible';retry.onclick=function(){location.reload();};}
+    }
+    if(document.body)recover();else document.addEventListener('DOMContentLoaded',recover,{once:true});
+  },true);
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e9">
+  <link rel="icon" type="image/png" sizes="32x32" href="/src/assets/home-icon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/src/assets/home-icon-180.png">
+  <title>DND.CENTER</title>
+  <link rel="stylesheet" href="/src/main.css">
+  <link rel="stylesheet" href="/src/qq-login.css">
+
+</head>
+<body class="intro-active" data-style="orbits" data-intro="loading">
+  <div class="intro-backdrop" aria-hidden="true"></div>
+  <div id="world" aria-hidden="true"></div>
+  <header class="masthead">
+    <div class="header-right">
+      <button id="replay" class="icon-button" aria-label="重播开屏动画">↻</button>
+    </div>
+  </header>
+
+  <div id="home-qq-account" inert><button type="button" id="about-open" aria-controls="about-dialog" aria-expanded="false">关于我</button></div>
+  <dialog id="about-dialog" aria-labelledby="about-title"></dialog>
+  <main id="space" aria-label="DND.CENTER">
+    <a id="make-card" class="entry entry-create" href="https://dnd.center/card/" target="_blank" rel="noopener noreferrer">
+      <span>制作角色卡</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>
+    </a>
+    <div class="center-stage">
+      <div id="hero" class="hero" role="img" aria-label="角色站在桌面上，分子与骰子悬浮在旁边">
+        <picture><source media="(max-width: 700px), (max-width: 900px) and (max-height: 500px)" srcset="/src/assets/home-logo-base-640.webp"><img id="hero-base" class="hero-piece piece-base" src="/src/assets/home-logo-base-640.webp" srcset="/src/assets/home-logo-base-640.webp 640w, /src/assets/home-logo-base-1280.webp 1280w, /src/assets/home-logo-base-1920.webp 1920w" sizes="(max-height: 500px) and (min-width: 701px) 250px, (max-width: 700px) and (max-height: 720px) 245px, (max-height: 720px) min(35vw, 340px), (max-width: 700px) clamp(250px, 70vw, 370px), (max-width: 1100px) 390px, (min-width: 1800px) 600px, clamp(370px, 37vw, 570px)" fetchpriority="high" decoding="async" alt="" draggable="false"></picture>
+        <picture><source media="(max-width: 700px), (max-width: 900px) and (max-height: 500px)" srcset="/src/assets/home-logo-person-640.webp"><img id="hero-person" class="hero-piece piece-person" src="/src/assets/home-logo-person-640.webp" srcset="/src/assets/home-logo-person-640.webp 640w, /src/assets/home-logo-person-1280.webp 1280w, /src/assets/home-logo-person-1920.webp 1920w" sizes="(max-height: 500px) and (min-width: 701px) 250px, (max-width: 700px) and (max-height: 720px) 245px, (max-height: 720px) min(35vw, 340px), (max-width: 700px) clamp(250px, 70vw, 370px), (max-width: 1100px) 390px, (min-width: 1800px) 600px, clamp(370px, 37vw, 570px)" fetchpriority="high" decoding="async" alt="" draggable="false"></picture>
+        <picture><source media="(max-width: 700px), (max-width: 900px) and (max-height: 500px)" srcset="/src/assets/home-logo-molecule-640.webp"><img id="hero-molecule" class="hero-piece piece-molecule" src="/src/assets/home-logo-molecule-640.webp" srcset="/src/assets/home-logo-molecule-640.webp 640w, /src/assets/home-logo-molecule-1280.webp 1280w, /src/assets/home-logo-molecule-1920.webp 1920w" sizes="(max-height: 500px) and (min-width: 701px) 250px, (max-width: 700px) and (max-height: 720px) 245px, (max-height: 720px) min(35vw, 340px), (max-width: 700px) clamp(250px, 70vw, 370px), (max-width: 1100px) 390px, (min-width: 1800px) 600px, clamp(370px, 37vw, 570px)" fetchpriority="high" decoding="async" alt="" draggable="false"></picture>
+        <picture><source media="(max-width: 700px), (max-width: 900px) and (max-height: 500px)" srcset="/src/assets/home-logo-die-640.webp"><img id="hero-die" class="hero-piece piece-die" src="/src/assets/home-logo-die-640.webp" srcset="/src/assets/home-logo-die-640.webp 640w, /src/assets/home-logo-die-1280.webp 1280w, /src/assets/home-logo-die-1920.webp 1920w" sizes="(max-height: 500px) and (min-width: 701px) 250px, (max-width: 700px) and (max-height: 720px) 245px, (max-height: 720px) min(35vw, 340px), (max-width: 700px) clamp(250px, 70vw, 370px), (max-width: 1100px) 390px, (min-width: 1800px) 600px, clamp(370px, 37vw, 570px)" fetchpriority="high" decoding="async" alt="" draggable="false"></picture>
+        <button id="molecule-handle" class="molecule-handle" aria-label="查看作品" aria-expanded="false" aria-controls="works-panel"></button>
+        <button id="die-hit" class="die-hit" aria-label="掷骰"></button>
+        <button id="logo-return" class="logo-return" aria-label="返回中心图案"></button>
+      </div>
+    </div>
+
+    <aside id="steam-card" class="steam-card" hidden aria-label="fuvtt Steam 预约">
+      <button id="reset-die" class="promo-close" aria-label="收起预约卡">×</button>
+      <span class="promo-eyebrow">YOUR NEXT TABLETOP</span>
+      <h2>fuvtt</h2>
+      <p class="promo-title">更好的 VTT 平台</p>
+      <p class="promo-status">已在 Steam 开启预约！</p>
+      <a href="https://store.steampowered.com/app/3177780/" target="_blank" rel="noopener noreferrer">开启预约 <span>↗</span></a>
+    </aside>
+    <section id="works-panel" class="works-panel" aria-label="作品" hidden>
+      <button id="close-works" class="works-close" aria-label="返回中心图案">×</button>
+      <div id="project-carousel"></div>
+      <div class="works-grid">
+        <a class="work-card" href="https://dnd.center/3-dragon/" target="_blank" rel="noopener noreferrer">
+          <img src="/src/assets/project-three-dragon.webp" loading="lazy" decoding="async" crossorigin="anonymous" alt="" draggable="false"><h2>来一局三龙牌吧！</h2>
+        </a>
+        <a class="work-card" href="https://5e.kiwee.top/" target="_blank" rel="noopener noreferrer">
+          <img src="/src/assets/project-kiwee.webp" loading="lazy" decoding="async" crossorigin="anonymous" alt="" draggable="false">
+          <h2>DND中文规则速查网站</h2>
+        </a>
+        <a class="work-card" href="https://www.bilibili.com/video/BV1iDiiBDEbh/" target="_blank" rel="noopener noreferrer">
+          <img src="/src/assets/project-sealchat.webp" loading="lazy" decoding="async" crossorigin="anonymous" alt="" draggable="false">
+          <h2>星尘-SealChat</h2>
+        </a>
+        <a class="work-card" href="/downloads/DesktopDice-0.1.0-preview.10-windows-x64.exe" download>
+          <img src="/src/assets/project-desktop-dice.webp" loading="lazy" decoding="async" crossorigin="anonymous" alt="" draggable="false">
+          <h2>超越窗口的桌面3D骰子</h2>
+        </a>
+        <a class="work-card" href="https://github.com/FullPeople/MusicBoard/releases" target="_blank" rel="noopener noreferrer">
+          <img src="/src/assets/project-musicboard.webp" loading="lazy" decoding="async" crossorigin="anonymous" alt="" draggable="false">
+          <h2>便携桌面音乐板和悬浮窗</h2>
+        </a>
+        <a class="work-card" href="https://www.mihuashi.com/profiles/446041?role=painter" target="_blank" rel="noopener noreferrer">
+          <img src="/src/assets/project-artists.webp" loading="lazy" decoding="async" crossorigin="anonymous" alt="" draggable="false"><h2>鼎力支持的小画师们</h2>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <a id="library" class="entry entry-library" aria-disabled="true" tabindex="-1" style="pointer-events:none">
+    <span>云端暂不可用</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>
+  </a>
+  <div id="dice-stage" aria-live="off"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="pointer-effects" aria-hidden="true"></div>
+  <div id="roll-history" class="roll-history" aria-live="polite"></div>
+  <button id="skip-intro" class="skip-intro">跳过 ↗</button>
+  <script type="module" src="/src/app.ts"></script>
+</body>
+</html>

@@ -21,3 +21,32 @@ test('235 cancel, failed save and revoked permission keep the authoritative layo
  await manage(page).click();await dialog(page).locator('[data-resource-id="focus"] .resource-widget-face').click();await dialog(page).getByRole('button',{name:'色调 #a36d61',exact:true}).click();await page.evaluate(()=>(window as any).dashboard235.fail());await dialog(page).getByRole('button',{name:'保存布局',exact:true}).click();await expect(saveStatus(page)).toContainText('测试保存失败');await expect(dialog(page).locator('[data-dirty=true]')).toBeVisible();expect(await page.evaluate(()=>(window as any).dashboard235.authority())).toEqual(original);
  await page.evaluate(()=>(window as any).dashboard235.readonly());await expect(dialog(page).getByRole('button',{name:'保存布局',exact:true})).toBeDisabled();await dialog(page).getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(manage(page)).toBeDisabled();expect((await page.evaluate(()=>(window as any).dashboard235.requests)).filter((r:any)=>r.type==='save')).toHaveLength(1);
 });
+
+test('a saved added module is not mistaken for a second unsaved new-module form',async({page,baseURL})=>{
+ await open(page,baseURL);await manage(page).click();const editor=dialog(page);
+ await editor.getByLabel('新模块名称',{exact:true}).fill('原创邮件回归资源');
+ await editor.locator('[data-template-id=ring]').click();
+ await editor.getByRole('button',{name:'保存布局',exact:true}).click();await expect(saveStatus(page)).toHaveText('已保存布局');
+ const saved=await page.evaluate(()=>(window as any).dashboard235.authority());
+ expect(Object.values(saved.runtime.resources).some((row:any)=>row.name==='原创邮件回归资源')).toBe(true);
+ await editor.getByRole('button',{name:'新模块',exact:true}).click();
+ page.removeAllListeners('dialog');const confirmations:string[]=[];page.on('dialog',confirmation=>{confirmations.push(confirmation.message());void confirmation.accept();});
+ await editor.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(editor).toHaveCount(0);expect(confirmations).toEqual([]);
+ await page.reload();expect(await page.evaluate(()=>(window as any).dashboard235.authority())).toEqual(saved);
+});
+
+test('the reported spell-row removal and new resource values survive save and reload',async({page,baseURL})=>{
+ await open(page,baseURL);await manage(page).click();const editor=dialog(page);
+ await editor.locator('[data-resource-id="spell-slot:1"] .resource-widget-face').click();
+ await editor.getByRole('button',{name:'删除模块',exact:true}).click();
+ await editor.getByLabel('新模块名称',{exact:true}).fill('原创反馈计数');await editor.getByLabel('新模块上限',{exact:true}).fill('8');
+ await editor.locator('[data-template-id=ring]').click();
+ await editor.getByLabel('资源名称',{exact:true}).fill('原创已编辑资源');await editor.getByLabel('资源剩余',{exact:true}).fill('5');
+ await editor.getByRole('button',{name:'保存',exact:true}).click();await editor.getByRole('button',{name:'保存布局',exact:true}).click();await expect(saveStatus(page)).toHaveText('已保存布局');
+ const saved=await page.evaluate(()=>(window as any).dashboard235.authority());
+ expect(saved.quickbarLayout.hidden).toContain('resource:spell-slot:1');
+ expect(Object.values(saved.runtime.resources)).toContainEqual(expect.objectContaining({name:'原创已编辑资源',current:5,max:8}));
+ await editor.getByRole('button',{name:'关闭弹窗',exact:true}).click();await page.reload();
+ expect(await page.evaluate(()=>(window as any).dashboard235.authority())).toEqual(saved);
+ await manage(page).click();await expect(dialog(page).locator('[data-resource-name="原创已编辑资源"]')).toBeVisible();
+});

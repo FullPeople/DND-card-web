@@ -421,7 +421,7 @@ export default function App() {
   const dashboardSaveBases=useRef(new WeakMap<Character,Character>());
   const [editingResource,setEditingResource]=useState(''),[resourceViewport,setResourceViewport]=useState<DashboardViewport>({page:0});
   useEffect(()=>{const page=(event:Event)=>setResourceViewport(typeof (event as CustomEvent).detail==='number'?{page:(event as CustomEvent).detail}:(event as CustomEvent).detail||{page:0});window.addEventListener('resource-canvas-page',page);return()=>window.removeEventListener('resource-canvas-page',page);},[]);
-  useEffect(()=>{const open=(event:Event)=>{if(!confirmResourceDraftDiscard())return;setEditingResource((event as CustomEvent).detail);setModalValue('resources');};window.addEventListener('edit-character-resource',open);return()=>window.removeEventListener('edit-character-resource',open);},[]);
+  useEffect(()=>{const open=(event:Event)=>{if(!confirmResourceDraftDiscard())return;setEditingResource((event as CustomEvent).detail);setModal('resources');};window.addEventListener('edit-character-resource',open);return()=>window.removeEventListener('edit-character-resource',open);},[]);
 
   function persist(next: Workspace) {
     if(qqRoom&&!roomState()?.write){setNotice('卡主已锁定或房间连接已失效，本机草稿保留。');return;}
@@ -555,10 +555,6 @@ export default function App() {
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
     finally { if (!controller.signal.aborted) startTransition(()=>setLoading(false)); }
   }
-  useEffect(()=>{if(!startupComplete)return;return afterPaint(()=>{
-    // Warm one view at a time, after the first card is usable.
-    void import('./CharacterPages').then(()=>import('./SpellsPage')).then(()=>import('./InventoryPage')).catch(()=>{});
-  });},[startupComplete]);
   const [wikiUiError,setWikiUiError]=useState('');
   const [wikiUi,setWikiUi]=useState<typeof import('./WikiUi')>();
   useEffect(()=>{if(!workspace)return;let active=true;

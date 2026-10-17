@@ -8,7 +8,7 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {values}=parseArgs({options:{directory:{type:'string'},'verify-only':{type:'boolean'}}});
 const directory=resolve(values.directory||resolve(root,'.local-evidence/warforged/upstream'));
 const fixture=JSON.parse(readFileSync(resolve(root,'tests/fixtures/warforged-tool-sources.json'))),out=resolve(root,'.local-evidence/warforged/source-verification.json');
-rmSync(out,{force:true});mkdirSync(directory,{recursive:true});
+mkdirSync(dirname(out),{recursive:true});rmSync(out,{force:true});mkdirSync(directory,{recursive:true});
 const receipt={verifiedAt:new Date().toISOString(),dataRevision:fixture.dataRevision,inputs:[]};
 const fields=new Set(['name','ENG_name','source','edition','skillProficiencies','toolProficiencies','type','entries']);
 for(const [index,input] of fixture.inputs.entries()){

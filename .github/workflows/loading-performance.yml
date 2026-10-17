@@ -1,0 +1,35 @@
+name: Verify smooth loading
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  loading:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix site/homepage
+      - run: npm run build:standalone
+      - run: npm run build:wiki
+      - run: npm run build --prefix site/homepage
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.loading.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smooth-loading-browser-evidence
+          include-hidden-files: true
+          path: |
+            .local-evidence/loading/browser-results.json
+            test-results-performance-loading/
+          if-no-files-found: error
+          retention-days: 7
