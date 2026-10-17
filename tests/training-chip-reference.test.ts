@@ -24,6 +24,13 @@ it('honors explicit captions and sources, and does not invent unknown translatio
  expect(trainingChipReference('原创未知武器|HOME','item',resolve)).toMatchObject({reference:'原创未知武器|HOME',label:'原创未知武器',entry:undefined});
  expect(trainingChipReference('玩家手写的熟练说明','item',resolve).label).toBe('玩家手写的熟练说明');
 });
+it('keeps the complete authored weapon restriction around an inline filter',()=>{
+ const value='具有{@filter 轻型|items|type=军用武器|property=轻型}属性的军用武器';
+ expect(trainingChipReference(value,'item').label).toBe(value);
+ const html=renderToStaticMarkup(createElement(TrainingChips,{label:'武器',value,onChange:()=>{}}));
+ expect(html).toContain('具有轻型属性的军用武器');
+ expect(html).not.toContain('>type=军用武器<');
+});
 it('renders updated labels when the catalog arrives while retaining raw UID links and save values',()=>{
  const value=names.map(([english])=>`${english}|PHB`).join('、'),saved:string[]=[];
  const render=(ready:boolean)=>renderToStaticMarkup(createElement(ReferenceContext.Provider,{value:{resolve:ready?resolve:()=>undefined,show:()=>{},move:()=>{},leave:()=>{},close:()=>{}}},createElement(TrainingChips,{label:'武器',value,onChange:value=>saved.push(value)})));

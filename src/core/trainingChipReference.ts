@@ -5,6 +5,8 @@ type ResolveReference=(reference:string,kind?:string)=>Entry|undefined;
 /** Category aliases bind typed handles; explicit UIDs/captions and stored text stay intact. */
 export function trainingChipReference(value:string,defaultKind:string,resolve?:ResolveReference,context?:{group:string;source:string}){
  const tag=/^\{@(\w+) ([^{}]+)\}$/.exec(value),kind=tag?.[1]||defaultKind,reference=tag?.[2]||value;
+ // Pipes inside authored filter prose are filter arguments, not a UID caption.
+ if(value.includes('{@')&&(!tag||tag[1]==='filter'))return {reference:value,kind:defaultKind,label:value,entry:undefined};
  const parts=reference.split('|'),category=context&&(kind==='itemProperty'||!tag&&!value.includes('|'))?equipmentTraining(parts[0]):undefined;
  if(context&&category&&category[3]===context.group){
   const source=parts[1]||context.source,edition=source.toUpperCase()==='PHB'?'2014':source.toUpperCase()==='XPHB'?'2024':undefined;

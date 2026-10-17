@@ -2,6 +2,7 @@ export const RELEASE_DATE='2026-10-18';
 const release301=(mode:'standalone'|'suite'):ReleaseSection[]=>[
  {title:'页面与资料加载',items:['开场动画按时淡出，资料仍在读取时显示实际进度。','切换纸卡页签和书籍时保留当前内容，新内容准备好后再显示，减少空白与跳闪。']},
  {title:'仪表盘保存',items:['修复新增资源并保存布局后，旧表单仍误报存在未保存修改的问题。']},
+ {title:'资料显示',items:['修复熟练说明内含筛选标签时，显示名称截断、遗漏武器限制的问题。']},
  ...(mode==='suite'?[{title:'演出与投骰',items:['修复时停和文字演出的透明空白变黑问题。','普通投骰、先攻和群体结果文字自动消失，手动打开的历史可继续查看。','真实枭熊房间和原设备效果仍待复核。']}]:[]),
  {title:'资料校验',items:['可选特性进度不完整时保留已有记录并说明暂不可用，避免出现错误名额。','QQ 登录与云端功能继续暂停，已有资料保留。']}
 ];
@@ -470,6 +471,7 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
 export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release301(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE,sections:release301(mode)},
  ...(mode==='suite'?[{title:'2026-10-16-三',sections:release300()}]:[]),
  {title:'2026-10-16-二',sections:release299()},
  {title:'2026-10-16-一',sections:release298(mode)},
