@@ -22,3 +22,12 @@ test('a failed homepage entry leaves a working reload action instead of a frozen
  await page.goto('/',{waitUntil:'commit'});await expect(page.locator('body')).toHaveAttribute('data-intro','failed');
  await expect(page.getByRole('alert')).toContainText('页面文件未能加载');await expect(page.getByRole('button',{name:'重新加载',exact:true})).toBeVisible();
 });
+
+test('carousel opening follows elapsed time when animation frames arrive slowly',async({page})=>{
+ await page.setViewportSize({width:1440,height:960});
+ await page.route('**/api/home/projects',route=>route.fulfill({json:{projects:{}}}));
+ await page.addInitScript(()=>{const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=callback=>raf(()=>{window.setTimeout(()=>callback(performance.now()),250);});});
+ await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-intro','complete');
+ await page.locator('.project-carousel canvas').waitFor({state:'attached'});
+ await expect(page.locator('.project-carousel')).toHaveAttribute('data-ready','true',{timeout:2000});
+});

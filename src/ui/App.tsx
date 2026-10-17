@@ -353,6 +353,8 @@ export default function App() {
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
+  const pendingRuntimeEdits=useRef<{id:string;target:string|undefined;action:Parameters<Edit>[0];key?:Parameters<Edit>[1]}[]>([]);
+  const [runtimeInteractionRequested,setRuntimeInteractionRequested]=useState(false);
   const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
   const [editingLoadError,setEditingLoadError]=useState('');
   const [editingReloadPending,setEditingReloadPending]=useState(false);
@@ -362,9 +364,9 @@ export default function App() {
     const loadEditor=()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});};
     // Restoring an explicitly saved editing mode requires its runtime before
     // the card becomes interactive. Fresh browsing keeps it deferred.
-    const cancel=editingRequested?(loadEditor(),()=>{}):afterPaint(loadEditor);
+    const cancel=editingRequested||runtimeInteractionRequested?(loadEditor(),()=>{}):afterPaint(loadEditor);
     return()=>{alive=false;cancel();};
-  },[!!workspace,editingRequested,!!automationRuntime]);
+  },[!!workspace,editingRequested,runtimeInteractionRequested,!!automationRuntime]);
   const editing=editingRequested&&!!automationRuntime;
   useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editingRequested));}catch{/* A session still keeps the global editing preference. */}},[editingRequested]);
   const [sheetPage, setSheetPage] = useState<SheetPage>('主要');
@@ -667,13 +669,13 @@ export default function App() {
     recordAction({label:after.name,undo:()=>restore(after,before),redo:()=>restore(before,after)});
   }
   const edit: Edit = (action, key) => {
-    if(!automationRuntime){setNotice('正在加载编辑功能，请稍候。');return;}
     if (!writable.current) { setNotice('此标签页为只读。关闭另一编辑页并刷新后可继续。'); return; }
     const current = workspaceRef.current; if (!current) return;
     const character = current.characters.find(x => x.id === current.activeId)!;
     {const blocked=cloudAccessRef.current[character.id];if(blocked){setNotice(blocked);return;}}
     if(workbenchUncertain.current.has(character.id)){setNotice('上一项修改的结果尚未确认，本地修改已保留。请先核对枭熊数据。');return;}
     if(inWorkbench&&character.id.startsWith('suite:')&&(!wb.online||!wb.target?.write||workbenchCharacterId(wb.target)!==character.id)){setNotice('当前棋子不可编辑或已经切换');return;}
+    if(!automationRuntime){pendingRuntimeEdits.current.push({id:character.id,target:wb.target?.key,action,key});setRuntimeInteractionRequested(true);return;}
     const record = history.current.get(character.id) || { past: [], future: [], time: 0 };
     if (!key || record.key !== key || Date.now() - record.time > 900) record.past = [...record.past.slice(-59), character];
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
@@ -687,6 +689,15 @@ export default function App() {
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
     rememberCharacter(character,draft);void sendCharacter(character,draft).catch(()=>{});setHistoryTick(x=>x+1);
   };
+  useEffect(()=>{
+    if(!automationRuntime)return;
+    // Recheck the current card and permissions before replaying early gestures.
+    // Switching cards while the editor downloads must never edit the new card.
+    for(const pending of pendingRuntimeEdits.current.splice(0)){
+      if(workspaceRef.current?.activeId!==pending.id||inWorkbench&&wb.target?.key!==pending.target){setNotice('角色已切换，加载期间的操作未应用。');continue;}
+      edit(pending.action,pending.key);
+    }
+  },[automationRuntime]);
   async function saveDashboard(base:Character,draft:Character){
     const current=workspaceRef.current,character=current?.characters.find(row=>row.id===current.activeId);
     if(!current||!character||!writable.current||!automationRuntime||character.id!==base.id)throw Error('当前角色不可编辑或已经切换');

@@ -18,12 +18,14 @@ async function assertBeforeComplete(page:Page){
  const value=await page.evaluate(()=>document.documentElement.dataset.cardStartup);
  expect(await page.locator('#root').evaluate(el=>getComputedStyle(el).visibility)).toBe(await page.locator('html').getAttribute('data-card-ready')==='true'?'visible':'hidden');
  expect(await page.locator('#root').evaluate(el=>(el as HTMLElement).inert)).toBe(true);
+ await expect(page.locator('#root')).toHaveAttribute('aria-hidden','true');
  expect(await page.evaluate(()=>(window as any).modalStarts)).toEqual([]);
 }
 async function assertAfterComplete(page:Page){
  await phase(page,'complete');await expect(page.locator('.announcement[open]')).toBeVisible();
  expect(await page.locator('#startup-intro').evaluate(el=>(el as HTMLElement).hidden)).toBe(true);
  expect(await page.locator('#root').evaluate(el=>(el as HTMLElement).inert)).toBe(false);
+ await expect(page.locator('#root')).not.toHaveAttribute('aria-hidden','true');
  expect(await page.evaluate(()=>(window as any).modalStarts.every((row:any)=>row.phase==='complete'))).toBe(true);
  const phases=await page.evaluate(()=>(window as any).startupEvents.map((row:any)=>row.phase));expect(phases.filter((value:string)=>value!=='waiting')).toEqual(['loading','playing','fading','complete']);if(phases.includes('waiting'))expect(phases.indexOf('waiting')).toBeGreaterThan(phases.indexOf('fading'));
 }
@@ -62,7 +64,9 @@ test('slow card CSS cannot extend the opening or expose an unstyled card',async(
  await page.goto(url(info),{waitUntil:'commit'});await phase(page,'playing');await assertBeforeComplete(page);
  await phase(page,'waiting');await assertBeforeComplete(page);await expect(page.locator('#startup-intro')).toBeHidden();await expect(page.locator('#startup')).toBeVisible();
  expect(await page.locator('link[data-card-style]').evaluateAll(nodes=>nodes.every(node=>(node as HTMLLinkElement).media==='print'))).toBe(true);
- release();await assertAfterComplete(page);await expect(page.locator('.paper').first()).toBeVisible();
+ release();await assertAfterComplete(page);
+ if(info.project.name==='suite')await expect(page.locator('.app-shell .workbench-modes')).toBeVisible();
+ else await expect(page.locator('.paper').first()).toBeVisible();
  await page.screenshot({path:info.outputPath('styled-card-after-timely-exit.png')});
 });
 test('failed card CSS provides recovery instead of a permanent yellow wait',async({page},info)=>{

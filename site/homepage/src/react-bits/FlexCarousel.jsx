@@ -509,7 +509,7 @@ const FlexCarousel = ({
       touch: false,
       samples: []
     };
-    const introState = { kind: 'none', t: 0, running: false, done: false, readyAt: 0 };
+    const introState = { kind: 'none', t: 0, running: false, done: false, readyAt: 0, startedAt: 0 };
     const focus = { index: -1, pending: -1, t: 0, v: 0, target: 0 };
     let instances = [];
 
@@ -762,6 +762,7 @@ const FlexCarousel = ({
       introState.running = introState.kind !== 'none';
       introState.done = !introState.running;
       introState.t = 0;
+      introState.startedAt = performance.now();
       if (introState.done) setRevealed(true);
       if (introState.kind === 'spin') {
         const distance = m.loop * 1.6 + width;
@@ -824,7 +825,8 @@ const FlexCarousel = ({
         }
       }
       if (introState.running) {
-        introState.t = Math.min(1, introState.t + dt / Math.max(.1,s.introDuration ?? INTRO_DURATION[introState.kind] ?? 1));
+        const elapsed = (now - introState.startedAt) / 1000;
+        introState.t = Math.min(1, Math.max(introState.t, elapsed / Math.max(.1,s.introDuration ?? INTRO_DURATION[introState.kind] ?? 1)));
         if (introState.t >= 1) {
           introState.running = false;
           introState.done = true;

@@ -2,12 +2,12 @@ import {test,expect} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
-import {writeFileSync} from 'node:fs';
+import {mkdirSync,writeFileSync} from 'node:fs';
 
 test('Wiki code can remain stalled while a saved card opens, edits and persists',async({page})=>{
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  const card=newCharacter();card.name='首屏独立验收';card.automation={...newAutomationState(),enabled:false};card.runtime.resources={fixture:{name:'保留次数',current:2,max:5}};
- writeFileSync('.local-evidence/startup-character.json',JSON.stringify(card));
+ mkdirSync('.local-evidence',{recursive:true});writeFileSync('.local-evidence/startup-character.json',JSON.stringify(card));
  await page.addInitScript(card=>{
   (window as any).seed=new Promise<void>((done,fail)=>{const open=indexedDB.open('dnd-card-standalone',1);open.onupgradeneeded=()=>{open.result.createObjectStore('documents');open.result.createObjectStore('cache');};open.onerror=()=>fail(open.error);open.onsuccess=()=>{const db=open.result,tx=db.transaction('documents','readwrite');tx.objectStore('documents').put({schemaVersion:1,characters:[card],activeId:card.id,packs:[]},'workspace');tx.oncomplete=()=>{db.close();done();};};});
  },card);

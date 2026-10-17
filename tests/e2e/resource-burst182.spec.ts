@@ -7,7 +7,7 @@ async function open(page:Page,mode='overview',rage=5,extra=''){
  await page.route('**/resource-burst182?*',r=>r.fulfill({contentType:'text/html; charset=utf-8',body:`<!doctype html><meta charset="utf-8"><div id="test-root"></div><script type="module">import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$=()=>{};window.$RefreshSig$=()=>type=>type;window.__vite_plugin_react_preamble_installed__=true;</script><script type="module" src="/tests/e2e/resourceBurst182.harness.jsx"></script>`}));
  await page.goto('/resource-burst182?mode='+mode+'&rage='+rage+extra+'#suite=resource-burst182&bridge='+encodeURIComponent(String(test.info().project.use.baseURL)));
  await page.waitForFunction(()=>(window as any).resource182?.ready);
- if(mode==='card'){await expect(page.locator('.app-shell')).toBeVisible();await page.evaluate(()=>(window as any).resource182.showCard());await page.locator('.resource-widget[data-resource-name="怒气"] .resource-widget-face').click();}
+ if(mode==='card'){await expect(page.locator('.app-shell')).toHaveAttribute('data-workbench-page','console');await page.evaluate(()=>(window as any).resource182.showCard());await expect(page.locator('.paper')).toBeVisible();await page.locator('.resource-widget[data-resource-name="怒气"] .resource-widget-face').click();}
  if(mode==='monster')await page.getByRole('button',{name:'怪物',exact:true}).click();
  if(mode!=='card')await page.locator(mode==='public'?'.public-resources .compact-resource[data-resource-name="怒气"] .resource-widget-face':'.resource-overview .compact-resource[data-resource-name="怒气"] .resource-widget-face').click();
  await expect(row(page,'怒气',mode).locator('.resource-pips button[aria-pressed=true]')).toHaveCount(rage);
@@ -67,6 +67,22 @@ test('actual App quickbar spend/restore survives ACK boundaries, stale selection
  await page.evaluate(()=>(window as any).resource182.confirmNext());await pips(page,'怒气',5,'card');await page.evaluate(()=>{const f=(window as any).resource182;f.stale(1);});await noRebound(page,'怒气',5);
  expect(await page.evaluate(()=>(window as any).resource182.notices.map((n:any)=>[n.from,n.to]))).toEqual([[5,4],[4,5]]);
  await page.evaluate(()=>(window as any).resource182.remote('focus',{current:1}));await pips(page,'战术点',1,'card');await pips(page,'怒气',5,'card');expect(errors).toEqual([]);expect(await page.evaluate(()=>(window as any).resource182.errors)).toEqual([]);
+});
+
+test('the first actual App resource gesture waits for the deferred editor instead of disappearing',async({page})=>{
+ let release!:()=>void,requested=false;const held=new Promise<void>(resolve=>{release=resolve;});
+ await page.route('**/src/core/automation/cardRuntime.ts*',async route=>{requested=true;await held;await route.continue();});
+ try{
+  await open(page,'card',2);
+  await row(page,'怒气','card').getByRole('button',{name:'怒气 2',exact:true}).click();
+  await expect.poll(()=>requested).toBe(true);
+  expect(await page.evaluate(()=>(window as any).resource182.requests.length)).toBe(0);
+  release();await requests(page,1);await pips(page,'怒气',1,'card');
+  await page.evaluate(()=>(window as any).resource182.confirmNext());
+  await noRebound(page,'怒气',1);
+  expect(await page.evaluate(()=>(window as any).resource182.authority().rage.current)).toBe(1);
+  expect(await page.evaluate(()=>(window as any).resource182.errors)).toEqual([]);
+ }finally{release();}
 });
 
 test('actual App quickbar 2→1→2→0 and another resource preserve final local values during delayed saves',async({page})=>{
