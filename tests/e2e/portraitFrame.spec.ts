@@ -58,7 +58,7 @@ for(const mode of ['a4','screen'] as const)test(`${mode}: title, eye and keyboar
  await cell(page).locator('.portrait-frame-eye').click();await expect(toggle(page)).toHaveAttribute('aria-pressed','false');
  await cell(page).locator('.portrait-frame-eye').click();await expect(toggle(page)).toHaveAttribute('aria-pressed','true');
  // All avatar instances share the preference; the independent illustration does not.
- for(const name of ['特性','法术','背包']){await page.getByRole('tab',{name,exact:true}).click();await expect(toggle(page)).toHaveAttribute('aria-pressed','true');await assertUnclipped(page);}
+ for(const name of ['特性','法术','背包']){await page.getByRole('tab',{name,exact:true}).click();await expect(page.getByRole('tab',{name,exact:true})).toHaveAttribute('aria-selected','true');await expect(toggle(page)).toHaveAttribute('aria-pressed','true');await assertUnclipped(page);}
  await page.getByRole('tab',{name:'背景',exact:true}).click();await expect(toggle(page)).toHaveCount(0);await expect(page.locator('.illustration-cell .cell-heading')).toBeVisible();await expect(page.getByAltText('角色立绘')).toBeVisible();
  await page.getByRole('tab',{name:'主要',exact:true}).click();await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
  await expect(cell(page).locator('.cell-heading')).toHaveCSS('visibility','hidden');await expect(toggle(page)).toHaveCount(0);
