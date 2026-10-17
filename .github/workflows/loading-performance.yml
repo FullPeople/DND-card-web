@@ -31,5 +31,6 @@ jobs:
           path: |
             .local-evidence/loading/browser-results.json
             test-results-performance-loading/
+            site/homepage/dist/
           if-no-files-found: error
           retention-days: 7

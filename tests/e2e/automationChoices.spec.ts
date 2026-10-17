@@ -39,7 +39,7 @@ async function exitChoice(page:Page){await page.getByRole('button',{name:'收起
 async function titleMenu(page:Page,name:string){await page.locator('.feature-group h4').getByRole('button',{name:`职业 ${name} Lv.1`,exact:true}).click({button:'right'});await expect(page.getByRole('menuitem')).toHaveCount(1);}
 
 test('bounded Features workspace, Wiki skill slots, replacement and delete, gray buttons and one-item toggle persist',async({page})=>{
- const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(page.getByRole('tab',{name:'特性',exact:true})).toHaveAttribute('aria-selected','true');
  const title=page.locator('.feature-group h4').first(),style=await title.evaluate(el=>{const s=getComputedStyle(el);return {background:s.backgroundColor,border:s.borderBottomWidth,font:s.fontWeight};});expect(style.background).toBe('rgba(0, 0, 0, 0)');expect(style.border).toBe('1px');expect(Number(style.font)).toBeGreaterThanOrEqual(600);
  await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await expect(workspace(page,'起始熟练项')).toBeVisible();await expect(page.locator('.features-page-grid')).toHaveCount(1);await expect(page.locator('.choice-slot')).toHaveCount(2);await expect(page.getByRole('dialog',{name:'选择起始熟练项'})).toHaveCount(0);
  await expect(page.getByRole('combobox',{name:'资料版本',exact:true})).toHaveValue('2024');await expect(page.locator('.catalog-row')).toHaveCount(3);expect(await page.locator('.choice-slot').first().evaluate(el=>getComputedStyle(el).borderWidth)).toBe('0px');
