@@ -8,7 +8,7 @@ import {restoreAuthoredChoices} from './authoredChoicesFixture';
 // Authored fixtures carry the source schema, without publisher prose or players.
 const cls={name:'原创成长职业',ENG_name:'Authored Progression',source:'XPHB',edition:'one',hd:{faces:8},
  classFeatures:[4,6].map(level=>`原创提升|原创成长职业|XPHB|${level}`),
- optionalfeatureProgression:[{name:'原创祈唤学习',featureType:['ei'],progression:[1,3,3,3,5,5]}]};
+ optionalfeatureProgression:[{name:'原创祈唤学习',featureType:['ei'],progression:Array.from({length:20},(_,i)=>i===0?1:i<4?3:5)}]};
 const data={class:[cls],classFeature:[4,6].map(level=>({name:'原创提升',source:'XPHB',className:cls.name,classSource:'XPHB',level,entries:['{@feat 原创提升专长|XPHB}']}))};
 const feats={feat:[{name:'原创提升专长',ENG_name:'Authored Improvement',source:'XPHB',category:'G',repeatable:true,ability:[{choose:{from:['str','dex'],amount:2}}],prerequisite:[{level:4}],entries:['属性分配手动记录。']}]};
 const optional={optionalfeature:[{name:'原创祈唤记录',ENG_name:'Authored Invocation',source:'XPHB',featureType:['EI'],entries:['只保存学习记录。']}]};

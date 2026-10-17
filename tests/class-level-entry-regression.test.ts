@@ -27,13 +27,13 @@ describe('class-level entry regressions at 251',()=>{
   expect(choice!.count).toBe(1);expect(choice!.options.map(o=>o.entry.raw.category)).toEqual(['FS']);
  });
  it('offers four learned legacy infusions at Artificer-source class level 2, without treating them as items',()=>{
-  const {c,entries}=fixture('TCE',2,{optionalfeatureProgression:[{name:'原创注法选择',featureType:['AI'],progression:[0,4]}]});
+  const {c,entries}=fixture('TCE',2,{optionalfeatureProgression:[{name:'原创注法选择',featureType:['AI'],progression:[0,...Array(19).fill(4)]}]});
   const choice=sheetChoices(c,entries).find(r=>r.ownerId==='class-owner'&&r.options.some(o=>o.entry.raw.featureType?.includes('AI')));
   expect(choice,'optionalfeatureProgression AI must create a source-owned choice').toBeDefined();
   expect(choice!.count).toBe(4);expect(choice!.options.every(o=>o.entry.kind==='feature')).toBe(true);
  });
  it('offers three updated invocations at Warlock-source class level 2',()=>{
-  const {c,entries}=fixture('XPHB',2,{optionalfeatureProgression:[{name:'原创祈唤选择',featureType:['EI'],progression:[1,3]}]});
+  const {c,entries}=fixture('XPHB',2,{optionalfeatureProgression:[{name:'原创祈唤选择',featureType:['EI'],progression:[1,...Array(19).fill(3)]}]});
   const choice=sheetChoices(c,entries).find(r=>r.ownerId==='class-owner'&&r.options.some(o=>o.entry.raw.featureType?.includes('EI')));
   expect(choice,'optionalfeatureProgression EI must create a source-owned choice').toBeDefined();expect(choice!.count).toBe(3);
  });
@@ -50,7 +50,7 @@ describe('class-level entry regressions at 251',()=>{
 
 describe('source-owned records and boundaries',()=>{
  it('retains learned snapshots, source-disabled slots and overflow without granting mechanisms',()=>{
-  const {c,entries}=fixture('XPHB',2,{optionalfeatureProgression:[{name:'原创学习',featureType:['ei'],progression:[1,3]}]});
+  const {c,entries}=fixture('XPHB',2,{optionalfeatureProgression:[{name:'原创学习',featureType:['ei'],progression:[1,...Array(19).fill(3)]}]});
   const choice=sheetChoices(c,entries).find(r=>r.sourceProgression==='optional')!,entry=entries.find(e=>e.raw.featureType?.includes('EI'))!;
   const resources=JSON.stringify(c.runtime),manual=JSON.stringify(c.abilities);
   setSheetChoiceSlot(c,choice.id,2,entry.id,entries);syncChoiceContent(c,entries);
