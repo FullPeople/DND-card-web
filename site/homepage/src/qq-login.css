@@ -1,0 +1,10 @@
+#home-qq-account{position:fixed;right:calc(5% + 46px);top:38px;z-index:15;display:flex;align-items:center;gap:8px;pointer-events:auto;font-size:13px;opacity:0;visibility:hidden}
+body[data-intro="complete"] #home-qq-account{opacity:1;visibility:visible;transition:opacity .18s .6s,visibility 0s .6s}
+body:not([data-intro="complete"]) #home-qq-account{pointer-events:none}
+#home-qq-account a{display:block;line-height:0}
+#home-qq-account picture,#home-qq-account picture img{display:block;width:170px;height:32px;max-width:none;filter:none}
+#home-qq-account .qq-avatar{width:28px;height:28px;object-fit:cover;border-radius:50%}
+#home-qq-account .qq-name{max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#home-qq-account button{font:inherit;background:#f5f2e9;border:1px solid #91947d70;padding:6px 9px;border-radius:4px}
+@media(max-width:640px){#home-qq-account{top:25px;right:calc(5% + 44px)}#home-qq-account picture,#home-qq-account picture img{width:120px;height:24px}}
+@media(min-width:1000px) and (min-height:540px){#home-qq-account{right:calc(var(--home-rail-width) + var(--home-rail-gutter) + 70px)}}

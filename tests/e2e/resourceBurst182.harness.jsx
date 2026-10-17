@@ -48,6 +48,8 @@ fixture.slotState=()=>({resource:clone(native.runtime.resources['spell-slot:1'])
 fixture.stockAuthority=()=>clone(inventory);
 fixture.workbench=()=>clone({resources:getWorkbench().cards[0]?.resources,document:getWorkbench().document});
 fixture.showCard=()=>send('navigate');
+fixture.revoke=()=>{target.write=false;const snap=snapshot();send('selection',snap);catalog(snap);};
+fixture.switchCard=()=>{Object.assign(target,{key:'room:card:second',cardId:'second',itemId:'token-second',name:'原创同伴'});native={...clone(native),id:workbenchCharacterId(target),name:target.name};const snap=snapshot();send('selection',snap);catalog(snap);send('navigate');};
 fixture.confirmNext=(holdAck=false)=>{
  const request=fixture.pending.shift();if(!request)throw Error('No pending resource/save request');
  if(request.type==='inventory'){

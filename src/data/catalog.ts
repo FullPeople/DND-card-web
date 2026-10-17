@@ -95,23 +95,26 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
   const paused=()=>{if(!transport.paused)return false;progress.paused=transport.paused.message;publish();return true;};
   publish();
   let spellLookup: Raw = {}; let lookupRevision = '';
+  const indexes=['class','spells','bestiary'].map(category=>({category,result:read(`data/${category}/index.json`).then(value=>({value}),error=>({error}))}));
   try {
     const lookup = await read('data/generated/gendata-spell-source-lookup.json');
     spellLookup = lookup.body; lookupRevision = lookup.revision; if (lookup.cached) progress.cached++;
     if (lookup.warning) failed('data/generated/gendata-spell-source-lookup.json','法术职业索引',lookup.warning);
   } catch (error) { if (signal.aborted) return; failed('data/generated/gendata-spell-source-lookup.json','法术职业索引',error); }
   progress.done++;publish();
-  if(paused())return;
-  for (const category of ['class', 'spells', 'bestiary']) {
+  for (const {category,result} of indexes) {
     try {
-      const { body, cached, warning } = await read(`data/${category}/index.json`);
+      const response=await result;if('error' in response)throw response.error;
+      const { body, cached, warning } = response.value;
       if (warning) failed(`data/${category}/index.json`,`${category} 索引`,warning);
       if (cached) progress.cached++;
       for (const value of Object.values(body)) if (typeof value === 'string' && /^[\w.-]+\.json$/.test(value)) paths.push(`data/${category}/${value}`);
     } catch (error) { if (signal.aborted) return; failed(`data/${category}/index.json`,`${category} 索引`,error); }
     progress.done++; progress.total = paths.length + 4; publish();
-    if(paused())return;
   }
+  // All required index requests have already started; collect their failures
+  // before pausing, so the retry list never loses an in-flight index.
+  if(paused())return;
   for(const file of ['spells-phb.json','spells-xphb.json']){const path=`data/spells/${file}`;if(!paths.includes(path))paths.push(path);}
   progress.total=paths.length+4;
   // Core rulebooks first; remaining books arrive incrementally.

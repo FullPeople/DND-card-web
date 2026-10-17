@@ -256,7 +256,7 @@ export default function App() {
   const bookNames=useMemo(()=>Object.fromEntries(Object.entries(sourceDisplay.registry).map(([id,m])=>[id,m.name])),[sourceDisplay.registry]);
   const catalogRef = useRef(new Map<string, Entry>());
   const [progress, setProgress] = useState(emptyProgress);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const loadController = useRef<AbortController | undefined>(undefined);
   const [rulesDraft,setRulesDraft]=useState<{key:string;rules:SharedRules}>();
   const roomRules=rulesDraft?.key===wb.shared?.key?rulesDraft?.rules:wb.shared?.rules;
@@ -320,7 +320,13 @@ export default function App() {
   useEffect(()=>{const show=()=>setAnnouncement(true);window.addEventListener('workbench-announcement',show);return()=>window.removeEventListener('workbench-announcement',show);},[]);
   const [modal, setModalValue] = useState('');
   const [paletteOpen,setPaletteOpen]=useState(false);
-  const setModal=(value:string)=>{if(confirmResourceDraftDiscard())setModalValue(value);};
+  const modalRequest=useRef(0);
+  const setModal=(value:string)=>{
+    if(!confirmResourceDraftDiscard())return;const request=++modalRequest.current;
+    const panels:Record<string,()=>Promise<unknown>>={characters:()=>import('./CharacterManager'),export:()=>import('./TransferPanel'),review:()=>import('./CharacterReview'),hp:()=>import('./HitPointEditor'),spellAbility:()=>import('./SpellAbilityEditor'),quickbar:()=>import('./QuickbarManager'),resources:()=>Promise.all([import('./ResourceModuleEditor'),import('./ResourceDashboard')]),rules:()=>Promise.all([import('./SourceSettings'),import('./RuleOptions')]),onboarding:()=>Promise.all([import('./SourceSettings'),import('./RuleOptions')]),personal:()=>import('./PersonalEntries'),automation:()=>import('./AutomationPanel')};
+    if(!panels[value]){setModalValue(value);return;}
+    void panels[value]().then(()=>{if(request===modalRequest.current)startTransition(()=>setModalValue(value));}).catch(()=>{if(request===modalRequest.current)setNotice('界面未能加载，请检查网络后重试。');});
+  };
   const [classSyncBusy,setClassSyncBusy]=useState(false);
   const [workbenchReadError,setWorkbenchReadError]=useState<{key:string;message:string}>();
   const classReview=useMemo(()=>mechanics?cardMigrationIssues(mechanics,allEntries):[],[mechanics,allEntries]);
@@ -347,6 +353,8 @@ export default function App() {
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
+  const pendingRuntimeEdits=useRef<{id:string;target:string|undefined;action:Parameters<Edit>[0];key?:Parameters<Edit>[1]}[]>([]);
+  const [runtimeInteractionRequested,setRuntimeInteractionRequested]=useState(false);
   const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
   const [editingLoadError,setEditingLoadError]=useState('');
   const [editingReloadPending,setEditingReloadPending]=useState(false);
@@ -356,9 +364,9 @@ export default function App() {
     const loadEditor=()=>{void import('../core/automation/cardRuntime').then(runtime=>{if(alive){setAutomationRuntime(runtime);setEditingLoadError('');}}).catch(error=>{if(alive)setEditingLoadError(String(error));});};
     // Restoring an explicitly saved editing mode requires its runtime before
     // the card becomes interactive. Fresh browsing keeps it deferred.
-    const cancel=editingRequested?(loadEditor(),()=>{}):afterPaint(loadEditor);
+    const cancel=editingRequested||runtimeInteractionRequested?(loadEditor(),()=>{}):afterPaint(loadEditor);
     return()=>{alive=false;cancel();};
-  },[!!workspace,editingRequested,!!automationRuntime]);
+  },[!!workspace,editingRequested,runtimeInteractionRequested,!!automationRuntime]);
   const editing=editingRequested&&!!automationRuntime;
   useEffect(()=>{try{localStorage.setItem('dnd-card:editing',String(editingRequested));}catch{/* A session still keeps the global editing preference. */}},[editingRequested]);
   const [sheetPage, setSheetPage] = useState<SheetPage>('主要');
@@ -415,7 +423,7 @@ export default function App() {
   const dashboardSaveBases=useRef(new WeakMap<Character,Character>());
   const [editingResource,setEditingResource]=useState(''),[resourceViewport,setResourceViewport]=useState<DashboardViewport>({page:0});
   useEffect(()=>{const page=(event:Event)=>setResourceViewport(typeof (event as CustomEvent).detail==='number'?{page:(event as CustomEvent).detail}:(event as CustomEvent).detail||{page:0});window.addEventListener('resource-canvas-page',page);return()=>window.removeEventListener('resource-canvas-page',page);},[]);
-  useEffect(()=>{const open=(event:Event)=>{if(!confirmResourceDraftDiscard())return;setEditingResource((event as CustomEvent).detail);setModalValue('resources');};window.addEventListener('edit-character-resource',open);return()=>window.removeEventListener('edit-character-resource',open);},[]);
+  useEffect(()=>{const open=(event:Event)=>{if(!confirmResourceDraftDiscard())return;setEditingResource((event as CustomEvent).detail);setModal('resources');};window.addEventListener('edit-character-resource',open);return()=>window.removeEventListener('edit-character-resource',open);},[]);
 
   function persist(next: Workspace) {
     if(qqRoom&&!roomState()?.write){setNotice('卡主已锁定或房间连接已失效，本机草稿保留。');return;}
@@ -551,7 +559,10 @@ export default function App() {
   }
   const [wikiUiError,setWikiUiError]=useState('');
   const [wikiUi,setWikiUi]=useState<typeof import('./WikiUi')>();
-  useEffect(()=>{if(!workspace)return;const cancel=afterPaint(()=>{void import('./WikiUi').then(setWikiUi).catch(error=>setWikiUiError(String(error)));});return cancel;},[!!workspace]);
+  useEffect(()=>{if(!workspace)return;let active=true;
+    const frame=requestAnimationFrame(()=>{if(announcement)void import('./Announcement').catch(()=>{});void import('./WikiUi').then(value=>{if(active)setWikiUi(value);}).catch(error=>{if(active)setWikiUiError(String(error));});});
+    return()=>{active=false;cancelAnimationFrame(frame);};
+  },[!!workspace]);
   useEffect(()=>{if(!wikiUi)return;void load();return()=>loadController.current?.abort();},[!!wikiUi]);
   useEffect(() => {if(startupComplete)void registerOffline(activate => setActivateUpdate(() => activate));}, [startupComplete]);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
@@ -658,13 +669,13 @@ export default function App() {
     recordAction({label:after.name,undo:()=>restore(after,before),redo:()=>restore(before,after)});
   }
   const edit: Edit = (action, key) => {
-    if(!automationRuntime){setNotice('正在加载编辑功能，请稍候。');return;}
     if (!writable.current) { setNotice('此标签页为只读。关闭另一编辑页并刷新后可继续。'); return; }
     const current = workspaceRef.current; if (!current) return;
     const character = current.characters.find(x => x.id === current.activeId)!;
     {const blocked=cloudAccessRef.current[character.id];if(blocked){setNotice(blocked);return;}}
     if(workbenchUncertain.current.has(character.id)){setNotice('上一项修改的结果尚未确认，本地修改已保留。请先核对枭熊数据。');return;}
     if(inWorkbench&&character.id.startsWith('suite:')&&(!wb.online||!wb.target?.write||workbenchCharacterId(wb.target)!==character.id)){setNotice('当前棋子不可编辑或已经切换');return;}
+    if(!automationRuntime){pendingRuntimeEdits.current.push({id:character.id,target:wb.target?.key,action,key});setRuntimeInteractionRequested(true);return;}
     const record = history.current.get(character.id) || { past: [], future: [], time: 0 };
     if (!key || record.key !== key || Date.now() - record.time > 900) record.past = [...record.past.slice(-59), character];
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
@@ -678,6 +689,15 @@ export default function App() {
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
     rememberCharacter(character,draft);void sendCharacter(character,draft).catch(()=>{});setHistoryTick(x=>x+1);
   };
+  useEffect(()=>{
+    if(!automationRuntime)return;
+    // Recheck the current card and permissions before replaying early gestures.
+    // Switching cards while the editor downloads must never edit the new card.
+    for(const pending of pendingRuntimeEdits.current.splice(0)){
+      if(workspaceRef.current?.activeId!==pending.id||inWorkbench&&wb.target?.key!==pending.target){setNotice('角色已切换，加载期间的操作未应用。');continue;}
+      edit(pending.action,pending.key);
+    }
+  },[automationRuntime]);
   async function saveDashboard(base:Character,draft:Character){
     const current=workspaceRef.current,character=current?.characters.find(row=>row.id===current.activeId);
     if(!current||!character||!writable.current||!automationRuntime||character.id!==base.id)throw Error('当前角色不可编辑或已经切换');
@@ -1018,14 +1038,14 @@ export default function App() {
         </div>
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {inWorkbench&&<WorkbenchPermissionNotice/>}{showClassReview&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
-        <SheetEditContext.Provider value={editing&&!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}>{cloudAccess[c.id]&&<aside className="class-compatibility-banner card-permission-banner" role="status"><p>{cloudAccess[c.id]}</p></aside>}<PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => { setSheetPage(page); setTab('sheet'); }}>
+        <SheetEditContext.Provider value={editing&&!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}>{cloudAccess[c.id]&&<aside className="class-compatibility-banner card-permission-banner" role="status"><p>{cloudAccess[c.id]}</p></aside>}<PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => startTransition(()=>{setSheetPage(page);setTab('sheet');})}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{qqRoom?<RoomCardControl flush={async()=>{await queue.current;if(saveFailed.current&&!await hasRoomDraft())throw Error('本机草稿尚未保存，请先导出备份。');}}/>:inWorkbench&&(wb.target?.cloudRoom||wb.qqAccount?.id)?<CloudRoomControl upload={async()=>{const key=wb.target?.key,account=wb.qqAccount?.id;let saved;do{saved=queue.current;await saved;}while(saved!==queue.current);if(key)await flushWorkbenchSaves(key);if(saveFailed.current||pendingSaves.current>0)throw Error('保存尚未成功，请先核对角色卡。');const latest=getWorkbench(),workspace=workspaceRef.current,native=workspace?.characters.find(row=>row.id===workspace.activeId);if(latest.target?.key!==key||latest.qqAccount?.id!==account||!native||!latest.target?.write||native.id!==c.id)throw Error('当前角色卡或编辑权限已改变，请重新打开云端设置。');return workbenchRequest('cloudUpload',{key,itemId:wb.target?.targetId||wb.target?.itemId,native,accountId:account});}}/>:standalone?<CloudCardControl id={c.id} name={c.name} locked={!!c.locked} lock={()=>edit(draft=>{draft.locked=!draft.locked;})}/>:<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={!!qqRoom||inWorkbench&&(!wb.online||!wb.target?.write)} title={qqRoom?'房间卡的锁定由卡主在枭熊插件的 QQ 卡库中管理':undefined} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}>{c.locked?<LockClosedIcon size={18}/>:<LockOpenIcon size={18}/>}</button>}</span></div>
-          {sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
-</> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><Suspense fallback={<PanelLoading label={`正在加载${sheetPage}…`} sheet/>}><div className="sheet-details">
+          <Suspense fallback={<PanelLoading label="正在读取角色卡…" sheet/>}>{sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
+</> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><div className="sheet-details">
           <div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>
           <DetailHeader openSpellAbility={()=>setModal('spellAbility')} page={sheetPage} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>
           {sheetPage==='特性'?<FeaturesPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='背景'?<BackgroundPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:sheetPage==='法术'?<SpellsPage entries={allEntries} c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>:inWorkbench&&!wb.target?.cloudRoom?<WorkbenchInventory id={`card:${wb.target!.cardId}`} capacity={<CarryCapacity c={c} d={d} edit={edit}/>}/>:<InventoryPage c={c} d={d} edit={edit} browse={browse} inspect={inspect} onLink={link} add={add}/>}
-        </div></Suspense></ToolBoundary>}
+        </div></ToolBoundary>}</Suspense>
           <footer className="paper-footer"><span>{t('cardFooter',{edition:c.edition,level:d.level||'—',revision:c.revision})}</span><span>{t('snapshotSaved')}</span></footer>
         </PaperFrame></ValueTraceProvider></SheetEditContext.Provider><div className={`save-status ${saving === '保存失败' ? 'error' : ''}`} role="status"><span className="status-dot"/>{inWorkbench?(workbenchUncertain.current.has(c.id)?'待核对 · 本地修改已保留':workbenchDirty.current.has(c.id)?'正在同步至枭熊…':workbenchFailed.current.has(c.id)?'同步失败 · 已保留本地备份':wb.target?.projectionPending?'资料已保存 · 棋子显示待同步':wb.online?'与枭熊同步':'等待枭熊重连'):saving}{workbenchUncertain.current.has(c.id)&&wb.document&&<button onClick={()=>{window.dispatchEvent(new CustomEvent('workbench-operation-reconciled',{detail:{requestId:workbenchUncertain.current.get(c.id)?.requestId}}));workbenchUncertain.current.delete(c.id);workbenchDirty.current.delete(c.id);workbenchFailed.current.delete(c.id);workbenchDocuments.current.delete(c.id);appliedWorkbench.current='';setHistoryTick(n=>n+1);setNotice('已采用枭熊当前数据；未确认的本地修改仍保留在恢复备份中。');}}>核对并采用枭熊数据</button>}{syncDiagnostic&&<CopyDiagnostic text={syncDiagnostic}/>}<span>{inWorkbench?'角色资料自动保存':'资料与角色保存在当前浏览器 · 请定期导出'}</span></div></>}
       </section>

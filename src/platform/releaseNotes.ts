@@ -1,4 +1,11 @@
-export const RELEASE_DATE='2026-10-16';
+export const RELEASE_DATE='2026-10-18';
+const release301=(mode:'standalone'|'suite'):ReleaseSection[]=>[
+ {title:'页面与资料加载',items:['开场动画按时淡出，资料仍在读取时显示实际进度。','切换纸卡页签和书籍时保留当前内容，新内容准备好后再显示，减少空白与跳闪。','首次点击资源会在功能准备好后执行，不再需要重复点击。','资料源断线后可恢复重试，离线重开时保留已经使用的功能。']},
+ {title:'仪表盘保存',items:['修复新增资源并保存布局后，旧表单仍误报存在未保存修改的问题。']},
+ {title:'资料显示',items:['修复熟练说明内含筛选标签时，显示名称截断、遗漏武器限制的问题。']},
+ ...(mode==='suite'?[{title:'演出与投骰',items:['修复时停和文字演出的透明空白变黑问题。','普通投骰、先攻和群体结果文字自动消失，手动打开的历史可继续查看。','真实枭熊房间和原设备效果仍待复核。']}]:[]),
+ {title:'资料校验',items:['可选特性进度不完整时保留已有记录并说明暂不可用，避免出现错误名额。','QQ 登录与云端功能继续暂停，已有资料保留。']}
+];
 const release300=():ReleaseSection[]=>[
  {title:'新插件连接与演出',items:['初始化尚未完成时不再提前显示已连接；投骰和演出控制请求不再排在大目录后面。','文字演出支持连接恢复与透明背景；播放使用前景弹层，结束后恢复操作。','传送门按当前图片、尺寸、旋转和锚点判断进入范围。']},
  {title:'当前范围',items:['本轮只更新新插件及内嵌工作台，网站、卡库、Wiki 和稳定版保留现有线上版本。','QQ 登录与云端功能继续暂停，已有资料保留；真实房间仍待复核。']}
@@ -463,8 +470,9 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='suite'?release300():release299();export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='suite'?[{title:RELEASE_DATE,sections:release300()}]:[]),
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release301(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE,sections:release301(mode)},
+ ...(mode==='suite'?[{title:'2026-10-16-三',sections:release300()}]:[]),
  {title:'2026-10-16-二',sections:release299()},
  {title:'2026-10-16-一',sections:release298(mode)},
  ...(mode==='suite'?[{title:'2026-10-15-三',sections:release297()}]:[]),

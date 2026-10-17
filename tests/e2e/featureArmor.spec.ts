@@ -32,6 +32,7 @@ async function ready(page:Page,edition:'2014'|'2024'){
 }
 async function choose(page:Page,name:string){
  await page.getByRole('tab',{name:'特性',exact:true}).click();
+ await expect(page.getByRole('tab',{name:'特性',exact:true})).toHaveAttribute('aria-selected','true');
  const caption=page.locator('[data-feature-id]').filter({hasText:'测试风格'}).first().locator('.feature-caption');
  if(await caption.getAttribute('aria-label').then(label=>label?.startsWith('选择')))await caption.click();else{if(await caption.getAttribute('aria-expanded')!=='true')await caption.click();await page.locator('[data-feature-id]').filter({hasText:'测试风格'}).first().getByRole('button',{name:/^调整测试风格/}).click();}
  const choices=page.getByRole('region',{name:'选择测试风格',exact:true});await expect(choices).toBeVisible();

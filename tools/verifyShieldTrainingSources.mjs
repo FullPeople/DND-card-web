@@ -13,7 +13,7 @@ const {values}=parseArgs({options:{directory:{type:'string'},'verify-only':{type
 const directory=resolve(values.directory||resolve(root,'.local-evidence/shield-training/upstream'));
 const fixture=JSON.parse(readFileSync(resolve(root,'tests/fixtures/shield-training-sources.json')));
 const out=resolve(root,'.local-evidence/shield-training/source-verification.json');
-rmSync(out,{force:true});
+mkdirSync(dirname(out),{recursive:true});rmSync(out,{force:true});
 mkdirSync(directory,{recursive:true});
 const receipt={schemaVersion:1,verifiedAt:new Date().toISOString(),dataRevision:fixture.dataRevision,inputs:[]};
 for(const [index,input] of fixture.inputs.entries()){

@@ -27,6 +27,7 @@ test('map follow restores the preceding dice page and original card after clear'
 });
 test('cold multi selection displays pending overview and clears before any target read completes',async({page:host},info)=>{
  const page=await pair(host);await page.getByRole('tab',{name:'法术',exact:true}).click();
+ await expect(page.getByRole('tab',{name:'法术',exact:true})).toHaveAttribute('aria-selected','true');
  await send(host,'followSelection',{followRevision:1});await send(host,'groupRollState',{group:{id:'cold-group',phase:'select',loading:true,selectedCount:20,targets:[],visible:true,kind:'save',ability:'dex',variant:'normal'},groupRevision:1});
  const area=page.getByRole('region',{name:'群体区域'});await expect(area).toBeVisible();await expect(area).toContainText('20 个单位');await expect(area).toContainText('正在读取所选单位资料');await expect(area.getByRole('button',{name:'同时投掷'})).toBeDisabled();await expect(area.getByRole('button',{name:'关闭',exact:true})).toBeEnabled();await expect(page.locator('.app-shell')).toHaveAttribute('data-workbench-page','console');
  await page.screenshot({path:info.outputPath('pending-group-overview.png')});

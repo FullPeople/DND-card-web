@@ -2,12 +2,12 @@ import {test,expect} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
-import {writeFileSync} from 'node:fs';
+import {mkdirSync,writeFileSync} from 'node:fs';
 
 test('Wiki code can remain stalled while a saved card opens, edits and persists',async({page})=>{
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  const card=newCharacter();card.name='首屏独立验收';card.automation={...newAutomationState(),enabled:false};card.runtime.resources={fixture:{name:'保留次数',current:2,max:5}};
- writeFileSync('.local-evidence/startup-character.json',JSON.stringify(card));
+ mkdirSync('.local-evidence',{recursive:true});writeFileSync('.local-evidence/startup-character.json',JSON.stringify(card));
  await page.addInitScript(card=>{
   (window as any).seed=new Promise<void>((done,fail)=>{const open=indexedDB.open('dnd-card-standalone',1);open.onupgradeneeded=()=>{open.result.createObjectStore('documents');open.result.createObjectStore('cache');};open.onerror=()=>fail(open.error);open.onsuccess=()=>{const db=open.result,tx=db.transaction('documents','readwrite');tx.objectStore('documents').put({schemaVersion:1,characters:[card],activeId:card.id,packs:[]},'workspace');tx.oncomplete=()=>{db.close();done();};};});
  },card);
@@ -50,11 +50,16 @@ test('a failed deferred page leaves the saved card and navigation available',asy
 test.describe('offline cache',()=>{
  test.use({serviceWorkers:'allow'});
  test('offline installation excludes unused dictionary and editing tools',async({page})=>{
+ let release!:()=>void;const held=new Promise<void>(resolve=>release=resolve);
+ // Inspect installation separately from the intentional post-opening prefetch.
+ await page.route(/\/assets\/(?:search|sheetImage|AutomationPanel|ResourceDashboard|SpellsPage|CardMigration)-[^/]+\.js$/,async route=>{await held;await route.continue().catch(()=>{});});
+ try{
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
  await page.evaluate(async()=>{const registration=await navigator.serviceWorker.ready;if(registration.active?.state!=='activated')await new Promise<void>(done=>registration.active?.addEventListener('statechange',()=>done(),{once:true}));});
  const cached=await page.evaluate(async()=>{const names=await caches.keys(),name=names.find(name=>name.startsWith('dnd-card-shell:'));return (await (await caches.open(name!)).keys()).map(request=>request.url);});
  expect(cached.some(url=>/\/assets\/App-.*\.js/.test(url))).toBe(true);
  for(const tool of ['search','sheetImage','AutomationPanel','ResourceDashboard','SpellsPage','CardMigration'])expect(cached.some(url=>new RegExp('/assets/'+tool+'-.*\\.js').test(url)),tool).toBe(false);
+ }finally{release();}
 });
 
 test('first-visit libraries and used pages are retained for offline reopening',async({page,context,browserName})=>{

@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-10-06",
+  "checkedAt": "2026-10-18",
   "dataRevision": "9acd4d5e7c5bed9cf34150db4319a7aeec6751e8",
   "manifest": "reports/g1/inputs-sha256.json",
   "evidenceBoundary": "Only mechanical field projection of two real class and two real shield identities; no copied rule prose or player data",
   "inputs": [
     {
       "url": "https://5e.kiwee.top/data/class/class-fighter.json",
-      "bytes": 170179,
-      "sha256": "da2d63f3d4eb692db32f22b081dafecbc08394f27fbaeff7a51503824aefd1e0"
+      "bytes": 170412,
+      "sha256": "8aeee8edd8fce87db2e4bed6aae540d7748d2a70d046d2375c6d7f16104813ee"
     },
     {
       "url": "https://5e.kiwee.top/data/items-base.json",
-      "bytes": 197272,
-      "sha256": "9f1346c69344d66088dbdb1c26ea5872102d318ac148805a8ae9b5fedc5fc94f"
+      "bytes": 197281,
+      "sha256": "0528690536619ebd5f84ae4a33e2ca5258c3db3d831844672362e58889bd1f01"
     }
   ],
   "projection": {
@@ -103,5 +103,6 @@
         "page": 219
       }
     ]
-  }
+  },
+  "inputVerification": "Current public bytes rechecked against the unchanged mechanical projections; dataRevision records the original projection provenance."
 }

@@ -5,8 +5,10 @@
   "manifestPath": "reports/g1/inputs-sha256.json",
   "manifestBlob": "a074bc740ac5fd2641d000b7d40826e20c553cba",
   "url": "https://5e.kiwee.top/data/items-base.json",
-  "bytes": 197272,
-  "sha256": "9f1346c69344d66088dbdb1c26ea5872102d318ac148805a8ae9b5fedc5fc94f",
+  "bytes": 197281,
+  "sha256": "0528690536619ebd5f84ae4a33e2ca5258c3db3d831844672362e58889bd1f01",
+  "checkedAt": "2026-10-18",
+  "inputVerification": "Current public bytes independently checked against all six unchanged mechanical projections; dataRevision, manifestPath and manifestBlob record the original projection provenance, not the current raw input.",
   "verifiedScope": ["stable identity", "edition", "structured type", "structured base AC"],
   "missingRuleClauses": ["medium armor Dexterity limit", "heavy armor Dexterity exclusion", "2014 shield proficiency consequences", "2024 shield training requirement"],
   "entries": [

@@ -7,7 +7,10 @@ test('wheel and continuous drag wrap; side taps select; fullscreen keeps A4 prop
  await context.addCookies([{name:'dnd_cloud',value:fixture.ownerSession.token,url:'http://127.0.0.1:5320/api/',httpOnly:true,sameSite:'Strict'}]);
  try{
   page.on('request',r=>{if(/\/api\/cards\/[A-Z]{6}$/.test(r.url())&&r.method()==='GET')reads.push(r.url());});page.on('pageerror',error=>errors.push(error.message));await page.goto('/library/?q=循环交互验收');const active=page.locator('.cloud-gallery-item.is-active'),stage=page.locator('.cloud-gallery-stage'),full=page.getByRole('dialog',{name:'全屏角色卡'});await expect(active.locator('.paper')).toBeVisible();await expect.poll(()=>reads.length).toBe(3);const first=(await active.getAttribute('data-card-id'))!;
-  await stage.hover();for(let i=0;i<9;i++){const previous=await active.getAttribute('data-card-id');await page.mouse.wheel(0,70);await expect(active).not.toHaveAttribute('data-card-id',previous!);}await expect(active).toHaveAttribute('data-card-id',first);await expect(full).toHaveCount(0);
+  await stage.hover();for(let i=0;i<9;i++){const previous=await active.getAttribute('data-card-id');await page.mouse.wheel(0,70);await expect(active).not.toHaveAttribute('data-card-id',previous!);
+   // This loop models separate notches. A continuous flick is intentionally
+   // capped at three cards and has its own momentum regression coverage.
+   await expect.poll(()=>active.evaluate(el=>Math.abs(new DOMMatrixReadOnly(getComputedStyle(el).transform).m41))).toBeLessThan(.1);}await expect(active).toHaveAttribute('data-card-id',first);await expect(full).toHaveCount(0);
   const side=page.locator('.cloud-gallery-item[data-offset="1"] .cloud-gallery-open');
   await expect.poll(()=>stage.evaluate(el=>[...el.querySelectorAll('.cloud-gallery-item')].reduce((count,item)=>count+item.getAnimations().length,0))).toBe(0);
   // The gallery also animates with requestAnimationFrame; getAnimations() alone

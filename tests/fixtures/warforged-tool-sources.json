@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-10-06",
+  "checkedAt": "2026-10-18",
   "dataRevision": "9acd4d5e7c5bed9cf34150db4319a7aeec6751e8",
   "evidenceBoundary": "Two Warforged structured proficiency declarations and four real tool identities only; no rule prose or player data",
   "inputs": [
     {
       "url": "https://5e.kiwee.top/data/races.json",
-      "bytes": 603288,
-      "sha256": "d60b2cde3733e363aa4d1bd0bb8465d79213d247948ff46561d883fc55c00df7"
+      "bytes": 603906,
+      "sha256": "636af963e6476cccc1740462fa3ae532f9e9b4a48e44f04920c8c3059046a7bc"
     },
     {
       "url": "https://5e.kiwee.top/data/items-base.json",
-      "bytes": 197272,
-      "sha256": "9f1346c69344d66088dbdb1c26ea5872102d318ac148805a8ae9b5fedc5fc94f"
+      "bytes": 197281,
+      "sha256": "0528690536619ebd5f84ae4a33e2ca5258c3db3d831844672362e58889bd1f01"
     }
   ],
   "projection": {
@@ -79,5 +79,6 @@
         "type": "INS|XPHB"
       }
     ]
-  }
+  },
+  "inputVerification": "Current public bytes rechecked against the unchanged mechanical projections; dataRevision records the original projection provenance."
 }
