@@ -4,6 +4,7 @@ import {newCharacter} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
 import {sheetChoices,setSheetChoiceSlot,syncChoiceContent} from '../src/core/automation/choices';
 import {optionalChoiceSupport} from '../src/core/automation/classChoiceSupport';
+import classChoiceEvidence from '../src/core/automation/classChoiceEvidence.json';
 import {evaluate} from '../src/core/engine';
 import {validateCharacter} from '../src/core/validation';
 
@@ -25,10 +26,12 @@ it('records a legacy alternative feat without activating its effects and keeps s
 });
 it('grades exact source identities and keeps unverified later infusion totals at source-declared',()=>{
  const [owner]=normalizeData({class:[{name:'魔契师',ENG_name:'Warlock',source:'XPHB'}]},'authored-support');
- expect(optionalChoiceSupport(owner,['ei'],3,2)).toMatchObject({rule:'verified',execution:'record-only',publication:'unverified'});
- expect(optionalChoiceSupport({...owner,source:'PHB'},['EI'],3,2).rule).toBe('source-declared');
+ const invocations=classChoiceEvidence.optionalProgressions.find(row=>row.owner==='Warlock|XPHB')!.progression;
+ expect(optionalChoiceSupport(owner,['ei'],3,2,invocations)).toMatchObject({rule:'verified',execution:'record-only',publication:'unverified'});
+ expect(optionalChoiceSupport({...owner,source:'PHB'},['EI'],3,2,invocations).rule).toBe('source-declared');
  const [infuser]=normalizeData({class:[{name:'奇械师',ENG_name:'Artificer',source:'TCE'}]},'authored-support');
- expect(optionalChoiceSupport(infuser,['AI'],4,2).rule).toBe('verified');expect(optionalChoiceSupport(infuser,['AI'],6,6).rule).toBe('source-declared');
+ const infusions=classChoiceEvidence.optionalProgressions.find(row=>row.owner==='Artificer|TCE')!.progression;
+ expect(optionalChoiceSupport(infuser,['AI'],4,2,infusions).rule).toBe('verified');expect(optionalChoiceSupport(infuser,['AI'],6,6,infusions).rule).toBe('source-declared');
 });
 it('uses existing verified effect evaluation for a selected 2024 feat while ASI scores remain manual',()=>{
  const entries=normalizeData({class:[{name:'战士',ENG_name:'Fighter',source:'XPHB',classFeatures:['原创提升|战士|XPHB|4']}],classFeature:[{name:'原创提升',source:'XPHB',className:'战士',classSource:'XPHB',level:4,entries:['{@feat 原创属性提升|XPHB}']}],feat:[{name:'原创属性提升',source:'XPHB',category:'G',repeatable:true,ability:[{choose:{from:['str','dex'],amount:2}}],entries:[]},{name:'原创已适配效果',source:'XPHB',category:'G',entries:[]}]},'authored-effects');

@@ -1,7 +1,7 @@
 import {ABILITIES,selectionEffectsAllowed,type Character,type Entry,type Selection} from '../model';
 import {candidateReason,evaluate} from '../engine';
 import {resolveEntryReference,matchesReference} from '../entryReferences';
-import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
+import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
 
 const list=(value:unknown):unknown[]=>Array.isArray(value)?value:[];
@@ -43,10 +43,11 @@ function linkedClassFeatFilters(c:Character,owner:Selection,known:Entry[],group:
   return matchingGroups.length===1?[`${feature.id}:filter:${index}`]:[];
  });
 }
-/** Sparse optional-feature progressions carry the most recent declared total. */
+/** Arrays require all class levels; sparse objects carry the last declared total. */
 export function sourceProgressionCount(value:unknown,at:number):number|undefined{
+ if(!Number.isSafeInteger(at)||at<1||at>20)return;
  let count:unknown;
- if(Array.isArray(value))count=value[at-1];
+ if(Array.isArray(value)){if(!completeOptionalProgression(value))return;count=value[at-1];}
  else if(value&&typeof value==='object'){
   const steps=Object.keys(value).filter(k=>/^\d+$/.test(k)&&Number(k)>=1&&Number(k)<=at).map(Number).sort((a,b)=>b-a);
   count=steps.length?(value as Record<string,unknown>)[String(steps[0])]:0;
@@ -131,7 +132,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const types=list(group.featureType).filter((type):type is string=>typeof type==='string').map(key),count=sourceProgressionCount(group.progression,at);
    if(count===0&&!c.answers[`${owner.id}:class-optional:${index}`]?.some(Boolean))return;
    const candidates=types.length?known.filter(entry=>entry.kind==='feature'&&entry.raw._category==='optionalfeature'&&list(entry.raw.featureType).some(type=>types.includes(key(type)))&&(entry.edition==='both'||entry.edition===owner.entry.edition)):[];
-   add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined,true,optionalChoiceSupport(owner.entry,types,count??0,at));
+   add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined,true,optionalChoiceSupport(owner.entry,types,count,at,group.progression));
   });
   list(owner.entry.raw.featProgression).forEach((raw,index)=>{
    if(!raw||typeof raw!=='object')return;const group=raw as {name?:string;ENG_name?:string;category?:unknown;progression?:unknown};

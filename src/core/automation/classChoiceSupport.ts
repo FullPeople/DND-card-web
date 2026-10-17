@@ -16,10 +16,18 @@ export function fightingStylePrerequisiteEvidence(owner:Entry,feature:Entry){
 export function fightingStyleAlternativeEvidence(owner:Entry,feature:Entry,feat:Entry){
  return evidence.fightingStyleAlternatives.find(row=>matchesReference(owner,row.owner)&&matchesReference(feature,row.feature)&&matchesReference(feat,row.feat)&&feature.raw.level===row.level&&String(feat.raw.category).trim().toLowerCase()===row.category);
 }
-export function optionalChoiceSupport(owner:Entry,types:string[],count:number,at:number):ClassChoiceSupport{
+/** Array quotas declare every class level; holes and partial tables stay unknown. */
+export function completeOptionalProgression(value:unknown):value is number[]{
+ if(!Array.isArray(value)||value.length!==20)return false;
+ for(const count of value)if(!Number.isSafeInteger(count)||count<0||count>100)return false;
+ return true;
+}
+export function optionalChoiceSupport(owner:Entry,types:string[],count:number|undefined,at:number,progression:unknown):ClassChoiceSupport{
+ if(count===undefined||!Number.isSafeInteger(count)||count<0||count>100||!Number.isSafeInteger(at)||at<1||at>20||Array.isArray(progression)&&!completeOptionalProgression(progression))
+  return {rule:'pending',execution:'unavailable',publication:'unverified',reason:'此来源的进度结构尚未核对；已有记录保留。'};
  const keys=types.map(value=>value.trim().toLowerCase());
  const row=evidence.optionalProgressions.find(row=>matchesReference(owner,row.owner)&&row.featureType.some(type=>keys.includes(type.toLowerCase())));
- const expected=row?.progression[at-1],matches=expected===count;
+ const matches=!!row&&completeOptionalProgression(progression)&&progression.every((value,index)=>value===row.progression[index])&&row.progression[at-1]===count;
  // The full EI tables were checked. The legacy AI guide establishes only
  // the opening learned quota; later source totals are not official proof.
  const verified=matches&&!!row&&(keys.includes('ei')||keys.includes('ai')&&at===2&&count===4);
