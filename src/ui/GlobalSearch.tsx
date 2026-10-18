@@ -10,7 +10,8 @@ import { useSources } from './SourceName';
 import { VirtualList } from './VirtualList';
 export function GlobalSearch({query,change,entries,c,inspect}:{query:string;change:(s:string)=>void;entries:Entry[];c:Character;inspect:(e:Entry)=>void}){
  const {format,registry}=useSources(),deferredQuery=useDeferredValue(query);const [open,setOpen]=useState(false),[fixed,setFixed]=useState(false),[keyboardIndex,setKeyboardIndex]=useState(-1);const root=useRef<HTMLDivElement>(null);
- const eligible=useMemo(()=>entries.filter(e=>wikiEditionAllows(e,c)),[entries,c.edition,c.profile.optional.legacy]);
+ const searching=!!deferredQuery.trim();
+ const eligible=useMemo(()=>searching?entries.filter(e=>wikiEditionAllows(e,c)):[],[entries,searching,c.edition,c.profile.optional.legacy]);
  const {matches,status}=useEntrySearch(deferredQuery,eligible,registry);
  const results=useMemo(()=>deferredQuery.trim()?eligible.filter(matches):[],[deferredQuery,eligible,matches]);
  useEffect(()=>{if(!open)return;const outside=(e:PointerEvent)=>{if(root.current?.contains(e.target as Node)||(e.target as Element).closest('[role=tooltip]'))return;if(fixed){e.preventDefault();e.stopImmediatePropagation();}setOpen(false);setFixed(false);};document.addEventListener('pointerdown',outside,true);return()=>document.removeEventListener('pointerdown',outside,true);},[open,fixed]);
