@@ -277,14 +277,15 @@ export default function App() {
   const customEntries=useMemo(()=>inWorkbench?roomRules?.customEntries||[]:workspace?.customEntries||[],[roomRules?.customEntries,workspace?.customEntries]);
   const localSources=!inWorkbench&&!qqRoom;
   const storedCharacter=workspace?.characters.find(x=>x.id===workspace.activeId);
+  const storedBuild=storedCharacter&&runtimeCharacterBase(storedCharacter);
   const allEntries = useMemo<Entry[]>(() => [...SIZE_ENTRIES, ...entries, ...activePacks.flatMap(p=>p.entries.map(entry=>({...entry,raw:{...entry.raw,_customPack:true}}))), ...(canAuthor?customEntries:[])].filter(e=>monstersVisible||e.kind!=='monster'), [entries, activePacks,monstersVisible,canAuthor,customEntries]);
   const catalogNames=useMemo(()=>entryNameIndex(allEntries),[allEntries]);
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
   const localProfile=useMemo(()=>storedCharacter?withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile:undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks]);
-  const c=useMemo(()=>{
-    if(!storedCharacter)return;
-    const effective=inWorkbench&&wb.shared?{...storedCharacter,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources&&workspace?.siteSources?{...storedCharacter,profile:localProfile!,rulePacks:activePacks}:storedCharacter;
+  const buildView=useMemo(()=>{
+    if(!storedBuild)return;
+    const effective=inWorkbench&&wb.shared?{...storedBuild,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources&&workspace?.siteSources?{...storedBuild,profile:localProfile!,rulePacks:activePacks}:storedBuild;
     // Reading an old card must not create competing network writes. Casting
     // metadata is a view until the owner performs an explicit edit.
     // Gaps that only surface after a legacy sync (catalog still streaming,
@@ -293,16 +294,18 @@ export default function App() {
     const reviewed=(view:Character)=>acknowledgedView(view,sheetChoices(view,allEntries));
     if(inWorkbench&&effective.selections.some(s=>s.entry.packId==='imported'&&s.entry.kind==='class'&&!s.entry.raw._castingSource)){const view=structuredClone(effective);const hydrated=hydrateImportedCasting(view,allEntries),initialized=initializeAutomation(view);if(hydrated||initialized){syncAutoResources(view);return reviewed(view);}}
     if(automationNeedsInitialization(effective)){const autoView=structuredClone(effective);if(initializeAutomation(autoView)){syncAutoResources(autoView);return reviewed(autoView);}}return reviewed(effective);
-  },[storedCharacter,roomRules,roomProfile,localProfile,activePacks,allEntries]);
+  },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries]);
+  // Explicit runtime forks share their construction review; retain the latest balances.
+  const c=useMemo(()=>!storedCharacter||!buildView?undefined:storedCharacter===storedBuild?buildView:{...buildView,runtime:storedCharacter.runtime,spellSettings:storedCharacter.spellSettings,revision:storedCharacter.revision,updatedAt:storedCharacter.updatedAt},[storedCharacter,storedBuild,buildView]);
+  const buildChoices=useMemo(()=>buildView?sheetChoices(buildView,allEntries):[],[buildView,allEntries]);
   const mechanicsRef=useRef<Character|undefined>(undefined);
   if(c&&!sameCharacterMechanics(mechanicsRef.current,c))mechanicsRef.current=c;
   const mechanics=mechanicsRef.current;
   const reconciliationRef=useRef<Character|undefined>(undefined);
-  const storedBuild=storedCharacter&&runtimeCharacterBase(storedCharacter);
   if(storedBuild&&!sameCharacterMechanics(reconciliationRef.current,storedBuild))reconciliationRef.current=storedBuild;
   const reconciliation=reconciliationRef.current;
 
-  const choicesSnapshot=useMemo(()=>mechanics?{character:mechanics,catalog:allEntries,choices:sheetChoices(mechanics,allEntries)}:undefined,[mechanics,allEntries]);
+  const choicesSnapshot=useMemo(()=>mechanics?{character:mechanics,catalog:allEntries,choices:buildChoices}:undefined,[mechanics,allEntries,buildChoices]);
   function createLocalCharacter(edition:Edition='2024'){const next=newCharacter(edition);initializeAutomation(next);return localSources?(workspaceRef.current?.siteSources?withSiteSources(next,workspaceRef.current.siteSources,workspaceRef.current.packs):startAllSources(next,defaultSources)):next;}
   useEffect(()=>{
     const current=workspaceRef.current;
@@ -339,11 +342,11 @@ export default function App() {
   };
   const [classSyncBusy,setClassSyncBusy]=useState(false);
   const [workbenchReadError,setWorkbenchReadError]=useState<{key:string;message:string}>();
-  const classReview=useMemo(()=>mechanics?cardMigrationIssues(mechanics,allEntries):[],[mechanics,allEntries]);
+  const classReview=useMemo(()=>buildView?cardMigrationIssues(buildView,allEntries):[],[buildView,allEntries]);
   const classNeedsReview=classReview.length>0;
   const showClassReview=usePointerStableValue(classNeedsReview&&!loading,c?.id);
   const migrationWarningCache=useMemo(()=>new WeakMap<Character,boolean>(),[allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
-  const classWarnings=useMemo(()=>new Set(!loading&&workspace?workspace.characters.filter(row=>{let issue=migrationWarningCache.get(row);if(issue===undefined){issue=cardMigrationIssues(inWorkbench&&roomRules?{...row,edition:roomRules.edition,profile:roomProfile!}:withSiteSources(row,workspace.siteSources,activePacks),allEntries).length>0;migrationWarningCache.set(row,issue);}return issue;}).map(row=>row.id):[]),[workspace?.characters,loading,migrationWarningCache]);
+  const classWarnings=useMemo(()=>new Set(!loading&&workspace?workspace.characters.filter(row=>{const base=runtimeCharacterBase(row);let issue=migrationWarningCache.get(base);if(issue===undefined){issue=cardMigrationIssues(inWorkbench&&roomRules?{...row,edition:roomRules.edition,profile:roomProfile!}:withSiteSources(row,workspace.siteSources,activePacks),allEntries).length>0;migrationWarningCache.set(base,issue);}return issue;}).map(row=>row.id):[]),[workspace?.characters,loading,migrationWarningCache]);
   const roomClassWarnings=useMemo(()=>new Set(!loading&&c?wb.cards.filter(card=>card.id===wb.target?.cardId&&c.id===workbenchCharacterId(wb.target!)?classNeedsReview:card.classSummary?classCompatibilityIssues({...c,selections:card.classSummary},allEntries).length:classWarnings.has(`suite:${wb.target?.key.split(':card:')[0]}:card:${card.id}`)).map(card=>card.id):[]),[loading,c,wb.cards,wb.target,classNeedsReview,classWarnings,allEntries]);
   const [setupDone,setSetupDone]=useState(rulesSetupComplete);
   const completeSetup=()=>{rememberRulesSetup();setSetupDone(true);setModal('');};

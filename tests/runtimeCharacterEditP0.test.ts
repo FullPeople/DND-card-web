@@ -7,6 +7,7 @@ import {rememberSourceSpellUses} from '../src/core/automation/sourceSpellState';
 import {evaluate} from '../src/core/engine';
 import {validateCharacter} from '../src/core/validation';
 import {exportCharacter} from '../src/core/export';
+import {sheetChoices} from '../src/core/automation/choices';
 const entry=(id:string,kind:Entry['kind'],raw:Entry['raw']={}):Entry=>({id,kind,name:id,english:id,source:'XPHB',edition:'2024',packId:'authored',revision:'1',entries:[],raw});
 function card(){const c=newCharacter();c.automation=newAutomationState();c.selections=[
  {id:'owner',entry:entry('Authored caster','class',{casterProgression:'full',hd:{faces:8}}),quantity:1,equipped:false,level:3},
@@ -52,4 +53,8 @@ describe('explicit runtime balances',()=>{
   expect(changed.runtime.resources['spell-slot:1'].current).toBe(1);
  });
  it('repeated no-op balances do not create a new snapshot',()=>{const c=card();expect(applyRuntimeCharacterEdit(c,runtimeValueEdit('hp',0))).toBe(c);expect(applyRuntimeCharacterEdit(c,resourceBalanceEdit('manual',2))).toBe(c);});
+ it('runtime balances do not invalidate construction choices, including an unfilled skill choice',()=>{
+  const c=card();c.selections[1].entry.raw.skillProficiencies=[{choose:{from:['arcana','history'],count:1}}];const catalog=c.selections.map(row=>row.entry),before=sheetChoices(c,catalog);expect(before.length).toBeGreaterThan(0);
+  for(const action of [runtimeValueEdit('hp',7),resourceBalanceEdit('spell-slot:1',0),resourceBalanceEdit('manual',1)])expect(sheetChoices(applyRuntimeCharacterEdit(c,action)!,catalog)).toEqual(before);
+ });
 });
