@@ -1,0 +1,13 @@
+import {lazy,Suspense,useEffect,useRef,useState} from 'react';
+import type {Character,Derived,Entry} from '../core/model';
+import {runtimeValueEdit} from '../core/runtimeCharacterEdit';
+import {NumberInput} from './NumberInput';
+const Quickbar=lazy(()=>import('./Quickbar').then(module=>({default:module.Quickbar})));
+
+export function MobilePlayActions({c,d,edit,disabled,inspect,resources,quickbar,spells}:{c:Character;d:Derived;edit:(f:(c:Character)=>void,key?:string)=>void;disabled:boolean;inspect:(entry:Entry)=>void;resources:()=>void;quickbar:()=>void;spells:()=>void}){
+ const [page,setPage]=useState(''),dialog=useRef<HTMLDialogElement>(null);
+ useEffect(()=>{setPage('');},[c.id]);
+ useEffect(()=>{if(page)dialog.current?.showModal();},[page]);
+ const close=()=>setPage('');
+ return <><nav className="mobile-play-actions" aria-label="跑团快捷操作"><button onClick={()=>setPage('health')}>生命 <b>{c.runtime.hp}</b><small> / {d.maxHp}</small></button><button onClick={()=>setPage('resources')}>攻击 / 资源</button><button onClick={spells}>法术</button></nav>{page&&<dialog ref={dialog} className="mobile-play-dialog" aria-label={page==='health'?'生命快捷操作':'攻击与资源快捷操作'} onCancel={event=>{event.preventDefault();close();}} onClick={event=>{if(event.target===event.currentTarget)close();}}><header><strong>{page==='health'?'生命值':'攻击 / 资源'}</strong><button aria-label="关闭快捷操作" onClick={close}>×</button></header>{page==='health'?<div className="mobile-health-fields"><label>当前生命值<NumberInput autoFocus arithmetic aria-label="快捷当前生命值" disabled={disabled} value={c.runtime.hp} onChange={event=>edit(runtimeValueEdit('hp',Math.max(0,Math.min(9999,Number(event.target.value)||0))),'hp')}/></label><span>上限 <b>{d.maxHp}</b></span><label>临时生命值<NumberInput arithmetic aria-label="快捷临时生命值" disabled={disabled} value={c.runtime.tempHp} onChange={event=>edit(runtimeValueEdit('tempHp',Math.max(0,Math.min(9999,Number(event.target.value)||0))),'tempHp')}/></label><small>支持 −5 扣除 5；输入 =20 设为 20。按回车或点空白处提交。</small></div>:<Suspense fallback={<p role="status">正在打开快捷栏…</p>}><Quickbar c={c} d={d} edit={edit} disabled={disabled} inspect={entry=>{close();inspect(entry);}} manage={()=>{close();resources();}} manageQuickbar={()=>{close();quickbar();}}/></Suspense>}</dialog>}</>;
+}

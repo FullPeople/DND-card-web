@@ -2,8 +2,10 @@ import {useContext,useLayoutEffect,useRef,useState,type InputHTMLAttributes} fro
 import {flushSync} from 'react-dom';
 import {ValueTraceContext,traceForInput} from './ValueTrace';
 import {numericExpression} from '../core/numericExpression';
+import {useVerifiedValueFeedback} from './InteractionFeedback';
 export function NumberInput({value,displayValue,onChange,onBlur,arithmetic=false,...props}:InputHTMLAttributes<HTMLInputElement>&{arithmetic?:boolean;displayValue?:number}){
  const context=useContext(ValueTraceContext);
+ const feedback=useVerifiedValueFeedback(Number(value),String(props['aria-label']||'数值'));
  // Derived totals are presentation only. Focus, edits and trace inputs always
  // use the stored value, so a displayed bonus can never become a new base.
  const display=displayValue??value;
@@ -34,5 +36,5 @@ export function NumberInput({value,displayValue,onChange,onBlur,arithmetic=false
   // The trace is the editor after focus handoff. In particular, refocusing the
   // covered anchor must not overwrite a just-committed trace with its old base.
   if(props.readOnly||traceOwnsFocus.current){traceOwnsFocus.current=false;setDraft(String(display??''));onBlur?.(e);return;}
-  let next=Number(e.currentTarget.value);if(arithmetic&&e.currentTarget.value.trim())try{next=Math.floor(numericExpression(e.currentTarget.value,Number(value)||0).value);e.currentTarget.value=String(next);}catch(error){e.currentTarget.setCustomValidity(String(error instanceof Error?error.message:error));e.currentTarget.reportValidity();setDraft(String(value??''));onBlur?.(e);return;}if(e.currentTarget.value.trim()!==''&&Number.isFinite(next)){if(next!==Number(value))onChange?.(e);setDraft(String(next));}else setDraft(String(value??''));onBlur?.(e);}} onKeyDown={e=>{props.onKeyDown?.(e);if(e.key==='Enter')e.currentTarget.blur();if(e.key==='Escape'){e.currentTarget.value=String(value??'');setDraft(String(value??''));e.currentTarget.setCustomValidity('');e.currentTarget.blur();}}}/>;
+  let next=Number(e.currentTarget.value);if(arithmetic&&e.currentTarget.value.trim())try{next=Math.floor(numericExpression(e.currentTarget.value,Number(value)||0).value);e.currentTarget.value=String(next);}catch(error){e.currentTarget.setCustomValidity(String(error instanceof Error?error.message:error));e.currentTarget.reportValidity();setDraft(String(value??''));onBlur?.(e);return;}if(e.currentTarget.value.trim()!==''&&Number.isFinite(next)){if(next!==Number(value)){feedback.stage(e.currentTarget,Number(value),next);onChange?.(e);}setDraft(String(next));}else setDraft(String(value??''));onBlur?.(e);}} onKeyDown={e=>{props.onKeyDown?.(e);if(e.key==='Enter')e.currentTarget.blur();if(e.key==='Escape'){feedback.cancel();e.currentTarget.value=String(value??'');setDraft(String(value??''));e.currentTarget.setCustomValidity('');e.currentTarget.blur();}}}/>;
 }
