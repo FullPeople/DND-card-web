@@ -62,8 +62,10 @@ export default function WikiApp(){
   {key:'level',label:'等级',value:(entry:Entry)=>entry.raw.level??'—'},
   {key:'source',label:'来源',value:(entry:Entry)=>entry.source}
  ]:columnsFor(kind,edition!=='2024'),[kind,subtype,edition]);
- const facets=useMemo(()=>facetsFor(kind),[kind]),search=useEntrySearch(state.query);
- const filtered=useMemo(()=>category.filter(entry=>matchesFacets(entry,state.filters,facets)&&search.matches(entry,state.query,sources.registry[entry.source]?.name)).sort((a,b)=>compareEntries(a,b,columns.find(column=>column.key===state.sort)||columns[0],state.descending,sources.registry)),[category,state.filters,facets,search.matches,state.query,sources.registry,columns,state.sort,state.descending]);
+ const facets=useMemo(()=>facetsFor(kind),[kind]);
+ const sortedCategory=useMemo(()=>category.filter(entry=>matchesFacets(entry,state.filters,facets)).sort((a,b)=>compareEntries(a,b,columns.find(column=>column.key===state.sort)||columns[0],state.descending,sources.registry)),[category,state.filters,facets,sources.registry,columns,state.sort,state.descending]);
+ const search=useEntrySearch(state.query,sortedCategory,sources.registry);
+ const filtered=useMemo(()=>state.query.trim()?sortedCategory.filter(search.matches):sortedCategory,[sortedCategory,search.matches,state.query]);
  useLayoutEffect(()=>{
   if(!['book','adventure'].includes(new URLSearchParams(location.search).get('reading')||'')&&loading&&!notice&&(!filtered.length||((target.entry||target.reference)&&!detail)))return;
   document.documentElement.dataset.wikiContent='ready';

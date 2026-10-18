@@ -1,3 +1,4 @@
+import {runtimeValueEdit} from '../core/runtimeCharacterEdit';
 import {catalogTrainingIndex} from './catalogTrainingIndex';
 import {OverviewChoiceOverlay} from './OverviewChoiceOverlay';
 import {ClassChoiceRecords} from './ClassChoiceRecords';
@@ -108,7 +109,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
         <SheetCell label={screen?'护甲':'护甲等级'} className="armor-cell" hint={d.trace.ac.join('；')}><AdjustedValue c={c} value={d.ac} target="ac" label="护甲等级" edit={edit}/><small>AC</small></SheetCell>
       </div>;
   const health = <div className="overview-health">
-        <SheetCell label="生命值" settingsIcon onHeadingClick={editing?openHp:undefined} headingActionLabel="设置生命值取值方式" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput arithmetic aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(draft => { draft.runtime.hp = clamp(e.target.value); }, 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput arithmetic aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(draft => { draft.runtime.tempHp = clamp(e.target.value); }, 'tempHp')}/></label></div></SheetCell>
+        <SheetCell label="生命值" settingsIcon onHeadingClick={editing?openHp:undefined} headingActionLabel="设置生命值取值方式" className="life-cell" hint={d.trace.hp.join('；')}><div className="life-fields"><label>当前<NumberInput arithmetic aria-label="当前生命值" type="number" value={c.runtime.hp} onChange={e => edit(runtimeValueEdit('hp',clamp(e.target.value)), 'hp')}/></label><span className="hp-slash">/</span><div className="hp-maximum"><span>上限</span><AdjustedValue c={c} value={d.maxHp} target="hp" label="生命值上限" edit={edit}/></div><label>临时<NumberInput arithmetic aria-label="临时生命值" type="number" value={c.runtime.tempHp} onChange={e => edit(runtimeValueEdit('tempHp',clamp(e.target.value)), 'tempHp')}/></label></div></SheetCell>
         <SheetCell label="生命骰" className="dice-cell"><HitDiceResources c={c} edit={edit}/></SheetCell>
       </div>;
   const death = <SheetCell label="死亡豁免" className="death-saves-cell"><div className="death-saves">{(['success', 'failure'] as const).map(key => <div key={key}><span>{key === 'success' ? '成功' : '失败'}</span>{[1, 2, 3].map(n => <input key={n} type="checkbox" aria-label={`死亡豁免${key === 'success' ? '成功' : '失败'}${n}`} checked={(c.runtime.deathSaves?.[key] || 0) >= n} onChange={() => edit(draft => { const saves = draft.runtime.deathSaves ||= { success: 0, failure: 0 }; saves[key] = saves[key] >= n ? n - 1 : n; })}/>)}</div>)}</div></SheetCell>;

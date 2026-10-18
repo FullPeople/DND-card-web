@@ -10,8 +10,9 @@ import { useSources } from './SourceName';
 import { VirtualList } from './VirtualList';
 export function GlobalSearch({query,change,entries,c,inspect}:{query:string;change:(s:string)=>void;entries:Entry[];c:Character;inspect:(e:Entry)=>void}){
  const {format,registry}=useSources(),deferredQuery=useDeferredValue(query);const [open,setOpen]=useState(false),[fixed,setFixed]=useState(false),[keyboardIndex,setKeyboardIndex]=useState(-1);const root=useRef<HTMLDivElement>(null);
- const {matches,status}=useEntrySearch(deferredQuery);
- const results=useMemo(()=>{const q=deferredQuery.trim();return q?entries.filter(e=>wikiEditionAllows(e,c)&&matches(e,q,registry[e.source]?.name)):[];},[deferredQuery,entries,registry,matches,c.edition,c.profile.optional.legacy]);
+ const eligible=useMemo(()=>entries.filter(e=>wikiEditionAllows(e,c)),[entries,c.edition,c.profile.optional.legacy]);
+ const {matches,status}=useEntrySearch(deferredQuery,eligible,registry);
+ const results=useMemo(()=>deferredQuery.trim()?eligible.filter(matches):[],[deferredQuery,eligible,matches]);
  useEffect(()=>{if(!open)return;const outside=(e:PointerEvent)=>{if(root.current?.contains(e.target as Node)||(e.target as Element).closest('[role=tooltip]'))return;if(fixed){e.preventDefault();e.stopImmediatePropagation();}setOpen(false);setFixed(false);};document.addEventListener('pointerdown',outside,true);return()=>document.removeEventListener('pointerdown',outside,true);},[open,fixed]);
  useEffect(()=>{if(keyboardIndex>=0)requestAnimationFrame(()=>root.current?.querySelector<HTMLButtonElement>(`[data-row-index="${keyboardIndex}"] button`)?.focus());},[keyboardIndex]);
  return <div className="global-search" ref={root} onKeyDown={e=>{if(e.key==='Escape'){setOpen(false);setFixed(false);}if(['ArrowDown','ArrowUp'].includes(e.key)&&results.length){e.preventDefault();setOpen(true);setKeyboardIndex(index=>(index+(e.key==='ArrowDown'?1:-1)+results.length)%results.length);}}}>

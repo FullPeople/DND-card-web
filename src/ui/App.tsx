@@ -25,6 +25,8 @@ import {wikiEditionAllows} from './wikiEdition';
 import {LibraryDisplaySettings} from './LibraryDisplaySettings';
 import {CharacterTabs} from './CharacterTabs';
 import {applyDisplayCharacterEdit,sameCharacterMechanics} from '../core/displayCharacterEdit';
+import {applyRuntimeCharacterEdit,runtimeCharacterBase} from '../core/runtimeCharacterEdit';
+import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
 import {ToolBoundary} from './ToolBoundary';
 import './classCompatibility.css';
 import './editingRecovery.css';
@@ -244,6 +246,9 @@ export default function App() {
   useEffect(()=>{const error=(e:Event)=>{const detail=(e as CustomEvent).detail;setNotice(typeof detail==='string'?detail:detail.message);setNoticeDiagnostic(typeof detail==='object'?detail:undefined);};window.addEventListener('workbench-error',error);return()=>window.removeEventListener('workbench-error',error);},[]);
   const [saving, setSaving] = useState('正在读取');
   const queue = useRef(Promise.resolve());
+  const snapshotWriter=useRef<ReturnType<typeof snapshotSaveQueue<Workspace>>|undefined>(undefined);
+  snapshotWriter.current??=snapshotSaveQueue(saveWorkspace,{coalesce:!qqRoom});
+  useEffect(()=>{const flush=()=>snapshotWriter.current!.flush();const hidden=()=>{if(document.visibilityState==='hidden')flush();};window.addEventListener('pagehide',flush);document.addEventListener('visibilitychange',hidden);return()=>{window.removeEventListener('pagehide',flush);document.removeEventListener('visibilitychange',hidden);flush();};},[]);
   const pendingSaves = useRef(0);
   const saveFailed = useRef(false);
   const restoredWorkspacePendingSave = useRef(false);
@@ -292,6 +297,11 @@ export default function App() {
   const mechanicsRef=useRef<Character|undefined>(undefined);
   if(c&&!sameCharacterMechanics(mechanicsRef.current,c))mechanicsRef.current=c;
   const mechanics=mechanicsRef.current;
+  const reconciliationRef=useRef<Character|undefined>(undefined);
+  const storedBuild=storedCharacter&&runtimeCharacterBase(storedCharacter);
+  if(storedBuild&&!sameCharacterMechanics(reconciliationRef.current,storedBuild))reconciliationRef.current=storedBuild;
+  const reconciliation=reconciliationRef.current;
+
   const choicesSnapshot=useMemo(()=>mechanics?{character:mechanics,catalog:allEntries,choices:sheetChoices(mechanics,allEntries)}:undefined,[mechanics,allEntries]);
   function createLocalCharacter(edition:Edition='2024'){const next=newCharacter(edition);initializeAutomation(next);return localSources?(workspaceRef.current?.siteSources?withSiteSources(next,workspaceRef.current.siteSources,workspaceRef.current.packs):startAllSources(next,defaultSources)):next;}
   useEffect(()=>{
@@ -434,7 +444,7 @@ export default function App() {
     if(localSources)next=ensureSiteSources(next);
     if (!writable.current) { setNotice('另一标签页正在编辑；此页仅供查阅与导出。关闭另一页后刷新即可编辑。'); return; }
     workspaceRef.current = next; setWorkspace(next); setSaving('保存中…'); pendingSaves.current++;
-    const operation = queue.current.catch(() => {}).then(() => saveWorkspace(next)).then(() => {
+    const operation = snapshotWriter.current!.enqueue(next).then(() => {
       if (workspaceRef.current === next) { restoredWorkspacePendingSave.current = false; saveFailed.current = false; setSaving(qqRoom?'已同步到云端原卡':'已保存到本机'); }
     });
     queue.current=operation.catch(error => { saveFailed.current = true; setSaving('保存失败'); setNotice(`${qqRoom?'云端同步失败，本机草稿保留，请导出备份后核对云端版本。':'本机保存失败，请立即导出角色备份。'}${String(error)}`); }).finally(() => { pendingSaves.current--; });
@@ -652,8 +662,9 @@ export default function App() {
     return libraryEntries.filter(e => (candidates?candidates.has(e.id):kind==='favorites'?favorites.has(e):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
       (candidates&&activeChoice?.sourceProgression?true:wikiEditionAllows(e,c,editionFilter)));
   }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope,favorites.has]);
-  const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery);
-  const filtered = useMemo(() => categoryEntries.filter(e => matchesFacets(e, filters, facets)&&matchesEntrySearch(e,categoryQuery,sourceDisplay.registry[e.source]?.name)).sort((a, b) => compareEntries(a, b, columns.find(col => col.key === sort) || columns[0], descending,sourceDisplay.registry)), [categoryEntries, filters, facets, columns, sort, descending,sourceDisplay.registry,categoryQuery,matchesEntrySearch]);
+  const sortedCategoryEntries=useMemo(()=>categoryEntries.filter(e=>matchesFacets(e,filters,facets)).sort((a,b)=>compareEntries(a,b,columns.find(col=>col.key===sort)||columns[0],descending,sourceDisplay.registry)),[categoryEntries,filters,facets,columns,sort,descending,sourceDisplay.registry]);
+  const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery,sortedCategoryEntries,sourceDisplay.registry);
+  const filtered=useMemo(()=>categoryQuery.trim()?sortedCategoryEntries.filter(matchesEntrySearch):sortedCategoryEntries,[sortedCategoryEntries,categoryQuery,matchesEntrySearch]);
   useEffect(() => { setException(''); }, [detail?.id]);
   useEffect(() => { if (detailPane.current && detail) { const pending=previewCommit.current;detailPane.current.scrollTop=pending?.id===detail.id?pending.top:libraryState.positions[detail.id]||0;previewCommit.current=undefined; } }, [kind, detail?.id, !!library.hover,library.navigationKey]);
 
@@ -681,11 +692,12 @@ export default function App() {
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
     const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
     const displayDraft=applyDisplayCharacterEdit(character,action);
+    const runtimeDraft=displayDraft?undefined:applyRuntimeCharacterEdit(character,action);
     let draft:Character;
-    if(displayDraft){if(displayDraft===character)return;draft=displayDraft;}
+    if(displayDraft||runtimeDraft){draft=(displayDraft||runtimeDraft)!;if(draft===character)return;}
     else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
-    if(!displayDraft&&inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
+    if(!displayDraft&&!runtimeDraft&&inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
     rememberCharacter(character,draft);void sendCharacter(character,draft).catch(()=>{});setHistoryTick(x=>x+1);
   };
@@ -757,7 +769,7 @@ export default function App() {
     const castingChanged=hydrateImportedCasting(draft,allEntries);
     const featuresChanged=syncFeatures(draft, allEntries,undefined,catalogNames),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=automationRuntime.syncSourceSpells(draft,allEntries);
     if (featuresChanged || resourcesChanged || castingChanged || sourceSpellsChanged) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
-  }, [mechanics, allEntries,automationRuntime]);
+  }, [reconciliation, allEntries,automationRuntime]);
   function undo(redo=false){void travelHistory(redo);}
 
   useEffect(() => {
@@ -976,7 +988,7 @@ export default function App() {
     }
     const next=ensureSiteSources({...w,characters:[...w.characters.map(card=>card.id===original.id?current:card),backup],activeId:original.id});
     workspaceRef.current=next;pendingSaves.current++;setSaving('保存旧卡备份并同步当前卡…');
-    const operation=queue.current.catch(()=>{}).then(()=>saveWorkspace(next));queue.current=operation.catch(()=>{});
+    const operation=snapshotWriter.current!.enqueue(next,true);queue.current=operation.catch(()=>{});
     try{await operation;if(workspaceRef.current===next)restoredWorkspacePendingSave.current=false;setWorkspace(workspaceRef.current);saveFailed.current=false;setSaving('已保存到本机');rememberCharacter(original,current);setModal('');setNotice('已更新当前卡，同步前备份保留在角色簿中。');}
     catch(e){const restored=workspaceRef.current===next;if(restored){workspaceRef.current=w;setWorkspace(w);}setSaving('保存失败');saveFailed.current=!restored;throw Error(`本机同步未保存，原卡保留。${String(e)}`);}
     finally{pendingSaves.current--;}
