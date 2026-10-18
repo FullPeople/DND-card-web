@@ -686,16 +686,16 @@ export default function App() {
     {const blocked=cloudAccessRef.current[character.id];if(blocked){setNotice(blocked);return;}}
     if(workbenchUncertain.current.has(character.id)){setNotice('上一项修改的结果尚未确认，本地修改已保留。请先核对枭熊数据。');return;}
     if(inWorkbench&&character.id.startsWith('suite:')&&(!wb.online||!wb.target?.write||workbenchCharacterId(wb.target)!==character.id)){setNotice('当前棋子不可编辑或已经切换');return;}
-    if(!automationRuntime){pendingRuntimeEdits.current.push({id:character.id,target:wb.target?.key,action,key});setRuntimeInteractionRequested(true);return;}
+    const displayDraft=applyDisplayCharacterEdit(character,action);
+    const runtimeDraft=displayDraft?undefined:applyRuntimeCharacterEdit(character,action);
+    if(!automationRuntime&&!displayDraft&&!runtimeDraft){pendingRuntimeEdits.current.push({id:character.id,target:wb.target?.key,action,key});setRuntimeInteractionRequested(true);return;}
     const record = history.current.get(character.id) || { past: [], future: [], time: 0 };
     if (!key || record.key !== key || Date.now() - record.time > 900) record.past = [...record.past.slice(-59), character];
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
     const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
-    const displayDraft=applyDisplayCharacterEdit(character,action);
-    const runtimeDraft=displayDraft?undefined:applyRuntimeCharacterEdit(character,action);
     let draft:Character;
     if(displayDraft||runtimeDraft){draft=(displayDraft||runtimeDraft)!;if(draft===character)return;}
-    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
+    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime!.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
     if(!displayDraft&&!runtimeDraft&&inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
