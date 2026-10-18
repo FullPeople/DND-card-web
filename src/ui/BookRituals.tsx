@@ -1,21 +1,18 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useMemo} from 'react';
 import type {Character,Entry} from '../core/model';
 import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../core/bookRituals';
 import {automationEnabled} from '../core/automation/state';
-import {performSpellAction,spellActionRequest,type SpellActionResult} from '../core/automation/actions';
+import {SpellActionFeedback,useSpellActionFeedback} from './SpellActionFeedback';
 import {Reference} from './Reference';
 import './bookRituals.css';
 
 /** Another view of the same book rows, never another prepared or learned list. */
 export function BookRituals({c,edit,inspect,readOnly=false}:{c:Character;edit:(action:(draft:Character)=>void)=>void;inspect:(entry:Entry)=>void;readOnly?:boolean}){
- const groups=useMemo(()=>bookRitualGroups(c),[c]),[message,setMessage]=useState('');
- useEffect(()=>setMessage(''),[c.id]);
+ const groups=useMemo(()=>bookRitualGroups(c),[c]),feedback=useSpellActionFeedback(c,edit);
  if(!groups.length)return null;
  const enabled=automationEnabled(c)&&!readOnly;
  function cast(selectionId:string,ownerId:string){
-  const request=spellActionRequest(c,selectionId,bookRitualPaymentId(ownerId),crypto.randomUUID());let result:SpellActionResult|undefined;
-  edit(draft=>{result=performSpellAction(draft,request);});
-  if(result)setMessage(result.message);
+  feedback.run(selectionId,bookRitualPaymentId(ownerId),BOOK_RITUAL_TIME);
  }
  return <section className="prepared-spell-group book-ritual-grouping" aria-label="来自仪式施法"><h4><span>来自仪式施法</span></h4>
   <p className="spell-group-hint">无需预备，不占预备格。{BOOK_RITUAL_TIME}施法时须阅读法术书。</p>
@@ -25,11 +22,11 @@ export function BookRituals({c,edit,inspect,readOnly=false}:{c:Character;edit:(a
     <small className="book-ritual-source">资格来源：{group.source!.entry.name}</small>
     {group.spells.length?<div className="book-ritual-grid">{group.spells.map(row=><div key={row.id} className="book-ritual-row" data-ritual-spell-id={row.id}>
      <Reference reference={`entry:${row.entry.id}`} entry={row.entry} className="feature-caption" commitOnClick={false} onClick={()=>inspect(row.entry)}>{row.entry.name}</Reference>
-     <button className="book-ritual-cast" disabled={!enabled} aria-label={`${row.entry.name}仪式施法`} onClick={()=>cast(row.id,group.owner.id)}>仪式施法</button>
+     <button className="book-ritual-cast" disabled={!enabled||feedback.busy} aria-label={`${row.entry.name}仪式施法`} onClick={()=>cast(row.id,group.owner.id)}>仪式施法</button>
     </div>)}</div>:<p className="spell-group-hint">法术书中尚无符合条件的仪式法术。</p>}
    </>}
   </section>)}
   {!automationEnabled(c)&&<p className="spell-group-hint">自动化已关闭，仪式资格仅供查阅。</p>}
-  {message&&<p className="spell-group-hint" role="status">{message}</p>}
+  <SpellActionFeedback action={feedback.action}/>
  </section>;
 }
