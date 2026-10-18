@@ -31,7 +31,7 @@ export function LocalDice(){
    <label className="local-roll-expression">表达式<input ref={field} autoFocus aria-label="骰子表达式" readOnly={phase==='rolling'} value={roll.expression} onChange={event=>{setRoll({...roll,expression:event.target.value});setResult(undefined);setError('');setPhase('ready');}}/></label>
    <div className="local-roll-stage" aria-busy={phase==='rolling'}>
     <div className="local-roll-mark" aria-hidden="true"><DieMark/></div>
-    <output className="local-roll-result" role="status" aria-label="投骰结果">{phase==='rolling'?<span className="local-roll-pending">投掷中…</span>:result?<><small>合计 · {result.formula}</small><strong key={result.formula+':'+result.total}>{result.total}</strong></>:<span className="local-roll-ready">等待投掷</span>}</output>
+    <output className="local-roll-result" role="status" aria-label="投骰结果">{phase==='rolling'?<span className="local-roll-pending">投掷中…</span>:result?<><small>{result.formula} · 合计：</small><strong key={result.formula+':'+result.total}>{result.total}</strong></>:<span className="local-roll-ready">等待投掷</span>}</output>
    </div>
    {error&&<p className="inline-error" role="alert">{error}</p>}
    {result&&<div className="local-roll-breakdown" aria-label="骰子明细">{result.groups.map((group,index)=><div key={index}><small>{group.sign<0?'− ':''}{group.values.length}d{group.sides}</small><div>{group.values.map((value,i)=><b key={i}>{value}</b>)}</div></div>)}{result.modifier!==0&&<div><small>调整</small><strong>{result.modifier>0?'+':''}{result.modifier}</strong></div>}</div>}
