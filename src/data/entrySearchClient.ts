@@ -12,7 +12,7 @@ export function entrySearchClient(rows:SearchRow[]){
  }
  return {async search(query:string,signal:AbortSignal):Promise<number[]|undefined>{
   if(signal.aborted)return;start();const id=++sequence;
-  const cancel=()=>{jobs.get(id)?.resolve([]);jobs.delete(id);worker?.postMessage({id:++sequence});};
+  const cancel=()=>{jobs.get(id)?.resolve([]);jobs.delete(id);worker?.postMessage({id,cancel:true});};
   signal.addEventListener('abort',cancel,{once:true});
   try{
    if(worker){try{const indices=await new Promise<number[]>((resolve,reject)=>{jobs.set(id,{resolve,reject});try{worker!.postMessage({id,query});}catch(error){jobs.delete(id);reject(error);}});return signal.aborted?undefined:indices;}catch{stop();}}
