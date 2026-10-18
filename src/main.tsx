@@ -35,3 +35,4 @@ import './ui/refinement183.css';
 import './ui/domesticCompact.css';
 import './ui/screenLayout.css';
 import './ui/uiRefresh.css';
+import './ui/readabilityP2.css';

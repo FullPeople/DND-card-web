@@ -6,5 +6,6 @@ import '../ui/style.css';
 import '../ui/library.css';
 import '../ui/libraryRefine.css';
 import './wiki.css';
+import '../ui/readabilityP2.css';
 
 createRoot(document.getElementById('root')!).render(<UiLanguageProvider><SourceProvider><WikiApp/></SourceProvider></UiLanguageProvider>);

@@ -1,7 +1,8 @@
 import {useSheetZoom} from './useSheetZoom';
 import {useUiLanguage} from './UiLanguage';
 import type {UiTextKey} from './uiText';
-import {useSheetRenderMode} from './sheetDisplay';
+import {useSheetRenderMode,useSheetCaptureActive} from './sheetDisplay';
+import {useSurfaceMotion} from './useSurfaceMotion';
 import './responsive177.css';
 import { useContext, useId, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Character } from '../core/model';
@@ -35,6 +36,8 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const visuals = editing || !effectsEnabled ? { active: new Set<import('./conditionVisuals').ConditionVisual>(), exhaustion: 0 } : effects;
   const originalVisuals=adaptive?{active:new Set<import('./conditionVisuals').ConditionVisual>(),exhaustion:0}:visuals;
   const paper=useRef<HTMLDivElement>(null);
+  const capturing=useSheetCaptureActive();
+  useSurfaceMotion(paper,`${character.id}:${page}`,motionEnabled&&!displayOnly&&!capturing);
   const [decoration,setDecoration]=useState<typeof import('./CardDecoration')>();
   useEffect(()=>{if(!effectsEnabled||!motionEnabled)return;return afterPaint(()=>{void import('./CardDecoration').then(setDecoration).catch(error=>console.warn('Card decoration unavailable:',error));});},[effectsEnabled,motionEnabled]);
   const viewport = useRef<HTMLDivElement>(null);

@@ -10,5 +10,6 @@ function subscribe(listener:()=>void){listeners.add(listener);return()=>{listene
 export function setSheetDisplayMode(mode:SheetDisplayMode){preference=mode;try{localStorage.setItem(key,mode);}catch{/* Keep the preference for this session. */}notify();}
 export function useSheetDisplayMode(){return useSyncExternalStore(subscribe,()=>preference,()=>'a4' as const);}
 export function useSheetRenderMode(){return useSyncExternalStore(subscribe,()=>captures?'a4':preference,()=>'a4' as const);}
+export function useSheetCaptureActive(){return useSyncExternalStore(subscribe,()=>captures>0,()=>false);}
 /** Capture changes composition without changing the user's preference. */
 export function beginSheetCapture(){captures++;notify();let released=false;return()=>{if(!released){released=true;captures--;notify();}};}
