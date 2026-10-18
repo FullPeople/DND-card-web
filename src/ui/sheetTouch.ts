@@ -13,7 +13,7 @@ export function frameLatest<T>(paint:(value:T)=>void,request:(callback:FrameRequ
   cancel(){if(frame!==undefined)cancel(frame);frame=undefined;}};
 }
 export function sheetTouch(root:HTMLElement,read:()=>SheetView,update:(view:SheetView)=>void,commit:()=>void){
- let start:Pinch|undefined,scroller:HTMLElement|null=null,lastY=0,startY=0,lastTime=0,velocity=0,scrolling=false,suppressUntil=0,inertia:number|undefined;
+ let start:Pinch|undefined,bounds={width:0,height:0},scroller:HTMLElement|null=null,lastY=0,startY=0,lastTime=0,velocity=0,scrolling=false,suppressUntil=0,inertia:number|undefined;
  const pair=(touches:TouchList):Point=>({distance:Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY),x:(touches[0].clientX+touches[1].clientX)/2,y:(touches[0].clientY+touches[1].clientY)/2});
  const scroll=frameLatest<number>(position=>{if(scroller)scroller.scrollTop=position;});
  let desiredScroll=0;
@@ -22,7 +22,7 @@ export function sheetTouch(root:HTMLElement,read:()=>SheetView,update:(view:Shee
  const begin=(event:TouchEvent)=>{
   stopInertia();velocity=0;scrolling=false;
   if(event.touches.length===2){
-   event.preventDefault();gesture();scroller=null;const view=read(),rect=(root.querySelector('.paper-stack')||root).getBoundingClientRect();
+   event.preventDefault();gesture();scroller=null;const view=read(),rect=(root.querySelector('.paper-stack')||root).getBoundingClientRect();bounds=root.getBoundingClientRect();
    start={...pair(event.touches),view,cx:rect.x+rect.width/2-view.x,cy:rect.y+rect.height/2-view.y};suppressUntil=Date.now()+600;
   }else if(event.touches.length===1&&!start){
    lastY=startY=event.touches[0].clientY;lastTime=performance.now();
@@ -33,7 +33,7 @@ export function sheetTouch(root:HTMLElement,read:()=>SheetView,update:(view:Shee
  };
  const move=(event:TouchEvent)=>{
   if(start&&event.touches.length>=2){
-   event.preventDefault();event.stopPropagation();const rect=root.getBoundingClientRect();update(pinchView(start,pair(event.touches),rect.width,rect.height));suppressUntil=Date.now()+600;
+   event.preventDefault();event.stopPropagation();update(pinchView(start,pair(event.touches),bounds.width,bounds.height));suppressUntil=Date.now()+600;
   }else if(!start&&event.touches.length===1&&scroller&&!root.querySelector('.visual-editing')){
    const y=event.touches[0].clientY,now=performance.now();if(!scrolling&&Math.abs(startY-y)<6)return;
    if(!scrolling){scrolling=true;gesture();}

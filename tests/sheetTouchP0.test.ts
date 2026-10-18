@@ -15,14 +15,14 @@ it('keeps the pinch focal point and clamps zoom and translation',()=>{
 function fixture(initialZoom=1){
  const frames=new Map<number,FrameRequestCallback>();let id=0;vi.stubGlobal('requestAnimationFrame',(fn:FrameRequestCallback)=>{frames.set(++id,fn);return id;});vi.stubGlobal('cancelAnimationFrame',(key:number)=>frames.delete(key));vi.stubGlobal('window',new EventTarget());
  const scroller={scrollTop:100,scrollHeight:1000,clientHeight:100,closest:()=>scroller,parentElement:null};
- const root=new EventTarget() as any;root.closest=()=>scroller;root.querySelector=(selector:string)=>selector==='.paper-stack'?root:null;root.getBoundingClientRect=()=>({x:0,y:0,width:400,height:800});
+ const root=new EventTarget() as any;root.closest=()=>scroller;root.querySelector=(selector:string)=>selector==='.paper-stack'?root:null;root.getBoundingClientRect=vi.fn(()=>({x:0,y:0,width:400,height:800}));
  let view:SheetView={zoom:initialZoom,x:0,y:0};const commit=vi.fn(),update=vi.fn((next:SheetView)=>view=next),dispose=sheetTouch(root,()=>view,update,commit);
  const touch=(type:string,points:number[][])=>{const event=new Event(type,{cancelable:true});Object.defineProperty(event,'touches',{value:points.map(([clientX,clientY])=>({clientX,clientY}))});root.dispatchEvent(event);return event;};
  return {touch,frames,commit,update,dispose,scroller,root};
 }
 it('commits pinch state once at gesture end and suppresses the synthetic click',()=>{
  const f=fixture();f.touch('touchstart',[[100,100],[200,100]]);for(let i=0;i<20;i++)f.touch('touchmove',[[100,100],[250+i,100]]);
- expect(f.commit).not.toHaveBeenCalled();f.touch('touchend',[]);expect(f.commit).toHaveBeenCalledOnce();const click=new Event('click',{cancelable:true});f.root.dispatchEvent(click);expect(click.defaultPrevented).toBe(true);f.dispose();
+ expect(f.commit).not.toHaveBeenCalled();expect(f.root.getBoundingClientRect).toHaveBeenCalledTimes(2);f.touch('touchend',[]);expect(f.commit).toHaveBeenCalledOnce();const click=new Event('click',{cancelable:true});f.root.dispatchEvent(click);expect(click.defaultPrevented).toBe(true);f.dispose();
 });
 it('leaves normal one-finger scrolling native and batches zoomed scroll writes',()=>{
  const native=fixture();native.touch('touchstart',[[100,200]]);expect(native.touch('touchmove',[[100,150]]).defaultPrevented).toBe(false);expect(native.frames.size).toBe(0);native.dispose();
