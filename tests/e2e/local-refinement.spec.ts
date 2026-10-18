@@ -14,7 +14,7 @@ test('large catalog has bounded DOM, sorted sources and instant access to the ta
 });
 test('fill prompts have no size dash, pulse the catalog, and skills use an ordinary cursor',async({page})=>{
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
- await expect(page.locator('.size-cell .cell-content')).toHaveText('点击并拖拽填写');await page.locator('.size-cell .cell-fill').click();await expect(page.locator('.catalog-fill-glow')).toBeVisible();await expect(page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'体型',exact:true})).toHaveClass(/active/);
+ await expect(page.locator('.size-cell .cell-content')).toHaveText('查阅并选择');await page.locator('.size-cell .cell-fill').click();await expect(page.locator('.catalog-fill-glow')).toBeVisible();await expect(page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'体型',exact:true})).toHaveClass(/active/);
  await expect(page.locator('.ability-skill').first()).toHaveCSS('cursor','default');
 });
 test('source defaults show all conditions at the end and spells start at low levels',async({page})=>{

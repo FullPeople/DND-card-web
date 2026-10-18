@@ -36,7 +36,7 @@ test('version conflict requires review before creating a copy; cancel leaves boo
 });
 test('subclass fill link opens subclasses instead of the main class body',async({page})=>{
  await start(page);await page.getByRole('switch',{name:'编辑模式'}).click();await page.locator('.catalog-row').first().click();await fillFromDetail(page);
- await page.locator('.identity-subclass').getByRole('button',{name:'点击并拖拽填写'}).click();await expect(page.getByRole('button',{name:'子职',exact:true})).toHaveAttribute('aria-expanded','true');await expect(page.locator('.entry-detail')).toContainText('测试学派');
+ await page.locator('.identity-subclass').getByRole('button',{name:'查阅并选择'}).click();await expect(page.getByRole('button',{name:'子职',exact:true})).toHaveAttribute('aria-expanded','true');await expect(page.locator('.entry-detail')).toContainText('测试学派');
 });
 
 test('legacy import with no prepared spells recovers its source-declared spellbook and preparation capacity',async({page})=>{

@@ -9,8 +9,10 @@ import {useEntryMenu} from './EntrySharing';
 import {ReferenceContext} from './Reference';
 import './dragAvailability.css';
 import {entryDragIntent,type EntryDragIntent} from './entryDragIntent';
+import {EntryApplicationContext,type EntryApplicationTarget} from './entryApplication';
 
-export const requiresEditing=(entry:Entry,intent:EntryDragIntent=entryDragIntent(entry))=>intent==='training'||!['condition','item'].includes(entry.kind);
+import {requiresEditing} from './entryWritePolicy';
+export {requiresEditing} from './entryWritePolicy';
 type Zone = DropRules & { element: HTMLElement; onReceive?: (entry: Entry) => void; wholePaper?: boolean };
 function compatible(character: Character, entry: Entry, zone: Omit<Zone, 'element'>, intent:EntryDragIntent) {
   return !dropRejection(character,entry,zone,intent);
@@ -53,7 +55,15 @@ export function EntryDragProvider({ character, receive, children, editing=false,
       }
     });
   }
-  return <DragContext.Provider value={{ editing,preservePage,entry,intent, character, over, hoverTab, register, start }}>{children}</DragContext.Provider>;
+  function applicationTargets(item:Entry):EntryApplicationTarget[]{
+    if(entryDragIntent(item)!=='training')return [];
+    return [...zones.current].filter(([,zone])=>zone.training&&!zone.wholePaper&&!!zone.onReceive&&compatible(latest.current.character,item,zone,'training')).map(([id,zone])=>({id,label:zone.element.querySelector('dt')?.textContent||'装备训练',apply:()=>{
+      const state=latest.current,current=zones.current.get(id);
+      if(state.disabledReason||!state.editing||!current||!compatible(state.character,item,current,'training')){window.dispatchEvent(new CustomEvent('workbench-error',{detail:state.disabledReason||'当前填写位置或编辑权限已改变，请重新选择。'}));return;}
+      current.onReceive?.(item);window.dispatchEvent(new CustomEvent('workbench-error',{detail:`已填入「${item.name}」的${zone.element.querySelector('dt')?.textContent||'熟练项'}记录。`}));
+    }}));
+  }
+  return <DragContext.Provider value={{ editing,preservePage,entry,intent, character, over, hoverTab, register, start }}><EntryApplicationContext.Provider value={applicationTargets}>{children}</EntryApplicationContext.Provider></DragContext.Provider>;
 }
 export function EntryDraggable({ entry, children, dragEnabled = true, onContextMenu, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { entry: Entry; dragEnabled?: boolean }) {
   const drag = useContext(DragContext);
