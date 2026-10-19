@@ -13,61 +13,6 @@
 .resource-current-label,.resource-bar b{white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
 
 @media screen{
- /* Typography is scoped to the actual reader, never authored canvases or A4. */
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose{
-  font-family:var(--reading-font);font-size:14px;line-height:1.85;
-  font-weight:400;color:var(--wiki-ink,#303030);letter-spacing:.01em;
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose p{margin-bottom:.65em}
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose li{margin-block:.3em}
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose h4{
-  font-family:var(--reading-font);font-size:16px;font-weight:700;
-  line-height:1.5;margin-top:1em;margin-bottom:.45em;
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose h4 small{
-  font-family:inherit;font-size:12px;font-weight:450;color:var(--wiki-muted,#625b4f);
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose strong{font-weight:700}
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose table{font-size:12px;line-height:1.65}
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose :is(th,td){padding:5px 7px}
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .detail-heading h1{
-  font-family:var(--reading-font);font-size:24px;font-weight:750;line-height:1.4;
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .detail-heading .english-name{
-  font-family:var(--reading-font);font-size:13px;font-weight:450;
-  color:var(--wiki-muted,#625b4f);line-height:1.5;
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .detail-heading>small{
-  display:block;font-size:11px;line-height:1.6;color:var(--wiki-muted,#625b4f);
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .entry-facts{
-  font-size:12px;line-height:1.7;gap:4px 12px;
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .entry-facts dt{
-  color:var(--wiki-muted,#625b4f);font-weight:450;
- }
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .entry-facts dd{font-weight:600}
- :is(.wiki-pane,.wiki-reader-app) .entry-apply-bar{line-height:1.6;gap:12px;padding-block:9px}
- :is(.wiki-pane,.wiki-reader-app) .entry-apply-bar small{font-size:11px;color:var(--wiki-muted,#625b4f)}
- :is(.wiki-pane,.wiki-reader-app) .entry-apply-bar>div:first-child>span{font-weight:550}
- :is(.wiki-pane,.wiki-reader-app) .entry-apply-bar>button{font-size:13px;font-weight:650}
- :is(.wiki-pane,.wiki-reader-app) .document-nav button{font-size:11px;line-height:1.5;padding-block:4px}
- :is(.wiki-pane,.wiki-reader-app) .document-nav>strong{font-size:11px;font-weight:650}
-
- /* The virtualizer uses the same 26px desktop / 56px touch row geometry. */
- :is(.wiki-pane,.wiki-reader-app) .catalog-row .entry-name{font-weight:600}
- :is(.wiki-pane,.wiki-reader-app) .catalog-row .entry-name>small{
-  font-family:var(--reading-font);font-weight:400;color:var(--wiki-muted,#625b4f);
- }
- :is(.wiki-pane,.wiki-reader-app) .catalog-row .catalog-source{color:var(--wiki-muted,#625b4f)}
- :is(.wiki-pane,.wiki-reader-app) .catalog-row.active{
-  box-shadow:inset 3px 0 var(--ui-selected,#50525b);
- }
- :is(.wiki-pane,.wiki-reader-app) .catalog-row:focus-visible{
-  outline:2px solid var(--ui-selected,#50525b);outline-offset:-2px;
- }
- :is(.wiki-pane,.wiki-reader-app) .raw-details{font-size:11px;color:var(--wiki-muted,#625b4f)}
-
  /* No change to the page's scale, frame shape, title height or saved layout. */
  .sheet-viewport .paper:not(.sheet-export) :is(.stat-input,.life-fields input,.ability-score input,.ability-modifier,.adjusted-value strong,.rm-readout,.rm-inline-value,.rm-pool-values){
   font-family:var(--reading-font);font-variant-numeric:lining-nums tabular-nums;
@@ -120,19 +65,7 @@
 }
 @keyframes p2-surface-in{from{opacity:0}to{opacity:1}}
 @keyframes p2-backdrop-in{from{opacity:0}to{opacity:1}}
-@media screen and (min-width:761px){
- :is(.wiki-pane,.wiki-reader-app) .library-body .catalog-row{height:26px!important;min-height:26px!important;padding-block:3px!important}
- :is(.wiki-pane,.wiki-reader-app) .library-body .catalog-row .entry-name{font-size:12px;line-height:18px}
- :is(.wiki-pane,.wiki-reader-app) .library-body .catalog-row .entry-name>small{font-size:10px}
- :is(.wiki-pane,.wiki-reader-app) .library-body .catalog-value{font-size:11px;line-height:18px}
- :is(.wiki-pane,.wiki-reader-app) .library-body .catalog-columns{height:28px!important;min-height:28px!important}
- :is(.wiki-pane,.wiki-reader-app) .library-body .catalog-columns button{font-size:11px;line-height:20px}
- :is(.wiki-pane,.wiki-reader-app) .library-body .catalog-race-group{height:26px!important;min-height:26px!important}
-}
 @media screen and (max-width:760px){
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose{font-size:15px;line-height:1.85}
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .document-prose h4{font-size:17px}
- :is(.wiki-pane,.wiki-reader-app) .entry-detail .detail-heading h1{font-size:23px}
  .app-shell .dialog .dialog-body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select){font-size:16px}
  .mobile-play-dialog .mobile-health-fields input{font-size:26px;line-height:1.4}
  .field-change-feedback>div:first-child{align-items:center}
