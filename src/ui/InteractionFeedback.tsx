@@ -1,5 +1,6 @@
 import {createContext,useCallback,useContext,useEffect,useLayoutEffect,useMemo,useRef,useState,type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
+import {cloudFeaturesEnabled} from '../cloud/availability';
 type Change={anchor:HTMLElement;label:string;before:number;after:number};
 const FeedbackContext=createContext<{scope:string;saveLabel:string;announce:(change:Change)=>void}|undefined>(undefined);
 export const useInteractionStatus=()=>useContext(FeedbackContext);
@@ -15,7 +16,9 @@ export function InteractionFeedbackProvider({scope,saveLabel,undo,canUndo,childr
 
 /** Publish only after the controlled value reflects the user's submitted intent. */
 export function useVerifiedValueFeedback(value:number,label:string){
- const context=useContext(FeedbackContext),pending=useRef<(Change&{time:number;scope:string})|undefined>(undefined);
- useLayoutEffect(()=>{const change=pending.current;if(!change)return;if(change.scope!==context?.scope){pending.current=undefined;return;}if(value===change.after&&Date.now()-change.time<5000){pending.current=undefined;context?.announce(change);}else if(value!==change.before||Date.now()-change.time>=5000)pending.current=undefined;},[value,context]);
- return {stage:(anchor:HTMLElement|null,before:number,after:number)=>{if(anchor&&context&&before!==after)pending.current={anchor,label,before,after,time:Date.now(),scope:context.scope};},cancel:()=>{pending.current=undefined;}};
+ const context=useContext(FeedbackContext),pending=useRef<(Change&{time:number;started:number;scope:string})|undefined>(undefined),frames=useRef<number[]>([]),scope=useRef(context?.scope);
+ const stop=()=>{frames.current.forEach(cancelAnimationFrame);frames.current=[];};
+ useEffect(()=>stop,[]);
+ useLayoutEffect(()=>{if(scope.current!==context?.scope){scope.current=context?.scope;stop();}const change=pending.current;if(!change)return;if(change.scope!==context?.scope){pending.current=undefined;return;}if(value===change.after&&Date.now()-change.time<5000){pending.current=undefined;if(cloudFeaturesEnabled){stop();change.anchor.dataset.valueCommitMs=(performance.now()-change.started).toFixed(2);delete change.anchor.dataset.valuePaintMs;frames.current.push(requestAnimationFrame(()=>{frames.current.push(requestAnimationFrame(()=>{if(change.anchor.isConnected)change.anchor.dataset.valuePaintMs=(performance.now()-change.started).toFixed(2);}));}));}context?.announce(change);}else if(value!==change.before||Date.now()-change.time>=5000)pending.current=undefined;},[value,context]);
+ return {stage:(anchor:HTMLElement|null,before:number,after:number)=>{if(anchor&&context&&before!==after)pending.current={anchor,label,before,after,time:Date.now(),started:performance.now(),scope:context.scope};},cancel:()=>{pending.current=undefined;stop();}};
 }

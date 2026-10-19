@@ -34,6 +34,8 @@ import {applyRuntimeCharacterEdit,runtimeCharacterBase} from '../core/runtimeCha
 import {workbenchDerived} from '../platform/workbenchDerivation';
 import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
 import {snapshotMemo} from '../platform/snapshotMemo';
+import {settledSnapshotCheck} from '../platform/settledSnapshotCheck';
+import {useReadViewMemo} from './useReadViewMemo';
 import {workspaceNavigationWriter} from '../platform/workspaceNavigationWriter';
 import {saveWorkspaceSelection} from '../platform/storage';
 import {cloudFeaturesEnabled} from '../cloud/availability';
@@ -294,6 +296,7 @@ export default function App() {
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
   const rememberView=useMemo(()=>snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
+  const checkReconciliation=useMemo(()=>settledSnapshotCheck(localCloudViews),[rememberView]);
   const localProfile=useMemo(()=>storedCharacter?rememberView('profile',storedCharacter.profile,()=>withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile):undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks,rememberView]);
   const buildView=useMemo(()=>{
     if(!storedBuild)return;
@@ -328,7 +331,7 @@ export default function App() {
     const profile=includeNewProfileSources(current.siteSources,defaultSources);
     if(profile!==current.siteSources)persist({...current,siteSources:sourceSettings(profile)});
   },[defaultSources,workspace]);
-  const sourceEntries=useMemo(()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
+  const sourceEntries=useReadViewMemo(localCloudViews,()=>c?allEntries.filter(e=>librarySourceEnabled(c,e)):[],[allEntries,c?.profile.enabledSources]);
   const selectedEntries = useMemo(()=>workspace?.characters.filter(row=>!inWorkbench||!row.id.startsWith('suite:')||(wb.access?wb.access.enabled.characterCards!==false&&wb.access.cards.some(card=>row.id===`suite:${wb.access!.room}:card:${card.id}`):!!wb.document&&!!wb.target&&row.id===workbenchCharacterId(wb.target))).flatMap(row=>row.selections.map(s=>s.entry))||[],[workspace?.characters,wb.access,wb.target?.key,wb.document]);
   const favorites=useLibraryFavorites();
   const library = useLibrary(allEntries,selectedEntries,inWorkbench);
@@ -337,7 +340,7 @@ export default function App() {
   useEffect(()=>{if(kind==='favorites'&&storedDetail&&!favorites.has(storedDetail))setDetail(undefined);},[kind,storedDetail,favorites.has]);
   useEffect(()=>{if(!monstersVisible&&kind==='monster')setKind('class');if(!monstersVisible&&detail?.kind==='monster')setDetail(undefined);},[monstersVisible,kind,detail?.id]);
   const { edition: editionFilter, filters, sort, descending, query:categoryQuery } = libraryState;
-  const libraryEntries=useMemo(()=>sourceEntries.filter(entry=>customVisibilityAllows(entry,customVisibility.mode)),[sourceEntries,customVisibility.mode]);
+  const libraryEntries=useReadViewMemo(localCloudViews,()=>sourceEntries.filter(entry=>customVisibilityAllows(entry,customVisibility.mode)),[sourceEntries,customVisibility.mode]);
   const { globalQuery:query, setGlobalQuery:setQuery } = library;
   const setEditionFilter = library.setEdition;
   const detailPane = useRef<HTMLElement>(null);
@@ -672,15 +675,15 @@ export default function App() {
   useLayoutEffect(()=>{if(inWorkbench&&wb.target?.kind==='character'&&storedCharacter?.id===workbenchCharacterId(wb.target)&&appliedDocument.current===wb.document)markWorkbenchView('committed',wb.target.key);},[storedCharacter,wb.target,wb.document]);
 
 
-  const columns = useMemo(() => columnsFor(choiceScope?.wiki&&choiceScope.tab===kind&&choiceScope.entries.length>0&&choiceScope.entries.every(e=>e.kind==='feature')?'feature':kind, c?.edition==='2014'||!!c?.profile.optional.legacy||['2014','all'].includes(editionFilter)), [kind,c?.edition,c?.profile.optional.legacy,editionFilter,choiceScope]);
+  const columns = useReadViewMemo(localCloudViews,() => columnsFor(choiceScope?.wiki&&choiceScope.tab===kind&&choiceScope.entries.length>0&&choiceScope.entries.every(e=>e.kind==='feature')?'feature':kind, c?.edition==='2014'||!!c?.profile.optional.legacy||['2014','all'].includes(editionFilter)), [kind,c?.edition,c?.profile.optional.legacy,editionFilter,choiceScope]);
   const facets = useMemo(() => facetsFor(kind), [kind]);
-  const categoryEntries = useMemo(() => {
+  const categoryEntries = useReadViewMemo(localCloudViews,() => {
     if (!c) return [];
     const candidates=choiceScope?.wiki&&choiceScope.tab===kind?new Set(choiceScope.entries.map(e=>e.id)):undefined;
     return libraryEntries.filter(e => (candidates?candidates.has(e.id):kind==='favorites'?favorites.has(e):matchesLibraryTab(e,kind)&&(kind!=='class'||e.kind==='class')) &&
       (candidates&&activeChoice?.sourceProgression?true:wikiEditionAllows(e,c,editionFilter)));
   }, [libraryEntries, c?.edition, c?.profile.optional.legacy, kind, editionFilter,choiceScope,favorites.has]);
-  const sortedCategoryEntries=useMemo(()=>categoryEntries.filter(e=>matchesFacets(e,filters,facets)).sort((a,b)=>compareEntries(a,b,columns.find(col=>col.key===sort)||columns[0],descending,sourceDisplay.registry)),[categoryEntries,filters,facets,columns,sort,descending,sourceDisplay.registry]);
+  const sortedCategoryEntries=useReadViewMemo(localCloudViews,()=>categoryEntries.filter(e=>matchesFacets(e,filters,facets)).sort((a,b)=>compareEntries(a,b,columns.find(col=>col.key===sort)||columns[0],descending,sourceDisplay.registry)),[categoryEntries,filters,facets,columns,sort,descending,sourceDisplay.registry]);
   const {matches:matchesEntrySearch,status:searchStatus}=useEntrySearch(categoryQuery,sortedCategoryEntries,sourceDisplay.registry);
   const filtered=useMemo(()=>categoryQuery.trim()?sortedCategoryEntries.filter(matchesEntrySearch):sortedCategoryEntries,[sortedCategoryEntries,categoryQuery,matchesEntrySearch]);
   useEffect(() => { setException(''); }, [detail?.id]);
@@ -783,11 +786,15 @@ export default function App() {
   }
   useEffect(() => {
     if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench) return;
+    checkReconciliation(reconciliation!,()=>{
     const draft = structuredClone(c);
     const castingChanged=hydrateImportedCasting(draft,allEntries);
     const featuresChanged=syncFeatures(draft, allEntries,undefined,catalogNames),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=automationRuntime.syncSourceSpells(draft,allEntries);
-    if (featuresChanged || resourcesChanged || castingChanged || sourceSpellsChanged) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
-  }, [reconciliation, allEntries,automationRuntime]);
+    const changed=featuresChanged || resourcesChanged || castingChanged || sourceSpellsChanged;
+    if (changed) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
+    return changed;
+    });
+  }, [reconciliation, allEntries,automationRuntime,checkReconciliation]);
   function undo(redo=false){void travelHistory(redo);}
 
   useEffect(() => {

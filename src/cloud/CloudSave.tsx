@@ -9,6 +9,7 @@ import {queuedRefresh} from './queuedRefresh';
 import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
 import {readPersistedCharacter} from './persistedCharacter';
 import {cloudSaveScheduler,snapshotHasher} from './saveScheduler';
+import {syncTiming} from './syncTiming';
 import {UploadWarning} from './UploadWarning';
 import './cloudSave.css';
 import {QQLogin} from './QQLogin';
@@ -35,12 +36,13 @@ function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,rec
  const hashSnapshot=useRef<ReturnType<typeof snapshotHasher>|undefined>(undefined);
  if(!hashSnapshot.current)hashSnapshot.current=snapshotHasher(characterHash);
  const disposed=useRef(false),terminal=useRef<Record<string,SyncState>>({}),engine=useRef<ReturnType<typeof createCloudSync>|undefined>(undefined);
+ const timings=useRef<ReturnType<typeof syncTiming>|undefined>(undefined);timings.current??=syncTiming();
  if(!engine.current)engine.current=createCloudSync({readCharacter:async id=>{
   if(latest.current.disabled)throw Error('当前标签页只读，本机草稿保留。');
   // A new edit can extend App's local save queue while the first read waits.
   // Read again until the previously observed content has also been persisted.
   return readPersistedCharacter(()=>latest.current.readCharacter(id),hashSnapshot.current!);
- },receive:(...args)=>latest.current.receive?.(...args)||Promise.resolve(false),readReceipt:readSyncReceipt,writeReceipt:writeSyncReceipt,session:cloudSession,read:readCloudCard,directory:cloudCards,mutation:cloudMutation,hash:hashSnapshot.current!,lock:cloudCardLock,changed:(id,state)=>{terminal.current[id]=state;if(!disposed.current)setStates(old=>({...old,[id]:state}));}});
+ },receive:(...args)=>latest.current.receive?.(...args)||Promise.resolve(false),readReceipt:readSyncReceipt,writeReceipt:writeSyncReceipt,session:cloudSession,read:readCloudCard,directory:cloudCards,mutation:cloudMutation,hash:hashSnapshot.current!,lock:cloudCardLock,changed:(id,state)=>{timings.current!.observe(id,state.phase);terminal.current[id]=state;if(!disposed.current)setStates(old=>({...old,[id]:state}));}});
  const scheduler=useRef<ReturnType<typeof cloudSaveScheduler>|undefined>(undefined);
  if(!scheduler.current)scheduler.current=cloudSaveScheduler(async id=>{
   if(latest.current.disabled||rightsRef.current[id])return;
@@ -117,7 +119,7 @@ function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,rec
   try{const session=await cloudSession(),account=session.authenticated?session.account?.id:session.temporaryUpload?session.uploadOwner?.id:undefined;setTarget(old=>old?.id===id?{...old,account,temporary:session.temporaryUpload===true&&!session.authenticated,error:account?undefined:session.qqLogin==='ready'?'请先使用 QQ 登录，再保存到自己的卡库。':'云端暂时无法保存。请保留本机 JSON 备份，稍后重试。'}:old);}
   catch{setTarget(old=>old?.id===id?{...old,error:'云端连接失败。请保留本机 JSON 备份，稍后重试。'}:old);}
  }
- return <CloudSaveContext.Provider value={enabled?{states,session,refreshSession,focus,request:id=>void request(id),beforeLogin:async id=>{if(!latest.current.disabled)await latest.current.readCharacter(id);},importCard:importCard?async id=>{
+ return <CloudSaveContext.Provider value={enabled?{states,syncMs:timings.current.read,session,refreshSession,focus,request:id=>void request(id),beforeLogin:async id=>{if(!latest.current.disabled)await latest.current.readCharacter(id);},importCard:importCard?async id=>{
   const account=session?.account?.id;if(!account||latest.current.disabled)throw Error('当前不可导入，请先登录并恢复编辑权限。');
   const before=await cloudSession();if(before.account?.id!==account)throw Error('账号已改变，请重新打开卡库。');
   const card=await readCloudCard(id),after=await cloudSession();
