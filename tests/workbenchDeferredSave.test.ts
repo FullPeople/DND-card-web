@@ -1,6 +1,9 @@
 import {beforeEach,afterEach,expect,it,vi} from 'vitest';
 import {newCharacter} from '../src/core/model';
 import {evaluate} from '../src/core/engine';
+import {newAutomationState} from '../src/core/automation/state';
+import {applyRuntimeCharacterEdit,runtimeValueEdit} from '../src/core/runtimeCharacterEdit';
+import {createWorkbenchDerivation} from '../src/platform/workbenchDerivation';
 const wire=vi.hoisted(()=>({sent:[] as any[],receive:undefined as undefined|((m:any)=>void)}));
 vi.mock('../src/platform/relay',()=>({Relay:class{constructor(_u:string,_s:string,_r:string,_k:string,receive:(m:any)=>void){wire.receive=receive;}send(message:any){wire.sent.push(message);return Promise.resolve();}}}));
 vi.mock('../src/platform/workbenchSound',()=>({startWorkbenchSound:vi.fn(),playWorkbenchSound:vi.fn()}));
@@ -30,6 +33,12 @@ it('does no expensive work if permission is revoked before the queued send',asyn
  const {api,c}=await ready(),compute=vi.fn(()=>evaluate(c)),result=api.patchWorkbenchStats(c,{...c,runtime:{...c.runtime,hp:8}},compute,compute)!.catch(e=>e);
  receive('access',{access:auth(2,false)});await vi.advanceTimersByTimeAsync(80);
  expect(await result).toMatchObject({permissionChanged:true});expect(compute).not.toHaveBeenCalled();expect(saves()).toHaveLength(0);
+});
+it('combines certified balance edits and derives only once while preserving the native delta and ACK',async()=>{
+ const {api,c}=await ready();c.automation=newAutomationState();const compute=vi.fn(evaluate),derive=createWorkbenchDerivation(compute),pending:Promise<any>[]=[];let before=c;
+ for(let i=0;i<10;i++){const old=before,next=applyRuntimeCharacterEdit(old,runtimeValueEdit('hp',9-i))!;expect(next).toBeDefined();pending.push(api.patchWorkbenchStats(old,next,()=>derive(old),()=>derive(next))!);before=next;}
+ expect(compute).not.toHaveBeenCalled();await vi.advanceTimersByTimeAsync(80);expect(compute).toHaveBeenCalledTimes(1);expect(saves()).toHaveLength(1);expect(saves()[0].statPatch.health).toBe(0);expect(saves()[0].delta.native).toContainEqual(expect.objectContaining({path:['runtime','hp'],before:10,after:0}));
+ receive('ack',{requestId:saves()[0].requestId,ok:true,result:{}});await Promise.all(pending);expect(c.runtime.hp).toBe(10);
 });
 it('rejects all coalesced waiters if derivation fails without sending a partial document',async()=>{
  const {api,c}=await ready(),failed=()=>{throw Error('derive failed');};
