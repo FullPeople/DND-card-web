@@ -1,6 +1,7 @@
-import { useContext } from 'react';
+import { memo,useContext } from 'react';
+import {cloudFeaturesEnabled} from '../cloud/availability';
 import { CardVisualContext } from './cardVisualState';
-export function CellArt({ width: w, height: h, missing, rounded=false }: { width: number; height: number; missing: boolean; rounded?:boolean }) {
+function CellArtBody({ width: w, height: h, missing, rounded=false }: { width: number; height: number; missing: boolean; rounded?:boolean }) {
   const { exhaustion } = useContext(CardVisualContext);
   if (!w || !h) return null;
   const perimeter = rounded ? `M9 1.5H${w-9}Q${w-1.5} 1.5 ${w-1.5} 9V${h-9}Q${w-1.5} ${h-1.5} ${w-9} ${h-1.5}H9Q1.5 ${h-1.5} 1.5 ${h-9}V9Q1.5 1.5 9 1.5Z` : `M8.6 1.5H${w-8.6}L${w-1.5} 8.6V${h-8.6}L${w-8.6} ${h-1.5}H8.6L1.5 ${h-8.6}V8.6Z`;
@@ -18,8 +19,10 @@ export function CellArt({ width: w, height: h, missing, rounded=false }: { width
     <div className="cell-state-art poison-soak" aria-hidden="true"/>
   </>;
 }
-export function CellHalo({ kind }: { kind: 'portrait' | 'initiative' }) {
+function CellHaloBody({ kind }: { kind: 'portrait' | 'initiative' }) {
   return <svg className={`cell-halo halo-${kind}`} viewBox="0 0 160 100" preserveAspectRatio="none" aria-hidden="true">
     {kind === 'portrait' ? <g className="portrait-star-orbit"><ellipse cx="80" cy="28" rx="67" ry="20"/>{[0,1,2].map(i => <g className={`ellipse-star star-${i}`} key={i}><path d="M0-10L3-3 10 0 3 3 0 10-3 3-10 0-3-3Z"/></g>)}</g> : <g className="initiative-burst">{Array.from({length:18},(_,i)=><path key={i} d="M-2-38L0-50 3-38Z" transform={`translate(80 50) scale(1.5 1) rotate(${i*20})`}/>)}</g>}
   </svg>;
 }
+export const CellArt=cloudFeaturesEnabled?memo(CellArtBody):CellArtBody;
+export const CellHalo=cloudFeaturesEnabled?memo(CellHaloBody):CellHaloBody;

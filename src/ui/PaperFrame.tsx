@@ -4,7 +4,8 @@ import type {UiTextKey} from './uiText';
 import {useSheetRenderMode,useSheetCaptureActive} from './sheetDisplay';
 import {useSurfaceMotion} from './useSurfaceMotion';
 import './responsive177.css';
-import { useContext, useId, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useContext, useId, useEffect, useLayoutEffect, useMemo,useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import {cloudFeaturesEnabled} from '../cloud/availability';
 import type { Character } from '../core/model';
 import {sheetPaletteStyle} from '../core/palette';
 
@@ -34,7 +35,9 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const adaptive=effectsEnabled&&(compact||effectLayout==='adaptive');
   const effects = visualConditions(character);
   const visuals = editing || !effectsEnabled ? { active: new Set<import('./conditionVisuals').ConditionVisual>(), exhaustion: 0 } : effects;
-  const originalVisuals=adaptive?{active:new Set<import('./conditionVisuals').ConditionVisual>(),exhaustion:0}:visuals;
+  // Balance and save updates do not change the hundreds of status-art paths.
+  const visualKey=cloudFeaturesEnabled?(adaptive?'adaptive':`${[...visuals.active].sort().join(',')}:${visuals.exhaustion}`):visuals;
+  const originalVisuals=useMemo(()=>adaptive?{active:new Set<import('./conditionVisuals').ConditionVisual>(),exhaustion:0}:visuals,[visualKey]);
   const paper=useRef<HTMLDivElement>(null);
   const capturing=useSheetCaptureActive();
   useSurfaceMotion(paper,`${character.id}:${page}`,motionEnabled&&!displayOnly&&!capturing);
