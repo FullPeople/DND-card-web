@@ -33,6 +33,10 @@ import {applyDisplayCharacterEdit,sameCharacterMechanics} from '../core/displayC
 import {applyRuntimeCharacterEdit,runtimeCharacterBase} from '../core/runtimeCharacterEdit';
 import {workbenchDerived} from '../platform/workbenchDerivation';
 import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
+import {snapshotMemo} from '../platform/snapshotMemo';
+import {workspaceNavigationWriter} from '../platform/workspaceNavigationWriter';
+import {saveWorkspaceSelection} from '../platform/storage';
+import {cloudFeaturesEnabled} from '../cloud/availability';
 import {ToolBoundary} from './ToolBoundary';
 import './classCompatibility.css';
 import './editingRecovery.css';
@@ -253,7 +257,8 @@ export default function App() {
   const [saving, setSaving] = useState('正在读取');
   const queue = useRef(Promise.resolve());
   const snapshotWriter=useRef<ReturnType<typeof snapshotSaveQueue<Workspace>>|undefined>(undefined);
-  snapshotWriter.current??=snapshotSaveQueue(saveWorkspace,{coalesce:!qqRoom});
+  const localCloudViews=standalone&&!inWorkbench&&!qqRoom&&cloudFeaturesEnabled;
+  snapshotWriter.current??=snapshotSaveQueue(localCloudViews?workspaceNavigationWriter(saveWorkspace,saveWorkspaceSelection):saveWorkspace,{coalesce:!qqRoom});
   useEffect(()=>{const flush=()=>snapshotWriter.current!.flush();const hidden=()=>{if(document.visibilityState==='hidden')flush();};window.addEventListener('pagehide',flush);document.addEventListener('visibilitychange',hidden);return()=>{window.removeEventListener('pagehide',flush);document.removeEventListener('visibilitychange',hidden);flush();};},[]);
   const pendingSaves = useRef(0);
   const saveFailed = useRef(false);
@@ -288,9 +293,11 @@ export default function App() {
   const catalogNames=useMemo(()=>entryNameIndex(allEntries),[allEntries]);
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
-  const localProfile=useMemo(()=>storedCharacter?withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile:undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks]);
+  const rememberView=useMemo(()=>snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
+  const localProfile=useMemo(()=>storedCharacter?rememberView('profile',storedCharacter.profile,()=>withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile):undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks,rememberView]);
   const buildView=useMemo(()=>{
     if(!storedBuild)return;
+    return rememberView('build',storedBuild,()=>{
     const effective=inWorkbench&&wb.shared?{...storedBuild,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources&&workspace?.siteSources?{...storedBuild,profile:localProfile!,rulePacks:activePacks}:storedBuild;
     // Reading an old card must not create competing network writes. Casting
     // metadata is a view until the owner performs an explicit edit.
@@ -300,10 +307,11 @@ export default function App() {
     const reviewed=(view:Character)=>acknowledgedView(view,sheetChoices(view,allEntries));
     if(inWorkbench&&effective.selections.some(s=>s.entry.packId==='imported'&&s.entry.kind==='class'&&!s.entry.raw._castingSource)){const view=structuredClone(effective);const hydrated=hydrateImportedCasting(view,allEntries),initialized=initializeAutomation(view);if(hydrated||initialized){syncAutoResources(view);return reviewed(view);}}
     if(automationNeedsInitialization(effective)){const autoView=structuredClone(effective);if(initializeAutomation(autoView)){syncAutoResources(autoView);return reviewed(autoView);}}return reviewed(effective);
-  },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries]);
+    });
+  },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries,rememberView]);
   // Explicit runtime forks share their construction review; retain the latest balances.
-  const c=useMemo(()=>!storedCharacter||!buildView?undefined:storedCharacter===storedBuild?buildView:{...buildView,runtime:storedCharacter.runtime,spellSettings:storedCharacter.spellSettings,revision:storedCharacter.revision,updatedAt:storedCharacter.updatedAt},[storedCharacter,storedBuild,buildView]);
-  const buildChoices=useMemo(()=>buildView?sheetChoices(buildView,allEntries):[],[buildView,allEntries]);
+  const c=useMemo(()=>!storedCharacter||!buildView?undefined:rememberView('display',storedCharacter,()=>storedCharacter===storedBuild?buildView:{...buildView,runtime:storedCharacter.runtime,spellSettings:storedCharacter.spellSettings,revision:storedCharacter.revision,updatedAt:storedCharacter.updatedAt}),[storedCharacter,storedBuild,buildView,rememberView]);
+  const buildChoices=useMemo(()=>buildView?rememberView('choices',buildView,()=>sheetChoices(buildView,allEntries)):[],[buildView,allEntries,rememberView]);
   const mechanicsRef=useRef<Character|undefined>(undefined);
   if(c&&!sameCharacterMechanics(mechanicsRef.current,c))mechanicsRef.current=c;
   const mechanics=mechanicsRef.current;
@@ -349,7 +357,7 @@ export default function App() {
   };
   const [classSyncBusy,setClassSyncBusy]=useState(false);
   const [workbenchReadError,setWorkbenchReadError]=useState<{key:string;message:string}>();
-  const classReview=useMemo(()=>buildView?cardMigrationIssues(buildView,allEntries):[],[buildView,allEntries]);
+  const classReview=useMemo(()=>buildView?rememberView('review',buildView,()=>cardMigrationIssues(buildView,allEntries)):[],[buildView,allEntries,rememberView]);
   const classNeedsReview=classReview.length>0;
   const showClassReview=usePointerStableValue(classNeedsReview&&!loading,c?.id);
   const migrationWarningCache=useMemo(()=>new WeakMap<Character,boolean>(),[allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
@@ -523,7 +531,7 @@ export default function App() {
     const initialize = async (canWrite: boolean) => {
       writable.current = canWrite; setReadOnly(!canWrite); setWorkbenchTabWritable(canWrite);
       try {
-        const stored = await loadWorkspace();
+        const stored = await loadWorkspace(localCloudViews);
         const value = await prepareCloudDraft(stored,canWrite); if (!alive) return;
         if(value!==stored&&canWrite&&value)await saveWorkspace(value);
         if (value) {acceptWorkspace(value);if(localSources&&canWrite&&(!value.siteSources||!sameValue(value.characters,workspaceRef.current!.characters)))persist(workspaceRef.current!);} else { const first = createLocalCharacter(); const initial: Workspace = { schemaVersion: 1, characters: [first], activeId: first.id, packs: [] }; if (canWrite) persist(initial); else acceptWorkspace(initial); }
@@ -560,7 +568,7 @@ export default function App() {
   useEffect(()=>{
     if(!standalone||qqRoom||inWorkbench)return;
     let alive=true;
-    const refresh=async()=>{if(writable.current||pendingSaves.current||saveFailed.current)return;const value=await loadWorkspace();if(alive&&value&&!writable.current)acceptWorkspace(value);};
+    const refresh=async()=>{if(writable.current||pendingSaves.current||saveFailed.current)return;const value=await loadWorkspace(localCloudViews);if(alive&&value&&!writable.current)acceptWorkspace(value);};
     const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('dnd-card-workspace'):undefined;channel?.addEventListener('message',refresh);window.addEventListener('focus',refresh);
     return()=>{alive=false;channel?.close();window.removeEventListener('focus',refresh);};
   },[]);
@@ -586,7 +594,7 @@ export default function App() {
   useEffect(()=>{if(!wikiUi)return;void load();return()=>loadController.current?.abort();},[!!wikiUi]);
   useEffect(() => {if(startupComplete)void registerOffline(activate => setActivateUpdate(() => activate));}, [startupComplete]);
   useEffect(() => { const beforeUnload = (event: BeforeUnloadEvent) => { if (pendingSaves.current > 0 || saveFailed.current || restoredWorkspacePendingSave.current) { event.preventDefault(); event.returnValue = ''; } }; window.addEventListener('beforeunload', beforeUnload); return () => window.removeEventListener('beforeunload', beforeUnload); }, []);
-  const d = useMemo(() => mechanics ? evaluate(mechanics) : undefined, [mechanics]);
+  const d = useMemo(() => mechanics ? rememberView('derived',mechanics,()=>evaluate(mechanics)) : undefined, [mechanics,rememberView]);
   // Reveal a fully validated/evaluated read-only card independently of editing.
   // A saved editing preference is restored by loadEditor; its network download
   // must not keep the whole card behind a finished logo.
@@ -1055,7 +1063,7 @@ export default function App() {
     <main className={`workspace ${wikiVisible?'':'wiki-hidden'}`}>
       <section data-inventory-recipient={inWorkbench&&workbenchPage==='sheet'&&wb.target?wb.target.cardId?`card:${wb.target.cardId}`:`monster:${wb.target.itemId}`:undefined} className={`sheet-pane ${tab === 'sheet' ? 'mobile-active' : ''} ${editing&&(!inWorkbench||workbenchPage==='sheet'&&wb.target?.write)&&!exportView?'sheet-editing':''}`} aria-label={t('cardWorkspace')}>
         {inWorkbench&&workbenchPage==='qq'?<WorkbenchPanel panel="qq" close={()=>setWorkbenchPage(previousPanelPage.current)}/>:inWorkbench&&workbenchPage==='textEffects'?<WorkbenchPanel panel="textEffects" close={()=>setWorkbenchPage('console')}/>:inWorkbench&&workbenchPage==='music'?<MusicWorkspace close={()=>setWorkbenchPage('console')}/>:inWorkbench&&['settings','features'].includes(workbenchPage)?<WorkbenchPanel key={workbenchPage} panel="settings" section={workbenchPage==='features'?'features':undefined} close={closeWorkbenchPanel}/>:inWorkbench&&workbenchPage==='notes'&&wb.role==='GM'?<DmNotes/>:inWorkbench&&workbenchPage==='dice'?<DicePage online={wb.online} target={wb.target} rolls={wb.rolls} compose={wb.compose}/>:inWorkbench&&workbenchPage==='console'?<DMConsole navigate={setWorkbenchPage}/>:inWorkbench&&wb.readFailure?<div className="workbench-monster"><section role="alert" className="workbench-read-recovery"><h2>这张角色卡暂时无法读取</h2><p>{wb.readFailure.message}</p><p>不会自动移除角色资料或放宽 Owner 权限。可以重新读取；仍失败时请复制诊断信息反馈。</p><div className="dialog-actions"><button disabled={!wb.online||wb.loading} onClick={()=>void retryWorkbenchRead()}>{wb.loading?'正在重试…':'重试读取这张卡'}</button><button onClick={()=>setModal('characters')}>打开角色簿</button><CopyDiagnostic text={JSON.stringify(wb.readFailure.diagnostic,null,2)} label="复制诊断信息"/></div></section></div>:inWorkbench&&(!wb.target||wb.target.kind==='character'&&(!wb.document||c.id!==workbenchCharacterId(wb.target)||workbenchReadError?.key===wb.target.key))?<div className="workbench-monster">{workbenchReadError&&workbenchReadError.key===wb.target?.key?<p role="alert">{workbenchReadError?.message}。原始资料保留，请选择其他角色或重新读取角色簿。</p>:<p role="status">{wb.loading||wb.document?'读取角色资料…':'从上方选择角色卡'}</p>}</div>:inWorkbench&&(wb.target?.kind==='monster'||wb.target?.kind==='token')?<WorkbenchMonster editing={editing} setEditing={setEditing} key={wb.target.key} target={wb.target} raw={wb.document} online={wb.online} onLink={link}/>:<>
-        <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span>{!inWorkbench&&<CharacterTabs characters={workspace.characters} activeId={c.id} warnings={classWarnings} label={t('currentCharacter')} select={id=>{if(confirmResourceDraftDiscard())persist({...workspace,activeId:id});}}/>}</div>
+        <div className="pane-toolbar"><div><span className="eyebrow">{t('card')}</span>{!inWorkbench&&<CharacterTabs characters={workspace.characters} activeId={c.id} warnings={classWarnings} label={t('currentCharacter')} select={id=>{const current=workspaceRef.current;if(current&&id!==current.activeId&&confirmResourceDraftDiscard())persist({...current,activeId:id});}}/>}</div>
           <div className="toolbar-actions">{<button className="automation-toggle" aria-label={t('automationSettings')} aria-pressed={automationEnabled(c)} onClick={()=>setModal('automation')}><BoltIcon/>{t('automation')}<span className="label-long"> · {t(automationEnabled(c)?'on':'manual')}</span></button>}{inWorkbench&&(workbenchUncertain.current.has(c.id)||workbenchFailed.current.has(c.id))&&<button className="sync-review-button" onClick={()=>setModal('syncReview')}>{t('syncReview')}</button>}<SheetFullscreenButton/><button aria-label={t('undo')} title={t('undo')} disabled={!actionHistory.undo} onClick={() => undo()}><UndoIcon/></button><button aria-label={t('redo')} title={t('redo')} disabled={!actionHistory.redo} onClick={() => undo(true)}><RedoIcon/></button><SheetDisplayButton/><button disabled={readOnly||!automationRuntime||inWorkbench&&!wb.target?.write} className="edit-mode-toggle" aria-busy={editingRequested&&!automationRuntime&&!editingLoadError} title={editingRequested&&!automationRuntime&&!editingLoadError?'正在恢复编辑模式，当前卡面仍可查阅':undefined} role="switch" aria-checked={editing} aria-label={t('editMode')} onClick={() => setEditing(v => !v)}><span className="edit-switch-track"><i/></span>{t('editMode')}</button></div>
         </div>
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}

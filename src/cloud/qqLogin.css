@@ -5,6 +5,8 @@
 /* Header control. */
 .qq-account{display:flex;align-items:center;gap:6px;flex-shrink:0;min-width:0;font-size:12px}
 a.qq-login-button{display:inline-flex;align-items:center;padding:0;border:0;background:none;clip-path:none;line-height:0;flex-shrink:0;min-height:32px;text-decoration:none}
+a.qq-login-button[aria-busy=true]{position:relative;cursor:progress}
+.qq-login-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--ui-selected,#50525b);color:var(--ui-selectedInk,#fff);font:600 12px/1.4 system-ui,"Microsoft YaHei",sans-serif;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
 .qq-login-button picture{display:block;line-height:0}
 .qq-account .qq-login-button img{display:block;width:170px;height:32px;max-width:none;object-fit:contain;image-rendering:auto;filter:none;border:0;padding:0}
 .qq-account-trigger{display:inline-flex;align-items:center;gap:6px;max-width:190px;box-sizing:border-box;min-height:30px;padding:2px 8px 2px 5px;font-size:12px;flex:none}

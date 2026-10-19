@@ -11,8 +11,12 @@ let cacheConnection:ReturnType<typeof openDB>|undefined;
 const openWorkspace=(name:string)=>openDB(name,1,{upgrade(db){db.createObjectStore('documents');db.createObjectStore('cache');}});
 const db = () => connection ??= openWorkspace(workspaceIdentity.database);
 const cacheDb=()=>workspaceIdentity.cacheDatabase===workspaceIdentity.database?db():cacheConnection??=openWorkspace(workspaceIdentity.cacheDatabase);
-export async function loadWorkspace(): Promise<Workspace | undefined> {
-  if(!qqRoom)return (await db()).get('documents','workspace');
+export async function loadWorkspace(navigation=false): Promise<Workspace | undefined> {
+  if(!qqRoom){
+    const database=await db();if(!navigation)return database.get('documents','workspace');
+    const tx=database.transaction('documents','readonly'),[workspace,activeId]=await Promise.all([tx.store.get('workspace'),tx.store.get('workspace-active-id')]);await tx.done;
+    return workspace&&typeof activeId==='string'&&workspace.characters.some((card:Character)=>card.id===activeId)?{...workspace,activeId}:workspace;
+  }
   const remote=await readRoom(),database=await db(),scopeKey=await roomScopeKey(),draft=await database.get('documents','room-pending') as {workspace:Workspace;revision:number;scopeKey?:string}|undefined;
   if(draft&&(!draft.scopeKey||draft.scopeKey===scopeKey))return draft.workspace;
   return {schemaVersion:1,characters:[remote.character],activeId:remote.character.id,packs:remote.character.rulePacks||[]};
@@ -22,6 +26,7 @@ export async function saveWorkspace(workspace: Workspace): Promise<void> {
   const database = await db(); const tx = database.transaction('documents', 'readwrite');
   const previous = await tx.store.get('workspace');
   if (previous) await tx.store.put(previous, 'backup');
+  await tx.store.delete('workspace-active-id');
   await tx.store.put(workspace, 'workspace'); await tx.done;
   if(standalone&&!qqRoom&&typeof BroadcastChannel!=='undefined'){const channel=new BroadcastChannel('dnd-card-workspace');channel.postMessage({saved:true});channel.close();}
   if(qqRoom){
@@ -37,6 +42,13 @@ export async function saveWorkspace(workspace: Workspace): Promise<void> {
       if(latest?.operationId===operation!.id){if(operation!.phase==='confirmed'&&operation!.scope===roomChangeScope())await tx.store.delete('room-pending');else await tx.store.put({...latest,receipt},'room-pending');}await tx.done;
     }
   }
+}
+export async function saveWorkspaceSelection(workspace:Workspace):Promise<void>{
+  if(qqRoom)throw Error('Room saves require the full document transaction');
+  if(!workspace.characters.some(card=>card.id===workspace.activeId))throw Error('Selected character is not in this workspace');
+  const tx=(await db()).transaction('documents','readwrite');
+  await tx.store.put(workspace.activeId,'workspace-active-id');await tx.done;
+  if(standalone&&typeof BroadcastChannel!=='undefined'){const channel=new BroadcastChannel('dnd-card-workspace');channel.postMessage({saved:true});channel.close();}
 }
 export async function hasRoomDraft(){if(!qqRoom)return false;const scopeKey=await roomScopeKey(),draft=await (await db()).get('documents','room-pending');return !!draft&&(!draft.scopeKey||draft.scopeKey===scopeKey);}
 export async function archiveRoomDraft(){if(!qqRoom)return;const database=await db(),tx=database.transaction('documents','readwrite'),draft=await tx.store.get('room-pending');if(draft)await tx.store.put(draft,'room-recovery:'+Date.now());await tx.store.delete('room-pending');await tx.done;}

@@ -15,6 +15,7 @@ export function cloudSaveScheduler(sync:(id:string)=>Promise<void>,delay=650){
  let previous=new Map<string,Character>(),started=false,selected:string|undefined,enabled=false;
  let timer:ReturnType<typeof setTimeout>|undefined,running=false;
  const dirty=new Set<string>();
+ const checked=new WeakSet<Character>();
  function schedule(){
   clearTimeout(timer);timer=undefined;
   if(!enabled||running||!dirty.size)return;
@@ -28,6 +29,7 @@ export function cloudSaveScheduler(sync:(id:string)=>Promise<void>,delay=650){
    for(const id of batch){
     if(!enabled)break;
     if(!dirty.delete(id)||!previous.has(id))continue;
+    checked.add(previous.get(id)!);
     // The sync engine owns failure receipts and uncertain-write recovery.
     try{await sync(id);}catch{/* A later explicit retry rechecks the receipt. */}
    }
@@ -38,7 +40,7 @@ export function cloudSaveScheduler(sync:(id:string)=>Promise<void>,delay=650){
    const next=new Map(characters.map(card=>[card.id,card]));
    if(!started){for(const card of characters)if(!activeId||card.id===activeId)dirty.add(card.id);started=true;}
    else for(const card of characters)if(previous.get(card.id)!==card)dirty.add(card.id);
-   if(activeId&&activeId!==selected&&next.has(activeId))dirty.add(activeId);
+   if(activeId&&activeId!==selected&&next.has(activeId)&&!checked.has(next.get(activeId)!))dirty.add(activeId);
    for(const id of dirty)if(!next.has(id))dirty.delete(id);
    previous=next;selected=activeId;schedule();
   },

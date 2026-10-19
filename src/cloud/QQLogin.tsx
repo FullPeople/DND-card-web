@@ -12,8 +12,17 @@ export function QQLogin(props:QQLoginProps){
 }
 /** First visible character of the nickname for the avatar circle when QQ gave no picture. */
 export const avatarInitial=(nickname?:string)=>(nickname||'').trim().slice(0,1).toUpperCase()||'Q';
+const loginTimingKey='dnd-card:qq-login-prepare-ms';
+function lastPreparation(){try{const value=sessionStorage.getItem(loginTimingKey);return value===null?undefined:Number(value);}catch{return undefined;}}
+function warmQQ(){
+  for(const host of ['https://graph.qq.com','https://imgcache.qq.com']){
+    if(document.head.querySelector(`link[data-qq-connect="${host}"]`))continue;
+    const link=document.createElement('link');link.rel='preconnect';link.href=host;link.dataset.qqConnect=host;document.head.append(link);
+  }
+}
 function OnlineQQLogin({session:managedSession,managed=false,beforeLogin,refresh,children}:QQLoginProps){
   const [local,setLocal]=useState<CloudSession>(),[error,setError]=useState(''),[busy,setBusy]=useState(false),[open,setOpen]=useState(false),[copied,setCopied]=useState(false);
+  const [loginStatus,setLoginStatus]=useState(''),[preparationMs]=useState(lastPreparation);
   const dialog=useRef<HTMLDialogElement>(null),trigger=useRef<HTMLButtonElement>(null);
   const session=managed?managedSession:local;
   useEffect(()=>{
@@ -31,7 +40,7 @@ function OnlineQQLogin({session:managedSession,managed=false,beforeLogin,refresh
   }
   const href='/api/auth/qq/login?returnTo='+encodeURIComponent(location.pathname+location.search+location.hash);
   const account=session?.authenticated?session.account:undefined,initial=avatarInitial(account?.nickname),slots=session?.slots,inLibrary=location.pathname==='/library/';
-  return <div className="qq-account">{account?<><button ref={trigger} type="button" className="qq-account-trigger" aria-label="账号" aria-haspopup="dialog" aria-expanded={open} onClick={()=>{setCopied(false);setError('');setOpen(true);}}><span className="qq-profile">{account.avatar?<img src={account.avatar} alt="" referrerPolicy="no-referrer"/>:<span className="qq-avatar qq-avatar-small" aria-hidden="true">{initial}</span>}<span>{account.nickname||'QQ 已登录'}</span></span><span className="qq-account-chevron" aria-hidden="true"><ChevronDownIcon size={14}/></span></button>
+  return <div className="qq-account" data-qq-preparation-ms={preparationMs}>{account?<><button ref={trigger} type="button" className="qq-account-trigger" aria-label="账号" aria-haspopup="dialog" aria-expanded={open} onClick={()=>{setCopied(false);setError('');setOpen(true);}}><span className="qq-profile">{account.avatar?<img src={account.avatar} alt="" referrerPolicy="no-referrer"/>:<span className="qq-avatar qq-avatar-small" aria-hidden="true">{initial}</span>}<span>{account.nickname||'QQ 已登录'}</span></span><span className="qq-account-chevron" aria-hidden="true"><ChevronDownIcon size={14}/></span></button>
     {open&&<dialog ref={dialog} className="qq-account-dialog cloud-modal dialog" aria-label="账号" onCancel={event=>{event.preventDefault();close();}} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}}}>
       <header className="cloud-modal-head"><span className="cloud-modal-icon"><UserIcon size={18}/></span><div className="cloud-modal-heading"><h2>账号</h2><p>QQ 登录 · 私人卡库</p></div><button type="button" className="cloud-modal-close" autoFocus onClick={close} aria-label="关闭账号弹窗"><CloseIcon size={18}/></button></header>
       <div className="cloud-modal-body">
@@ -41,5 +50,12 @@ function OnlineQQLogin({session:managedSession,managed=false,beforeLogin,refresh
         {error&&<p className="cloud-modal-alert qq-account-error" role="alert"><WarningIcon size={15}/><span>{error}</span></p>}
       </div>
       <footer className="cloud-modal-foot">{!inLibrary&&<a className="cloud-button" href="/library/"><FolderOpenIcon size={15}/><span>打开卡库</span></a>}<button type="button" className="cloud-danger" disabled={busy} onClick={logout}><LogOutIcon size={15}/><span>{busy?'正在退出…':'退出登录'}</span></button></footer>
-    </dialog>}</>:<a className="qq-login-button" href={href} aria-label="QQ 登录" onClick={beforeLogin?event=>{event.preventDefault();if(busy)return;setBusy(true);setError('');void beforeLogin().then(()=>location.assign(href)).catch(()=>{setError('本机保存尚未完成，请先导出备份。');setBusy(false);});}:undefined} aria-busy={busy||undefined}><picture><source media="(max-width: 640px)" srcSet="/card/qq-login-120x24.png"/><img src="/card/qq-login-170x32.png" alt="QQ 登录" width="170" height="32"/></picture></a>}{error&&!open&&<span className="qq-account-error" role="alert">{error}</span>}</div>;
+    </dialog>}</>:<a className="qq-login-button" href={href} aria-label="QQ 登录" onPointerEnter={warmQQ} onFocus={warmQQ} onPointerDown={warmQQ} onClick={beforeLogin?event=>{
+      event.preventDefault();if(busy)return;setBusy(true);setError('');setLoginStatus('正在保留档案…');
+      const started=performance.now();
+      void beforeLogin().then(()=>{
+        try{sessionStorage.setItem(loginTimingKey,String(Math.round(performance.now()-started)));}catch{/* Timing is optional and contains no identity or OAuth data. */}
+        setLoginStatus('正在连接 QQ…');location.assign(href);
+      }).catch(()=>{setError('本机保存尚未完成，请先导出备份。');setBusy(false);});
+    }:undefined} aria-busy={busy||undefined}><picture><source media="(max-width: 640px)" srcSet="/card/qq-login-120x24.png"/><img src="/card/qq-login-170x32.png" alt="QQ 登录" width="170" height="32"/></picture>{busy&&<span className="qq-login-status" role="status">{loginStatus}</span>}</a>}{error&&!open&&<span className="qq-account-error" role="alert">{error}</span>}</div>;
 }
