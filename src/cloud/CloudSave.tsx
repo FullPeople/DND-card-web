@@ -6,6 +6,7 @@ import {subscribeAccountChanges} from './accountChanges';
 import {queuedRefresh} from './queuedRefresh';
 import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
 import {readPersistedCharacter} from './persistedCharacter';
+import {cloudSaveScheduler,snapshotHasher} from './saveScheduler';
 import {UploadWarning} from './UploadWarning';
 import './cloudSave.css';
 import {QQLogin} from './QQLogin';
@@ -22,17 +23,27 @@ function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,rec
  const directoryRefresh=useRef<()=>Promise<void>>(()=>Promise.resolve());
  const [states,setStates]=useState<Record<string,SyncState>>({}),[target,setTarget]=useState<{id:string;name:string;account?:string;temporary?:boolean;error?:string}>(),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false);
  const [session,setSession]=useState<CloudSession>();
+ const [focusedId,setFocusedId]=useState<string>();
+ const focus=useCallback((id:string)=>setFocusedId(id),[]),hasCardPicker=!!importCard;
  const sessionEpoch=useRef(0);
  const refreshSession=useCallback(async()=>{const epoch=++sessionEpoch.current,value=await cloudSession();if(!disposed.current&&epoch===sessionEpoch.current)setSession(value);},[]);
  const latest=useRef({readCharacter,disabled,characters,receive,importCard,access});latest.current={readCharacter,disabled,characters,receive,importCard,access};
  const rightsRef=useRef<Record<string,string|undefined>>({});
+ const hashSnapshot=useRef<ReturnType<typeof snapshotHasher>|undefined>(undefined);
+ if(!hashSnapshot.current)hashSnapshot.current=snapshotHasher(characterHash);
  const disposed=useRef(false),terminal=useRef<Record<string,SyncState>>({}),engine=useRef<ReturnType<typeof createCloudSync>|undefined>(undefined);
  if(!engine.current)engine.current=createCloudSync({readCharacter:async id=>{
   if(latest.current.disabled)throw Error('当前标签页只读，本机草稿保留。');
   // A new edit can extend App's local save queue while the first read waits.
   // Read again until the previously observed content has also been persisted.
-  return readPersistedCharacter(()=>latest.current.readCharacter(id),characterHash);
- },receive:(...args)=>latest.current.receive?.(...args)||Promise.resolve(false),readReceipt:readSyncReceipt,writeReceipt:writeSyncReceipt,session:cloudSession,read:readCloudCard,directory:cloudCards,mutation:cloudMutation,hash:characterHash,lock:cloudCardLock,changed:(id,state)=>{terminal.current[id]=state;if(!disposed.current)setStates(old=>({...old,[id]:state}));}});
+  return readPersistedCharacter(()=>latest.current.readCharacter(id),hashSnapshot.current!);
+ },receive:(...args)=>latest.current.receive?.(...args)||Promise.resolve(false),readReceipt:readSyncReceipt,writeReceipt:writeSyncReceipt,session:cloudSession,read:readCloudCard,directory:cloudCards,mutation:cloudMutation,hash:hashSnapshot.current!,lock:cloudCardLock,changed:(id,state)=>{terminal.current[id]=state;if(!disposed.current)setStates(old=>({...old,[id]:state}));}});
+ const scheduler=useRef<ReturnType<typeof cloudSaveScheduler>|undefined>(undefined);
+ if(!scheduler.current)scheduler.current=cloudSaveScheduler(async id=>{
+  if(latest.current.disabled||rightsRef.current[id])return;
+  const receipt=await readSyncReceipt(id);
+  if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!['conflict','error','uncertain'].includes(terminal.current[id]?.phase||''))await engine.current!.run(id);
+ });
  useEffect(()=>{disposed.current=false;return()=>{disposed.current=true;};},[]);
  useEffect(()=>{if(!enabled)return;const refresh=()=>{if(document.visibilityState==='visible')void refreshSession().catch(()=>{});};refresh();window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);return()=>{window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};},[enabled,refreshSession]);
  useEffect(()=>{
@@ -63,7 +74,8 @@ function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,rec
   });
   directoryRefresh.current=refreshQueue.request;
   const refresh=()=>{void refreshQueue.request().catch(()=>{});};
-  refresh();const timer=setInterval(refresh,5000);
+  // Account change notices deliver normal updates; this is a recovery poll.
+  refresh();const timer=setInterval(refresh,60000);
   const sessionChanged=()=>{refreshEpoch++;const checking=Object.fromEntries(Object.keys(rightsRef.current).map(id=>[id,'正在核对 QQ 账号和云端卡权限，暂时无法修改。']));rightsRef.current=checking;latest.current.access?.(checking);refresh();},stop=subscribeCloudSessionChanges(sessionChanged);
   window.addEventListener('focus',refresh);window.addEventListener('online',refresh);
   return()=>{alive=false;refreshQueue.stop();directoryRefresh.current=()=>Promise.resolve();stop();clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);};
@@ -91,18 +103,18 @@ function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,rec
   return()=>{alive=false;clearTimeout(pendingDeadline);clearTimeout(refreshTimer);channel?.close();window.removeEventListener('cloud-binding-changed',changed);};
  },[enabled,characters.map(character=>character.id).join('|')]);
  useEffect(()=>{
-  if(!enabled||disabled||!auto||!session?.authenticated&&!session?.temporaryUpload)return;
-  let alive=true;
-  const timer=setTimeout(()=>{void (async()=>{const receipts=await readSyncReceipts(characters.map(character=>character.id));for(const character of characters){const receipt=receipts[character.id];if(!alive)return;if(receipt.binding&&!receipt.pending&&!receipt.lastError&&!rightsRef.current[character.id]&&!['conflict','error','uncertain'].includes(states[character.id]?.phase||''))await engine.current!.run(character.id);}})().catch(()=>{});},650);
-  return()=>{alive=false;clearTimeout(timer);};
- },[enabled,disabled,characters,auto,session?.authenticated,session?.temporaryUpload,session?.account?.id]);
+  const update=()=>scheduler.current!.enable(enabled&&!disabled&&auto&&!!(session?.authenticated||session?.temporaryUpload)&&document.visibilityState==='visible'&&navigator.onLine);
+  update();window.addEventListener('online',update);window.addEventListener('offline',update);document.addEventListener('visibilitychange',update);
+  return()=>{scheduler.current!.enable(false);window.removeEventListener('online',update);window.removeEventListener('offline',update);document.removeEventListener('visibilitychange',update);};
+ },[enabled,disabled,auto,session?.authenticated,session?.temporaryUpload,session?.account?.id]);
+ useEffect(()=>{if(hasCardPicker&&!focusedId)return;scheduler.current!.observe(characters,focusedId);},[characters,focusedId,hasCardPicker]);
  async function request(id:string){
   const character=latest.current.characters.find(card=>card.id===id);if(!character||latest.current.disabled)return;
   setConfirmed(false);setTarget({id,name:character.name});
   try{const session=await cloudSession(),account=session.authenticated?session.account?.id:session.temporaryUpload?session.uploadOwner?.id:undefined;setTarget(old=>old?.id===id?{...old,account,temporary:session.temporaryUpload===true&&!session.authenticated,error:account?undefined:session.qqLogin==='ready'?'请先使用 QQ 登录，再保存到自己的卡库。':'云端暂时无法保存。请保留本机 JSON 备份，稍后重试。'}:old);}
   catch{setTarget(old=>old?.id===id?{...old,error:'云端连接失败。请保留本机 JSON 备份，稍后重试。'}:old);}
  }
- return <CloudSaveContext.Provider value={enabled?{states,session,refreshSession,request:id=>void request(id),beforeLogin:async id=>{if(!latest.current.disabled)await latest.current.readCharacter(id);},importCard:importCard?async id=>{
+ return <CloudSaveContext.Provider value={enabled?{states,session,refreshSession,focus,request:id=>void request(id),beforeLogin:async id=>{if(!latest.current.disabled)await latest.current.readCharacter(id);},importCard:importCard?async id=>{
   const account=session?.account?.id;if(!account||latest.current.disabled)throw Error('当前不可导入，请先登录并恢复编辑权限。');
   const before=await cloudSession();if(before.account?.id!==account)throw Error('账号已改变，请重新打开卡库。');
   const card=await readCloudCard(id),after=await cloudSession();
@@ -127,6 +139,7 @@ function CloudUploadDialog({target,confirmed,busy,disabled,change,cancel,submit}
 export function useCloudSaveAvailable(){return !!useContext(CloudSaveContext);}
 export function CloudSaveControl({id,disabled=false,book=false,library=false}:{id:string;disabled?:boolean;book?:boolean;library?:boolean}){
  const context=useContext(CloudSaveContext),[copied,setCopied]=useState(false),[copyError,setCopyError]=useState(false);
+ useEffect(()=>{if(!book)context?.focus?.(id);},[id,book,context?.focus]);
  useEffect(()=>{setCopied(false);setCopyError(false);},[id,context?.states[id]?.cloudId]);
  if(!context)return null;
  const state=context.states[id]||{phase:'local'},failed=['error','conflict','uncertain'].includes(state.phase);
