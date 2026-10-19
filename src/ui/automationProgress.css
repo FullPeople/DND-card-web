@@ -1,8 +1,3 @@
-.announcement-tabs{display:flex;flex-shrink:0;gap:0;margin:6px -26px 0;padding:0;background:transparent;border:0}
-.announcement-tabs button{flex:1;min-width:0;height:22px;min-height:22px;padding:0;border:0;border-bottom:2px solid transparent;box-sizing:border-box;box-shadow:none;background:transparent;color:#6f7a5f;font-size:12px;line-height:20px;font-weight:600;cursor:pointer;border-radius:0}
-.announcement-tabs button[aria-selected=true]{background:transparent;color:#414b3d;border-bottom-color:#414b3d;font-weight:750}
-.announcement-tabs button:focus-visible{outline:0;color:#7d5110;border-bottom-color:#9c6f24}
-.announcement-body>[hidden]{display:none}
 .automation-progress{font-size:13px;line-height:1.65;overflow-wrap:anywhere}
 .automation-progress-intro{margin:0 0 12px}
 .automation-progress-summary{margin:0 0 14px;color:#414b3d;font-weight:600}
@@ -12,4 +7,4 @@
 .automation-progress-track{height:4px;background:#e2e6d8;border-radius:2px;overflow:hidden}
 .automation-progress-track>span{display:block;height:100%;background:#728860}
 .automation-progress-percent{text-align:right;color:#657257;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
-@media(max-width:520px){.announcement-tabs{margin-inline:-16px}.automation-progress-books li{grid-template-columns:minmax(0,1fr) 44px 46px;gap:8px;font-size:12px}}
+@media(max-width:520px){.automation-progress-books li{grid-template-columns:minmax(0,1fr) 44px 46px;gap:8px;font-size:12px}}

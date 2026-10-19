@@ -61,3 +61,10 @@
 .announcement-tabs button{color:var(--ui-muted,#6f7a5f)}
 .announcement-tabs button[aria-selected=true]{color:var(--ui-ink,#343532);border-bottom-color:var(--ui-selected,#50525b)}
 .announcement-foot button.primary{background:var(--ui-selected,#50525b)!important;color:var(--ui-selectedInk,#fff)!important;border-color:var(--ui-selected,#50525b)!important;border-radius:6px}
+
+.announcement-tabs{display:flex;flex-shrink:0;gap:0;margin:6px -26px 0;padding:0;background:transparent;border:0}
+.announcement-tabs button{flex:1;min-width:0;height:22px;min-height:22px;padding:0;border:0;border-bottom:2px solid transparent;box-sizing:border-box;box-shadow:none;background:transparent;color:#6f7a5f;font-size:12px;line-height:20px;font-weight:600;cursor:pointer;border-radius:0}
+.announcement-tabs button[aria-selected=true]{background:transparent;color:#414b3d;border-bottom-color:#414b3d;font-weight:750}
+.announcement-tabs button:focus-visible{outline:0;color:#7d5110;border-bottom-color:#9c6f24}
+.announcement-body>[hidden]{display:none}
+@media(max-width:520px){.announcement-tabs{margin-inline:-16px}}
