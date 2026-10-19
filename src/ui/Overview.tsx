@@ -92,9 +92,11 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       {a === 'dex' && (screen || editing || c.jackOfAllTrades) && <label className={`jack-of-all-trades ${screen&&!editing&&!c.jackOfAllTrades?'jack-reserved':''}`}><input type="checkbox" aria-label="万事通" disabled={!editing} checked={!!c.jackOfAllTrades} onChange={e => edit(draft => { draft.jackOfAllTrades = e.target.checked; })}/><span>万事通</span></label>}
     </SheetCell>;
   }
-  const training: { key: string; label: string; values: string[] }[] = [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
+  const training=useReadViewMemo(cloudFeaturesEnabled,()=>{
+  const activeTraining=c.selections.filter(s=>selectionActive(c,s)&&(!s.grantKey?.startsWith('choice:')||c.automation?.enabled));
+  return [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
-    const values = c.selections.filter(s => selectionActive(c,s)&&(!s.grantKey?.startsWith('choice:')||c.automation?.enabled)).flatMap(s => {
+    const values = activeTraining.flatMap(s => {
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
@@ -103,6 +105,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
     values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.flatMap(v=>{const option=r.options.find(o=>o.value===v);return key==='tools'?(option&&!option.unavailable?[option.label]:[]):[option?.label||v];})));
     return { key, label, values: [...new Set<string>(values.map(v => names[v] || trainingDisplayText(v,c.edition==='2024'?'XPHB':'PHB',key,trainingNames.get(v.toLowerCase())||[])))] };
   });
+  },[c,choices,trainingNames]);
     const identity = <div className="identity-main overview-identity">
         <SheetCell label="角色名" className="identity-name">{!editing&&inWorkbench?<button className="assign-token-name" onClick={()=>void workbenchRequest('assignName',{name:c.name}).catch(e=>window.dispatchEvent(new CustomEvent('workbench-error',{detail:String(e)})))}>{c.name}</button>:screen?<AutoSheetName value={c.name} readOnly={!editing} change={value=>edit(displayCharacterEdit('name',value),'name')}/>:<input aria-label="角色姓名" readOnly={!editing} value={c.name} onChange={e => edit(displayCharacterEdit('name',e.target.value), 'name')}/>}<input aria-label="玩家姓名" readOnly={!editing} placeholder="玩家姓名" value={c.player} onChange={e => edit(displayCharacterEdit('player',e.target.value), 'player')}/></SheetCell>
         {identityCell('background', '背景')}{identityCell('class', multi ? '职业与子职' : '职业')}{identityCell('race', '种族')}{!multi && identityCell('subclass', '子职')}
