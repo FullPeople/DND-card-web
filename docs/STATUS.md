@@ -1,3 +1,7 @@
+# 2026-10-19 - XPHB ASI automation review candidate
+
+Source-qualified explicit ASI allocations now calculate derived scores, retain base scores and existing manual data, and restore through the existing class-grant archive. See [scope and validation](ASI-AUTOMATION-20261019.md). Paired runtime evidence and final validation are required before review completion. No merge or deployment in this task.
+
 # 2026-10-19 · 302 已实际上线
 
 北京时间 12:59:56，单机角色卡／卡库／Wiki `standalone-1.0.302` 与新版插件 `1.0.302-dev` 已完成发布。运行来源固定为 Web `a17685fbd7871984f672f7221d4b6b55b9204aad`、Suite `c58f1d40de24bb12735d42aedadacc3672e09a2d`；后续文档提交不替代运行来源。18 组精确 CI、47 个任务、四份完整恢复副本、四棵线上树、128 项保护和数据库完整性检查通过；公网 49 个文件散列及七个源码归档范围请求通过。
