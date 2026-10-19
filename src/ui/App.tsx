@@ -35,7 +35,7 @@ import {workbenchDerived} from '../platform/workbenchDerivation';
 import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
 import {snapshotMemo} from '../platform/snapshotMemo';
 import {settledSnapshotCheck} from '../platform/settledSnapshotCheck';
-import {useReadViewMemo} from './useReadViewMemo';
+import {readViewMemo,useReadViewMemo} from './useReadViewMemo';
 import {workspaceNavigationWriter} from '../platform/workspaceNavigationWriter';
 import {saveWorkspaceSelection} from '../platform/storage';
 import {cloudFeaturesEnabled} from '../cloud/availability';
@@ -337,6 +337,7 @@ export default function App() {
   const library = useLibrary(allEntries,selectedEntries,inWorkbench);
   const { kind, setKind, detail: storedDetail, setDetail, state: libraryState } = library;
   const detail=storedDetail&&c&&librarySourceEnabled(c,storedDetail)?storedDetail:undefined;
+  const referenceReads=useReadViewMemo(localCloudViews,()=>readViewMemo(256),[sourceEntries,c?.selections,detail?.edition,detail?.source]);
   useEffect(()=>{if(kind==='favorites'&&storedDetail&&!favorites.has(storedDetail))setDetail(undefined);},[kind,storedDetail,favorites.has]);
   useEffect(()=>{if(!monstersVisible&&kind==='monster')setKind('class');if(!monstersVisible&&detail?.kind==='monster')setDetail(undefined);},[monstersVisible,kind,detail?.id]);
   const { edition: editionFilter, filters, sort, descending, query:categoryQuery } = libraryState;
@@ -817,6 +818,9 @@ export default function App() {
   function inspect(entry: Entry, push = true, from?:keyof typeof LIBRARY_TABS) { exitSheetFullscreen(); if(detail && !library.hover && detailPane.current)library.savePosition(detail.id,detailPane.current.scrollTop);const target=readingTarget(entry);if(library.hover){previewCommit.current={id:target.entry.id,top:detailPane.current?.scrollTop||0};setReadingFlash(n=>n+1);}else setReadingFlash(0);library.navigate(target.entry,target.focus,push,from);setTab('wiki'); }
   useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){inspect(allEntries.find(e=>e.id===entry.id)||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
   function resolveReference(reference: string, tag?: string) {
+    return localCloudViews?referenceReads([reference,tag],()=>lookupReference(reference,tag)):lookupReference(reference,tag);
+  }
+  function lookupReference(reference: string, tag?: string) {
     if (reference.startsWith('entry:')) return c?.selections.find(s => s.entry.id === reference.slice(6)&&librarySourceEnabled(c,s.entry))?.entry || sourceEntries.find(e => e.id === reference.slice(6));
     const [name, source] = reference.split('|');
     const tagKind = ['quickref', 'variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
