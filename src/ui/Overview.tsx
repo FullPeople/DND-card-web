@@ -1,4 +1,6 @@
 import {runtimeValueEdit} from '../core/runtimeCharacterEdit';
+import {cloudFeaturesEnabled} from '../cloud/availability';
+import {useReadViewMemo} from './useReadViewMemo';
 import {catalogTrainingIndex} from './catalogTrainingIndex';
 import {OverviewChoiceOverlay} from './OverviewChoiceOverlay';
 import {ClassChoiceRecords} from './ClassChoiceRecords';
@@ -49,7 +51,8 @@ const sizes: Record<string, string> = { T: '微型', S: '小型', M: '中型', L
 
 export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openResources, openQuickbar, openHp, pinDrop }: Props) {
   const editing = useContext(SheetEditContext),screen=useSheetRenderMode()==='screen';
-  const spells = spellState(c);
+  const spells = useReadViewMemo(cloudFeaturesEnabled,()=>spellState(c),[c]);
+  const readySpells=useReadViewMemo(cloudFeaturesEnabled,()=>c.selections.filter(row=>row.entry.kind==='spell'&&spellIsReady(c,row)),[c]);
   const choices=useSheetChoices(c,catalog);
   const trainingNames=useMemo(()=>catalogTrainingIndex(catalog),[catalog]);
   const [trainingEditor, setTrainingEditor] = useState(false);
@@ -127,7 +130,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const heritageCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>row.entry.kind==='background')} receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}><ClassChoiceRecords c={c} catalog={catalog} mode="feat"/></FeaturePanel>;
   const featuresCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>['class','subclass','race'].includes(row.entry.kind))} receive={entry => addEntry(entry, 'features')} c={c} rows={classFeatures} edit={edit} browse={() => browse('feature')} onLink={onLink}/>;
   const spellsHidden=c.overviewSpellsHidden===true;
-  const spellCell = spellsHidden&&!editing?null:contentCell(spells.mode==='prepared'?'已预备法术':'法术', selected(['spell']).filter(s=>spellIsReady(c,s)), ['spell'], `overview-spells spells-box ${spellsHidden?'overview-spells-hidden':''}`,editing?<button type="button" className="overview-spells-visibility" aria-label="隐藏主要页法术框" aria-pressed={spellsHidden} title={spellsHidden?'退出编辑后隐藏法术框':'隐藏主要页法术框'} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();edit(displayCharacterEdit('overviewSpellsHidden',!spellsHidden));}}><VisibilityEye hidden={spellsHidden}/></button>:undefined);
+  const spellCell = spellsHidden&&!editing?null:contentCell(spells.mode==='prepared'?'已预备法术':'法术', readySpells, ['spell'], `overview-spells spells-box ${spellsHidden?'overview-spells-hidden':''}`,editing?<button type="button" className="overview-spells-visibility" aria-label="隐藏主要页法术框" aria-pressed={spellsHidden} title={spellsHidden?'退出编辑后隐藏法术框':'隐藏主要页法术框'} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();edit(displayCharacterEdit('overviewSpellsHidden',!spellsHidden));}}><VisibilityEye hidden={spellsHidden}/></button>:undefined);
   if(screen)return <div className={`overview-sheet screen-overview ${spellsHidden&&!editing?'overview-spells-collapsed':''}`}><div className="screen-status">{statusRibbon}</div><div className="screen-layout"><div className="screen-summary">{identity}<ScreenAbilities items={[{id:'initiative',node:initiative},{id:'passive',node:passive},...(['str','int','dex','wis','con','cha'] as Ability[]).map(a=>({id:a,node:abilityCell(a)})),{id:'speed',node:speed},{id:'size',node:sizeCell},{id:'proficiency',node:proficiency},{id:'saves',node:death}]}/>{trainingCell}</div><div className="screen-actions"><div className="screen-vitals">{ratings}{health}<Portrait c={c} edit={edit}/></div>{quickbar}{featuresCell}{spellCell}{heritageCell}</div></div><OverviewChoiceOverlay c={c} catalog={catalog} edit={edit}/></div>;
   return <div className="overview-sheet">
     <div className="overview-top">
