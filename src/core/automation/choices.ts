@@ -12,6 +12,7 @@ export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
 import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
 import type {ClassChoiceSupport} from './classChoiceSupport';
+import {invocationActivationChoices} from './invocationActivation';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
 export type SheetChoice={id:string;ownerId:string;grantLevel?:number;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntries?:Entry[];duplicateChoiceIds?:string[];hint?:string};
@@ -119,7 +120,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
  for(const choice of sourceChoices)if(choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&choice.selected.includes(archive.selections[0].entry.id)&&!c.selections.some(row=>row.requirementId===choice.id&&row.entry.id===archive.selections[0].entry.id))){
   choice.complete=false;choice.hint='原授予与子项记录已保留，关联恢复前不会生效；来源特性停用时请先恢复原来源。';
  }
- return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...classSpellChoices(c,catalog)];
+ return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...invocationActivationChoices(c,known,sourceChoices),...classSpellChoices(c,catalog)];
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);

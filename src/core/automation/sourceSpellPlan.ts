@@ -8,6 +8,8 @@ import {activeSelections} from './active';
 import {automationEnabled,supportedAutomation} from './state';
 import {planFeatureResources} from './featureResources';
 import {sourceResourcePool,validResourceCost,type ResourceColumn} from './sourceResourcePools';
+import {sourceClassChoices} from './sourceClassChoices';
+import {invocationActivationChoices,reviewedInvocationSpell} from './invocationActivation';
 
 export const sourceSpellKey=(key?:string)=>!!key?.startsWith('source-spell:');
 export interface SourceSpellPlan {id:string;owner:Selection;key:string;entry:Entry;eligible:boolean;config:SpecialSpell}
@@ -21,7 +23,12 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
  // Saved snapshots win over a newly downloaded edition/revision of the same entry.
  const known=[...new Map([...c.selections.map(s=>s.entry),...catalog].map(e=>[e.id,e] as const).reverse()).values()].filter(e=>e.kind==='spell');
+ const invocationContext=[...c.selections.map(row=>row.entry),...catalog];
+ const activations=c.selections.some(row=>row.requirementId?.includes(':invocation-activation:'))?invocationActivationChoices(c,invocationContext,sourceClassChoices(c,invocationContext)):[];
  for(const owner of c.selections.filter(s=>s.entry.kind!=='spell'&&s.entry.raw.additionalSpells!=null)){
+  const activated=owner.requirementId?.includes(':invocation-activation:'),activation=activated?activations.find(choice=>choice.id===owner.requirementId&&choice.ownerId===owner.parentId&&choice.selected.includes(owner.entry.id)&&owner.grantKey===`choice:${choice.id}:${owner.entry.id}`):undefined;
+  const invocation=activation?reviewedInvocationSpell(owner.entry,known):undefined;
+  if(activated&&!invocation)continue;
   const issue=(path:string,message:string)=>{const id=`source-spell:${owner.id}:${path}:${message}`;if(!issues.some(i=>i.id===id))issues.push({id,selectionId:owner.id,severity:'warning',message:`${owner.entry.name}：${message}`});};
   if(owner.entry.kind==='item'){issue('item','物品赠送施法与充能尚未接入，请按原文记录。');continue;}
   const blocks=owner.entry.raw.additionalSpells;if(!Array.isArray(blocks)){issue('shape','额外法术数据格式未支持。');continue;}
@@ -77,6 +84,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       const enabled=automationEnabled(c)&&active.has(owner.id)&&eligible&&selectionAllowed(c,entry);
       const label=resource?'来源资源施法':kind==='prepared'?'始终预备':count?'来源次数施法':usage==='free'?'随意施法':usage==='ritual'?'仅仪式':kind==='known'?'来源已知法术':'来源天生施法';
       const config:SpecialSpell={mode:count?'uses':'locked',...(count?{max:count,recovery}:{}),label,sourceGrant:{ownerId:owner.id,key,usageKey,resourceKey,...(resource?{resourceName:resource.name,resourceCost:resource.cost}:{}),canUseSlots:!resource&&(kind==='known'||kind==='prepared'),ability,active:enabled,usage:usage==='slot'&&Number(entry.raw.level)===0?'free':usage,castLevel:castLevel&&castLevel!=='c'?Number(castLevel):undefined,reason:enabled?undefined:!automationEnabled(c)?'自动计算已关闭':!eligible?'尚未达到来源等级':'来源、版本或依赖未启用'}};
+      if(invocation&&entry.id===invocation.spellEntry.id){config.sourceGrant!.usage='free';config.sourceGrant!.canUseSlots=false;config.sourceGrant!.target='self';config.label='祈唤随意施法（仅限自身）';}
       grants.push({id,owner,key,entry,eligible,config});
      }
     }
