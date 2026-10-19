@@ -145,41 +145,53 @@ dialog.dialog::backdrop{background:#1a16108c;backdrop-filter:blur(2px)}
 .app-shell .dialog button.is-danger{color:#8f3a24!important;border-color:#c0795f!important}
 .app-shell .dialog button.is-danger:hover:not(:disabled){background:#f8e9e2!important}
 
-/* --- character book ------------------------------------------------- */
-.character-manager .manager-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:10px}
-.character-manager .manager-tools input[type=search],.character-manager .manager-tools>input{flex:1 1 200px;min-width:150px;border:1px solid var(--ui-buttonLine);border-radius:6px;padding:6px 10px}
-.character-manager .manager-select-all{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ui-muted,#625b4f)}
+/* --- character book: compact reference-style entries ---------------- */
+.character-manager .manager-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:6px}
+.character-manager .manager-tools>input{flex:1 0 100%;min-width:0;width:100%;border:1px solid var(--ui-buttonLine);border-radius:3px;padding:7px 10px}
+.character-manager .manager-tools .seg-group{gap:5px;font-size:12px;min-width:0}
+.character-manager .manager-tools .seg-options{flex-wrap:wrap}
+.character-manager .manager-tools .seg-options button{padding:3px 7px;font-size:12px}
+.character-manager .manager-selection{display:flex;align-items:center;gap:6px 10px;min-height:34px;margin-bottom:5px}
+.character-manager .manager-select-all{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ui-muted,#625b4f);white-space:nowrap}
 .character-manager .manager-summary{font-size:12px;color:var(--ui-muted,#625b4f);white-space:nowrap}
-.character-manager .manager-actions{display:inline-flex;gap:6px;flex-wrap:wrap;margin-left:auto}
-.book-list{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px;max-height:52vh;overflow:auto;overscroll-behavior:contain}
-.book-row{display:grid;grid-template-columns:22px auto minmax(140px,1.4fr) auto auto auto;align-items:center;gap:8px 10px;padding:8px 10px 8px 4px;border:1px solid var(--ui-line,#b8ad9b);border-radius:8px;background:var(--ui-button,#fbf8f1);transition:box-shadow .15s,transform .15s,background .15s}
-.book-row:has(.book-cloud){grid-template-columns:22px auto minmax(140px,1.4fr) auto auto auto auto}
-.book-row.is-current{border-color:var(--ui-selected,#4d5a6b);box-shadow:inset 3px 0 0 var(--ui-selected,#4d5a6b)}
-.book-row.is-dragging{opacity:.35;background:var(--ui-heading,#ece6d8);border-style:dashed}
+.character-manager .manager-actions{display:inline-flex;gap:5px;flex-wrap:nowrap;margin-left:auto;min-width:0}
+.character-manager .manager-actions button{font-size:12px;white-space:nowrap;padding:3px 7px}
+.book-heading,.book-row{display:grid;grid-template-columns:26px 18px minmax(0,1fr) 112px max-content;align-items:center;column-gap:8px;padding:4px 8px 4px 2px}
+.book-heading{font-size:11px;line-height:22px;color:var(--ui-muted,#625b4f);background:var(--ui-heading,#ece6d8);border-block:1px solid var(--ui-line,#b8ad9b)}
+.book-heading-actions{width:130px;text-align:right}
+.book-list{list-style:none;margin:0 0 10px;padding:0;max-height:52vh;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.book-row{min-height:46px;border:0;border-bottom:1px solid var(--ui-line,#b8ad9b);border-radius:0;background:var(--ui-button,#fbf8f1);transition:background .12s;box-sizing:border-box}
+.book-row:hover{background:var(--ui-heading,#ece6d8)}
+.book-row.is-current{box-shadow:inset 3px 0 0 var(--ui-selected,#4d5a6b);background:var(--ui-heading,#ece6d8)}
+.book-row.is-dragging{opacity:.3;background:var(--ui-heading,#ece6d8)}
 body.book-dragging{cursor:grabbing;user-select:none}
-body.book-dragging .book-row{transition:transform .12s}
-.book-grip{display:inline-grid;place-items:center;width:22px;height:30px;min-height:0!important;padding:0!important;border:0!important;background:transparent!important;color:var(--ui-muted,#625b4f)!important;cursor:grab;touch-action:none;border-radius:4px}
+.book-grip{display:inline-grid;place-items:center;width:26px;height:36px;min-height:0!important;padding:0!important;border:0!important;background:transparent!important;color:var(--ui-muted,#625b4f)!important;cursor:grab;touch-action:none;border-radius:3px}
 .book-grip:disabled{opacity:.3;cursor:default}
 .book-grip:not(:disabled):hover{background:var(--ui-heading,#ece6d8)!important}
 .book-grip .ui-icon{--icon:16px}
-.book-title{display:flex;align-items:center;gap:10px;min-width:0;text-align:left;padding:2px 6px 2px 2px!important;border:0!important;background:transparent!important;border-radius:6px}
-.book-title:hover:not(:disabled){background:var(--ui-heading,#ece6d8)!important;filter:none!important}
-.book-avatar{display:inline-grid;place-items:center;width:34px;height:34px;flex:none;border-radius:50%;background:var(--ui-band,#6e5a46);color:var(--ui-bandInk,#fff8ec);font-weight:700;font-size:15px;letter-spacing:0}
-.book-name{display:grid;gap:1px;min-width:0}
-.book-name strong{display:flex;align-items:center;gap:5px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.book-name small{font-size:11px;color:var(--ui-muted,#625b4f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.book-stats{display:inline-flex;gap:10px;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.book-stat{display:inline-flex;align-items:center;gap:3px}.book-stat .ui-icon{--icon:14px;color:var(--ui-muted,#625b4f)}.book-stat em{font-style:normal;color:var(--ui-muted,#625b4f)}
-.book-chips{display:inline-flex;flex-wrap:wrap;gap:4px;max-width:220px}
+.book-row>input[type=checkbox],.manager-select-all input{width:15px;height:15px;min-width:15px;margin:0;accent-color:var(--ui-selected,#4d5a6b)}
+.book-title{display:block;min-width:0;width:100%;text-align:left;padding:1px 0!important;border:0!important;background:transparent!important;border-radius:2px}
+.book-title:hover:not(:disabled){filter:none!important}
+.app-shell .dialog .book-title,.app-shell .dialog .book-grip{border:0!important;background:transparent!important}
+.book-name{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:6px;row-gap:2px;min-width:0}
+.book-name strong{grid-column:1/-1;display:flex;align-items:center;gap:5px;min-width:0;font-size:13px;line-height:17px;white-space:nowrap}
+.book-display-name{overflow:hidden;text-overflow:ellipsis}
+.book-current{font-size:10px;line-height:14px;padding:0 3px;border:1px solid currentColor;flex:none;color:var(--ui-selected,#4d5a6b)}
+.book-name small{min-width:0;font-size:11px;line-height:14px;color:var(--ui-muted,#625b4f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.book-chips{display:inline-flex;gap:5px;align-items:center;white-space:nowrap;font-size:10px;line-height:14px;color:var(--ui-muted,#625b4f)}
+.book-chips .book-warning{color:#8f3a24;font-weight:700}
+.book-stats{display:grid;grid-template-columns:70px 36px;gap:6px;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.book-stat{display:inline-flex;align-items:center;gap:3px}.book-stat .ui-icon{--icon:13px;color:var(--ui-muted,#625b4f)}.book-stat em{font-style:normal;color:var(--ui-muted,#625b4f)}
 .book-cloud{display:inline-flex;align-items:center}
-.book-row .row-actions{display:inline-flex;gap:4px;align-items:center;justify-self:end;flex-wrap:nowrap}
-.book-row .row-actions button{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:28px;height:28px;padding:0 8px;font-size:12px}
-.book-row .row-actions button:not(.icon-button){width:28px;padding:0}
-.book-row .row-actions .ui-icon{--icon:15px}
+.book-row .row-actions{display:inline-flex;gap:4px;align-items:center;justify-self:end;flex-wrap:nowrap;white-space:nowrap}
+.book-row .row-actions button{position:static;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:30px;height:30px;padding:0 7px;font-size:12px;white-space:nowrap}
+.book-row .row-actions .card-locate{width:30px;padding:0}
+.book-row .row-actions .ui-icon{--icon:14px}
+.book-order-notice{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .book-drag-ghost{position:fixed;left:0;top:0;z-index:2147483000;pointer-events:none;padding:0;max-width:none;will-change:transform}
 .book-drag-ghost>.book-list{margin:0;padding:0;max-height:none;overflow:visible;border:0}
-.book-drag-ghost .book-row{margin:0;opacity:1}
-.book-empty{display:grid;justify-items:center;gap:8px;padding:26px 12px;color:var(--ui-muted,#625b4f);border:1px dashed var(--ui-line,#b8ad9b);border-radius:8px;text-align:center}
+.book-drag-ghost .book-row{margin:0;opacity:1;outline:1px solid var(--ui-selected,#4d5a6b);box-shadow:0 8px 18px #0002}
+.book-empty{display:grid;justify-items:center;gap:8px;padding:26px 12px;color:var(--ui-muted,#625b4f);border-bottom:1px solid var(--ui-line,#b8ad9b);text-align:center}
 .book-empty .ui-icon{--icon:28px}
 .book-empty p{margin:0;max-width:360px}
 .manager-create{margin-top:4px}
@@ -189,9 +201,19 @@ body.book-dragging .book-row{transition:transform .12s}
 .manager-hint{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ui-muted,#625b4f)}
 .manager-hint .ui-icon{--icon:14px}
 @media(max-width:720px){
- .book-row,.book-row:has(.book-cloud){grid-template-columns:22px auto minmax(0,1fr);grid-template-areas:"grip check title" "grip check stats" "grip check chips" "grip check cloud" "grip check actions";row-gap:4px}
- .book-grip{grid-area:grip}.book-row>input[type=checkbox]{grid-area:check}.book-title{grid-area:title}.book-stats{grid-area:stats}.book-chips{grid-area:chips;max-width:none}.book-cloud{grid-area:cloud}.book-row .row-actions{grid-area:actions;justify-self:start;flex-wrap:wrap}
- .character-manager .manager-actions{margin-left:0}
+ .book-heading,.book-row{grid-template-columns:26px 16px minmax(0,1fr) max-content;column-gap:6px;padding-right:4px}
+ .book-heading-stats,.book-stats{display:none}
+ .book-heading-actions{width:104px}
+ .book-row{min-height:52px}
+ .book-grip{height:44px}
+ .book-row .row-actions button{height:36px;min-height:36px;padding:0 6px}
+ .book-row .row-actions .icon-button>.ui-icon{display:none}
+ .book-row .row-actions .label{display:inline}
+ .book-row .row-actions .card-locate{width:28px}
+ .book-chips{font-size:10px;gap:3px}
+ .character-manager .manager-selection{flex-wrap:wrap}
+ .character-manager .manager-actions .ui-icon{display:none}
+ .character-manager .manager-actions button{padding:3px 5px;font-size:11px}
  .book-list{max-height:58vh}
  dialog.dialog{width:calc(100vw - 16px);max-height:92dvh;border-radius:8px}
  .dialog .dialog-body{padding:12px}
