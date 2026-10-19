@@ -1,4 +1,8 @@
 import {deferredComponent} from './deferredComponent';
+// Keep the notice shell styled even when its optional progress page is unavailable.
+import './uiLanguage.css';
+import './authorSupport.css';
+import './supporterMarquee.css';
 
 export const ruleOptionsPanel=deferredComponent<Parameters<typeof import('./RuleOptions').RuleOptions>[0]>(()=>import('./RuleOptions').then(module=>({default:module.RuleOptions})));
 export const sourceSettingsPanel=deferredComponent<Parameters<typeof import('./SourceSettings').SourceSettings>[0]>(()=>import('./SourceSettings').then(module=>({default:module.SourceSettings})));
