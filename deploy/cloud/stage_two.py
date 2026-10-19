@@ -108,6 +108,7 @@ def publish(stage):
  for relative,sha in manifest['files'].items():
   p=stage/relative
   assert p.resolve().is_relative_to(stage) and relative.split('/')[0] in ['card','library','server','launcher.mjs'] and digest(p)==sha
+ assert set(tree(stage))==set(manifest['files'])|{'manifest.json'}
  config=P('/etc/nginx/sites-available/dnd-center-retired.conf');original=config.read_text()
  assert digest(config)==manifest['nginxBaselineSha256']
  patched=nginx_patch(original)
@@ -116,6 +117,8 @@ def publish(stage):
  lock=open('/run/lock/obr-static-release.lock','a')
  with lock:
   fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+  assert digest(config)==manifest['nginxBaselineSha256']
+  assert not any(p.exists() for p in [public,backend,database,unit])
   backup=P('/root/codex-backups/cloud-lab2-'+time.strftime('%Y%m%dT%H%M%SZ',time.gmtime()));backup.mkdir(mode=0o700)
   shutil.copy2(config,backup/'nginx.conf')
   before={'site':tree(site),'database':db_digest(source),'nginx':digest(config)}
