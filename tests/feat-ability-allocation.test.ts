@@ -53,7 +53,7 @@ it('rejects foreign, incomplete, explicit-effect, inherited and tampered allocat
  for(const change of [{source:'PHB'},{name:'Unreviewed Improvement',english:'Unreviewed Improvement',raw:{...feat.entry.raw,name:'Unreviewed Improvement',ENG_name:'Unreviewed Improvement'}},{raw:{...feat.entry.raw,ability:[feat.entry.raw.ability[0]]}},{raw:{...feat.entry.raw,_copy:{name:'x'}}},{effects:[{op:'add' as const,target:'str',value:1}]}]){
   const trial=structuredClone(c),row=trial.selections.find(s=>s.id===feat.id)!;Object.assign(row.entry,change);expect(sheetChoices(trial,entries).filter(q=>q.id.endsWith(':feat-abilities'))).toHaveLength(0);
  }
- c.answers[choice.id]=['str:99'];expect(evaluate(c).abilities.str).toBe(16);c.answers[choice.id]=['str:2','dex:2'];expect(evaluate(c).abilities.str).toBe(16);
+ c.answers[choice.id]=['str:99'];expect(evaluate(c).abilities.str).toBe(16);c.answers[choice.id]=['str:2','dex:2'];expect(evaluate(c).abilities.str).toBe(16);expect(sheetChoices(c,entries).find(q=>q.id===choice.id)!.complete).toBe(false);
  expect(()=>chooseSheetOption(c,choice.id,'str:99',entries)).toThrow();
  c.answers[choice.id]=['str:2'];c.automation!.enabled=false;expect(evaluate(c).abilities.str).toBe(16);
 });
@@ -68,7 +68,7 @@ it('caps innate increases after racial bonuses and before an equipment score ove
  const {c,entries,allocation}=setup();c.abilities.str=17;
  const race=normalizeData({race:[{name:'Authored Race',source:'XPHB',ability:[{str:2}]}]},'asi-race')[0];c.selections.push({id:'race',entry:race,level:1,quantity:1,equipped:false});
  chooseSheetOption(c,allocation().id,'str:2',entries);expect(evaluate(c).abilities.str).toBe(20);
- const item={...race,id:'item-override',kind:'item' as const,raw:{},effects:[{op:'set' as const,target:'str',value:19}]};c.selections.push({id:'item',entry:item,level:1,quantity:1,equipped:true});expect(evaluate(c).abilities.str).toBe(19);
+ const item={...race,id:'item-override',kind:'item' as const,raw:{},effects:[{op:'set' as const,target:'str' as const,value:19}]};c.selections.push({id:'item',entry:item,level:1,quantity:1,equipped:true});expect(evaluate(c).abilities.str).toBe(19);
 });
 it.skipIf(!inputRoot)('uses the frozen XPHB Fighter grant and actual ASI metadata through saving and offline re-evaluation',()=>{
  const index=JSON.parse(readFileSync(join(inputRoot!,'index.json'),'utf8'));

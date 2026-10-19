@@ -57,6 +57,8 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
   if(allocations.length){
    push('feat-abilities','属性提升（自动计算）',1,allocations.map(option=>({...option,entry:concept(row.entry,`feat-abilities:${option.value}`,option.label,[])})),'content');
    out.at(-1)!.hint='确认后计入派生属性，最高 20。若旧卡基础属性已包含这次提升，请保留手工方式，不要重复确认；取消分配即可撤销自动加值。';
+   const choice=out.at(-1)!,saved=c.answers[choice.id];
+   if(saved?.length>1){choice.selected=[];choice.complete=false;choice.hint='此分配包含多个旧答案，原记录保留且不计入属性。请重新确认一个分配方案。';}
   }
   const first=c.selections.find(s=>s.entry.kind==='class');
   const start=row.entry.kind==='class'?(first?.id===row.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;
