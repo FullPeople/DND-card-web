@@ -2,6 +2,14 @@
 import contextlib, hashlib, json, os, pathlib, shutil, sqlite3, subprocess, sys, time
 P=pathlib.Path
 def run(*args): return subprocess.run(args,check=True,capture_output=True,text=True).stdout.strip()
+def wait_json(args,ready,attempts=20):
+ for attempt in range(attempts):
+  try:
+   value=json.loads(run(*args))
+   if ready(value):return value
+  except (subprocess.CalledProcessError,ValueError):pass
+  if attempt+1<attempts:time.sleep(.5)
+ raise RuntimeError('Isolated endpoint did not become ready after reload')
 def digest(path):
  h=hashlib.sha256()
  with open(path,'rb') as f:
@@ -133,15 +141,12 @@ def publish(stage):
    run('/opt/dnd-card-cloud/runtime/bin/node','--input-type=module','-e',code)
    copy_permanent(source,database/'cards.sqlite');run('chown','-R','dnd-card-cloud:dnd-card-cloud',str(database));os.chmod(database/'cards.sqlite',0o600)
    atomic_write(unit,UNIT);run('systemctl','daemon-reload');run('systemctl','start',unit.name);started=True
-   for attempt in range(20):
-    try:health=json.loads(run('curl','-fsS','http://127.0.0.1:5015/api/health'));break
-    except subprocess.CalledProcessError:
-     if attempt==19:raise
-     time.sleep(.5)
-   assert health['qqLogin']=='ready' and health['accountPrivate'] is True
+   wait_json(('curl','-fsS','http://127.0.0.1:5015/api/health'),lambda value:value.get('qqLogin')=='ready' and value.get('accountPrivate') is True)
    atomic_write(config,patched);config_changed=True;run('nginx','-t');run('systemctl','reload','nginx')
+   # Nginx reload returns before replacement workers start accepting traffic.
+   # Existing workers can briefly serve the old static-only route (404).
+   wait_json(('curl','-fsS','--resolve','dnd.center:443:127.0.0.1','https://dnd.center/cloud-lab/api/session'),lambda value:value.get('authenticated') is False and value.get('qqLogin')=='ready')
    html=run('curl','-fsS','--resolve','dnd.center:443:127.0.0.1','https://dnd.center/cloud-lab/card/');assert 'data-cloud-lab="stage2"' in html
-   session=json.loads(run('curl','-fsS','--resolve','dnd.center:443:127.0.0.1','https://dnd.center/cloud-lab/api/session'));assert session['authenticated'] is False and session['qqLogin']=='ready'
    production=json.loads(run('curl','-sS','--resolve','dnd.center:443:127.0.0.1','https://dnd.center/api/session'));assert production['error']=='cloud_disabled'
    assert tree(site,public)==before['site'] and db_digest(source)==before['database']
    run('systemctl','enable',unit.name)
