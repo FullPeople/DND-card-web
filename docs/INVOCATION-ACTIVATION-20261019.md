@@ -24,11 +24,16 @@ original range. Only authored fixture metadata and hashes are committed.
 
 Reproduction: four workflow tests failed before implementation. A subsequent
 render test reproduced the missing activation entry point before its repair.
-Current validation: nine workflow/source/render tests pass; 127 tests pass across
+Current validation: ten workflow/source/render tests pass; 128 tests pass across
 ten related suites, with five pre-existing optional-source cases skipped.
 TypeScript passes after materializing the sparse checkout's supporting files.
 The new actual-source test runs with `DND_AUTOMATION_INPUTS`; it is not skipped in
 this local evidence.
+
+An additional failing regression reproduced a later download invalidating an
+already saved spell snapshot. Resolution now preserves the character's stored
+spell before considering a same-ID catalog revision, matching source-spell
+planning and offline reopening.
 
 This is a local follow-up candidate based on ASI source commit
 `fd6b8cb09a79dba12e39a426f31fd4885c4f3d47`. Its own full-corpus evidence,

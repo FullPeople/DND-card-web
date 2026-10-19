@@ -14,7 +14,8 @@ export function reviewedInvocationSpell(entry:Entry,known:Entry[]){
  if(!Array.isArray(blocks)||blocks.length!==1||!only(blocks[0],['innate'])||!only(blocks[0].innate,['_']))return;
  const refs=blocks[0].innate._;
  if(!Array.isArray(refs)||refs.length!==1||typeof refs[0]!=='string'||refs[0].split('|').length!==2)return;
- const spells=[...new Map(known.filter(row=>row.kind==='spell').map(row=>[row.id,row])).values()].filter(row=>row.edition===rule.edition&&matchesReference(row,refs[0]));
+ const savedFirst=new Map<string,Entry>();for(const row of known)if(row.kind==='spell'&&!savedFirst.has(row.id))savedFirst.set(row.id,row);
+ const spells=[...savedFirst.values()].filter(row=>row.edition===rule.edition&&matchesReference(row,refs[0]));
  if(spells.length!==1||spells[0].raw.level!==1||spells[0].raw._unresolvedParent||!matchesReference(spells[0],rule.spell))return;
  return {...rule,spellEntry:spells[0]};
 }

@@ -80,6 +80,11 @@ it('exposes activation beside the learned record even when no other feature grou
  const {c,entries,invocation,activation}=setup(),choice=activation()!;const render=()=>renderToStaticMarkup(createElement(ClassChoiceRecords,{c,catalog:entries,mode:'optional'}));
  expect(render()).toContain(`data-choice-id="${choice.id}"`);expect(render()).toContain('启用来源施法');chooseSheetOption(c,choice.id,invocation.id,entries);syncChoiceContent(c,entries);syncSourceSpells(c,entries);expect(render()).toContain('更改来源施法');
 });
+it('keeps the saved granted spell authoritative when a downloaded catalog revision changes',()=>{
+ const {c,entries,invocation,activation}=setup(),choice=activation()!;chooseSheetOption(c,choice.id,invocation.id,entries);syncChoiceContent(c,entries);syncSourceSpells(c,entries);const id=planSourceSpells(c,entries).grants.find(row=>row.config.sourceGrant?.active)!.id;
+ const downloaded=entries.map(entry=>entry.kind==='spell'?{...entry,revision:'later-download',raw:{...entry.raw,level:9}}:entry);
+ expect(sheetChoices(c,downloaded).find(row=>row.id===choice.id)?.selected).toEqual([invocation.id]);syncChoiceContent(c,downloaded);syncSourceSpells(c,downloaded);expect(planSourceSpells(c,downloaded).grants.find(row=>row.id===id)?.entry.raw.level).toBe(1);expect(spellPayments(c,id).options.map(row=>row.id)).toEqual(['free']);
+});
 it.skipIf(!inputRoot)('grants the actual frozen XPHB Mage Armor reference without changing its stored range',()=>{
  const index=JSON.parse(readFileSync(join(inputRoot!,'index.json'),'utf8')),suffixes=['/data/optionalfeatures.json','/data/class/class-warlock.json','/data/spells/spells-xphb.json'];
  const bodies=suffixes.map(suffix=>{const row=index.rows.find((row:any)=>row.url.endsWith(suffix));expect(row).toBeDefined();const body=JSON.parse(readFileSync(join(inputRoot!,row.path),'utf8'));expect(createHash('sha256').update(JSON.stringify(body)).digest('hex')).toBe(row.sha256);if(suffix==='/data/optionalfeatures.json')expect(row.sha256).toBe('031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844');return body;});
