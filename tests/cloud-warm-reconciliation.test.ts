@@ -30,6 +30,16 @@ describe('isolated cloud warm views',()=>{
  it('does not cache a failed projection',()=>{
   const memo=readViewMemo(),key={};expect(()=>memo([key],()=>{throw Error('source');})).toThrow('source');expect(memo([key],()=>42)).toBe(42);
  });
+ it('keeps reference results inside the exact source, selection and edition context',()=>{
+  const contexts=readViewMemo(),sourceA={},sourceB={},selectionA={},selectionB={},lookup=vi.fn((reference:string,kind:string)=>({reference,kind}));
+  const cache=(sources:object,selections:object,edition:string)=>contexts([sources,selections,edition],()=>readViewMemo(2));
+  const a=cache(sourceA,selectionA,'2014'),first=a(['same','spell'],()=>lookup('same','spell'));
+  expect(cache(sourceA,selectionA,'2014')(['same','spell'],()=>lookup('same','spell'))).toBe(first);expect(lookup).toHaveBeenCalledTimes(1);
+  expect(a(['same','item'],()=>lookup('same','item'))).not.toBe(first);
+  for(const changed of [cache(sourceB,selectionA,'2014'),cache(sourceA,selectionB,'2014'),cache(sourceA,selectionA,'2024')])expect(changed(['same','spell'],()=>lookup('same','spell'))).not.toBe(first);
+  const missing=cache({},selectionA,'2014');expect(missing(['later','spell'],()=>undefined)).toBeUndefined();
+  expect(cache({},selectionA,'2014')(['later','spell'],()=>lookup('later','spell'))).toEqual({reference:'later',kind:'spell'});
+ });
  it('reuses unchanged real reconciliation functions without mutating stored cards',()=>{
   const entries:Entry[]=Array.from({length:70},(_,n)=>({id:`warm:${n}`,kind:'feature',name:`Authored ${n}`,english:`Authored ${n}`,edition:'2024',source:'XPHB',packId:'fixture',revision:'1',raw:{},entries:['Authored rule content.']}));
   const cards=[newCharacter(),newCharacter()];for(const card of cards){card.automation=newAutomationState();card.selections=entries.map(entry=>({id:entry.id,entry,level:1,quantity:1,equipped:false}));}
