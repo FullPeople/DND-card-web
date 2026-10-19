@@ -29,8 +29,7 @@ test('wide Wiki uses full-height side columns, narrow Wiki returns to stacked wi
  await page.setViewportSize({width:1280,height:1080});
  await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
  b=await bounds(page);expect(b.detail.y).toBeGreaterThan(b.list.bottom);
- await expect(page.getByRole('separator',{name:'调整资料列表与正文高度'})).toHaveCount(0);
- await expect(page.locator('.entry-detail')).toBeVisible();await page.getByRole('button',{name:'返回资料列表',exact:true}).click();await expect(page.locator('.catalog-list')).toBeVisible();await page.locator('.catalog-row').first().click();await expect(page.locator('.entry-detail')).toBeVisible();
+ await expect(page.getByRole('separator',{name:'调整资料列表与正文高度'})).toBeVisible();
  expect(await page.locator('.entry-detail').evaluate(node=>node===(window as any).readerBeforeResize)).toBe(true);
  expect(await page.locator('.entry-detail').evaluate(node=>node.scrollTop)).toBeGreaterThanOrEqual(240);
  await page.setViewportSize({width:2560,height:1080});await expect(page.locator('.wiki-layout')).toHaveClass(/wiki-columns/);
