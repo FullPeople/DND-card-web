@@ -24,7 +24,7 @@ original range. Only authored fixture metadata and hashes are committed.
 
 Reproduction: four workflow tests failed before implementation. A subsequent
 render test reproduced the missing activation entry point before its repair.
-Current validation: ten workflow/source/render tests pass; 128 tests pass across
+Current validation: eleven workflow/source/render tests pass; 129 tests pass across
 ten related suites, with five pre-existing optional-source cases skipped.
 TypeScript passes after materializing the sparse checkout's supporting files.
 The new actual-source test runs with `DND_AUTOMATION_INPUTS`; it is not skipped in
@@ -35,9 +35,17 @@ already saved spell snapshot. Resolution now preserves the character's stored
 spell before considering a same-ID catalog revision, matching source-spell
 planning and offline reopening.
 
+The activation entry point remains visible when its spell catalog is missing.
+It explains the unresolved dependency and cannot be confirmed until that exact
+source-qualified spell is uniquely loaded. Loading data alone never creates a
+new activation answer.
+
 This is a local follow-up candidate based on ASI source commit
 `fd6b8cb09a79dba12e39a426f31fd4885c4f3d47`. Its own full-corpus evidence,
 builds, complete suite, isolated browser acceptance and remote CI remain pending.
+An authored browser flow covers the visible activation, self-cast receipt,
+unchanged resources, reload and cancellation while retaining the manual spell.
+Listing that test succeeds; it is not yet a browser pass.
 The ASI batch's running replay uses a separate immutable checkout and does not
 certify these newer invocation bytes.
 

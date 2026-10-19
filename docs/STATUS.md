@@ -1,6 +1,6 @@
 # 2026-10-19 - XPHB invocation local follow-up candidate
 
-The learned Armor of Shadows record has a separate activation and a self-only, no-slot Mage Armor grant. Ten workflow/source/render cases and 128 related tests pass; TypeScript passes. Saved spell snapshots retain precedence over later downloads. Its own full runtime ledger, builds and browser acceptance remain pending. See [scope and boundaries](INVOCATION-ACTIVATION-20261019.md). The separate ASI replay does not certify this candidate.
+The learned Armor of Shadows record has a separate activation and a self-only, no-slot Mage Armor grant. Eleven workflow/source/render cases and 129 related tests pass; TypeScript passes. Saved spell snapshots retain precedence over later downloads; missing spell data has a visible pending state. Its own full runtime ledger, builds and browser acceptance remain pending. See [scope and boundaries](INVOCATION-ACTIVATION-20261019.md). The separate ASI replay does not certify this candidate.
 
 # 2026-10-20 · 反馈首批完整回放完成，尚未发布
 

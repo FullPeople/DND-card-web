@@ -85,6 +85,11 @@ it('keeps the saved granted spell authoritative when a downloaded catalog revisi
  const downloaded=entries.map(entry=>entry.kind==='spell'?{...entry,revision:'later-download',raw:{...entry.raw,level:9}}:entry);
  expect(sheetChoices(c,downloaded).find(row=>row.id===choice.id)?.selected).toEqual([invocation.id]);syncChoiceContent(c,downloaded);syncSourceSpells(c,downloaded);expect(planSourceSpells(c,downloaded).grants.find(row=>row.id===id)?.entry.raw.level).toBe(1);expect(spellPayments(c,id).options.map(row=>row.id)).toEqual(['free']);
 });
+it('shows a pending activation while its spell catalog is missing and grants only after explicit confirmation with resolved data',()=>{
+ const {c,entries,invocation}=setup(),withoutSpells=entries.filter(row=>row.kind!=='spell'),pending=sheetChoices(c,withoutSpells).find(row=>row.id.includes(':invocation-activation:'));
+ expect(pending,'learning should expose the missing source dependency').toBeDefined();expect(pending!.options[0].unavailable).toBeTruthy();expect(()=>chooseSheetOption(c,pending!.id,invocation.id,withoutSpells)).toThrow();expect(c.answers[pending!.id]).toBeUndefined();
+ expect(sheetChoices(c,entries).find(row=>row.id===pending!.id)?.options[0].unavailable).toBeUndefined();chooseSheetOption(c,pending!.id,invocation.id,entries);syncChoiceContent(c,entries);syncSourceSpells(c,entries);expect(planSourceSpells(c,entries).grants.some(row=>row.config.sourceGrant?.active)).toBe(true);
+});
 it.skipIf(!inputRoot)('grants the actual frozen XPHB Mage Armor reference without changing its stored range',()=>{
  const index=JSON.parse(readFileSync(join(inputRoot!,'index.json'),'utf8')),suffixes=['/data/optionalfeatures.json','/data/class/class-warlock.json','/data/spells/spells-xphb.json'];
  const bodies=suffixes.map(suffix=>{const row=index.rows.find((row:any)=>row.url.endsWith(suffix));expect(row).toBeDefined();const body=JSON.parse(readFileSync(join(inputRoot!,row.path),'utf8'));expect(createHash('sha256').update(JSON.stringify(body)).digest('hex')).toBe(row.sha256);if(suffix==='/data/optionalfeatures.json')expect(row.sha256).toBe('031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844');return body;});
