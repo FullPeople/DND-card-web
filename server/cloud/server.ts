@@ -3,7 +3,7 @@ import {mkdirSync,statfsSync} from 'node:fs';
 import {isIP} from 'node:net';
 import {dirname} from 'node:path';
 import {CloudError,CloudStore,safeEqual} from './store';
-import {createQQAuth,type QQConfig} from './qq';
+import {createQQAuth,browserCookies,type QQConfig} from './qq';
 import {parseFile} from '../../src/core/validation';
 import {pluginAccess} from './plugin';
 import {CloudChanges} from './changes';
@@ -31,6 +31,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
   // behind the trusted loopback proxy, otherwise the socket address.
   const clientKey=(request:IncomingMessage)=>{if(options.trustedLoopbackProxy){const header=request.headers['x-real-ip'];if(typeof header==='string')try{return canonicalIP(header);}catch{}return 'proxy';}return request.socket.remoteAddress||'unknown';};
   const reserveDisk=()=>{if(options.freeBytes&&options.freeBytes()<128*1024*1024)throw new CloudError(507,'storage_full','服务器存储空间不足，请保留本机完整 JSON 备份。');};
+  const cookies=browserCookies(options.qq?.isolation);
   const qq=createQQAuth(store,origin,options.qq,clientKey),qqLogin=qq.ready?'ready':'pending';
   const plugin=pluginAccess(store,origin,options.pluginOrigins,{freeBytes:options.freeBytes,clientKey});
   const changes=new CloudChanges(options.changesWaitMs),stopChanges=store.observeChanges(audience=>changes.invalidate([...audience.accountIds.map(id=>'account:'+id),...audience.roomIds.map(id=>'room:'+id)]),()=>changes.stats().scopes>0);
@@ -51,8 +52,9 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         if(method==='GET'&&url.pathname==='/api/health')return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.295',...currentPolicy,cloudFeaturesEnabled:false,qqLogin:'disabled',qqOAuthSupported:false});
         throw new CloudError(503,'cloud_disabled',cloudDisabledMessage);
       }
+      if(options.qq?.isolation&&(request.headers.authorization||!/^\/api\/(?:auth\/qq\/(?:login|callback)|session|health|policy|logout|slots|changes|cards(?:\/[A-Za-z0-9-]{6,36})?)$/.test(url.pathname)))throw new CloudError(404,'not_found','接口不存在。');
       if(await qq.handle(request,response,url))return;
-      const token=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('dnd_cloud='))?.slice('dnd_cloud='.length);
+      const token=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith(cookies.session+'='))?.slice(cookies.session.length+1);
       const liveSession=()=>request.headers.authorization?plugin.session(request):request.headers.origin&&request.headers.origin!==origin?undefined:store.session(token);
       const session=liveSession();
       const temporaryToken=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('dnd_temporary='))?.slice('dnd_temporary='.length);
@@ -128,7 +130,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       }
       if(!session)throw new CloudError(401,'login_required','请先通过 QQ 登录后再打开卡库。');
       if(url.pathname==='/api/slots'&&method==='GET')return send(response,200,store.slots(session.account));
-      if(url.pathname==='/api/logout'&&method==='POST'){if(session.scope==='plugin'||!token)throw new CloudError(400,'cookie_required','插件连接请使用插件的退出；此接口只注销网站登录。');store.logout(token);response.setHeader('Set-Cookie','dnd_cloud=; Path=/api/; Secure; HttpOnly; SameSite=Strict; Max-Age=0');return send(response,200,{ok:true});}
+      if(url.pathname==='/api/logout'&&method==='POST'){if(session.scope==='plugin'||!token)throw new CloudError(400,'cookie_required','插件连接请使用插件的退出；此接口只注销网站登录。');store.logout(token);response.setHeader('Set-Cookie',cookies.session+'=; Path='+cookies.path+'; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=0');return send(response,200,{ok:true});}
       if(url.pathname==='/api/cards'&&method==='POST'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认上传完整角色卡。');reserveDisk();return send(response,201,store.create(session.account,data.character));}
       if(cardMatch){const [,id,editors,qq]=cardMatch;
         if(!editors&&method==='PUT'){const data=await body(request);if(data.confirmUpload!==true)throw new CloudError(400,'confirmation_required','需要明确确认保存完整角色卡。');reserveDisk();return send(response,200,store.update(id,session.account,data.revision,data.character));}

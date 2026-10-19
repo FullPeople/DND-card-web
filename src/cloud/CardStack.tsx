@@ -7,24 +7,17 @@ import './galleryPresentation.css';
 import {galleryMotion} from './galleryMotion';
 import {prepareGalleryFlight,flyGalleryPaper,type GalleryFlight} from './galleryFlight';
 import {createWheelScroller,type WheelScroller} from './galleryWheel';
+import {previewCache,adjacentPreviews,type Preview} from './previewCache';
 import {CheckIcon,ChevronLeftIcon,ChevronRightIcon,CopyIcon,EditIcon,SearchIcon,SlidersIcon,SpinnerIcon} from '../ui/icons';
 let renderer:ReturnType<typeof importPreview>|undefined;
 function importPreview(){return import('./SheetPreview');}
 const loadPreview=()=>renderer||(renderer=importPreview());
 const SheetPreview=lazy(loadPreview);
 const wrap=(value:number,length:number)=>(value%length+length)%length;
-type Preview={revision:number;character?:Character;error?:string};
-// Public content only. Ownership is always taken from the fresh directory.
-const cache=new Map<string,Preview>();
-const pending=new Map<string,Promise<Preview>>();
-function load(row:CardSummary){
- const saved=cache.get(row.id);if(saved?.character&&saved.revision>=row.revision)return Promise.resolve(saved);
- let task=pending.get(row.id);if(task)return task;
- task=readCloudCard(row.id).then(card=>{const next={revision:card.revision,character:card.character};if((cache.get(row.id)?.revision||0)<=next.revision)cache.set(row.id,next);return cache.get(row.id)!;}).finally(()=>pending.delete(row.id));pending.set(row.id,task);return task;
-}
 function offsets(length:number){return length<=1?[0]:length===2?[0,1]:length===3?[-1,0,1]:length===4?[-1,0,1,2]:[-2,-1,0,1,2];}
 
 export function CardStack({cards,manage,edit,missing,title='全部云端卡'}:{title?:string;cards:CardSummary[];manage:(card:CardSummary)=>void;edit:(card:CardSummary)=>void;missing:(id:string)=>void}){
+ const [ownedCache]=useState(()=>previewCache(readCloudCard)),{cache,load}=ownedCache;
  const [selected,setSelected]=useState<string>(),[previews,setPreviews]=useState<Record<string,Preview>>({}),[copy,setCopy]=useState(''),[retry,setRetry]=useState(0),[fullId,setFullId]=useState<string>();
  const stage=useRef<HTMLDivElement>(null),dialog=useRef<HTMLDialogElement>(null),fullSheet=useRef<HTMLDivElement>(null),opener=useRef<HTMLElement|undefined>(undefined),from=useRef<DOMRect|undefined>(undefined),gesture=useRef<{x:number;y:number;dragging:boolean;moved:boolean;origin:number;spacing:number;id:number}|undefined>(undefined),suppressClick=useRef(0),animation=useRef<Animation|undefined>(undefined),closing=useRef(false),selection=useRef<string|undefined>(undefined);
  const fraction=useRef(0),paintFrame=useRef(0),departures=useRef<HTMLDivElement>(null),flights=useRef(new Set<Animation>()),flight=useRef<GalleryFlight|undefined>(undefined);
@@ -51,14 +44,17 @@ export function CardStack({cards,manage,edit,missing,title='全部云端卡'}:{t
  useEffect(()=>{stopWheel();if(current&&selected!==current.id)select(current.id);if(fullId&&!cards.some(row=>row.id===fullId))close();},[signature]);
  useEffect(()=>{
   if(!current)return;let active=true;
-  const wanted=[current,...[-1,1,-2,2,-3,3].map(offset=>cards[wrap(index+offset,cards.length)])].filter((row,i,list)=>list.findIndex(other=>other.id===row.id)===i);
+  const adjacent=adjacentPreviews(cards,index),wanted=[current,...adjacent];
   const pinned=new Set(offsets(cards.length).map(offset=>cards[wrap(index+offset,cards.length)].id));if(fullId)pinned.add(fullId);
   function trim(){const now=latest.current,i=Math.max(0,now.cards.findIndex(row=>row.id===now.current?.id)),keep=new Set(now.cards.length?offsets(now.cards.length).map(offset=>now.cards[wrap(i+offset,now.cards.length)].id):[]);if(now.fullId)keep.add(now.fullId);for(const id of cache.keys())if(cache.size>8&&!keep.has(id))cache.delete(id);}
   function publish(row:CardSummary,value:Preview){trim();if(!active)return;setPreviews(old=>Object.fromEntries(Object.entries({...old,[row.id]:value}).filter(([id])=>cache.has(id)||pinned.has(id))));}
   const read=(row:CardSummary)=>{void load(row).then(value=>{publish(row,value);if(active&&value.revision<row.revision)setRetry(n=>n+1);}).catch(error=>{if(!active)return;if(error instanceof CloudRequestError&&error.status===404){cache.delete(row.id);latest.current.missing(row.id);}else publish(row,{revision:row.revision,error:`角色读取失败${error instanceof CloudRequestError?`（HTTP ${error.status}）`:''}，请重试。`});});};
   for(const row of wanted){const saved=cache.get(row.id);if(saved?.character&&saved.revision>=row.revision)publish(row,saved);}
-  void loadPreview();wanted.forEach(read);
-  return()=>{active=false;};
+  void loadPreview();read(current);
+  // Fast switching cancels speculative work. At rest only the two nearest
+  // previews are warmed, after the selected card has priority.
+  const warm=setTimeout(()=>adjacent.forEach(read),350);
+  return()=>{active=false;clearTimeout(warm);};
  },[signature,current?.id,retry]);
  useEffect(()=>{if(!stage.current)return;const update=()=>{const node=stage.current!,height=node.clientHeight;node.style.setProperty('--gallery-width',Math.min(node.clientWidth*(node.clientWidth<700?.76:.66),Math.max(100,height-28)*210/297)+'px');node.style.setProperty('--gallery-spacing',Math.min(node.clientWidth*.25,Math.max(90,height*.22))+'px');paint();};update();const observer=new ResizeObserver(update);observer.observe(stage.current);return()=>observer.disconnect();},[!!current]);
  function down(event:PointerEvent){if(!event.isPrimary||event.button!==0)return;stopWheel();suppressClick.current=0;const now=latest.current;gesture.current={x:event.clientX,y:event.clientY,dragging:false,moved:false,origin:Math.max(0,now.cards.findIndex(row=>row.id===now.current?.id)),spacing:Math.max(90,parseFloat(stage.current?.style.getPropertyValue('--gallery-spacing')||'180')),id:event.pointerId};}

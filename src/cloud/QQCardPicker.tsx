@@ -1,5 +1,6 @@
+import {cloudDirectory as cloudCards} from './directoryReader';
 import {useContext,useEffect,useRef,useState} from 'react';
-import {cloudCards,cloudSession,subscribeCloudSessionChanges,type CardSummary} from './api';
+import {cloudSession,subscribeCloudSessionChanges,type CardSummary} from './api';
 import {CloudSaveContext} from './CloudSaveContext';
 import {subscribeAccountChanges} from './accountChanges';
 import {queuedRefresh} from './queuedRefresh';
@@ -21,7 +22,7 @@ export function QQCardPicker(){
   refreshRequest.current=quiet=>{if(!quiet){interactive=true;setBusy(true);setError('');}return queue.request();};
   const update=()=>{generation.current++;setCards([]);setBusy(false);setMessage('');if(account)void refresh().catch(()=>{});};update();
   const stop=subscribeCloudSessionChanges(update),stopChanges=account?subscribeAccountChanges(account,()=>refresh(true)):()=>{};
-  const timer=setInterval(()=>void refresh(true).catch(()=>{}),5000);
+  const timer=setInterval(()=>void refresh(true).catch(()=>{}),60000);
   return()=>{alive=false;generation.current++;queue.stop();refreshRequest.current=()=>Promise.resolve();stop();stopChanges();clearInterval(timer);};
  },[account]);
  if(!account||!context?.importCard)return null;

@@ -30,5 +30,7 @@ describe('cloud-only workload comparison',()=>{
    expect(before.hashes).toBe(328);expect(after.hashes).toBe(9);expect(after.writes).toBe(8);expect(before.writes).toBe(after.writes);expect(after.finalHp).toBe(8);
    mkdirSync('.local-evidence/cloud-stage1',{recursive:true});writeFileSync('.local-evidence/cloud-stage1/workload.json',JSON.stringify({syntheticData:true,realQQ:false,networkMeasured:false,before,after},null,2));
   }finally{vi.useRealTimers();}
- });
+ // The unoptimized control intentionally hashes 328 large snapshots. Allow
+ // contended CI machines to finish; assertions still check the exact workload.
+ },30000);
 });

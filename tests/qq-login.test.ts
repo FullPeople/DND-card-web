@@ -6,10 +6,10 @@ import {newCharacter} from '../src/core/model';
 const origin='https://dnd.center',appId='123456789',openid='A'.repeat(32);
 const cleanups:Array<()=>Promise<void>>=[];
 afterEach(async()=>{for(const cleanup of cleanups.splice(0))await cleanup();});
-async function setup(variant:'ok'|'wrong-app'|'no-profile'='ok'){
+async function setup(variant:'ok'|'wrong-app'|'no-profile'='ok',isolation?:'stage2'){
   const store=new CloudStore(':memory:'),calls:URL[]=[];
-  const qq:QQConfig={appId,appKey:'test-only-not-a-real-key',callback:origin+'/api/auth/qq/callback',fetch:(async(input:URL|RequestInfo)=>{const url=new URL(String(input));calls.push(url);return new Response(url.pathname.endsWith('/token')?'access_token=server-only-token&expires_in=3600':url.pathname.endsWith('/me')?'callback( '+JSON.stringify({client_id:variant==='wrong-app'?'999999999':appId,openid})+' );':JSON.stringify(variant==='no-profile'?{ret:100030}:{ret:0,nickname:'测试玩家',figureurl_qq_2:'https://q1.qlogo.cn/test.png'}));}) as typeof fetch};
-  const server=createCloudServer(store,origin,{qq,temporaryUpload:true});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const qq:QQConfig={appId,appKey:'test-only-not-a-real-key',callback:origin+'/api/auth/qq/callback'+(isolation?'?cloud_lab=stage2':''),isolation,fetch:(async(input:URL|RequestInfo)=>{const url=new URL(String(input));calls.push(url);return new Response(url.pathname.endsWith('/token')?'access_token=server-only-token&expires_in=3600':url.pathname.endsWith('/me')?'callback( '+JSON.stringify({client_id:variant==='wrong-app'?'999999999':appId,openid})+' );':JSON.stringify(variant==='no-profile'?{ret:100030}:{ret:0,nickname:'测试玩家',figureurl_qq_2:'https://q1.qlogo.cn/test.png'}));}) as typeof fetch};
+  const server=createCloudServer(store,origin,{qq,temporaryUpload:!isolation,accountPrivate:!!isolation});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
   cleanups.push(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));store.close();});
   const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
   const begin=async(returnTo='/library/')=>{const response=await fetch(base+'/api/auth/qq/login?returnTo='+encodeURIComponent(returnTo),{redirect:'manual'});expect(response.status).toBe(302);const url=new URL(response.headers.get('location')!);return {state:url.searchParams.get('state')!,cookie:response.headers.get('set-cookie')!.split(';')[0],response,url};};
@@ -17,6 +17,30 @@ async function setup(variant:'ok'|'wrong-app'|'no-profile'='ok'){
   return {store,calls,base,begin,finish};
 }
 describe('QQ OAuth identity boundary',()=>{
+  it('isolates real-provider test login, session cookies, landing pages and plugin access',async()=>{
+    const {begin,finish,base}=await setup('ok','stage2'),start=await begin('/cloud-lab/card/?intro=0');
+    expect(start.url.searchParams.get('redirect_uri')).toBe(origin+'/api/auth/qq/callback?cloud_lab=stage2');
+    expect(start.cookie).toMatch(/^dnd_qq_state_lab2=/);
+    const done=await finish(start.state,start.cookie);expect(done.status).toBe(302);
+    expect(done.headers.get('location')).toBe('/cloud-lab/card/?intro=0');
+    const sessionCookie=done.headers.getSetCookie().find(value=>value.startsWith('dnd_cloud_lab2='))!;
+    expect(sessionCookie).toContain('Path=/cloud-lab/api/; Secure; HttpOnly; SameSite=Strict');
+    const cookie=sessionCookie.split(';')[0],session=await(await fetch(base+'/api/session',{headers:{Cookie:cookie}})).json();
+    expect(session.authenticated).toBe(true);
+    expect((await(await fetch(base+'/api/session',{headers:{Cookie:cookie.replace('dnd_cloud_lab2=','dnd_cloud=')}})).json()).authenticated).toBe(false);
+    for(const path of ['/api/plugin/session','/api/rooms','/api/auth/plugin'])expect((await fetch(base+path,{headers:{Cookie:cookie}})).status).toBe(404);
+    expect((await fetch(base+'/api/session',{headers:{Authorization:'Bearer anything'}})).status).toBe(404);
+    const logout=await fetch(base+'/api/logout',{method:'POST',headers:{Cookie:cookie,Origin:origin,'X-CSRF-Token':session.csrf}});
+    expect(logout.status).toBe(200);expect(logout.headers.get('set-cookie')).toContain('dnd_cloud_lab2=; Path=/cloud-lab/api/;');
+    expect(qqReturnTo('/card/',origin,'stage2')).toBe('/cloud-lab/card/');
+    expect(qqReturnTo('/cloud-lab/library/',origin,'stage2')).toBe('/cloud-lab/library/');
+  });
+  it('keeps production callback validation strict and rejects arbitrary test callback queries',()=>{
+    const store=new CloudStore(':memory:');
+    try{for(const [isolation,query] of [[undefined,'?cloud_lab=stage2'],['stage2','?next=https://evil.example'],['stage2','?cloud_lab=stage2&next=1']] as const)
+      expect(()=>createCloudServer(store,origin,{qq:{appId,appKey:'test-only',callback:origin+'/api/auth/qq/callback'+query,isolation}})).toThrow('Invalid QQ OAuth configuration');
+    }finally{store.close();}
+  });
   it('uses Tencent authorization with the registered callback, no secret, and a secure browser-bound state',async()=>{const {begin}=await setup(),{response,url}=await begin();expect(url.origin).toBe('https://graph.qq.com');expect(url.pathname).toBe('/oauth2.0/authorize');expect(url.searchParams.get('redirect_uri')).toBe(origin+'/api/auth/qq/callback');expect(url.searchParams.get('client_id')).toBe(appId);expect(url.href).not.toContain('test-only');expect(response.headers.get('set-cookie')).toMatch(/Secure; HttpOnly; SameSite=Lax/);});
   it('rejects forged, missing, cross-browser and replayed states before provider calls',async()=>{const {begin,finish,calls}=await setup(),a=await begin(),b=await begin();for(const [state,cookie] of [['forged',a.cookie],[a.state,''],[a.state,b.cookie]])expect((await finish(state,cookie)).status).toBe(400);expect(calls).toHaveLength(0);expect((await finish(a.state,a.cookie)).status).toBe(302);expect((await finish(a.state,a.cookie)).status).toBe(400);expect(calls).toHaveLength(3);});
   it('persists one verified account, shared session and profile without exposing tokens or inventing a QQ number',async()=>{const {begin,finish,base,store}=await setup(),start=await begin('/card/?intro=0'),done=await finish(start.state,start.cookie);expect(done.status).toBe(302);expect(done.headers.get('location')).toBe('/card/?intro=0');const cookie=done.headers.getSetCookie().find(value=>value.startsWith('dnd_cloud='))!.split(';')[0];const session=await(await fetch(base+'/api/session',{headers:{Cookie:cookie}})).json();expect(session).toMatchObject({authenticated:true,qqLogin:'ready',account:{qq:null,nickname:'测试玩家',avatar:'https://q1.qlogo.cn/test.png'}});expect(JSON.stringify(session)).not.toMatch(/server-only-token|test-only|AAAAAAAA/);const second=await begin(),secondDone=await finish(second.state,second.cookie);expect(secondDone.status).toBe(302);expect(store.db.prepare('SELECT COUNT(*) n FROM accounts').get()).toEqual({n:1});});

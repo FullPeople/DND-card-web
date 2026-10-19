@@ -1,7 +1,9 @@
+import {cloudDirectory as cloudCards} from './directoryReader';
 import {useCallback,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
 import {cloudFeaturesEnabled} from './availability';
+import {useStartupComplete} from '../platform/startup';
 import type {Character} from '../core/model';
-import {cloudCards,cloudMutation,cloudSession,readCloudCard,subscribeCloudSessionChanges,type CloudSession,type CloudCard} from './api';
+import {cloudMutation,cloudSession,readCloudCard,subscribeCloudSessionChanges,type CloudSession,type CloudCard} from './api';
 import {subscribeAccountChanges} from './accountChanges';
 import {queuedRefresh} from './queuedRefresh';
 import {characterHash,cloudCardLock,createCloudSync,readSyncReceipt,readSyncReceipts,writeSyncReceipt,type SyncState} from './sync';
@@ -17,7 +19,8 @@ import {CheckIcon,CloudUploadIcon,CopyIcon,SheetIcon,SpinnerIcon,WarningIcon} fr
 
 
 export function CloudSaveProvider(props:Parameters<typeof EnabledCloudSaveProvider>[0]){
- return cloudFeaturesEnabled?<EnabledCloudSaveProvider {...props}/>:<CloudSaveContext.Provider value={undefined}>{props.children}</CloudSaveContext.Provider>;
+ const ready=useStartupComplete();
+ return cloudFeaturesEnabled?<EnabledCloudSaveProvider {...props} enabled={props.enabled&&ready}/>:<CloudSaveContext.Provider value={undefined}>{props.children}</CloudSaveContext.Provider>;
 }
 function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,receive,importCard,access,children,auto=true}:{enabled:boolean;disabled:boolean;auto?:boolean;characters:Character[];readCharacter:(id:string)=>Promise<Character>;receive?:(id:string,card:Character,hash:string)=>Promise<boolean>;importCard?:(card:CloudCard,account:string)=>Promise<void>;access?:(rights:Record<string,string|undefined>)=>void;children:ReactNode}){
  const directoryRefresh=useRef<()=>Promise<void>>(()=>Promise.resolve());

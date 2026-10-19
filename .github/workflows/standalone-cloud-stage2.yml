@@ -1,0 +1,28 @@
+name: Standalone private cloud stage 2
+on:
+  push:
+    branches: [codex/standalone-cloud-stage2-local-20261019]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - run: npx tsc -b
+      - run: python3 deploy/cloud/test_stage_two.py
+      - name: Persistence, permissions, OAuth and bounded workloads
+        run: npx vitest run tests/cloud-save-scheduler.test.ts tests/cloud-save-workload.test.ts tests/cloud-sync.test.ts tests/cloud-session.test.ts tests/cloudSuspension.test.ts tests/cloud-directory.test.ts tests/qq-permissions.test.ts tests/qq-login.test.ts tests/persistedCharacter.test.ts tests/cloud.test.ts tests/cloudChanges.test.ts tests/cloudSuspensionUi.test.ts tests/cloud-stage2.test.ts
+      - name: Unchanged production suspension and source provenance guard
+        run: npx vite build --mode standalone --outDir .local-evidence/cloud-stage2/paused
+      - name: Explicit isolated profiles only
+        run: |
+          npx vite build --config vite.cloud-stage2.config.ts --mode standalone
+          npx vite build --config vite.library-stage2.config.ts --mode standalone
+          npx vite build --config vite.cloud.config.ts --outDir .local-evidence/cloud-stage2/server

@@ -2,11 +2,15 @@ import type {IncomingMessage,ServerResponse} from 'node:http';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {CloudError,CloudStore} from './store';
 
-export interface QQConfig {appId:string;appKey:string;callback:string;fetch?:typeof fetch}
-export function qqReturnTo(value:string|null,origin:string){
-  if(!value||value.length>2048)return '/';
-  try {const url=new URL(value,origin);if(url.origin===origin&&!url.username&&!url.password&&['/','/card/','/library/'].includes(url.pathname))return url.pathname+url.search+url.hash;}catch{}
-  return '/';
+export interface QQConfig {appId:string;appKey:string;callback:string;fetch?:typeof fetch;isolation?:'stage2'}
+export function browserCookies(isolation?:'stage2'){
+ return isolation?{state:'dnd_qq_state_lab2',session:'dnd_cloud_lab2',path:'/cloud-lab/api/'}:{state:'dnd_qq_state',session:'dnd_cloud',path:'/api/'};
+}
+export function qqReturnTo(value:string|null,origin:string,isolation?:'stage2'){
+  const fallback=isolation?'/cloud-lab/card/':'/',allowed=isolation?['/cloud-lab/card/','/cloud-lab/library/']:['/','/card/','/library/'];
+  if(!value||value.length>2048)return fallback;
+  try {const url=new URL(value,origin);if(url.origin===origin&&!url.username&&!url.password&&allowed.includes(url.pathname))return url.pathname+url.search+url.hash;}catch{}
+  return fallback;
 }
 const cookie=(request:IncomingMessage,name:string)=>request.headers.cookie?.split(';').map(part=>part.trim()).find(part=>part.startsWith(name+'='))?.slice(name.length+1);
 const equal=(a:string,b:string)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
@@ -17,7 +21,8 @@ export function qqPage(response:ServerResponse,status:number,message:string,back
 }
 export function createQQAuth(store:CloudStore,origin:string,config?:QQConfig,clientKey?:(request:IncomingMessage)=>string){
   const ready=!!config?.appId&&!!config?.appKey;
-  if(ready){const callback=new URL(config!.callback);if(callback.origin!==origin||callback.pathname!=='/api/auth/qq/callback'||callback.search||callback.hash||!/^\d{5,20}$/.test(config!.appId))throw Error('Invalid QQ OAuth configuration');}
+  const cookies=browserCookies(config?.isolation);
+  if(ready){const callback=new URL(config!.callback);if(callback.origin!==origin||callback.pathname!=='/api/auth/qq/callback'||callback.search!==(config!.isolation?'?cloud_lab=stage2':'')||callback.hash||!/^\d{5,20}$/.test(config!.appId))throw Error('Invalid QQ OAuth configuration');}
   const pending=new Map<string,{nonce:string;returnTo:string;expires:number;key:string}>();
   const flags='; Path=/api/auth/qq/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Lax';
   async function provider(path:string,params:Record<string,string>){
@@ -32,7 +37,7 @@ export function createQQAuth(store:CloudStore,origin:string,config?:QQConfig,cli
   }
   return {ready,async handle(request:IncomingMessage,response:ServerResponse,url:URL){
     if(request.method!=='GET'||!['/api/auth/qq/login','/api/auth/qq/callback'].includes(url.pathname))return false;
-    const back=qqReturnTo(url.searchParams.get('returnTo'),origin);
+    const back=qqReturnTo(url.searchParams.get('returnTo'),origin,config?.isolation);
     if(!ready){qqPage(response,503,'网站尚未完成 QQ 登录配置，请稍后重试。本机角色卡仍可使用。',back);return true;}
     if(url.pathname.endsWith('/login')){
       const now=Date.now();for(const [state,row] of pending)if(row.expires<now)pending.delete(state);
@@ -40,11 +45,11 @@ export function createQQAuth(store:CloudStore,origin:string,config?:QQConfig,cli
       const key=clientKey?clientKey(request):request.socket.remoteAddress||'unknown';let mine=0;for(const row of pending.values())if(row.key===key&&++mine>=20)throw new CloudError(429,'qq_busy','登录请求过多，请稍后重试。');
       const state=randomBytes(32).toString('base64url'),nonce=randomBytes(32).toString('base64url');pending.set(state,{nonce,returnTo:back,expires:now+600000,key});
       const target=new URL('https://graph.qq.com/oauth2.0/authorize');target.search=new URLSearchParams({response_type:'code',client_id:config!.appId,redirect_uri:config!.callback,scope:'get_user_info',state}).toString();
-      response.writeHead(302,{'Location':target.href,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','Set-Cookie':'dnd_qq_state='+nonce+flags+'; Max-Age=600'});response.end();return true;
+      response.writeHead(302,{'Location':target.href,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','Set-Cookie':cookies.state+'='+nonce+flags+'; Max-Age=600'});response.end();return true;
     }
-    const state=url.searchParams.get('state')||'',row=pending.get(state),nonce=cookie(request,'dnd_qq_state')||'';
+    const state=url.searchParams.get('state')||'',row=pending.get(state),nonce=cookie(request,cookies.state)||'';
     if(!row||row.expires<Date.now()||!equal(nonce,row.nonce)){qqPage(response,400,'登录请求已失效，请从网站上的 QQ 登录按钮重新开始。');return true;}
-    pending.delete(state);response.setHeader('Set-Cookie','dnd_qq_state='+flags+'; Max-Age=0');
+    pending.delete(state);response.setHeader('Set-Cookie',cookies.state+'='+flags+'; Max-Age=0');
     if(url.searchParams.has('error')){qqPage(response,400,'你已取消 QQ 授权，网站没有登录。',row.returnTo);return true;}
     const code=url.searchParams.get('code');if(!code||code.length>512){qqPage(response,400,'QQ 没有返回有效的授权结果，请重新登录。',row.returnTo);return true;}
     try{
@@ -56,7 +61,7 @@ export function createQQAuth(store:CloudStore,origin:string,config?:QQConfig,cli
       const account=store.provisionVerifiedAccount('qq:'+config!.appId+':'+identity.openid.toUpperCase());
       try{const profile=await provider('/user/get_user_info',{access_token:token.access_token,oauth_consumer_key:config!.appId,openid:identity.openid});store.saveQQProfile(account.id,profile.nickname,profile.figureurl_qq_2||profile.figureurl_qq_1);}catch{/* Profile permission may be pending; verified identity remains valid. */}
       const issued=store.issueVerifiedSession(account.id,30*86400000);
-      response.writeHead(302,{'Location':row.returnTo,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','Set-Cookie':['dnd_qq_state='+flags+'; Max-Age=0','dnd_cloud='+issued.token+'; Path=/api/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=2592000']});response.end();
+      response.writeHead(302,{'Location':row.returnTo,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','Set-Cookie':[cookies.state+'='+flags+'; Max-Age=0',cookies.session+'='+issued.token+'; Path='+cookies.path+'; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=2592000']});response.end();
     }catch{qqPage(response,502,'QQ 登录未完成，请确认应用回调配置并重新登录。本机角色卡保留。',row.returnTo);}
     return true;
   }};
