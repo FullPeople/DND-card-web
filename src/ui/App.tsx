@@ -3,7 +3,7 @@ import './interactionP1.css';
 import {QuickStart} from './QuickStart';
 import {EntryApplyAction} from './EntryApplyAction';
 import {InteractionFeedbackProvider} from './InteractionFeedback';
-import {MobilePlayActions} from './MobilePlayActions';
+import {ruleOptionsPanel,sourceSettingsPanel,roomRulesPanel,transferPanel,announcementPanel,preloadRulesPanel,warmPanel} from './deferredPanels';
 import './announcement.css';
 import {legacyRecoveryIds} from '../platform/workspaceNamespace';
 import {qqRoom,roomState,readRoom,subscribeRoom,roomEditorLock,roomChangeScope,roomChangeNotice,invalidateRoomAuthorization} from '../cloud/room';
@@ -42,7 +42,7 @@ const CardMigration=lazy(()=>import('./CardMigration').then(module=>({default:mo
 import {cardMigrationIssues} from '../core/cardMigrationIssues';
 import {ClearableSearch} from './ClearableSearch';
 import {classCompatibilityIssues,migrationStillCurrent,type ClassMigrationPlan} from '../core/classMigrationQuery';
-const RuleOptions=lazy(()=>import('./RuleOptions').then(m=>({default:m.RuleOptions})));
+const RuleOptions=ruleOptionsPanel.Component;
 import {rulesSetupComplete,rememberRulesSetup} from '../platform/rulesSetup';
 import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
 
@@ -50,7 +50,7 @@ const AutomationPanel=lazy(()=>import('./AutomationPanel').then(module=>({defaul
 
 import {automationEnabled,automationNeedsInitialization,initializeAutomation,newAutomationState} from '../core/automation/state';
 import {reconcileEquipping} from '../core/automation/equipment';
-const Announcement=lazy(()=>import('./Announcement').then(m=>({default:m.Announcement})));
+const Announcement=announcementPanel.Component;
 import {useUiLanguage} from './UiLanguage';
 
 import {uiEntryLabel} from './uiText';
@@ -65,7 +65,7 @@ import {cloudSession,type CloudCard} from '../cloud/api';
 import {loadCloudBindings} from '../platform/storage';
 import {createCharacterRowReader} from './characterRows';
 const CharacterManager=lazy(()=>import('./CharacterManager').then(m=>({default:m.CharacterManager})));
-const TransferPanel=lazy(()=>import('./TransferPanel').then(module=>({default:module.TransferPanel})));
+const TransferPanel=transferPanel.Component;
 const CharacterReview=lazy(()=>import('./CharacterReview').then(module=>({default:module.CharacterReview})));
 import {readCharacterTransfer,deleteLocalCharacters} from '../core/transfers';
 import {useEntrySearch} from './useEntrySearch';
@@ -154,8 +154,8 @@ import {SheetFullscreenButton,exitSheetFullscreen} from './SheetFullscreenButton
 import { DropZone, EntryDragProvider, EntryDraggable } from './DragEntry';
 import {optionalFeatureLearningDrop} from './entryDragIntent';
 
-const SourceSettings=lazy(()=>import('./SourceSettings').then(m=>({default:m.SourceSettings})));
-const RoomRulesSummary=lazy(()=>import('./RoomRulesSummary').then(m=>({default:m.RoomRulesSummary})));
+const SourceSettings=sourceSettingsPanel.Component;
+const RoomRulesSummary=roomRulesPanel.Component;
 import {confirmedChanges} from '../core/syncRecovery';
 import { SourceName, useSources } from './SourceName';
 import { KeywordPreview } from './KeywordPreview';
@@ -185,7 +185,7 @@ function AnnouncementLoading({mode}:{mode:'standalone'|'suite'}){
 }
 function Dialog({ title, icon, subtitle, children, close }: { title: string; icon?: ReactNode; subtitle?: string; children: ReactNode; close: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => { ref.current?.showModal(); }, []);
+  useLayoutEffect(() => { ref.current?.showModal(); }, []);
   return <dialog className="dialog" ref={ref} onCancel={e=>{if(e.target===e.currentTarget){e.preventDefault();close();}}} onClick={e => { if (e.target === ref.current) close(); }} aria-labelledby="dialog-title"><div className="dialog-head"><h2 id="dialog-title">{icon}<span>{title}{subtitle&&<small className="dialog-subtitle">{subtitle}</small>}</span></h2><button onClick={close} aria-label="关闭弹窗" title="关闭"><CloseIcon/></button></div><div className="dialog-body">{children}</div></dialog>;
 }
 /** Icons and one-line explanations for the main dialogs. */
@@ -335,13 +335,14 @@ export default function App() {
   const previewCommit=useRef<{id:string;top:number}|undefined>(undefined);
   const startupComplete=useStartupComplete();
   const [announcement,setAnnouncement]=useState(()=>(standalone||inWorkbench)&&announcementPending(readAnnouncementVersion(inWorkbench?'suite':'standalone'),announcementVersionFor(inWorkbench?'suite':'standalone')));
-  useEffect(()=>{const show=()=>setAnnouncement(true);window.addEventListener('workbench-announcement',show);return()=>window.removeEventListener('workbench-announcement',show);},[]);
+  const openAnnouncement=()=>{void announcementPanel.preload().then(()=>setAnnouncement(true)).catch(()=>setNotice('公告未能加载，请检查网络后重试。已保存的角色仍然保留。'));};
+  useEffect(()=>{window.addEventListener('workbench-announcement',openAnnouncement);return()=>window.removeEventListener('workbench-announcement',openAnnouncement);},[]);
   const [modal, setModalValue] = useState('');
   const [paletteOpen,setPaletteOpen]=useState(false);
   const modalRequest=useRef(0);
   const setModal=(value:string)=>{
     if(!confirmResourceDraftDiscard())return;const request=++modalRequest.current;
-    const panels:Record<string,()=>Promise<unknown>>={characters:()=>import('./CharacterManager'),export:()=>import('./TransferPanel'),review:()=>import('./CharacterReview'),hp:()=>import('./HitPointEditor'),spellAbility:()=>import('./SpellAbilityEditor'),quickbar:()=>import('./QuickbarManager'),resources:()=>Promise.all([import('./ResourceModuleEditor'),import('./ResourceDashboard')]),rules:()=>Promise.all([import('./SourceSettings'),import('./RuleOptions')]),onboarding:()=>import('./QuickStart'),personal:()=>import('./PersonalEntries'),automation:()=>import('./AutomationPanel')};
+    const panels:Record<string,()=>Promise<unknown>>={characters:()=>import('./CharacterManager'),export:transferPanel.preload,review:()=>import('./CharacterReview'),hp:()=>import('./HitPointEditor'),spellAbility:()=>import('./SpellAbilityEditor'),quickbar:()=>import('./QuickbarManager'),resources:()=>Promise.all([import('./ResourceModuleEditor'),import('./ResourceDashboard')]),rules:preloadRulesPanel,onboarding:()=>import('./QuickStart'),personal:()=>import('./PersonalEntries'),automation:()=>import('./AutomationPanel')};
     if(!panels[value]){setModalValue(value);return;}
     void panels[value]().then(()=>{if(request===modalRequest.current)startTransition(()=>setModalValue(value));}).catch(()=>{if(request===modalRequest.current)setNotice('界面未能加载，请检查网络后重试。');});
   };
@@ -1042,8 +1043,8 @@ export default function App() {
       <div className="header-tools">
  <span className="header-group header-group-account">{inWorkbench&&<WorkbenchQQAccount/>}{qqRoom&&<button className="icon-button" title="核对云端版本" onClick={()=>{if(window.confirm('导出本机草稿并重新读取云端版本？当前草稿会保留在恢复记录中。'))void(async()=>{await queue.current;download((c.name||'角色')+'-房间草稿.json',exportCharacter(c));await archiveRoomDraft();const next=await readRoom();saveFailed.current=false;acceptWorkspace({schemaVersion:1,characters:[next.character],activeId:next.character.id,packs:next.character.rulePacks||[]});})().catch(error=>setNotice(String(error)));}}><CloudCheckIcon/><span className="label">核对云端版本</span></button>}{standalone&&<CloudSaveControl id={c.id}/>}{standalone&&<a className="suite-website-link icon-button" href="https://dnd.center/library/" target="_blank" rel="noopener noreferrer" aria-label="云端存储" title="云端存储（卡库网站）"><CloudIconGlyph/><span className="label">云端存储</span></a>}</span>
  <span className="header-group header-group-workspace">{inWorkbench&&wb.enabled.threeDragonAnte!==false&&<a className="suite-website-link icon-button" href="https://dnd.center/3-dragon/" target="_blank" rel="noopener noreferrer" aria-label={t('threeDragon')}><DiceIcon/><span className="label">{t('threeDragon')}</span></a>}{inWorkbench&&<button className="icon-button" aria-label={t('featuresToggle')} aria-pressed={workbenchPage==='features'} onClick={()=>{toggleWorkbenchPanel('features');setTab('sheet');}}><BoltIcon/><span className="label">{t('featuresToggle')}</span></button>}{inWorkbench&&<button className="icon-button" aria-label={t('settings')} aria-pressed={workbenchPage==='settings'} onClick={()=>{toggleWorkbenchPanel('settings');setTab('sheet');}}><GearIcon/><span className="label">{t('settings')}</span></button>}</span><span className="workspace-reset-slot" hidden/>
- <span className="header-group header-group-notice">{(standalone||inWorkbench)&&<button className="icon-button" aria-label={t('announcements')} onClick={()=>setAnnouncement(true)}><MegaphoneIcon/><span className="label">{t('announcements')}</span></button>}</span>
- <span className="header-group header-group-cards">{!qqRoom&&<button className="icon-button" aria-label={t('characters')} onClick={() => setModal('characters')}><BookIcon/><span className="label">{t('characters')}</span><span className="button-count">{inWorkbench?wb.cards.length:workspace.characters.length}</span></button>}<button className="icon-button" aria-label={t('rules')} onClick={() => setModal('rules')}><SlidersIcon/><span className="label">{t('rules')}</span></button><button className="primary icon-button" title="导入与导出" onClick={() => setModal('export')}><TransferIcon/><span className="label">{t('transfer')}</span></button></span>
+ <span className="header-group header-group-notice">{(standalone||inWorkbench)&&<button className="icon-button" aria-label={t('announcements')} onPointerEnter={()=>warmPanel(announcementPanel.preload)} onFocus={()=>warmPanel(announcementPanel.preload)} onPointerDown={()=>warmPanel(announcementPanel.preload)} onClick={openAnnouncement}><MegaphoneIcon/><span className="label">{t('announcements')}</span></button>}</span>
+ <span className="header-group header-group-cards">{!qqRoom&&<button className="icon-button" aria-label={t('characters')} onClick={() => setModal('characters')}><BookIcon/><span className="label">{t('characters')}</span><span className="button-count">{inWorkbench?wb.cards.length:workspace.characters.length}</span></button>}<button className="icon-button" aria-label={t('rules')} onPointerEnter={()=>warmPanel(preloadRulesPanel)} onFocus={()=>warmPanel(preloadRulesPanel)} onPointerDown={()=>warmPanel(preloadRulesPanel)} onClick={() => setModal('rules')}><SlidersIcon/><span className="label">{t('rules')}</span></button><button className="primary icon-button" title="导入与导出" onPointerEnter={()=>warmPanel(transferPanel.preload)} onFocus={()=>warmPanel(transferPanel.preload)} onPointerDown={()=>warmPanel(transferPanel.preload)} onClick={() => setModal('export')}><TransferIcon/><span className="label">{t('transfer')}</span></button></span>
  <PaletteButton open={paletteOpen} title="调色盘" toggle={()=>setPaletteOpen(value=>!value)}/></div>
     </header>
     {inWorkbench&&<><WorkbenchBar classWarnings={roomClassWarnings} online={wb.online} target={wb.target} message={wb.message} page={workbenchPage} change={page=>{setWorkbenchPage(page);setTab('sheet');}} save={()=>{if(!wb.target||c.id!==workbenchCharacterId(wb.target)){setNotice('当前角色与选中的棋子不一致');return;}void workbenchRequest('save',{native:c,data:exportOwlbear(c,d)}).then(()=>{workbenchDirty.current.delete(c.id);setNotice('已保存角色资料到枭熊');}).catch(e=>setNotice(String(e)));}}/></>}
@@ -1058,7 +1059,7 @@ export default function App() {
         </div>
         {editingLoadError&&<aside className="editing-load-error" role="alert"><p>编辑功能加载失败。检查网络后可重新加载，角色资料已保留。</p><div><button disabled={editingReloadPending} onClick={()=>void reloadSavedWorkspace()}>保存后重新加载编辑功能</button><button onClick={()=>download(`${fileName(c.name)}-角色备份.json`,exportCharacter(c))}>导出角色备份</button><details><summary>错误详情</summary><pre>{editingLoadError}</pre></details></div></aside>}
         {inWorkbench&&<WorkbenchPermissionNotice/>}{showClassReview&&<aside className="class-compatibility-banner" role="status"><p>当前角色的职业尚未关联资料库，或与当前 {c.edition} 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。</p><button onClick={()=>setModal('classSync')}>核对并同步旧卡</button></aside>}
-        <MobilePlayActions c={c} d={d} edit={edit} disabled={!!dragDisabledReason} inspect={inspect} resources={()=>{setEditingResource('');setModal('resources');}} quickbar={()=>setModal('quickbar')} spells={()=>{setSheetPage('法术');setTab('sheet');}}/><SheetEditContext.Provider value={editing&&!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}>{cloudAccess[c.id]&&<aside className="class-compatibility-banner card-permission-banner" role="status"><p>{cloudAccess[c.id]}</p></aside>}<PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => startTransition(()=>{setSheetPage(page);setTab('sheet');})}>
+        <SheetEditContext.Provider value={editing&&!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)}><ValueTraceProvider c={c} d={d} enabled={editing&&(!inWorkbench||!!wb.target?.write)}>{cloudAccess[c.id]&&<aside className="class-compatibility-banner card-permission-banner" role="status"><p>{cloudAccess[c.id]}</p></aside>}<PaperFrame effectsEnabled={!exportView?.hideConditions} character={c} page={sheetPage} changePage={page => startTransition(()=>{setSheetPage(page);setTab('sheet');})}>
           <div className="paper-heading"><span>DUNGEONS &amp; DRAGONS</span><span className="paper-heading-right">{storedCharacter?.edition||c.edition}{storedCharacter?.edition!==c.edition&&` · ${t('room')} ${c.edition}`}{inWorkbench&&<LocateButton/>}{qqRoom?<RoomCardControl flush={async()=>{await queue.current;if(saveFailed.current&&!await hasRoomDraft())throw Error('本机草稿尚未保存，请先导出备份。');}}/>:inWorkbench&&(wb.target?.cloudRoom||wb.qqAccount?.id)?<CloudRoomControl upload={async()=>{const key=wb.target?.key,account=wb.qqAccount?.id;let saved;do{saved=queue.current;await saved;}while(saved!==queue.current);if(key)await flushWorkbenchSaves(key);if(saveFailed.current||pendingSaves.current>0)throw Error('保存尚未成功，请先核对角色卡。');const latest=getWorkbench(),workspace=workspaceRef.current,native=workspace?.characters.find(row=>row.id===workspace.activeId);if(latest.target?.key!==key||latest.qqAccount?.id!==account||!native||!latest.target?.write||native.id!==c.id)throw Error('当前角色卡或编辑权限已改变，请重新打开云端设置。');return workbenchRequest('cloudUpload',{key,itemId:wb.target?.targetId||wb.target?.itemId,native,accountId:account});}}/>:standalone?<CloudCardControl id={c.id} name={c.name} locked={!!c.locked} lock={()=>edit(draft=>{draft.locked=!draft.locked;})}/>:<button className="card-lock" aria-label={c.locked?'解锁角色卡':'上锁角色卡'} aria-pressed={!!c.locked} disabled={!!qqRoom||inWorkbench&&(!wb.online||!wb.target?.write)} title={qqRoom?'房间卡的锁定由卡主在枭熊插件的 QQ 卡库中管理':undefined} onClick={()=>{if(inWorkbench)void workbenchRequest('lock',{locked:!c.locked}).catch(e=>setNotice(String(e)));else edit(draft=>{draft.locked=!draft.locked;});}}>{c.locked?<LockClosedIcon size={18}/>:<LockOpenIcon size={18}/>}</button>}</span></div>
           <Suspense fallback={<PanelLoading label="正在读取角色卡…" sheet/>}>{sheetPage === '主要' ? <><Overview catalog={allEntries} statusRibbon={<div className="edition-divider"><span/><strong>{t('cardTitle')}{classEditionSuffix(c)}</strong><FeaturePanel inline grouped={false} label="状态" kinds={['condition']} c={c} rows={c.selections.filter(s => s.entry.kind === 'condition')} edit={edit} browse={() => browse('condition')} onLink={link} receive={entry => add(entry)}/><span/></div>} addEntry={(entry, section) => add(entry, false, section)} onLink={link} c={c} d={d} edit={edit} browse={browse} inspect={inspect} renderSelection={renderSelection} openResources={() => {setEditingResource('');setModal('resources');}} openQuickbar={()=>setModal('quickbar')} openHp={()=>setModal('hp')} pinDrop={entry => add(entry, true)}/>
 </> : <ToolBoundary key={sheetPage} label={sheetPage} close={()=>setSheetPage('主要')}><div className="sheet-details">
@@ -1093,7 +1094,7 @@ export default function App() {
       </section></>}
     </main>
       <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)} disabledReason={readOnlyReason||(inWorkbench?wb.online?'卡主未授予当前玩家编辑这张卡的权限。':'房间连接尚未恢复，暂时无法修改角色卡配色。':undefined)}/>
-    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<Suspense fallback={<AnnouncementLoading mode={inWorkbench?'suite':'standalone'}/>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense>}{notice&&<Toast message={notice} action={/^已填入/.test(notice)&&actionHistory.undo&&!readOnly?{label:'撤销最近修改',run:()=>{undo();setNotice('');}}:!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
+    {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<ToolBoundary label="公告" close={()=>setAnnouncement(false)}><Suspense fallback={<AnnouncementLoading mode={inWorkbench?'suite':'standalone'}/>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense></ToolBoundary>}{notice&&<Toast message={notice} action={/^已填入/.test(notice)&&actionHistory.undo&&!readOnly?{label:'撤销最近修改',run:()=>{undo();setNotice('');}}:!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
     {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
       <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<PanelLoading label="正在加载面板…"/>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}

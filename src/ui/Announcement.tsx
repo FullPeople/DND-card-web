@@ -8,7 +8,6 @@ import {FeedbackSection} from './UiControls';
 import {AuthorSupport} from './AuthorSupport';
 import {SupporterMarquee} from './SupporterMarquee';
 import {ToolBoundary} from './ToolBoundary';
-import './automationProgress.css';
 const AutomationProgress=lazy(()=>import('./AutomationProgress'));
 
 const QUESTIONS=[['faqEditionQ','faqEditionA'],['faqSourcesQ','faqSourcesA'],['faqSourceControlQ','faqSourceControlA'],['faqAutomationQ','faqAutomationA']] as const;

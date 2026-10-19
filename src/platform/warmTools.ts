@@ -1,6 +1,12 @@
 import {afterPaint} from './afterPaint';
 import {preloadModules,type PreloadTask} from './preloadQueue';
+import {ruleOptionsPanel,sourceSettingsPanel,roomRulesPanel,transferPanel,announcementPanel} from '../ui/deferredPanels';
 const tools:PreloadTask[]=[
+ {name:'规则设置',load:ruleOptionsPanel.preload},
+ {name:'来源设置',load:sourceSettingsPanel.preload},
+ {name:'导入导出',load:transferPanel.preload},
+ {name:'公告',load:announcementPanel.preload},
+ {name:'房间规则',load:roomRulesPanel.preload},
  {name:'角色各页',load:()=>import('../ui/CharacterPages')},
  {name:'法术页',load:()=>import('../ui/SpellsPage')},
  {name:'背包页',load:()=>import('../ui/InventoryPage')},
@@ -12,10 +18,6 @@ const tools:PreloadTask[]=[
  {name:'法术能力',load:()=>import('../ui/SpellAbilityEditor')},
  {name:'自动化设置',load:()=>import('../ui/AutomationPanel')},
  {name:'角色簿',load:()=>import('../ui/CharacterManager')},
- {name:'规则设置',load:()=>import('../ui/RuleOptions')},
- {name:'来源设置',load:()=>import('../ui/SourceSettings')},
- {name:'房间规则',load:()=>import('../ui/RoomRulesSummary')},
- {name:'导入导出',load:()=>import('../ui/TransferPanel')},
  {name:'审卡',load:()=>import('../ui/CharacterReview')},
  {name:'自定义条目',load:()=>import('../ui/PersonalEntries')},
  {name:'旧卡核对',load:()=>import('../ui/CardMigration')},
