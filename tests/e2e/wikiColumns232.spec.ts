@@ -49,7 +49,14 @@ test('saved split and responsive preferences survive reload and stacked/column t
   await expect.poll(()=>page.locator('.sheet-viewport').evaluate(n=>n.scrollTop)).toBeGreaterThan(0);
   expect(await page.locator('.catalog-list').evaluate(n=>n.scrollTop)).toBe(listBefore);expect(await page.locator('.entry-detail').evaluate(n=>n.scrollTop)).toBe(readerBefore);
   await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Wiki',exact:true}).click();
-  await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);await expect(page.getByRole('separator',{name:'调整资料列表与正文高度'})).toBeVisible();
+  await expect(page.locator('.wiki-layout')).not.toHaveClass(/wiki-columns/);
+  await expect(page.locator('.entry-detail')).toBeVisible();
+  await expect(page.getByRole('separator',{name:'调整资料列表与正文高度'})).toHaveCount(0);
+  await page.getByRole('button',{name:'返回资料列表',exact:true}).click();
+  await expect(page.locator('.catalog-list')).toBeVisible();
+  await expect(page.locator('.entry-detail')).not.toBeVisible();
+  await page.locator('.catalog-row.active').click();
+  await expect(page.locator('.entry-detail')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.screenshot({path:info.outputPath('narrow-stacked-390.png')});
 });

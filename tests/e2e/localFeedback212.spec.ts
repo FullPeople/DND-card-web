@@ -10,11 +10,26 @@ const spell=(id:string,level:number):Entry=>({id,name:id,english:id,kind:'spell'
 
 function expectOldBackup(rows:Character[],original:Character){const backup=rows.find(card=>card.id!==original.id&&card.name===original.name+'（同步前备份）');expect(backup).toBeDefined();expect({...backup,id:original.id,name:original.name,revision:original.revision,createdAt:original.createdAt,updatedAt:original.updatedAt}).toEqual(original);}
 
-test('first-use setup selects character rules, display and sources once, with an always-available rules entry',async({page})=>{
- await mockSource(page,{firstSetup:true});await suppressAnnouncement(page);await page.goto('/');const setup=page.getByRole('dialog',{name:'开始使用角色卡'});await expect(setup).toBeVisible();await expect(setup.locator('.setup-intro')).toContainText('你随时可以在右上角');
- await setup.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2014',exact:true}).click();await setup.getByRole('radio',{name:'简写',exact:true}).click();await setup.locator('.source-group').filter({has:page.getByRole('checkbox',{name:'启用三宝书',exact:true})}).locator(':scope > summary').click();await expect(setup.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XPHB',exact:true})})).toBeVisible();await setup.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XPHB',exact:true})}).getByRole('checkbox').uncheck();
- await setup.getByRole('button',{name:'完成设置',exact:true}).click();await expect(setup).toHaveCount(0);await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await expect(page.locator('.paper')).toBeVisible();await expect(setup).toHaveCount(0);
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();const rules=page.getByRole('dialog',{name:/^规则与扩展(?:\s|$)/});await expect(rules.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2014',exact:true})).toHaveAttribute('aria-checked','true');await expect(rules.getByRole('radio',{name:'简写',exact:true})).toHaveAttribute('aria-checked','true');await rules.locator('.source-group').filter({has:page.getByRole('checkbox',{name:'启用三宝书',exact:true})}).locator(':scope > summary').click();await expect(rules.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XPHB',exact:true})}).getByRole('checkbox')).not.toBeChecked();await page.screenshot({path:test.info().outputPath('rules-setup.png')});
+test('first-use setup selects rules simply and advanced options persist after explicit editing',async({page})=>{
+ await mockSource(page,{firstSetup:true});await suppressAnnouncement(page);await page.goto('/');
+ const setup=page.getByRole('dialog',{name:'开始使用角色卡'});
+ await expect(setup).toBeVisible();await expect(setup.locator('.quick-start')).toContainText('之后可在“规则与扩展”中调整');
+ await setup.getByRole('radiogroup',{name:'开始使用的规则版本'}).getByRole('radio',{name:/2014/}).click();
+ await setup.getByRole('button',{name:'开始填写',exact:true}).click();
+ await expect(setup).toHaveCount(0);await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await expect(page.locator('.paper')).toBeVisible();await expect(setup).toHaveCount(0);
+ await page.getByRole('button',{name:'规则与扩展',exact:true}).click();
+ const rules=page.getByRole('dialog',{name:/^规则与扩展(?:\s|$)/});
+ await expect(rules.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2014',exact:true})).toHaveAttribute('aria-checked','true');
+ await rules.getByRole('radio',{name:'简写',exact:true}).click();
+ const source=rules.locator('.source-group').filter({has:page.getByRole('checkbox',{name:'启用三宝书',exact:true})});await source.locator(':scope > summary').click();
+ await rules.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XPHB',exact:true})}).getByRole('checkbox').uncheck();
+ await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();
+ await expect(setup).toHaveCount(0);await page.getByRole('button',{name:'规则与扩展',exact:true}).click();
+ await expect(rules.getByRole('radiogroup',{name:'角色规则版本'}).getByRole('radio',{name:'2014',exact:true})).toHaveAttribute('aria-checked','true');
+ await expect(rules.getByRole('radio',{name:'简写',exact:true})).toHaveAttribute('aria-checked','true');
+ await source.locator(':scope > summary').click();await expect(rules.locator('.source-book').filter({has:page.getByRole('button',{name:'设置来源 XPHB',exact:true})}).getByRole('checkbox')).not.toBeChecked();
+ await page.screenshot({path:test.info().outputPath('rules-setup.png')});
 });
 
 test('empty preparation stays hidden, manual allowance creates exactly that many slots and the frame shrinks',async({page})=>{

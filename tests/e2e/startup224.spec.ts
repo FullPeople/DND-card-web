@@ -43,9 +43,9 @@ test('pinyin dictionary is loaded on demand and results refresh after it arrives
  const search=page.getByRole('textbox',{name:'搜索规则资料',exact:true});
  await search.fill('测试法师');await expect(page.locator('.global-result').filter({hasText:'测试法师'}).first()).toBeVisible();expect(requested).toBe(false);
  await search.fill('ceshifashi');await expect.poll(()=>requested).toBe(true);
- await expect(page.getByText('正在加载拼音搜索…',{exact:true})).toBeVisible();
+ await expect(page.locator('.global-results').getByRole('status').filter({hasText:'正在搜索…'})).toBeVisible();
  release();await expect(page.locator('.global-result').filter({hasText:'测试法师'}).first()).toBeVisible();
- await expect(page.getByText('正在加载拼音搜索…',{exact:true})).toHaveCount(0);
+ await expect(page.locator('.global-results').getByRole('status').filter({hasText:'正在搜索…'})).toHaveCount(0);
 });
 
 
@@ -56,10 +56,10 @@ test('category pinyin updates in the existing status row without displacing the 
  await page.goto('/');await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
  const before=await page.locator('.catalog-shell').boundingBox();
  await page.getByRole('searchbox',{name:'职业分类搜索',exact:true}).fill('ceshifashi');
- await expect(page.locator('.catalog-status')).toContainText('正在加载拼音搜索');
+ await expect(page.locator('.catalog-status')).toContainText('正在搜索…');
  const during=await page.locator('.catalog-shell').boundingBox();expect(Math.abs(during!.width-before!.width)).toBeLessThan(2);expect(Math.abs(during!.x-before!.x)).toBeLessThan(2);
  release();await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
- await expect(page.locator('.catalog-status')).not.toContainText('正在加载拼音搜索');
+ await expect(page.locator('.catalog-status')).not.toContainText('正在搜索…');
 });
 
 

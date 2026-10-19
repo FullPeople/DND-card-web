@@ -72,6 +72,7 @@ test('弹窗高度固定：展开答案只滚动正文，超出部分可滑下�
  }
  await expect.poll(()=>body.evaluate(node=>node.scrollHeight-node.clientHeight)).toBeGreaterThan(0);
  await expect(body).toHaveCSS('overscroll-behavior','contain');
+ await body.hover();await page.mouse.wheel(0,550);
  await expect.poll(()=>body.evaluate(node=>node.scrollTop)).toBeGreaterThan(0);
  await settle(page,body);
  const last=questions.last();

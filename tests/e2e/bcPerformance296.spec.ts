@@ -12,7 +12,8 @@ test('all character pages warm before navigation and repeated switches download 
  await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
  await page.waitForFunction(()=>(window as any).__toolsWarm);
  const warmed=await page.evaluate(()=>(window as any).__toolWarm);
- expect(warmed.filter((row:any)=>!row.ok)).toEqual([]);expect(warmed.length).toBe(18);
+ expect(warmed.filter((row:any)=>!row.ok)).toEqual([]);
+ expect(warmed.map((row:any)=>row.name).sort()).toEqual(['规则设置','来源设置','导入导出','公告','房间规则','角色各页','法术页','背包页','场景背包','生命值','快捷栏','资源面板','资源编辑','法术能力','自动化设置','角色簿','审卡','自定义条目','旧卡核对'].sort());
  const requests:string[]=[];page.on('request',request=>{if(/\/assets\/.*\.js(?:\?|$)/.test(request.url()))requests.push(request.url());});
  const timings:number[]=[];
  for(let pass=0;pass<2;pass++)for(const name of ['特性','背景','法术','背包','主要']){
