@@ -25,8 +25,8 @@ export function featAbilityOptions(entry:Entry){
  return backgroundAbilityOptions({...entry,raw:{ability:blocks.map(({choose})=>({choose}))}});
 }
 
-/** Uses active source ownership supplied by evaluate(), after existing effects.
- * A capped increase cannot reduce an already higher manual or magical score. */
+/** Computes a capped innate increase for the evaluator's active sources.
+ * The evaluator replays existing source/item operations without reordering. */
 export function applyFeatAbilityAllocations(c:Character,active:Selection[],abilities:Record<Ability,number>,trace:Record<string,string[]>){
  for(const selection of active){
   const saved=c.answers[featAbilityChoiceId(selection.id)];if(saved?.length!==1)continue;

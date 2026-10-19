@@ -4,7 +4,8 @@ Players can explicitly choose the reviewed XPHB Ability Score Improvement's
 one-score +2 or two-score +1 allocation after selecting the feat. The 21
 allocations use the source's numeric metadata and a source-qualified evidence
 record. They affect derived scores, modifiers and dependent sheet values, up to
-20. Existing equipment score overrides apply afterward. Base scores, notes and
+20. Existing source and equipment ability operations retain their original
+order, including on unallocated attributes. Base scores, notes and
 runtime resource balances are never rewritten.
 
 The new `selection-id:feat-abilities` answer is opt-in. Existing manual cards do

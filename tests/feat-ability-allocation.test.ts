@@ -70,6 +70,22 @@ it('caps innate increases after racial bonuses and before an equipment score ove
  chooseSheetOption(c,allocation().id,'str:2',entries);expect(evaluate(c).abilities.str).toBe(20);
  const item={...race,id:'item-override',kind:'item' as const,raw:{},effects:[{op:'set' as const,target:'str' as const,value:19}]};c.selections.push({id:'item',entry:item,level:1,quantity:1,equipped:true});expect(evaluate(c).abilities.str).toBe(19);
 });
+it.each(['item-first','race-first'] as const)('retains the existing %s ability operation order when an unrelated ASI allocation is confirmed or cancelled',order=>{
+ const {c,entries,allocation}=setup(),id=allocation().id;
+ const race=normalizeData({race:[{name:'Ordered Race',source:'XPHB',ability:[{str:2}]}]},'ordered-asi-race')[0];
+ const item={...race,id:'ordered-item-entry',kind:'item' as const,raw:{},effects:[{op:'set' as const,target:'str' as const,value:19}]};
+ const worn={id:'ordered-item',entry:item,level:1,quantity:1,equipped:true},species={id:'ordered-race',entry:race,level:1,quantity:1,equipped:false};
+ c.selections=[...(order==='item-first'?[worn,species]:[species,worn]),...c.selections];
+ const before=evaluate(c).abilities.str;expect(before).toBe(order==='item-first'?21:19);
+ chooseSheetOption(c,id,'dex:2',entries);expect(evaluate(c).abilities.str).toBe(before);expect(evaluate(c).abilities.dex).toBe(15);
+ chooseSheetOption(c,id,'dex:2',entries);expect(evaluate(c).abilities.str).toBe(before);expect(evaluate(c).abilities.dex).toBe(13);
+});
+it('does not reorder an existing equipment override and later racial increase for a targeted ability either',()=>{
+ const {c,entries,allocation}=setup(),id=allocation().id;
+ const race=normalizeData({race:[{name:'Later Race',source:'XPHB',ability:[{str:2}]}]},'later-asi-race')[0];
+ c.selections=[{id:'first-item',entry:{...race,id:'first-item-entry',kind:'item',raw:{},effects:[{op:'set',target:'str',value:19}]},level:1,quantity:1,equipped:true},{id:'later-race',entry:race,level:1,quantity:1,equipped:false},...c.selections];
+ expect(evaluate(c).abilities.str).toBe(21);chooseSheetOption(c,id,'str:2',entries);expect(evaluate(c).abilities.str).toBe(21);
+});
 it.skipIf(!inputRoot)('uses the frozen XPHB Fighter grant and actual ASI metadata through saving and offline re-evaluation',()=>{
  const index=JSON.parse(readFileSync(join(inputRoot!,'index.json'),'utf8'));
  const bodies=['/data/feats.json','/data/class/class-fighter.json'].map(suffix=>{
