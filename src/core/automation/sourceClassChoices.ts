@@ -2,7 +2,7 @@ import {ABILITIES,selectionEffectsAllowed,type Character,type Entry,type Selecti
 import {candidateReason,evaluate} from '../engine';
 import {entryReferenceResolver,resolveEntryReference,matchesReference,type EntryReferenceResolver} from '../entryReferences';
 import {catalogRuleKey} from '../entryRecordIdentity';
-import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
+import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,optionalProgressionOptionsEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
 import {featAbilityOptions} from './featAbilities';
 import {invocationActivationChoiceId} from './invocationActivation';
@@ -46,6 +46,48 @@ function linkedClassFeatFilters(c:Character,owner:Selection,resolveRef:EntryRefe
   const matchingGroups=list(owner.entry.raw.featProgression).filter((raw:any)=>raw&&[raw.name,raw.ENG_name].map(key).filter(Boolean).some(name=>names(feature.entry).includes(name))&&list(raw.category).map(key).includes(category)&&raw.progression?.[String(atGrant)]===1);
   return matchingGroups.length===1?[`${feature.id}:filter:${index}`]:[];
  });
+}
+/** Only a reviewed, owned source directory is an alias of a learning quota.
+ * Matching names, loose filters and independent rewards establish no link. */
+function linkedOptionalOptions(c:Character,owner:Selection,resolveRef:EntryReferenceResolver,types:string[],progression:unknown){
+ const links:{id:string;evidenceEntries:Entry[]}[]=[];
+ const groups=list(owner.entry.raw.optionalfeatureProgression).filter((group:any)=>JSON.stringify(list(group?.featureType).map(key).sort())===JSON.stringify([...types].sort()));
+ if(groups.length!==1)return links;
+ for(const feature of c.selections.filter(row=>row.parentId===owner.id&&row.entry.raw._category==='classFeature')){
+  const reviewed=optionalProgressionOptionsEvidence(owner.entry,feature.entry);if(!reviewed||JSON.stringify(reviewed.featureType.map(key).sort())!==JSON.stringify([...types].sort()))continue;
+  const ref=feature.grantKey?.startsWith('ref:')?feature.grantKey.slice(4):undefined;
+  if(!ref||!list(owner.entry.raw.classFeatures).some((raw:any)=>(typeof raw==='string'?raw:raw?.classFeature)===ref)||resolveRef(ref,'feature')?.id!==feature.entry.id)continue;
+  const at=Number(feature.entry.raw.level);
+  if(optionalChoiceSupport(owner.entry,types,sourceProgressionCount(progression,at),at,progression).rule!=='verified'||sourceProgressionCount(progression,at)!==reviewed.count)continue;
+  const parts=reviewed.path.split(':');let node:unknown=feature.entry;
+  for(const part of parts)node=node&&typeof node==='object'?(node as any)[part]:undefined;
+  const block=node as {type?:unknown;count?:unknown;entries?:unknown};
+  if(block?.type!=='options'||block.count!==reviewed.count||!Array.isArray(block.entries)||block.entries.length!==reviewed.references)continue;
+  const entries:Entry[]=[];
+  for(const raw of block.entries){
+   if(!raw||raw.type!=='refOptionalfeature'||typeof raw.optionalfeature!=='string'){entries.length=0;break;}
+   const entry=resolveRef(raw.optionalfeature,'feature','optionalfeature');
+   if(!entry||entry.raw._category!=='optionalfeature'||entry.edition!==owner.entry.edition||key(entry.source)!==key(owner.entry.source)||!list(entry.raw.featureType).some(type=>types.includes(key(type)))){entries.length=0;break;}
+   entries.push(entry);
+  }
+  // Prove every typed directory reference. Unrelated manual copies in a card
+  // are not publisher catalog rows and cannot invalidate that source proof.
+  if(new Set(entries.map(entry=>entry.id)).size!==reviewed.references)continue;
+  links.push({id:`${feature.id}:text-option:${reviewed.path}`,evidenceEntries:[feature.entry,...entries]});
+ }
+ return links.length===1?links:[];
+}
+/** Snapshot the old answer as a receipt, so a later cancellation stays cancelled.
+ * A subsequent edit by an older reader is imported as a new legacy change. */
+export const optionalAliasReceipt=(id:string,alias:string)=>`${id}:linked-option-answer:${alias}`;
+export function optionalAnswers(c:Character,id:string,aliases:string[]):string[]{
+ const saved=[...c.answers[id]||[]];
+ for(const alias of aliases){
+  const raw=c.answers[alias]||[];if(JSON.stringify(c.answers[optionalAliasReceipt(id,alias)]||[])===JSON.stringify(raw))continue;
+  if(!saved.length){saved.push(...raw);continue;}
+  const seen=new Map<string,number>();for(const value of raw){if(!value)continue;const occurrence=(seen.get(value)||0)+1;seen.set(value,occurrence);if(saved.filter(current=>current===value).length<occurrence){const empty=saved.indexOf('');if(empty>=0)saved[empty]=value;else saved.push(value);}}
+ }
+ return saved;
 }
 /** Arrays require all class levels; sparse objects carry the last declared total. */
 export function sourceProgressionCount(value:unknown,at:number):number|undefined{
@@ -129,7 +171,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
   const sourceCard={...c,edition:owner.entry.edition==='both'?c.edition:owner.entry.edition,profile:{...c.profile,optional:{...c.profile.optional,legacy:false}}};
   const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string,recordOnly=optional,support?:ClassChoiceSupport,duplicateChoiceIds:string[]=[])=>{
    candidates=candidates.filter((entry,index)=>candidates.findIndex(other=>other.id===entry.id)===index);
-   const saved=c.answers[id]??duplicateChoiceIds.flatMap(alias=>c.answers[alias]||[]),options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
+   const saved=optional?optionalAnswers(c,id,duplicateChoiceIds):c.answers[id]??duplicateChoiceIds.flatMap(alias=>c.answers[alias]||[]),options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
     grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||'')&&!(optional&&s.parentId===owner.id&&saved.includes(s.entry.id)&&s.requirementId===invocationActivationChoiceId(owner.id,s.entry.id)&&s.grantKey===`choice:${s.requirementId}:${s.entry.id}`))},entry)||sourceChoicePrerequisite(c,entry,owner,optional,known,resolveRef)}));
    const slots=Array.from({length:Math.max(count,saved.length)},(_,index)=>saved[index]||'');
    const selected=restricted?[]:saved.slice(0,count).filter((value,index,values)=>options.some(option=>option.value===value&&!option.unavailable)&&(values.indexOf(value)===index||options.find(option=>option.value===value)?.entry.raw.repeatable===true));
@@ -141,7 +183,9 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const types=list(group.featureType).filter((type):type is string=>typeof type==='string').map(key),count=sourceProgressionCount(group.progression,at);
    if(count===0&&!c.answers[`${owner.id}:class-optional:${index}`]?.some(Boolean))return;
    const candidates=types.length?known.filter(entry=>entry.kind==='feature'&&entry.raw._category==='optionalfeature'&&list(entry.raw.featureType).some(type=>types.includes(key(type)))&&(entry.edition==='both'||entry.edition===owner.entry.edition)):[];
-   add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined,true,optionalChoiceSupport(owner.entry,types,count,at,group.progression));
+   const links=linkedOptionalOptions(c,owner,resolveRef,types,group.progression);
+   add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined,true,optionalChoiceSupport(owner.entry,types,count,at,group.progression),links.map(link=>link.id));
+   if(links.length){out.at(-1)!.evidenceEntries=links.flatMap(link=>link.evidenceEntries);if(c.selections.some(row=>links.some(link=>row.requirementId===link.id)&&row.grantKey===`choice:${row.requirementId}:${row.entry.id}`))out.at(-1)!.hint+=' 旧入口已加入卡面的特性和资源继续保留；学习记录变更不会自动删除这些旧特性，需要时请在卡面调整。';}
   });
   list(owner.entry.raw.featProgression).forEach((raw,index)=>{
    if(!raw||typeof raw!=='object')return;const group=raw as {name?:string;ENG_name?:string;category?:unknown;progression?:unknown};

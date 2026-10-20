@@ -1,5 +1,8 @@
 {
   "schemaVersion": 1,
+  "optionalProgressionOptions": [
+    {"owner":"Warlock|XPHB","feature":"Eldritch Invocation Options|魔契师|XPHB|1","edition":"2024","featureType":["EI"],"path":"entries:1","count":1,"references":28,"source":"https://www.dndbeyond.com/sources/dnd/br-2024/character-classes#EldritchInvocations"}
+  ],
   "invocationSpellActivations": [
     {"owner":"Warlock|XPHB","invocation":"Armor of Shadows|XPHB","spell":"Mage Armor|XPHB","edition":"2024","usage":"free","target":"self","source":"https://www.dndbeyond.com/sources/dnd/br-2024/character-classes#EldritchInvocationOptions"}
   ],

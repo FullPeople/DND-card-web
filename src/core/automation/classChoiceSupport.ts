@@ -34,3 +34,6 @@ export function optionalChoiceSupport(owner:Entry,types:string[],count:number|un
  return {rule:verified?'verified':'source-declared',execution:'record-only',publication:'unverified',reason:verified?'已核对此来源的学习数量；具体效果和替换限制仍手动处理。':'数量取自来源声明，尚不代表完整规则核对；只保存学习记录。'};
 }
 export const legacyRecordSupport:ClassChoiceSupport={rule:'verified',execution:'record-only',publication:'unverified',reason:'2014 ASI 与可选专长替代规则已核对；这里只保存方案，不自动改属性或激活专长效果。'};
+export function optionalProgressionOptionsEvidence(owner:Entry,feature:Entry){
+ return evidence.optionalProgressionOptions.find(row=>owner.edition===row.edition&&feature.edition===row.edition&&matchesReference(owner,row.owner)&&matchesReference(feature,row.feature));
+}
