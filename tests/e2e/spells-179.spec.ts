@@ -11,6 +11,8 @@ test('prepared spell remains marked in the known list, context menus and fullscr
  await expect(page.locator('.spell-slots-cell')).toHaveCount(0);await known.click();await expect(prepared).toHaveCount(0);await expect(page.locator('.detail-title')).toContainText('星光矢');
  await page.getByRole('switch',{name:'编辑模式'}).click();await known.click();await expect(prepared).toContainText('星光矢');await expect(known).toContainText('已预备');await prepared.click();await expect(known).not.toContainText('已预备');
  await known.dragTo(page.getByRole('button',{name:'预备空位3',exact:true}));await expect(page.locator('[data-prepared-slot="2"] .spell-stock-tile')).toContainText('星光矢');await prepared.click();await known.click({button:'right'});await page.getByRole('menuitem',{name:'放入预备栏',exact:true}).click();await expect(prepared).toHaveCount(1);
+ // Persistence is asynchronous; reload only after the app confirms its durable write.
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(prepared).toHaveCount(1);await expect(known).toContainText('已预备');
  await page.getByRole('button',{name:'卡片全屏',exact:true}).click();await prepared.hover();await expect(page.getByRole('tooltip')).toBeVisible();await prepared.click({button:'right'});await expect(page.getByRole('menu',{name:'法术操作'})).toBeVisible();await expect(page.locator('.tooltip-backdrop')).toHaveCount(0);
 });
