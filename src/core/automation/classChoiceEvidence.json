@@ -1,5 +1,8 @@
 {
   "schemaVersion": 1,
+  "featAbilityAllocations": [
+    {"feat":"Ability Score Improvement|XPHB","edition":"2024","maximum":20,"source":"https://www.dndbeyond.com/sources/dnd/br-2024/feats#AbilityScoreImprovement"}
+  ],
   "definition": "Explicit source references reviewed for selection records; not complete mechanics or publication evidence",
   "sources": {
     "legacyFeats": "https://www.dndbeyond.com/sources/dnd/basic-rules-2014/customization-options",

@@ -10,6 +10,8 @@ async function open(page:Page){
  await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete',{timeout:12000});
  await expect(page.locator('.paper')).toBeVisible();
  await expect(dialog(page)).toBeVisible();
+ // The lazy loading dialog has the same accessible title as the actual notice.
+ await expect(dialog(page).locator('.announcement-faq details')).toHaveCount(4);
 }
 async function finger(page:Page){
  const cdp=await page.context().newCDPSession(page);
@@ -62,7 +64,11 @@ test('首次公告保留 Q&A，更新日志按日期展开并采用最新说明'
 test('弹窗高度固定：展开答案只滚动正文，超出部分可滑下去看',async({page})=>{
  await open(page);
  const body=dialog(page).locator('.announcement-body');
- const height=async()=>(await dialog(page).boundingBox())!.height;
+ const height=async()=>{
+  await expect(dialog(page)).toBeVisible();
+  const value=await dialog(page).evaluate(node=>node.getBoundingClientRect().height);
+  expect(value).toBeGreaterThan(0);return value;
+ };
  const before=await height();
  const questions=dialog(page).locator('.announcement-faq details');
  for(let i=0;i<await questions.count();i++){

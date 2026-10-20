@@ -1,7 +1,7 @@
 import { downloadBlob } from './storage';
 import {beginSheetCapture} from '../ui/sheetDisplay';
 import {waitForRenderedSheet} from './sheetReady';
-export type SheetCaptureOptions={hidePortraits?:boolean;hideNotes?:boolean;hideConditions?:boolean;hideResources?:boolean;collapseFeatures?:boolean};
+export type SheetCaptureOptions={hidePortraits?:boolean;hideNotes?:boolean;hideConditions?:boolean;hideResources?:boolean};
 export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob> {
  const paper=document.querySelector<HTMLElement>('.paper');if(!paper)throw new Error('角色卡尚未显示');
  const release=beginSheetCapture(),identity=paper.dataset.characterId,page=paper.getAttribute('aria-labelledby');
@@ -16,7 +16,6 @@ export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob
  if(options.hideNotes)conceal('.bio-description,.bio-appearance,.bio-personality,.bio-story');
  if(options.hideConditions)conceal('.overview-conditions,.condition-bubbles,.edition-divider .feature-panel,.card-art-layer,.card-atmosphere,.card-art,.buff-atmosphere');
  if(options.hideResources)conceal('.spell-slot-summary,.spell-slot-resources,.hit-dice-groups,.hit-dice-resources,.resource179-flow,.resource-row,.resource-section,.resources-grid');
- if(options.collapseFeatures)conceal('.feature-prose,.feature-body,.feature-expanded,.feature-detail',true);
  await new Promise(requestAnimationFrame);await document.fonts.ready;
  if(!paper.isConnected||paper.dataset.characterId!==identity||paper.getAttribute('aria-labelledby')!==page)throw Error('角色或页面已切换，已停止导出');
  const {toSvg}=await import('html-to-image');

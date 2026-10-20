@@ -1,3 +1,18 @@
+# 2026-10-20 · 公告检查等待真实正文加载
+
+远端公告高度用例失败后，保留失败产物，并在本机原用例三次运行中复现一次失败。轨迹与源码确认，公告加载占位与正式正文同标题，原可见性等待可能匹配占位；后续取高读到已移除节点的 0，或在问答尚未出现时跳过动态循环。现在等待实际四条问答挂载后再操作，保留高度、展开、滚动及移动端断言，没有改产品源码或延长时限。最终提交 CI 另核对，尚未合并或发布。
+
+# 2026-10-20 · 工具熟练专项等待真实保存后刷新
+
+首批完整 PR 汇总发现，主工作流通过之外，工具熟练专项在重做后立即刷新时读到了尚未替换的旧存档。确认保存队列异步完成后，浏览器用例增加刷新前的存档轮询，保留原刷新后答案、手工熟练与资源断言。两份真实机制来源夹具（ERLW／EFA）的实际 Edge 流程均通过；没有改产品保存逻辑或规则源码。远端最终提交全部检查仍须重新核对，不因主工作流通过就称全部通过；合并等待用户确认。
+
+# 2026-10-20 · 反馈首批完整回放完成，尚未发布
+
+已在隔离候选接续 PR89 本地最终版，并整合导出临时合拢／恢复和钱币显示修复。Data45／46／47 与正式 303 锁定的数据历史均保留，新的 Data 配对提交为 `03e767a`。229 份冻结输入、18,789 条身份和 72 模块完整回放通过，4,561 已核对、6,538 至少一个机制通过，不能当作整条完成；两仓库账本字节核对一致。冲突后导出三项及 ASI 桌面／窄屏两项浏览器检查通过，Web 全量 1,715 项通过、93 项条件跳过，机制证据、类型及来源检查通过；Data 全量检查与构建通过。构建与远端最终 CI 待完成。未合并或部署，下一批功能仍独立。见[整合记录](FEEDBACK-INTEGRATION-20261020.md)。
+
+# 2026-10-20 · 导出与钱币显示反馈，本地候选
+
+在独立工作副本复现并修复：导出沿用展开特性导致其他条目不可见，以及钱币折算显示浮点长尾。导出临时合拢特性并在成功／失败后恢复界面，不改写人物数据；钱币只规范显示，不改余额。三项实际浏览器流程分别通过，TypeScript 通过；五页 A4 PDF 已逐页渲染核对，24 个原创特性名称完整可见。未取得玩家原 PDF，不声称未知版式全部验收；未推送、合并或发布。受审计模块已改变，必须完成新配对账本后再作完整发布验证。见 [本轮记录](FEEDBACK-EXPORT-CURRENCY-20261020.md)。
 # 2026-10-20 · 服务器旧产物已清理，测试后台与笔记已停
 
 按用户新指示，独立 QQ 测试后台 `dnd-card-cloud-lab2.service` 停止并取消开机启动；笔记 `dnd-notes` 停止并移出 PM2 自动恢复清单，文件／数据保留。SIG、正式卡库、枭熊及三龙牌继续运行；不要因旧测试入口不可用自行重启已停项目。
@@ -42,6 +57,10 @@ Web 检查 39279326447 与 Data 检查 39279445155 均已成功。单次发布�
 # 2026-10-19 · 单机云端第一阶段，仅本地
 
 按用户要求分阶段重接云端，先做单机、枭熊后置。完成旧链路审查、仅变化卡的保存调度、不可变快照摘要复用和通知优先的恢复轮询。独立测试账号的导入、数值／资源保存、立即切卡和刷新回读已通过；122 项定向检查、类型检查、普通暂停版与启用试验版构建通过。40 卡／8 次修改对照的摘要计算从 328 次降到 9 次，实际写入次数与最终数值一致；这是受控本机证据，不是真实 QQ 或公网性能。5317 定稿、5353 预览、样式、角色数据和公网暂停状态保留，未推送、未部署。预览 http://127.0.0.1:5361/，完整范围与后续步骤见 [第一阶段记录](STANDALONE-CLOUD-STAGE1-20261019.md)。
+
+# 2026-10-20 - XPHB ASI automation review candidate
+
+Explicit XPHB ASI allocations calculate derived scores and modifiers, retain base scores and manual data, and restore through the existing class-grant archive. Full replay is complete: 229 inputs, 18,789 identities, 71 exact-source modules, and exactly one new usable ASI witness (6,538 identities have at least one verified mechanism; this is not whole-rule completion). Web adopts Data `ccf474fbf8e83eb1a50db397deed2e9029b8415c` and passes committed-blob provenance, 1,650 tests (92 existing optional/historical skips), TypeScript, both builds, and desktop/390px browser acceptance covering real scores/modifiers, save/reload, replacement and cancellation. See [scope, validation and rollback](ASI-AUTOMATION-20261019.md). Review Data PR47 before Web PR89. No merge or deployment in this task.
 
 # 2026-10-19 · 302 已实际上线
 
