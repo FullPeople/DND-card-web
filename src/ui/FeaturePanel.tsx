@@ -2,7 +2,7 @@ import {useSheetChoices} from './SheetChoicesContext';
 import {cloudFeaturesEnabled} from '../cloud/availability';
 import {useReadViewMemo} from './useReadViewMemo';
 import {useEntryMenu} from './EntrySharing';
-import {useSheetRenderMode} from './sheetDisplay';
+import {useSheetRenderMode,useSheetCaptureActive} from './sheetDisplay';
 import {builtinChoices,builtinOptionsVisible,setBuiltinOptionsVisible,sheetChoicePending,sheetChoiceIgnored} from '../core/automation/choices';
 import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {ChoiceOutline} from './ChoiceOutline';
@@ -34,6 +34,7 @@ type Props = { headingInline?:ReactNode; catalog?:Entry[]; owners?:Selection[]; 
 export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = false, inline = false, c, rows, receive, edit, browse, onLink, children, label = '特性', className = 'class-features', kinds = ['feature', 'rule'], grouped = true }: Props) {
   const {format}=useSources(); const editing=useContext(SheetEditContext);
   const screen=useSheetRenderMode()==='screen';
+  const capturing=useSheetCaptureActive();
   const menu=useEntryMenu();
   const choices=useSheetChoices(c,catalog),workspace=useChoiceWorkspace(),setChoiceId=(id:string)=>workspace.open(id,className);
   const activeChoice=workspace.id&&(workspace.host||'class-features')===className?workspace.id:undefined;
@@ -65,12 +66,13 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
   const ids = draftOrder || saved?.order || [];
   const ordered = [...ids.flatMap(id => natural.find(f => f.id === id) || []), ...natural.filter(f => !ids.includes(f.id))];
   if (spells) ordered.sort((a, b) => Number(a.group) - Number(b.group));
-  const expanded = new Set(expandedFeatureIds(c,detailed,inline));
+  const expanded = new Set(capturing?[]:expandedFeatureIds(c,detailed,inline));
   const allOpen = ordered.length > 0 && ordered.every(f => expanded.has(f.id));
   const live = useRef({ ordered, expanded, edit }); live.current = { ordered, expanded, edit };
   useEffect(() => { setDraftOrder(undefined); setDragging(''); return () => cancel.current?.(); }, [c.id]);
   const layoutKey = ordered.map(f => `${f.id}:${expanded.has(f.id)}`).join('|');
   useLayoutEffect(() => {
+    if(capturing)for(const animation of panel.current?.getAnimations({subtree:true})||[])animation.cancel();
     const elements = [...(panel.current?.querySelectorAll<HTMLElement>('[data-feature-id]') || [])];
     const changedCharacter=measuredCharacter.current!==c.id;measuredCharacter.current=c.id;
     const before = positions.current.size ? positions.current : previous.current;
@@ -79,12 +81,12 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
     for (const element of elements) {
       const id = element.dataset.featureId!, old = before.get(id);
       const after = element.getBoundingClientRect(), scale = after.width / element.offsetWidth || 1; next.set(id, after);
-      if (reduced||changedCharacter) continue;
+      if (capturing||reduced||changedCharacter) continue;
       if (!old) element.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, delay: Math.min(arriving++ * 25, 150), fill: 'backwards', easing: 'ease-out' });
       else { const x = (old.x - after.x) / scale, y = (old.y - after.y) / scale; if (x || y) element.animate([{ transform: `translate(${x}px,${y}px)` }, { transform: 'translate(0,0)' }], { duration: 180, easing: 'ease-out' }); }
     }
     previous.current = next; positions.current.clear();
-  }, [layoutKey, c.id]);
+  }, [layoutKey, c.id,capturing]);
   function saveLayout(order: string[], open: string[]) {
     live.current.edit(draft => {
       saveFeatureLayout(draft,features.map(f=>f.id),order,open,detailed);
