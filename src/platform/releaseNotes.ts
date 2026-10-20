@@ -1,5 +1,14 @@
 import {cloudFeaturesEnabled} from '../cloud/availability';
-export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-20':'2026-10-19';
+export const RELEASE_DATE='2026-10-21';
+const release304=(mode:'standalone'|'suite'):ReleaseSection[]=>[
+ {title:'属性生成与提升',items:['基础属性可使用购点或随机掷骰生成，先预览再应用；取消时保留原卡。','2024 版属性值提升可明确选择一项加 2，或两项各加 1，最高为 20；保留基础值、旧手工数据和其他已填内容。','技能选择会提示已有的其他熟练来源；保留旧答案，重复选择不会叠加熟练加值。']},
+ {title:'导出与钱币显示',items:['导出 PNG 或 PDF 前临时合拢已展开的特性，导出后恢复原界面，保留已保存的选择。','修正金币换算后出现的一长串小数，原余额和币种保持。']},
+ {title:'祈唤学习与来源施法',items:['补足部分 2024 祈唤的学习资格检查，按实际已学的对应职业戏法、来源和版本判断；条件失效时保留原学习记录。','已学的幽影护甲可单独启用来源施法，按来源对自身随意施放法师护甲；取消时保留原有手工法术。','法师护甲的 AC、持续时间和护甲资格，以及伤害祈唤的具体目标、加伤、射程和击退仍需手动核对。']},
+ {title:'同名资料与旧卡',items:['区分同一来源内的不同条目，避免同名资料互相覆盖。','旧引用存在多个可能结果时先让你选择，保留各份正文；刷新和重开继续保留已选定义、手工内容和已消耗资源。']},
+ ...(mode==='suite'?[{title:'扩展资料导入与阅读',items:['扩展自制怪物资料来源，并补齐职业、其他资料及书籍和冒险的本机导入阅读。','刷新失败时保留上次缓存；尚未解析的引用、结构、图片路径和上游失效地址继续显示提示。']}]:[]),
+ {title:'感谢支持',items:['感谢 Renown 支持 66 元，赞助名单已更新。']},
+ {title:'当前范围',items:mode==='standalone'&&cloudFeaturesEnabled?['正式网站与私人卡库继续使用 QQ 登录和各账号自己的云端角色；保留本机存档。']:['本机角色、现有资料及已消耗资源保留；此入口的 QQ 登录与云端功能继续暂停。',...(mode==='suite'?['真实多人房间和玩家原设备仍待现场复核。']:[])]},
+];
 const release303=():ReleaseSection[]=>[
  {title:'QQ 登录与私人卡库',items:['正式单机版可使用 QQ 登录，读取和保存自己的云端角色卡，各账号的私人卡库保持隔离。','保留原本机角色、灰色切角样式和浏览器设置，不使用测试版数据覆盖正式库。']},
  {title:'切卡与保存',items:['减少切卡和修改数值时的重复计算，后台合并保存；账号变化、冲突或写入未确认时保留本机草稿。','统一初始化本机存储，缺失时可从完整 JSON 备份恢复，保留角色身份与填写内容。']},
@@ -482,8 +491,9 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'&&cloudFeaturesEnabled?release303():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release303()}]:[]),
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release304(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ {title:RELEASE_DATE,sections:release304(mode)},
+ ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:'2026-10-20',sections:release303()}]:[]),
  {title:'2026-10-19',sections:release302(mode)},
  {title:'2026-10-18',sections:release301(mode)},
  ...(mode==='suite'?[{title:'2026-10-16-三',sections:release300()}]:[]),
