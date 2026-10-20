@@ -1,6 +1,7 @@
 import {ABILITIES,selectionEffectsAllowed,type Character,type Entry,type Selection} from '../model';
 import {candidateReason,evaluate} from '../engine';
 import {resolveEntryReference,matchesReference} from '../entryReferences';
+import {catalogRuleKey} from '../entryRecordIdentity';
 import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
 import {featAbilityOptions} from './featAbilities';
@@ -10,12 +11,12 @@ const key=(value:unknown)=>String(value??'').trim().toLowerCase();
 const level=(row:Selection)=>Number.isSafeInteger(row.level)&&row.level>=1&&row.level<=20?row.level:0;
 const names=(entry:Entry)=>[entry.name,entry.english,entry.raw.name,entry.raw.ENG_name].map(key);
 const abilityImprovement=(entry:Entry)=>key(entry.raw.category)==='g'&&entry.raw.repeatable===true&&list(entry.raw.ability).some((row:any)=>Array.isArray(row?.choose?.from)&&row.choose.from.length>0&&row.choose.from.every((ability:any)=>ABILITIES.includes(ability))&&(row.choose.amount??1)*(row.choose.count??1)===2);
-function activeOwnedFeat(c:Character,entry:Entry,reference:string):boolean{
+function activeOwnedFeat(c:Character,entry:Entry,reference:string,known:Entry[]):boolean{
  const parts=reference.split('|');
  if(parts.length>2||!parts[0].trim())return false;
  const qualified=`${parts[0]}|${parts[1]?.trim()||'PHB'}`;
  return c.selections.some(row=>{
-  if(row.entry.kind!=='feat'||row.entry.id===entry.id||!matchesReference(row.entry,qualified)||
+  if(row.entry.kind!=='feat'||catalogRuleKey(row.entry,known)===catalogRuleKey(entry,known)||!matchesReference(row.entry,qualified)||
    row.entry.edition!=='both'&&row.entry.edition!==(entry.edition==='both'?c.edition:entry.edition))return false;
   const seen=new Set<string>();let current:Selection|undefined=row;
   while(current){
@@ -90,7 +91,7 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
     if(!groups.length||!groups.some(group=>Object.entries(group).every(([ability,minimum])=>Object.hasOwn(current,ability)&&typeof minimum==='number'&&current[ability as keyof typeof current]>=minimum)))return '尚未满足属性前置条件。';
    }else if(field==='feat'&&!optional){
     if(!Array.isArray(value)||!value.length||value.some(ref=>typeof ref!=='string'||!ref.trim()||!ref.split('|')[0].trim()||ref.split('|').length>2))return '此专长前置结构尚未核对。';
-    if(!value.some(ref=>activeOwnedFeat(c,entry,ref)))return '尚未具备来源和版本匹配且当前有效的所需专长。';
+    if(!value.some(ref=>activeOwnedFeat(c,entry,ref,known)))return '尚未具备来源和版本匹配且当前有效的所需专长。';
    }else if(field==='feature'&&!optional&&key(entry.raw.category)==='fs'){
     if(!Array.isArray(value)||value.length!==1||typeof value[0]!=='string'||!value[0].trim())return '此特性前置结构尚未核对。';
     if(!ownedFightingStylePrerequisite(c,owner,known,value[0]))return '尚未具备来源明确授予且当前有效的所需职业特性。';
@@ -192,9 +193,9 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
  // duplicates remain recorded; only the first eligible grant is active.
  const claimed=new Map<string,string>();
  for(const choice of out)if(choice.sourceProgression==='feat'&&!choice.restricted&&choice.count>0)
-  for(const value of choice.selected){const entry=choice.options.find(option=>option.value===value)?.entry;if(entry?.kind==='feat'&&entry.raw.repeatable!==true&&!claimed.has(entry.id))claimed.set(entry.id,choice.id);}
+  for(const value of choice.selected){const entry=choice.options.find(option=>option.value===value)?.entry;if(entry?.kind==='feat'&&entry.raw.repeatable!==true&&!claimed.has(catalogRuleKey(entry,known)))claimed.set(catalogRuleKey(entry,known),choice.id);}
  for(const choice of out)if(choice.sourceProgression==='feat'){
-  for(const option of choice.options)if(option.entry.kind==='feat'&&option.entry.raw.repeatable!==true&&claimed.has(option.entry.id)&&claimed.get(option.entry.id)!==choice.id)
+  for(const option of choice.options)if(option.entry.kind==='feat'&&option.entry.raw.repeatable!==true&&claimed.has(catalogRuleKey(option.entry,known))&&claimed.get(catalogRuleKey(option.entry,known))!==choice.id)
    option.unavailable||='此不可重复专长已在其他有效职业授予中选择；原记录保留。';
   choice.selected=choice.selected.filter(value=>choice.options.some(option=>option.value===value&&!option.unavailable));
   choice.complete=choice.selected.length===choice.count&&choice.count>0;

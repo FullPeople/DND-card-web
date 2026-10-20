@@ -1,8 +1,9 @@
 import type {Entry} from '../core/model';
 import type {SourceMeta} from '../core/sourceCatalog';
 import type {LoadProgress} from './catalog';
+import {mergeCatalogRecords} from '../core/entryRecordIdentity';
 
-export const CATALOG_SNAPSHOT_SCHEMA='wiki-normalized-296-v1';
+export const CATALOG_SNAPSHOT_SCHEMA='wiki-normalized-record-identities-v2';
 export type CatalogSnapshot={
  schema:string;scope:string;createdAt:number;entries:Entry[];
  sources:Record<string,SourceMeta>;progress:LoadProgress;
@@ -44,7 +45,7 @@ export async function loadCatalogSnapshot(options:Options):Promise<void>{
  const entries=new Map<string,Entry>(),sources:Record<string,SourceMeta>={};
  let progress:LoadProgress|undefined;
  await options.load(batch=>{
-  if(signal.aborted)return;for(const entry of batch)entries.set(entry.id,entry);onBatch(batch);
+  if(signal.aborted)return;mergeCatalogRecords(entries,batch);onBatch(batch);
  },value=>{
   if(signal.aborted)return;progress={...value,failed:[...value.failed],retry:[...(value.retry||[])]};onProgress(value);
  },value=>{

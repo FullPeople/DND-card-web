@@ -1,4 +1,5 @@
 import { compareSources, SOURCE_SEED, type SourceMeta } from './SourceName';
+import {legacyCatalogId} from '../core/entryRecordIdentity';
 const collator = new Intl.Collator('zh-CN', { numeric: true });
 import { entryEdition, ABILITY_LABELS, type Ability, type Character, type Entry, type Kind } from '../core/model';
 import {trainingCategory} from './trainingData';
@@ -12,7 +13,7 @@ export const librarySourceEnabled = (c:Character,e:Entry):boolean => c.profile.e
   // Personal snapshots have no expansion switch. Authored Wiki packs still do.
   || e.source==='IMPORTED'&&e.packId==='imported'
   || e.source==='CUSTOM'&&e.packId==='custom'&&e.raw._custom===true&&!e.raw._workbenchCustom;
-export const explicitlyExcluded = (c:Character,e:Entry):boolean => librarySourceEnabled(c,e) && !!c.profile.disabledEntries?.includes(e.id);
+export const explicitlyExcluded = (c:Character,e:Entry):boolean => librarySourceEnabled(c,e) && !!c.profile.disabledEntries?.some(id=>id===e.id||id===legacyCatalogId(e));
 export const tabOf = (e: Entry): LibraryTab => {
   if(e.raw._workbenchCustom||e.raw._customPack)return 'custom';
   const category=e.raw._category;
