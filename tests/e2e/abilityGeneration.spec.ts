@@ -19,6 +19,14 @@ async function setup(page:Page,edition:'2014'|'2024'='2024'){
 }
 const retained=(card:Character)=>{const {abilities,revision,updatedAt,...other}=card;return other;};
 
+test('screen mode keeps the compact generator entry reachable without changing the card on cancel',async({page},info)=>{
+ const before=await setup(page);await page.getByRole('button',{name:'切换为非 A4 显示',exact:true}).click();
+ const cell=page.locator('.screen-overview .ability-str'),launch=page.getByRole('button',{name:'生成基础属性',exact:true});
+ await expect(cell).toBeVisible();await expect(launch).toBeVisible();await cell.screenshot({path:info.outputPath('screen-generation-entry.png')});
+ await launch.click();const dialog=page.getByRole('dialog',{name:'生成基础属性',exact:true});await expect(dialog).toBeVisible();
+ await dialog.getByRole('button',{name:'取消',exact:true}).click();await expect(dialog).toHaveCount(0);expect(await readCard(page)).toEqual(before);
+});
+
 test('2014 point buy and random generation preserve the edition and existing manual records',async({page})=>{
  const before=await setup(page,'2014');await page.getByRole('button',{name:'生成基础属性',exact:true}).click();let dialog=page.getByRole('dialog',{name:'生成基础属性',exact:true});
  for(const name of ['力量','敏捷','体质'])await dialog.getByRole('combobox',{name:`${name}购点值`,exact:true}).selectOption('15');

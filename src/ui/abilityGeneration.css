@@ -1,4 +1,7 @@
 .ability-generator-launch{margin-left:auto;padding:0 4px;color:inherit;font:inherit;white-space:nowrap;border:1px solid currentColor;background:transparent}
+.sheet-viewport.screen-mode .ability-str .cell-heading{position:relative;align-items:flex-start;justify-content:center}
+.sheet-viewport.screen-mode .ability-str .ability-generator-launch{position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;margin:0;padding:0;border:0;border-radius:0;font-size:0}
+.sheet-viewport.screen-mode .ability-str .ability-generator-launch::after{content:"生成";position:absolute;inset-inline:0;bottom:0;font-size:9px;line-height:9px;text-align:center}
 .ability-generation-dialog{width:540px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px)}
 .ability-generation-dialog .dialog-body{overflow:auto}
 .ability-generation-methods{display:flex;gap:8px;flex-wrap:wrap}
