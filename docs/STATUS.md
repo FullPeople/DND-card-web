@@ -9,6 +9,17 @@
 # 2026-10-19 - XPHB invocation local follow-up candidate
 
 The learned Armor of Shadows record has a separate activation and a self-only, no-slot Mage Armor grant. Eleven workflow/source/render cases and 129 related tests pass; TypeScript passes. Saved spell snapshots retain precedence over later downloads; missing spell data has a visible pending state. Its own full runtime ledger, builds and browser acceptance remain pending. See [scope and boundaries](INVOCATION-ACTIVATION-20261019.md). The separate ASI replay does not certify this candidate.
+# 2026-10-20 · 第二批屏幕框高回归已复现并修复
+
+6316ee6 的最终 CI 揭示真实回归：屏幕模式的力量标题只有 29 像素宽，生成按钮使编辑框从 79 撑至 90 像素。原版式用例在本机同样失败；现仅调整响应式样式，标题区保持整块可点击并显示紧凑“生成”字样，原框高测试通过，九项完整屏幕版式及三项导出流程通过。桌面／390px 属性生成八项流程通过，包含新屏幕入口的取消不落盘，截图已检查。另一拖拽检查先等待异步候选可见再取位置，原拖拽、Esc、幽灵清理和保存断言保留，原专项通过。
+
+没有改变规则运行模块，Data4d7c6e7 的 72 个模块字节与提交来源核对仍通过，可依用户要求复用完整回放。最终机制证据、构建及新提交远端 CI 继续分别核对；旧 6316 的失败不作为通过，也未合并或发布。
+
+# 2026-10-20 · 第二批配对验证完成，远端检查另核对
+
+属性生成／重复技能提醒的整合候选全量 1,724 项通过、93 项条件跳过；最初来源夹具复制用例超时一次，保留失败记录，原断言在两工作线程的全量重跑通过，未排除用例或加长时限。机制证据 355 项通过、20 项条件跳过，类型与普通／默认独立／Wiki／正式卡页／正式卡库五种构建及正式隔离检查通过。13 条实际浏览器流程全部通过（属性生成 6、技能提醒 2、导出／钱币 3、ASI 2）。
+
+本次只接续首批公告真实正文等待；STATUS 冲突双方保留。已按当前工作区核对 Data `4d7c6e7` 绑定的 72 个模块字节，规则源码与已验证候选一致。Data 第二批 PR49 的最终推送及 PR 校验通过，pipeline 原条件跳过；不能把它称作完整 pipeline 通过。最新正文等待整合后，机制证据再次通过，五种构建与正式隔离检查再次通过，公告／进度桌面及手机 11 条浏览器流程通过。Web 远端最终 CI 单列，尚未合并、部署或以本地样例替代原卡／房间验收。
 
 # 2026-10-20 · 购点与技能提醒完成独立配对回放
 
@@ -21,6 +32,10 @@ The learned Armor of Shadows record has a separate activation and a self-only, n
 # 2026-10-20 · 购点与随机基础属性独立候选
 
 编辑模式下可从力量标题的“生成属性”打开预览，使用 27 点购点或六组 4d6 去最低值，确认后仅替换基础属性。五项逻辑检查、2014／2024 桌面与 390px 六项保存／重开／取消／失败浏览器流程及类型检查通过，保留 ASI 分配、来源和资源。该候选独立于正在回放的前一批，尚未推送、合并或发布，不能沿用前一批账本认证其 `Overview` 改动。见[本地记录](ABILITY-GENERATION-LOCAL-20261020.md)。
+
+# 2026-10-20 · 公告检查等待真实正文加载
+
+远端公告高度用例失败后，保留失败产物，并在本机原用例三次运行中复现一次失败。轨迹与源码确认，公告加载占位与正式正文同标题，原可见性等待可能匹配占位；后续取高读到已移除节点的 0，或在问答尚未出现时跳过动态循环。现在等待实际四条问答挂载后再操作，保留高度、展开、滚动及移动端断言，没有改产品源码或延长时限。最终提交 CI 另核对，尚未合并或发布。
 
 # 2026-10-20 · 工具熟练专项等待真实保存后刷新
 
