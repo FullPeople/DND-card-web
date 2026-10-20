@@ -8,6 +8,7 @@ import {sheetChoices,setSheetChoiceSlot,chooseSheetOption,syncChoiceContent} fro
 import {syncFeatures} from '../src/core/sheet';
 import {validateCharacter} from '../src/core/validation';
 import {syncAutoResources} from '../src/core/resources';
+import oldFixture from './fixtures/preOptionalProgressionOptions.json' with {type:'json'};
 
 // Original prose and candidates; only reviewed source identities are metadata.
 const optionalfeature=Array.from({length:28},(_,i)=>({name:`原创学习项 ${i}`,source:'XPHB',featureType:['EI'],entries:['原创手工效果。']}));
@@ -76,9 +77,8 @@ it.each(['unreviewed-feature','changed-count','missing-reference','mixed-categor
 });
 
 const core=process.env.DND_AUTOMATION_CORE_DATA;
-const oldFixture=process.env.DND_OPTIONAL_OPTIONS_LEGACY_FIXTURE;
-it.skipIf(!oldFixture)('preserves a pre-fix-code-produced tree and spent feature counter across refresh, restriction, import and level changes',()=>{
- const fixture=JSON.parse(readFileSync(oldFixture!,'utf8'));expect(fixture.producer).toBe('c08f11af030035a14c117c2219aae946281e4f13');
+it('preserves a pre-fix-code-produced tree and spent feature counter across refresh, restriction, import and level changes',()=>{
+ const fixture=structuredClone(oldFixture);expect(fixture.authored).toBe(true);expect(fixture.playerDocumentsRead).toBe(false);expect(fixture.producer).toBe('c08f11af030035a14c117c2219aae946281e4f13');
  const c=validateCharacter(fixture.character),entries=fixture.entries as Entry[],{ids}=fixture;
  const old=structuredClone(c.selections.find(row=>row.id===ids.granted))!,resource=structuredClone(c.runtime.resources[ids.resource]),answers=structuredClone(c.answers),layout=structuredClone(c.featureLayout),quickbar=structuredClone(c.quickbar);
  expect(resource.current).toBe(0);syncFeatures(c,entries);syncAutoResources(c);
