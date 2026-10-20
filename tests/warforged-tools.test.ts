@@ -3,7 +3,7 @@ import {it,expect,vi} from 'vitest';
 // unused live-room transport and pointer-event setup isolated from Node.
 vi.mock('../src/platform/workbench',()=>({inWorkbench:false,workbenchRequest:vi.fn(),composeRoll:vi.fn(),useWorkbench:()=>({role:'PLAYER'})}));
 vi.mock('../src/ui/pointerDrag',()=>({pointerDrag:vi.fn(),landingWithin:vi.fn()}));
-vi.mock('../src/ui/sheetDisplay',()=>({useSheetRenderMode:()=> 'a4'}));
+vi.mock('../src/ui/sheetDisplay',()=>({useSheetRenderMode:()=> 'a4',useSheetCaptureActive:()=>false}));
 import {newCharacter,type Entry} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
 import {normalizeData} from '../src/data/catalog';
