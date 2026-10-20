@@ -1,5 +1,6 @@
 import {planFeatureResources} from './automation/featureResources';
 import {planRacialAbilities} from './racialAbilities';
+import {applyFeatAbilityAllocations,hasFeatAbilityAllocation} from './automation/featAbilities';
 import {sheetChoices} from './automation/choices';
 import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
@@ -31,6 +32,9 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   let speed = typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
   const sizes = new Set<string>();
   const effectTrace:Record<string,string[]>={ac:[],hp:[],speed:[]};
+  const allocateFeatAbilities=automationEnabled(c)&&hasFeatAbilityAllocation(c,active);
+  const innateAbilities=allocateFeatAbilities?{...c.abilities}:undefined;
+  const abilityOperations:{ability:Ability;op:'add'|'set';value:number}[]=[];
   for (const selection of active) {
     const e = selection.entry; const origin = `${e.name} · ${e.source}`; const raw = e.raw;
     if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(unhandledFeatureArmorText(e)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
@@ -42,6 +46,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
       issues.push(...racial.issues);
       for (const a of ABILITIES) {
         abilities[a] += racial.bonuses[a] || 0;
+        if(innateAbilities){innateAbilities[a]+=racial.bonuses[a]||0;if(racial.bonuses[a])abilityOperations.push({ability:a,op:'add',value:racial.bonuses[a]!});}
         if (racial.trace[a]) trace[a].push(...racial.trace[a]!);
       }
     }
@@ -59,11 +64,21 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
       else if (ABILITIES.includes(effect.target as Ability)) {
         if(e.kind==='background')continue;
         const a = effect.target as Ability; abilities[a] = effect.op === 'set' ? effect.value : abilities[a] + effect.value;
+        if(innateAbilities){abilityOperations.push({ability:a,op:effect.op,value:effect.value});if(e.kind!=='item')innateAbilities[a]=effect.op==='set'?effect.value:innateAbilities[a]+effect.value;}
         trace[a].push(`${origin} ${effect.op === 'set' ? '=' : '+'}${effect.value}`);
       } else if (effect.target === 'speed') {speed = effect.op === 'set' ? effect.value : speed + effect.value;effectTrace.speed.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`);}
       else if (effect.target === 'ac') { if (effect.op === 'set') acOverride = effect.value; else acBonus += effect.value;effectTrace.ac.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }
       else if (effect.target === 'hp') { if (effect.op === 'set') hpOverride = effect.value; else hpBonus += effect.value;effectTrace.hp.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }
     }
+  }
+  if(innateAbilities){
+    // Bound the new innate increase separately, then replay the existing ability
+    // operations in exactly their original order. ASI must never reorder an
+    // equipment override and a later racial/source increase on any attribute.
+    const before={...innateAbilities},allocationTrace:Record<string,string[]>=Object.fromEntries(ABILITIES.map(a=>[a,[]])),changedAbilities=new Set<Ability>();
+    applyFeatAbilityAllocations(c,active,innateAbilities,allocationTrace);
+    for(const a of ABILITIES){const increase=innateAbilities[a]-before[a];if(increase){changedAbilities.add(a);abilities[a]=c.abilities[a]+increase;trace[a].splice(1,0,...allocationTrace[a]);}}
+    for(const {ability,op,value} of abilityOperations)if(changedAbilities.has(ability))abilities[ability]=op==='set'?value:abilities[ability]+value;
   }
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
     if (key.startsWith('save:')) { if (value) proficientSaves.add(key.slice(5)); else proficientSaves.delete(key.slice(5)); }

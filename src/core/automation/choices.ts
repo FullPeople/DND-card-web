@@ -6,6 +6,7 @@ import {automationEnabled} from './state';
 import {candidateReason} from '../engine';
 import {removeSelection} from '../sheet';
 import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbilities';
+import {featAbilityOptions} from './featAbilities';
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
@@ -51,6 +52,13 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
    const options=backgroundAbilityOptions(row.entry).map(option=>({...option,entry:concept(row.entry,`abilities:${option.value}`,option.label,['背景属性分配记录；不会重复改写卡面的基础属性。'])}));
    push('abilities','背景属性',1,options,'abilities');
    const choice=out.at(-1);if(choice?.channel==='abilities')choice.hint=options.length?'保存背景声明的分配方案，不会再次叠加到已填写的基础属性。':'此背景属性结构尚未支持，原有记录保留；请查阅来源资料。';
+  }
+  const allocations=featAbilityOptions(row.entry);
+  if(allocations.length){
+   push('feat-abilities','属性提升（自动计算）',1,allocations.map(option=>({...option,entry:concept(row.entry,`feat-abilities:${option.value}`,option.label,[])})),'content');
+   out.at(-1)!.hint='确认后计入派生属性，最高 20。若旧卡基础属性已包含这次提升，请保留手工方式，不要重复确认；取消分配即可撤销自动加值。';
+   const choice=out.at(-1)!,saved=c.answers[choice.id];
+   if(saved?.length>1){choice.selected=[];choice.complete=false;choice.hint='此分配包含多个旧答案，原记录保留且不计入属性。请重新确认一个分配方案。';}
   }
   const first=c.selections.find(s=>s.entry.kind==='class');
   const start=row.entry.kind==='class'?(first?.id===row.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;

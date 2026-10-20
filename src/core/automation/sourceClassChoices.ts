@@ -3,6 +3,7 @@ import {candidateReason,evaluate} from '../engine';
 import {resolveEntryReference,matchesReference} from '../entryReferences';
 import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
+import {featAbilityOptions} from './featAbilities';
 
 const list=(value:unknown):unknown[]=>Array.isArray(value)?value:[];
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
@@ -177,6 +178,10 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
    const candidates=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
    add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；只有既有已适配机制生效。ASI 属性分配仍手动填写，不会重复改变卡面基础属性。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；仅既有已适配机制生效，ASI 属性仍手动填写。'});
+   if(featAbilityOptions(grant).length){
+    out.at(-1)!.hint='选入属性提升专长后，可显式确认自动分配；已手工计入基础属性的旧卡可继续保留手工方式。其他专长仅计算已支持的来源效果。';
+    out.at(-1)!.support!.reason='专长授予已接入；此来源的属性提升支持显式分配、上限 20 和可撤销的派生计算。';
+   }
    // The chosen feat can differ from the typed ASI identity. Preserve both
    // references so catalog absence cannot turn a confirmed grant into no grant.
    out.at(-1)!.evidenceEntries=[feature,grant];out.at(-1)!.grantLevel=atGrant;

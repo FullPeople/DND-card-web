@@ -33,6 +33,10 @@ Web 检查 39279326447 与 Data 检查 39279445155 均已成功。单次发布�
 
 按用户要求分阶段重接云端，先做单机、枭熊后置。完成旧链路审查、仅变化卡的保存调度、不可变快照摘要复用和通知优先的恢复轮询。独立测试账号的导入、数值／资源保存、立即切卡和刷新回读已通过；122 项定向检查、类型检查、普通暂停版与启用试验版构建通过。40 卡／8 次修改对照的摘要计算从 328 次降到 9 次，实际写入次数与最终数值一致；这是受控本机证据，不是真实 QQ 或公网性能。5317 定稿、5353 预览、样式、角色数据和公网暂停状态保留，未推送、未部署。预览 http://127.0.0.1:5361/，完整范围与后续步骤见 [第一阶段记录](STANDALONE-CLOUD-STAGE1-20261019.md)。
 
+# 2026-10-20 - XPHB ASI automation review candidate
+
+Explicit XPHB ASI allocations calculate derived scores and modifiers, retain base scores and manual data, and restore through the existing class-grant archive. Full replay is complete: 229 inputs, 18,789 identities, 71 exact-source modules, and exactly one new usable ASI witness (6,538 identities have at least one verified mechanism; this is not whole-rule completion). Web adopts Data `ccf474fbf8e83eb1a50db397deed2e9029b8415c` and passes committed-blob provenance, 1,650 tests (92 existing optional/historical skips), TypeScript, both builds, and desktop/390px browser acceptance covering real scores/modifiers, save/reload, replacement and cancellation. See [scope, validation and rollback](ASI-AUTOMATION-20261019.md). Review Data PR47 before Web PR89. No merge or deployment in this task.
+
 # 2026-10-19 · 302 已实际上线
 
 北京时间 12:59:56，单机角色卡／卡库／Wiki `standalone-1.0.302` 与新版插件 `1.0.302-dev` 已完成发布。运行来源固定为 Web `a17685fbd7871984f672f7221d4b6b55b9204aad`、Suite `c58f1d40de24bb12735d42aedadacc3672e09a2d`；后续文档提交不替代运行来源。18 组精确 CI、47 个任务、四份完整恢复副本、四棵线上树、128 项保护和数据库完整性检查通过；公网 49 个文件散列及七个源码归档范围请求通过。
