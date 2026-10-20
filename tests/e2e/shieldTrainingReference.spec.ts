@@ -21,6 +21,12 @@ async function ready(page:Page,edition:'2014'|'2024',manualArmor?:string,mobile=
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'synthetic-shield-entry-card.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  if(edition==='2014')await page.getByRole('dialog',{name:'导入前核对',exact:true}).getByRole('button',{name:'保留全部记录并导入',exact:true}).click();
  await expect(page.getByRole('tab',{name:c.name+'（导入）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ // Import reconciliation persists automatic resources asynchronously. Finish
+ // that save before measuring whether a read-only reference changes the card.
+ await expect.poll(async()=>{const saved=await savedCard(page);return {
+  defaults:saved.profile.autoSourceDefaults,
+  hitDie:saved.runtime.resources['hit-die:10'],manual:saved.runtime.resources.manual,
+ };}).toMatchObject({defaults:['PHB','XPHB'],hitDie:{automatic:true,current:1,max:1},manual:{current:1,max:4}});
  return c;
 }
 const armor=(page:Page)=>page.locator('.training-row').filter({has:page.locator('dt').filter({hasText:/^护甲$/})});
