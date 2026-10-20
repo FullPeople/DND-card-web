@@ -1,5 +1,8 @@
 {
   "schemaVersion": 1,
+  "invocationSpellActivations": [
+    {"owner":"Warlock|XPHB","invocation":"Armor of Shadows|XPHB","spell":"Mage Armor|XPHB","edition":"2024","usage":"free","target":"self","source":"https://www.dndbeyond.com/sources/dnd/br-2024/character-classes#EldritchInvocationOptions"}
+  ],
   "featAbilityAllocations": [
     {"feat":"Ability Score Improvement|XPHB","edition":"2024","maximum":20,"source":"https://www.dndbeyond.com/sources/dnd/br-2024/feats#AbilityScoreImprovement"}
   ],

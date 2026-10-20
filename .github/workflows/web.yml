@@ -117,6 +117,7 @@ jobs:
               npx playwright test --config playwright.skill-choice-warnings.config.ts
               npx playwright test --config playwright.feedback-export.config.ts
               npx playwright test --config playwright.feedback-asi.config.ts
+              npx playwright test --config playwright.feedback-invocation.config.ts
           - group: dashboard-appearance
             commands: |
               npx playwright test --config playwright.dashboard237.config.ts
