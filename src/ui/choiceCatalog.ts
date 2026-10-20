@@ -1,6 +1,7 @@
 import {editionAllows,selectionAllowed,selectionEffectsAllowed,skillKey,type Character,type Entry} from '../core/model';
 import type {ChoiceOption,SheetChoice} from '../core/automation/choices';
 import {facetsFor,tabOf,type FacetSelection,type LibraryTab} from './libraryData';
+import {hasRecordDiscriminator,legacyCatalogId,sameCatalogRecord} from '../core/entryRecordIdentity';
 const key=(s:unknown)=>String(s||'').trim().toLocaleLowerCase();
 const wikiEntry=(entry:Entry)=>!entry.raw._choiceConcept&&entry.raw._category!=='inlineChoice'&&!entry.raw._custom;
 const identity=(entry:Entry)=>JSON.stringify([entry.kind,entry.source,key(entry.english||entry.name),...['className','classSource','level','_category'].map(k=>key(entry.raw[k]))]);
@@ -8,6 +9,7 @@ const choiceAllows=(c:Character,choice:SheetChoice,entry:Entry)=>choice.sourcePr
 /** Resolve candidates in one catalog pass, including older saved entry aliases. */
 export function choiceEntryMatcher(c:Character,choice:SheetChoice):(entry:Entry)=>ChoiceOption|undefined{
  const ids=new Map<string,number>(),identities=new Map<string,number>(),skills=new Map<string,ChoiceOption>();
+ const strictAliases=new Set(choice.options.filter(option=>hasRecordDiscriminator(option.entry)).map(option=>legacyCatalogId(option.entry)));
  choice.options.forEach((option,index)=>{if(choice.channel==='skills'){if(!skills.has(option.value))skills.set(option.value,option);return;}if(!wikiEntry(option.entry))return;if(!ids.has(option.entry.id))ids.set(option.entry.id,index);const alias=identity(option.entry);if(!identities.has(alias))identities.set(alias,index);});
  return entry=>{
   if(!choiceAllows(c,choice,entry))return;
@@ -17,6 +19,7 @@ export function choiceEntryMatcher(c:Character,choice:SheetChoice):(entry:Entry)
    const matches=[entry.name,entry.english,entry.raw.ENG_name].flatMap(name=>typeof name==='string'?skills.get(skillKey(name))||[]:[]);
    return matches.reduce<ChoiceOption|undefined>((found,option)=>!found||choice.options.indexOf(option)<choice.options.indexOf(found)?option:found,undefined);
   }
+  if(hasRecordDiscriminator(entry)||strictAliases.has(entry.id))return choice.options.find(option=>wikiEntry(option.entry)&&sameCatalogRecord(option.entry,entry));
   const direct=ids.get(entry.id),alias=identities.get(identity(entry)),index=direct===undefined?alias:alias===undefined?direct:Math.min(direct,alias);
   return index===undefined?undefined:choice.options[index];
  };
@@ -27,7 +30,8 @@ export function optionForEntry(c:Character,choice:SheetChoice,entry:Entry):Choic
   if(entry.kind!=='rule'||entry.raw._category!=='skill'||entry.source!==(c.edition==='2024'?'XPHB':'PHB'))return;
   return choice.options.find(o=>[entry.name,entry.english,entry.raw.ENG_name].some(n=>typeof n==='string'&&skillKey(n)===o.value));
  }
- return choice.options.find(o=>wikiEntry(o.entry)&&(o.entry.id===entry.id||o.entry.kind===entry.kind&&o.entry.source===entry.source&&key(o.entry.english||o.entry.name)===key(entry.english||entry.name)&&['className','classSource','level','_category'].every(k=>key(o.entry.raw[k])===key(entry.raw[k]))));
+ const strict=hasRecordDiscriminator(entry)||choice.options.some(option=>hasRecordDiscriminator(option.entry)&&legacyCatalogId(option.entry)===entry.id);
+ return choice.options.find(o=>wikiEntry(o.entry)&&(strict?sameCatalogRecord(o.entry,entry):(o.entry.id===entry.id||o.entry.kind===entry.kind&&o.entry.source===entry.source&&key(o.entry.english||o.entry.name)===key(entry.english||entry.name)&&['className','classSource','level','_category'].every(k=>key(o.entry.raw[k])===key(entry.raw[k])))));
 }
 export function choiceCatalog(c:Character,choice:SheetChoice,catalog:Entry[]):{wiki:boolean;tab:LibraryTab;entries:Entry[];filters:FacetSelection}{
  const match=choiceEntryMatcher(c,choice),matched=catalog.flatMap(entry=>{const option=match(entry);return option?[{entry,option}]:[]}),entries=matched.map(row=>row.entry),values=new Set(matched.map(row=>row.option.value)),wiki=!!choice.catalogKind&&choice.options.every(o=>wikiEntry(o.entry))||['skills','spells'].includes(choice.channel)||choice.channel==='tools'&&choice.options.every(o=>wikiEntry(o.entry))||choice.channel!=='equipment'&&choice.options.length>0&&choice.options.every(o=>o.unavailable==='引用资料尚未加载，不能确认此项。'||values.has(o.value));

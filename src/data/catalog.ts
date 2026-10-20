@@ -10,6 +10,7 @@ import { prepareBody, specificMagicItems, expandVersions, expandCopies } from '.
 import { inheritSubrace, readableEntries } from './adapt';
 import {DEFAULT_HOMEBREW,homebrewPaths,homebrewMetadata,homebrewBody} from './homebrew';
 import {DEFAULT_SOURCE} from './catalogSource';
+import {catalogRuleKey,disambiguateCatalogRecords} from '../core/entryRecordIdentity';
 export {DEFAULT_SOURCE} from './catalogSource';
 export interface LoadProgress { done: number; total: number; label: string; failed: string[]; cached: number; retry?:string[]; paused?:string }
 const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition', variantrule: 'rule', action: 'rule', sense: 'rule', skill: 'rule', language: 'rule', status: 'condition', disease: 'condition', itemGroup: 'item', magicvariant: 'item', itemMastery: 'feature', itemProperty: 'rule', itemType: 'rule', reward: 'feature', charoption: 'feature', psionic: 'feature', deity: 'rule', cult: 'rule', boon: 'feature', facility: 'rule', table: 'rule', tableGroup: 'rule', monster: 'monster' };
@@ -26,8 +27,12 @@ export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): En
       const item = sourceItem && !sourceItem.name && sourceItem.abbreviation ? { ...sourceItem, name: sourceItem.entries?.[0]?.name || sourceItem.abbreviation, ENG_name: sourceItem.entries?.[0]?.ENG_name || sourceItem.abbreviation } : sourceItem;
       if (!item || typeof item.name !== 'string' && key !== 'subrace') continue;
       const inherited = key === 'subrace' ? inheritSubrace(item, body.race || []) : item;
+      let baseEntry:Entry|undefined;
       for (const snapshot of [inherited, ...expandVersions(inherited)]) {
-      const raw=correctSourceData(snapshot);
+      const raw={...correctSourceData(snapshot)},version=snapshot!==inherited;
+      // Identity and review annotations belong to this normalizer, not its input.
+      for(const field of Object.keys(raw))if(field.startsWith('_catalog')||['_versionBaseName','_versionIdentity'].includes(field))delete raw[field];
+      if(version){raw._versionBaseName=inherited.name;raw._versionIdentity=snapshot._versionIdentity;}
       if(['subclass','classFeature','subclassFeature'].includes(key)){
         const parent=body.class?.find((c:Raw)=>c.source===raw.classSource&&[c.name,c.ENG_name].includes(raw.className));
         const parentEdition=parent?.edition==='one'?'2024':parent?.edition==='classic'?'2014':undefined;
@@ -35,12 +40,15 @@ export function normalizeData(body: Raw, revision: string, packId = 'kiwee'): En
       }
       const source = String(raw.source || raw.classSource || 'CUSTOM').toUpperCase();
       const edition = raw.edition === 'one' || ['XPHB', 'XDMG', 'XMM'].includes(source) ? '2024' : raw.edition === 'classic' || ['PHB', 'DMG', 'MM'].includes(source) ? '2014' : 'both';
-      result.push({ id: entryIdentity(kind, { ...raw, source, _category: key }, packId), kind, name: raw.name, english: raw.ENG_name || raw.name, source, edition,
-        packId, revision, page: raw.page, entries: readableEntries(raw, key), raw: { ...raw, _category: key } });
+      const entry:Entry={ id: entryIdentity(kind, { ...raw, source, _category: key }, packId), kind, name: raw.name, english: raw.ENG_name || raw.name, source, edition,
+        packId, revision, page: raw.page, entries: readableEntries(raw, key), raw: { ...raw, _category: key } };
+      if(!version)baseEntry=entry;
+      if(baseEntry&&Array.isArray(inherited._versions)&&inherited._versions.length)entry.raw._catalogVersionFamilyKey=catalogRuleKey(baseEntry);
+      result.push(entry);
       }
     }
   }
-  return result;
+  return disambiguateCatalogRecords(result);
 }
 export {resolveEntryReference as resolveReference} from '../core/entryReferences';
 export function normalizeCatalogData(body:Raw,revision:string,packId='kiwee',operation:CatalogOperation='normalize'):Entry[]{

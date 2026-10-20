@@ -1,4 +1,5 @@
 import {planFeatureResources} from './automation/featureResources';
+import {catalogRuleKey,legacyCatalogId} from './entryRecordIdentity';
 import {planRacialAbilities} from './racialAbilities';
 import {applyFeatAbilityAllocations,hasFeatAbilityAllocation} from './automation/featAbilities';
 import {sheetChoices} from './automation/choices';
@@ -148,7 +149,8 @@ export function requirementMismatch(e: Entry, r?: Partial<Requirement>): string 
 }
 export function candidateReason(c: Character, e: Entry, r?: Requirement): string | undefined {
   if(e.kind==='class'&&!c.profile.optional.multiclass&&c.selections.some(s=>s.entry.kind==='class'&&s.entry.id!==e.id))return '当前规则未启用兼职，不能加入第二个职业';
-  if(c.profile.disabledEntries?.includes(e.id))return '此条目已在规则与扩展中单独禁用';
+  if(c.profile.disabledEntries?.some(id=>id===e.id||id===legacyCatalogId(e)))return '此条目已在规则与扩展中单独禁用';
+  if(e.raw._catalogConflict&&!c.profile.exceptions[e.id]?.trim())return '同一来源包含不同定义，请核对资料后再采用此项';
   if(e.kind==='subclass'&&!subclassOwner(c,e))return '需要先加入该子职所属的职业';
   if (e.kind === 'feat' && !c.profile.optional.feats) return '当前角色未启用专长选项';
   if (!selectionAllowed(c, e)) {
@@ -159,7 +161,8 @@ export function candidateReason(c: Character, e: Entry, r?: Requirement): string
     return '此条目当前未获准加入，请核对规则与扩展';
   }
   const mismatch = requirementMismatch(e, r); if (mismatch) return mismatch;
-  const existing = c.selections.some(s => s.entry.id === e.id && (!r || s.requirementId === r.id));
+  const family=e.kind==='feat'?catalogRuleKey(e,c.selections.map(row=>row.entry)):undefined;
+  const existing = c.selections.some(s => (s.entry.id === e.id||e.kind==='feat'&&s.entry.kind==='feat'&&catalogRuleKey(s.entry,[e])===family) && (!r || s.requirementId === r.id));
   if(e.kind==='class'&&c.selections.filter(s=>s.entry.kind==='class').reduce((sum,s)=>sum+s.level,0)>=20)return '职业总等级已达到 20';
   if (existing && e.kind !== 'class' && e.kind !== 'item' && !e.raw.repeatable) return '这个条目已经在角色卡中';
 
