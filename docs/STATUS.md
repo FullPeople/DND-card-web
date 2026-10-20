@@ -1,3 +1,7 @@
+# 2026-10-20 · 幽影护甲独立候选浏览器接续通过
+
+已在当前首批基线上接续原独立候选，11 项祈唤检查（含实际冻结来源）和七文件 69 项相关检查通过，10 项条件跳过，类型通过。桌面与 390px 实际启用、自身免费施法、资源保留、重开和取消通过；只修正旧测试入口与页面等待，没有因此改规则源码。完整账本与发布验证仍待完成，法师护甲 AC、持续时间、护甲资格继续手动，不混入首批或属性生成候选。见[接续记录](INVOCATION-ACTIVATION-20261019.md)。
+
 # 2026-10-19 - XPHB invocation local follow-up candidate
 
 The learned Armor of Shadows record has a separate activation and a self-only, no-slot Mage Armor grant. Eleven workflow/source/render cases and 129 related tests pass; TypeScript passes. Saved spell snapshots retain precedence over later downloads; missing spell data has a visible pending state. Its own full runtime ledger, builds and browser acceptance remain pending. See [scope and boundaries](INVOCATION-ACTIVATION-20261019.md). The separate ASI replay does not certify this candidate.

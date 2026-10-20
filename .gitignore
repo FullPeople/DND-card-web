@@ -68,3 +68,5 @@ test-results-excel-suite-import/
 test-results-performance*/
 test-results-feedback-export/
 test-results-feedback-asi/
+
+test-results-feedback-invocation/
