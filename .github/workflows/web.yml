@@ -114,6 +114,7 @@ jobs:
               npx playwright test --config playwright.workspace-feedback.config.ts
               DND_WORKSPACE_SUITE=1 npx playwright test --config playwright.workspace-feedback.config.ts
               npx playwright test --config playwright.ability-generation.config.ts
+              npx playwright test --config playwright.skill-choice-warnings.config.ts
           - group: dashboard-appearance
             commands: |
               npx playwright test --config playwright.dashboard237.config.ts

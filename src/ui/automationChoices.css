@@ -112,3 +112,6 @@
 .paper .feature-panel .choice-inline .choice-footer{position:relative;background:var(--paper-surface,#e8e8e8);padding:6px 0;margin-top:6px}
 
 @media print{.choice-inline{display:none!important}}
+
+.choice-slot:has([data-skill-proficiency-warning]){flex-wrap:wrap}
+.choice-slot [data-skill-proficiency-warning]{flex-basis:100%;order:1;overflow-wrap:anywhere;font-size:10px;line-height:1.5;color:#555}
