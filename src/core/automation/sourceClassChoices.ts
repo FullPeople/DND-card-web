@@ -1,6 +1,6 @@
 import {ABILITIES,selectionEffectsAllowed,type Character,type Entry,type Selection} from '../model';
 import {candidateReason,evaluate} from '../engine';
-import {resolveEntryReference,matchesReference} from '../entryReferences';
+import {entryReferenceResolver,resolveEntryReference,matchesReference,type EntryReferenceResolver} from '../entryReferences';
 import {catalogRuleKey} from '../entryRecordIdentity';
 import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
@@ -32,11 +32,11 @@ export function sourceFeatFilterCategory(text:unknown):string|undefined{
  if(typeof text!=='string'||!/(?:获得|选择).*(?:一项|一个|1)/.test(text))return;
  return text.match(/\{@filter ([^|}]+)\|feats\|category=([^|}]+)/)?.[2].trim().toLowerCase();
 }
-function linkedClassFeatFilters(c:Character,owner:Selection,known:Entry[],group:{name?:string;ENG_name?:string;category?:unknown},atGrant:number):string[]{
+function linkedClassFeatFilters(c:Character,owner:Selection,resolveRef:EntryReferenceResolver,group:{name?:string;ENG_name?:string;category?:unknown},atGrant:number):string[]{
  const groupNames=[group.name,group.ENG_name].map(key).filter(Boolean),categories=list(group.category).map(key);
  if(!groupNames.length)return [];
  const refs=list(owner.entry.raw.classFeatures).flatMap(raw=>{const ref=typeof raw==='string'?raw:raw&&typeof raw==='object'?(raw as {classFeature?:unknown}).classFeature:undefined;return typeof ref==='string'&&Number(ref.split('|')[3])===atGrant?[ref]:[];});
- const features=c.selections.filter(row=>row.parentId===owner.id&&row.entry.kind==='feature'&&key(row.entry.source)===key(owner.entry.source)&&names(row.entry).some(name=>groupNames.includes(name))&&refs.some(ref=>row.grantKey===`ref:${ref}`&&resolveEntryReference(ref,known,'feature')?.id===row.entry.id));
+ const features=c.selections.filter(row=>row.parentId===owner.id&&row.entry.kind==='feature'&&key(row.entry.source)===key(owner.entry.source)&&names(row.entry).some(name=>groupNames.includes(name))&&refs.some(ref=>row.grantKey===`ref:${ref}`&&resolveRef(ref,'feature')?.id===row.entry.id));
  if(features.length!==1)return []; // Ambiguous or unrelated rewards stay separate.
  const feature=features[0];
  return feature.entry.entries.flatMap((text,index)=>{
@@ -59,16 +59,16 @@ export function sourceProgressionCount(value:unknown,at:number):number|undefined
 /** Only an active, declared source grant can satisfy the reviewed prerequisite.
  * A matching display name, manual copy, future reference or dismissed grant cannot.
  */
-function ownedFightingStylePrerequisite(c:Character,owner:Selection,known:Entry[],required?:string){
+function ownedFightingStylePrerequisite(c:Character,owner:Selection,resolveRef:EntryReferenceResolver,required?:string){
  if(!level(owner)||!selectionEffectsAllowed(c,owner.entry))return;
  const refs=list(owner.entry.raw.classFeatures).flatMap(raw=>{const ref=typeof raw==='string'?raw:raw&&typeof raw==='object'?(raw as {classFeature?:unknown}).classFeature:undefined;return typeof ref==='string'?[ref]:[];});
  return c.selections.find(row=>row.parentId===owner.id&&row.entry.kind==='feature'&&row.entry.raw._category==='classFeature'&&selectionEffectsAllowed(c,row.entry)&&
   !!fightingStylePrerequisiteEvidence(owner.entry,row.entry)&&Number(row.entry.raw.level)<=level(owner)&&
   !c.dismissedFeatures?.includes(`${owner.id}|${row.grantKey}`)&&(!required||names(row.entry).includes(key(required)))&&
-  refs.some(ref=>row.grantKey===`ref:${ref}`&&resolveEntryReference(ref,known,'feature')?.id===row.entry.id));
+  refs.some(ref=>row.grantKey===`ref:${ref}`&&resolveRef(ref,'feature')?.id===row.entry.id));
 }
 /** Unknown prerequisite shapes remain unavailable; a choice never repairs them. */
-export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[]=c.selections.map(row=>row.entry)):string|undefined{
+export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[]=c.selections.map(row=>row.entry),resolveRef:EntryReferenceResolver=(reference,kind,category)=>resolveEntryReference(reference,known,kind,category)):string|undefined{
  const alternatives=entry.raw.prerequisite;if(alternatives===undefined)return;
  if(!Array.isArray(alternatives)||!alternatives.length)return '此前置条件结构尚未核对。';
  let scores:ReturnType<typeof evaluate>['abilities']|undefined;
@@ -94,9 +94,9 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
     if(!value.some(ref=>activeOwnedFeat(c,entry,ref,known)))return '尚未具备来源和版本匹配且当前有效的所需专长。';
    }else if(field==='feature'&&!optional&&key(entry.raw.category)==='fs'){
     if(!Array.isArray(value)||value.length!==1||typeof value[0]!=='string'||!value[0].trim())return '此特性前置结构尚未核对。';
-    if(!ownedFightingStylePrerequisite(c,owner,known,value[0]))return '尚未具备来源明确授予且当前有效的所需职业特性。';
+    if(!ownedFightingStylePrerequisite(c,owner,resolveRef,value[0]))return '尚未具备来源明确授予且当前有效的所需职业特性。';
    }else if(field==='otherSummary'&&!optional){
-    const feature=ownedFightingStylePrerequisite(c,owner,known),evidence=feature&&fightingStyleAlternativeEvidence(owner.entry,feature.entry,entry);
+    const feature=ownedFightingStylePrerequisite(c,owner,resolveRef),evidence=feature&&fightingStyleAlternativeEvidence(owner.entry,feature.entry,entry);
     if(!feature||!evidence||!value||typeof value!=='object'||Array.isArray(value))return '此前置条件仍需手动核对，不能由本入口确认。';
     const summary=value as Record<string,unknown>,keys=Object.keys(summary);
     // These two reviewed alternatives state the same source-qualified class
@@ -116,6 +116,8 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
 
 export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
  known=[...Object.values(c.classChoiceSnapshots||{}),...known];
+ let indexed:EntryReferenceResolver|undefined;
+ const resolveRef:EntryReferenceResolver=(reference,kind,category)=>(indexed??=entryReferenceResolver(known))(reference,kind,category);
  const out:SheetChoice[]=[];
  for(const owner of c.selections.filter(row=>row.entry.kind==='class')){
   const restricted=!selectionEffectsAllowed(c,owner.entry),at=level(owner);
@@ -123,7 +125,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
   const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string,recordOnly=optional,support?:ClassChoiceSupport,duplicateChoiceIds:string[]=[])=>{
    candidates=candidates.filter((entry,index)=>candidates.findIndex(other=>other.id===entry.id)===index);
    const saved=c.answers[id]??duplicateChoiceIds.flatMap(alias=>c.answers[alias]||[]),options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
-    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||''))},entry)||sourceChoicePrerequisite(c,entry,owner,optional,known)}));
+    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||''))},entry)||sourceChoicePrerequisite(c,entry,owner,optional,known,resolveRef)}));
    const slots=Array.from({length:Math.max(count,saved.length)},(_,index)=>saved[index]||'');
    const selected=restricted?[]:saved.slice(0,count).filter((value,index,values)=>options.some(option=>option.value===value&&!option.unavailable)&&(values.indexOf(value)===index||options.find(option=>option.value===value)?.entry.raw.repeatable===true));
    out.push({id,ownerId:owner.id,label,count,options,slots,selected,complete:selected.length===count&&count>0,restricted,channel:'content',catalogKind:optional?'feature':'feat',sourceProgression:optional?'optional':'feat',ownerEdition:owner.entry.edition,support,duplicateChoiceIds,
@@ -146,7 +148,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     const candidates=known.filter(entry=>entry.kind==='feat'&&(categories.includes(key(entry.raw.category))||unrestrictedCategory)&&(entry.edition==='both'||entry.edition===owner.entry.edition));
     for(let slot=0;slot<Number(value);slot++){
      const id=`${owner.id}:class-feat:${index}:${step}:${slot}`;
-     const aliases=Number(value)===1?linkedClassFeatFilters(c,owner,known,group,grantedAt):[];
+     const aliases=Number(value)===1?linkedClassFeatFilters(c,owner,resolveRef,group,grantedAt):[];
      if(grantedAt>at&&!c.answers[id]?.some(Boolean)&&!aliases.some(alias=>c.answers[alias]?.some(Boolean)))continue;
      add(id,`${group.name||'职业专长'}（职业 ${step} 级）`,grantedAt<=at?1:0,candidates,false,undefined,false,undefined,aliases);out.at(-1)!.grantLevel=grantedAt;
     }
@@ -158,7 +160,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const ref=typeof raw==='string'?raw:raw&&typeof raw==='object'?(raw as {classFeature?:unknown}).classFeature:undefined;
    if(typeof ref!=='string')continue;
    const atGrant=Number(ref.split('|')[3]);if(!Number.isSafeInteger(atGrant)||atGrant<1)continue;
-   const feature=resolveEntryReference(ref,known,'feature');if(!feature)continue;
+   const feature=resolveRef(ref,'feature');if(!feature)continue;
    if(legacyFeatEvidence(owner.entry,feature)){
     const id=`${owner.id}:class-legacy-feat:${feature.id}`;if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
     const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升（手动填写）',english:'Recorded ability improvement',entries:['保存本次属性提升方案；请在卡面手动填写属性，不重复叠加。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
@@ -167,7 +169,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     out.at(-1)!.evidenceEntries=[feature];out.at(-1)!.grantLevel=atGrant;
     continue;
    }
-   const typed=feature.entries.flatMap(node=>typeof node==='string'?[...node.matchAll(/\{@feat ([^}]+)\}/g)].map(match=>resolveEntryReference(match[1],known,'feat')):[]).filter((entry):entry is Entry=>!!entry);
+   const typed=feature.entries.flatMap(node=>typeof node==='string'?[...node.matchAll(/\{@feat ([^}]+)\}/g)].map(match=>resolveRef(match[1],'feat')):[]).filter((entry):entry is Entry=>!!entry);
    const grant=typed.find(abilityImprovement);
    if(!grant){
     if(atGrant<=at&&feature.entries.some(node=>typeof node==='string'&&/\{@5etools [^|}]+\|feats\.html\}/.test(node))&&typed.length===0){

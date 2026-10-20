@@ -31,6 +31,16 @@ export function resolveEntryReference(reference:string,entries:Entry[],kind?:Ent
  const candidates=entryReferenceCandidates(reference,entries,kind,category);
  return candidates.length===1?candidates[0]:undefined;
 }
+export type EntryReferenceResolver=(reference:string,kind?:Entry['kind'],category?:string)=>Entry|undefined;
+/** Build once for a single immutable planning snapshot. No global cache survives
+ * an edit or refresh; all source/owner/ambiguity checks still run on candidates. */
+export function entryReferenceResolver(entries:readonly Entry[]):EntryReferenceResolver{
+ const names=new Map<string,Entry[]>();
+ for(const entry of entries)for(const name of new Set([key(entry.name),key(entry.english)])){
+  const group=names.get(name);if(group)group.push(entry);else names.set(name,[entry]);
+ }
+ return (reference,kind,category)=>resolveEntryReference(reference,names.get(key(reference.split('|')[0]))||[],kind,category);
+}
 export function ownsSubclassFeature(subclass:Entry,feature:Entry){
  const s=subclass.raw,f=feature.raw;
  return subclass.kind==='subclass'&&same(s.classSource||'PHB',f.classSource||'PHB')&&
