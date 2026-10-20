@@ -1,4 +1,4 @@
-import {openDB} from 'idb';
+import {openWorkspaceDatabase} from '../platform/workspaceDatabase';
 import type {Character} from '../core/model';
 import {cloudCards,cloudMutation,cloudSession,readCloudCard,CloudRequestError,type CloudCard} from './api';
 import type {CloudBinding} from '../platform/storage';
@@ -119,14 +119,14 @@ export async function readSyncReceipt(id:string):Promise<SyncReceipt>{
 }
 export async function readSyncReceipts(ids:string[]):Promise<Record<string,SyncReceipt>>{
  if(!ids.length)return {};
- const db=await openDB('dnd-card-standalone',1);try{
+ const db=await openWorkspaceDatabase('dnd-card-standalone');try{
   const tx=db.transaction('documents','readonly');
   const rows=await Promise.all(ids.map(async id=>{const [binding,receipt]=await Promise.all([tx.store.get('cloud-binding:'+id),tx.store.get('cloud-sync:'+id)]);return [id,{...receipt,binding}] as const;}));await tx.done;
   return Object.fromEntries(rows);
  }finally{db.close();}
 }
 export async function writeSyncReceipt(id:string,receipt:SyncReceipt){
- const db=await openDB('dnd-card-standalone',1);try{
+ const db=await openWorkspaceDatabase('dnd-card-standalone');try{
   const tx=db.transaction('documents','readwrite');
   if(receipt.binding)await tx.store.put(receipt.binding,'cloud-binding:'+id);
   await tx.store.put(receipt,'cloud-sync:'+id);await tx.done;

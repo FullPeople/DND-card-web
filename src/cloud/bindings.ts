@@ -1,8 +1,8 @@
-import {openDB} from 'idb';
+import {openWorkspaceDatabase} from '../platform/workspaceDatabase';
 // Delete only bindings to the successfully deleted cloud card. Local characters,
 // staged drafts and recovery documents remain untouched.
 export async function forgetDeletedCloudCard(cloudId:string){
-  const database=await openDB('dnd-card-standalone',1);
+  const database=await openWorkspaceDatabase('dnd-card-standalone');
   try{
     const tx=database.transaction('documents','readwrite');
     for(const key of await tx.store.getAllKeys()){

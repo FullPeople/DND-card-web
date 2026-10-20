@@ -66,7 +66,7 @@ import type {CharacterRow} from './CharacterManager';
 import {CloudCardControl} from '../cloud/CloudCardControl';
 import {RoomCardControl} from './RoomCardControl';
 import {CloudSaveProvider,CloudSaveControl} from '../cloud/CloudSave';
-import {characterHash,writeSyncReceipt} from '../cloud/sync';
+import {characterHash,readSyncReceipt,writeSyncReceipt} from '../cloud/sync';
 import {cloudCardLock} from '../cloud/sync';
 import {cloudSession,type CloudCard} from '../cloud/api';
 import {loadCloudBindings} from '../platform/storage';
@@ -174,6 +174,8 @@ import {useLibraryFavorites} from './useLibraryFavorites';
 import { explicitlyExcluded, librarySourceEnabled, LIBRARY_TABS, tabOf, matchesLibraryTab, columnsFor, facetsFor, matchesFacets, compareEntries } from './libraryData';
 
 import { registerOffline } from '../platform/offline';
+import {StorageRecoveryControls} from './StorageRecoveryControls';
+import {recoveredBinding} from '../cloud/recoveredBinding';
 
 const emptyProgress: LoadProgress = { done: 0, total: 1, label: '等待资料', failed: [], cached: 0 };
 const clamp = (value: string, min = 0, max = 100) => Math.max(min, Math.min(max, Number(value) || 0));
@@ -489,7 +491,20 @@ export default function App() {
       const bindings=await loadCloudBindings(),session=await cloudSession();
       if(session.account?.id!==account)throw Error('QQ 账号已改变，未导入角色卡。');
       const current=workspaceRef.current!,existing=current.characters.find(row=>bindings[row.id]?.cloudId===card.id&&bindings[row.id]?.accountId===account);
-      if(existing){const operation=persist({...current,activeId:existing.id});if(!operation)throw Error('当前标签页只读。');await operation;}
+      const restored=existing?undefined:current.characters.find(row=>row.id==='cloud:'+account+':'+card.id);
+      if(restored){
+        await cloudCardLock(restored.id,async()=>{
+          const recovered=await recoveredBinding(restored,card,account,await readSyncReceipt(restored.id),current.siteSources);
+          const verified=await cloudSession();
+          if(!writable.current||workspaceRef.current?.characters.find(row=>row.id===restored.id)!==restored||verified.account?.id!==account)throw Error('QQ 账号、角色内容或本机编辑权限已改变，未重新连接。');
+          await writeSyncReceipt(restored.id,recovered.receipt);
+          const latest=workspaceRef.current!;
+          // Preserve edits made during the receipt write; only reconstruct
+          // the export's shared-source split, not an earlier card snapshot.
+          const operation=persist({...latest,activeId:restored.id,characters:latest.characters.map(row=>row.id===restored.id?withSiteSources(row,sourceSettings(recovered.character.profile)):row)});if(!operation)throw Error('当前标签页只读。');await operation;
+        });
+      }
+      else if(existing){const operation=persist({...current,activeId:existing.id});if(!operation)throw Error('当前标签页只读。');await operation;}
       else{
         const id='cloud:'+account+':'+card.id,character={...structuredClone(card.character),id};validateCharacter(character);
         cloudPacks(character,current);
@@ -1047,7 +1062,7 @@ export default function App() {
   const addButton = (kind: Kind) => <button className="sheet-add" onClick={() => browse(kind)}>＋ 查阅{KIND_LABELS[kind]}</button>;
 
 
-  if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?t('cardBrand'):'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup,true); } catch (e) { setStartupError(String(e)); } }}>读取备份</button><button onClick={() => { const next = createLocalCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button></> : <p>正在打开你的角色卡…</p>}</main>;
+  if (!workspace || !c || !d) return <main className="startup"><h1>{standalone?t('cardBrand'):'Full Suite'}</h1>{startupError ? <><p role="alert">本机记录读取失败：{startupError}</p><p>现有记录尚未覆盖。可以尝试恢复上一次保存。</p><button onClick={async () => { try { const backup = await restoreBackup(); if (!backup) throw new Error('没有可用备份'); acceptWorkspace(backup,true); } catch (e) { setStartupError(String(e)); } }}>读取备份</button>{localCloudViews?<StorageRecoveryControls recovered={value=>acceptWorkspace(value)} retry={async()=>{const value=await loadWorkspace(true);if(!value)throw Error('没有可读取的角色簿，请选择完整 JSON 备份。');acceptWorkspace(value);}}/>:<button onClick={() => { const next = createLocalCharacter(); workspaceRef.current = { schemaVersion: 1, characters: [next], activeId: next.id, packs: [] }; setWorkspace(workspaceRef.current); setNotice('临时工作区。第一次编辑将保存新记录；请先导出重要数据。'); }}>使用新的临时工作区</button>}</> : <p>正在打开你的角色卡…</p>}</main>;
   void historyTick;
   const blocked = detail ? candidateReason(c, detail) : '';
   const dragDisabledReason=

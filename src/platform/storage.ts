@@ -1,20 +1,19 @@
 import {standalone} from './buildMode';
-import { openDB } from 'idb';
+import {workspaceConnection,workspaceRecoveryKey} from './workspaceDatabase';
 import type { Character, Entry, Raw, RulePack } from '../core/model';
 import type {SiteSources} from '../core/siteSources';
 import {qqRoom,readRoom,saveRoom,roomState,beginRoomWrite,roomScopeKey,roomWriteReceipt,roomChangeScope} from '../cloud/room';
 import {characterHash} from '../cloud/sync';
 import {workspaceIdentity} from './workspaceIdentity';
 export interface Workspace { schemaVersion: 1; characters: Character[]; activeId: string; packs: RulePack[]; customEntries?:Entry[]; siteSources?:SiteSources; legacySourceProfiles?:Record<string,SiteSources> }
-let connection: ReturnType<typeof openDB> | undefined;
-let cacheConnection:ReturnType<typeof openDB>|undefined;
-const openWorkspace=(name:string)=>openDB(name,1,{upgrade(db){db.createObjectStore('documents');db.createObjectStore('cache');}});
-const db = () => connection ??= openWorkspace(workspaceIdentity.database);
-const cacheDb=()=>workspaceIdentity.cacheDatabase===workspaceIdentity.database?db():cacheConnection??=openWorkspace(workspaceIdentity.cacheDatabase);
+const db=workspaceConnection(workspaceIdentity.database);
+const cacheDb=workspaceIdentity.cacheDatabase===workspaceIdentity.database?db:workspaceConnection(workspaceIdentity.cacheDatabase);
 export async function loadWorkspace(navigation=false): Promise<Workspace | undefined> {
   if(!qqRoom){
-    const database=await db();if(!navigation)return database.get('documents','workspace');
-    const tx=database.transaction('documents','readonly'),[workspace,activeId]=await Promise.all([tx.store.get('workspace'),tx.store.get('workspace-active-id')]);await tx.done;
+    const database=await db(),tx=database.transaction('documents','readonly');
+    const [workspace,activeId]=await Promise.all([tx.store.get('workspace'),navigation?tx.store.get('workspace-active-id'):undefined]);
+    const recovery=!workspace&&await tx.store.get(workspaceRecoveryKey);await tx.done;
+    if(recovery)throw Error('本机存储结构已修复，已有记录未覆盖。请从 JSON 备份恢复角色簿。');
     return workspace&&typeof activeId==='string'&&workspace.characters.some((card:Character)=>card.id===activeId)?{...workspace,activeId}:workspace;
   }
   const remote=await readRoom(),database=await db(),scopeKey=await roomScopeKey(),draft=await database.get('documents','room-pending') as {workspace:Workspace;revision:number;scopeKey?:string}|undefined;
@@ -24,6 +23,7 @@ export async function loadWorkspace(navigation=false): Promise<Workspace | undef
 export async function saveWorkspace(workspace: Workspace): Promise<void> {
   const operation=qqRoom?beginRoomWrite(roomState()?.revision??0):undefined;
   const database = await db(); const tx = database.transaction('documents', 'readwrite');
+  if(await tx.store.get(workspaceRecoveryKey)){await tx.done;throw Error('请先从 JSON 备份恢复角色簿；现有记录未覆盖。');}
   const previous = await tx.store.get('workspace');
   if (previous) await tx.store.put(previous, 'backup');
   await tx.store.delete('workspace-active-id');
