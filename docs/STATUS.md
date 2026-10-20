@@ -17,6 +17,11 @@
 # 2026-10-19 - XPHB invocation local follow-up candidate
 
 The learned Armor of Shadows record has a separate activation and a self-only, no-slot Mage Armor grant. Eleven workflow/source/render cases and 129 related tests pass; TypeScript passes. Saved spell snapshots retain precedence over later downloads; missing spell data has a visible pending state. Its own full runtime ledger, builds and browser acceptance remain pending. See [scope and boundaries](INVOCATION-ACTIVATION-20261019.md). The separate ASI replay does not certify this candidate.
+# 2026-10-20 · 三龙入口检查确认切页与查询状态后继续
+
+第二批远端 CI 的手机流程曾在打开外部网站后读到空查询；保留该失败和本机诊断记录，未据此改规则或存储源码。现先断言输入、调整窗口后的查询和宽度，以及点击法术页后的实际选中状态，再打开外链；原有新窗口地址、原页不跳转、查询与页签保留、工具栏和权限／零写入检查全部保留。桌面与 390px 各三次串行重复，共六项通过。仅增加真实状态等待，不把一次通过称作产品根因已查明。
+
+同提交的另一项职业选择 CI 失败发生在系统浏览器依赖安装的上游 APT 403，应用检查尚未执行；独立正式构建工作流的同提交职业流程已通过。新提交仍须以最终远端完整 CI 为准，不以这些诊断代替最终绿灯。本批未合并或发布。
 # 2026-10-20 · 第二批屏幕框高回归已复现并修复
 
 6316ee6 的最终 CI 揭示真实回归：屏幕模式的力量标题只有 29 像素宽，生成按钮使编辑框从 79 撑至 90 像素。原版式用例在本机同样失败；现仅调整响应式样式，标题区保持整块可点击并显示紧凑“生成”字样，原框高测试通过，九项完整屏幕版式及三项导出流程通过。桌面／390px 属性生成八项流程通过，包含新屏幕入口的取消不落盘，截图已检查。另一拖拽检查先等待异步候选可见再取位置，原拖拽、Esc、幽灵清理和保存断言保留，原专项通过。
