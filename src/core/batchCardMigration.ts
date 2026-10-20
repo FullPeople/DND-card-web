@@ -1,7 +1,7 @@
 import {classMatches,selectionAllowed,type Character,type Entry,type Selection,type Kind} from './model';
 import {emptyMigrationChoices,finalizeCardMigration,migrationCandidates,migrationDraft,MIGRATION_ROOTS,suggestedMigrationTarget,unlinkedEntry} from './cardMigration';
 import {supportedAutomation} from './automation/state';
-import {matchesReference} from './entryReferences';
+import {entryReferenceCandidates,matchesReference} from './entryReferences';
 import {syncChoiceContent} from './automation/choices';
 import {rememberFeatureResources} from './automation/featureResources';
 import {rememberSourceEquipment} from './automation/sourceEquipment';
@@ -78,7 +78,11 @@ export function prepareBatchCardMigration(original:Character,entries:Entry[],roo
   if(declaration&&!row.grantKey?.startsWith('choice:')){
    const owner=card.selections.find(s=>s.id===row.parentId),refs=owner?.entry.raw[owner.entry.kind==='subclass'?'subclassFeatures':'classFeatures'];
    const missing=owner&&['class','subclass'].includes(owner.entry.kind)&&(!Array.isArray(refs)||refs.some(block=>{const ref=typeof block==='string'?block:block?.classFeature||block?.subclassFeature;return typeof ref==='string'&&names(row.entry).includes(ref.split('|')[0].normalize('NFKC').toLocaleLowerCase().replace(/[\s·•’']/g,''))&&!first.grants.some(g=>g.owner.id===owner.id&&g.row.grantKey==='ref:'+ref);}));
-   if(missing)retain(row,'目标来源声明尚未完整载入，保留旧记录');else removed.add(row.id);continue;
+   if(missing){
+    const ambiguous=Array.isArray(refs)&&refs.some(block=>{const ref=typeof block==='string'?block:block?.classFeature||block?.subclassFeature;return typeof ref==='string'&&names(row.entry).includes(ref.split('|')[0].normalize('NFKC').toLocaleLowerCase().replace(/[\s·•’']/g,''))&&entryReferenceCandidates(ref,entries,row.entry.kind).length>1;});
+    if(ambiguous)batchWarnings.push('「'+row.entry.name+'」存在多个来源或旧项，未自动任选或新增。');
+    retain(row,ambiguous?'目标来源存在多个定义，保留旧记录':'目标来源声明尚未完整载入，保留旧记录');
+   }else removed.add(row.id);continue;
   }
   // A source choice remains the player's choice. Preserve its association and answer.
   const kinds=unlinkedEntry(row.entry)&&bubbles.includes(row.entry.kind)?['feat','feature','rule','spell','item'] as Kind[]:[row.entry.kind];
