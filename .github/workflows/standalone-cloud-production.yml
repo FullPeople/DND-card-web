@@ -30,3 +30,22 @@ jobs:
           npx vite build --config vite.cloud.config.ts
       - name: Original default and embedded profiles stay suspended
         run: npx vite build --mode standalone
+  class-choice-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - run: npx vite build --mode standalone
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config playwright.class-choices.config.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: standalone-class-choice-evidence
+          include-hidden-files: true
+          path: .local-evidence/class-level-choices/
+          retention-days: 3

@@ -6,7 +6,7 @@ for(const count of [2,4,5,7])test(`previous and both edge transitions remain con
  for(let i=0;i<count;i++){const response=await request.post('/api/cards',{headers,data:{confirmUpload:true,character:{...fixture.card.character,id:crypto.randomUUID(),name:'动画连续性验收 '+i}}});expect(response.status()).toBe(201);ids.push((await response.json()).id);}
  await context.addCookies([{name:'dnd_cloud',value:fixture.ownerSession.token,url:'http://127.0.0.1:5320/api/',httpOnly:true,sameSite:'Strict'}]);
  try{
-  await page.goto('/library/?q=动画连续性验收');await expect(page.locator('.cloud-gallery-item .paper')).toHaveCount(Math.min(count,5));
+  await page.goto('/library/?q=动画连续性验收');await expect(page.locator('.cloud-gallery-item')).toHaveCount(Math.min(count,5));await expect(page.locator('.cloud-gallery-item .paper')).toHaveCount(Math.min(count,3));
   const first=await page.locator('.cloud-gallery-item.is-active').getAttribute('data-card-id');
   for(const direction of [-1,1,1,-1]){
    await expect.poll(()=>page.locator('.cloud-gallery-stage').evaluate(el=>[...el.querySelectorAll('.cloud-gallery-item')].reduce((sum,node)=>sum+node.getAnimations().length,0))).toBe(0);

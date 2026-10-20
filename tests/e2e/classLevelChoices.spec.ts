@@ -58,6 +58,6 @@ test('a background origin feat unlocks the level-four source feat and persists t
  const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();
  await expect(slot).toContainText('原创前置后续');await page.getByRole('button',{name:'收起选择',exact:true}).click();
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'功能页',exact:true}).click();
- await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
+ await expect(grant).toContainText('1/1').catch(async error=>{console.log('choice-return-state',JSON.stringify(await page.evaluate(()=>({tabs:[...document.querySelectorAll('[role="tab"]')].map(el=>({label:el.textContent,selected:el.getAttribute('aria-selected')})),regions:[...document.querySelectorAll('[role="region"]')].map(el=>({label:el.getAttribute('aria-label'),hidden:!!el.closest('[aria-hidden="true"], [inert]')})),sheet:document.querySelector('.sheet-pane')?.textContent?.slice(0,6000)}))));throw error;});await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
  await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
 });
