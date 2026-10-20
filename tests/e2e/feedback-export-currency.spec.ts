@@ -19,13 +19,22 @@ async function setup(page:Page,card:Character,displayMode:'a4'|'screen'='a4'){
   const workspace=await loadWorkspace();await saveWorkspace({...workspace,characters:[card],activeId:card.id});
  },card);
  await page.reload();await expect(page.getByRole('tab',{name:card.name,exact:true})).toBeVisible();
+ await expect(page.getByRole('tab',{name:card.name,exact:true})).toHaveAttribute('aria-selected','true');
+ await expect(page.locator('.paper')).toHaveAttribute('data-character-id',card.id);
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
+}
+
+async function showPage(page:Page,name:string){
+ const tab=page.getByRole('tab',{name,exact:true});await tab.click();
+ await expect(tab).toHaveAttribute('aria-selected','true');
+ await expect(page.getByRole('tabpanel',{name,exact:true})).toBeVisible();
+ await expect(page.locator('.sheet-details-loading')).toHaveCount(0);
 }
 
 test('coin edits show ordinary decimal GP values and preserve denomination balances after reopening',async({page})=>{
  const card=newCharacter();card.name='Currency display witness';
  card.inventory={...inventoryState(card),coins:{cp:29,sp:0,ep:1,gp:12,pp:2}};
- await setup(page,card);await page.getByRole('tab',{name:'背包',exact:true}).click();
+ await setup(page,card);await showPage(page,'背包');
  const silver=page.locator('[data-stock-id="coin:sp"]');
  await silver.getByRole('button',{name:'银币数量',exact:true}).click();
  await silver.getByRole('textbox',{name:'银币数量',exact:true}).fill('3');
@@ -33,7 +42,7 @@ test('coin edits show ordinary decimal GP values and preserve denomination balan
  await expect(silver.locator('.stock-value')).toHaveText('0.3 GP');
  await expect(page.locator('[data-stock-id="coin:cp"] .stock-value')).toHaveText('0.29 GP');
  await expect.poll(async()=>(await readCard(page)).inventory?.coins.sp).toBe(3);
- await page.reload();await page.getByRole('tab',{name:'背包',exact:true}).click();
+ await page.reload();await showPage(page,'背包');
  await expect(page.locator('[data-stock-id="coin:sp"] .stock-value')).toHaveText('0.3 GP');
  expect((await readCard(page)).inventory?.coins).toEqual({cp:29,sp:3,ep:1,gp:12,pp:2});
 });
@@ -43,7 +52,7 @@ test('five-page PDF collapses opened feature prose for capture and restores the 
  const entries:Entry[]=Array.from({length:24},(_,i)=>({id:`export-witness:${i}`,kind:'feature',name:`Export entry ${String(i+1).padStart(2,'0')}`,english:`Export entry ${i+1}`,source:'XPHB',edition:'2024',packId:'authored',revision:'1',raw:{},entries:Array.from({length:i===0?40:2},(_,j)=>`Authored layout paragraph ${j+1}. This text tests the existing card export.`)}));
  card.selections=entries.map(entry=>({id:entry.id,entry,quantity:1,level:1,equipped:false}));
  card.featureLayout={order:entries.map(entry=>entry.id),expanded:[entries[0].id],detailsExpanded:[entries[0].id]};
- await setup(page,card,'screen');await page.getByRole('tab',{name:'特性',exact:true}).click();
+ await setup(page,card,'screen');await showPage(page,'特性');
  await expect(page.locator('.detail-class-features .feature-bubble.is-expanded')).toHaveCount(1);
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
  const before=await readCard(page);
@@ -78,7 +87,7 @@ test('a failed image capture restores feature expansion and screen preference wi
  const entry:Entry={id:'failure-witness',kind:'feature',name:'Restored feature',english:'Restored feature',source:'XPHB',edition:'2024',packId:'authored',revision:'1',raw:{},entries:['Authored failure recovery witness.']};
  card.selections=[{id:entry.id,entry,quantity:1,level:1,equipped:false}];
  card.featureLayout={order:[entry.id],expanded:[entry.id],detailsExpanded:[entry.id]};
- await setup(page,card,'screen');await page.getByRole('tab',{name:'特性',exact:true}).click();
+ await setup(page,card,'screen');await showPage(page,'特性');
  await expect(page.locator('.feature-bubble.is-expanded')).toHaveCount(1);const before=await readCard(page);
  const result=await page.evaluate(async()=>{
   const path='/src/platform/sheetImage.ts';const {captureSheet}=await import(path),original=HTMLCanvasElement.prototype.toBlob;

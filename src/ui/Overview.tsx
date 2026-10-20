@@ -7,6 +7,7 @@ import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {useSheetChoices} from './SheetChoicesContext';
 import {displayCharacterEdit} from '../core/displayCharacterEdit';
 import {ScreenAbilities} from './ScreenAbilities';
+import {AbilityGenerationDialog} from './AbilityGenerationDialog';
 import {ProficiencyStatus} from './ProficiencyStatus';
 import {setManualSkillExpertise,setManualSkillProficiency} from '../core/manualSkills';
 import {AutoSheetName} from './AutoSheetName';
@@ -26,7 +27,7 @@ import {NumberInput} from './NumberInput';
 import {Portrait} from './Portrait';
 import {VisibilityEye} from './VisibilityEye';
 import './overviewSpellVisibility.css';
-import { useContext, useMemo, useState, type ReactNode } from 'react';
+import { useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AdjustedValue, SheetEditContext } from './SheetEdit';
 import { sizeEntry } from '../data/sizes';
 import { TrainingChips } from './TrainingChips';
@@ -56,6 +57,8 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const choices=useSheetChoices(c,catalog);
   const trainingNames=useMemo(()=>catalogTrainingIndex(catalog),[catalog]);
   const [trainingEditor, setTrainingEditor] = useState(false);
+  const [generatingAbilities,setGeneratingAbilities]=useState(false);
+  useEffect(()=>setGeneratingAbilities(false),[c.id,editing]);
   function receiveTraining(entry:Entry,key:string) {edit(draft=>{const current=draft.training?.[key]??training.find(t=>t.key===key)!.values.join('、');const token=`{@${entry.raw._category==='language'?'language':entry.raw._category==='itemProperty'?'itemProperty':entry.raw._category==='itemMastery'?'itemMastery':'item'} ${entry.name}|${entry.source}}`; (draft.training||={})[key]=[...new Set([...current.split(/[、\n；;]/).filter(Boolean),token])].join('、');});}
   const selected = (kinds: Kind[]) => c.selections.filter(s => kinds.includes(s.entry.kind));
   const ownerOf = (s: Selection) => c.selections.find(p => p.id === s.parentId || s.requirementId?.startsWith(`${p.id}:`));
@@ -83,7 +86,8 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   }
   function abilityCell(a: Ability) {
     const skills = Object.entries(SKILLS).filter(([, s]) => s.ability === a);
-    return <SheetCell label={ABILITY_LABELS[a]} className={`ability-box ability-${a}`} hint={d.trace[a].join('；')}>
+    return <SheetCell label={ABILITY_LABELS[a]} className={`ability-box ability-${a}`} hint={d.trace[a].join('；')} headingInline={a==='str'&&editing?<button type="button" className="ability-generator-launch" aria-label="生成基础属性" onClick={()=>setGeneratingAbilities(true)}>生成属性</button>:undefined}>
+      {a==='str'&&editing&&generatingAbilities&&<AbilityGenerationDialog c={c} edit={edit} close={()=>setGeneratingAbilities(false)}/>}
       <div className="ability-values"><span className="ability-code">{a.toUpperCase()}</span><label><NumberInput aria-label={`${ABILITY_LABELS[a]}基础值`} type="number" readOnly={!editing} min="1" max="30" value={c.abilities[a]} displayValue={d.abilities[a]} onChange={e => edit(draft => { draft.abilities[a] = clamp(e.target.value, 1, 30); }, a)}/><span>属性值</span></label><div><button className="ability-modifier rollable-stat" disabled={!inWorkbench} onClick={()=>composeRoll(`1d20${signed(d.modifiers[a])}`,`${ABILITY_LABELS[a]}检定`)}>{signed(d.modifiers[a])}</button><small>调整值</small></div></div>
       <div className={`ability-save ability-proficiency-row ${editing?'save-editing':inWorkbench?'roll-row':''}`} role={!editing&&inWorkbench?'button':undefined} tabIndex={!editing&&inWorkbench?0:undefined} onClick={()=>{if(!editing&&inWorkbench)composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}} onKeyDown={e=>{if(!editing&&inWorkbench&&['Enter',' '].includes(e.key)){e.preventDefault();composeRoll(`1d20${signed(d.saves[a].value)}`,`${ABILITY_LABELS[a]}豁免`);}}}><ProficiencyStatus name={`${ABILITY_LABELS[a]}豁免`} proficient={d.saves[a].proficient} editing={editing} kind="save"/>{editing?<TraceValue target={`save:${a}`} label={`${ABILITY_LABELS[a]}豁免`} value={d.saves[a].value}><b>{signed(d.saves[a].value)}</b></TraceValue>:<b>{signed(d.saves[a].value)}</b>}<span>豁免</span>{editing&&<NumberInput className="save-extra-adjustment" aria-label={`${ABILITY_LABELS[a]}豁免额外调整值`} title="额外加减值，叠加于豁免；保留至手动修改" min="-9999" max="9999" step="1" value={c.saveBonuses?.[a]||0} onChange={e=>edit(draft=>{const value=Math.trunc(clamp(e.target.value,-9999,9999));if(value)(draft.saveBonuses||={})[a]=value;else if(draft.saveBonuses)delete draft.saveBonuses[a];},`save-bonus:${a}`)}/>}</div>
       <div className="ability-skills" data-palette-component="skills">{skills.map(([key, skill]) => <div className={`ability-skill ability-proficiency-row ${editing ? 'skill-editing' : inWorkbench?'roll-row':''}`} role={!editing&&inWorkbench?'button':undefined} tabIndex={!editing&&inWorkbench?0:undefined} onClick={()=>{if(!editing&&inWorkbench)composeRoll(`1d20${signed(d.skills[key].value)}`,skill.name);}} onKeyDown={e=>{if(!editing&&inWorkbench&&['Enter',' '].includes(e.key)){e.preventDefault();composeRoll(`1d20${signed(d.skills[key].value)}`,skill.name);}}} key={key} title={d.skills[key].sources.join('；')}>

@@ -62,7 +62,11 @@ test('首次公告保留 Q&A，更新日志按日期展开并采用最新说明'
 test('弹窗高度固定：展开答案只滚动正文，超出部分可滑下去看',async({page})=>{
  await open(page);
  const body=dialog(page).locator('.announcement-body');
- const height=async()=>(await dialog(page).boundingBox())!.height;
+ const height=async()=>{
+  await expect(dialog(page)).toBeVisible();
+  const value=await dialog(page).evaluate(node=>node.getBoundingClientRect().height);
+  expect(value).toBeGreaterThan(0);return value;
+ };
  const before=await height();
  const questions=dialog(page).locator('.announcement-faq details');
  for(let i=0;i<await questions.count();i++){
