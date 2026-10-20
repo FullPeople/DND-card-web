@@ -1,4 +1,10 @@
-export const RELEASE_DATE='2026-10-19';
+import {cloudFeaturesEnabled} from '../cloud/availability';
+export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-20':'2026-10-19';
+const release303=():ReleaseSection[]=>[
+ {title:'QQ 登录与私人卡库',items:['正式单机版可使用 QQ 登录，读取和保存自己的云端角色卡，各账号的私人卡库保持隔离。','保留原本机角色、灰色切角样式和浏览器设置，不使用测试版数据覆盖正式库。']},
+ {title:'切卡与保存',items:['减少切卡和修改数值时的重复计算，后台合并保存；账号变化、冲突或写入未确认时保留本机草稿。','统一初始化本机存储，缺失时可从完整 JSON 备份恢复，保留角色身份与填写内容。']},
+ {title:'当前范围',items:['本轮只接入正式单机版与私人卡库。枭熊连接和房间同步继续暂停。']},
+];
 const release302=(mode:'standalone'|'suite'):ReleaseSection[]=>[
  {title:'编辑、保存与搜索',items:['减少连续修改数值时的重复计算和保存等待，保留现有角色数据与已消耗资源。','搜索按需准备索引，取消过时查询；优化手机滑动与双指缩放。']},
  {title:'阅读与常用操作',items:['统一文字层级、当前数值强调与操作反馈，保留灰色切角外观及 Wiki 密集条目。','角色簿改为紧凑单行，功能按钮集中排列，支持拖拽排序。','提前准备规则与扩展、导入导出及公告，修复公告样式加载失败；完整五页准备好后再导出。']},
@@ -476,8 +482,9 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- {title:RELEASE_DATE,sections:release302(mode)},
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'&&cloudFeaturesEnabled?release303():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release303()}]:[]),
+ {title:'2026-10-19',sections:release302(mode)},
  {title:'2026-10-18',sections:release301(mode)},
  ...(mode==='suite'?[{title:'2026-10-16-三',sections:release300()}]:[]),
  {title:'2026-10-16-二',sections:release299()},

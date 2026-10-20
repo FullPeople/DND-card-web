@@ -8,6 +8,7 @@ import {parseFile} from '../../src/core/validation';
 import {pluginAccess} from './plugin';
 import {CloudChanges} from './changes';
 import {cloudFeaturesEnabled,cloudDisabledMessage} from '../../src/cloud/availability';
+import {standaloneCloudPath} from './standalonePolicy';
 export {CloudStore} from './store';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -17,7 +18,7 @@ export function canonicalIP(value:string){
   const family=isIP(value);if(!family)throw new CloudError(400,'client_ip','无法识别上传 IP，请稍后重试。');
   return family===6?new URL('http://['+value+']/').hostname.slice(1,-1):value;
 }
-export interface CloudServerOptions {featuresEnabled?:boolean;temporaryUpload?:boolean;accountPrivate?:boolean;pluginOrigins?:string[];trustedLoopbackProxy?:boolean;freeBytes?:()=>number;qq?:QQConfig;changesWaitMs?:number}
+export interface CloudServerOptions {featuresEnabled?:boolean;standaloneOnly?:boolean;buildVersion?:string;temporaryUpload?:boolean;accountPrivate?:boolean;pluginOrigins?:string[];trustedLoopbackProxy?:boolean;freeBytes?:()=>number;qq?:QQConfig;changesWaitMs?:number}
 async function body(request:IncomingMessage,maxBytes=20_100_000):Promise<Record<string,unknown>> {
   if(!/^application\/json(?:;|$)/i.test(request.headers['content-type']||''))throw new CloudError(415,'json_required','请求必须使用 JSON。');
   let size=0;const parts:Buffer[]=[];
@@ -27,6 +28,7 @@ async function body(request:IncomingMessage,maxBytes=20_100_000):Promise<Record<
 }
 export function createCloudServer(store:CloudStore,origin='https://dnd.center',options:CloudServerOptions={}){
   if(options.accountPrivate&&options.temporaryUpload)throw Error('Private account mode cannot enable temporary anonymous uploads');
+  if(options.standaloneOnly&&(!options.accountPrivate||options.temporaryUpload||options.qq?.isolation))throw Error('Standalone production requires the original private-account database and cookies');
   // Rate keys and pairing caps follow the real client: the canonical X-Real-IP
   // behind the trusted loopback proxy, otherwise the socket address.
   const clientKey=(request:IncomingMessage)=>{if(options.trustedLoopbackProxy){const header=request.headers['x-real-ip'];if(typeof header==='string')try{return canonicalIP(header);}catch{}return 'proxy';}return request.socket.remoteAddress||'unknown';};
@@ -35,7 +37,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
   const qq=createQQAuth(store,origin,options.qq,clientKey),qqLogin=qq.ready?'ready':'pending';
   const plugin=pluginAccess(store,origin,options.pluginOrigins,{freeBytes:options.freeBytes,clientKey});
   const changes=new CloudChanges(options.changesWaitMs),stopChanges=store.observeChanges(audience=>changes.invalidate([...audience.accountIds.map(id=>'account:'+id),...audience.roomIds.map(id=>'room:'+id)]),()=>changes.stats().scopes>0);
-  const currentPolicy={permissionsVersion:1,accountLibrariesPrivate:true,accountPrivate:options.accountPrivate===true,quotaScope:'account',temporaryUpload:false,...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true};
+  const currentPolicy={permissionsVersion:1,accountLibrariesPrivate:true,accountPrivate:options.accountPrivate===true,quotaScope:'account',temporaryUpload:false,...(options.temporaryUpload?{freeSlots:10,quotaScope:'ip',publicDirectory:true,temporaryUpload:true,unsafeStorage:true}:policy),qqLogin,qqOAuthSupported:true,...(options.standaloneOnly?{standaloneOnly:true,cloudFeaturesEnabled:true,pluginConnections:false}:{})};
   const limits=new Map<string,{at:number;count:number}>();
   const send=(response:ServerResponse,status:number,value:unknown)=>{response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'});response.end(JSON.stringify(value));};
   const server=createServer(async(request,response)=>{
@@ -49,9 +51,10 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       plugin.cors(request,response);
       if(method==='OPTIONS'){response.writeHead(204);response.end();return;}
       if(options.featuresEnabled===false){
-        if(method==='GET'&&url.pathname==='/api/health')return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.295',...currentPolicy,cloudFeaturesEnabled:false,qqLogin:'disabled',qqOAuthSupported:false});
+        if(method==='GET'&&url.pathname==='/api/health')return send(response,200,{ok:true,service:'dnd-card-cloud',version:options.buildVersion||'1.0.295',...currentPolicy,cloudFeaturesEnabled:false,qqLogin:'disabled',qqOAuthSupported:false});
         throw new CloudError(503,'cloud_disabled',cloudDisabledMessage);
       }
+      if(options.standaloneOnly&&(request.headers.authorization||request.headers.origin&&request.headers.origin!==origin||!standaloneCloudPath(url.pathname)))throw new CloudError(503,'cloud_disabled','枭熊连接与房间同步暂未开放，已有资料会保留。');
       if(options.qq?.isolation&&(request.headers.authorization||!/^\/api\/(?:auth\/qq\/(?:login|callback)|session|health|policy|logout|slots|changes|cards(?:\/[A-Za-z0-9-]{6,36})?)$/.test(url.pathname)))throw new CloudError(404,'not_found','接口不存在。');
       if(await qq.handle(request,response,url))return;
       const token=request.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith(cookies.session+'='))?.slice(cookies.session.length+1);
@@ -61,7 +64,9 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
       let temporaryOwner=store.temporarySession(temporaryToken);
       if(await plugin.handle(request,response,url,session,token,()=>body(request),(status,value)=>send(response,status,value)))return;
       if(url.pathname==='/api/changes'&&method==='POST'){
-        const data=await body(request,16384),actor=liveSession(),scopes=plugin.changeScopes(request,actor,data.rooms);
+        const data=await body(request,16384);
+        if(options.standaloneOnly&&data.rooms!==undefined&&(!Array.isArray(data.rooms)||data.rooms.length))throw new CloudError(503,'cloud_disabled','枭熊连接与房间同步暂未开放，已有资料会保留。');
+        const actor=liveSession(),scopes=plugin.changeScopes(request,actor,data.rooms);
         if(response.destroyed)return;
         const wait=changes.wait(scopes,data.cursor,clientKey(request),actor?.account.id);
         const cancel=()=>wait.cancel();response.once('close',cancel);
@@ -88,7 +93,7 @@ export function createCloudServer(store:CloudStore,origin='https://dnd.center',o
         }
         return socketIP;
       };
-      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:'1.0.295',changeNotifications:'bounded-wait',...currentPolicy});
+      if(method==='GET'&&(url.pathname==='/api/'||url.pathname==='/api/health'))return send(response,200,{ok:true,service:'dnd-card-cloud',version:options.buildVersion||'1.0.295',changeNotifications:'bounded-wait',...currentPolicy});
       if(method==='GET'&&url.pathname==='/api/session'){
         if(options.temporaryUpload&&!session){
           if(!temporaryOwner){const issued=store.issueTemporarySession();temporaryOwner=issued.owner;response.setHeader('Set-Cookie','dnd_temporary='+issued.token+'; Path=/api/; '+(origin.startsWith('https:')?'Secure; ':'')+'HttpOnly; SameSite=Strict; Max-Age=31536000');}

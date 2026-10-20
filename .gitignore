@@ -18,6 +18,8 @@ playwright-report/
 dist-sync-prototype/
 
 dist-standalone/
+dist-standalone-cloud/
+dist-library-cloud/
 
 test-results-standalone/
 
