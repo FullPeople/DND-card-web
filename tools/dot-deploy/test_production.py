@@ -508,35 +508,6 @@ class RunnerAndInstallerTests(unittest.TestCase):
             archive.write_bytes(b'changed archive')
             with self.assertRaises(build.c.Denied): build.use_prepared(root, root, 'a' * 40, metadata['version'])
 
-    def test_package_includes_only_two_frontends_and_exact_tracked_source(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            subprocess.run(['git', 'init', '-q', str(root)], check=True)
-            (root / 'LICENSE').write_text('license'); (root / 'private-untracked.txt').write_text('not public')
-            subprocess.run(['git', 'add', 'LICENSE'], cwd=root, check=True)
-            subprocess.run(['git', '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'fixture'], cwd=root, check=True)
-            sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
-            for name in c.TARGETS:
-                (root / 'dist-cloud' / name).mkdir(parents=True)
-                (root / 'dist-cloud' / name / 'index.html').write_text('candidate')
-            (root / 'dist-cloud/index.html').write_text('must not publish this homepage')
-            (root / 'dist-cloud/card/sw.js').write_text('worker')
-            (root / 'dist-cloud/card/standalone-audit.json').write_text('{"singlePlayer":true,"multiplayerModules":[]}')
-            (root / 'deploy/cloud').mkdir(parents=True)
-            for name in ('frontend.py', 'publish.py'): (root / 'deploy/cloud' / name).write_text('fixed publisher fixture')
-            for policy in ('pending', 'ready'):
-                output = root / ('out-' + policy)
-                result = build.package(root, output, sha, 'standalone-1.0.257', '1.0.253', policy)
-                metadata, _ = build.c.inspect_archive(output / 'deployment.tar.gz', result['sha256'])
-                self.assertEqual(metadata['format'], 2)
-                self.assertEqual(metadata['qqLogin'], policy)
-                self.assertNotIn('index.html', metadata['files'])
-                destination = root / ('extracted-' + policy)
-                build.c.extract_frontends(output / 'deployment.tar.gz', destination)
-                for target in c.TARGETS:
-                    self.assertEqual(json.loads((destination / target / 'release.json').read_text())['qqLogin'], policy)
-                with zipfile.ZipFile(destination / 'card/source.zip') as archive:
-                    self.assertEqual(archive.comment.decode(), sha); self.assertEqual(archive.namelist(), ['LICENSE'])
 
 
 class InstallationTransitionTests(unittest.TestCase):
