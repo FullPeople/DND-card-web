@@ -1,6 +1,6 @@
-# 2026-10-19 - XPHB ASI automation review candidate
+# 2026-10-20 - XPHB ASI automation review candidate
 
-Source-qualified explicit ASI allocations now calculate derived scores, retain base scores and existing manual data, and restore through the existing class-grant archive. See [scope and validation](ASI-AUTOMATION-20261019.md). Paired runtime evidence and final validation are required before review completion. No merge or deployment in this task.
+Explicit XPHB ASI allocations calculate derived scores and modifiers, retain base scores and manual data, and restore through the existing class-grant archive. Full replay is complete: 229 inputs, 18,789 identities, 71 exact-source modules, and exactly one new usable ASI witness (6,538 identities have at least one verified mechanism; this is not whole-rule completion). Web adopts Data `ccf474fbf8e83eb1a50db397deed2e9029b8415c` and passes committed-blob provenance, 1,650 tests (92 existing optional/historical skips), TypeScript, both builds, and desktop/390px browser acceptance covering real scores/modifiers, save/reload, replacement and cancellation. See [scope, validation and rollback](ASI-AUTOMATION-20261019.md). Review Data PR47 before Web PR89. No merge or deployment in this task.
 
 # 2026-10-19 · 302 已实际上线
 

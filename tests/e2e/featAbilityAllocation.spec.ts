@@ -15,23 +15,26 @@ test('confirms, saves, reopens, replaces and removes an ASI allocation using the
  await page.goto('/');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'asi-authored.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  await expect(page.getByRole('tab',{name:/ASI Browser（导入）/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await restoreAuthoredChoices(page);
- await page.getByRole('tab',{name:'特性',exact:true}).click();
+ const tab=async(name:string)=>{const target=page.getByRole('tab',{name,exact:true});await target.click();await expect(target).toHaveAttribute('aria-selected','true');await expect(page.getByRole('tabpanel',{name,exact:true})).toBeVisible();};
+ await tab('特性');
  const open=async()=>{
-  const direct=page.getByRole('button',{name:/属性提升（自动计算）/}).first();
-  if(await direct.isVisible())await direct.click();
-  else {await page.locator('.heritage-features [data-feature-id]').filter({hasText:'Ability Score Improvement'}).first().locator('.feature-caption').click();if(!await page.locator('[data-choice-workspace]').isVisible())await direct.click();}
+  const caption=page.getByRole('tabpanel',{name:'特性',exact:true}).locator('.feature-caption[data-choice-id$=":feat-abilities"]').first();
+  if(await caption.getAttribute('aria-expanded')!=='true')await page.getByRole('region',{name:'专长',exact:true}).getByRole('button',{name:'职业 Allocation Class Lv.4',exact:true}).click();
+  await expect(caption).toHaveAttribute('aria-expanded','true');
+  await page.locator('.feature-choice-actions button[data-choice-id$=":feat-abilities"]:visible').first().click();
   await expect(page.locator('[data-choice-workspace]')).toBeVisible();
+  await expect(page.locator('.choice-option')).toHaveCount(21);
  };
  const scores=async(str:number,dex:number)=>{
-  await page.getByRole('tab',{name:'总览',exact:true}).click();
-  await expect(page.getByRole('spinbutton',{name:'力量属性值',exact:true})).toHaveValue(String(str));await expect(page.getByRole('spinbutton',{name:'敏捷属性值',exact:true})).toHaveValue(String(dex));
+  await tab('主要');
+  await expect(page.getByRole('spinbutton',{name:'力量基础值',exact:true})).toHaveValue(String(str));await expect(page.getByRole('spinbutton',{name:'敏捷基础值',exact:true})).toHaveValue(String(dex));
   await expect(page.locator('.ability-str .ability-modifier')).toHaveText(`+${Math.floor((str-10)/2)}`);await expect(page.locator('.ability-dex .ability-modifier')).toHaveText(`+${Math.floor((dex-10)/2)}`);
  };
  await open();await expect(page.locator('.choice-option')).toHaveCount(21);await expect(page.locator('.choice-hint').filter({hasText:'旧卡基础属性'})).toBeVisible();
- await page.locator('.choice-option').filter({hasText:/^力量 \+2$/}).click();await page.getByRole('button',{name:'退出选择',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');
- await scores(18,13);await page.reload();await scores(18,13);await page.getByRole('tab',{name:'特性',exact:true}).click();await open();await expect(page.locator('.choice-option').filter({hasText:/^力量 \+2$/})).toHaveAttribute('aria-pressed','true');
+ await page.locator('.choice-option').filter({hasText:/^力量 \+2$/}).click();await page.getByRole('button',{name:'完成并返回',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await scores(18,13);await page.reload();await scores(18,13);await tab('特性');await open();await expect(page.locator('.choice-option').filter({hasText:/^力量 \+2$/})).toHaveAttribute('aria-pressed','true');
  await page.locator('.choice-option').filter({hasText:/^力量 \+1、敏捷 \+1$/}).click();await expect(page.locator('.choice-option').filter({hasText:/^力量 \+2$/})).toHaveAttribute('aria-pressed','false');
- await page.getByRole('button',{name:'退出选择',exact:true}).click();await scores(17,14);await page.getByRole('tab',{name:'特性',exact:true}).click();await open();
+ await page.getByRole('button',{name:'完成并返回',exact:true}).click();await scores(17,14);await tab('特性');await open();
  await page.screenshot({path:info.outputPath('asi-allocation.png')});await page.locator('.choice-option').filter({hasText:/^力量 \+1、敏捷 \+1$/}).click();await expect(page.locator('.choice-option[aria-pressed="true"]')).toHaveCount(0);
- await page.getByRole('button',{name:'退出选择',exact:true}).click();await scores(16,13);
+ await page.getByRole('button',{name:'完成并返回',exact:true}).click();await scores(16,13);
 });
