@@ -12,7 +12,7 @@ test('230 expanded automation choices have clear collapse, fast navigation and f
 });
 
 test('230 repeated drag, duplicate swap and rapid removal keep one saved allocation without drag clones',async({page})=>{
- await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await dragWiki(page,'运动',0);
+ await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(page.getByRole('tab',{name:'特性',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await dragWiki(page,'运动',0);
  await page.evaluate(()=>{const original=window.structuredClone;Object.assign(window,{choiceCloneCount:0});window.structuredClone=((...args:Parameters<typeof structuredClone>)=>{(window as any).choiceCloneCount++;return original(...args);}) as typeof structuredClone;});
  await dragWiki(page,'运动',0);expect(await page.evaluate(()=>(window as any).choiceCloneCount)).toBe(0);await expect(page.locator('.choice-slot-entry')).toHaveCount(1);
  await dragWiki(page,'察觉',1);await dragWiki(page,'运动',1);await expect(page.locator('.choice-slot').nth(0)).toContainText('察觉');await expect(page.locator('.choice-slot').nth(1)).toContainText('运动');

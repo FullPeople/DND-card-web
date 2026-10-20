@@ -10,7 +10,7 @@ async function setup(page:Page,edition:'2014'|'2024'='2024'){
  card.profile.autoSourceDefaults=['PHB','XPHB'];card.rulePacks=[];
  card.runtime.hp=3;card.runtime.resources={spent:{name:'Authored resource',max:4,current:1}};
  validateCharacter(card);
- await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await page.locator('.app-shell').waitFor();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.evaluate(async(card)=>{const path='/src/platform/storage.ts',catalogPath='/src/data/catalog.ts',validationPath='/src/core/validation.ts';const {loadWorkspace,saveWorkspace}=await import(path),{normalizeData}=await import(catalogPath),{validateCharacter}=await import(validationPath);const from=['str','dex','con','int','wis','cha'];const [entry]=normalizeData({feat:[{name:'Ability Score Improvement',source:'XPHB',category:'G',repeatable:true,ability:[{choose:{from,amount:2},hidden:true},{choose:{from,count:2},hidden:true}]}]},'ability-generation-fixture');if(card.edition==='2024'){card.selections=[{id:'boost',entry,quantity:1,level:1,equipped:false}];card.answers['boost:feat-abilities']=['str:2'];}validateCharacter(card);const w=await loadWorkspace();await saveWorkspace({...w,characters:[card],activeId:card.id});},card);
  await page.reload();await expect(page.getByRole('tab',{name:card.name,exact:true})).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  expect(await derivedStrength(page)).toBe(edition==='2024'?16:14);
