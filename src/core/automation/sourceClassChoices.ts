@@ -5,6 +5,7 @@ import {catalogRuleKey} from '../entryRecordIdentity';
 import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
 import {featAbilityOptions} from './featAbilities';
+import {reviewedLearnedSpellPrerequisite} from './learnedSpellPrerequisite';
 
 const list=(value:unknown):unknown[]=>Array.isArray(value)?value:[];
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
@@ -80,7 +81,8 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
      const v=value as {level?:unknown;class?:{name?:unknown;ENG_name?:unknown;source?:unknown}};required=v.level;
      if(!v.class)return '此等级前置的职业范围尚未核对。';
      const declared=[v.class.name,v.class.ENG_name].map(key).filter(Boolean);
-     const parent=c.selections.find(s=>s.entry.kind==='class'&&declared.some(n=>names(s.entry).includes(n))&&key(s.entry.source)===key(v.class!.source));actual=parent?level(parent):0;
+     const parents=c.selections.filter(s=>s.entry.kind==='class'&&declared.some(n=>names(s.entry).includes(n))&&key(s.entry.source)===key(v.class!.source));
+     const parent=optional&&parents.some(s=>s.id===owner.id)?owner:parents.length===1?parents[0]:undefined;actual=parent?level(parent):0;
     }
     if(!Number.isSafeInteger(required)||Number(required)<1)return '此等级前置结构尚未核对。';
     if(actual<Number(required))return `尚未达到所需${optional?'职业':''}等级 ${required}。`;
@@ -89,6 +91,8 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
     const groups=list(value) as Record<string,unknown>[];
     const current=scores;
     if(!groups.length||!groups.some(group=>Object.entries(group).every(([ability,minimum])=>Object.hasOwn(current,ability)&&typeof minimum==='number'&&current[ability as keyof typeof current]>=minimum)))return '尚未满足属性前置条件。';
+   }else if(field==='spell'&&optional){
+    const reason=reviewedLearnedSpellPrerequisite(c,entry,owner);if(reason)return reason;
    }else if(field==='feat'&&!optional){
     if(!Array.isArray(value)||!value.length||value.some(ref=>typeof ref!=='string'||!ref.trim()||!ref.split('|')[0].trim()||ref.split('|').length>2))return '此专长前置结构尚未核对。';
     if(!value.some(ref=>activeOwnedFeat(c,entry,ref,known)))return '尚未具备来源和版本匹配且当前有效的所需专长。';
