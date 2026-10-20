@@ -18,6 +18,8 @@ jobs:
           persist-credentials: false
       - name: Check the fixed entry point without server credentials
         working-directory: tools/dot-deploy
-        run: python3 -B -m unittest -v test_preflight test_production
+        run: python3 -B -m unittest -v test_preflight test_production test_build_production
       - name: Exercise the existing atomic front-end publisher on real Linux directories
         run: python3 -B deploy/cloud/test_frontend.py
+      - name: Reject suspended or isolated private-cloud frontend packages
+        run: node --test tools/checkStandaloneCloudBuild.test.mjs
