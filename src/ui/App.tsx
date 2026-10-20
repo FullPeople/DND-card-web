@@ -497,11 +497,12 @@ export default function App() {
           const recovered=await recoveredBinding(restored,card,account,await readSyncReceipt(restored.id),current.siteSources);
           const verified=await cloudSession();
           if(!writable.current||workspaceRef.current?.characters.find(row=>row.id===restored.id)!==restored||verified.account?.id!==account)throw Error('QQ 账号、角色内容或本机编辑权限已改变，未重新连接。');
-          await writeSyncReceipt(restored.id,recovered.receipt);
           const latest=workspaceRef.current!;
-          // Preserve edits made during the receipt write; only reconstruct
-          // the export's shared-source split, not an earlier card snapshot.
+          // Make the source split durable before enabling cloud writes. A failed
+          // save or a closed tab must not leave a binding on the export view.
           const operation=persist({...latest,activeId:restored.id,characters:latest.characters.map(row=>row.id===restored.id?withSiteSources(row,sourceSettings(recovered.character.profile)):row)});if(!operation)throw Error('当前标签页只读。');await operation;
+          if(!writable.current||(await cloudSession()).account?.id!==account)throw Error('QQ 账号或本机编辑权限已改变，未重新连接。');
+          await writeSyncReceipt(restored.id,recovered.receipt);
         });
       }
       else if(existing){const operation=persist({...current,activeId:existing.id});if(!operation)throw Error('当前标签页只读。');await operation;}
