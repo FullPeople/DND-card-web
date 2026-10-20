@@ -1,3 +1,11 @@
+# 2026-10-20 · 单机正式 QQ 与私人卡库已上线
+
+正式 `/card/`、`/library/` 与原单机后台 `standalone-1.0.303` 已发布，运行来源 `e5dbe0b97f4c762c425ee231c8f7f17088d18e25`；后续文档提交不替代运行来源。正式构建采用 `vite.standalone-cloud.config.ts`、`vite.library-cloud.config.ts`，沿用原浏览器存储与正式 SQLite；不能用仍暂停的默认包替换。枭熊目录、插件／房间接口、测试版与 Nginx 保持。
+
+最终同提交 5 组 CI 全绿，Web 29 个任务成功；公网 90 文件与封包一致。新备份与发布回执完整，启用时原 141 卡／212 账号及原有全部表相同、数据库身份不变，未复制任何测试库。用户本人 QQ 登录成功，原 5 张私人卡可读；正式云端卡两次切回提交 55.9／54.9 ms，原云端整行不变。本机原卡改值保存后还原，全部人物字段与备份相同，仅 revision／updatedAt 改变。上线后不同账号另有一次保存已保留，不可用旧 SQLite 备份回盖。后台当前约 57 MiB、上限 384 MiB，swap 为 0。
+
+回执 `/root/codex-release-receipts/standalone-cloud-e5dbe0b97f4c762c425ee231c8f7f17088d18e25.json`；新备份 `/root/codex-backups/standalone-cloud-20261020T032531Z-e5dbe0b9`。正式页面 91 保留；原测试页面 88 未关闭。私人文件只在忽略目录。源码配置、确切 CI、实际测量、保护范围、首次发布器限制及恢复注意见 [正式接入记录](STANDALONE-CLOUD-PRODUCTION-20261020.md)。下方正式仍暂停的描述均为历史。
+
 # 2026-10-20 · 本机存储修复，公网本人实卡验收完成
 
 只更新隔离 `/cloud-lab/card/`、`/cloud-lab/library/`，运行来源 `a1b6fd0a752662c825fc66c38ed6c97fd8ff3e34`；实现 `744c7b1`，Data 报告 `f374806ba54158d74b3868cdf67431f3f962a790`。统一数据库结构初始化，既有存储仅补缺、不清空；失败连接可重试，缺正文时阻止空白保存并要求完整 JSON 恢复。恢复先落盘再启用经过本人账号／权限／全内容核对的云端绑定，保留冲突与未知写入证据。
