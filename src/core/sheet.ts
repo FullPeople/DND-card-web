@@ -1,12 +1,13 @@
 import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEquipment';
 import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
-import {resolveEntryReference} from './entryReferences';
+import {ownsSubclassFeature,resolveEntryReference} from './entryReferences';
+import {sameCatalogRecord} from './entryRecordIdentity';
 import {equipmentBlocks,syncChoiceContent,preserveClassChoiceGrants} from './automation/choices';
 import {rememberFeatureResources} from './automation/featureResources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import { requirementMismatch } from './engine';
-import { uid, type Character, type Entry, type Selection } from './model';
+import { uid,entryEdition,editionAllows, type Character, type Entry, type Selection } from './model';
 import {inventoryState} from './characterDetails';
 import {classMatches,featureOwner} from './featureOwnership';
 import {retainedClassFeatureGrant} from './automation/classChoiceSourceGrant';
@@ -64,15 +65,27 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
   changed = (review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id))))||changed;
   for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
   const selectedNames=entryNameIndex(c.selections.map(s=>s.entry)),publishedNames=catalogNames||entryNameIndex(catalog);
-  const named=(name:string)=>review?.refresh?[...(publishedNames.get(name)||[]),...(selectedNames.get(name)||[])]:[...(selectedNames.get(name)||[]),...(publishedNames.get(name)||[])];
-  function resolve(ref: string, kind: Entry['kind']) {
-    const exact = named(ref.split('|')[0].toLowerCase()).find(e => e.kind === kind && !requirementMismatch(e, { refs: [ref] }));
+  function resolve(ref: string, kind: Entry['kind'], owner:Selection) {
+    const ownedEdition=entryEdition(owner.entry),edition=ownedEdition==='both'?c.edition:ownedEdition;
+    const matching=(rows:readonly Entry[],pointer:string)=>rows.filter(entry=>{
+      const own=kind==='feature'&&(owner.entry.kind==='class'?classMatches(entry,owner.entry):owner.entry.kind==='subclass'&&ownsSubclassFeature(owner.entry,entry));
+      return entry.kind===kind&&(!own||editionAllows(entry,edition))&&!requirementMismatch(entry,{refs:[pointer]});
+    });
+    const choose=(pointer:string)=>{
+      const name=pointer.split('|')[0].toLowerCase(),selected=matching(selectedNames.get(name)||[],pointer)
+        .filter(entry=>c.selections.some(row=>row.entry===entry&&(!row.parentId||row.parentId===owner.id))),published=matching(publishedNames.get(name)||[],pointer);
+      const retained=resolveEntryReference(pointer,selected,kind);
+      if(retained&&!review?.refresh)return retained;
+      if(retained){const aliases=published.filter(entry=>sameCatalogRecord(entry,retained));if(aliases.length===1)return aliases[0];}
+      return resolveEntryReference(pointer,published,kind)||retained;
+    };
+    const exact = choose(ref);
     if (exact || kind !== 'feat') return exact;
     // A declared grant can qualify a catalog feat with a choice after a separator.
     // Preserve that qualifier as content; do not interpret or enforce the choice.
     const [name, source] = ref.split('|'), base = name.split(/[：:；;]/)[0].trim();
     if (base === name) return undefined;
-    const entry = named(base.toLowerCase()).find(e => e.kind === kind && !requirementMismatch(e, { refs: [`${base}|${source || ''}`] }));
+    const entry = choose(`${base}|${source || ''}`);
     return entry ? { ...entry, id: `${entry.id}#grant:${name}`, name, raw: { ...entry.raw, _grantReference: ref } } : undefined;
   }
   const roots = c.selections.filter(s => ['class', 'subclass', 'race', 'background'].includes(s.entry.kind)&&(!review||review.owners.has(s.id)));
@@ -87,7 +100,7 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       if (typeof ref !== 'string') continue;
       const level = Number(ref.split('|')[owner.entry.kind === 'subclass' ? 5 : 3]);
       if (level > (parent?.level || owner.level)) continue;
-      grants.push({ key: `ref:${ref}`, entry: resolve(ref, 'feature') });
+      grants.push({ key: `ref:${ref}`, entry: resolve(ref, 'feature',owner) });
     }
     // Named inline blocks are content sections, not separately invented rules.
     const blocks = raw.entries || (['race', 'background', 'feat'].includes(owner.entry.kind) ? owner.entry.entries : undefined);
@@ -98,7 +111,7 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       grants.push({ key: `inline:${index}`, entry: { ...owner.entry, id: `${owner.entry.id}#trait:${index}`, kind: 'feature', name: block.name, english: block.ENG_name || block.name, entries: block.entries || [block.entry].filter(Boolean), raw: {}, effects: undefined, choices: undefined } });
     });
     for (const block of Array.isArray(raw.feats) ? raw.feats : []) for (const [ref, granted] of Object.entries(block || {})) {
-      if (granted === true) grants.push({ key: `feat:${ref}`, entry: resolve(ref, 'feat') });
+      if (granted === true) grants.push({ key: `feat:${ref}`, entry: resolve(ref, 'feat',owner) });
     }
     // The old-card review builds a disposable linked-grant template. Runtime
     // hydration uses sourceEquipment receipts and never executes this preview path.
@@ -110,7 +123,7 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       let money=0;
       equipment.forEach(({item,key}:{item:any;key:string})=>{
         const ref=typeof item==='string'?item:item.item;
-        let entry=typeof ref==='string'?resolve(ref,'item'):undefined;
+        let entry=typeof ref==='string'?resolve(ref,'item',owner):undefined;
         if(!entry&&(item.special||ref))entry={...owner.entry,id:`${owner.entry.id}#${key}`,kind:'item',name:item.special||ref.split('|')[0],english:item.special||ref.split('|')[0],entries:[],raw:ref?{_equipmentRef:ref}:{},effects:undefined,choices:undefined};
         if(entry)grants.push({key,entry,quantity:Math.max(1,Math.trunc(item.quantity||1))});
         money+=Number(item.value||item.containsValue||0)/100;

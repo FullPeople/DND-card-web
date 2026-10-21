@@ -159,6 +159,10 @@ jobs:
             commands: |
               npx playwright test --config playwright.direct232.config.ts
               npx playwright test --config playwright.wiki232.config.ts
+          - group: wiki-record-identities
+            commands: |
+              npm run build:wiki
+              npx playwright test --config playwright.wiki-identities.config.ts
           - group: saving-throw-adjustments
             commands: |
               npx playwright test --config playwright.save-bonuses.config.ts
@@ -281,6 +285,7 @@ jobs:
             .local-evidence/startup-order/
             .local-evidence/integration230-browser/
             .local-evidence/wiki232/
+            .local-evidence/wiki-identities/
             .local-evidence/edit-perf232/
             .local-evidence/class-drop-perf232/
             test-results/feedback217/

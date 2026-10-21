@@ -10,7 +10,8 @@ import {reconcileEquipping} from '../src/core/automation/equipment';
 import {sheetChoices,setSheetChoiceSlot} from '../src/core/automation/choices';
 import {syncFeatures} from '../src/core/sheet';
 import {syncSourceSpells} from '../src/core/automation/sourceSpells';
-import {syncAutoResources} from '../src/core/resources';
+import {planFeatureResources} from '../src/core/automation/featureResources';
+import {setResource,syncAutoResources} from '../src/core/resources';
 import {ensureResourceWidget} from '../src/core/resourceWidgets';
 import {pruneQuickbar} from '../src/core/quickbar';
 import {evaluate} from '../src/core/engine';
@@ -36,8 +37,19 @@ function preserved(old:ReturnType<typeof load>,c:Character){
  const choice=sheetChoices(c,old.entries).find(q=>q.sourceProgression==='feat'&&q.duplicateChoiceIds?.includes(old.ids.choice))!;expect(choice).toBeDefined();expect(choice.selected).toContain(old.ids.featEntry);expect(choice.complete).toBe(true);
 }
 it.skipIf(!directory).each(['fighter','paladin','ranger'])('preserves an actual old %s Defense grant and nested manual data through upgrade, repeat open and import',name=>{
- const old=load(name);expect(old.defenseAc).toBe(old.armorAc+1);const upgraded=edit(old.c,old.entries);preserved(old,upgraded);expect(upgraded.quickbarLayout).toEqual(old.c.quickbarLayout);
+ const old=load(name);expect(old.defenseAc).toBe(old.armorAc+1);const upgraded=edit(old.c,old.entries);preserved(old,upgraded);
+ // Later reviewed automatic resources may be new to this old-code save. Every
+ // old counter and presentation field must remain exact; additions must be
+ // precisely the newly source-owned resource grants, never arbitrary widgets.
+ const oldWidgets=old.c.quickbarLayout?.widgets||{},widgets=upgraded.quickbarLayout?.widgets||{};
+ const added=planFeatureResources(upgraded).grants.filter(grant=>!Object.hasOwn(old.c.runtime.resources,grant.key));
+ expect(Object.keys(widgets).filter(id=>!Object.hasOwn(oldWidgets,id)).sort()).toEqual(added.map(grant=>grant.key).sort());
+ expect({...upgraded.quickbarLayout,widgets:Object.fromEntries(Object.keys(oldWidgets).map(id=>[id,widgets[id]]))}).toEqual(old.c.quickbarLayout);
+ for(const [id,resource] of Object.entries(old.c.runtime.resources))expect(upgraded.runtime.resources[id]).toEqual(resource);
+ for(const grant of added){expect(upgraded.selections.some(row=>row.id===grant.ownerId)).toBe(true);expect(upgraded.runtime.resources[grant.key]).toMatchObject({name:grant.name,max:grant.max,current:grant.max,featureGrant:{ownerId:grant.ownerId,ruleMax:grant.max}});}
  const repeated=edit(validateCharacter(JSON.parse(JSON.stringify(upgraded))),old.entries);preserved(old,repeated);expect(repeated).toEqual(upgraded);
+ const spent=structuredClone(upgraded);for(const grant of added)setResource(spent,grant.key,0);
+ const reopened=edit(validateCharacter(JSON.parse(JSON.stringify(spent))),old.entries);preserved(old,reopened);expect(reopened.runtime.resources).toEqual(spent.runtime.resources);expect(reopened.quickbarLayout).toEqual(spent.quickbarLayout);
  const higher=edit(repeated,old.entries,c=>{c.selections.find(s=>s.id==='class-owner')!.level=old.level+1;});preserved(old,higher);
 });
 it.skipIf(!directory).each(['fighter','paladin','ranger'])('retains an actual %s FS grant, consumed manual resource and pins through source-off/on and offline import',name=>{

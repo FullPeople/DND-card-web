@@ -1,4 +1,5 @@
 import './loadingPanel.css';
+import {mergeCatalogRecords,resolveCatalogId,sameCatalogRecord} from '../core/entryRecordIdentity';
 import './interactionP1.css';
 import {QuickStart} from './QuickStart';
 import {EntryApplyAction} from './EntryApplyAction';
@@ -78,7 +79,7 @@ import {readCharacterTransfer,deleteLocalCharacters} from '../core/transfers';
 import {useEntrySearch} from './useEntrySearch';
 import {announcementVersionFor,announcementPending,readAnnouncementVersion} from '../platform/announcement';
 const SpellAbilityEditor=lazy(()=>import('./SpellAbilityEditor').then(module=>({default:module.SpellAbilityEditor})));
-import {ownsSubclassFeature} from '../core/entryReferences';
+import {ownsSubclassFeature,referenceEntryCategory,referenceEntryKind,resolveEntryReference} from '../core/entryReferences';
 import {reviewImport} from '../core/importReview';
 import {hydrateImportedCasting} from '../core/castingSnapshot';
 const PersonalEntries=lazy(()=>import('./PersonalEntries').then(module=>({default:module.PersonalEntries})));
@@ -598,7 +599,7 @@ export default function App() {
     let lastPublish=0;
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
-        batch.forEach(e => catalogRef.current.set(e.id, e));
+        mergeCatalogRecords(catalogRef.current,batch);
         if(performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
       }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
       if(!controller.signal.aborted)startTransition(()=>setEntries([...catalogRef.current.values()]));
@@ -821,6 +822,7 @@ export default function App() {
     }; window.addEventListener('keydown', handle); return () => window.removeEventListener('keydown', handle);
   }, []);
   function readingTarget(entry:Entry){
+    const current=libraryEntries.filter(candidate=>sameCatalogRecord(candidate,entry));if(current.length===1)entry=current[0];
     if(entry.raw._inlineOwner){const owner=libraryEntries.find(e=>e.id===entry.raw._inlineOwner);if(owner)return {entry:owner,focus:`name:${entry.raw._inlineName||entry.name}`};}
     const selected=c?.selections.find(s=>s.entry.id===entry.id),parent=selected?.parentId?c?.selections.find(s=>s.id===selected.parentId):undefined;
     if(parent && selected?.grantKey?.startsWith('inline:'))return {entry:libraryEntries.find(e=>e.id===parent.entry.id)||parent.entry,focus:`name:${entry.name}`};
@@ -832,28 +834,30 @@ export default function App() {
     return {entry};
   }
   function inspect(entry: Entry, push = true, from?:keyof typeof LIBRARY_TABS) { exitSheetFullscreen(); if(detail && !library.hover && detailPane.current)library.savePosition(detail.id,detailPane.current.scrollTop);const target=readingTarget(entry);if(library.hover){previewCommit.current={id:target.entry.id,top:detailPane.current?.scrollTop||0};setReadingFlash(n=>n+1);}else setReadingFlash(0);library.navigate(target.entry,target.focus,push,from);setTab('wiki'); }
-  useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){inspect(allEntries.find(e=>e.id===entry.id)||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
+  useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){inspect(allEntries.find(e=>sameCatalogRecord(e,entry))||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
   function resolveReference(reference: string, tag?: string) {
     return localCloudViews?referenceReads([reference,tag],()=>lookupReference(reference,tag)):lookupReference(reference,tag);
   }
   function lookupReference(reference: string, tag?: string) {
-    if (reference.startsWith('entry:')) return c?.selections.find(s => s.entry.id === reference.slice(6)&&librarySourceEnabled(c,s.entry))?.entry || sourceEntries.find(e => e.id === reference.slice(6));
+    if(reference.startsWith('entry:')){const selected=c?.selections.filter(s=>librarySourceEnabled(c,s.entry)).map(s=>s.entry)||[],id=reference.slice(6);if(selected.some(entry=>entry.id===id))return resolveCatalogId(id,selected);return resolveCatalogId(id,sourceEntries);}
     const [name, source] = reference.split('|');
-    const tagKind = ['quickref', 'variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
+    const tagKind=referenceEntryKind(tag),category=referenceEntryCategory(tag);
     const known = [...sourceEntries, ...(c?.selections.filter(s=>librarySourceEnabled(c,s.entry)).map(s => s.entry) || [])];
     if(tag==='class'){
       const parts=reference.split('|'),sub=parts[3],subSource=parts[4]||source||'PHB';
-      if(sub){const target=known.find(e=>e.kind==='subclass'&&e.source.toLowerCase()===subSource.toLowerCase()&&[e.name,e.english,e.raw.shortName,e.raw.ENG_shortName].some(n=>typeof n==='string'&&n.toLowerCase()===sub.toLowerCase())&&(e.raw.classSource||'PHB').toLowerCase()===(source||'PHB').toLowerCase()&&[e.raw.className,e.raw.classEnglish].some(n=>typeof n==='string'&&n.toLowerCase()===name.toLowerCase()));if(target)return target;}
+      if(sub){const targets=known.filter(e=>e.kind==='subclass'&&e.source.toLowerCase()===subSource.toLowerCase()&&[e.name,e.english,e.raw.shortName,e.raw.ENG_shortName].some(n=>typeof n==='string'&&n.toLowerCase()===sub.toLowerCase())&&(e.raw.classSource||'PHB').toLowerCase()===(source||'PHB').toLowerCase()&&[e.raw.className,e.raw.classEnglish].some(n=>typeof n==='string'&&n.toLowerCase()===name.toLowerCase()));const unique=targets.filter((entry,index)=>targets.findIndex(other=>sameCatalogRecord(other,entry))===index);return unique.length===1?unique[0]:undefined;}
     }
     const matches = known.filter(e => (!tagKind || e.kind === tagKind) && [e.name, e.english].some(n => n.toLowerCase() === name.toLowerCase()));
-    const found = tagKind === 'feature' ? matches.find(e => !requirementMismatch(e, { refs: [reference] })) : source ? matches.find(e => e.source.toLowerCase() === source.toLowerCase()) : matches.find(e => e.edition === detail?.edition && e.source === (detail?.source || 'PHB')) || matches.find(e => e.source === 'PHB') || matches[0];
-    return found;
+    if(tagKind==='feature')return resolveEntryReference(reference,matches.filter(e=>!requirementMismatch(e,{refs:[reference]})),'feature',category);
+    if(source)return resolveEntryReference(reference,matches,tagKind,category);
+    const contextual=matches.filter(e=>e.edition===detail?.edition&&e.source===(detail?.source||'PHB')),core=matches.filter(e=>e.source==='PHB');
+    return resolveEntryReference(reference,contextual.length?contextual:core.length?core:matches,tagKind,category);
   }
   function link(reference: string, tag?: string) {
     exitSheetFullscreen();
     const found = resolveReference(reference, tag);
     const name = reference.split('|')[0];
-    const tagKind = ['quickref', 'variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
+    const tagKind=referenceEntryKind(tag);
     if (found) inspect(found); else { setQuery(name); if (tagKind && Object.hasOwn(KIND_LABELS, tagKind)) setKind(tagKind as Kind); setDetail(undefined); setNotice(`已搜索「${name}」。若未收录，可开启其他来源或在中文站查阅。`); }
   }
   function browse(kind: Kind | 'size',parent?:Entry) { exitSheetFullscreen(); setFillPulse(n=>n+1);setKind(kind); if (kind === 'subclass') { const owner = parent||c?.selections.find(s => s.entry.kind === 'class')?.entry; if (owner) {library.navigate(allEntries.find(e => e.id === owner.id) || owner,'subclasses');library.patch({subclassesOpen:true});} } setTab('wiki'); }

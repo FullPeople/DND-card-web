@@ -10,7 +10,7 @@ import {featAbilityOptions} from './featAbilities';
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
-import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
+import {sourceClassChoices,sourceFeatFilterCategory,optionalAliasReceipt} from './sourceClassChoices';
 import type {ClassChoiceSupport} from './classChoiceSupport';
 import {invocationActivationChoices} from './invocationActivation';
 
@@ -128,8 +128,9 @@ export function chooseSheetOption(c:Character,id:string,value:string,catalog:Ent
  if(choice.channel==='tools'||choice.sourceProgression){
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
-  const saved=c.answers[id]||[];
-  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
+  const linkedOptional=choice.sourceProgression==='optional'&&choice.duplicateChoiceIds?.length;
+  const saved=linkedOptional?choice.slots||choice.selected:c.answers[id]||[];
+  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];if(linkedOptional)rememberOptionalAliases(c,choice);resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
   const index=choice.count===1?0:choice.slots!.findIndex((v,i)=>i<choice.count&&!v);
   if(index<0)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
   setSheetChoiceSlot(c,id,index,value,catalog);return;
@@ -196,6 +197,11 @@ function finishBuiltinChoices(c:Character,before:SheetChoice[],catalog:Entry[]){
  const after=sheetChoices(c,catalog),sources=new Set(before.filter(r=>!r.complete).map(r=>choiceSource(c,r)));
  for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>!sheetChoicePending(c,r))&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
 }
+function rememberOptionalAliases(c:Character,choice:SheetChoice){
+ if(choice.sourceProgression!=='optional'||!choice.duplicateChoiceIds?.length)return;
+ for(const alias of choice.duplicateChoiceIds)c.answers[optionalAliasReceipt(choice.id,alias)]=[...c.answers[alias]||[]];
+ c.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries((choice.evidenceEntries||[]).map(entry=>[entry.id,structuredClone(entry)]))};
+}
 /** Slot edits validate and replace atomically, including already full choices. */
 export function setSheetChoiceSlot(c:Character,id:string,index:number,value:string|undefined,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id);
@@ -211,7 +217,7 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
   if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }
- resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
+ rememberOptionalAliases(draft,choice);resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
 }
 const classFeatRequirement=(id:string|undefined)=>!!id&&/:(?:class-feat|class-typed-feat):/.test(id);
 function parkClassChoiceGrant(c:Character,root:Selection){
@@ -228,7 +234,17 @@ function parkClassChoiceGrant(c:Character,root:Selection){
 export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
  if(!automationEnabled(c))return false;
  let changed=false;
- const choices=sheetChoices(c,catalog).filter(choice=>choice.sourceProgression==='feat');
+ const sourceChoices=sheetChoices(c,catalog);
+ for(const choice of sourceChoices.filter(choice=>choice.sourceProgression==='optional'&&choice.duplicateChoiceIds?.length)){
+  const aliases=choice.duplicateChoiceIds!,pending=aliases.filter(alias=>JSON.stringify(c.answers[optionalAliasReceipt(choice.id,alias)]||[])!==JSON.stringify(c.answers[alias]||[]));
+  // Keep the complete proof in the card, including directory candidates that
+  // are not selected, so reopening without a catalog preserves this link.
+  const evidence=choice.evidenceEntries||[];
+  const missing=evidence.filter(entry=>!c.classChoiceSnapshots?.[entry.id]);
+  if(missing.length){c.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries(missing.map(entry=>[entry.id,structuredClone(entry)]))};changed=true;}
+  if(pending.length){c.answers={...c.answers,[choice.id]:[...choice.slots||choice.selected],...Object.fromEntries(pending.map(alias=>[optionalAliasReceipt(choice.id,alias),[...c.answers[alias]||[]]]))};changed=true;}
+ }
+ const choices=sourceChoices.filter(choice=>choice.sourceProgression==='feat');
  for(const choice of choices)if(choice.duplicateChoiceIds?.length){
   if(!Object.hasOwn(c.answers,choice.id)&&choice.slots?.some(Boolean)){c.answers={...c.answers,[choice.id]:[...choice.slots]};changed=true;}
   for(const row of c.selections)if(row.entry.kind==='feat'&&choice.duplicateChoiceIds.some(alias=>row.requirementId===alias&&row.grantKey===`choice:${alias}:${row.entry.id}`)){
@@ -269,6 +285,11 @@ export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
 export function syncChoiceContent(c:Character,catalog:Entry[]){
  if(!automationEnabled(c))return false;
  let changed=preserveClassChoiceGrants(c,catalog);const desired=new Map<string,{owner:string;entry:Entry;requirementId:string}>();
+ // An old directory pick already granted a real tree. Keep that exact tree
+ // and its resource identities; linking learning records grants nothing new.
+ for(const choice of sheetChoices(c,catalog).filter(choice=>choice.sourceProgression==='optional'&&choice.duplicateChoiceIds?.length))for(const row of c.selections){
+  if(row.parentId&&choice.duplicateChoiceIds!.includes(row.requirementId||'')&&row.grantKey===`choice:${row.requirementId}:${row.entry.id}`)desired.set(row.grantKey,{owner:row.parentId,entry:row.entry,requirementId:row.requirementId!});
+ }
  // Resolve newly granted nested options in bounded passes without inventing answers.
  for(let pass=0;pass<12;pass++){
   let added=false;
