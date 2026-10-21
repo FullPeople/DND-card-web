@@ -1,4 +1,3 @@
-import {switchDiagnostic} from '../platform/localSwitchDiagnostics';
 import {useEffect,useLayoutEffect,useRef,type KeyboardEvent,type PointerEvent} from 'react';
 import type {Character} from '../core/model';
 import {CloudSaveBadge} from '../cloud/CloudSaveBadge';
@@ -7,7 +6,7 @@ import {useCharacterBookOrder} from './characterBookOrder';
 export function CharacterTabs({characters:inputCharacters,activeId,warnings,label,select}:{characters:Character[];activeId:string;warnings:Set<string>;label:string;select:(id:string)=>void}){
  const characters=useCharacterBookOrder(inputCharacters),list=useRef<HTMLDivElement>(null);
  const timing=useRef<{id:string;started:number}|undefined>(undefined);
- const choose=(id:string)=>{if(id!==activeId){if(list.current){delete list.current.dataset.switchCommitMs;delete list.current.dataset.switchPaintMs;}switchDiagnostic('choose');timing.current={id,started:performance.now()};}select(id);};
+ const choose=(id:string)=>{if(id!==activeId){if(list.current){delete list.current.dataset.switchCommitMs;delete list.current.dataset.switchPaintMs;}timing.current={id,started:performance.now()};}select(id);};
  const drag=useRef<{id:number;x:number;y:number;left:number;moved:boolean}|undefined>(undefined),suppress=useRef(false);
  const tabIds=JSON.stringify(characters.map(character=>character.id));
  const reveal=(button:HTMLButtonElement)=>{const container=list.current;if(!container)return;const strip=container.getBoundingClientRect(),tab=button.getBoundingClientRect();if(tab.left<strip.left)container.scrollLeft+=tab.left-strip.left;else if(tab.right>strip.right)container.scrollLeft+=tab.right-strip.right;};
@@ -15,7 +14,7 @@ export function CharacterTabs({characters:inputCharacters,activeId,warnings,labe
  useLayoutEffect(()=>{
   const sample=timing.current,container=list.current;if(!sample||sample.id!==activeId||!container)return;
   container.dataset.switchCommitMs=(performance.now()-sample.started).toFixed(2);
-  let second=0;const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>{if(timing.current!==sample)return;container.dataset.switchPaintMs=(performance.now()-sample.started).toFixed(2);switchDiagnostic('paint',{ms:Number(container.dataset.switchPaintMs)});timing.current=undefined;});});
+  let second=0;const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>{if(timing.current!==sample)return;container.dataset.switchPaintMs=(performance.now()-sample.started).toFixed(2);timing.current=undefined;});});
   return()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
  },[activeId]);
  useLayoutEffect(()=>{const container=list.current;if(!container)return;const observer=new ResizeObserver(()=>{const button=container.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);});// Tab names can change width without changing the strip width. ResizeObserver

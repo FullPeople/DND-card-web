@@ -1,5 +1,4 @@
 import {cardCatalogEntries,prepareStandaloneCatalog,sameCatalogBasis,type CatalogBasis,type PreparedStandaloneCatalog} from '../platform/standaloneCatalogPublication';
-import {switchDiagnostic} from '../platform/localSwitchDiagnostics';
 import './loadingPanel.css';
 import './interactionP1.css';
 import {QuickStart} from './QuickStart';
@@ -487,7 +486,6 @@ export default function App() {
   useEffect(()=>{const open=(event:Event)=>{if(!confirmResourceDraftDiscard())return;setEditingResource((event as CustomEvent).detail);setModal('resources');};window.addEventListener('edit-character-resource',open);return()=>window.removeEventListener('edit-character-resource',open);},[]);
 
   function persist(next: Workspace) {
-    switchDiagnostic('persist',{navigation:next.characters===workspaceRef.current?.characters});
     if(qqRoom&&!roomState()?.write){setNotice('卡主已锁定或房间连接已失效，本机草稿保留。');return;}
     // A cloud card whose rights were revoked (or that belongs to another account)
     // stays readable, but its content must not change locally either: the next
@@ -627,7 +625,7 @@ export default function App() {
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e));
-        if(!localCloudViews&&performance.now()-lastPublish>500){lastPublish=performance.now();switchDiagnostic('catalog-publish',{entries:catalogRef.current.size});startTransition(()=>setEntries([...catalogRef.current.values()]));}
+        if(!localCloudViews&&performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
       }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
       if(!controller.signal.aborted){
         const nextEntries=[...catalogRef.current.values()];
@@ -641,7 +639,6 @@ export default function App() {
               if(controller.signal.aborted)return;
               if(!sameCatalogBasis(basis,currentCatalogBasis.current))continue;
               preparedCatalog.current=prepared;
-              switchDiagnostic('catalog-ready',{entries:prepared.entries.length});
               startTransition(()=>{const latest=workspaceRef.current!;if(prepared.sources!==latest.siteSources&&writable.current)persist({...latest,siteSources:prepared.sources});setEntries(nextEntries);});
               break;
             }catch(error){if(controller.signal.aborted)return;if(error instanceof CardPreparationContextChanged)continue;throw error;}
