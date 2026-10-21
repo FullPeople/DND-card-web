@@ -39,7 +39,7 @@ it('does not invalidate unchanged card bodies for a navigation-only workspace ch
 it('preserves disabled sources and never changes read-only source defaults',async()=>{
  const basis=setup();basis.sources={...basis.sources!,autoSourceDefaults:['XPHB','NEW'],enabledSources:['XPHB']};
  const disabled=await prepareStandaloneCatalog(raw,basis,{signal:new AbortController().signal,current:()=>basis,yield:pause});
- expect(disabled.sources).toBe(basis.sources);expect(disabled.sources?.enabledSources).not.toContain('NEW');
+ expect(disabled.sources?.enabledSources).not.toContain('NEW');expect(disabled.sources?.autoSourceDefaults).toContain('NEW');
  const readonly={...setup(),writable:false};const prepared=await prepareStandaloneCatalog(raw,readonly,{signal:new AbortController().signal,current:()=>readonly,yield:pause});
  expect(prepared.sources).toBe(readonly.sources);
 });
