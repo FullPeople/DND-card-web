@@ -14,7 +14,7 @@ class Events{
 }
 let win:Events,doc:Events,cleanup:void|(()=>void),narrow=true;
 beforeEach(()=>{hooks.effects=[];hooks.ref=undefined;narrow=true;win=new Events();doc=new Events();vi.stubGlobal('window',win);vi.stubGlobal('document',doc);vi.stubGlobal('Element',TestElement);vi.stubGlobal('matchMedia',()=>({matches:narrow}));});
-afterEach(()=>{cleanup?.();cleanup=undefined;vi.unstubAllGlobals();});
+afterEach(()=>{cleanup?.();cleanup=undefined;vi.restoreAllMocks();vi.unstubAllGlobals();});
 function mount(tab='wiki',visible=true){const change=vi.fn();useNarrowWikiDrag(tab,change,visible);cleanup=hooks.effects[0]();return change;}
 function start(wiki=true){win.emit('card-drag-start',{detail:{source:new TestElement(wiki?['.wiki-pane']:[])}});}
 function navigate(mobile=true){doc.emit('click',{target:new TestElement(mobile?['.mobile-tabs button']:[])});}
@@ -39,4 +39,11 @@ it('uses the current callback after a render, without adding listeners',()=>{
 });
 it('removes the pending return and all navigation listeners on unmount',()=>{
  const change=mount();start();cleanup?.();cleanup=undefined;expect(win.count()).toBe(0);expect(doc.count()).toBe(0);win.emit('card-drag-end');expect(change.mock.calls).toEqual([['sheet']]);
+});
+it('does no navigation lookup on normal clicks before or after a drag landing',()=>{
+ mount();const closest=vi.spyOn(TestElement.prototype,'closest');navigate(false);expect(closest).not.toHaveBeenCalled();
+ start();expect(doc.count()).toBe(1);win.emit('card-drag-end');closest.mockClear();navigate(false);expect(closest).not.toHaveBeenCalled();expect(doc.count()).toBe(0);closest.mockRestore();
+});
+it('releases the click listener immediately after an explicit page decision',()=>{
+ mount();expect(doc.count()).toBe(0);start();expect(doc.count()).toBe(1);navigate();expect(doc.count()).toBe(0);win.emit('card-drag-end');expect(doc.count()).toBe(0);
 });
