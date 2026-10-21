@@ -20,6 +20,7 @@ import {removeSelection} from '../core/sheet';
 import {SheetCell} from './SheetCell';
 import {DropZone} from './DragEntry';
 import {SheetEditContext} from './SheetEdit';
+import {useSheetCaptureActive} from './sheetDisplay';
 import {Reference,ReferenceContext} from './Reference';
 import {pointerDrag} from './pointerDrag';
 import {type PageProps} from './CharacterPages';
@@ -31,7 +32,7 @@ type Target={kind:'cantrip'|'ordinary'|'source';owner?:string;index?:number};
 const error=(detail:string)=>window.dispatchEvent(new CustomEvent('workbench-error',{detail}));
 
 export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:PageProps&{readOnly?:boolean}){
- const editing=useContext(SheetEditContext),preview=useContext(ReferenceContext),settings=spellState(c);
+ const editing=useContext(SheetEditContext),preview=useContext(ReferenceContext),settings=spellState(c),capturing=useSheetCaptureActive();
  const spells=useMemo(()=>spellLibrary(c,entries),[c,entries]),groups=cantripGroups(c),profiles=casterProfiles(c);
  const sourceIssues=useMemo(()=>planSourceSpells(c,entries).issues,[c,entries]);
  const [focused,setFocused]=useState<Target>(),[menu,setMenu]=useState<{row:Selection;target?:Target;x:number;y:number}>(),[detail,setDetail]=useState<string>(),[classFilter,setClassFilter]=useState('');
@@ -42,7 +43,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
  const special=spells.filter(s=>settings.special?.[s.id]);
  const selectedClass=profiles.find(p=>p.owner.id===classFilter);
  const showLibrary=profiles.some(hasKnownLibrary)||!profiles.length||settings.modeOverride&&settings.mode==='prepared'||profiles.some(p=>p.mode==='prepared'&&p.pool==='learned');
- const library=spells.filter(s=>!settings.special?.[s.id]&&(!selectedClass||spellOnClassList(s.entry,selectedClass)||!s.entry.raw._spellClasses&&!s.entry.raw.classes));
+ const library=spells.filter(s=>!settings.special?.[s.id]&&(!selectedClass||spellOnClassList(s.entry,selectedClass)||!s.entry.raw._spellClasses&&!s.entry.raw.classes)&&(!capturing||c.selections.some(record=>record.id===s.id)));
  const knownActive=knownActiveSpells(c);
  const sourceOwner=(s:Selection)=>settings.special?.[s.id]?.sourceGrant?.ownerId||settings.special?.[s.id]?.manualSource?.ownerId||'manual';
  const sourceGroups=[...new Set([...special.map(sourceOwner),...Object.keys({...settings.sourceCantripCapacities,...settings.sourceCapacityAdjustments}).filter(id=>id==='manual'||giftSources.some(s=>s.id===id))])].map(owner=>({owner,name:c.selections.find(s=>s.id===owner)?.entry.name||(owner==='manual'?'手动添加':'已移除的来源'),rows:special.filter(s=>sourceOwner(s)===owner)}));
