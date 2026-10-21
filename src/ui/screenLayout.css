@@ -16,6 +16,7 @@
 .sheet-viewport.screen-mode .page-number{display:none}
 .sheet-viewport.screen-mode .sheet-cell{height:auto;min-height:0;flex:none}
 .sheet-viewport.screen-mode .paper.has-card-art .sheet-cell .cell-face{position:relative;inset:auto;min-height:0;flex:none;width:100%;height:auto}
+.sheet-viewport.screen-mode .paper.has-card-art .feature-panel .choice-inline>.cell-face{position:absolute;inset:0;height:100%}
 .sheet-viewport.screen-mode .paper.has-card-art .portrait-cell .cell-face{height:100%;flex:1}
 .sheet-viewport.screen-mode .cell-heading{min-height:23px;padding:1px 5px}
 .sheet-viewport.screen-mode .cell-heading h3{font-size:14px;line-height:20px;letter-spacing:0;overflow-wrap:anywhere}
