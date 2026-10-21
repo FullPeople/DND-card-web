@@ -85,3 +85,4 @@
 .paper.sheet-export .spell-stock-cell .spell-stock-tile.stock-item{height:auto;min-height:28px;grid-template-columns:minmax(0,1fr);padding:4px 5px;gap:0}
 .paper.sheet-export .spell-stock-tile.stock-item .stock-name{padding-left:0;line-height:14px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
 .paper.sheet-export .book-ritual-row>.feature-caption{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.spell-export-overflow>h5{margin:1px 4px;font-size:9px;font-weight:400;line-height:13px;color:var(--paper-ink,#555)}
