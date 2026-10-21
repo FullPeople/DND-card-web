@@ -10,3 +10,9 @@ export function rememberSheetSpellScroll(){
   positions.forEach((position,index)=>{const node=nodes[index];if(node&&node.closest('.sheet-cell')?.getAttribute('aria-label')===position.label){node.scrollTop=position.top;node.scrollLeft=position.left;}});
  };
 }
+
+export async function withSheetSpellScroll<T>(capture:()=>Promise<T>):Promise<T>{
+ const restore=rememberSheetSpellScroll();
+ try{return await capture();}
+ finally{await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));restore();}
+}

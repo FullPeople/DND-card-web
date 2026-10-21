@@ -1,5 +1,5 @@
 import {afterEach,expect,it,vi} from 'vitest';
-import {rememberSheetSpellScroll} from '../src/platform/sheetSpellScroll';
+import {rememberSheetSpellScroll,withSheetSpellScroll} from '../src/platform/sheetSpellScroll';
 
 afterEach(()=>vi.unstubAllGlobals());
 function setup(){
@@ -22,4 +22,10 @@ it.each(['card','page','disconnected'] as const)('does not restore into a change
 it('does not put a known-list position into a different section after the layout changes',()=>{
  const {paper,cell}=setup(),restore=rememberSheetSpellScroll();paper.nodes=[cell('known',0),cell('prepared',0)];
  restore();expect(paper.nodes.map(node=>node.scrollTop)).toEqual([0,0]);
+});
+it('waits for the restored editing layout even when export fails, then preserves the original error',async()=>{
+ const {paper}=setup();let frames=0;
+ vi.stubGlobal('requestAnimationFrame',(callback:FrameRequestCallback)=>{queueMicrotask(()=>{frames++;callback(0);});return 1;});
+ await expect(withSheetSpellScroll(async()=>{paper.nodes[1].scrollTop=205;throw Error('image-failed');})).rejects.toThrow('image-failed');
+ expect(frames).toBe(2);expect(paper.nodes[1].scrollTop).toBe(268);
 });
