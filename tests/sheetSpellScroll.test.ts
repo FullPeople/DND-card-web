@@ -4,7 +4,7 @@ import {rememberSheetSpellScroll} from '../src/platform/sheetSpellScroll';
 afterEach(()=>vi.unstubAllGlobals());
 function setup(){
  const cell=(label:string,top:number)=>({scrollTop:top,scrollLeft:7,closest:()=>({getAttribute:()=>label})});
- const paper={isConnected:true,dataset:{characterId:'original'},page:'spells',nodes:[cell('prepared',0),cell('known',268)],getAttribute:()=>paper.page,querySelectorAll:()=>paper.nodes};
+ const paper={isConnected:true,dataset:{characterId:'original'},page:'spells',nodes:[cell('prepared',0),cell('known',268)],getAttribute(){return this.page;},querySelectorAll(){return this.nodes;}};
  let current=paper;vi.stubGlobal('document',{querySelector:()=>current});
  return {paper,cell,replace:(next:typeof paper)=>{current=next;}};
 }
