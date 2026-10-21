@@ -40,6 +40,7 @@ import {reconciledCardView} from '../platform/cardViewReconciliation';
 import {settledSnapshotCheck} from '../platform/settledSnapshotCheck';
 import {readViewMemo,useReadViewMemo} from './useReadViewMemo';
 import {workspaceNavigationWriter} from '../platform/workspaceNavigationWriter';
+import {rememberSheetSpellScroll} from '../platform/sheetSpellScroll';
 import {saveWorkspaceSelection} from '../platform/storage';
 import {cloudFeaturesEnabled} from '../cloud/availability';
 import {ToolBoundary} from './ToolBoundary';
@@ -1024,11 +1025,12 @@ export default function App() {
     if(inWorkbench&&wb.target?.kind!=='character')throw Error('请先打开需要导出的五页人物角色卡');
     if(exportInProgress.current)throw Error('上一项导出尚未完成');
     exportInProgress.current=true;
+    const restoreScroll=rememberSheetSpellScroll();
     const original={page:sheetPage,editing,workbenchPage,tab,id:workspaceRef.current?.activeId};
     const result:{page:SheetPage;blob:Blob}[]=[];
     const settle=()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
     try{setExportView(options);setEditing(false);setWorkbenchPage('sheet');setTab('sheet');for(const page of (['主要','特性','背景','法术','背包'] as SheetPage[]).filter(p=>pages.includes(p))){setSheetPage(page);await settle();if(workspaceRef.current?.activeId!==original.id)throw Error('角色已切换，已停止导出');result.push({page,blob:await (await import('../platform/sheetImage')).captureSheet(options)});}return result;}
-    finally{exportInProgress.current=false;setExportView(undefined);setSheetPage(original.page);setEditing(original.editing);setWorkbenchPage(original.workbenchPage);setTab(original.tab);}
+    finally{setExportView(undefined);setSheetPage(original.page);setEditing(original.editing);setWorkbenchPage(original.workbenchPage);setTab(original.tab);await settle();restoreScroll();exportInProgress.current=false;}
   }
   async function importFile(mode: string, file?: File, text?: string) {
     setImportError('');
