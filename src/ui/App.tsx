@@ -1,3 +1,4 @@
+import {switchDiagnostic} from '../platform/localSwitchDiagnostics';
 import './loadingPanel.css';
 import './interactionP1.css';
 import {QuickStart} from './QuickStart';
@@ -482,6 +483,7 @@ export default function App() {
   useEffect(()=>{const open=(event:Event)=>{if(!confirmResourceDraftDiscard())return;setEditingResource((event as CustomEvent).detail);setModal('resources');};window.addEventListener('edit-character-resource',open);return()=>window.removeEventListener('edit-character-resource',open);},[]);
 
   function persist(next: Workspace) {
+    switchDiagnostic('persist',{navigation:next.characters===workspaceRef.current?.characters});
     if(qqRoom&&!roomState()?.write){setNotice('卡主已锁定或房间连接已失效，本机草稿保留。');return;}
     // A cloud card whose rights were revoked (or that belongs to another account)
     // stays readable, but its content must not change locally either: the next
@@ -621,7 +623,7 @@ export default function App() {
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e));
-        if(performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
+        if(performance.now()-lastPublish>500){lastPublish=performance.now();switchDiagnostic('catalog-publish',{entries:catalogRef.current.size});startTransition(()=>setEntries([...catalogRef.current.values()]));}
       }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
       if(!controller.signal.aborted)startTransition(()=>setEntries([...catalogRef.current.values()]));
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
