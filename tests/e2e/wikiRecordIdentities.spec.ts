@@ -22,7 +22,7 @@ for(const width of [1440,390]){
   await expect(chooser.getByRole('button')).toHaveCount(3);await expect(page.locator('.entry-detail')).toHaveCount(0);
   await expect(chooser.getByRole('button').first()).toBeVisible();await page.screenshot({path:test.info().outputPath(`definition-chooser-${width}.png`)});
   await chooser.getByRole('button',{name:/原创乙专长/}).click();await expect(page.locator('.entry-detail')).toContainText('乙定义的原创正文。');
-  const url=page.url();expect(new URL(url).searchParams.get('definition')).toBeTruthy();
+  const url=page.url();expect(new URL(url).searchParams.get('definition')).toBeTruthy();await page.context().grantPermissions(['clipboard-read','clipboard-write']);await page.getByRole('button',{name:'复制链接',exact:true}).click();expect(await page.evaluate(()=>navigator.clipboard.readText())).toBe(url);
   await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
   await page.reload();await expect(page.locator('.entry-detail')).toContainText('乙定义的原创正文。');expect(page.url()).toBe(url);
   await expect(page.locator('.catalog-status')).toContainText('份缓存');
