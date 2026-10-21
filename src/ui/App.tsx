@@ -35,6 +35,7 @@ import {workbenchDerived} from '../platform/workbenchDerivation';
 import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
 import {snapshotMemo} from '../platform/snapshotMemo';
 import {standaloneCardViews,prepareStandaloneCards,yieldCardPreparation,CardPreparationContextChanged,type StandaloneCardViews} from '../platform/standaloneCardViews';
+import {reconciledCardView} from '../platform/cardViewReconciliation';
 import {settledSnapshotCheck} from '../platform/settledSnapshotCheck';
 import {readViewMemo,useReadViewMemo} from './useReadViewMemo';
 import {workspaceNavigationWriter} from '../platform/workspaceNavigationWriter';
@@ -299,9 +300,9 @@ export default function App() {
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
   const rememberView=useMemo(()=>snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
-  const localCardViews=useMemo(()=>localCloudViews?standaloneCardViews(allEntries,workspace?.siteSources,activePacks,rememberView):undefined,[localCloudViews,rememberView]);
-  const currentCardViews=useRef<StandaloneCardViews|undefined>(undefined);currentCardViews.current=localCardViews;
   const checkReconciliation=useMemo(()=>settledSnapshotCheck(localCloudViews),[rememberView]);
+  const localCardViews=useMemo(()=>localCloudViews?standaloneCardViews(allEntries,workspace?.siteSources,activePacks,rememberView,checkReconciliation):undefined,[localCloudViews,rememberView,checkReconciliation]);
+  const currentCardViews=useRef<StandaloneCardViews|undefined>(undefined);currentCardViews.current=localCardViews;
   const localProfile=useMemo(()=>storedCharacter?rememberView('profile',storedCharacter.profile,()=>withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile):undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks,rememberView]);
   const buildView=useMemo(()=>{
     if(!storedBuild)return;
@@ -387,14 +388,6 @@ export default function App() {
   const importPreparation=useRef<AbortController|undefined>(undefined);
   const [cardPreparation,setCardPreparation]=useState<{completed:number;total:number}>();
   useEffect(()=>()=>{importPreparation.current?.abort();},[]);
-  useEffect(()=>{
-    if(!localCardViews||!workspace||loading)return;
-    const controller=new AbortController();
-    void prepareStandaloneCards(workspace.characters,localCardViews,{signal:controller.signal,current:()=>currentCardViews.current===localCardViews,yield:()=>yieldCardPreparation(controller.signal,true)}).catch(error=>{
-      if(!controller.signal.aborted&&!(error instanceof CardPreparationContextChanged))console.warn('Local card preparation failed',error);
-    });
-    return()=>controller.abort();
-  },[localCardViews,workspace?.characters,loading]);
   const [reviewTarget,setReviewTarget]=useState<Character>();
   const [exportView,setExportView]=useState<SheetCaptureOptions>();
   const exportInProgress=useRef(false);
@@ -402,6 +395,20 @@ export default function App() {
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
+  useEffect(()=>{
+    if(!localCardViews||!workspace||loading)return;
+    const controller=new AbortController();
+    void (async()=>{
+      await prepareStandaloneCards(workspace.characters,localCardViews,{signal:controller.signal,current:()=>currentCardViews.current===localCardViews,yield:()=>yieldCardPreparation(controller.signal,true)});
+      if(automationRuntime)for(const card of workspace.characters){
+        if(localCardViews.reconciliationReady(card))continue;
+        await yieldCardPreparation(controller.signal,true);
+        if(currentCardViews.current!==localCardViews)throw new CardPreparationContextChanged();
+        localCardViews.warmReconciliation(card,automationRuntime.syncSourceSpells);
+      }
+    })().catch(error=>{if(!controller.signal.aborted&&!(error instanceof CardPreparationContextChanged))console.warn('Local card preparation failed',error);});
+    return()=>controller.abort();
+  },[localCardViews,workspace?.characters,loading,automationRuntime]);
   const pendingRuntimeEdits=useRef<{id:string;target:string|undefined;action:Parameters<Edit>[0];key?:Parameters<Edit>[1]}[]>([]);
   const [runtimeInteractionRequested,setRuntimeInteractionRequested]=useState(false);
   const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
@@ -819,12 +826,9 @@ export default function App() {
   useEffect(() => {
     if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench) return;
     checkReconciliation(reconciliation!,()=>{
-    const draft = structuredClone(c);
-    const castingChanged=hydrateImportedCasting(draft,allEntries);
-    const featuresChanged=syncFeatures(draft, allEntries,undefined,catalogNames),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=automationRuntime.syncSourceSpells(draft,allEntries);
-    const changed=featuresChanged || resourcesChanged || castingChanged || sourceSpellsChanged;
-    if (changed) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
-    return changed;
+    const draft=reconciledCardView(c,allEntries,catalogNames,automationRuntime.syncSourceSpells);
+    if (draft) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
+    return !!draft;
     });
   }, [reconciliation, allEntries,automationRuntime,checkReconciliation]);
   function undo(redo=false){void travelHistory(redo);}
@@ -948,9 +952,9 @@ export default function App() {
           batch.completed=index+1;
         }
       }else{
-        await prepareImportedCards(cards);
+        const prepared=await prepareImportedCards(cards);
         await queue.current;
-        const w=workspaceRef.current!,next={...w,characters:[...w.characters,...cards],activeId:cards[0].id};
+        const w=workspaceRef.current!,next={...w,characters:[...w.characters,...prepared],activeId:prepared[0].id};
         const operation=persist(next);if(!operation)throw Error('当前标签页不可写，角色尚未导入');
         try{await operation;}catch(error){if(workspaceRef.current===next){workspaceRef.current=w;setWorkspace(w);}throw error;}
         batch.completed=cards.length;
@@ -977,7 +981,7 @@ export default function App() {
     if(batchBusy||batchUncertain)return;setBatchBusy(true);setImportError('');let completed=0;
     try{
       if(inWorkbench){for(const row of pendingBatch){await createRemoteCard(row.card,false);completed++;}}
-      else{const cards=pendingBatch.map(r=>r.card);await prepareImportedCards(cards);const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,...cards]}))throw Error('当前标签页不可写，角色尚未导入');completed=pendingBatch.length;}
+      else{const cards=await prepareImportedCards(pendingBatch.map(r=>r.card));const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,...cards]}))throw Error('当前标签页不可写，角色尚未导入');completed=pendingBatch.length;}
       setPendingBatch([]);setModal('characters');setNotice(`已导入 ${completed} 张角色卡。`);
     }catch(e){setPendingBatch(rows=>rows.slice(completed));if((e as {uncertain?:boolean}).uncertain)setBatchUncertain(true);setImportError(`已确认导入 ${completed} 张，剩余已停止：${String(e)}${(e as {uncertain?:boolean}).uncertain?' 请先在角色簿核对本次结果，不能重复提交。':''}`);}
     finally{setBatchBusy(false);}
@@ -1056,21 +1060,39 @@ export default function App() {
   }
   async function finishImport(character:Character){
     initializeAutomation(character);ignoreUnfilledSheetChoices(character,allEntries);recordReviewedRoots(character);
-    if(inWorkbench)await createRemoteCard(character);else{await prepareImportedCards([character]);const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,character],activeId:character.id}))throw Error('当前标签页不可写，角色尚未导入');setModal('export');}
+    if(inWorkbench)await createRemoteCard(character);else{const [prepared]=await prepareImportedCards([character]);const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,prepared],activeId:prepared.id}))throw Error('当前标签页不可写，角色尚未导入');setModal('export');}
     setPendingImport(undefined);setNotice(inWorkbench?'角色已导入枭熊角色簿。':'角色已作为新副本导入。');
   }
   async function prepareImportedCards(cards:Character[]){
-    if(!currentCardViews.current)return;
+    if(!currentCardViews.current)return cards;
     if(importPreparation.current)throw Error('正在准备角色卡，请等待当前导入完成');
     const controller=new AbortController();importPreparation.current=controller;
     try{
+      const runtime=automationRuntime||await import('../core/automation/cardRuntime');
       for(;;){
-        const views=currentCardViews.current;
+        const views:StandaloneCardViews|undefined=currentCardViews.current;
         if(!views)throw Error('角色卡页面已关闭，尚未导入');
-        try{await prepareStandaloneCards(cards,views,{signal:controller.signal,current:()=>currentCardViews.current===views,progress:(completed,total)=>setCardPreparation({completed,total})});break;}
+        try{
+          const prepared:Character[]=[];
+          for(const card of cards){
+            setCardPreparation({completed:prepared.length,total:cards.length});
+            let next=card;
+            for(let pass=0;;pass++){
+              await yieldCardPreparation(controller.signal);
+              if(currentCardViews.current!==views)throw new CardPreparationContextChanged();
+              const draft=views.reconcile(next,runtime.syncSourceSpells);
+              if(!draft)break;
+              if(pass>=7)throw Error('角色资料核对尚未稳定，已停止导入，请保留备份后重试');
+              draft.revision=next.revision+1;draft.updatedAt=new Date().toISOString();next=draft;
+            }
+            prepared.push(next);
+          }
+          await prepareStandaloneCards(prepared,views,{signal:controller.signal,current:()=>currentCardViews.current===views,progress:(completed,total)=>setCardPreparation({completed,total})});
+          if(!writable.current)throw Error('当前标签页已变为只读，角色尚未导入');
+          return prepared;
+        }
         catch(error){if(!(error instanceof CardPreparationContextChanged))throw error;}
       }
-      if(!writable.current)throw Error('当前标签页已变为只读，角色尚未导入');
     }finally{if(importPreparation.current===controller)importPreparation.current=undefined;setCardPreparation(undefined);}
   }
   async function createRemoteCard(card:Character,select=true,initialize=true){

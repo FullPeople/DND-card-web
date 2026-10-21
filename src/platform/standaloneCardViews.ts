@@ -8,11 +8,16 @@ import {evaluate} from '../core/engine';
 import {cardMigrationIssues} from '../core/cardMigrationIssues';
 import {acknowledgedView} from './choiceReview';
 import type {snapshotMemo} from './snapshotMemo';
+import {settledSnapshotCheck} from './settledSnapshotCheck';
+import {entryNameIndex} from '../core/entryNameIndex';
+import {reconciledCardView} from './cardViewReconciliation';
 
 /** One rule/source context; shared by visible cards and import preparation.
  * Views are disposable. Preparing them must never save or mutate a character. */
-export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefined,packs:RulePack[],remember:ReturnType<typeof snapshotMemo>){
+export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefined,packs:RulePack[],remember:ReturnType<typeof snapshotMemo>,checkReconciliation=settledSnapshotCheck(true)){
  const ready=new WeakSet<Character>();
+ const reconciliationReady=new WeakSet<Character>();
+ let names:ReturnType<typeof entryNameIndex>|undefined;
  const build=(character:Character):Character=>{
   const base=runtimeCharacterBase(character);
   return remember('build',base,()=>{
@@ -29,7 +34,20 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
   const view=build(character);
   return character===runtimeCharacterBase(character)?view:{...view,runtime:character.runtime,spellSettings:character.spellSettings,revision:character.revision,updatedAt:character.updatedAt};
  });
- return {build,display,ready:(card:Character)=>ready.has(card),
+ const reconcile=(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
+  let draft:Character|undefined;
+  checkReconciliation(runtimeCharacterBase(card),()=>{
+   names??=entryNameIndex(entries);
+   draft=reconciledCardView(display(card),entries,names,syncSourceSpells);return !!draft;
+  });
+  return draft;
+ };
+ return {build,display,ready:(card:Character)=>ready.has(card),reconcile,
+  reconciliationReady:(card:Character)=>reconciliationReady.has(card),
+  warmReconciliation:(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
+   if(reconciliationReady.has(card))return;
+   reconcile(card,syncSourceSpells);reconciliationReady.add(card);
+  },
   steps:(card:Character)=>[
    ()=>{build(card);display(card);},
    ()=>remember('choices',build(card),()=>sheetChoices(build(card),entries)),

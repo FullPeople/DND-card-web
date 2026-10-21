@@ -1,6 +1,8 @@
 import {expect,it,vi} from 'vitest';
 import {newCharacter,type Character,type Entry} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
+import {syncSourceSpells} from '../src/core/automation/sourceSpells';
+import {settledSnapshotCheck} from '../src/platform/settledSnapshotCheck';
 import {sheetChoices} from '../src/core/automation/choices';
 import {evaluate} from '../src/core/engine';
 import {cardMigrationIssues} from '../src/core/cardMigrationIssues';
@@ -79,4 +81,23 @@ it('cancels a scheduled preparation without leaving a pending idle or timer task
   const controller=new AbortController(),pending=yieldCardPreparation(controller.signal);controller.abort();
   await expect(pending).rejects.toMatchObject({name:'AbortError'});expect(vi.getTimerCount()).toBe(0);
  }finally{vi.useRealTimers();}
+});
+
+it('completes the real first-open reconciliation during preparation, then skips that same completed check on selection',()=>{
+ const c=card(),check=settledSnapshotCheck(true),views=standaloneCardViews(entries,undefined,[],snapshotMemo(),check),original=JSON.stringify(c);
+ const sync=vi.fn(syncSourceSpells);
+ expect(views.reconcile(c,sync)).toBeUndefined();expect(sync).toHaveBeenCalledTimes(1);
+ const firstOpen=vi.fn(()=>false);expect(check(c,firstOpen)).toBe(false);expect(firstOpen).not.toHaveBeenCalled();
+ expect(JSON.stringify(c)).toBe(original);
+ const edited={...c,runtime:{...c.runtime,hp:4}};views.reconcile(edited,sync);expect(sync).toHaveBeenCalledTimes(2);
+});
+
+it('never treats a changed or failed reconciliation as settled and preserves spent manual resources',()=>{
+ const c=card();c.runtime.resources.manual={current:1,max:3};
+ const check=settledSnapshotCheck(true),views=standaloneCardViews(entries,undefined,[],snapshotMemo(),check),original=JSON.stringify(c);
+ const changed=vi.fn((draft:Character)=>{draft.runtime.hp=2;return true;});
+ const draft=views.reconcile(c,changed)!;expect(draft.runtime.hp).toBe(2);expect(draft.runtime.resources.manual.current).toBe(1);
+ views.reconcile(c,changed);expect(changed).toHaveBeenCalledTimes(2);
+ expect(()=>views.reconcile(c,()=>{throw Error('source failure');})).toThrow('source failure');
+ views.reconcile(c,changed);expect(changed).toHaveBeenCalledTimes(3);expect(JSON.stringify(c)).toBe(original);
 });
