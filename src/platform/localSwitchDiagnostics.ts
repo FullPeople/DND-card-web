@@ -1,5 +1,6 @@
 const events:unknown[]=[];
 export function switchDiagnostic(kind:string,detail:Record<string,unknown>={}){
+ if(typeof document==='undefined')return;
  events.push({at:Math.round(performance.now()),kind,...detail});
  if(events.length>1000)events.shift();
  document.documentElement.dataset.switchDiagnostics=JSON.stringify(events);

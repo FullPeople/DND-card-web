@@ -1,3 +1,4 @@
+import {cardCatalogEntries,prepareStandaloneCatalog,sameCatalogBasis,type CatalogBasis,type PreparedStandaloneCatalog} from '../platform/standaloneCatalogPublication';
 import {switchDiagnostic} from '../platform/localSwitchDiagnostics';
 import './loadingPanel.css';
 import './interactionP1.css';
@@ -151,7 +152,6 @@ import { download,saveRecovery,loadRecoveries, loadWorkspace,hasRoomDraft,archiv
 import { ContentBoundary, Entries } from './Entries';
 import { EntryFacts } from './EntryFacts';
 import { AdjustedValue, SheetEditContext } from './SheetEdit';
-import { SIZE_ENTRIES } from '../data/sizes';
 import { EntryBadges } from './EntryBadges';
 import { SheetCell } from './SheetCell';
 import { FeaturePanel } from './FeaturePanel';
@@ -275,6 +275,7 @@ export default function App() {
   useEffect(()=>{const handler=(event:Event)=>{const receipt=(event as CustomEvent).detail;if(receipt.uncertain)return;let changed=false;for(const [id,pending] of workbenchUncertain.current){if(pending.requestId!==receipt.requestId)continue;const remote=receipt.result?.snapshot?.document?.dnd_card_web;if(receipt.ok&&(!remote||!confirmedChanges(pending.before,pending.after,remote)))continue;workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);if(receipt.ok)workbenchFailed.current.delete(id);changed=true;}if(changed){appliedWorkbench.current='';setHistoryTick(n=>n+1);}};window.addEventListener('workbench-operation-result',handler);return()=>window.removeEventListener('workbench-operation-result',handler);},[]);
   const actionHistory=useActionHistory();
   const [entries, setEntries] = useState<Entry[]>([]);
+  const preparedCatalog=useRef<PreparedStandaloneCatalog|undefined>(undefined);
   const sourceDisplay=useSources();
   const bookNames=useMemo(()=>Object.fromEntries(Object.entries(sourceDisplay.registry).map(([id,m])=>[id,m.name])),[sourceDisplay.registry]);
   const catalogRef = useRef(new Map<string, Entry>());
@@ -296,13 +297,15 @@ export default function App() {
   const localSources=!inWorkbench&&!qqRoom;
   const storedCharacter=workspace?.characters.find(x=>x.id===workspace.activeId);
   const storedBuild=storedCharacter&&runtimeCharacterBase(storedCharacter);
-  const allEntries = useMemo<Entry[]>(() => [...SIZE_ENTRIES, ...entries, ...activePacks.flatMap(p=>p.entries.map(entry=>({...entry,raw:{...entry.raw,_customPack:true}}))), ...(canAuthor?customEntries:[])].filter(e=>monstersVisible||e.kind!=='monster'), [entries, activePacks,monstersVisible,canAuthor,customEntries]);
+  const catalogBasis:CatalogBasis={characters:workspace?.characters||[],sources:workspace?.siteSources,packs:activePacks,custom:customEntries,author:canAuthor,monsters:monstersVisible,writable:writable.current};
+  const currentCatalogBasis=useRef(catalogBasis);currentCatalogBasis.current=catalogBasis;
+  const allEntries = useMemo<Entry[]>(() => {const prepared=preparedCatalog.current;return prepared?.raw===entries&&prepared.basis.packs===activePacks&&prepared.basis.custom===customEntries&&prepared.basis.author===canAuthor&&prepared.basis.monsters===monstersVisible?prepared.entries:cardCatalogEntries(entries,catalogBasis);}, [entries, activePacks,monstersVisible,canAuthor,customEntries]);
   const catalogNames=useMemo(()=>entryNameIndex(allEntries),[allEntries]);
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
-  const rememberView=useMemo(()=>snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
-  const checkReconciliation=useMemo(()=>settledSnapshotCheck(localCloudViews),[rememberView]);
-  const localCardViews=useMemo(()=>localCloudViews?standaloneCardViews(allEntries,workspace?.siteSources,activePacks,rememberView,checkReconciliation):undefined,[localCloudViews,rememberView,checkReconciliation]);
+  const rememberView=useMemo(()=>localCloudViews&&preparedCatalog.current?.entries===allEntries&&preparedCatalog.current.sources===workspace?.siteSources?preparedCatalog.current.remember:snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
+  const checkReconciliation=useMemo(()=>preparedCatalog.current?.remember===rememberView?preparedCatalog.current.check:settledSnapshotCheck(localCloudViews),[rememberView]);
+  const localCardViews=useMemo(()=>localCloudViews?(preparedCatalog.current?.remember===rememberView?preparedCatalog.current.views:standaloneCardViews(allEntries,workspace?.siteSources,activePacks,rememberView,checkReconciliation)):undefined,[localCloudViews,rememberView,checkReconciliation]);
   const currentCardViews=useRef<StandaloneCardViews|undefined>(undefined);currentCardViews.current=localCardViews;
   const localProfile=useMemo(()=>storedCharacter?rememberView('profile',storedCharacter.profile,()=>withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile):undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks,rememberView]);
   const buildView=useMemo(()=>{
@@ -396,8 +399,9 @@ export default function App() {
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
+  const currentAutomationRuntime=useRef(automationRuntime);currentAutomationRuntime.current=automationRuntime;
   useEffect(()=>{
-    if(!localCardViews||!workspace||loading)return;
+    if(!localCardViews||!workspace)return;
     const controller=new AbortController();
     void (async()=>{
       await prepareStandaloneCards(workspace.characters,localCardViews,{signal:controller.signal,current:()=>currentCardViews.current===localCardViews,yield:()=>yieldCardPreparation(controller.signal,true)});
@@ -623,9 +627,27 @@ export default function App() {
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e));
-        if(performance.now()-lastPublish>500){lastPublish=performance.now();switchDiagnostic('catalog-publish',{entries:catalogRef.current.size});startTransition(()=>setEntries([...catalogRef.current.values()]));}
+        if(!localCloudViews&&performance.now()-lastPublish>500){lastPublish=performance.now();switchDiagnostic('catalog-publish',{entries:catalogRef.current.size});startTransition(()=>setEntries([...catalogRef.current.values()]));}
       }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
-      if(!controller.signal.aborted)startTransition(()=>setEntries([...catalogRef.current.values()]));
+      if(!controller.signal.aborted){
+        const nextEntries=[...catalogRef.current.values()];
+        if(localCloudViews&&workspaceRef.current){
+          // Keep the displayed context reusable while the catalog streams. Publish
+          // only after every stored card has its next read context prepared.
+          for(;;){
+            const basis=currentCatalogBasis.current;
+            try{
+              const prepared=await prepareStandaloneCatalog(nextEntries,basis,{signal:controller.signal,current:()=>currentCatalogBasis.current,syncSourceSpells:currentAutomationRuntime.current?.syncSourceSpells});
+              if(controller.signal.aborted)return;
+              if(!sameCatalogBasis(basis,currentCatalogBasis.current))continue;
+              preparedCatalog.current=prepared;
+              switchDiagnostic('catalog-ready',{entries:prepared.entries.length});
+              startTransition(()=>{const latest=workspaceRef.current!;if(prepared.sources!==latest.siteSources&&writable.current)persist({...latest,siteSources:prepared.sources});setEntries(nextEntries);});
+              break;
+            }catch(error){if(controller.signal.aborted)return;if(error instanceof CardPreparationContextChanged)continue;throw error;}
+          }
+        }else startTransition(()=>setEntries(nextEntries));
+      }
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
     finally { if (!controller.signal.aborted) startTransition(()=>setLoading(false)); }
   }
@@ -826,13 +848,13 @@ export default function App() {
     try{await workbenchRequest('rules',{key:undefined,itemId:undefined,scopeKey:wb.shared.key,expected:wb.shared.revision,rules});return true;}catch(e){setNotice(String(e));return false;}finally{setRulesDraft(undefined);setRulesBusy(false);}
   }
   useEffect(() => {
-    if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench) return;
+    if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench || localCloudViews&&loading) return;
     checkReconciliation(reconciliation!,()=>{
     const draft=reconciledCardView(c,allEntries,catalogNames,automationRuntime.syncSourceSpells);
     if (draft) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
     return !!draft;
     });
-  }, [reconciliation, allEntries,automationRuntime,checkReconciliation]);
+  }, [reconciliation, allEntries,automationRuntime,checkReconciliation,loading]);
   function undo(redo=false){void travelHistory(redo);}
 
   useEffect(() => {
