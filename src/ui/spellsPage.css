@@ -63,3 +63,25 @@
 .prepared-spell-group>h4{flex-wrap:wrap}.spell-capacity-adjust{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:3px;width:auto!important;font-size:9px;font-weight:400;white-space:nowrap}.spell-capacity-adjust input{width:43px!important;min-width:0;flex:none!important;padding:1px 2px!important}
 .spell-library-level>summary{cursor:pointer;font-size:11px;line-height:18px;padding:2px 4px;background:#5551}.spell-library-level>summary small{font-weight:400;opacity:.65}
 .spell-overflow{font-size:10px;margin:3px 4px}.spell-overflow summary{cursor:pointer;color:#80601d}.spell-overflow ul{padding-left:12px}.spell-overflow li{display:flex;gap:8px;align-items:center}.spell-overflow button{font:inherit;padding:2px 4px}
+
+/* Export recorded spell names without changing the interactive sheet or saved quotas. */
+.paper.sheet-export .spell-source-notices,
+.paper.sheet-export .multiclass-spells>.segmented,
+.paper.sheet-export .spell-stock-meta,
+.paper.sheet-export .spell-ready-mark,
+.paper.sheet-export .spell-use-badge,
+.paper.sheet-export .spell-stock-empty,
+.paper.sheet-export .spell-grid-slot:has(.spell-stock-empty),
+.paper.sheet-export .prepared-spell-group>h4 small,
+.paper.sheet-export .spell-group-hint,
+.paper.sheet-export .book-ritual-source,
+.paper.sheet-export .book-ritual-cast{display:none}
+.paper.sheet-export .spell-stock-cell.unified-prepared{height:auto!important;max-height:none;flex:none}
+.paper.sheet-export .unified-prepared>.cell-face{position:relative;inset:auto}
+.paper.sheet-export .unified-prepared .cell-drop-surface{height:auto}
+.paper.sheet-export .unified-prepared .cell-content{flex:none;overflow:visible}
+.paper.sheet-export .prepared-spell-groups{gap:3px}
+.paper.sheet-export .spell-grants-grid.spell-stock-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.paper.sheet-export .spell-stock-cell .spell-stock-tile.stock-item{height:auto;min-height:28px;grid-template-columns:minmax(0,1fr);padding:4px 5px;gap:0}
+.paper.sheet-export .spell-stock-tile.stock-item .stock-name{padding-left:0;line-height:14px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.paper.sheet-export .book-ritual-row>.feature-caption{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
