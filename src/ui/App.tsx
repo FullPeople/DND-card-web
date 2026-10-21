@@ -34,6 +34,7 @@ import {applyRuntimeCharacterEdit,runtimeCharacterBase} from '../core/runtimeCha
 import {workbenchDerived} from '../platform/workbenchDerivation';
 import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
 import {snapshotMemo} from '../platform/snapshotMemo';
+import {standaloneCardViews,prepareStandaloneCards,yieldCardPreparation,CardPreparationContextChanged,type StandaloneCardViews} from '../platform/standaloneCardViews';
 import {settledSnapshotCheck} from '../platform/settledSnapshotCheck';
 import {readViewMemo,useReadViewMemo} from './useReadViewMemo';
 import {workspaceNavigationWriter} from '../platform/workspaceNavigationWriter';
@@ -298,10 +299,13 @@ export default function App() {
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
   const rememberView=useMemo(()=>snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
+  const localCardViews=useMemo(()=>localCloudViews?standaloneCardViews(allEntries,workspace?.siteSources,activePacks,rememberView):undefined,[localCloudViews,rememberView]);
+  const currentCardViews=useRef<StandaloneCardViews|undefined>(undefined);currentCardViews.current=localCardViews;
   const checkReconciliation=useMemo(()=>settledSnapshotCheck(localCloudViews),[rememberView]);
   const localProfile=useMemo(()=>storedCharacter?rememberView('profile',storedCharacter.profile,()=>withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile):undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks,rememberView]);
   const buildView=useMemo(()=>{
     if(!storedBuild)return;
+    if(localCardViews)return localCardViews.build(storedCharacter!);
     return rememberView('build',storedBuild,()=>{
     const effective=inWorkbench&&wb.shared?{...storedBuild,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources&&workspace?.siteSources?{...storedBuild,profile:localProfile!,rulePacks:activePacks}:storedBuild;
     // Reading an old card must not create competing network writes. Casting
@@ -313,7 +317,7 @@ export default function App() {
     if(inWorkbench&&effective.selections.some(s=>s.entry.packId==='imported'&&s.entry.kind==='class'&&!s.entry.raw._castingSource)){const view=structuredClone(effective);const hydrated=hydrateImportedCasting(view,allEntries),initialized=initializeAutomation(view);if(hydrated||initialized){syncAutoResources(view);return reviewed(view);}}
     if(automationNeedsInitialization(effective)){const autoView=structuredClone(effective);if(initializeAutomation(autoView)){syncAutoResources(autoView);return reviewed(autoView);}}return reviewed(effective);
     });
-  },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries,rememberView]);
+  },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries,rememberView,localCardViews]);
   // Explicit runtime forks share their construction review; retain the latest balances.
   const c=useMemo(()=>!storedCharacter||!buildView?undefined:rememberView('display',storedCharacter,()=>storedCharacter===storedBuild?buildView:{...buildView,runtime:storedCharacter.runtime,spellSettings:storedCharacter.spellSettings,revision:storedCharacter.revision,updatedAt:storedCharacter.updatedAt}),[storedCharacter,storedBuild,buildView,rememberView]);
   const buildChoices=useMemo(()=>buildView?rememberView('choices',buildView,()=>sheetChoices(buildView,allEntries)):[],[buildView,allEntries,rememberView]);
@@ -380,6 +384,17 @@ export default function App() {
   function stageExcel(batch:ExcelBatch|undefined){excelBatchRef.current=batch;setExcelImport(batch);}
   const [batchBusy,setBatchBusy]=useState(false);
   const [batchUncertain,setBatchUncertain]=useState(false);
+  const importPreparation=useRef<AbortController|undefined>(undefined);
+  const [cardPreparation,setCardPreparation]=useState<{completed:number;total:number}>();
+  useEffect(()=>()=>{importPreparation.current?.abort();},[]);
+  useEffect(()=>{
+    if(!localCardViews||!workspace||loading)return;
+    const controller=new AbortController();
+    void prepareStandaloneCards(workspace.characters,localCardViews,{signal:controller.signal,current:()=>currentCardViews.current===localCardViews,yield:()=>yieldCardPreparation(controller.signal,true)}).catch(error=>{
+      if(!controller.signal.aborted&&!(error instanceof CardPreparationContextChanged))console.warn('Local card preparation failed',error);
+    });
+    return()=>controller.abort();
+  },[localCardViews,workspace?.characters,loading]);
   const [reviewTarget,setReviewTarget]=useState<Character>();
   const [exportView,setExportView]=useState<SheetCaptureOptions>();
   const exportInProgress=useRef(false);
@@ -933,6 +948,7 @@ export default function App() {
           batch.completed=index+1;
         }
       }else{
+        await prepareImportedCards(cards);
         await queue.current;
         const w=workspaceRef.current!,next={...w,characters:[...w.characters,...cards],activeId:cards[0].id};
         const operation=persist(next);if(!operation)throw Error('当前标签页不可写，角色尚未导入');
@@ -961,7 +977,7 @@ export default function App() {
     if(batchBusy||batchUncertain)return;setBatchBusy(true);setImportError('');let completed=0;
     try{
       if(inWorkbench){for(const row of pendingBatch){await createRemoteCard(row.card,false);completed++;}}
-      else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,...pendingBatch.map(r=>r.card)]});completed=pendingBatch.length;}
+      else{const cards=pendingBatch.map(r=>r.card);await prepareImportedCards(cards);const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,...cards]}))throw Error('当前标签页不可写，角色尚未导入');completed=pendingBatch.length;}
       setPendingBatch([]);setModal('characters');setNotice(`已导入 ${completed} 张角色卡。`);
     }catch(e){setPendingBatch(rows=>rows.slice(completed));if((e as {uncertain?:boolean}).uncertain)setBatchUncertain(true);setImportError(`已确认导入 ${completed} 张，剩余已停止：${String(e)}${(e as {uncertain?:boolean}).uncertain?' 请先在角色簿核对本次结果，不能重复提交。':''}`);}
     finally{setBatchBusy(false);}
@@ -1040,8 +1056,22 @@ export default function App() {
   }
   async function finishImport(character:Character){
     initializeAutomation(character);ignoreUnfilledSheetChoices(character,allEntries);recordReviewedRoots(character);
-    if(inWorkbench)await createRemoteCard(character);else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,character],activeId:character.id});setModal('export');}
+    if(inWorkbench)await createRemoteCard(character);else{await prepareImportedCards([character]);const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,character],activeId:character.id}))throw Error('当前标签页不可写，角色尚未导入');setModal('export');}
     setPendingImport(undefined);setNotice(inWorkbench?'角色已导入枭熊角色簿。':'角色已作为新副本导入。');
+  }
+  async function prepareImportedCards(cards:Character[]){
+    if(!currentCardViews.current)return;
+    if(importPreparation.current)throw Error('正在准备角色卡，请等待当前导入完成');
+    const controller=new AbortController();importPreparation.current=controller;
+    try{
+      for(;;){
+        const views=currentCardViews.current;
+        if(!views)throw Error('角色卡页面已关闭，尚未导入');
+        try{await prepareStandaloneCards(cards,views,{signal:controller.signal,current:()=>currentCardViews.current===views,progress:(completed,total)=>setCardPreparation({completed,total})});break;}
+        catch(error){if(!(error instanceof CardPreparationContextChanged))throw error;}
+      }
+      if(!writable.current)throw Error('当前标签页已变为只读，角色尚未导入');
+    }finally{if(importPreparation.current===controller)importPreparation.current=undefined;setCardPreparation(undefined);}
   }
   async function createRemoteCard(card:Character,select=true,initialize=true){
     if(initialize)initializeAutomation(card);
@@ -1131,9 +1161,10 @@ export default function App() {
     </main>
       <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)} disabledReason={readOnlyReason||(inWorkbench?wb.online?'卡主未授予当前玩家编辑这张卡的权限。':'房间连接尚未恢复，暂时无法修改角色卡配色。':undefined)}/>
     {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<ToolBoundary label="公告" close={()=>setAnnouncement(false)}><Suspense fallback={<AnnouncementLoading mode={inWorkbench?'suite':'standalone'}/>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense></ToolBoundary>}{notice&&<Toast message={notice} action={/^已填入/.test(notice)&&actionHistory.undo&&!readOnly?{label:'撤销最近修改',run:()=>{undo();setNotice('');}}:!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
-    {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
+    {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!importPreparation.current&&!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
       <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<PanelLoading label="正在加载面板…"/>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}
+      {cardPreparation&&<div role="status" className="card-import-preparation"><p>正在准备角色卡 {cardPreparation.completed} / {cardPreparation.total}，完成后即可切换。</p><button onClick={()=>importPreparation.current?.abort()}>取消准备</button></div>}
       {modal === 'adjust' && <><ArmorAdjustmentReview c={c} edit={edit}/><p className="muted">以下其他数值在特殊规则尚未适配时可填写最终值与原因，持续保留到手动撤回，并列入审卡。</p><div className="adjust-form"><label>数值<select aria-label="人工修正目标" value={adjustTarget} onChange={e => setAdjustTarget(e.target.value)}>{[['hp', '生命值上限'], ['speed', '速度'], ['initiative', '先攻'], ['passive', '被动察觉'], ...Object.entries(SKILLS).map(([key, s]) => [`skill:${key}`, `${s.name}检定`]), ...ABILITIES.map(a => [`save:${a}`, `${ABILITY_LABELS[a]}豁免`])].map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label><label>最终值<NumberInput aria-label="人工修正数值" type="number" min="-9999" max="9999" value={adjustValue} onChange={e => setAdjustValue(clamp(e.target.value, -9999, 9999))}/></label><label className="full-width">原因<input aria-label="人工修正原因" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="例如：DM 允许的生命值修正，或尚未适配的专长"/></label><button disabled={!adjustReason.trim()} onClick={() => { edit(draft => { draft.adjustments = [...(draft.adjustments || []).filter(a => a.target !== adjustTarget), { id: uid(), target: adjustTarget, value: adjustValue, reason: adjustReason.trim() }]; }); setAdjustReason(''); }}>记录修正</button></div>{(c.adjustments || []).filter(a=>a.target!=='ac').map(a => <div className="pack-row" key={a.id}><span><strong>{a.target} → {a.value}</strong><small>{a.reason}</small></span><button onClick={() => edit(draft => { draft.adjustments = draft.adjustments?.filter(x => x.id !== a.id); })}>撤回</button></div>)}<details className="calculation-trace"><summary>展开计算依据</summary>{Object.entries(d.trace).map(([key, items]) => <p key={key}><strong>{choiceLabel(key)}</strong>：{items.join('；')}</p>)}</details></>}
       {modal==='classSync'&&<CardMigration key={c.id} c={c} entries={allEntries} loading={loading} readOnly={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} save={saveClassCopy} busy={classSyncBusy} setBusy={setClassSyncBusy}/>}
       {modal==='excelImportChoice'&&excelImport&&<section className="excel-import-choice"><h3>是否同步为 5etools 资料？</h3><p>已读取 {excelImport.cards.length} 张角色，其中 {excelImport.excelIds.length} 张来自 Excel。确认后直接核对并同步，每份 Excel 只导入一张对应的角色卡。</p><ul>{excelImport.cards.filter(card=>excelImport.excelIds.includes(card.id)).map(card=><li key={card.id}><strong>{card.name}</strong> · {card.edition}</li>)}</ul><p>取消同步则按 Excel 原内容导入，作为普通自定义卡使用。</p><div className="dialog-actions"><button className="primary" disabled={excelImportBusy||excelImport.uncertain||excelImport.completed>0} onClick={()=>setModal('excelImportSync')}>同步 5etools 资料</button><button disabled={excelImportBusy||excelImport.uncertain} onClick={()=>void commitExcel(excelBatchRef.current!).catch(error=>setImportError(String(error)))}>{excelImportBusy?'正在导入…':'取消同步，导入自定义卡'}</button></div>{excelImport.uncertain&&<p role="alert">保存结果尚未确认，请先核对枭熊角色簿，避免重复导入。</p>}</section>}
@@ -1142,7 +1173,7 @@ export default function App() {
       {modal === 'quickbar' && <QuickbarManager c={c} edit={edit}/>}
       {modal === 'resources' && (editingResource?<ResourceModuleEditor key={editingResource} c={c} id={editingResource} edit={edit} close={()=>setModal('')} disabled={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} gm={inWorkbench?wb.role==='GM':localGm()}/>:<ResourceDashboard onSave={saveDashboard} c={c} d={d} edit={edit} inspect={inspect} viewport={resourceViewport} disabled={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} gm={inWorkbench?wb.role==='GM':localGm()}/>)}
       {modal==='syncReview'&&<section><p>{workbenchUncertain.current.has(c.id)?'上一项修改尚未得到确认。本地修改已备份，核对期间不会重放未确认的操作。':'本地修改已有恢复备份，可重新读取枭熊保存的结果。'}</p><div className="dialog-actions"><button disabled={!wb.online} onClick={()=>void workbenchRequest('refreshCard',{itemId:wb.target?.targetId||(wb.target?.cardId?`card:${wb.target.cardId}`:wb.target?.itemId),key:undefined}).then(()=>setNotice('已重新读取枭熊数据。')).catch(e=>{setSyncDiagnostic(diagnosticText(e));setNotice(String(e));})}>重新核对保存结果</button><button onClick={()=>download(`${fileName(c.name)}-本地恢复.json`,exportCharacter(c))}>导出本地修改</button><CopyDiagnostic text={syncDiagnostic||diagnosticText({connection:workbenchDiagnostics()})}/></div></section>}
-      {modal==='importReview'&&pendingImport&&<section><h3>{pendingImport.card.name}</h3>{pendingImport.review.editionMismatch&&<p>导入角色使用 {pendingImport.card.edition}，当前规则使用 {c.edition}。{pendingImport.review.editionChanged?'房间规则将用于计算此角色。':'导入后保留该角色自己的规则版本。'}</p>}{pendingImport.review.totalLevel!==pendingImport.review.effectiveLevel&&<p role="alert">原卡总等级 {pendingImport.review.totalLevel}，当前启用来源下的计算等级 {pendingImport.review.effectiveLevel}。职业与等级记录会保留。</p>}{pendingImport.review.disabled.length>0&&<><p>以下 {pendingImport.review.disabled.length} 项在当前规则或资料来源中未启用，保留条目但暂停效果：</p><ul className="import-conflicts">{pendingImport.review.disabled.map(s=><li key={s.id}>{s.entry.name} · <SourceName id={s.entry.source}/></li>)}</ul></>}<div className="dialog-actions"><button disabled={creatingCard} onClick={()=>void finishImport(pendingImport.card).catch(e=>setImportError(String(e)))}>保留全部记录并导入</button><button onClick={()=>{setPendingImport(undefined);setModal('export');}}>取消导入</button></div></section>}
+      {modal==='importReview'&&pendingImport&&<section><h3>{pendingImport.card.name}</h3>{pendingImport.review.editionMismatch&&<p>导入角色使用 {pendingImport.card.edition}，当前规则使用 {c.edition}。{pendingImport.review.editionChanged?'房间规则将用于计算此角色。':'导入后保留该角色自己的规则版本。'}</p>}{pendingImport.review.totalLevel!==pendingImport.review.effectiveLevel&&<p role="alert">原卡总等级 {pendingImport.review.totalLevel}，当前启用来源下的计算等级 {pendingImport.review.effectiveLevel}。职业与等级记录会保留。</p>}{pendingImport.review.disabled.length>0&&<><p>以下 {pendingImport.review.disabled.length} 项在当前规则或资料来源中未启用，保留条目但暂停效果：</p><ul className="import-conflicts">{pendingImport.review.disabled.map(s=><li key={s.id}>{s.entry.name} · <SourceName id={s.entry.source}/></li>)}</ul></>}<div className="dialog-actions"><button disabled={creatingCard||!!cardPreparation} onClick={()=>void finishImport(pendingImport.card).catch(e=>setImportError(String(e)))}>保留全部记录并导入</button><button disabled={!!cardPreparation} onClick={()=>{setPendingImport(undefined);setModal('export');}}>取消导入</button></div></section>}
       {modal==='personal' &&editing&&<PersonalEntries c={c} edit={edit}/>}
       {modal==='spellAbility'&&<SpellAbilityEditor c={c} edit={edit}/>}
       {modal==='hp'&&editing&&<HitPointEditor c={c} edit={edit}/>}
@@ -1156,7 +1187,7 @@ export default function App() {
         <SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/>
 
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
-      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={!!qqRoom||loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} importFiles={importFiles} capture={capturePages} disabled={!!qqRoom||readOnly||inWorkbench&&!wb.online||importFilesBusy} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>本机恢复</h3><input className="file-input" disabled={!!qqRoom||importFilesBusy} data-testid="character-file" type="file" accept=".json,.xlsx" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button disabled={!!qqRoom} onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup,true);history.current.clear();setNotice('已读取上一次保存，尚未保存。继续编辑或重试编辑加载时将保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
+      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={!!qqRoom||loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} importFiles={importFiles} capture={capturePages} disabled={!!qqRoom||readOnly||inWorkbench&&!wb.online||importFilesBusy||!!cardPreparation} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>本机恢复</h3><input className="file-input" disabled={!!qqRoom||importFilesBusy||!!cardPreparation} data-testid="character-file" type="file" accept=".json,.xlsx" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button disabled={!!qqRoom} onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup,true);history.current.clear();setNotice('已读取上一次保存，尚未保存。继续编辑或重试编辑加载时将保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
 
       </Suspense></ToolBoundary>
     </Dialog>}
