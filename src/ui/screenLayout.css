@@ -21,6 +21,7 @@
 .sheet-viewport.screen-mode .cell-heading{min-height:23px;padding:1px 5px}
 .sheet-viewport.screen-mode .cell-heading h3{font-size:14px;line-height:20px;letter-spacing:0;overflow-wrap:anywhere}
 .sheet-viewport.screen-mode .cell-content{flex:none;overflow:visible;padding:4px 6px;font-size:14px;line-height:1.45}
+.sheet-viewport.screen-mode .overview-choice-overlay .cell-content{flex:1;min-height:0;overflow:auto}
 .sheet-viewport.screen-mode .cell-drop-surface{height:auto;flex:none}
 .sheet-viewport.screen-mode .cell-fill{font-size:13px!important;line-height:20px;padding:2px 0!important}
 .sheet-viewport.screen-mode .paper input,.sheet-viewport.screen-mode .paper textarea,.sheet-viewport.screen-mode .paper select{font-size:14px}
