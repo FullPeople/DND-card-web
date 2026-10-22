@@ -75,6 +75,7 @@ jobs:
               npx playwright test --config playwright.tooltip-wheel.config.ts
               npx playwright test --config playwright.compact-choices.config.ts
               npx playwright test --config playwright.feature-motion.config.ts
+              npx playwright test --config playwright.catalog-progress.config.ts
               node tools/buildProductionFrontends.mjs
               npx playwright test --config playwright.surface-motion-app.config.ts
               node node_modules/typescript/bin/tsc -p switch-lab/tsconfig.json

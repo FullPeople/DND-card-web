@@ -169,6 +169,8 @@ const SourceSettings=sourceSettingsPanel.Component;
 const RoomRulesSummary=roomRulesPanel.Component;
 import {confirmedChanges} from '../core/syncRecovery';
 import { SourceName, useSources } from './SourceName';
+import {catalogProgressStore} from './catalogProgress';
+import {CatalogLoadStatus} from './CatalogLoadStatus';
 import { KeywordPreview } from './KeywordPreview';
 import { Reference } from './Reference';
 
@@ -280,7 +282,7 @@ export default function App() {
   const sourceDisplay=useSources();
   const bookNames=useMemo(()=>Object.fromEntries(Object.entries(sourceDisplay.registry).map(([id,m])=>[id,m.name])),[sourceDisplay.registry]);
   const catalogRef = useRef(new Map<string, Entry>());
-  const [progress, setProgress] = useState(emptyProgress);
+  const [progressStore] = useState(()=>catalogProgressStore(emptyProgress));
   const [loading, setLoading] = useState(true);
   const loadController = useRef<AbortController | undefined>(undefined);
   const [rulesDraft,setRulesDraft]=useState<{key:string;rules:SharedRules}>();
@@ -623,13 +625,13 @@ export default function App() {
   },[]);
   async function load(refresh = false,retryKeys:readonly string[] = []) {
     loadController.current?.abort(); const controller = new AbortController(); loadController.current = controller;
-    setLoading(true); setProgress(emptyProgress);
+    setLoading(true); progressStore.publish(emptyProgress);
     let lastPublish=0;
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
         batch.forEach(e => catalogRef.current.set(e.id, e));
         if(!localCloudViews&&performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
-      }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
+      }, progress=>{if(!controller.signal.aborted)progressStore.publish(progress);}, controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
       if(!controller.signal.aborted){
         const nextEntries=[...catalogRef.current.values()];
         if(localCloudViews&&workspaceRef.current){
@@ -1188,9 +1190,7 @@ export default function App() {
         <nav className="category-tabs" aria-label="资料分类">{Object.entries(LIBRARY_TABS).filter(([key])=>(key!=='custom'||canAuthor)&&(key!=='monster'||monstersVisible)&&(key!=='weaponMastery'||c.edition==='2024'||editionFilter==='2024'||editionFilter==='all')).map(([key, label]) => <button key={key} className={kind === key ? 'active' : ''} onClick={() => setKind(key as keyof typeof LIBRARY_TABS)}>{label}</button>)}</nav>
         {choiceScope?.wiki&&<div className="wiki-choice-notice"><span>选择{activeChoice!.label} · 拖拽加入左侧空格</span><button onClick={()=>setTab('sheet')}>查看选择</button><button onClick={closeChoice}>退出选择</button></div>}<div className="wiki-filters"><ClearableSearch className="category-search-control" label={`${LIBRARY_TABS[kind]}分类搜索`} clearLabel="清空分类搜索" placeholder={`搜索${LIBRARY_TABS[kind]}`} value={categoryQuery} change={query=>library.patch({query})}/><select aria-label="资料版本" value={editionFilter} onChange={e => setEditionFilter(e.target.value)}><option value="character">跟随角色 · {c.edition}</option><option value="2014">2014 规则</option><option value="2024">2024 规则</option><option value="all">所有版本</option></select><LibraryFilters tab={kind} entries={categoryEntries} filters={filters} change={filters => library.patch({ filters })} names={bookNames}/>
         </div>
-        <div className="catalog-status"><span>{loading || progress.paused ? `${progress.done}/${progress.total} 份资料${progress.paused?' · 已暂停':''}` : `${libraryEntries.length.toLocaleString()} 条资料`}{progress.cached > 0 ? ` · ${progress.cached} 份缓存` : ''}</span><span role={searchStatus?"status":undefined}>{searchStatus||`${filtered.length} 条符合筛选`}</span></div>
-        {progress.paused && <p className="load-paused" role="status">{progress.paused}尚有资料未读。</p>}
-        {(progress.failed.length > 0 || progress.paused) && <details className="load-errors"><summary>{progress.failed.length} 份资料读取异常 · 可重试</summary>{progress.failed.map((e, i) => <p key={i}>{e}</p>)}<button disabled={loading} onClick={() => load(false,progress.retry)}>重试加载</button></details>}
+        <CatalogLoadStatus store={progressStore} loading={loading} entryCount={libraryEntries.length} matchedCount={filtered.length} searchStatus={searchStatus} retry={keys=>{void load(false,keys);}}/>
         <div className={`library-body ${detail||kind==='custom' ? 'has-detail' : ''}`} data-library-tab={kind}><CatalogList entries={filtered} columns={columns} kind={kind} character={c} selected={detail} inspect={entry=>inspect(entry,true,kind)} sort={sort} descending={descending} onSort={key=>library.patch({sort:key,descending:sort===key?!descending:false})} resetKey={JSON.stringify([kind,filters,editionFilter,sort,descending,categoryQuery])} loading={loading} onSettings={()=>setModal('rules')} pulse={fillPulse}/>
         <WikiSplitter/><CustomCopyDrop enabled={canAuthor&&!rulesReadonly&&!readOnly} receive={newCustomEntry}>{kind==='custom'&&canAuthor&&<><CustomEntryEditor key={`${authoringKey}:${detail?.id||'new'}`} draft={customDraft} newEntry={()=>newCustomEntry()} entry={detail?.raw._workbenchCustom?detail:undefined} busy={rulesBusy||readOnly} save={entry=>changeCustom(entry)} remove={entry=>changeCustom(entry,true)}/></>}
         {detail && <article key={`${detail.kind}:${detail.id}`} className={`entry-detail ${explicitlyExcluded(c,detail)?'entry-disabled':''} ${library.hover?'is-sheet-preview':readingFlash?'sheet-preview-committed':''} ${library.focus?'has-reading-focus':''}`} data-described-entry={detail.id} data-entry-kind={detail.kind} ref={detailPane} onScroll={e => { if(!library.hover)library.savePosition(detail.id, e.currentTarget.scrollTop); }}><div className="detail-frozen"><div className="detail-navigation"><button disabled={!library.canGoBack} onClick={library.back}>← 上一条</button><WikiReaderBack close={()=>setDetail(undefined)}/></div><div className="detail-heading">{detail.kind==='monster'&&<MonsterPortrait entry={detail}/>}<EntryBadges entry={detail}/><span className="eyebrow">{KIND_LABELS[detail.kind]} · {entryEdition(detail) === 'both' ? '通用资料' : entryEdition(detail)}</span><h1><EntryDraggable className="detail-title" entry={detail} >{uiEntryLabel(detail,language)}{detail.english !== detail.name && <small className="english-name"> {language==='en'?detail.name:detail.english}</small>}</EntryDraggable></h1><small>{detail.raw._authoredBy ? `${detail.raw._authoredBy} · ` : ''}<SourceName id={detail.source}/>{detail.page ? ` · 第 ${detail.page} 页` : ''}</small></div>{detail.kind!=='monster'&&<EntryApplyAction key={`${c.id}:${detail.id}`} entry={detail} character={c} blocked={blocked} disabledReason={dragDisabledReason} editing={editing} editReady={!!automationRuntime} enableEditing={()=>setEditing(true)} apply={()=>add(detail)}/>}<ClassNavigation focus={library.focus} subclassesOpen={!!libraryState.subclassesOpen} onToggleSubclasses={()=>library.patch({subclassesOpen:!libraryState.subclassesOpen})} entry={detail} entries={libraryEntries} character={c} navigate={(entry,focus)=>library.navigate(entry,focus)}/></div>
