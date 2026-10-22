@@ -37,6 +37,19 @@ def validate_context(source, ci, baseline, version):
     return c.verify_ci(request, os.environ.get('GITHUB_TOKEN'))
 
 
+def check_private_frontend_profiles(root):
+    for target in c.TARGETS:
+        profile_path = root / 'dist-cloud' / target / 'cloud-profile.json'
+        c.require(profile_path.is_file() and not profile_path.is_symlink(), 'private-frontend-profile-missing')
+        profile = c.json_unique(profile_path.read_bytes())
+        c.require(profile.get('scope') == 'standalone-private-cloud-production'
+                  and profile.get('cloudFeaturesEnabled') is True
+                  and profile.get('accountLibrariesPrivate') is True
+                  and profile.get('originalStorageNamespaces') is True
+                  and profile.get('owlbearEnabled') is False
+                  and profile.get('apiBase') == '/api/', 'private-frontend-profile-invalid')
+
+
 def package(root, output, source, version, backend_version, qq_login='pending', cloud_mode='temporary-ip'):
     c.require(c.SHA.fullmatch(source) and c.VERSION.fullmatch(version), 'invalid-release-input')
     c.require(qq_login in ('pending', 'ready'), 'invalid-qq-login-policy')
@@ -46,6 +59,8 @@ def package(root, output, source, version, backend_version, qq_login='pending', 
     c.require(not subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], cwd=root, text=True).strip(),
               'tracked-source-dirty')
     c.require(not output.exists(), 'artifact-output-exists')
+    if cloud_mode == 'account-private':
+        check_private_frontend_profiles(root)
     output.mkdir(parents=True)
     candidate = output / 'frontends'
     candidate.mkdir()
