@@ -75,6 +75,8 @@ jobs:
               npx playwright test --config playwright.tooltip-wheel.config.ts
               npx playwright test --config playwright.compact-choices.config.ts
               npx playwright test --config playwright.feature-motion.config.ts
+              node tools/buildProductionFrontends.mjs
+              npx playwright test --config playwright.surface-motion-app.config.ts
               node node_modules/typescript/bin/tsc -p switch-lab/tsconfig.json
               npx vite build --config vite.switch-lab.config.ts
               npx playwright test --config playwright.switch-lab.config.ts
@@ -274,6 +276,7 @@ jobs:
             test-results/
             test-results-tooltip-wheel/
             test-results-compact-choices/
+            test-results-feature-motion/
             test-results-switch-lab/
             .local-evidence/card-fixes235/
             .local-evidence/direct232-browser/

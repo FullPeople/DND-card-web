@@ -21,7 +21,7 @@
 
 ## 证据与边界
 
-私有证据目录：`U:/CodexWork/2026-10-20/dnd-feedback-control/next-sources-20261022/live-browser/`。
+完整网络记录、截图和原始验证材料仅在本地保留。
 
 - `attempt-1.json`：五个真实 HTTPS GET 的 URL、状态、CORS 响应头、规范化身份、计数及异常。
 - `attempt-1.png`：本次浏览器实际结果页面，已查看。
