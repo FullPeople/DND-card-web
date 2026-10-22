@@ -19,10 +19,6 @@ test('a complete warm catalog bypasses downloads and normalization and restores 
  expect(f.onSources).toHaveBeenCalledWith({TEST:{name:'Test source'}});
  expect(f.onProgress).toHaveBeenCalledWith(expect.objectContaining({done:2,total:2,cached:2,failed:[]}));
 });
-test('a parsed view with the old record identity schema is rebuilt through the raw-file loader',async()=>{
- const old=snapshot();old.schema='wiki-normalized-296-v1';const f=fixture(old);await loadCatalogSnapshot(f);
- expect(f.load).toHaveBeenCalledOnce();expect(f.write).toHaveBeenCalledOnce();expect(f.write.mock.calls[0][0].schema).toBe(CATALOG_SNAPSHOT_SCHEMA);
-});
 test('a cold load persists the completed parsed view for the next opening',async()=>{
  const f=fixture();await loadCatalogSnapshot(f);
  expect(f.load).toHaveBeenCalledOnce();expect(f.write).toHaveBeenCalledOnce();

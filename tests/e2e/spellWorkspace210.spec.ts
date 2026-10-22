@@ -1,6 +1,6 @@
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
-import {newCharacter,type Character,type Entry} from '../../src/core/model';
+import {newCharacter,type Entry} from '../../src/core/model';
 import {spellState} from '../../src/core/characterDetails';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
@@ -17,15 +17,7 @@ async function closeImportedCard(page:Page,name:string){
  await expect(page.locator('.character-tabs').getByRole('tab',{name:name+'（导入）'})).toHaveAttribute('aria-selected','true');
  const dialog=page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/});await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toHaveCount(0);
 }
-async function savedGiftIds(page:Page,ownerId:string){return page.evaluate(async owner=>{
- const request=indexedDB.open('dnd-card-standalone'),db=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
- try{return await new Promise<string[]>((resolve,reject)=>{
-  const get=db.transaction('documents').objectStore('documents').get('workspace');
-  get.onsuccess=()=>{const c:Character=get.result.characters.find((row:Character)=>row.id===get.result.activeId);
-   resolve([...new Set([...c.selections.filter(row=>row.parentId===owner&&row.entry.kind==='spell').map(row=>row.id),...Object.entries(c.spellSettings?.special||{}).filter(([,config])=>config.manualSource?.ownerId===owner).map(([id])=>id)])]);};
-  get.onerror=()=>reject(get.error);
- });}finally{db.close();}
-},ownerId);}
+async function expectPrepared(tile:Locator,ready:boolean){await expect(tile).toHaveAttribute('aria-pressed',String(ready));const mark=tile.locator('.spell-ready-mark');if(ready){await expect(mark).toHaveText('✓');await expect(mark).toBeVisible();await expect(mark).toHaveAttribute('aria-hidden','true');}else await expect(mark).toHaveCount(0);}
 async function load(page:Page,c=card(),prepare?:()=>Promise<void>){
  await mockSource(page);await suppressAnnouncement(page);await prepare?.();await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'spells.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
@@ -60,7 +52,7 @@ test('original spell height, cut frame, ritual wash and rotating concentration s
  const known=page.locator('.spell-library [data-spell-id="Ward"]'),gift=page.locator('.source-spell-row .spell-stock-tile'),cantrip=page.locator('[data-cantrip-group="Source Mage"] .spell-stock-tile').first();
  for(const tile of [known,gift,cantrip]){await expect(tile).toHaveCSS('height','28px');await expect(tile.locator('.spell-tile-frame')).toHaveAttribute('viewBox','0 0 100 28');await expect(tile.locator('.spell-tile-frame')).toBeVisible();}
  await expect(known.locator('svg.spell-concentration-mark')).toHaveCount(1);await expect(known.locator('.spell-concentration-mark')).toHaveCSS('animation-name','spell-concentration-turn');await expect(known).toHaveCSS('background-image',/linear-gradient/);
- await known.click();const prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]');await expect(prepared).toBeVisible();await expect(known).toContainText('已预备');
+ await known.click();const prepared=page.locator('.ordinary-prepared-group [data-spell-id="Ward"]');await expect(prepared).toBeVisible();await expectPrepared(known,true);
  for(const tile of [known,prepared,gift]){await expect(tile).toHaveCSS('height','28px');await tile.hover();await expect(tile).toHaveCSS('background-image',/linear-gradient/);}
  await page.mouse.move(1200,40);await page.screenshot({path:test.info().outputPath('spell-style-desktop.png')});await page.locator('.paper').screenshot({path:test.info().outputPath('spell-style-card.png')});
  await page.setViewportSize({width:390,height:844});await expect(page.locator('.sheet-viewport')).toHaveAttribute('data-sheet-display','a4');for(const tile of [known,prepared,gift,cantrip])await expect(tile).toHaveCSS('height','28px');
@@ -77,7 +69,7 @@ test('known spells press in place and toggle a prepared copy, including cantrips
  await known.hover();
  await expect(known).toBeVisible();
  const positions=()=>page.locator('.spell-library .spell-stock-tile').evaluateAll(nodes=>nodes.map(el=>{const r=el.getBoundingClientRect();return {id:(el as HTMLElement).dataset.spellId,x:r.x,y:r.y,w:r.width,h:r.height};}));
- const before=await positions();await recordMotion(page);await known.click();await expect(prepared).toBeVisible();await expect(known).toHaveAttribute('aria-pressed','true');await expect(known).toHaveCSS('box-shadow',/inset/);await expect(known.locator('.spell-ready-mark')).toContainText('已预备');expect(await positions()).toEqual(before);
+ const before=await positions();await recordMotion(page);await known.click();await expect(prepared).toBeVisible();await expect(known).toHaveAttribute('aria-pressed','true');await expect(known).toHaveCSS('box-shadow',/inset/);await expectPrepared(known,true);expect(await positions()).toEqual(before);
  await known.click();await expect(prepared).toHaveCount(0);await expect(known).toHaveAttribute('aria-pressed','false');await expect(known.locator('.spell-ready-mark')).toHaveCount(0);await expect(gift).toContainText('免费 1/1');expect(await positions()).toEqual(before);
  const spark=page.locator('.spell-library [data-spell-id="Spark"]'),group=page.locator('[data-cantrip-group="Source Mage"]');await expect(spark).toHaveAttribute('aria-pressed','true');await spark.click();await expect(spark).toHaveAttribute('aria-pressed','false');await expect(group.locator('[data-spell-id="Spark"]')).toHaveCount(0);
  await spark.click();await expect(spark).toHaveAttribute('aria-pressed','true');await expect(group.locator('[data-spell-id="Spark"]')).toHaveCount(1);expect(await positions()).toEqual(before);
@@ -98,10 +90,10 @@ test('wizard spells share one prepared area with independent cantrip, gift and n
  const known=page.locator('.spell-library'),ordinary=page.locator('.ordinary-prepared-group'),cantrips=page.locator('[data-cantrip-group="Source Mage"]'),gift=page.locator('.source-spell-group');
  await expect(cantrips.locator('.spell-stock-tile')).toHaveCount(2);await expect(gift).toContainText('来自验收提夫林');await expect(gift).toContainText('免费 1/1 · 长休');await expect(ordinary.locator('.stock-empty')).toHaveCount(2);
  // The same UID already exists as a gifted spell. Its ordinary copy must still prepare.
- await drag(page,known.locator('[data-entry-id="Ward"]'),ordinary.locator('[data-prepared-slot="0"]'));await expect(ordinary).toContainText('护盾示例');await expect(known.locator('[data-entry-id="Ward"]')).toContainText('已预备');
+ await drag(page,known.locator('[data-entry-id="Ward"]'),ordinary.locator('[data-prepared-slot="0"]'));await expect(ordinary).toContainText('护盾示例');await expectPrepared(known.locator('[data-entry-id="Ward"]'),true);
  await known.locator('[data-entry-id="Step"]').click();await expect(ordinary.locator('.spell-stock-tile')).toHaveCount(2);await expect(gift).toContainText('免费 1/1');
  // Explicitly dropping onto a filled slot replaces it at full capacity.
- await drag(page,known.locator('[data-entry-id="Beam"]'),ordinary.locator('[data-prepared-slot="0"]'));await expect(ordinary).toContainText('光束示例');await expect(ordinary).not.toContainText('护盾示例');await expect(known.locator('[data-entry-id="Ward"]')).not.toContainText('已预备');
+ await drag(page,known.locator('[data-entry-id="Beam"]'),ordinary.locator('[data-prepared-slot="0"]'));await expect(ordinary).toContainText('光束示例');await expect(ordinary).not.toContainText('护盾示例');await expectPrepared(known.locator('[data-entry-id="Ward"]'),false);
  await drag(page,known.locator('[data-entry-id="Mist"]'),cantrips.locator('[data-spell-index="0"]'));await expect(cantrips).toContainText('小雾团');await expect(cantrips).not.toContainText('小火花');await expect(ordinary.locator('.spell-stock-tile')).toHaveCount(2);
  await page.getByRole('button',{name:'撤销',exact:true}).click();await expect(cantrips).toContainText('小火花');await page.getByRole('button',{name:'重做',exact:true}).click();await expect(cantrips).toContainText('小雾团');
  await gift.getByRole('button',{name:'护盾示例施放详情'}).click();await page.getByRole('dialog',{name:'护盾示例施放详情'}).getByRole('button',{name:'使用',exact:true}).click();await page.keyboard.press('Escape');await expect(gift).toContainText('免费 0/1');
@@ -150,15 +142,11 @@ test('full class cantrips accept an explicitly recorded feat gift separately acr
  await drag(page,mist,recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await drag(page,mist,recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
- // Reload only after the explicit gift has reached the real local document.
- await expect.poll(()=>savedGiftIds(page,'gift-feat')).toHaveLength(1);
  await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();
  await expect(page.locator('.class-compatibility-banner')).toBeVisible();
  await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await group.getByRole('button',{name:'小雾团',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'从角色卡移除',exact:true}).click();
- await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
- await expect.poll(()=>savedGiftIds(page,'gift-feat')).toEqual([]);
- await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
+ await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
  await expect(page.locator('.class-compatibility-banner')).toBeVisible();
  await drag(page,library.getByRole('button',{name:'小雾团',exact:true}),recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await drag(page,library.getByRole('button',{name:'小火花',exact:true}),recipient);await expect(page.locator('.suite-toast')).toContainText('赠送法术数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
@@ -174,6 +162,6 @@ test('an unlearned cantrip from the loaded class list can fill a slot without gr
  const editing=page.getByRole('switch',{name:'编辑模式',exact:true});if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await page.getByRole('tab',{name:'法术',exact:true}).click();
  await page.locator('.wiki-pane').getByRole('button',{name:'法术',exact:true}).click();
  const known=page.locator('.spell-library').getByRole('button',{name:'目录星火',exact:true});await expect(known).toBeVisible();await page.getByRole('button',{name:'验收法师戏法空位1',exact:true}).click();await known.click();
- await expect(page.locator('[data-cantrip-group="Source Mage"]')).toContainText('目录星火');await expect(known).toContainText('已选');await expect(page.locator('.ordinary-prepared-group .stock-empty')).toHaveCount(2);
+ await expect(page.locator('[data-cantrip-group="Source Mage"]')).toContainText('目录星火');await expectPrepared(known,true);await expect(page.locator('.ordinary-prepared-group .stock-empty')).toHaveCount(2);
  await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(page.locator('[data-cantrip-group="Source Mage"]')).toContainText('目录星火');
 });

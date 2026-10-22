@@ -54,8 +54,8 @@
 .spell-stock-cell .spell-choice.is-prepared{background-color:color-mix(in srgb,var(--paper-surface,#ededed) 82%,var(--paper-frame,#555));box-shadow:inset 0 2px 3px #0003,inset 0 -1px #fff7}
 /* Keep the original tile geometry and spell tier; the check shares the name row. */
 .spell-choice.is-prepared .stock-name{padding-left:11px}
-.spell-ready-mark{position:absolute;left:5px;top:50%;transform:translateY(-50%);font-size:0;line-height:1;color:var(--paper-ink,#444)}
-.spell-ready-mark:before{content:'✓';font-size:10px;font-weight:bold}.spell-stock-tile[data-restricted=true]{opacity:.6}
+.spell-ready-mark{position:absolute;left:5px;top:0;width:8px;height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;line-height:1;color:var(--paper-ink,#444)}
+.spell-stock-tile[data-restricted=true]{opacity:.6}
 .spell-detail-shade{position:fixed;inset:0;z-index:2147482650;background:#0005;display:grid;place-items:center;padding:16px}
 .spell-detail-dialog{width:min(380px,calc(100vw - 32px));max-height:80dvh;overflow:auto;background:#eee;color:#333;border:3px solid #555;padding:14px;font-size:13px;box-shadow:0 8px 30px #0004}
 .spell-detail-dialog header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #999;padding-bottom:7px;margin-bottom:8px}.spell-detail-dialog p{margin:7px 0;line-height:1.5}.spell-detail-dialog .source-spell-actions{font-size:13px;margin-top:12px;gap:8px}.spell-detail-dialog button,.spell-detail-dialog select{font-size:12px;padding:5px 8px}.spell-detail-dialog .special-spell-uses{font-size:12px}.spell-detail-dialog .manual-spell-actions{display:flex;gap:6px;margin-top:10px}
@@ -63,3 +63,26 @@
 .prepared-spell-group>h4{flex-wrap:wrap}.spell-capacity-adjust{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:3px;width:auto!important;font-size:9px;font-weight:400;white-space:nowrap}.spell-capacity-adjust input{width:43px!important;min-width:0;flex:none!important;padding:1px 2px!important}
 .spell-library-level>summary{cursor:pointer;font-size:11px;line-height:18px;padding:2px 4px;background:#5551}.spell-library-level>summary small{font-weight:400;opacity:.65}
 .spell-overflow{font-size:10px;margin:3px 4px}.spell-overflow summary{cursor:pointer;color:#80601d}.spell-overflow ul{padding-left:12px}.spell-overflow li{display:flex;gap:8px;align-items:center}.spell-overflow button{font:inherit;padding:2px 4px}
+
+/* Export recorded spell names without changing the interactive sheet or saved quotas. */
+.paper.sheet-export .spell-source-notices,
+.paper.sheet-export .multiclass-spells>.segmented,
+.paper.sheet-export .spell-stock-meta,
+.paper.sheet-export .spell-ready-mark,
+.paper.sheet-export .spell-use-badge,
+.paper.sheet-export .spell-stock-empty,
+.paper.sheet-export .spell-grid-slot:has(.spell-stock-empty),
+.paper.sheet-export .prepared-spell-group>h4 small,
+.paper.sheet-export .spell-group-hint,
+.paper.sheet-export .book-ritual-source,
+.paper.sheet-export .book-ritual-cast{display:none}
+.paper.sheet-export .spell-stock-cell.unified-prepared{height:auto!important;max-height:none;flex:none}
+.paper.sheet-export .unified-prepared>.cell-face{position:relative;inset:auto}
+.paper.sheet-export .unified-prepared .cell-drop-surface{height:auto}
+.paper.sheet-export .unified-prepared .cell-content{flex:none;overflow:visible}
+.paper.sheet-export .prepared-spell-groups{gap:3px}
+.paper.sheet-export .spell-grants-grid.spell-stock-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.paper.sheet-export .spell-stock-cell .spell-stock-tile.stock-item{height:auto;min-height:28px;grid-template-columns:minmax(0,1fr);padding:4px 5px;gap:0}
+.paper.sheet-export .spell-stock-tile.stock-item .stock-name{padding-left:0;line-height:14px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.paper.sheet-export .book-ritual-row>.feature-caption{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.spell-export-overflow>h5{margin:1px 4px;font-size:9px;font-weight:400;line-height:13px;color:var(--paper-ink,#555)}

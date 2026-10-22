@@ -6,13 +6,11 @@ import {automationEnabled} from './state';
 import {candidateReason} from '../engine';
 import {removeSelection} from '../sheet';
 import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbilities';
-import {featAbilityOptions} from './featAbilities';
 import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
-import {sourceClassChoices,sourceFeatFilterCategory,optionalAliasReceipt} from './sourceClassChoices';
+import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
 import type {ClassChoiceSupport} from './classChoiceSupport';
-import {invocationActivationChoices} from './invocationActivation';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
 export type SheetChoice={id:string;ownerId:string;grantLevel?:number;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntries?:Entry[];duplicateChoiceIds?:string[];hint?:string};
@@ -53,13 +51,6 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
    const options=backgroundAbilityOptions(row.entry).map(option=>({...option,entry:concept(row.entry,`abilities:${option.value}`,option.label,['背景属性分配记录；不会重复改写卡面的基础属性。'])}));
    push('abilities','背景属性',1,options,'abilities');
    const choice=out.at(-1);if(choice?.channel==='abilities')choice.hint=options.length?'保存背景声明的分配方案，不会再次叠加到已填写的基础属性。':'此背景属性结构尚未支持，原有记录保留；请查阅来源资料。';
-  }
-  const allocations=featAbilityOptions(row.entry);
-  if(allocations.length){
-   push('feat-abilities','属性提升（自动计算）',1,allocations.map(option=>({...option,entry:concept(row.entry,`feat-abilities:${option.value}`,option.label,[])})),'content');
-   out.at(-1)!.hint='确认后计入派生属性，最高 20。若旧卡基础属性已包含这次提升，请保留手工方式，不要重复确认；取消分配即可撤销自动加值。';
-   const choice=out.at(-1)!,saved=c.answers[choice.id];
-   if(saved?.length>1){choice.selected=[];choice.complete=false;choice.hint='此分配包含多个旧答案，原记录保留且不计入属性。请重新确认一个分配方案。';}
   }
   const first=c.selections.find(s=>s.entry.kind==='class');
   const start=row.entry.kind==='class'?(first?.id===row.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;
@@ -120,7 +111,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
  for(const choice of sourceChoices)if(choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&choice.selected.includes(archive.selections[0].entry.id)&&!c.selections.some(row=>row.requirementId===choice.id&&row.entry.id===archive.selections[0].entry.id))){
   choice.complete=false;choice.hint='原授予与子项记录已保留，关联恢复前不会生效；来源特性停用时请先恢复原来源。';
  }
- return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...invocationActivationChoices(c,known,sourceChoices),...classSpellChoices(c,catalog)];
+ return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...classSpellChoices(c,catalog)];
 }
 export function chooseSheetOption(c:Character,id:string,value:string,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id),option=choice?.options.find(o=>o.value===value);
@@ -128,9 +119,8 @@ export function chooseSheetOption(c:Character,id:string,value:string,catalog:Ent
  if(choice.channel==='tools'||choice.sourceProgression){
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
-  const linkedOptional=choice.sourceProgression==='optional'&&choice.duplicateChoiceIds?.length;
-  const saved=linkedOptional?choice.slots||choice.selected:c.answers[id]||[];
-  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];if(linkedOptional)rememberOptionalAliases(c,choice);resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
+  const saved=c.answers[id]||[];
+  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
   const index=choice.count===1?0:choice.slots!.findIndex((v,i)=>i<choice.count&&!v);
   if(index<0)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
   setSheetChoiceSlot(c,id,index,value,catalog);return;
@@ -197,11 +187,6 @@ function finishBuiltinChoices(c:Character,before:SheetChoice[],catalog:Entry[]){
  const after=sheetChoices(c,catalog),sources=new Set(before.filter(r=>!r.complete).map(r=>choiceSource(c,r)));
  for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>!sheetChoicePending(c,r))&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
 }
-function rememberOptionalAliases(c:Character,choice:SheetChoice){
- if(choice.sourceProgression!=='optional'||!choice.duplicateChoiceIds?.length)return;
- for(const alias of choice.duplicateChoiceIds)c.answers[optionalAliasReceipt(choice.id,alias)]=[...c.answers[alias]||[]];
- c.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries((choice.evidenceEntries||[]).map(entry=>[entry.id,structuredClone(entry)]))};
-}
 /** Slot edits validate and replace atomically, including already full choices. */
 export function setSheetChoiceSlot(c:Character,id:string,index:number,value:string|undefined,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id);
@@ -217,7 +202,7 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
   if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }
- rememberOptionalAliases(draft,choice);resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
+ resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
 }
 const classFeatRequirement=(id:string|undefined)=>!!id&&/:(?:class-feat|class-typed-feat):/.test(id);
 function parkClassChoiceGrant(c:Character,root:Selection){
@@ -234,17 +219,7 @@ function parkClassChoiceGrant(c:Character,root:Selection){
 export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
  if(!automationEnabled(c))return false;
  let changed=false;
- const sourceChoices=sheetChoices(c,catalog);
- for(const choice of sourceChoices.filter(choice=>choice.sourceProgression==='optional'&&choice.duplicateChoiceIds?.length)){
-  const aliases=choice.duplicateChoiceIds!,pending=aliases.filter(alias=>JSON.stringify(c.answers[optionalAliasReceipt(choice.id,alias)]||[])!==JSON.stringify(c.answers[alias]||[]));
-  // Keep the complete proof in the card, including directory candidates that
-  // are not selected, so reopening without a catalog preserves this link.
-  const evidence=choice.evidenceEntries||[];
-  const missing=evidence.filter(entry=>!c.classChoiceSnapshots?.[entry.id]);
-  if(missing.length){c.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries(missing.map(entry=>[entry.id,structuredClone(entry)]))};changed=true;}
-  if(pending.length){c.answers={...c.answers,[choice.id]:[...choice.slots||choice.selected],...Object.fromEntries(pending.map(alias=>[optionalAliasReceipt(choice.id,alias),[...c.answers[alias]||[]]]))};changed=true;}
- }
- const choices=sourceChoices.filter(choice=>choice.sourceProgression==='feat');
+ const choices=sheetChoices(c,catalog).filter(choice=>choice.sourceProgression==='feat');
  for(const choice of choices)if(choice.duplicateChoiceIds?.length){
   if(!Object.hasOwn(c.answers,choice.id)&&choice.slots?.some(Boolean)){c.answers={...c.answers,[choice.id]:[...choice.slots]};changed=true;}
   for(const row of c.selections)if(row.entry.kind==='feat'&&choice.duplicateChoiceIds.some(alias=>row.requirementId===alias&&row.grantKey===`choice:${alias}:${row.entry.id}`)){
@@ -285,11 +260,6 @@ export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
 export function syncChoiceContent(c:Character,catalog:Entry[]){
  if(!automationEnabled(c))return false;
  let changed=preserveClassChoiceGrants(c,catalog);const desired=new Map<string,{owner:string;entry:Entry;requirementId:string}>();
- // An old directory pick already granted a real tree. Keep that exact tree
- // and its resource identities; linking learning records grants nothing new.
- for(const choice of sheetChoices(c,catalog).filter(choice=>choice.sourceProgression==='optional'&&choice.duplicateChoiceIds?.length))for(const row of c.selections){
-  if(row.parentId&&choice.duplicateChoiceIds!.includes(row.requirementId||'')&&row.grantKey===`choice:${row.requirementId}:${row.entry.id}`)desired.set(row.grantKey,{owner:row.parentId,entry:row.entry,requirementId:row.requirementId!});
- }
  // Resolve newly granted nested options in bounded passes without inventing answers.
  for(let pass=0;pass<12;pass++){
   let added=false;

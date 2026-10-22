@@ -1,10 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 
-// Session refresh may still be reading its response when the logout UI appears.
-// Drain route handlers before Playwright disposes their request context.
-test.afterEach(async({page})=>{await page.unrouteAll({behavior:'wait'});});
-
 for(const count of [2,4,5,7])test(`previous and both edge transitions remain continuous with ${count} cards`,async({page,request,context})=>{
  const fixture=JSON.parse(readFileSync('evidence/cloud-fixture.json','utf8')),headers={Origin:'http://127.0.0.1:5320','X-CSRF-Token':fixture.ownerSession.csrf,Cookie:'dnd_cloud='+fixture.ownerSession.token},ids:string[]=[];
  for(let i=0;i<count;i++){const response=await request.post('/api/cards',{headers,data:{confirmUpload:true,character:{...fixture.card.character,id:crypto.randomUUID(),name:'动画连续性验收 '+i}}});expect(response.status()).toBe(201);ids.push((await response.json()).id);}

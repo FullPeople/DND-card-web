@@ -4,7 +4,9 @@ import {waitForRenderedSheet} from './sheetReady';
 export type SheetCaptureOptions={hidePortraits?:boolean;hideNotes?:boolean;hideConditions?:boolean;hideResources?:boolean};
 export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob> {
  const paper=document.querySelector<HTMLElement>('.paper');if(!paper)throw new Error('角色卡尚未显示');
- const release=beginSheetCapture(),identity=paper.dataset.characterId,page=paper.getAttribute('aria-labelledby');
+ const identity=paper.dataset.characterId,page=paper.getAttribute('aria-labelledby');
+ const scrollPositions=[...paper.querySelectorAll<HTMLElement>('.spell-stock-cell .cell-content')].map(node=>({node,top:node.scrollTop,left:node.scrollLeft}));
+ const release=beginSheetCapture();
  const restored:{node:HTMLElement;style:string|null}[]=[];
  try {
  await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
@@ -45,7 +47,7 @@ export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob
  const canvas=document.createElement('canvas');canvas.width=2480;canvas.height=3508;
  const context=canvas.getContext('2d');if(!context)throw new Error('无法创建 PNG 画布');context.drawImage(image,0,0,canvas.width,canvas.height);
  return await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG 生成失败')),'image/png'));
- }finally{for(const {node,style} of restored){if(style===null)node.removeAttribute('style');else node.setAttribute('style',style);}paper.classList.remove('sheet-export');release();await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));}
+ }finally{for(const {node,style} of restored){if(style===null)node.removeAttribute('style');else node.setAttribute('style',style);}paper.classList.remove('sheet-export');release();await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));if(paper.isConnected&&paper.dataset.characterId===identity&&paper.getAttribute('aria-labelledby')===page)for(const {node,top,left} of scrollPositions)if(node.isConnected&&paper.contains(node)){node.scrollTop=top;node.scrollLeft=left;}}
 }
 export function saveSheetPng(blob:Blob,name:string){downloadBlob(name,blob);}
 export function printSheetPng(url:string){

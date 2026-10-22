@@ -1,5 +1,4 @@
 import type {CardComponent,CardPalette} from './palette';
-import {legacyCatalogId} from './entryRecordIdentity';
 export type Edition = '2014' | '2024';
 export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule' | 'monster';
 export const KIND_LABELS: Record<Kind, string> = { class: '职业', subclass: '子职', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', feature: '特性', condition: '状态', rule: '规则', monster: '怪物' };
@@ -26,7 +25,7 @@ export interface Entry {
 }
 export interface SourceEquipmentReceipt { received:string[]; choices:Record<string,string>; itemIds:string[]; ownerIds:string[]; completed:boolean }
 export interface Selection { catalogReview?:{edition:Edition;entryId:string;source:string;kind:Kind}; id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; weaponAbility?:Ability; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
-export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;resourceName?:string;resourceCost?:number;canUseSlots?:boolean;target?:'self';ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check'|'resource';castLevel?:number}}
+export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;resourceName?:string;resourceCost?:number;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check'|'resource';castLevel?:number}}
 export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; classSpells?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface ClassPoolMetadata {entryId:string;label:string}
@@ -115,9 +114,8 @@ export function editionAllows(e:Entry,edition:Edition,legacy=false){const requir
 /** Saved sources keep their declared mechanics when the card edition changes.
  * Availability, dependencies and explicit opt-outs still govern their effects. */
 export function selectionEffectsAllowed(c: Character, e: Entry): boolean {
-  if (c.profile.disabledEntries?.some(id=>id===e.id||id===legacyCatalogId(e))) return false;
+  if (c.profile.disabledEntries?.includes(e.id)) return false;
   if (c.profile.exceptions[e.id]?.trim()) return true;
-  if(e.raw._catalogConflict)return false;
   // Unmapped external card records have no publisher source to enable. Keep
   // their manually supplied values until the player replaces the snapshot.
   if (e.source === 'IMPORTED' && e.packId === 'imported') return true;

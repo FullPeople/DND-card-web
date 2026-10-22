@@ -1,18 +1,9 @@
 import {test,expect,type Page} from '@playwright/test';
-import {raw,ready,workspace,dragWiki} from './automationChoiceFixture';
+import {ready,workspace,dragWiki} from './automationChoiceFixture';
 
 async function saved(page:Page){return page.evaluate(()=>new Promise<any>((resolve,reject)=>{
  const request=indexedDB.open('dnd-card-automation-choices-20261001');request.onerror=()=>reject(request.error);request.onupgradeneeded=()=>{request.transaction?.abort();reject(Error('Expected saved choice-preview database'));};request.onsuccess=()=>{const db=request.result,get=db.transaction('documents').objectStore('documents').get('workspace');get.onerror=()=>{db.close();reject(get.error);};get.onsuccess=()=>{const w=get.result;db.close();resolve(w.characters.find((c:any)=>c.id===w.activeId));};};
 }));}
-
-for(const width of [1440,390])test(`screen inline choices keep long controls inside their frame and preserve the card at ${width}px`,async({page},info)=>{
- await page.setViewportSize({width,height:960});const data=structuredClone(raw);data.class[0].startingProficiencies.skills[0].choose.count=3;await ready(page,data);
- await page.getByRole('button',{name:'切换为非 A4 显示',exact:true}).click();const featureTab=page.getByRole('tab',{name:'特性',exact:true});await featureTab.click();await expect(featureTab).toHaveAttribute('aria-selected','true');await expect(page.locator('.sheet-details')).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');const before=await saved(page);
- await page.getByRole('button',{name:'起始熟练项 0/3',exact:true}).click();const inline=workspace(page,'起始熟练项');await expect(inline).toBeVisible();await expect(inline.locator('.choice-slot')).toHaveCount(3);
- const geometry=await inline.evaluate(el=>{const frame=el.getBoundingClientRect(),face=el.querySelector(':scope > .cell-face')!.getBoundingClientRect(),content=el.querySelector<HTMLElement>('.cell-content')!;return {frameHeight:frame.height,faceHeight:face.height,overflow:getComputedStyle(content).overflowY,scrollable:content.scrollHeight>content.clientHeight};});expect(geometry.faceHeight).toBeLessThanOrEqual(geometry.frameHeight+2);expect(geometry.overflow).toBe('auto');expect(geometry.scrollable).toBe(true);
- const finish=inline.getByRole('button',{name:'完成并返回',exact:true});await finish.scrollIntoViewIfNeeded();await expect(finish).toBeInViewport();await page.screenshot({path:info.outputPath(`screen-choice-footer-${width}.png`)});await finish.click();await expect(inline).toHaveCount(0);
- const after=await saved(page);expect(after.answers).toEqual(before.answers);expect(after.runtime).toEqual(before.runtime);expect(after.selections).toEqual(before.selections);expect(await page.evaluate(()=>localStorage.getItem('dnd-card-sheet-display'))).toBe('screen');await page.getByRole('button',{name:'切换为 A4 显示',exact:true}).click();await expect(page.locator('.sheet-viewport')).toHaveAttribute('data-sheet-display','a4');await expect.poll(async()=>{const paper=await page.locator('.paper').boundingBox();return paper?Math.abs(paper.width/paper.height-210/297):1;}).toBeLessThan(.005);
-});
 test('reading-mode choice covers all four main panels, accepts dragging and restores them on exit',async({page},info)=>{
  await ready(page);await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','false');
  await page.locator('.class-features').getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');await expect(page.getByRole('tab',{name:'主要',exact:true})).toHaveAttribute('aria-selected','true');

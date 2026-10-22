@@ -1,7 +1,8 @@
 import {it,expect} from 'vitest';
 import {newCharacter,type Entry} from '../src/core/model';
 import {newAutomationState} from '../src/core/automation/state';
-import {sheetChoices} from '../src/core/automation/choices';
+import {sheetChoices,setSheetChoiceSlot} from '../src/core/automation/choices';
+import {evaluate} from '../src/core/engine';
 import {classSkillWarnings} from '../src/ui/skillChoiceWarnings';
 function fixture(){
  const c=newCharacter('2014');c.automation=newAutomationState();
@@ -26,4 +27,13 @@ it('does not warn from a disabled grant or its orphaned descendants',()=>{
 it('leaves other editions, background choices and restricted owners outside this advisory',()=>{
  const c=fixture(),choice=sheetChoices(c)[0];c.edition='2024';expect(classSkillWarnings(c,choice)).toEqual({});
  c.edition='2014';expect(classSkillWarnings(c,{...choice,ownerId:'background'})).toEqual({});expect(classSkillWarnings(c,{...choice,restricted:true})).toEqual({});
+});
+it('keeps the duplicate answer until an explicit replacement, then retains the background grant and spent resources',()=>{
+ const c=fixture();c.runtime.hp=7;c.runtime.resources['authored-spent']={current:1,max:3};
+ const before=structuredClone(c),choice=sheetChoices(c)[0];classSkillWarnings(c,choice);
+ expect(c).toEqual(before);setSheetChoiceSlot(c,choice.id,0,'athletics',[]);
+ const next=sheetChoices(c)[0],warnings=classSkillWarnings(c,next);
+ expect(next.selected).toEqual(['athletics','perception']);expect(next.selected.filter(id=>warnings[id])).toEqual([]);
+ expect(evaluate(c).skills.history.sources).toEqual(['Authored Background · PHB']);expect(evaluate(c).skills.athletics.proficient).toBe(true);
+ expect(c.abilities).toEqual(before.abilities);expect(c.selections).toEqual(before.selections);expect(c.runtime).toEqual(before.runtime);
 });

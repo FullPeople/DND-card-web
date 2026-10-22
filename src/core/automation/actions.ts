@@ -6,9 +6,9 @@ import {automationEnabled} from './state';
 import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../bookRituals';
 import {planSourceSpells} from './sourceSpellPlan';
 
-export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;target?:'self'}
+export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string}
 export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long'}
-export interface SpellActionReceipt {id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number;target?:'self';recovered?:{resourceId:string;before:number;after:number}[]}
+export interface SpellActionReceipt {id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number;recovered?:{resourceId:string;before:number;after:number}[]}
 export interface ActionState {version:number;sequence:number;last?:SpellActionReceipt}
 export type SpellActionResult={status:'applied'|'duplicate';receipt:SpellActionReceipt;message:string}|{status:'rejected';message:string};
 
@@ -24,7 +24,6 @@ export function spellPayments(c:Character,id:string):{options:SpellPayment[];rea
  const current=planSourceSpells(c).grants.find(candidate=>candidate.id===id),declared=current?.config.sourceGrant;
  if(!declared?.active||declared.ownerId!==grant.ownerId||declared.key!==grant.key||declared.usage!==grant.usage||declared.resourceKey!==grant.resourceKey||declared.resourceCost!==grant.resourceCost||declared.resourceName!==grant.resourceName)return {options:[],reason:'来源声明或资源归属已变化，请同步当前卡后再施法。'};
  config=current!.config;grant=declared;
- if(c.spellSettings?.special?.[id]?.sourceGrant?.target!==grant.target)return {options:[],reason:'来源法术目标限制已变化，请同步当前来源后再施法。'};
  const base=Number(row.entry.raw.level),level=grant.castLevel??base;
  if(!Number.isInteger(base)||base<0||base>9||level<base)return {options:[],reason:'法术环阶未支持，请人工核对。'};
  const options:SpellPayment[]=[];
@@ -34,7 +33,7 @@ export function spellPayments(c:Character,id:string):{options:SpellPayment[];rea
  }else if(config.mode==='uses'){
   const resourceId=specialSpellResource(id,c),r=c.runtime.resources[resourceId],available=!!r&&Number.isSafeInteger(r.current)&&r.current>=1;
   options.push({id:'source',label:`${grant.resourceKey?'共享':'来源'}次数（${r?.current??0} / ${r?.max??config.max}）`,level,resourceId,cost:1,available,...(!available?{reason:'来源次数不足或计数器不可用。'}:{})});
- }else if(grant.usage==='free'||grant.usage==='ritual')options.push({id:grant.usage,label:grant.target==='self'?'对自身随意施法（不消耗法术位）':grant.usage==='ritual'?'仪式施法（不消耗法术位）':'免费施法',level,cost:0,available:true,...(grant.target?{target:grant.target}:{})});
+ }else if(grant.usage==='free'||grant.usage==='ritual')options.push({id:grant.usage,label:grant.usage==='ritual'?'仪式施法（不消耗法术位）':'免费施法',level,cost:0,available:true});
  if(base>0&&(grant.usage==='slot'||grant.canUseSlots)){
   for(const [resourceId,r] of Object.entries(c.runtime.resources)){
    const match=/^(spell-slot|pact-slot):([1-9])$/.exec(resourceId);if(!match||Number(match[2])<level||!Number.isSafeInteger(r.max)||r.max<1)continue;
@@ -111,7 +110,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest):Spell
  const resource=payment.resourceId?c.runtime.resources[payment.resourceId]:undefined,before=resource?.current,after=before===undefined?undefined:before-payment.cost;
  // All validation precedes mutation, including restored counter bounds.
  if(after!==undefined&&(!Number.isSafeInteger(after)||after<0||after>resource!.max))return reject('资源状态已变化，未执行。');
- const receipt:SpellActionReceipt={id:request.id,sequence,fingerprint,selectionId:request.selectionId,mode:request.mode,level:payment.level,...(payment.target?{target:payment.target}:{}),...(payment.resourceId?{resourceId:payment.resourceId,before,after}:{})};
+ const receipt:SpellActionReceipt={id:request.id,sequence,fingerprint,selectionId:request.selectionId,mode:request.mode,level:payment.level,...(payment.resourceId?{resourceId:payment.resourceId,before,after}:{})};
  if(payment.resourceId&&after!==undefined)setResource(c,payment.resourceId,after);
  c.runtime.automationActions={version:1,sequence:sequence+1,last:receipt};if(config?.sourceGrant)rememberSourceSpellUses(c);
  return {status:'applied',receipt,message:payment.id.startsWith('book-ritual:')?`已记录仪式施法。${BOOK_RITUAL_TIME}`:request.mode==='restore'?'已恢复来源次数。':payment.resourceId?`已记录 ${payment.level} 环施法，${payment.label.split('（')[0]}剩余 ${after}。`:'已记录施法，不消耗资源。'};
@@ -122,7 +121,6 @@ export function validateActionState(value:unknown):void{
  const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
  if(!object(value)||!Number.isSafeInteger(value.version)||value.version<1)throw Error('自动化动作记录无效。');
  if(value.version!==1)return; // Preserve unfamiliar ledgers, never execute them.
- if(value.last!==undefined&&(!object(value.last)||value.last.target!==undefined&&value.last.target!=='self'))throw Error('施法目标限制记录无效。');
  if(!Number.isSafeInteger(value.sequence)||value.sequence<0)throw Error('自动化动作序号无效。');
  if(value.last!==undefined){const r=value.last;if(!object(r)||typeof r.id!=='string'||!r.id.trim()||r.id.length>128||!Number.isSafeInteger(r.sequence)||r.sequence!==value.sequence-1||typeof r.fingerprint!=='string'||r.fingerprint.length>40000||typeof r.selectionId!=='string'||!['cast','restore'].includes(r.mode)||!Number.isInteger(r.level)||r.level<0||r.level>9||r.resourceId!==undefined&&(typeof r.resourceId!=='string'||!Number.isSafeInteger(r.before)||r.before<0||!Number.isSafeInteger(r.after)||r.after<0))throw Error('自动化动作回执无效。');if(r.recovered!==undefined&&(!Array.isArray(r.recovered)||r.recovered.length>3000||r.recovered.some((x:any)=>!object(x)||typeof x.resourceId!=='string'||!Number.isSafeInteger(x.before)||x.before<0||!Number.isSafeInteger(x.after)||x.after<x.before)))throw Error('批量恢复回执无效。');}
 }

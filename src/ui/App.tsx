@@ -1,5 +1,5 @@
+import {cardCatalogEntries,prepareStandaloneCatalog,sameCatalogBasis,type CatalogBasis,type PreparedStandaloneCatalog} from '../platform/standaloneCatalogPublication';
 import './loadingPanel.css';
-import {mergeCatalogRecords,resolveCatalogId,sameCatalogRecord} from '../core/entryRecordIdentity';
 import './interactionP1.css';
 import {QuickStart} from './QuickStart';
 import {EntryApplyAction} from './EntryApplyAction';
@@ -35,6 +35,8 @@ import {applyRuntimeCharacterEdit,runtimeCharacterBase} from '../core/runtimeCha
 import {workbenchDerived} from '../platform/workbenchDerivation';
 import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
 import {snapshotMemo} from '../platform/snapshotMemo';
+import {standaloneCardViews,prepareStandaloneCards,yieldCardPreparation,CardPreparationContextChanged,type StandaloneCardViews} from '../platform/standaloneCardViews';
+import {reconciledCardView} from '../platform/cardViewReconciliation';
 import {settledSnapshotCheck} from '../platform/settledSnapshotCheck';
 import {readViewMemo,useReadViewMemo} from './useReadViewMemo';
 import {workspaceNavigationWriter} from '../platform/workspaceNavigationWriter';
@@ -79,7 +81,7 @@ import {readCharacterTransfer,deleteLocalCharacters} from '../core/transfers';
 import {useEntrySearch} from './useEntrySearch';
 import {announcementVersionFor,announcementPending,readAnnouncementVersion} from '../platform/announcement';
 const SpellAbilityEditor=lazy(()=>import('./SpellAbilityEditor').then(module=>({default:module.SpellAbilityEditor})));
-import {ownsSubclassFeature,referenceEntryCategory,referenceEntryKind,resolveEntryReference} from '../core/entryReferences';
+import {ownsSubclassFeature} from '../core/entryReferences';
 import {reviewImport} from '../core/importReview';
 import {hydrateImportedCasting} from '../core/castingSnapshot';
 const PersonalEntries=lazy(()=>import('./PersonalEntries').then(module=>({default:module.PersonalEntries})));
@@ -149,7 +151,6 @@ import { download,saveRecovery,loadRecoveries, loadWorkspace,hasRoomDraft,archiv
 import { ContentBoundary, Entries } from './Entries';
 import { EntryFacts } from './EntryFacts';
 import { AdjustedValue, SheetEditContext } from './SheetEdit';
-import { SIZE_ENTRIES } from '../data/sizes';
 import { EntryBadges } from './EntryBadges';
 import { SheetCell } from './SheetCell';
 import { FeaturePanel } from './FeaturePanel';
@@ -273,6 +274,7 @@ export default function App() {
   useEffect(()=>{const handler=(event:Event)=>{const receipt=(event as CustomEvent).detail;if(receipt.uncertain)return;let changed=false;for(const [id,pending] of workbenchUncertain.current){if(pending.requestId!==receipt.requestId)continue;const remote=receipt.result?.snapshot?.document?.dnd_card_web;if(receipt.ok&&(!remote||!confirmedChanges(pending.before,pending.after,remote)))continue;workbenchUncertain.current.delete(id);workbenchDirty.current.delete(id);if(receipt.ok)workbenchFailed.current.delete(id);changed=true;}if(changed){appliedWorkbench.current='';setHistoryTick(n=>n+1);}};window.addEventListener('workbench-operation-result',handler);return()=>window.removeEventListener('workbench-operation-result',handler);},[]);
   const actionHistory=useActionHistory();
   const [entries, setEntries] = useState<Entry[]>([]);
+  const preparedCatalog=useRef<PreparedStandaloneCatalog|undefined>(undefined);
   const sourceDisplay=useSources();
   const bookNames=useMemo(()=>Object.fromEntries(Object.entries(sourceDisplay.registry).map(([id,m])=>[id,m.name])),[sourceDisplay.registry]);
   const catalogRef = useRef(new Map<string, Entry>());
@@ -294,15 +296,20 @@ export default function App() {
   const localSources=!inWorkbench&&!qqRoom;
   const storedCharacter=workspace?.characters.find(x=>x.id===workspace.activeId);
   const storedBuild=storedCharacter&&runtimeCharacterBase(storedCharacter);
-  const allEntries = useMemo<Entry[]>(() => [...SIZE_ENTRIES, ...entries, ...activePacks.flatMap(p=>p.entries.map(entry=>({...entry,raw:{...entry.raw,_customPack:true}}))), ...(canAuthor?customEntries:[])].filter(e=>monstersVisible||e.kind!=='monster'), [entries, activePacks,monstersVisible,canAuthor,customEntries]);
+  const catalogBasis:CatalogBasis={characters:workspace?.characters||[],sources:workspace?.siteSources,packs:activePacks,custom:customEntries,author:canAuthor,monsters:monstersVisible,writable:writable.current};
+  const currentCatalogBasis=useRef(catalogBasis);currentCatalogBasis.current=catalogBasis;
+  const allEntries = useMemo<Entry[]>(() => {const prepared=preparedCatalog.current;return prepared?.raw===entries&&prepared.basis.packs===activePacks&&prepared.basis.custom===customEntries&&prepared.basis.author===canAuthor&&prepared.basis.monsters===monstersVisible?prepared.entries:cardCatalogEntries(entries,catalogBasis);}, [entries, activePacks,monstersVisible,canAuthor,customEntries]);
   const catalogNames=useMemo(()=>entryNameIndex(allEntries),[allEntries]);
   const defaultSources=useMemo(()=>[...new Set(allEntries.flatMap(e=>[e.source,...(e.dependencies||[])]))],[allEntries]);
   const roomProfile=useMemo(()=>roomRules?includeNewProfileSources(roomRules.profile,defaultSources):undefined,[roomRules,defaultSources]);
-  const rememberView=useMemo(()=>snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
-  const checkReconciliation=useMemo(()=>settledSnapshotCheck(localCloudViews),[rememberView]);
+  const rememberView=useMemo(()=>localCloudViews&&preparedCatalog.current?.entries===allEntries&&preparedCatalog.current.sources===workspace?.siteSources?preparedCatalog.current.remember:snapshotMemo(localCloudViews),[localCloudViews,allEntries,roomRules,roomProfile,workspace?.siteSources,activePacks]);
+  const checkReconciliation=useMemo(()=>preparedCatalog.current?.remember===rememberView?preparedCatalog.current.check:settledSnapshotCheck(localCloudViews),[rememberView]);
+  const localCardViews=useMemo(()=>localCloudViews?(preparedCatalog.current?.remember===rememberView?preparedCatalog.current.views:standaloneCardViews(allEntries,workspace?.siteSources,activePacks,rememberView,checkReconciliation)):undefined,[localCloudViews,rememberView,checkReconciliation]);
+  const currentCardViews=useRef<StandaloneCardViews|undefined>(undefined);currentCardViews.current=localCardViews;
   const localProfile=useMemo(()=>storedCharacter?rememberView('profile',storedCharacter.profile,()=>withSiteSources(storedCharacter,workspace?.siteSources,activePacks).profile):undefined,[storedCharacter?.profile,workspace?.siteSources,activePacks,rememberView]);
   const buildView=useMemo(()=>{
     if(!storedBuild)return;
+    if(localCardViews)return localCardViews.build(storedCharacter!);
     return rememberView('build',storedBuild,()=>{
     const effective=inWorkbench&&wb.shared?{...storedBuild,edition:roomRules!.edition,profile:roomProfile!,rulePacks:roomRules!.packs}:localSources&&workspace?.siteSources?{...storedBuild,profile:localProfile!,rulePacks:activePacks}:storedBuild;
     // Reading an old card must not create competing network writes. Casting
@@ -314,7 +321,7 @@ export default function App() {
     if(inWorkbench&&effective.selections.some(s=>s.entry.packId==='imported'&&s.entry.kind==='class'&&!s.entry.raw._castingSource)){const view=structuredClone(effective);const hydrated=hydrateImportedCasting(view,allEntries),initialized=initializeAutomation(view);if(hydrated||initialized){syncAutoResources(view);return reviewed(view);}}
     if(automationNeedsInitialization(effective)){const autoView=structuredClone(effective);if(initializeAutomation(autoView)){syncAutoResources(autoView);return reviewed(autoView);}}return reviewed(effective);
     });
-  },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries,rememberView]);
+  },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries,rememberView,localCardViews]);
   // Explicit runtime forks share their construction review; retain the latest balances.
   const c=useMemo(()=>!storedCharacter||!buildView?undefined:rememberView('display',storedCharacter,()=>storedCharacter===storedBuild?buildView:{...buildView,runtime:storedCharacter.runtime,spellSettings:storedCharacter.spellSettings,revision:storedCharacter.revision,updatedAt:storedCharacter.updatedAt}),[storedCharacter,storedBuild,buildView,rememberView]);
   const buildChoices=useMemo(()=>buildView?rememberView('choices',buildView,()=>sheetChoices(buildView,allEntries)):[],[buildView,allEntries,rememberView]);
@@ -381,6 +388,9 @@ export default function App() {
   function stageExcel(batch:ExcelBatch|undefined){excelBatchRef.current=batch;setExcelImport(batch);}
   const [batchBusy,setBatchBusy]=useState(false);
   const [batchUncertain,setBatchUncertain]=useState(false);
+  const importPreparation=useRef<AbortController|undefined>(undefined);
+  const [cardPreparation,setCardPreparation]=useState<{completed:number;total:number}>();
+  useEffect(()=>()=>{importPreparation.current?.abort();},[]);
   const [reviewTarget,setReviewTarget]=useState<Character>();
   const [exportView,setExportView]=useState<SheetCaptureOptions>();
   const exportInProgress=useRef(false);
@@ -388,6 +398,21 @@ export default function App() {
   const [fillPulse,setFillPulse]=useState(0);
   const [readingFlash,setReadingFlash]=useState(0);
   const [automationRuntime,setAutomationRuntime]=useState<typeof import('../core/automation/cardRuntime')>();
+  const currentAutomationRuntime=useRef(automationRuntime);currentAutomationRuntime.current=automationRuntime;
+  useEffect(()=>{
+    if(!localCardViews||!workspace)return;
+    const controller=new AbortController();
+    void (async()=>{
+      await prepareStandaloneCards(workspace.characters,localCardViews,{signal:controller.signal,current:()=>currentCardViews.current===localCardViews,yield:()=>yieldCardPreparation(controller.signal,true)});
+      if(automationRuntime)for(const card of workspace.characters){
+        if(localCardViews.reconciliationReady(card))continue;
+        await yieldCardPreparation(controller.signal,true);
+        if(currentCardViews.current!==localCardViews)throw new CardPreparationContextChanged();
+        localCardViews.warmReconciliation(card,automationRuntime.syncSourceSpells);
+      }
+    })().catch(error=>{if(!controller.signal.aborted&&!(error instanceof CardPreparationContextChanged))console.warn('Local card preparation failed',error);});
+    return()=>controller.abort();
+  },[localCardViews,workspace?.characters,loading,automationRuntime]);
   const pendingRuntimeEdits=useRef<{id:string;target:string|undefined;action:Parameters<Edit>[0];key?:Parameters<Edit>[1]}[]>([]);
   const [runtimeInteractionRequested,setRuntimeInteractionRequested]=useState(false);
   const [editingRequested, setEditing] = useState(()=>{try{return localStorage.getItem('dnd-card:editing')==='true';}catch{return false;}});
@@ -599,10 +624,27 @@ export default function App() {
     let lastPublish=0;
     try {
       await (await import('../data/catalog')).loadCatalog(batch => {
-        mergeCatalogRecords(catalogRef.current,batch);
-        if(performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
+        batch.forEach(e => catalogRef.current.set(e.id, e));
+        if(!localCloudViews&&performance.now()-lastPublish>500){lastPublish=performance.now();startTransition(()=>setEntries([...catalogRef.current.values()]));}
       }, progress=>startTransition(()=>setProgress(progress)), controller.signal, refresh, DEFAULT_SOURCE, names=>startTransition(()=>sourceDisplay.merge(names)),retryKeys);
-      if(!controller.signal.aborted)startTransition(()=>setEntries([...catalogRef.current.values()]));
+      if(!controller.signal.aborted){
+        const nextEntries=[...catalogRef.current.values()];
+        if(localCloudViews&&workspaceRef.current){
+          // Keep the displayed context reusable while the catalog streams. Publish
+          // only after every stored card has its next read context prepared.
+          for(;;){
+            const basis=currentCatalogBasis.current;
+            try{
+              const prepared=await prepareStandaloneCatalog(nextEntries,basis,{signal:controller.signal,current:()=>currentCatalogBasis.current,syncSourceSpells:currentAutomationRuntime.current?.syncSourceSpells});
+              if(controller.signal.aborted)return;
+              if(!sameCatalogBasis(basis,currentCatalogBasis.current))continue;
+              preparedCatalog.current=prepared;
+              startTransition(()=>{const latest=workspaceRef.current!;if(prepared.sources!==latest.siteSources&&writable.current)persist({...latest,siteSources:prepared.sources});setEntries(nextEntries);});
+              break;
+            }catch(error){if(controller.signal.aborted)return;if(error instanceof CardPreparationContextChanged)continue;throw error;}
+          }
+        }else startTransition(()=>setEntries(nextEntries));
+      }
     } catch (e) { if (!controller.signal.aborted) setNotice(`资料加载失败：${String(e)}`); }
     finally { if (!controller.signal.aborted) startTransition(()=>setLoading(false)); }
   }
@@ -803,16 +845,13 @@ export default function App() {
     try{await workbenchRequest('rules',{key:undefined,itemId:undefined,scopeKey:wb.shared.key,expected:wb.shared.revision,rules});return true;}catch(e){setNotice(String(e));return false;}finally{setRulesDraft(undefined);setRulesBusy(false);}
   }
   useEffect(() => {
-    if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench) return;
+    if (!automationRuntime || !c || !workspace || !writable.current || inWorkbench || localCloudViews&&loading) return;
     checkReconciliation(reconciliation!,()=>{
-    const draft = structuredClone(c);
-    const castingChanged=hydrateImportedCasting(draft,allEntries);
-    const featuresChanged=syncFeatures(draft, allEntries,undefined,catalogNames),resourcesChanged=syncAutoResources(draft),sourceSpellsChanged=automationRuntime.syncSourceSpells(draft,allEntries);
-    const changed=featuresChanged || resourcesChanged || castingChanged || sourceSpellsChanged;
-    if (changed) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
-    return changed;
+    const draft=reconciledCardView(c,allEntries,catalogNames,automationRuntime.syncSourceSpells);
+    if (draft) { draft.revision++; draft.updatedAt = new Date().toISOString(); persist({ ...workspace, characters: workspace.characters.map(row => row.id === draft.id ? draft : row) }); }
+    return !!draft;
     });
-  }, [reconciliation, allEntries,automationRuntime,checkReconciliation]);
+  }, [reconciliation, allEntries,automationRuntime,checkReconciliation,loading]);
   function undo(redo=false){void travelHistory(redo);}
 
   useEffect(() => {
@@ -822,7 +861,6 @@ export default function App() {
     }; window.addEventListener('keydown', handle); return () => window.removeEventListener('keydown', handle);
   }, []);
   function readingTarget(entry:Entry){
-    const current=libraryEntries.filter(candidate=>sameCatalogRecord(candidate,entry));if(current.length===1)entry=current[0];
     if(entry.raw._inlineOwner){const owner=libraryEntries.find(e=>e.id===entry.raw._inlineOwner);if(owner)return {entry:owner,focus:`name:${entry.raw._inlineName||entry.name}`};}
     const selected=c?.selections.find(s=>s.entry.id===entry.id),parent=selected?.parentId?c?.selections.find(s=>s.id===selected.parentId):undefined;
     if(parent && selected?.grantKey?.startsWith('inline:'))return {entry:libraryEntries.find(e=>e.id===parent.entry.id)||parent.entry,focus:`name:${entry.name}`};
@@ -834,30 +872,28 @@ export default function App() {
     return {entry};
   }
   function inspect(entry: Entry, push = true, from?:keyof typeof LIBRARY_TABS) { exitSheetFullscreen(); if(detail && !library.hover && detailPane.current)library.savePosition(detail.id,detailPane.current.scrollTop);const target=readingTarget(entry);if(library.hover){previewCommit.current={id:target.entry.id,top:detailPane.current?.scrollTop||0};setReadingFlash(n=>n+1);}else setReadingFlash(0);library.navigate(target.entry,target.focus,push,from);setTab('wiki'); }
-  useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){inspect(allEntries.find(e=>sameCatalogRecord(e,entry))||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
+  useEffect(()=>{const open=(event:Event)=>{const entry=(event as CustomEvent<Entry>).detail;if(entry?.id&&entry?.name&&entry?.kind){inspect(allEntries.find(e=>e.id===entry.id)||(entry.id.startsWith('resource:')?allEntries.find(e=>e.name===entry.name):undefined)||entry);}};window.addEventListener('workbench-open-entry',open);return()=>window.removeEventListener('workbench-open-entry',open);});
   function resolveReference(reference: string, tag?: string) {
     return localCloudViews?referenceReads([reference,tag],()=>lookupReference(reference,tag)):lookupReference(reference,tag);
   }
   function lookupReference(reference: string, tag?: string) {
-    if(reference.startsWith('entry:')){const selected=c?.selections.filter(s=>librarySourceEnabled(c,s.entry)).map(s=>s.entry)||[],id=reference.slice(6);if(selected.some(entry=>entry.id===id))return resolveCatalogId(id,selected);return resolveCatalogId(id,sourceEntries);}
+    if (reference.startsWith('entry:')) return c?.selections.find(s => s.entry.id === reference.slice(6)&&librarySourceEnabled(c,s.entry))?.entry || sourceEntries.find(e => e.id === reference.slice(6));
     const [name, source] = reference.split('|');
-    const tagKind=referenceEntryKind(tag),category=referenceEntryCategory(tag);
+    const tagKind = ['quickref', 'variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
     const known = [...sourceEntries, ...(c?.selections.filter(s=>librarySourceEnabled(c,s.entry)).map(s => s.entry) || [])];
     if(tag==='class'){
       const parts=reference.split('|'),sub=parts[3],subSource=parts[4]||source||'PHB';
-      if(sub){const targets=known.filter(e=>e.kind==='subclass'&&e.source.toLowerCase()===subSource.toLowerCase()&&[e.name,e.english,e.raw.shortName,e.raw.ENG_shortName].some(n=>typeof n==='string'&&n.toLowerCase()===sub.toLowerCase())&&(e.raw.classSource||'PHB').toLowerCase()===(source||'PHB').toLowerCase()&&[e.raw.className,e.raw.classEnglish].some(n=>typeof n==='string'&&n.toLowerCase()===name.toLowerCase()));const unique=targets.filter((entry,index)=>targets.findIndex(other=>sameCatalogRecord(other,entry))===index);return unique.length===1?unique[0]:undefined;}
+      if(sub){const target=known.find(e=>e.kind==='subclass'&&e.source.toLowerCase()===subSource.toLowerCase()&&[e.name,e.english,e.raw.shortName,e.raw.ENG_shortName].some(n=>typeof n==='string'&&n.toLowerCase()===sub.toLowerCase())&&(e.raw.classSource||'PHB').toLowerCase()===(source||'PHB').toLowerCase()&&[e.raw.className,e.raw.classEnglish].some(n=>typeof n==='string'&&n.toLowerCase()===name.toLowerCase()));if(target)return target;}
     }
     const matches = known.filter(e => (!tagKind || e.kind === tagKind) && [e.name, e.english].some(n => n.toLowerCase() === name.toLowerCase()));
-    if(tagKind==='feature')return resolveEntryReference(reference,matches.filter(e=>!requirementMismatch(e,{refs:[reference]})),'feature',category);
-    if(source)return resolveEntryReference(reference,matches,tagKind,category);
-    const contextual=matches.filter(e=>e.edition===detail?.edition&&e.source===(detail?.source||'PHB')),core=matches.filter(e=>e.source==='PHB');
-    return resolveEntryReference(reference,contextual.length?contextual:core.length?core:matches,tagKind,category);
+    const found = tagKind === 'feature' ? matches.find(e => !requirementMismatch(e, { refs: [reference] })) : source ? matches.find(e => e.source.toLowerCase() === source.toLowerCase()) : matches.find(e => e.edition === detail?.edition && e.source === (detail?.source || 'PHB')) || matches.find(e => e.source === 'PHB') || matches[0];
+    return found;
   }
   function link(reference: string, tag?: string) {
     exitSheetFullscreen();
     const found = resolveReference(reference, tag);
     const name = reference.split('|')[0];
-    const tagKind=referenceEntryKind(tag);
+    const tagKind = ['quickref', 'variantrule', 'action', 'skill', 'sense', 'language', 'itemProperty', 'itemType', 'table', 'deity', 'facility'].includes(tag || '') ? 'rule' : ['optfeature', 'itemMastery', 'reward', 'charoption', 'psionic'].includes(tag || '') ? 'feature' : ['status', 'disease'].includes(tag || '') ? 'condition' : tag==='creature'?'monster':tag;
     if (found) inspect(found); else { setQuery(name); if (tagKind && Object.hasOwn(KIND_LABELS, tagKind)) setKind(tagKind as Kind); setDetail(undefined); setNotice(`已搜索「${name}」。若未收录，可开启其他来源或在中文站查阅。`); }
   }
   function browse(kind: Kind | 'size',parent?:Entry) { exitSheetFullscreen(); setFillPulse(n=>n+1);setKind(kind); if (kind === 'subclass') { const owner = parent||c?.selections.find(s => s.entry.kind === 'class')?.entry; if (owner) {library.navigate(allEntries.find(e => e.id === owner.id) || owner,'subclasses');library.patch({subclassesOpen:true});} } setTab('wiki'); }
@@ -937,8 +973,9 @@ export default function App() {
           batch.completed=index+1;
         }
       }else{
+        const prepared=await prepareImportedCards(cards);
         await queue.current;
-        const w=workspaceRef.current!,next={...w,characters:[...w.characters,...cards],activeId:cards[0].id};
+        const w=workspaceRef.current!,next={...w,characters:[...w.characters,...prepared],activeId:prepared[0].id};
         const operation=persist(next);if(!operation)throw Error('当前标签页不可写，角色尚未导入');
         try{await operation;}catch(error){if(workspaceRef.current===next){workspaceRef.current=w;setWorkspace(w);}throw error;}
         batch.completed=cards.length;
@@ -965,7 +1002,7 @@ export default function App() {
     if(batchBusy||batchUncertain)return;setBatchBusy(true);setImportError('');let completed=0;
     try{
       if(inWorkbench){for(const row of pendingBatch){await createRemoteCard(row.card,false);completed++;}}
-      else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,...pendingBatch.map(r=>r.card)]});completed=pendingBatch.length;}
+      else{const cards=await prepareImportedCards(pendingBatch.map(r=>r.card));const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,...cards]}))throw Error('当前标签页不可写，角色尚未导入');completed=pendingBatch.length;}
       setPendingBatch([]);setModal('characters');setNotice(`已导入 ${completed} 张角色卡。`);
     }catch(e){setPendingBatch(rows=>rows.slice(completed));if((e as {uncertain?:boolean}).uncertain)setBatchUncertain(true);setImportError(`已确认导入 ${completed} 张，剩余已停止：${String(e)}${(e as {uncertain?:boolean}).uncertain?' 请先在角色簿核对本次结果，不能重复提交。':''}`);}
     finally{setBatchBusy(false);}
@@ -1044,8 +1081,40 @@ export default function App() {
   }
   async function finishImport(character:Character){
     initializeAutomation(character);ignoreUnfilledSheetChoices(character,allEntries);recordReviewedRoots(character);
-    if(inWorkbench)await createRemoteCard(character);else{const w=workspaceRef.current!;persist({...w,characters:[...w.characters,character],activeId:character.id});setModal('export');}
+    if(inWorkbench)await createRemoteCard(character);else{const [prepared]=await prepareImportedCards([character]);const w=workspaceRef.current!;if(!persist({...w,characters:[...w.characters,prepared],activeId:prepared.id}))throw Error('当前标签页不可写，角色尚未导入');setModal('export');}
     setPendingImport(undefined);setNotice(inWorkbench?'角色已导入枭熊角色簿。':'角色已作为新副本导入。');
+  }
+  async function prepareImportedCards(cards:Character[]){
+    if(!currentCardViews.current)return cards;
+    if(importPreparation.current)throw Error('正在准备角色卡，请等待当前导入完成');
+    const controller=new AbortController();importPreparation.current=controller;
+    try{
+      const runtime=automationRuntime||await import('../core/automation/cardRuntime');
+      for(;;){
+        const views:StandaloneCardViews|undefined=currentCardViews.current;
+        if(!views)throw Error('角色卡页面已关闭，尚未导入');
+        try{
+          const prepared:Character[]=[];
+          for(const card of cards){
+            setCardPreparation({completed:prepared.length,total:cards.length});
+            let next=card;
+            for(let pass=0;;pass++){
+              await yieldCardPreparation(controller.signal);
+              if(currentCardViews.current!==views)throw new CardPreparationContextChanged();
+              const draft=views.reconcile(next,runtime.syncSourceSpells);
+              if(!draft)break;
+              if(pass>=7)throw Error('角色资料核对尚未稳定，已停止导入，请保留备份后重试');
+              draft.revision=next.revision+1;draft.updatedAt=new Date().toISOString();next=draft;
+            }
+            prepared.push(next);
+          }
+          await prepareStandaloneCards(prepared,views,{signal:controller.signal,current:()=>currentCardViews.current===views,progress:(completed,total)=>setCardPreparation({completed,total})});
+          if(!writable.current)throw Error('当前标签页已变为只读，角色尚未导入');
+          return prepared;
+        }
+        catch(error){if(!(error instanceof CardPreparationContextChanged))throw error;}
+      }
+    }finally{if(importPreparation.current===controller)importPreparation.current=undefined;setCardPreparation(undefined);}
   }
   async function createRemoteCard(card:Character,select=true,initialize=true){
     if(initialize)initializeAutomation(card);
@@ -1135,9 +1204,10 @@ export default function App() {
     </main>
       <PaletteDrawer open={paletteOpen} close={()=>setPaletteOpen(false)} character={c} edit={edit} writable={!readOnly&&(!inWorkbench||wb.online&&!!wb.target?.write)} disabledReason={readOnlyReason||(inWorkbench?wb.online?'卡主未授予当前玩家编辑这张卡的权限。':'房间连接尚未恢复，暂时无法修改角色卡配色。':undefined)}/>
     {standalone?<LocalDice/>:<SupporterEffect/>}{(standalone||inWorkbench)&&startupComplete&&announcement&&<ToolBoundary label="公告" close={()=>setAnnouncement(false)}><Suspense fallback={<AnnouncementLoading mode={inWorkbench?'suite':'standalone'}/>}><Announcement mode={inWorkbench?"suite":"standalone"} close={()=>setAnnouncement(false)}/></Suspense></ToolBoundary>}{notice&&<Toast message={notice} action={/^已填入/.test(notice)&&actionHistory.undo&&!readOnly?{label:'撤销最近修改',run:()=>{undo();setNotice('');}}:!editing&&!readOnly&&(!inWorkbench||!!wb.target?.write)&&/开启编辑模式/.test(notice)?{label:'开启编辑模式',run:()=>{setEditing(true);setNotice('');}}:undefined} details={notice===noticeDiagnostic?.message?noticeDiagnostic.diagnostic:notice.startsWith('同步失败')?syncDiagnostic:undefined} close={()=>setNotice('')}/>}
-    {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
+    {modal && <Dialog icon={dialogIcons[modal]} subtitle={dialogSubtitles[modal]} title={modal==='excelImportChoice'?'Excel 导入方式':modal==='excelImportSync'?'Excel 资料同步':modal==='onboarding'?'开始使用角色卡':modal==='classSync'?'旧卡资料同步':modal==='automation'?'基础自动化':modal==='review'?'DM 审卡':modal==='batchImport'?'批量导入前核对':modal==='spellAbility'?'施法属性':modal==='syncReview'?'核对同步结果':modal==='importReview'?'导入前核对':modal==='personal'?'条目与等级':modal==='hp'?'生命值取值方式':modal === 'characters' ? '角色簿' : modal === 'rules' ? '规则与扩展' : modal === 'export' ? '导入与导出' : modal === 'adjust' ? '数值依据与人工修正' : modal === 'resources' ? editingResource?'资源配置':'仪表盘' : modal === 'quickbar' ? '整理快捷栏' : '让角色卡带你完成选择'} close={() => { if(!importPreparation.current&&!batchBusy&&!classSyncBusy&&!importFilesBusy&&!excelImportBusy&&!creatingCard&&!exportInProgress.current){if(modal==='onboarding'){completeSetup();return;}if(modal.startsWith('excelImport'))stageExcel(undefined);setModal(''); setImportError('');} }}>
       <ToolBoundary key={modal} label="编辑面板" close={()=>setModal('')}><Suspense fallback={<PanelLoading label="正在加载面板…"/>}>
       {importError && <p className="inline-error" role="alert">导入未生效：{importError}</p>}
+      {cardPreparation&&<div role="status" className="card-import-preparation"><p>正在准备角色卡 {cardPreparation.completed} / {cardPreparation.total}，完成后即可切换。</p><button onClick={()=>importPreparation.current?.abort()}>取消准备</button></div>}
       {modal === 'adjust' && <><ArmorAdjustmentReview c={c} edit={edit}/><p className="muted">以下其他数值在特殊规则尚未适配时可填写最终值与原因，持续保留到手动撤回，并列入审卡。</p><div className="adjust-form"><label>数值<select aria-label="人工修正目标" value={adjustTarget} onChange={e => setAdjustTarget(e.target.value)}>{[['hp', '生命值上限'], ['speed', '速度'], ['initiative', '先攻'], ['passive', '被动察觉'], ...Object.entries(SKILLS).map(([key, s]) => [`skill:${key}`, `${s.name}检定`]), ...ABILITIES.map(a => [`save:${a}`, `${ABILITY_LABELS[a]}豁免`])].map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label><label>最终值<NumberInput aria-label="人工修正数值" type="number" min="-9999" max="9999" value={adjustValue} onChange={e => setAdjustValue(clamp(e.target.value, -9999, 9999))}/></label><label className="full-width">原因<input aria-label="人工修正原因" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="例如：DM 允许的生命值修正，或尚未适配的专长"/></label><button disabled={!adjustReason.trim()} onClick={() => { edit(draft => { draft.adjustments = [...(draft.adjustments || []).filter(a => a.target !== adjustTarget), { id: uid(), target: adjustTarget, value: adjustValue, reason: adjustReason.trim() }]; }); setAdjustReason(''); }}>记录修正</button></div>{(c.adjustments || []).filter(a=>a.target!=='ac').map(a => <div className="pack-row" key={a.id}><span><strong>{a.target} → {a.value}</strong><small>{a.reason}</small></span><button onClick={() => edit(draft => { draft.adjustments = draft.adjustments?.filter(x => x.id !== a.id); })}>撤回</button></div>)}<details className="calculation-trace"><summary>展开计算依据</summary>{Object.entries(d.trace).map(([key, items]) => <p key={key}><strong>{choiceLabel(key)}</strong>：{items.join('；')}</p>)}</details></>}
       {modal==='classSync'&&<CardMigration key={c.id} c={c} entries={allEntries} loading={loading} readOnly={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} save={saveClassCopy} busy={classSyncBusy} setBusy={setClassSyncBusy}/>}
       {modal==='excelImportChoice'&&excelImport&&<section className="excel-import-choice"><h3>是否同步为 5etools 资料？</h3><p>已读取 {excelImport.cards.length} 张角色，其中 {excelImport.excelIds.length} 张来自 Excel。确认后直接核对并同步，每份 Excel 只导入一张对应的角色卡。</p><ul>{excelImport.cards.filter(card=>excelImport.excelIds.includes(card.id)).map(card=><li key={card.id}><strong>{card.name}</strong> · {card.edition}</li>)}</ul><p>取消同步则按 Excel 原内容导入，作为普通自定义卡使用。</p><div className="dialog-actions"><button className="primary" disabled={excelImportBusy||excelImport.uncertain||excelImport.completed>0} onClick={()=>setModal('excelImportSync')}>同步 5etools 资料</button><button disabled={excelImportBusy||excelImport.uncertain} onClick={()=>void commitExcel(excelBatchRef.current!).catch(error=>setImportError(String(error)))}>{excelImportBusy?'正在导入…':'取消同步，导入自定义卡'}</button></div>{excelImport.uncertain&&<p role="alert">保存结果尚未确认，请先核对枭熊角色簿，避免重复导入。</p>}</section>}
@@ -1146,7 +1216,7 @@ export default function App() {
       {modal === 'quickbar' && <QuickbarManager c={c} edit={edit}/>}
       {modal === 'resources' && (editingResource?<ResourceModuleEditor key={editingResource} c={c} id={editingResource} edit={edit} close={()=>setModal('')} disabled={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} gm={inWorkbench?wb.role==='GM':localGm()}/>:<ResourceDashboard onSave={saveDashboard} c={c} d={d} edit={edit} inspect={inspect} viewport={resourceViewport} disabled={readOnly||inWorkbench&&(!wb.online||!wb.target?.write)} gm={inWorkbench?wb.role==='GM':localGm()}/>)}
       {modal==='syncReview'&&<section><p>{workbenchUncertain.current.has(c.id)?'上一项修改尚未得到确认。本地修改已备份，核对期间不会重放未确认的操作。':'本地修改已有恢复备份，可重新读取枭熊保存的结果。'}</p><div className="dialog-actions"><button disabled={!wb.online} onClick={()=>void workbenchRequest('refreshCard',{itemId:wb.target?.targetId||(wb.target?.cardId?`card:${wb.target.cardId}`:wb.target?.itemId),key:undefined}).then(()=>setNotice('已重新读取枭熊数据。')).catch(e=>{setSyncDiagnostic(diagnosticText(e));setNotice(String(e));})}>重新核对保存结果</button><button onClick={()=>download(`${fileName(c.name)}-本地恢复.json`,exportCharacter(c))}>导出本地修改</button><CopyDiagnostic text={syncDiagnostic||diagnosticText({connection:workbenchDiagnostics()})}/></div></section>}
-      {modal==='importReview'&&pendingImport&&<section><h3>{pendingImport.card.name}</h3>{pendingImport.review.editionMismatch&&<p>导入角色使用 {pendingImport.card.edition}，当前规则使用 {c.edition}。{pendingImport.review.editionChanged?'房间规则将用于计算此角色。':'导入后保留该角色自己的规则版本。'}</p>}{pendingImport.review.totalLevel!==pendingImport.review.effectiveLevel&&<p role="alert">原卡总等级 {pendingImport.review.totalLevel}，当前启用来源下的计算等级 {pendingImport.review.effectiveLevel}。职业与等级记录会保留。</p>}{pendingImport.review.disabled.length>0&&<><p>以下 {pendingImport.review.disabled.length} 项在当前规则或资料来源中未启用，保留条目但暂停效果：</p><ul className="import-conflicts">{pendingImport.review.disabled.map(s=><li key={s.id}>{s.entry.name} · <SourceName id={s.entry.source}/></li>)}</ul></>}<div className="dialog-actions"><button disabled={creatingCard} onClick={()=>void finishImport(pendingImport.card).catch(e=>setImportError(String(e)))}>保留全部记录并导入</button><button onClick={()=>{setPendingImport(undefined);setModal('export');}}>取消导入</button></div></section>}
+      {modal==='importReview'&&pendingImport&&<section><h3>{pendingImport.card.name}</h3>{pendingImport.review.editionMismatch&&<p>导入角色使用 {pendingImport.card.edition}，当前规则使用 {c.edition}。{pendingImport.review.editionChanged?'房间规则将用于计算此角色。':'导入后保留该角色自己的规则版本。'}</p>}{pendingImport.review.totalLevel!==pendingImport.review.effectiveLevel&&<p role="alert">原卡总等级 {pendingImport.review.totalLevel}，当前启用来源下的计算等级 {pendingImport.review.effectiveLevel}。职业与等级记录会保留。</p>}{pendingImport.review.disabled.length>0&&<><p>以下 {pendingImport.review.disabled.length} 项在当前规则或资料来源中未启用，保留条目但暂停效果：</p><ul className="import-conflicts">{pendingImport.review.disabled.map(s=><li key={s.id}>{s.entry.name} · <SourceName id={s.entry.source}/></li>)}</ul></>}<div className="dialog-actions"><button disabled={creatingCard||!!cardPreparation} onClick={()=>void finishImport(pendingImport.card).catch(e=>setImportError(String(e)))}>保留全部记录并导入</button><button disabled={!!cardPreparation} onClick={()=>{setPendingImport(undefined);setModal('export');}}>取消导入</button></div></section>}
       {modal==='personal' &&editing&&<PersonalEntries c={c} edit={edit}/>}
       {modal==='spellAbility'&&<SpellAbilityEditor c={c} edit={edit}/>}
       {modal==='hp'&&editing&&<HitPointEditor c={c} edit={edit}/>}
@@ -1160,7 +1230,7 @@ export default function App() {
         <SourceSettings c={c} entries={allEntries} edit={editSources} readOnly={rulesReadonly} changeMode={sourceDisplay.setMode}/>
 
         {Object.keys(c.profile.exceptions).length > 0 && <section className="settings-section"><h3>DM 特许记录</h3>{Object.entries(c.profile.exceptions).map(([id, reason]) => <p key={id}>{c.selections.find(s => s.entry.id === id)?.entry.name || allEntries.find(e => e.id === id)?.name || id}：{reason}<button disabled={rulesReadonly} onClick={() => editRules(draft => { delete draft.profile.exceptions[id]; })}>撤回</button></p>)}</section>}
-      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={!!qqRoom||loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} importFiles={importFiles} capture={capturePages} disabled={!!qqRoom||readOnly||inWorkbench&&!wb.online||importFilesBusy} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>本机恢复</h3><input className="file-input" disabled={!!qqRoom||importFilesBusy} data-testid="character-file" type="file" accept=".json,.xlsx" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button disabled={!!qqRoom} onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup,true);history.current.clear();setNotice('已读取上一次保存，尚未保存。继续编辑或重试编辑加载时将保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
+      </>}</fieldset></>}      {modal === 'export' && <><div className="dialog-actions"><button disabled={!!qqRoom||loading||readOnly||inWorkbench&&!wb.target?.write} onClick={()=>setModal('classSync')}>核对当前角色资料</button></div><TransferPanel rows={managerRows} currentId={managerId} currentName={c.name} currentPage={sheetPage} read={readCards} importTexts={importTexts} importFiles={importFiles} capture={capturePages} disabled={!!qqRoom||readOnly||inWorkbench&&!wb.online||importFilesBusy||!!cardPreparation} formatSource={sourceDisplay.format}/><section className="settings-section"><h3>本机恢复</h3><input className="file-input" disabled={!!qqRoom||importFilesBusy||!!cardPreparation} data-testid="character-file" type="file" accept=".json,.xlsx" aria-label="导入角色备份文件" onChange={e=>{if(e.target.files?.[0])importFile('character',e.target.files[0]);e.target.value='';}}/><button disabled={!!qqRoom} onClick={async()=>{try{const backup=await restoreBackup();if(!backup)throw Error('没有可用备份');acceptWorkspace(backup,true);history.current.clear();setNotice('已读取上一次保存，尚未保存。继续编辑或重试编辑加载时将保存。');setModal('');}catch(e){setImportError(String(e));}}}>读取上一次保存</button></section></>}
 
       </Suspense></ToolBoundary>
     </Dialog>}

@@ -190,7 +190,6 @@ export function validateCharacter(value: unknown): Character {
    // Keep the exact snapshot and counter without restoring an active selection.
    assert(storedSelections.some(row=>row.id===id&&row.entry.kind==='spell')&&plain(value)&&['locked','uses'].includes(value.mode)&&(value.mode!=='uses'||Number.isInteger(value.max)&&value.max>=1&&value.max<=100)&&(value.recovery===undefined||['long','short','manual'].includes(value.recovery))&&(value.label===undefined||typeof value.label==='string'&&value.label.length<=160),'固定与次数法术设置无效。');
    if(value.sourceGrant!==undefined){const g=value.sourceGrant;
-     assert(plain(g)&&(g.target===undefined||g.target==='self'),'来源法术目标限制无效。');
     assert(plain(g)&&typeof g.ownerId==='string'&&typeof g.key==='string'&&g.key.startsWith('source-spell:')&&typeof g.active==='boolean'&&(g.ability===undefined||ABILITIES.includes(g.ability))&&['slot','free','ritual','check','resource'].includes(g.usage)&&(g.reason===undefined||typeof g.reason==='string')&&(g.usageKey===undefined||typeof g.usageKey==='string'&&g.usageKey.length<=20000)&&(g.canUseSlots===undefined||typeof g.canUseSlots==='boolean')&&(g.castLevel===undefined||Number.isInteger(g.castLevel)&&g.castLevel>=1&&g.castLevel<=9),'来源法术关系无效。');
     if(g.usage==='resource'){
      assert(value.mode==='locked'&&typeof g.resourceName==='string'&&g.resourceName.trim()&&g.resourceName.length<=160&&Number.isSafeInteger(g.resourceCost)&&g.resourceCost>=1&&g.resourceCost<=10000&&typeof g.resourceKey==='string'&&g.resourceKey.length<=40000,'来源法术资源声明无效。');

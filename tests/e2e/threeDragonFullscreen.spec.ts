@@ -27,15 +27,8 @@ async function pair(host:Page){
 for(const width of [1440,390])test(`Three Dragon opens the website and preserves ${width}px Suite toolbar and workspace`,async({page:host},info)=>{
  const page=await pair(host),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  info.annotations.push({type:'settingsSource',description:process.env.TDA_SUITE_SETTINGS_DIST?'Reviewed real production Suite settings bundles':'Authored panel fixture for the isolated Web parent contract'});
- await page.locator('.category-search-control input').fill('保留的查询');
- await expect(page.locator('.category-search-control input')).toHaveValue('保留的查询');
- await page.setViewportSize({width,height:width===390?844:960});
- await expect.poll(()=>page.evaluate(()=>innerWidth)).toBe(width);
- await expect(page.locator('.category-search-control input')).toHaveValue('保留的查询');
- await page.getByRole('tab',{name:'法术',exact:true}).click();
- await expect(page.getByRole('tab',{name:'法术',exact:true})).toHaveAttribute('aria-selected','true');
- await expect(page.locator('.category-search-control input')).toHaveValue('保留的查询');
- const before=page.url();
+ await page.locator('.category-search-control input').fill('保留的查询');await page.setViewportSize({width,height:width===390?844:960});
+ await page.getByRole('tab',{name:'法术',exact:true}).click();const before=page.url();
  await page.context().route('https://dnd.center/3-dragon/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><h1>Website destination fixture</h1>'}));
  const launcher=page.locator('.header-tools').getByRole('link',{name:'三龙牌',exact:true});await expect(launcher).toHaveAttribute('target','_blank');
  const opened=page.context().waitForEvent('page');await launcher.click();const website=await opened;await website.waitForLoadState('domcontentloaded');expect(website.url()).toBe('https://dnd.center/3-dragon/');

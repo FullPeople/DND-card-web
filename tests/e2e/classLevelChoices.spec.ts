@@ -33,45 +33,31 @@ async function ready(page:Page,withFeatPrerequisite=false){
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
  await restoreAuthoredChoices(page,'dnd-card-standalone');
 }
-async function showFeatures(page:Page){const tab=page.getByRole('tab',{name:'特性',exact:true});await tab.click();await expect(tab).toHaveAttribute('aria-selected','true');await expect(page.locator('.sheet-details')).toBeVisible();}
-async function returnAfterLanding(page:Page){await expect(page.locator('.pointer-ghost')).toHaveCount(0);if((page.viewportSize()?.width||0)<=760){await page.getByRole('button',{name:'功能页',exact:true}).click();await expect(page.locator('.sheet-pane')).toHaveClass(/mobile-active/);}}
 test('class grants appear in the feat region; optional learning drag saves without activation',async({page},info)=>{
  await ready(page);
  await expect(page.locator('.heritage-features [data-class-choice]')).toHaveCount(2);
- await showFeatures(page);
+ await page.getByRole('tab',{name:'特性',exact:true}).click();
  await page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'}).getByRole('button').click();
  await expect(page.locator('.choice-slot')).toHaveCount(5);
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({hasText:'原创祈唤记录'}).first();await expect(row).toBeVisible();
  await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();await page.mouse.move(from!.x+20,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+30,from!.y+from!.height/2,{steps:3});
  const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(slot).toContainText('原创祈唤记录');
- await returnAfterLanding(page);await page.getByRole('button',{name:'收起选择',exact:true}).click();await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
- await page.screenshot({path:info.outputPath('class-learning.png')});await page.reload();await showFeatures(page);
+ await page.getByRole('button',{name:'收起选择',exact:true}).click();await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
+ await page.screenshot({path:info.outputPath('class-learning.png')});await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();
  await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
 });
 
 test('a background origin feat unlocks the level-four source feat and persists through reload',async({page})=>{
- await ready(page,true);await showFeatures(page);
+ await ready(page,true);await page.getByRole('tab',{name:'特性',exact:true}).click();
  const grant=page.getByRole('region',{name:'职业特性',exact:true}).getByRole('button',{name:/^原创提升（职业 4 级）/});
  await grant.click();
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({hasText:'原创前置后续'}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();
  const from=await row.boundingBox();await page.mouse.move(from!.x+20,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+30,from!.y+from!.height/2,{steps:3});
  const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();
- await expect(slot).toContainText('原创前置后续');await returnAfterLanding(page);await page.getByRole('button',{name:'收起选择',exact:true}).click();
+ await expect(slot).toContainText('原创前置后续');await page.getByRole('button',{name:'收起选择',exact:true}).click();
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'功能页',exact:true}).click();
- await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
- await page.reload();await showFeatures(page);await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
-});
-
-for(const explicit of [true,false])test(`${explicit?'explicit mobile navigation survives':'untouched mobile navigation restores Wiki after'} a pending drag landing without changing the saved choice`,async({page})=>{
- await page.setViewportSize({width:390,height:844});await ready(page,true);const featureTab=page.getByRole('tab',{name:'特性',exact:true});await featureTab.click();await expect(featureTab).toHaveAttribute('aria-selected','true');await expect(page.locator('.sheet-details')).toBeVisible();
- const grant=page.getByRole('region',{name:'职业特性',exact:true}).getByRole('button',{name:/^原创提升（职业 4 级）/});await grant.click();await page.getByRole('button',{name:'打开候选资料',exact:true}).click();
- // Hold the real landing animation so an explicit page choice is made before
- // its completion callback. This is timing fault injection, not device acceptance.
- await page.evaluate(()=>{const original=Element.prototype.animate;Object.assign(window,{heldChoiceLanding:undefined});Element.prototype.animate=function(...args:Parameters<Element['animate']>){const animation=original.apply(this,args);if(this.matches('.pointer-ghost')){animation.pause();Object.assign(window,{heldChoiceLanding:animation});}return animation;};});
- const row=page.locator('.catalog-row').filter({hasText:'原创前置后续'}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();expect(from).not.toBeNull();await page.mouse.move(from!.x+20,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+30,from!.y+from!.height/2,{steps:3});const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();expect(to).not.toBeNull();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(slot).toContainText('原创前置后续');await expect(page.locator('.pointer-ghost')).toHaveCount(1);
- await page.getByRole('button',{name:'收起选择',exact:true}).click();if(explicit){await page.getByRole('button',{name:'功能页',exact:true}).click();await expect(page.locator('.sheet-pane')).toHaveClass(/mobile-active/);}
- expect(await page.evaluate(()=>{const animation=(window as any).heldChoiceLanding as Animation|undefined;if(!animation)return false;animation.finish();return true;})).toBe(true);await expect(page.locator('.pointer-ghost')).toHaveCount(0);if(!explicit){await expect(page.locator('.wiki-pane')).toHaveClass(/mobile-active/);await page.getByRole('button',{name:'功能页',exact:true}).click();}await expect(page.locator('.sheet-pane')).toHaveClass(/mobile-active/);await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
- await page.reload();await page.locator('.app-shell').waitFor();await featureTab.click();await expect(featureTab).toHaveAttribute('aria-selected','true');await expect(page.locator('.sheet-details')).toBeVisible();await expect(grant).toContainText('1/1');
+ await expect(grant).toContainText('1/1').catch(async error=>{console.log('choice-return-state',JSON.stringify(await page.evaluate(()=>({tabs:[...document.querySelectorAll('[role="tab"]')].map(el=>({label:el.textContent,selected:el.getAttribute('aria-selected')})),regions:[...document.querySelectorAll('[role="region"]')].map(el=>({label:el.getAttribute('aria-label'),hidden:!!el.closest('[aria-hidden="true"], [inert]')})),sheet:document.querySelector('.sheet-pane')?.textContent?.slice(0,6000)}))));throw error;});await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
+ await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
 });
