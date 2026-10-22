@@ -20,6 +20,8 @@ dist-sync-prototype/
 dist-standalone/
 dist-standalone-cloud/
 dist-library-cloud/
+dist-switch-lab/
+test-results-switch-lab/
 
 test-results-standalone/
 

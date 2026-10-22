@@ -2,9 +2,9 @@ import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState,type RefOb
 import {frameLatest,sheetTouch,type SheetView} from './sheetTouch';
 export function useSheetZoom(ref:RefObject<HTMLDivElement|null>,identity:string,enabled=true){
  const [view,setView]=useState<SheetView>({zoom:1,x:0,y:0}),current=useRef(view);
- const paint=useCallback((next:SheetView)=>{const stack=ref.current?.querySelector<HTMLElement>('.paper-stack');if(stack&&enabled)stack.style.transform=`translate(${next.x}px,${next.y}px) scale(${next.zoom})`;},[ref,enabled]);
+ const paint=useCallback((next:SheetView)=>{const stack=ref.current?.querySelector<HTMLElement>('.paper-stack'),transform=`translate(${next.x}px,${next.y}px) scale(${next.zoom})`;if(stack&&enabled&&stack.style.transform!==transform)stack.style.transform=transform;},[ref,enabled]);
  const frames=useMemo(()=>frameLatest<SheetView>(paint),[paint]);
- const reset=useCallback(()=>{frames.cancel();current.current={zoom:1,x:0,y:0};paint(current.current);setView(current.current);},[paint,frames]);
+ const reset=useCallback(()=>{frames.cancel();current.current={zoom:1,x:0,y:0};paint(current.current);setView(previous=>previous.zoom===1&&previous.x===0&&previous.y===0?previous:current.current);},[paint,frames]);
  useLayoutEffect(reset,[identity,enabled,reset]);
  useEffect(()=>{window.addEventListener('sheet-fullscreen-change',reset);return()=>window.removeEventListener('sheet-fullscreen-change',reset);},[reset]);
  useEffect(()=>{const root=ref.current;if(!root||!enabled)return;

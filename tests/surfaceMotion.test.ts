@@ -27,6 +27,19 @@ describe('navigation paint and numeric renders have independent lifetimes',()=>{
   const f=fixture();f.motion.update('card-a:main');f.motion.update('card-b:main');
   expect(f.animate).toHaveBeenCalledTimes(1);
  });
+ it('switches scoped cards immediately and cancels the previous page fade',()=>{
+  const f=fixture();f.motion.update('main',true,'card-a');f.motion.update('spells',true,'card-a');
+  expect(f.animate).toHaveBeenCalledTimes(1);
+  f.motion.update('main',true,'card-b');
+  expect(f.animate).toHaveBeenCalledTimes(1);expect(f.handles[0].cancel).toHaveBeenCalledTimes(1);
+  f.motion.update('features',true,'card-b');expect(f.animate).toHaveBeenCalledTimes(2);
+ });
+ it('never dims warmed cards during repeated owner switches',()=>{
+  const f=fixture();f.motion.update('main',true,'card-a');
+  for(let i=0;i<30;i++)f.motion.update('main',true,i%2?'card-a':'card-b');
+  expect(f.animate).not.toHaveBeenCalled();
+  f.motion.update('spells',true,'card-a');expect(f.animate).toHaveBeenCalledTimes(1);
+ });
  it('reduced motion cancels paint and never replays skipped pages',()=>{
   const f=fixture();f.motion.update('main');f.motion.update('spells');f.reduce(true);f.motion.update('features');
   expect(f.handles[0].cancel).toHaveBeenCalledTimes(1);expect(f.animate).toHaveBeenCalledTimes(1);

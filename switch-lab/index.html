@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>角色卡切换实验 · DND Center</title>
+</head>
+<body class="switch-lab-page">
+  <header class="lab-header">
+    <div><h1>角色卡切换实验</h1><p>从简单页面逐层加入真实卡面，分别观察计算、渲染和下一帧。这里不加载 Wiki，也不连接云端。</p></div>
+    <a href="/card/">返回正式角色卡</a>
+  </header>
+  <main class="lab-layout">
+    <section class="lab-controls" aria-label="实验设置">
+      <label>比较方式<select id="lab-mode">
+        <option value="native" selected>1 · 普通页面，保留所有内容</option>
+        <option value="react">2 · 简单卡面，切换时渲染</option>
+        <option value="compute">3 · 真实卡面，切换时计算</option>
+        <option value="cached">4 · 真实卡面，提前缓存计算</option>
+        <option value="retained">5 · 真实卡面，计算和卡面都保留</option>
+      </select></label>
+      <label>显示方式<select id="lab-display"><option value="screen" selected>非 A4</option><option value="a4">A4</option></select></label>
+      <label class="lab-check"><input id="lab-decoration" type="checkbox" />加入原有卡面特效</label>
+      <label class="lab-check"><input id="lab-legacy-fade" type="checkbox" />对照原 180 毫秒淡入</label>
+      <label>示例规模<select id="lab-size"><option value="12">每卡 12 个原创特性</option><option value="80" selected>每卡 80 个原创特性</option><option value="200">每卡 200 个原创特性</option></select></label>
+      <div class="lab-actions"><button id="lab-samples">恢复三张示例卡</button><label class="lab-file">读入本机 JSON<input id="lab-import" type="file" accept=".json,application/json" /></label></div>
+      <p class="lab-private">读入只用于当前页内存，刷新即清除；不会保存到正式卡册或上传。导出的测量只含数量和耗时。</p>
+      <p id="lab-status" role="status">正在准备实验…</p>
+      <nav id="lab-tabs" class="lab-tabs" aria-label="实验角色"></nav>
+      <div class="lab-actions"><button id="lab-run">往返测试三轮</button><button id="lab-clear">清空测量</button><button id="lab-export">导出测量</button></div>
+      <div id="lab-summary" class="lab-summary" aria-live="polite"></div>
+      <details><summary>测量说明</summary><p>“界面提交”是点击处理开始到内容更新完成；“下一帧”是请求动画帧后的观测，包含浏览器帧调度，不代表精确像素绘制时间。准备耗时单独记录；“卡面提交”只统计卡面根组件的提交，并非所有子组件。切换期间另统计求值、挂载和卸载。示例结果不能代替真实卡或其他设备验收。</p></details>
+      <div class="lab-results-wrap"><table class="lab-results"><thead><tr><th>切换</th><th>界面提交</th><th>下一帧</th><th>求值</th><th>卡面提交</th><th>DOM 增／删</th><th>空白帧</th></tr></thead><tbody id="lab-results"></tbody></table></div>
+    </section>
+    <section id="lab-stage" class="lab-stage" aria-label="实验卡面"></section>
+  </main>
+  <script type="module" src="./main.tsx"></script>
+</body>
+</html>
