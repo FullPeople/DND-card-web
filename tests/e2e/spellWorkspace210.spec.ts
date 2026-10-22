@@ -142,11 +142,11 @@ test('full class cantrips accept an explicitly recorded feat gift separately acr
  await drag(page,mist,recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await drag(page,mist,recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
- await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();
  await expect(page.locator('.class-compatibility-banner')).toBeVisible();
  await expect(group.locator('.spell-grant-tile')).toHaveCount(1);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await group.getByRole('button',{name:'小雾团',exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'从角色卡移除',exact:true}).click();
- await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);
+ await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await expect(page.locator('.save-status')).toContainText('已保存到本机');await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);await page.reload();await page.getByRole('tab',{name:'法术',exact:true}).click();await expect(group.locator('.spell-grant-tile')).toHaveCount(0);await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await expect(page.locator('.class-compatibility-banner')).toBeVisible();
  await drag(page,library.getByRole('button',{name:'小雾团',exact:true}),recipient);await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
  await drag(page,library.getByRole('button',{name:'小火花',exact:true}),recipient);await expect(page.locator('.suite-toast')).toContainText('赠送法术数量已满');await expect(group.locator('.spell-grant-tile')).toHaveCount(1);
