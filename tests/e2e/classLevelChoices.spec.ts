@@ -33,31 +33,36 @@ async function ready(page:Page,withFeatPrerequisite=false){
  await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
  await restoreAuthoredChoices(page,'dnd-card-standalone');
 }
+async function openFeatures(page:Page){
+ const tab=page.getByRole('tab',{name:'特性',exact:true});await tab.click();await expect(tab).toHaveAttribute('aria-selected','true');
+ const body=page.locator('.paper.page-1 .features-page-grid');await expect(body).toBeVisible();await expect(body.locator('.detail-class-features')).toBeVisible();await expect(page.locator('.overview-choice-overlay')).toHaveCount(0);
+ return body;
+}
 test('class grants appear in the feat region; optional learning drag saves without activation',async({page},info)=>{
  await ready(page);
  await expect(page.locator('.heritage-features [data-class-choice]')).toHaveCount(2);
- await page.getByRole('tab',{name:'特性',exact:true}).click();
- await page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'}).getByRole('button').click();
- await expect(page.locator('.choice-slot')).toHaveCount(5);
- if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'打开候选资料',exact:true}).click();
+ const features=await openFeatures(page),learning=features.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'});
+ await learning.getByRole('button').click();
+ const choice=features.getByRole('region',{name:'选择原创祈唤学习',exact:true});await expect(choice).toBeVisible();await expect(choice.locator('.choice-slot')).toHaveCount(5);
+ if((page.viewportSize()?.width||0)<=760)await choice.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({hasText:'原创祈唤记录'}).first();await expect(row).toBeVisible();
  await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();await page.mouse.move(from!.x+20,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+30,from!.y+from!.height/2,{steps:3});
- const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(slot).toContainText('原创祈唤记录');
- await page.getByRole('button',{name:'收起选择',exact:true}).click();await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
- await page.screenshot({path:info.outputPath('class-learning.png')});await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();
- await expect(page.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
+ const slot=choice.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(slot).toContainText('原创祈唤记录');
+ await choice.getByRole('button',{name:'收起选择',exact:true}).click();await expect(learning).toContainText('原创祈唤记录');
+ await page.screenshot({path:info.outputPath('class-learning.png')});await page.reload();const restored=await openFeatures(page);
+ await expect(restored.locator('[data-class-choice]').filter({hasText:'原创祈唤学习'})).toContainText('原创祈唤记录');
 });
 
 test('a background origin feat unlocks the level-four source feat and persists through reload',async({page})=>{
- await ready(page,true);await page.getByRole('tab',{name:'特性',exact:true}).click();
- const grant=page.getByRole('region',{name:'职业特性',exact:true}).getByRole('button',{name:/^原创提升（职业 4 级）/});
- await grant.click();
- if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'打开候选资料',exact:true}).click();
+ await ready(page,true);const features=await openFeatures(page);
+ const grant=features.getByRole('region',{name:'职业特性',exact:true}).getByRole('button',{name:/^原创提升（职业 4 级）/});
+ await grant.click();const choice=features.locator('.choice-workspace');await expect(choice).toBeVisible();
+ if((page.viewportSize()?.width||0)<=760)await choice.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({hasText:'原创前置后续'}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();
  const from=await row.boundingBox();await page.mouse.move(from!.x+20,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+30,from!.y+from!.height/2,{steps:3});
- const slot=page.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();
- await expect(slot).toContainText('原创前置后续');await page.getByRole('button',{name:'收起选择',exact:true}).click();
+ const slot=choice.locator('.choice-slot').first();await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();
+ await expect(slot).toContainText('原创前置后续');await choice.getByRole('button',{name:'收起选择',exact:true}).click();
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'功能页',exact:true}).click();
  await expect(grant).toContainText('1/1').catch(async error=>{console.log('choice-return-state',JSON.stringify(await page.evaluate(()=>({tabs:[...document.querySelectorAll('[role="tab"]')].map(el=>({label:el.textContent,selected:el.getAttribute('aria-selected')})),regions:[...document.querySelectorAll('[role="region"]')].map(el=>({label:el.getAttribute('aria-label'),hidden:!!el.closest('[aria-hidden="true"], [inert]')})),sheet:document.querySelector('.sheet-pane')?.textContent?.slice(0,6000)}))));throw error;});await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
- await page.reload();await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(grant).toContainText('1/1');await expect(page.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
+ await page.reload();await openFeatures(page);await expect(grant).toContainText('1/1');await expect(features.getByRole('region',{name:'专长',exact:true})).toContainText('原创前置后续');
 });
