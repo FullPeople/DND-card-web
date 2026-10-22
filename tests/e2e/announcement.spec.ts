@@ -10,6 +10,8 @@ async function open(page:Page){
  await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete',{timeout:12000});
  await expect(page.locator('.paper')).toBeVisible();
  await expect(dialog(page)).toBeVisible();
+ await expect(dialog(page).locator('.announcement-faq')).toBeVisible();
+ await expect(dialog(page).getByRole('button',{name:'我知道了',exact:true})).toBeEnabled();
 }
 async function finger(page:Page){
  const cdp=await page.context().newCDPSession(page);
