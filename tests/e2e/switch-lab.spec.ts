@@ -15,11 +15,18 @@ test('minimal page loads no React, rules or production style; retained native co
  await info.attach('native-report',{body:JSON.stringify(result,null,2),contentType:'application/json'});
 });
 
-for(const mode of ['react','compute','cached','retained'])test(`${mode}: compare the actual layer with unchanged character contents`,async({page},info)=>{
+for(const mode of ['react','compute','cached','retained'])test(`${mode}: compare outer React lifecycle and actual DOM changes with unchanged character contents`,async({page},info)=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(String(error)));
  await page.goto('./');await ready(page);await page.locator('#lab-mode').selectOption(mode);await ready(page);
+ await page.evaluate(()=>{(window as any).labOriginalElements=[...document.querySelectorAll('#lab-stage *')];});
  const result=await run(page);expect(errors).toEqual([]);
- if(mode==='retained')expect(result.samples.every((row:any)=>Object.values(row.counts).every(value=>value===0))).toBe(true);
+ const removedOriginalElements=await page.evaluate(()=>(window as any).labOriginalElements.filter((element:Element)=>!element.isConnected).length);
+ expect(result.version).toBe(1);expect(Object.keys(result.metricSemantics.counts).sort()).toEqual(Object.keys(result.counts).sort());expect(result.metricSemantics.counts.mounts).toContain('zero does not imply that descendant DOM elements were retained');expect(result.metricSemantics.counts.commits).toContain('not every React root commit');expect(result.metricSemantics.counts.domAdded).toContain('excludes text, attribute and style changes');
+ await expect(page.locator('#lab-metric-note')).toContainText('外层挂载／卸载为 0 时，卡面内部仍可能替换 DOM');await expect(page.getByRole('columnheader',{name:'外层挂载／卸载',exact:true})).toBeVisible();
+ expect(result.counts.mounts).toBe(mode==='retained'?result.cardCount:1);expect(result.counts.unmounts).toBe(0);
+ expect(result.samples.every((row:any)=>row.counts.mounts===0&&row.counts.unmounts===0)).toBe(true);
+ if(mode==='retained'){expect(result.samples.every((row:any)=>Object.values(row.counts).every(value=>value===0))).toBe(true);expect(removedOriginalElements).toBe(0);}
+ else{expect(result.samples.every((row:any)=>row.counts.domAdded>0&&row.counts.domRemoved>0)).toBe(true);expect(removedOriginalElements).toBeGreaterThan(0);}
  if(mode==='compute')expect(result.samples.every((row:any)=>row.counts.evaluations===1&&row.counts.choices===1&&row.counts.commits>0)).toBe(true);
  if(mode==='cached')expect(result.samples.every((row:any)=>row.counts.evaluations===0&&row.counts.choices===0&&row.counts.commits>0)).toBe(true);
  if(mode==='react')expect(result.samples.every((row:any)=>row.counts.evaluations===0&&row.counts.commits>0)).toBe(true);

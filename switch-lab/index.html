@@ -31,8 +31,13 @@
       <nav id="lab-tabs" class="lab-tabs" aria-label="实验角色"></nav>
       <div class="lab-actions"><button id="lab-run">往返测试三轮</button><button id="lab-clear">清空测量</button><button id="lab-export">导出测量</button></div>
       <div id="lab-summary" class="lab-summary" aria-live="polite"></div>
-      <details><summary>测量说明</summary><p>“界面提交”是点击处理开始到内容更新完成；“下一帧”是请求动画帧后的观测，包含浏览器帧调度，不代表精确像素绘制时间。准备耗时单独记录；“卡面提交”只统计卡面根组件的提交，并非所有子组件。切换期间另统计求值、挂载和卸载。示例结果不能代替真实卡或其他设备验收。</p></details>
-      <div class="lab-results-wrap"><table class="lab-results"><thead><tr><th>切换</th><th>界面提交</th><th>下一帧</th><th>求值</th><th>卡面提交</th><th>DOM 增／删</th><th>空白帧</th></tr></thead><tbody id="lab-results"></tbody></table></div>
+      <p id="lab-metric-note" class="lab-private">外层挂载／卸载为 0 时，卡面内部仍可能替换 DOM。请同时查看外层卡面提交和 DOM 元素增／删。</p>
+      <details><summary>测量说明</summary>
+        <p>“界面提交”是点击处理开始到同步内容更新完成；“下一帧”包含浏览器帧调度，不代表精确像素绘制时间。准备耗时单独记录。</p>
+        <p>“外层卡面提交”只统计实验卡面外层 React 组件的布局提交，未覆盖所有子组件或 React 根提交。“外层挂载／卸载”只统计外层包装组件的生命周期。第 2～4 层会复用外层组件，因此它们也可能保持零挂载、零卸载，同时重新求值、提交或替换内部 DOM；这与第 5 层保留全部卡面有不同含义。</p>
+        <p>“DOM 元素增／删”统计卡面区域新增或移除的元素及其后代，不统计文字、属性或样式变更。第 5 层切换可见性和 inert 属性也不计入增删。导出的总计包含准备阶段，每条切换记录只统计本次切换到第一帧观测之间的变化。示例结果不能代替真实卡或其他设备验收。</p>
+      </details>
+      <div class="lab-results-wrap"><table class="lab-results"><thead><tr><th>切换</th><th>界面提交</th><th>下一帧</th><th>规则求值</th><th>外层卡面提交</th><th>外层挂载／卸载</th><th>DOM 元素增／删</th><th>空白帧</th></tr></thead><tbody id="lab-results"></tbody></table></div>
     </section>
     <section id="lab-stage" class="lab-stage" aria-label="实验卡面"></section>
   </main>

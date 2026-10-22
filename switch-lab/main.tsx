@@ -1,6 +1,6 @@
 import type {Character} from '../src/core/model';
 import {authoredCards} from './cards';
-import {counts,emptyCounts,type Counts,type Mode,type CardRenderer} from './types';
+import {counts,emptyCounts,metricSemantics,type Counts,type Mode,type CardRenderer} from './types';
 import './style.css';
 
 type Sample={sequence:number;from:number;to:number;mode:Mode;commitMs:number;nextFrameMs:number;counts:Counts;blankFrames:number;wrongCardFrames:number;opacity:number};
@@ -24,7 +24,7 @@ function summary(){
  const sorted=samples.map(row=>row.commitMs).sort((a,b)=>a-b),median=sorted.length?sorted[Math.floor(sorted.length/2)]:0;
  $('lab-summary').textContent=`准备 ${prepareMs.toFixed(1)} ms · ${samples.length} 次切换 · 界面提交中位 ${median.toFixed(2)} ms`;
  const body=$('lab-results');body.replaceChildren();for(const sample of samples.slice(-40)){
-  const tr=document.createElement('tr');for(const value of [`${sample.from+1} → ${sample.to+1}`,sample.commitMs.toFixed(2)+' ms',sample.nextFrameMs.toFixed(2)+' ms',String(sample.counts.evaluations),String(sample.counts.commits),`${sample.counts.domAdded}／${sample.counts.domRemoved}`,String(sample.blankFrames)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}body.append(tr);
+  const tr=document.createElement('tr');for(const value of [`${sample.from+1} → ${sample.to+1}`,sample.commitMs.toFixed(2)+' ms',sample.nextFrameMs.toFixed(2)+' ms',String(sample.counts.evaluations),String(sample.counts.commits),`${sample.counts.mounts}／${sample.counts.unmounts}`,`${sample.counts.domAdded}／${sample.counts.domRemoved}`,String(sample.blankFrames)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}body.append(tr);
  }
  document.body.dataset.labSamples=String(samples.length);
 }
@@ -78,5 +78,5 @@ $('lab-samples').onclick=()=>{if(running)return;cards=authoredCards(Number($<HTM
 $('lab-import').onchange=()=>{const input=$<HTMLInputElement>('lab-import'),file=input.files?.[0];if(file&&!running)void importFile(file).catch(error=>{status.textContent=String(error);});input.value='';};
 $('lab-clear').onclick=()=>{samples=[];summary();};
 $('lab-run').onclick=()=>{if(!ready||running)return;running=true;for(const node of document.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('.lab-controls input,.lab-controls select,.lab-controls button'))node.disabled=true;void(async()=>{for(let round=0;round<3;round++)for(const index of [...cards.keys()].slice(1).concat([...cards.keys()].reverse().slice(1))){await select(index);await frames();}if(JSON.stringify(cards)!==original)throw Error('验收失败：实验意外改变了角色内容。');status.textContent='三轮完成 · 原角色内容完整相同';})().catch(error=>{status.textContent=String(error);}).finally(()=>{running=false;for(const node of document.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('.lab-controls input,.lab-controls select,.lab-controls button'))node.disabled=false;});};
-$('lab-export').onclick=()=>{const report={format:'dnd-card-switch-lab',version:1,scope:'one document, no Wiki or cloud; frame timing is an observation, not exact pixel paint',mode,display:$<HTMLSelectElement>('lab-display').value,cardCount:cards.length,selectionCounts:cards.map(card=>card.selections.length),prepareMs,counts,samples,unchanged:JSON.stringify(cards)===original,legacyFade:$<HTMLInputElement>('lab-legacy-fade').checked,decoration:$<HTMLInputElement>('lab-decoration').checked};const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='card-switch-measurements.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);};
+$('lab-export').onclick=()=>{const report={format:'dnd-card-switch-lab',version:1,scope:'one document, no Wiki or cloud; frame timing is an observation, not exact pixel paint',metricSemantics,mode,display:$<HTMLSelectElement>('lab-display').value,cardCount:cards.length,selectionCounts:cards.map(card=>card.selections.length),prepareMs,counts,samples,unchanged:JSON.stringify(cards)===original,legacyFade:$<HTMLInputElement>('lab-legacy-fade').checked,decoration:$<HTMLInputElement>('lab-decoration').checked};const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='card-switch-measurements.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);};
 cards=authoredCards(80);original=JSON.stringify(cards);void setup().catch(error=>{status.textContent=String(error);});
