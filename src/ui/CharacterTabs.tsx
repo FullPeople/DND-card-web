@@ -4,20 +4,20 @@ import {CloudSaveBadge} from '../cloud/CloudSaveBadge';
 import {useCharacterBookOrder} from './characterBookOrder';
 /** A single-row, roving-tabindex list; navigation never moves the sheet viewport. */
 export function CharacterTabs({characters:inputCharacters,activeId,warnings,label,select}:{characters:Character[];activeId:string;warnings:Set<string>;label:string;select:(id:string)=>void}){
- const characters=useCharacterBookOrder(inputCharacters),list=useRef<HTMLDivElement>(null);
+ const characters=useCharacterBookOrder(inputCharacters),list=useRef<HTMLDivElement>(null),visibleStrip=useRef<{ids:string;fits:boolean}>({ids:'',fits:false});
  const timing=useRef<{id:string;started:number}|undefined>(undefined);
  const choose=(id:string)=>{if(id!==activeId){if(list.current){delete list.current.dataset.switchCommitMs;delete list.current.dataset.switchPaintMs;}timing.current={id,started:performance.now()};}select(id);};
  const drag=useRef<{id:number;x:number;y:number;left:number;moved:boolean}|undefined>(undefined),suppress=useRef(false);
  const tabIds=JSON.stringify(characters.map(character=>character.id));
  const reveal=(button:HTMLButtonElement)=>{const container=list.current;if(!container)return;const strip=container.getBoundingClientRect(),tab=button.getBoundingClientRect();if(tab.left<strip.left)container.scrollLeft+=tab.left-strip.left;else if(tab.right>strip.right)container.scrollLeft+=tab.right-strip.right;};
- useLayoutEffect(()=>{const button=list.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);},[activeId,tabIds]);
+ useLayoutEffect(()=>{if(visibleStrip.current.ids===tabIds&&visibleStrip.current.fits)return;const button=list.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);},[activeId,tabIds]);
  useLayoutEffect(()=>{
   const sample=timing.current,container=list.current;if(!sample||sample.id!==activeId||!container)return;
   container.dataset.switchCommitMs=(performance.now()-sample.started).toFixed(2);
   let second=0;const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>{if(timing.current!==sample)return;container.dataset.switchPaintMs=(performance.now()-sample.started).toFixed(2);timing.current=undefined;});});
   return()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
  },[activeId]);
- useLayoutEffect(()=>{const container=list.current;if(!container)return;const observer=new ResizeObserver(()=>{const button=container.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);});// Tab names can change width without changing the strip width. ResizeObserver
+ useLayoutEffect(()=>{const container=list.current;if(!container)return;const observer=new ResizeObserver(()=>{visibleStrip.current={ids:tabIds,fits:container.scrollWidth<=container.clientWidth};if(visibleStrip.current.fits)return;const button=container.querySelector<HTMLButtonElement>('[aria-selected="true"]');if(button)reveal(button);});// Tab names can change width without changing the strip width. ResizeObserver
  // runs after layout, avoiding a forced whole-sheet layout on every character edit.
  observer.observe(container);for(const button of container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))observer.observe(button);return()=>observer.disconnect();},[tabIds]);
  useEffect(()=>{const container=list.current;if(!container)return;const wheel=(event:WheelEvent)=>{if(event.ctrlKey||container.scrollWidth<=container.clientWidth)return;const distance=(Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY)*(event.deltaMode===1?24:event.deltaMode===2?container.clientWidth:1);event.preventDefault();container.scrollLeft+=distance;};container.addEventListener('wheel',wheel,{passive:false});return()=>container.removeEventListener('wheel',wheel);},[]);

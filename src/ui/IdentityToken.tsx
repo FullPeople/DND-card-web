@@ -18,6 +18,10 @@ export function IdentityToken({ row, c, edit, inspect, children }: { row: Select
     if(!token||!title)return;
     let frame=0;
     const fit=()=>{
+      if(!token.isConnected)return;
+      // Screen titles already wrap at the approved readable font size. Their
+      // card need not be laid out again to perform the A4 shrink-to-fit pass.
+      if(title.closest('.screen-mode')){if(title.style.fontSize)title.style.removeProperty('font-size');return;}
       title.style.removeProperty('font-size');
       const base=parseFloat(getComputedStyle(title).fontSize);
       if(title.clientWidth && title.scrollWidth>title.clientWidth)title.style.fontSize=`${Math.max(5,Math.floor(base*title.clientWidth/title.scrollWidth*100)/100)}px`;

@@ -1,3 +1,4 @@
+import {useSheetContext} from './scopedSheetContext';
 import {ShareEntryButton} from './EntrySharing';
 import {ChevronDownIcon,ChevronRightIcon} from './icons';
 import {useRef,useState,useEffect,useLayoutEffect,useContext,type PointerEvent} from 'react';
@@ -27,7 +28,7 @@ export function StockBoard({container,targets=[],gm=false,disabled=false,operati
  const toggleCollapsed=()=>setCollapsed(value=>{try{localStorage.setItem('inventory-collapsed:'+container.id,String(!value));}catch{}return !value;});
  const [view,setView]=useState<'grid'|'list'>(()=>{try{return container.kind!=='public'&&localStorage.getItem('inventory-view:'+container.id)==='list'?'list':'grid';}catch{return 'grid';}}),[selected,setSelected]=useState<string[]>([]),[menu,setMenu]=useState<{x:number;y:number;ids:string[]}>(),[quantity,setQuantity]=useState('1'),[editingQuantity,setEditingQuantity]=useState(''),[split,setSplit]=useState<{row:Stock;target?:string;slot?:number}>(),[marquee,setMarquee]=useState<{x:number;y:number;w:number;h:number}>();
  useEffect(()=>{if(!menu)return;const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setMenu(undefined);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[!!menu]);
- const onPaper=!!useContext(CardIdentityContext),visuals=useContext(CardVisualContext),falling=onPaper&&visuals.active.has('incapacitated'),preview=useContext(ReferenceContext);
+ const onPaper=!!useContext(CardIdentityContext),visuals=useContext(CardVisualContext),falling=onPaper&&visuals.active.has('incapacitated'),preview=useSheetContext('reference',ReferenceContext);
  const positions=useRef(new Map<string,{x:number;y:number}>()),grid=useRef<HTMLDivElement>(null),latest=useRef(container);latest.current=container;
  useEffect(()=>{try{localStorage.setItem('inventory-view:'+container.id,view);}catch{}},[container.id,view]);
  const selectionCleanup=useRef<()=>void>(undefined);useEffect(()=>()=>selectionCleanup.current?.(),[]);

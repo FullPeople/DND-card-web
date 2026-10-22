@@ -49,3 +49,23 @@ jobs:
           include-hidden-files: true
           path: .local-evidence/class-level-choices/
           retention-days: 3
+  retained-card-browser:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Retained DOM, isolated contexts, input ownership, save recovery and catalog worker
+        run: npm run test:retained-card-browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: retained-card-browser-evidence
+          include-hidden-files: true
+          path: .local-evidence/retained-card-browser/
+          retention-days: 3

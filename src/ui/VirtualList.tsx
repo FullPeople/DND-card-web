@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 export function VirtualList<T>({items,rowHeight,renderRow,itemKey,header,className='',label,resetKey,empty,scrollToIndex,headerHeight=25,restoreScrollTop=0}: {items:T[];rowHeight:number;renderRow:(item:T,index:number)=>ReactNode;itemKey:(item:T)=>string;header?:ReactNode;className?:string;label?:string;resetKey?:string;empty?:ReactNode;scrollToIndex?:number;headerHeight?:number;restoreScrollTop?:number}) {
  const root=useRef<HTMLDivElement>(null),frame=useRef(0);
  const [viewport,setViewport]=useState({top:0,height:300});
- const update=()=>{const node=root.current;if(node){const top=node.scrollTop,height=node.clientHeight;setViewport(v=>v.top===top&&v.height===height?v:{top,height});}};
+ const update=()=>{const node=root.current;if(node?.isConnected){const top=node.scrollTop,height=node.clientHeight;setViewport(v=>v.top===top&&v.height===height?v:{top,height});}};
  useLayoutEffect(()=>{const node=root.current!;const observer=new ResizeObserver(update);observer.observe(node);return()=>{observer.disconnect();cancelAnimationFrame(frame.current);};},[]);
  // ResizeObserver supplies the initial size before paint. Do not force another
  // whole-page layout by reading it again while React commits a list reset.

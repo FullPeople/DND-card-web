@@ -1,14 +1,15 @@
+import {useSheetContext} from './scopedSheetContext';
 import {useEntryMenu,type EntryMenuOptions} from './EntrySharing';
 import {DragContext} from './DragEntry';
 import {entryLabel} from '../core/entryLabel';
-import { Children, createContext, useContext, type ButtonHTMLAttributes } from 'react';
+import { Children, createContext, type ButtonHTMLAttributes } from 'react';
 import type { Entry } from '../core/model';
 import type { Point } from './pointerDrag';
 
 type Preview = { resolve?: (reference:string,kind?:string)=>Entry|undefined; commit?: (anchor:HTMLElement, reference:string, kind?:string, entry?:Entry)=>boolean; show: (anchor: HTMLElement, reference: string, kind?: string, point?: Point, entry?: Entry, sourceLabel?: string) => void; move: (anchor: HTMLElement, point: Point) => void; leave: () => void; close: () => void; active?: HTMLElement; activeId?: string };
 export const ReferenceContext = createContext<Preview | null>(null);
 export function Reference({ reference, kind, children, onClick, onAuxClick, onContextMenu,onPointerDown, className = 'inline-reference', entry, sourceLabel, previewEnabled = true, commitOnClick = true,menuOptions, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { menuOptions?:EntryMenuOptions;commitOnClick?:boolean; previewEnabled?:boolean; reference: string; kind?: string; entry?: Entry; sourceLabel?: string }) {
-  const preview = useContext(ReferenceContext), menu=useEntryMenu(), drag=useContext(DragContext),shareable=!!menu;
+  const preview = useSheetContext('reference',ReferenceContext), menu=useEntryMenu(), drag=useSheetContext('drag',DragContext),shareable=!!menu;
   const pointerDown:ButtonHTMLAttributes<HTMLButtonElement>['onPointerDown']=event=>{
     if(onPointerDown){onPointerDown(event);return;}
     if(!event.currentTarget.closest('.wiki-pane,.keyword-preview'))return;

@@ -5,12 +5,13 @@ import {SIZE_ENTRIES} from '../data/sizes';
 import {snapshotMemo} from './snapshotMemo';
 import {settledSnapshotCheck} from './settledSnapshotCheck';
 import {standaloneCardViews,prepareStandaloneCards,CardPreparationContextChanged,yieldCardPreparation} from './standaloneCardViews';
+import {catalogReferenceIndex} from './catalogReferenceIndex';
 
 export type CatalogBasis={characters:Character[];sources:SiteSources|undefined;packs:RulePack[];custom:Entry[];author:boolean;monsters:boolean;writable:boolean};
 export function sameCatalogBasis(a:CatalogBasis,b:CatalogBasis){
  return a.characters===b.characters&&a.sources===b.sources&&a.packs===b.packs&&a.custom===b.custom&&a.author===b.author&&a.monsters===b.monsters&&a.writable===b.writable;
 }
-export function cardCatalogEntries(raw:Entry[],basis:Pick<CatalogBasis,'packs'|'custom'|'author'|'monsters'>){
+export function cardCatalogEntries(raw:Entry[],basis:Pick<CatalogBasis,'packs'|'custom'|'author'|'monsters'>):Entry[]{
  return [...SIZE_ENTRIES,...raw,...basis.packs.flatMap(pack=>pack.entries.map(entry=>({...entry,raw:{...entry.raw,_customPack:true}}))),...(basis.author?basis.custom:[])].filter(entry=>basis.monsters||entry.kind!=='monster');
 }
 /** Stage a complete read context without publishing partial rules or touching a card.
@@ -28,6 +29,19 @@ export async function prepareStandaloneCatalog(raw:Entry[],basis:CatalogBasis,op
   if(!current())throw new CardPreparationContextChanged();views.warmReconciliation(card,options.syncSourceSpells);
  }
  if(!current())throw new CardPreparationContextChanged();
- return {raw,basis,entries,sources,remember,check,views};
+ await pause();if(options.signal.aborted)throw new DOMException('Catalog preparation cancelled','AbortError');
+ if(!current())throw new CardPreparationContextChanged();
+ const names=views.nameIndex();
+ await pause();if(options.signal.aborted)throw new DOMException('Catalog preparation cancelled','AbortError');
+ if(!current())throw new CardPreparationContextChanged();
+ const references=catalogReferenceIndex(entries,names);
+ return {raw,basis,entries,sources,remember,check,views,names,references};
 }
 export type PreparedStandaloneCatalog=Awaited<ReturnType<typeof prepareStandaloneCatalog>>;
+
+/** Navigation may commit before a low-priority catalog state update. Adopt the
+ * complete prepared catalog with its already-persisted source settings rather
+ * than constructing a temporary new-source/old-catalog calculation context. */
+export function preparedCatalogEntries(prepared:PreparedStandaloneCatalog|undefined,raw:Entry[],basis:CatalogBasis):Entry[]|undefined{
+ return prepared&&(prepared.raw===raw||prepared.sources===basis.sources)&&prepared.basis.packs===basis.packs&&prepared.basis.custom===basis.custom&&prepared.basis.author===basis.author&&prepared.basis.monsters===basis.monsters?prepared.entries:undefined;
+}

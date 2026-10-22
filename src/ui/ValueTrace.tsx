@@ -1,10 +1,12 @@
 import {createContext,useContext,useLayoutEffect,useRef,useState,type ReactNode,type CSSProperties} from 'react';
+import {isActiveSheetTarget} from '../platform/activeSheet';
 import {CloseIcon} from './icons';
 import {createPortal} from 'react-dom';
 import {ABILITY_LABELS,SKILLS,type Character,type Derived,type Ability,type SheetBonus} from '../core/model';
 import {spellState,spellValues} from '../core/characterDetails';
 import {evaluate} from '../core/engine';
 import './valueTrace.css';
+import {useRetainedCardActive} from './RetainedCardVisibility';
 
 export type TraceModel={title:string;value:number;result:number;rows:string[];change?:(n:number)=>void;min?:number;max?:number};
 type Context={c:Character;d:Derived;open:(anchor:HTMLElement,model:TraceModel)=>void};
@@ -18,6 +20,7 @@ export function traceForInput(context:Context,label:string,value:number,change:(
  return undefined;
 }
 export function ValueTraceProvider({c,d,enabled=true,children}:{c:Character;d:Derived;enabled?:boolean;children:ReactNode}){
+ const active=useRetainedCardActive();enabled=enabled&&active;
  const [opened,setOpened]=useState<{element:HTMLElement;model:TraceModel;id:number;focusRequest:number}>(),serial=useRef(0);
  useLayoutEffect(()=>setOpened(undefined),[c.id,enabled]);
  return <ValueTraceContext.Provider value={enabled?{c,d,open:(element,model)=>setOpened(previous=>previous?.element===element?{...previous,focusRequest:previous.focusRequest+1}:{element,model,id:++serial.current,focusRequest:0})}:undefined}>{children}{opened&&enabled&&<TracePanel key={opened.id} element={opened.element} model={opened.model} focusRequest={opened.focusRequest} c={c} d={d} close={()=>setOpened(undefined)}/>}</ValueTraceContext.Provider>;
@@ -49,7 +52,7 @@ function TracePanel({element,model,focusRequest,c,d:current,close}:{element:HTML
  const tab=(backward:boolean)=>{
   // A portal sits at the end of body, but keyboard navigation belongs at the
   // original field. Continue from that anchor without painting an idle total.
-  const targets=[...document.querySelectorAll<HTMLElement>('input:not([disabled]),button:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(target=>!panel.current?.contains(target)&&target.tabIndex>=0&&target.getClientRects().length>0);
+  const targets=[...document.querySelectorAll<HTMLElement>('input:not([disabled]),button:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(target=>isActiveSheetTarget(target)&&!panel.current?.contains(target)&&target.tabIndex>=0&&target.getClientRects().length>0);
   const index=targets.indexOf(element),next=targets[index+(backward?-1:1)];commit();close();next?.focus();
  };
  return createPortal(<div ref={panel} className="value-trace-panel" role="dialog" aria-label={`${model.title}数据追溯`} style={{left,top,width:270}}><header style={{height:Math.max(24,fieldTop-10)}}><strong>{model.title}</strong><button aria-label="关闭数据追溯" onClick={()=>{commit();close();}}><CloseIcon/></button></header><div style={{height:anchor.height,marginLeft:anchor.left-left-14}}><input ref={field} className="trace-field" aria-label={`${model.title}追溯输入`} type="number" readOnly={!model.change} value={draft} style={{width:anchor.width,height:anchor.height,fontSize:style.fontSize,fontWeight:style.fontWeight,textAlign:style.textAlign as CSSProperties["textAlign"],padding:style.padding,boxSizing:'border-box'}} onChange={e=>setDraft(e.target.value)} onBlur={commit} onKeyDown={e=>{if(e.key==='Tab'){e.preventDefault();tab(e.shiftKey);}if(e.key==='Enter'){commit();close();}if(e.key==='Escape')cancel.current=true;}}/></div><ul>{(key?d.trace[key]||[]:fresh?.rows||model.rows).map((row,i)=><li key={i}>{row}</li>)}</ul><div className="trace-result"><span>最终结果</span><strong>{result}</strong></div></div>,document.body);

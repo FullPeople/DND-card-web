@@ -19,6 +19,7 @@ export function AdaptivePaperLayers({paper,active,exhaustion,editing,layoutKey}:
   const marked=new Map<HTMLElement,Set<string>>();
   const mark=(node:HTMLElement,name:string)=>{node.setAttribute(name,'');const names=marked.get(node)||new Set<string>();names.add(name);marked.set(node,names);};
   const scan=()=>{
+   if(!root.isConnected)return;
    const nodes=[...root.querySelectorAll<HTMLElement>(frameSelector)];
    for(const node of nodes){
     if(!keys.current.has(node))keys.current.set(node,String(++nextKey.current));

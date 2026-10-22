@@ -1,3 +1,4 @@
+import {useSheetContext} from './scopedSheetContext';
 import {BookRituals} from './BookRituals';
 import {CloseIcon} from './icons';
 import {bookRitualGroups} from '../core/bookRituals';
@@ -32,7 +33,7 @@ type Target={kind:'cantrip'|'ordinary'|'source';owner?:string;index?:number};
 const error=(detail:string)=>window.dispatchEvent(new CustomEvent('workbench-error',{detail}));
 
 export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:PageProps&{readOnly?:boolean}){
- const editing=useContext(SheetEditContext),preview=useContext(ReferenceContext),settings=spellState(c),capturing=useSheetCaptureActive();
+ const editing=useContext(SheetEditContext),preview=useSheetContext('reference',ReferenceContext),settings=spellState(c),capturing=useSheetCaptureActive();
  const spells=useMemo(()=>spellLibrary(c,entries),[c,entries]),groups=cantripGroups(c),profiles=casterProfiles(c);
  const sourceIssues=useMemo(()=>planSourceSpells(c,entries).issues,[c,entries]);
  const [focused,setFocused]=useState<Target>(),[menu,setMenu]=useState<{row:Selection;target?:Target;x:number;y:number}>(),[detail,setDetail]=useState<string>(),[classFilter,setClassFilter]=useState('');
@@ -51,7 +52,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
  const ordinaryVisible=normalCapacity>0||count>0;
  const showPrepared=bookRitualGroups(c).some(group=>group.spells.length>0)||ordinaryVisible||editing&&(groups.length>0||sourceGroups.length>0)||groups.some(g=>g.capacity>0||g.slots.some(Boolean))||sourceGroups.some(g=>g.rows.length>0||sourceCapacity(c,g.owner).total>0)||knownCapacity>0||knownActive.length>0;
  useEffect(()=>{setCollapsed({});setFocused(undefined);},[c.id]);
- useLayoutEffect(()=>{const node=preparedRoot.current;if(!node)return;const measure=()=>setPreparedHeight(node.scrollHeight);const observer=new ResizeObserver(measure);observer.observe(node);measure();return()=>observer.disconnect();},[showPrepared,c.id]);
+ useLayoutEffect(()=>{const node=preparedRoot.current;if(!node)return;const measure=()=>{if(node.isConnected)setPreparedHeight(node.scrollHeight);};const observer=new ResizeObserver(measure);observer.observe(node);measure();return()=>observer.disconnect();},[showPrepared,c.id]);
  const detailRow=spells.find(s=>s.id===detail),detailConfig=detailRow?settings.special?.[detailRow.id]:undefined;
  useEffect(()=>{if(classFilter&&!profiles.some(p=>p.owner.id===classFilter))setClassFilter('');},[classFilter,profiles]);
  useEffect(()=>{if(giftOwner&&!giftSources.some(s=>s.id===giftOwner))setGiftOwner('');},[giftOwner,giftSources]);

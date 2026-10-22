@@ -1,3 +1,4 @@
+import {useSheetContext} from './scopedSheetContext';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { SheetEditContext } from './SheetEdit';
 import { Reference, ReferenceContext } from './Reference';
@@ -7,7 +8,7 @@ import { pointerDrag } from './pointerDrag';
 import {trainingCaption} from './trainingReferences';
 
 export function TrainingChips({ label, value, onChange, editAll = false,group,source }: { editAll?: boolean; group?:string;source?:string;label: string; value: string; onChange: (value: string) => void }) {
-  const allowed = useContext(SheetEditContext), preview = useContext(ReferenceContext);
+  const allowed = useContext(SheetEditContext), preview = useSheetContext('reference',ReferenceContext);
   const [editing, setEditing] = useState(false), [text, setText] = useState(value), [order, setOrder] = useState<string[]>();
   const ref = useRef<HTMLDivElement>(null), cancel = useRef<(() => void) | undefined>(undefined);
   const items = order || value.split(/[、\n；;]/).map(s => s.trim()).filter(Boolean);

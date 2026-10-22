@@ -26,7 +26,8 @@
     "build:production-frontends": "node tools/buildProductionFrontends.mjs",
     "build:wiki": "tsc -b && vite build --config vite.wiki.config.ts --mode standalone",
     "test:cloud": "vitest run tests/cloud.test.ts tests/cloud-directory.test.ts tests/cloud-sync.test.ts tests/qq-login.test.ts tests/qq-permissions.test.ts",
-    "test:cloud-browser": "playwright test --config playwright.cloud.config.ts"
+    "test:cloud-browser": "playwright test --config playwright.cloud.config.ts",
+    "test:retained-card-browser": "playwright test --config playwright.retained.config.ts"
   },
   "dependencies": {
     "html-to-image": "1.11.13",

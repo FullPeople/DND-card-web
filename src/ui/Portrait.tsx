@@ -33,7 +33,7 @@ export function Portrait({c,edit,field='portrait',page='overview'}:{c:Character;
  useLayoutEffect(()=>{
   if(!frameHidden)return;
   const element=view.current,picture=image.current;if(!element||!picture)return;
-  const measure=()=>setCoverScale(portraitCoverScale(picture.naturalWidth,picture.naturalHeight,element.clientWidth,element.clientHeight));
+  const measure=()=>{if(element.isConnected)setCoverScale(portraitCoverScale(picture.naturalWidth,picture.naturalHeight,element.clientWidth,element.clientHeight));};
   measure();picture.addEventListener('load',measure);
   const observer=new ResizeObserver(measure);observer.observe(element);
   return()=>{observer.disconnect();picture.removeEventListener('load',measure);};

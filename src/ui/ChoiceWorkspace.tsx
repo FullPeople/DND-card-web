@@ -1,5 +1,7 @@
+import {useSheetContext} from './scopedSheetContext';
+import {activeSheet} from '../platform/activeSheet';
 import {sourceEquipmentChoices} from '../core/automation/sourceEquipment';
-import {useContext,useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import type {Character,Entry} from '../core/model';
 import {chooseSheetOption,setSheetChoiceSlot,sheetChoices,sheetChoiceIgnored,setSheetChoiceIgnored,choiceSource,claimStartingEquipment,equipmentBlocks,equipmentCandidates,equipmentTypeLabel,equipmentOptionConcept,equipmentPackage,type ChoiceOption} from '../core/automation/choices';
 import {Reference} from './Reference';
@@ -13,7 +15,7 @@ import './automationChoices.css';
 // Only this small leaf follows pointer hover state. Resolving a whole catalog on
 // every drag frame makes the drop targets lag behind the pointer on large wikis.
 function DraggableChoice({option}:{option:ChoiceOption}){
- const drag=useContext(DragContext);
+ const drag=useSheetContext('drag',DragContext);
  return <Reference className="choice-slot-entry" entry={option.entry} reference={`entry:${option.entry.id}`} commitOnClick={false} onPointerDown={event=>{if(option.unavailable)event.stopPropagation();else drag?.start(event,option.entry);}}>{option.label}</Reference>;
 }
 
@@ -22,7 +24,7 @@ export function ChoiceWorkspace({c,id,catalog,edit,close,embedded=false,height}:
  const scope=useMemo(()=>choice?choiceCatalog(c,choice,catalog):undefined,[c,choice,catalog]);
  const skillWarnings=useMemo(()=>choice?classSkillWarnings(c,choice):{},[c,choice]);
  const matchEntry=useMemo(()=>choice?choiceEntryMatcher(c,choice):()=>undefined,[c,choice]);
- const exit=()=>{window.dispatchEvent(new Event('sheet-gesture'));close();requestAnimationFrame(()=>document.querySelector<HTMLElement>(`[data-choice-id="${CSS.escape(id)}"]`)?.focus({preventScroll:true}));};
+ const exit=()=>{window.dispatchEvent(new Event('sheet-gesture'));close();requestAnimationFrame(()=>activeSheet()?.querySelector<HTMLElement>(`[data-choice-id="${CSS.escape(id)}"]`)?.focus({preventScroll:true}));};
  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape'&&!e.defaultPrevented&&!document.body.classList.contains('pointer-dragging')){e.preventDefault();exit();}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[close,id]);
  if(!choice||!scope)return null;
  const selected=choice.channel==='equipment'?(equipment?[equipment]:choice.selected.length?choice.selected:choice.equipmentIndex!<0&&choice.options[0]?[choice.options[0].value]:[]):choice.channel==='tools'||choice.sourceProgression?choice.slots!.filter(Boolean):choice.selected,owner=c.selections.find(s=>s.id===choice.ownerId)!,packageItems=choice.channel==='equipment'&&selected[0]?equipmentPackage(owner.entry,choice.equipmentIndex!,selected[0],picks):[],grouped=choice.channel==='equipment'&&choice.equipmentIndex!<0&&choice.options.length?equipmentBlocks(owner.entry):[],related=workspace.coverOverview?choices:choices.filter(row=>choiceSource(c,row)===choiceSource(c,choice)),availableCount=choice.selected.length,preservedTools=(choice.channel==='tools'||!!choice.sourceProgression)&&choice.slots!.some((value,index)=>value&&(choice.restricted||index>=choice.count||!choice.options.some(option=>option.value===value&&!option.unavailable))),overflowTools=(choice.channel==='tools'||!!choice.sourceProgression)&&choice.slots!.slice(choice.count).some(Boolean);
