@@ -177,3 +177,22 @@ test('a pending background source view cannot restore old content over an edit o
  await page.getByRole('button',{name:'a',exact:true}).click();await page.waitForTimeout(300);
  await expect(page.locator('[data-retained-card-active="true"] [data-context-owner]')).toHaveText('a:a original changed source1');
 });
+
+test('keyboard card navigation dismisses an old inventory portal instead of carrying it over the next retained card',async({page})=>{
+ await start(page);await page.locator('[data-retained-card-active="true"] .sheet-pages').getByRole('tab',{name:'背包',exact:true}).click();
+ await page.locator('.paper[data-active-sheet="true"] [data-stock-id="coin:cp"]').click({button:'right'});await expect(page.getByRole('menu')).toBeVisible();
+ await page.locator('.character-tabs').getByRole('tab',{name:'保留卡面0',exact:true}).press('ArrowRight');await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-1');
+ await expect(page.getByRole('menu')).toHaveCount(0);
+});
+
+test('changing cards cancels an old portrait confirmation while preserving the uploaded picture',async({page})=>{
+ await start(page);await page.getByRole('switch',{name:'编辑模式',exact:true}).click();
+ const pixel=await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=12;canvas.height=12;const ctx=canvas.getContext('2d')!;ctx.fillStyle='#808080';ctx.fillRect(0,0,12,12);return canvas.toDataURL('image/png').split(',')[1];});
+ const file=page.waitForEvent('filechooser');await page.locator('.paper[data-active-sheet="true"]').getByRole('button',{name:'设置头像',exact:true}).click();
+ await (await file).setFiles({name:'owned-test-pixel.png',mimeType:'image/png',buffer:Buffer.from(pixel,'base64')});
+ const remove=page.locator('.paper[data-active-sheet="true"]').getByRole('button',{name:'删除头像',exact:true});await expect(remove).toBeEnabled();
+ await expect.poll(async()=>(await saved(page)).characters.find((c:any)=>c.id==='retained-0').portrait?.data).toMatch(/^data:image\//);const original=(await saved(page)).characters.find((c:any)=>c.id==='retained-0').portrait;
+ await remove.click();await expect(page.getByRole('alertdialog',{name:'删除头像',exact:true})).toBeVisible();
+ await page.locator('.character-tabs').getByRole('tab',{name:'保留卡面0',exact:true}).press('ArrowRight');await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-1');
+ await expect(page.getByRole('alertdialog',{name:'删除头像',exact:true})).toHaveCount(0);expect((await saved(page)).characters.find((c:any)=>c.id==='retained-0').portrait).toEqual(original);
+});
