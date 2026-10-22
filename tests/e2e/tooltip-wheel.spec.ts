@@ -71,12 +71,19 @@ test('a tooltip above a modal routes to modal scrolling without moving the page 
 });
 test('modal boundaries without CSS containment or a body lock still protect the background',async({page})=>{
   await page.getByRole('button',{name:'打开测试弹窗'}).click();
+  await page.getByRole('dialog',{name:'滚轮测试弹窗'}).evaluate(el=>(el as HTMLElement).style.width='220px');
   const pane=await pin(page,'短说明',page.locator('#modal-reading'));
   await page.evaluate(()=>{document.body.style.overflow='';const modal=document.getElementById('modal-reading')!;modal.style.overscrollBehavior='auto';modal.scrollTop=modal.scrollHeight;});
   await over(page,pane);await page.mouse.wheel(0,180);
+  await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
   expect(await page.evaluate(()=>window.scrollY)).toBe(0);
   expect(await page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBe(0);
-  await page.mouse.move(15,650);await page.mouse.wheel(0,180);
+  const box=await pane.locator('.keyword-content').boundingBox();if(!box)throw Error('Tooltip content must be visible');
+  const point={x:box.x+box.width-8,y:box.y+10};
+  expect(await page.evaluate(point=>document.elementFromPoint(point.x,point.y)?.closest('[data-tooltip-id]')?.id,point)).toBe(await pane.getAttribute('id'));
+  const modal=await page.getByRole('dialog',{name:'滚轮测试弹窗'}).boundingBox();expect(point.x).toBeGreaterThan(modal!.x+modal!.width);
+  await page.mouse.move(point.x,point.y);await page.mouse.wheel(0,180);
+  await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
   expect(await page.evaluate(()=>window.scrollY)).toBe(0);
   expect(await page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBe(0);
 });
