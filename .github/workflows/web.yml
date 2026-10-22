@@ -74,6 +74,7 @@ jobs:
               npx playwright test --config playwright.next-feedback.config.ts
               npx playwright test --config playwright.tooltip-wheel.config.ts
               npx playwright test --config playwright.compact-choices.config.ts
+              npx playwright test --config playwright.feature-motion.config.ts
               node node_modules/typescript/bin/tsc -p switch-lab/tsconfig.json
               npx vite build --config vite.switch-lab.config.ts
               npx playwright test --config playwright.switch-lab.config.ts

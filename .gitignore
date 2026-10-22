@@ -22,6 +22,9 @@ dist-standalone-cloud/
 dist-library-cloud/
 dist-switch-lab/
 test-results-switch-lab/
+test-results-tooltip-wheel/
+test-results-compact-choices/
+test-results-feature-motion/
 
 test-results-standalone/
 
