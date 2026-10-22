@@ -5,6 +5,7 @@ class HttpError extends Error {
  constructor(readonly status:number,readonly retryAfter:string|null){super(`HTTP ${status}`);}
 }
 export class CatalogPausedError extends Error {}
+export function catalogHttpStatus(error:unknown):number|undefined{return error instanceof HttpError?error.status:undefined;}
 const transient=(error:unknown)=>error instanceof TypeError || error instanceof DOMException&&['TimeoutError','AbortError'].includes(error.name) || error instanceof HttpError&&[408,425,429,500,502,503,504].includes(error.status);
 function retryDelay(error:unknown,attempt:number){
  const fallback=attempt?1200:400;

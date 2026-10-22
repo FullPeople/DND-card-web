@@ -2,7 +2,8 @@ import {loadCatalogSnapshot,CATALOG_SNAPSHOT_SCHEMA} from './catalogSnapshot';
 import type {SourceMeta} from '../core/sourceCatalog';
 import {catalogNormalizer,type CatalogOperation} from './catalogNormalizer';
 import {correctSourceData} from '../core/sourceCorrections';
-import {catalogTransport,CatalogPausedError} from './catalogTransport';
+import {catalogTransport,CatalogPausedError,catalogHttpStatus} from './catalogTransport';
+import {homebrewRecovery,type RecoveredHomebrew} from './homebrewRecovery';
 import {EQUIPMENT_TRAINING_ENTRIES} from './weaponTraining';
 import type { Entry, Kind, Raw } from '../core/model';
 import { readCache, writeCache } from '../platform/storage';
@@ -11,7 +12,7 @@ import { inheritSubrace, readableEntries } from './adapt';
 import {DEFAULT_HOMEBREW,homebrewPaths,homebrewMetadata,homebrewBody} from './homebrew';
 import {DEFAULT_SOURCE} from './catalogSource';
 export {DEFAULT_SOURCE} from './catalogSource';
-export interface LoadProgress { done: number; total: number; label: string; failed: string[]; cached: number; retry?:string[]; paused?:string }
+export interface LoadProgress { done: number; total: number; label: string; failed: string[]; cached: number; retry?:string[]; paused?:string; recovered?:string[] }
 const categories: Record<string, Kind> = { class: 'class', subclass: 'subclass', race: 'race', subrace: 'race', background: 'background', feat: 'feat', spell: 'spell', item: 'item', baseitem: 'item', classFeature: 'feature', subclassFeature: 'feature', optionalfeature: 'feature', condition: 'condition', variantrule: 'rule', action: 'rule', sense: 'rule', skill: 'rule', language: 'rule', status: 'condition', disease: 'condition', itemGroup: 'item', magicvariant: 'item', itemMastery: 'feature', itemProperty: 'rule', itemType: 'rule', reward: 'feature', charoption: 'feature', psionic: 'feature', deity: 'rule', cult: 'rule', boon: 'feature', facility: 'rule', table: 'rule', tableGroup: 'rule', monster: 'monster' };
 const canonical = (s: unknown) => String(s ?? '').trim().toLowerCase();
 export function entryIdentity(kind: Kind, raw: Raw, packId = 'kiwee'): string {
@@ -52,7 +53,7 @@ export function normalizeCatalogData(body:Raw,revision:string,packId='kiwee',ope
  if(operation==='magicItems')return normalizeData({item:specificMagicItems(prepareBody(body))},revision,packId);
  return normalizeData(body,revision,packId);
 }
-async function fetchJson(base: string, path: string, signal: AbortSignal, refresh: boolean,transport:ReturnType<typeof catalogTransport>,retry:ReadonlySet<string>): Promise<{ body: Raw; revision: string; cached: boolean; warning?: string }> {
+async function fetchJson(base: string, path: string, signal: AbortSignal, refresh: boolean,transport:ReturnType<typeof catalogTransport>,retry:ReadonlySet<string>,recover?:()=>Promise<RecoveredHomebrew>): Promise<{ body: Raw; revision: string; cached: boolean; warning?: string; recoveredFrom?:string }> {
   const key = `${base}/${path}`;
   // Wiki caching is optional. A denied/full cache must not discard a valid network response.
   const cached = await readCache(key).catch(()=>undefined);
@@ -60,11 +61,17 @@ async function fetchJson(base: string, path: string, signal: AbortSignal, refres
   const prior=cached&&valid(cached.body)?cached:undefined;
   if (!refresh && !retry.has(key) && prior) return { ...prior, cached: true };
   try {
-    const {body,etag}=await transport.json(key);
+    let received:{body:Raw;etag:string|null;recoveredFrom?:string};
+    try{received=await transport.json(key);}
+    catch(error){
+      if(prior||!recover||catalogHttpStatus(error)!==404)throw error;
+      received=await recover();
+    }
+    const {body,etag}=received;
     if(signal.aborted)throw signal.reason;
     if(!valid(body))throw Error('资料索引为空，请重试');
     const revision = etag || await hashJson(body);
-    const result={body,revision,cached:false};
+    const result={body,revision,cached:false,...(received.recoveredFrom?{recoveredFrom:received.recoveredFrom}:{})};
     try{await writeCache(key,result);}catch{return {...result,warning:'资料已加载，但浏览器未能保存资料缓存。'};}
     return result;
   } catch (error) {
@@ -82,12 +89,12 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
   base = base.replace(/\/$/, '');
   const normalizer=catalogNormalizer(signal,normalizeCatalogData);
   const transport=catalogTransport(signal),retry=new Set(retryKeys);
-  const read=(path:string,source=base)=>fetchJson(source,path,signal,refresh,transport,retry);
+  const read=(path:string,source=base,recover?:()=>Promise<RecoveredHomebrew>)=>fetchJson(source,path,signal,refresh,transport,retry,recover);
   try {
   onBatch(EQUIPMENT_TRAINING_ENTRIES);
   const paths = ['data/bestiary/template.json','data/bestiary/legendarygroups.json','data/generated/gendata-variantrules.json', 'data/magicvariants.json', 'data/charcreationoptions.json', 'data/rewards.json', 'data/psionics.json', 'data/deities.json', 'data/cultsboons.json', 'data/bastions.json', 'data/tables.json', 'data/generated/gendata-tables.json', 'data/races.json', 'data/backgrounds.json', 'data/feats.json', 'data/items-base.json', 'data/items.json', 'data/optionalfeatures.json', 'data/conditionsdiseases.json', 'data/books.json', 'data/adventures.json', 'data/variantrules.json', 'data/actions.json', 'data/skills.json', 'data/senses.json', 'data/languages.json'];
   const progress: LoadProgress = { done: 0, total: paths.length + 4, label: '读取资料索引', failed: [], cached: 0,retry:[] };
-  const publish=()=>onProgress({...progress,failed:[...progress.failed],retry:[...progress.retry!]});
+  const publish=()=>onProgress({...progress,failed:[...progress.failed],retry:[...progress.retry!],...(progress.recovered?{recovered:[...progress.recovered]}:{})});
   const failed=(path:string,label:string,error:unknown,source=base)=>{
     if(error instanceof CatalogPausedError)return;
     progress.failed.push(`${label}：${String(error)}`);progress.retry!.push(`${source}/${path}`);
@@ -160,9 +167,9 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
   // The mirror keeps third-party books in a separate repository, outside data/*.
   // Load its generated index rather than maintaining a list of book titles here.
   if(!signal.aborted&&!transport.paused&&base===DEFAULT_SOURCE){
-    let brewFiles:string[]=[];
+    let brewFiles:string[]=[],recoverBrew:ReturnType<typeof homebrewRecovery>|undefined;
     progress.total++;
-    try{const index=await read('_generated/index-sources.json',DEFAULT_HOMEBREW);brewFiles=homebrewPaths(index.body);if(index.cached)progress.cached++;if(index.warning)failed('_generated/index-sources.json','三方索引',index.warning,DEFAULT_HOMEBREW);}
+    try{const index=await read('_generated/index-sources.json',DEFAULT_HOMEBREW);brewFiles=homebrewPaths(index.body);recoverBrew=homebrewRecovery(index.body,signal);if(index.cached)progress.cached++;if(index.warning)failed('_generated/index-sources.json','三方索引',index.warning,DEFAULT_HOMEBREW);}
     catch(error){if(signal.aborted)return;failed('_generated/index-sources.json','三方资料索引',error,DEFAULT_HOMEBREW);}
     progress.done++;
     progress.total+=brewFiles.length;let brewCursor=0;
@@ -170,8 +177,9 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
       const path=brewFiles[brewCursor++];
       try{
         const encodedPath=path.split('/').map(encodeURIComponent).join('/');
-        const result=await read(encodedPath,DEFAULT_HOMEBREW);
+        const result=await read(encodedPath,DEFAULT_HOMEBREW,recoverBrew?()=>recoverBrew!(path):undefined);
         if(signal.aborted)return;if(result.cached)progress.cached++;if(result.warning)failed(encodedPath,path,result.warning,DEFAULT_HOMEBREW);
+        if(result.recoveredFrom)(progress.recovered??=[]).push(path);
         onSources?.(homebrewMetadata(result.body));
         const body=homebrewBody(result.body);
         onBatch(await normalizer.normalize(body,result.revision,'kiwee-homebrew'));
