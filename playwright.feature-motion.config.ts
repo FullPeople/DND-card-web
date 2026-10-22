@@ -1,0 +1,3 @@
+import {defineConfig} from '@playwright/test';
+const output=process.env.FEATURE_MOTION_OUT||'test-results-feature-motion';
+export default defineConfig({testDir:'./tests/e2e',testMatch:['featureMotion.spec.ts','featureCollapse232.spec.ts'],workers:1,retries:0,timeout:120000,expect:{timeout:10000},outputDir:output,reporter:[['list'],['json',{outputFile:output+'/results.json'}]],use:{baseURL:'http://127.0.0.1:5482',channel:process.env.CI?undefined:'msedge',headless:true,viewport:{width:1512,height:982},trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:'node node_modules/vite/bin/vite.js --config tests/fixtures/compact-choices/vite.config.ts --mode automation-standalone',url:'http://127.0.0.1:5482',reuseExistingServer:false}});

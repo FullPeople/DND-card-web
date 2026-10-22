@@ -30,6 +30,11 @@ import {expandedFeatureIds,saveFeatureLayout} from '../core/featureLayout';
 
 type Feature = { id: string; group: string; origin: string; name: string; entry: Entry; body: unknown; restricted: boolean };
 type Props = { headingInline?:ReactNode; catalog?:Entry[]; owners?:Selection[]; detailed?:boolean; inline?: boolean; grouped?: boolean; c: Character; rows: Selection[]; receive?: (entry: Entry) => void; label?: string; className?: string; kinds?: Kind[]; edit: (action: (draft: Character) => void) => void; browse: () => void; onLink: (reference: string, kind?: string) => void; children?: ReactNode };
+function featurePositions(panel:HTMLElement|null){
+  const result=new Map<string,DOMRect>();
+  for(const element of panel?.querySelectorAll<HTMLElement>('[data-feature-id]')||[])result.set(element.dataset.featureId!,element.getBoundingClientRect());
+  return result;
+}
 
 export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = false, inline = false, c, rows, receive, edit, browse, onLink, children, label = '特性', className = 'class-features', kinds = ['feature', 'rule'], grouped = true }: Props) {
   const {format}=useSources(); const editing=useContext(SheetEditContext);
@@ -61,6 +66,7 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
   const positions = useRef(new Map<string, DOMRect>());
   const previous = useRef(new Map<string, DOMRect>());
   const measuredCharacter=useRef('');
+  const baselineReady=useRef(false);
   const sourceOrder = [...new Set(features.map(f => f.group))];
   const natural = [...features].sort((a, b) => sourceOrder.indexOf(a.group) - sourceOrder.indexOf(b.group));
   const ids = draftOrder || saved?.order || [];
@@ -73,21 +79,34 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
   const layoutKey = ordered.map(f => `${f.id}:${expanded.has(f.id)}`).join('|');
   useLayoutEffect(() => {
     if(capturing)for(const animation of panel.current?.getAnimations({subtree:true})||[])animation.cancel();
-    const elements = [...(panel.current?.querySelectorAll<HTMLElement>('[data-feature-id]') || [])];
+    const root=panel.current;
     const changedCharacter=measuredCharacter.current!==c.id;measuredCharacter.current=c.id;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(changedCharacter||capturing||reduced){previous.current.clear();positions.current.clear();baselineReady.current=false;}
+    if(capturing||reduced||!root)return;
+    if(!baselineReady.current){
+      let cancelled=false,second=0;
+      const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>{
+        if(cancelled||baselineReady.current||panel.current!==root||!root.isConnected||measuredCharacter.current!==c.id)return;
+        previous.current=featurePositions(root);baselineReady.current=true;
+      });});
+      return()=>{cancelled=true;cancelAnimationFrame(first);cancelAnimationFrame(second);};
+    }
+    const elements = [...root.querySelectorAll<HTMLElement>('[data-feature-id]')];
     const before = positions.current.size ? positions.current : previous.current;
     const next = new Map<string, DOMRect>(); let arriving = 0;
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     for (const element of elements) {
       const id = element.dataset.featureId!, old = before.get(id);
       const after = element.getBoundingClientRect(), scale = after.width / element.offsetWidth || 1; next.set(id, after);
-      if (capturing||reduced||changedCharacter) continue;
       if (!old) element.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, delay: Math.min(arriving++ * 25, 150), fill: 'backwards', easing: 'ease-out' });
       else { const x = (old.x - after.x) / scale, y = (old.y - after.y) / scale; if (x || y) element.animate([{ transform: `translate(${x}px,${y}px)` }, { transform: 'translate(0,0)' }], { duration: 180, easing: 'ease-out' }); }
     }
     previous.current = next; positions.current.clear();
   }, [layoutKey, c.id,capturing]);
   function saveLayout(order: string[], open: string[]) {
+    // An immediate first interaction may precede the deferred baseline. Capture
+    // the current card before that explicit edit so its first transition works.
+    if(!baselineReady.current&&!capturing&&!matchMedia('(prefers-reduced-motion: reduce)').matches){previous.current=featurePositions(panel.current);baselineReady.current=true;}
     live.current.edit(draft => {
       saveFeatureLayout(draft,features.map(f=>f.id),order,open,detailed);
     });
