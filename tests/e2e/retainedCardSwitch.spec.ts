@@ -153,3 +153,27 @@ test('background source invalidation eventually refreshes coherent retained cont
  await expect(active.locator('[data-context-owner]')).toHaveText('a:a original changed source1');await expect(active.locator('[data-render-source]')).toHaveText('1');
  expect(await page.evaluate(()=>(window as any).sourceHost===document.querySelector('[data-retained-card-active="true"]'))).toBe(true);
 });
+
+test('overflowing character tabs reveal the selected label without synchronous geometry reads on warm navigation',async({page})=>{
+ await page.addInitScript(()=>{const native=Element.prototype.getBoundingClientRect;(window as any).tabGeometryReads=0;Element.prototype.getBoundingClientRect=function(){if(this.matches('.character-tabs,.character-tabs [role="tab"]'))(window as any).tabGeometryReads++;return native.call(this);};});
+ await page.goto('/card/tests/fixtures/character-tabs/index.html');const tabs=page.locator('.character-tabs');await expect(tabs.getByRole('tab',{selected:true})).toHaveText('Long character name 0');
+ await expect.poll(()=>page.evaluate(()=>(window as any).tabGeometryReads)).toBeGreaterThan(0);
+ const reads=await page.evaluate(()=>(window as any).tabGeometryReads);
+ await tabs.getByRole('tab',{selected:true}).press('End');await expect(page.locator('output')).toHaveText('tab-7');
+ await tabs.getByRole('tab',{selected:true}).press('ArrowLeft');await expect(page.locator('output')).toHaveText('tab-6');
+ expect(await page.evaluate(()=>(window as any).tabGeometryReads)).toBe(reads);
+ await expect.poll(()=>tabs.evaluate(node=>{const tab=node.querySelector<HTMLElement>('[aria-selected="true"]')!,box=node.getBoundingClientRect(),b=tab.getBoundingClientRect();return b.left>=box.left-1&&b.right<=box.right+1;})).toBe(true);
+ await tabs.getByRole('tab',{selected:true}).press('Home');await expect(page.locator('output')).toHaveText('tab-0');
+ await page.getByRole('button',{name:'resize strip',exact:true}).click();await tabs.getByRole('tab',{selected:true}).press('End');
+ await expect.poll(()=>tabs.evaluate(node=>{const b=node.querySelector('[aria-selected="true"]')!.getBoundingClientRect(),box=node.getBoundingClientRect();return b.left>=box.left-1&&b.right<=box.right+1;})).toBe(true);
+});
+
+test('a pending background source view cannot restore old content over an edit or follow the next card',async({page})=>{
+ await page.goto('/card/tests/fixtures/retained-contexts/index.html');
+ await page.getByRole('button',{name:'source update',exact:true}).click();await page.getByRole('button',{name:'edit',exact:true}).click();
+ await expect(page.locator('[data-retained-card-active="true"] [data-context-owner]')).toHaveText('a:a original changed source1');
+ await page.getByRole('button',{name:'b',exact:true}).click();await page.waitForTimeout(300);
+ await expect(page.locator('[data-retained-card-active="true"] [data-context-owner]')).toHaveText('b:b original source1');
+ await page.getByRole('button',{name:'a',exact:true}).click();await page.waitForTimeout(300);
+ await expect(page.locator('[data-retained-card-active="true"] [data-context-owner]')).toHaveText('a:a original changed source1');
+});

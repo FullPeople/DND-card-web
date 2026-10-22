@@ -1,4 +1,5 @@
-import {createContext,memo,useContext,useDeferredValue,useRef,type ReactNode} from 'react';
+import {createContext,memo,startTransition,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
+import {afterPaint} from '../platform/afterPaint';
 import {DragContext} from './DragEntry';
 import {EntryApplicationContext} from './entryApplication';
 import {ReferenceContext} from './Reference';
@@ -46,7 +47,16 @@ export function RetainedSheetContexts({active,version,urgentVersion,children}:{a
  const candidate=useRef<{version:readonly unknown[];urgent:readonly unknown[];value:typeof value;children:ReactNode}|undefined>(undefined);
  const before=candidate.current;
  if(!before||!same(before.version,version)||!same(before.urgent,urgentVersion)||(['drag','application','reference','choice','choices'] as const).some(key=>before.value[key]!==value[key]))candidate.current={version,urgent:urgentVersion,value,children};
- const deferred=useDeferredValue(candidate.current!),view=same(deferred.urgent,urgentVersion)?deferred:candidate.current!;
+ const next=candidate.current!,[settled,setSettled]=useState(next),urgent=!same(settled.urgent,urgentVersion);
+ useEffect(()=>{
+  if(settled===next)return;
+  if(urgent){setSettled(next);return;}
+  if(!active)return;
+  // A React deferred render can still run before the browser presents the
+  // newly revealed surface. Allow that presentation and an idle interval first.
+  return afterPaint(()=>startTransition(()=>setSettled(next)));
+ },[settled,next,urgent,active]);
+ const view=urgent?next:settled;
  const visible=view.value,hiddenChoice=useRef<typeof value.choice|undefined>(undefined);
  if(!active&&visible.choice.id)hiddenChoice.current=object(hiddenChoice.current,{...visible.choice,id:undefined,canEdit:false});
  return <SheetContextScope.Provider value={scoped}><RetainedCardVisibility.Provider value={active}><RetainedCardCaptureTarget.Provider value={f.isCaptureTarget}><scoped.drag.Provider value={visible.drag}><scoped.application.Provider value={visible.application}><scoped.reference.Provider value={visible.reference}><scoped.choice.Provider value={!active&&visible.choice.id?hiddenChoice.current!:visible.choice}><scoped.choices.Provider value={visible.choices}><scoped.feedback.Provider value={value.feedback}><Content version={view.version}>{view.children}</Content></scoped.feedback.Provider></scoped.choices.Provider></scoped.choice.Provider></scoped.reference.Provider></scoped.application.Provider></scoped.drag.Provider></RetainedCardCaptureTarget.Provider></RetainedCardVisibility.Provider></SheetContextScope.Provider>;
