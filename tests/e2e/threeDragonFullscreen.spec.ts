@@ -22,12 +22,13 @@ async function pair(host:Page){
  const c=newCharacter();c.name='三龙网站链接验收';c.baseHp=20;c.runtime.hp=17;
  const state={key:'room:card:hero',cardId:'hero',itemId:'token-hero',name:c.name,kind:'character',role:'GM',write:true,locked:false,pinned:false,documentRevision:1,stats:{health:17,'max health':20,'armor class':10},resources:[],conditions:[]};
  await host.evaluate(({protocol,session,state,document})=>{const emit=(type:string,rest:any={})=>(window as any).viewer.postMessage({protocol,session,type,hostStarted:1,...rest},location.origin);emit('ready');const catalog={cards:[{...state,id:'hero',inScene:true}],monsters:[],role:'GM',enabled:{characterCards:true,threeDragonAnte:true},visibility:{wiki:true,monsters:true}};(window as any).dragonCatalog=catalog;emit('catalog',{sequence:1,...catalog});emit('selection',{sequence:2,state,document});emit('navigate');},{protocol,session,state,document:{...exportOwlbear(c,evaluate(c)),dnd_card_web:c,_suiteRevision:1}});
- await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('17');return page;
+ await expect(page.getByLabel('当前生命值',{exact:true})).toHaveValue('17');
+ await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete');await expect(page.locator('#root')).toHaveJSProperty('inert',false);return page;
 }
 for(const width of [1440,390])test(`Three Dragon opens the website and preserves ${width}px Suite toolbar and workspace`,async({page:host},info)=>{
  const page=await pair(host),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  info.annotations.push({type:'settingsSource',description:process.env.TDA_SUITE_SETTINGS_DIST?'Reviewed real production Suite settings bundles':'Authored panel fixture for the isolated Web parent contract'});
- await page.locator('.category-search-control input').fill('保留的查询');await page.setViewportSize({width,height:width===390?844:960});
+ const search=page.locator('.category-search-control input');await search.fill('保留的查询');await expect(search).toHaveValue('保留的查询');await page.setViewportSize({width,height:width===390?844:960});
  await page.getByRole('tab',{name:'法术',exact:true}).click();const before=page.url();
  await page.context().route('https://dnd.center/3-dragon/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><h1>Website destination fixture</h1>'}));
  const launcher=page.locator('.header-tools').getByRole('link',{name:'三龙牌',exact:true});await expect(launcher).toHaveAttribute('target','_blank');
