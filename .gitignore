@@ -66,3 +66,12 @@ test-results-cloud/
 test-results-excel-import/
 test-results-excel-suite-import/
 test-results-performance*/
+test-results-feedback-export/
+test-results-ability-generation/
+
+test-results-feedback-asi/
+
+test-results-skill-choice-warnings/
+test-results-feedback-asi/
+
+test-results-feedback-invocation/
