@@ -19,6 +19,13 @@ export function parsePaletteSettings(text:string):PaletteSettings{
  return result;
 }
 
+/** Old combined exports still work; this entry point only reads website colours. */
+export function parseSitePaletteSettings(text:string):PaletteSettings{
+ const value:unknown=JSON.parse(text);
+ if(!record(value))throw Error('这不是支持的网页配色文件。');
+ return parsePaletteSettings(JSON.stringify({format:value.format,version:value.version,appearance:value.appearance}));
+}
+
 export function hexToHsv(hex:string){
  const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255,max=Math.max(r,g,b),min=Math.min(r,g,b),delta=max-min;
  let h=delta===0?0:max===r?((g-b)/delta)%6:max===g?(b-r)/delta+2:(r-g)/delta+4;

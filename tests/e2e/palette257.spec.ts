@@ -1,16 +1,16 @@
 import {test,expect} from '@playwright/test';
 import {mockSource,suppressAnnouncement} from './fixtures';
 
-test('top palette persists UI, Wiki and per-component card colors; right-click clones independently',async({page})=>{
+test('separate palettes persist UI, Wiki and per-component card colors; right-click clones independently',async({page})=>{
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/card/?intro=0');await expect(page.locator('.paper')).toBeVisible();
  await expect(page.locator('.paper .palette')).toHaveCount(0);
  await page.getByRole('button',{name:'调色盘',exact:true}).click();const drawer=page.getByRole('dialog',{name:'调色盘',exact:true});await expect(drawer).toBeVisible();
  const change=async(name:string,value:string)=>{const field=drawer.getByRole('textbox',{name:name+'颜色代码',exact:true});await field.fill(value);await field.blur();};
  await change('页面背景','#CBDBCA');await expect.poll(()=>page.locator('.app-shell').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(203, 219, 202)');
  await drawer.getByRole('button',{name:'Wiki',exact:true}).click();await change('条目底色','#DBCABD');await change('条目链接','#663344');
- await drawer.getByRole('button',{name:'角色卡组件',exact:true}).click();await drawer.getByRole('navigation',{name:'角色卡配色组件'}).getByRole('button',{name:'六项属性',exact:true}).click();await change('内容底色','#CCDDAB');
+ await drawer.getByRole('button',{name:'关闭调色盘'}).click();await page.getByRole('button',{name:'角色卡调色盘',exact:true}).click();const cardDrawer=page.getByRole('dialog',{name:'角色卡调色盘',exact:true});await cardDrawer.getByRole('navigation',{name:'角色卡配色组件'}).getByRole('button',{name:'六项属性',exact:true}).click();const cardField=cardDrawer.getByRole('textbox',{name:'内容底色颜色代码',exact:true});await cardField.fill('#CCDDAB');await cardField.blur();
  await expect(page.locator('[data-palette-component=abilities] .cell-surface').first()).toHaveCSS('background-color','color(srgb 0.8 0.866667 0.670588 / 0.66)');await expect(page.locator('[data-palette-component=abilities] .cell-content').first()).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
- await page.screenshot({path:test.info().outputPath('unified-palette.png')});await drawer.getByRole('button',{name:'关闭调色盘'}).click();await page.reload();await expect(page.locator('.paper')).toBeVisible();
+ await page.screenshot({path:test.info().outputPath('character-palette.png')});await cardDrawer.getByRole('button',{name:'关闭调色盘'}).click();await page.reload();await expect(page.locator('.paper')).toBeVisible();
  await expect(page.locator('[data-palette-component=abilities] .cell-surface').first()).toHaveCSS('background-color','color(srgb 0.8 0.866667 0.670588 / 0.66)');await expect(page.locator('[data-palette-component=abilities] .cell-content').first()).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();const row=page.locator('.catalog-row').filter({hasText:'微光术'}).first();await expect(row).toBeVisible();
  expect(await row.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(219, 202, 189)');await page.evaluate(()=>document.documentElement.dataset.suiteNight='true');await expect.poll(()=>row.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(219, 202, 189)');await page.evaluate(()=>document.documentElement.dataset.suiteNight='false');await row.click();await expect(page.locator('.entry-detail .spell-learners')).toBeVisible();
