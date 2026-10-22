@@ -4,7 +4,7 @@
   "updatedAt": "2026-10-22T09:36:21.396Z",
   "consumer": {
     "repository": "FullPeople/DND-card-web",
-    "revision": "3d8d2a07a6bac0708456a1d6953e788d010bf2fb",
+    "revision": "1854c84e0f99f394e76fdc30b164888d894c31de",
     "modules": [
       {
         "path": "src/cloud/CardStack.tsx",
@@ -336,11 +336,15 @@
       },
       {
         "path": "src/ui/App.tsx",
-        "sha256": "46368f86763dd5692243761e5b9f11863d5539f2cabc74acab308bd21df8ca81"
+        "sha256": "a3addf7134b334de3741af3a39447290da1900f8663984d207436a28f0b1edf0"
       },
       {
         "path": "src/ui/AutomationPanel.tsx",
         "sha256": "b412ccab8c6e100f434983d0494e41ab73d67431209516b09a8c8c6ba84be34f"
+      },
+      {
+        "path": "src/ui/CatalogLoadStatus.tsx",
+        "sha256": "14dbc709ca6a4bc3a063f3723468009143466f77d69e85cc9db62e5ee4cc3938"
       },
       {
         "path": "src/ui/CharacterTabs.tsx",
@@ -427,6 +431,10 @@
         "sha256": "12d6b054f9327a7596281be2d16f655b3a5ec3e1398be8c92a6e792ab01179c6"
       },
       {
+        "path": "src/ui/SourceName.tsx",
+        "sha256": "aac2bf397376f0fc7628799a50f57d5d0a9d23c14f3b85f66036be11b80658fa"
+      },
+      {
         "path": "src/ui/SourceSettings.tsx",
         "sha256": "fe5f20b09058b9abc4cad829951a84a48e2b826cd2a97b5dd90a1349972751a3"
       },
@@ -441,6 +449,10 @@
       {
         "path": "src/ui/cardPalettePresets.ts",
         "sha256": "b58c703143f6dd854bd9629aeeb3277acda99764efade5775c5dbd4f9987f901"
+      },
+      {
+        "path": "src/ui/catalogProgress.ts",
+        "sha256": "0153d73647c123bcbb441968f3d0f59721a32da2deb687c792fec444b13679b3"
       },
       {
         "path": "src/ui/choiceCatalog.ts",
@@ -300932,100 +300944,36 @@
   },
   "uiRebind": {
     "kind": "consumer-binding-only-no-second-full-replay",
-    "at": "2026-10-22T10:51:52.128Z",
-    "from": "77d49e4a73909f14b858f9ee730458a35eb8851b",
-    "to": "3d8d2a07a6bac0708456a1d6953e788d010bf2fb",
+    "at": "2026-10-22T11:52:20.599Z",
+    "from": "3d8d2a07a6bac0708456a1d6953e788d010bf2fb",
+    "to": "1854c84e0f99f394e76fdc30b164888d894c31de",
     "actualDependenciesSha256": "0bbda0d618e431e680ad5c97137731060f034fe65807bba34c832fcb8e49a364",
     "actualSourceDependenciesUnchanged": true,
     "baseline305": "d4f82004ae0fe5b69b68705158c0e53ebccd3afa",
     "preservedOriginalGatePaths": 85,
-    "boundModules": 116,
+    "boundModules": 119,
     "changedConsumerSources": [
-      {
-        "status": "M",
-        "path": "src/cloud/CardStack.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/cloud/CloudCardControl.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/cloud/CloudSave.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/cloud/QQLogin.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/standalone/LocalDice.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/Announcement.tsx"
-      },
       {
         "status": "M",
         "path": "src/ui/App.tsx"
       },
       {
-        "status": "M",
-        "path": "src/ui/CloudRoomControl.tsx"
+        "status": "A",
+        "path": "src/ui/CatalogLoadStatus.tsx"
       },
       {
         "status": "M",
-        "path": "src/ui/CustomFieldHelp.tsx"
+        "path": "src/ui/SourceName.tsx"
       },
       {
-        "status": "M",
-        "path": "src/ui/LibraryFilters.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/MobilePlayActions.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/OverviewResourceDashboard.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/PlayerPermissionButton.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/RoomCardControl.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/SourceSettings.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/WorkbenchQQAccount.tsx"
-      },
-      {
-        "status": "M",
-        "path": "src/ui/tooltipWheel.ts"
+        "status": "A",
+        "path": "src/ui/catalogProgress.ts"
       }
     ],
     "addedGatePaths": [
-      "src/cloud/CardStack.tsx",
-      "src/cloud/CloudCardControl.tsx",
-      "src/cloud/CloudSave.tsx",
-      "src/cloud/QQLogin.tsx",
-      "src/standalone/LocalDice.tsx",
-      "src/ui/Announcement.tsx",
-      "src/ui/CloudRoomControl.tsx",
-      "src/ui/CustomFieldHelp.tsx",
-      "src/ui/LibraryFilters.tsx",
-      "src/ui/MobilePlayActions.tsx",
-      "src/ui/OverviewResourceDashboard.tsx",
-      "src/ui/PlayerPermissionButton.tsx",
-      "src/ui/RoomCardControl.tsx",
-      "src/ui/SourceSettings.tsx",
-      "src/ui/WorkbenchQQAccount.tsx"
+      "src/ui/CatalogLoadStatus.tsx",
+      "src/ui/SourceName.tsx",
+      "src/ui/catalogProgress.ts"
     ],
     "preserved": {
       "updatedAt": "2026-10-22T09:36:21.396Z",
@@ -301034,23 +300982,39 @@
       "inputsSha256": "e56d46b8a82ca0625665e7871404790e6da02d04fe177a79b7aaaedc236fa089",
       "snapshotSha256": "7ee119297b4a93c1193f52e35c3fa8dc5e819dabd71ee508de5747848c68759a"
     },
-    "round": 2,
+    "round": 3,
     "fullReplayConsumer": "504e5f04d417e810f36ef560d83163f87784a70a",
-    "preservedPreviousGatePaths": 101,
+    "preservedPreviousGatePaths": 116,
     "validatedDataCheckout": {
-      "revision": "67349a428204c25a93ec123968b31ef9889aae90",
+      "revision": "68f9860d66b340f920f81900a70612b5e1537787",
       "originalReplayProducer": "c766977d78c99a2e971a9ede15ff169a61a21719",
       "checkoutIsOriginalReplayProducer": false,
       "onlyKnownReportDocChanges": true,
       "unchangedCommittedProducerFiles": 59
     },
     "previousBinding": {
-      "dataRevision": "67349a428204c25a93ec123968b31ef9889aae90",
-      "reportSha256": "cf70e61bb764ae204d4b29e78a720087ee0ba2bd8193666e42735f555f3a119b",
+      "dataRevision": "68f9860d66b340f920f81900a70612b5e1537787",
+      "reportSha256": "368e136986ab238bed2835432a027b7bfc98262a02ae33138d6b2c5a908af37c",
       "consumer": {
         "repository": "FullPeople/DND-card-web",
-        "revision": "77d49e4a73909f14b858f9ee730458a35eb8851b",
+        "revision": "3d8d2a07a6bac0708456a1d6953e788d010bf2fb",
         "modules": [
+          {
+            "path": "src/cloud/CardStack.tsx",
+            "sha256": "8a7928ec433837e43c5fc900ece74205cb5b6842db7ddb3388befbfff93d5629"
+          },
+          {
+            "path": "src/cloud/CloudCardControl.tsx",
+            "sha256": "4994381da4ff7f8fe284d1d6a317c46520a791fb8bc97c37b52488fbbb98f00a"
+          },
+          {
+            "path": "src/cloud/CloudSave.tsx",
+            "sha256": "855ddab11fad01d1fa740efa0c3c6d6d4f1d1b69f8ee2216bf8ddbf027fa879b"
+          },
+          {
+            "path": "src/cloud/QQLogin.tsx",
+            "sha256": "ea829623cf48f9cfca89cf32da1f3cfa5848f7f0a2510674cd4220b70aa5992c"
+          },
           {
             "path": "src/cloud/api.ts",
             "sha256": "56fa8ea4277b19655bff6c7843af8d0b0b64985ffc643c7bae1eb4573f67fdab"
@@ -301356,8 +301320,16 @@
             "sha256": "eb2509d68bf772144731a36a881ce3ff3ba2586fe09830b3ddda812130b7b278"
           },
           {
+            "path": "src/standalone/LocalDice.tsx",
+            "sha256": "8109eed337c48f3fa24044e856378c479adedc48d891958a068a67c98c0db7ae"
+          },
+          {
+            "path": "src/ui/Announcement.tsx",
+            "sha256": "15b66cbf58b7d4d52404a06ec359dcbef3c5b747c230351aa1efc65cf1e572c2"
+          },
+          {
             "path": "src/ui/App.tsx",
-            "sha256": "67283f3b465ff0a12dcdf65497c3ac56997922699c2fb1c1848ddcfee1c21ec1"
+            "sha256": "46368f86763dd5692243761e5b9f11863d5539f2cabc74acab308bd21df8ca81"
           },
           {
             "path": "src/ui/AutomationPanel.tsx",
@@ -301376,12 +301348,28 @@
             "sha256": "38235c054588ccba7ad5acdf32e8f5c2907459cac8a84f497d54397e5faf3b16"
           },
           {
+            "path": "src/ui/CloudRoomControl.tsx",
+            "sha256": "3bf0d670ef2905056f0392a01b9350efe53a4955e6b3c99085a4b58d2820de76"
+          },
+          {
+            "path": "src/ui/CustomFieldHelp.tsx",
+            "sha256": "c94cc1dcc769c674500dc4fbe6ccf78684f2b5fb5b599e3f6662023cabc04e92"
+          },
+          {
             "path": "src/ui/FeaturePanel.tsx",
             "sha256": "9ed874aa04abc65998c7500042270b38b2dfef832344ae9ab13ae1d7d8335f53"
           },
           {
             "path": "src/ui/KeywordPreview.tsx",
             "sha256": "28baa201adad9651c9a883ea565f3fff4cf4a1dc405c24489839f9a847e20cc3"
+          },
+          {
+            "path": "src/ui/LibraryFilters.tsx",
+            "sha256": "4fb0cdae70df142807518d465b4293f6adfe8bc0b1ead6546f3eccb011035270"
+          },
+          {
+            "path": "src/ui/MobilePlayActions.tsx",
+            "sha256": "388dd3ab5838ac6ab19f35bdb5262251c4538daf582012972e4293b37eaf9bc1"
           },
           {
             "path": "src/ui/NumberInput.tsx",
@@ -301396,6 +301384,10 @@
             "sha256": "49a588d9903a5872f3a19f767c95a426b91dc0d1980b2ccfe30a344bd43adb43"
           },
           {
+            "path": "src/ui/OverviewResourceDashboard.tsx",
+            "sha256": "33bc774d733e6476a22d79c41851ff263b6b5d2c730f270a8dc3950391d53daf"
+          },
+          {
             "path": "src/ui/PaletteButton.tsx",
             "sha256": "b243f6d781fed4d3f3315c6e157b94f03630e7018f9258d9bd243f7506a46a32"
           },
@@ -301408,8 +301400,16 @@
             "sha256": "4e3e843559d5096052d61086ffad37357a910627c24b0bcecfcc8d6c5f35ad34"
           },
           {
+            "path": "src/ui/PlayerPermissionButton.tsx",
+            "sha256": "1eb41aaedef63b9e9a2a7df117713f50ea1e16d69afa32ea668fb9e911a8eea6"
+          },
+          {
             "path": "src/ui/PlayerViewer.tsx",
             "sha256": "99644007c0fbbae96fe0e4ba01d2672e7924fdce99aa013325c8ef77944939af"
+          },
+          {
+            "path": "src/ui/RoomCardControl.tsx",
+            "sha256": "eb781a43aaeb1fb9dac7d8146c3926ba6226982d39c5fefd46592cb6b31058ed"
           },
           {
             "path": "src/ui/ScopedPaletteDrawer.tsx",
@@ -301420,8 +301420,16 @@
             "sha256": "12d6b054f9327a7596281be2d16f655b3a5ec3e1398be8c92a6e792ab01179c6"
           },
           {
+            "path": "src/ui/SourceSettings.tsx",
+            "sha256": "fe5f20b09058b9abc4cad829951a84a48e2b826cd2a97b5dd90a1349972751a3"
+          },
+          {
             "path": "src/ui/SourceSpellControls.tsx",
             "sha256": "82e2aa6872b17ed69a3ae90d8e582dc712c20a4887987bbe7fced012e180266e"
+          },
+          {
+            "path": "src/ui/WorkbenchQQAccount.tsx",
+            "sha256": "f09bef3e457ffb7f0ea0e3af336643ae9e13b1a87480a72dff24965f511fb67b"
           },
           {
             "path": "src/ui/cardPalettePresets.ts",
@@ -301445,7 +301453,7 @@
           },
           {
             "path": "src/ui/tooltipWheel.ts",
-            "sha256": "acb98aefc3a95303ce7fba97a5a38e333e6a6cdba0901f9fee2a9bac36806ef3"
+            "sha256": "1eab6368726978ee13b2dc843aae43dfd8e7bc741514d5db289e891d250431d9"
           },
           {
             "path": "src/ui/useSheetZoom.ts",
@@ -301459,41 +301467,100 @@
       },
       "uiRebind": {
         "kind": "consumer-binding-only-no-second-full-replay",
-        "at": "2026-10-22T09:59:09.739Z",
-        "from": "504e5f04d417e810f36ef560d83163f87784a70a",
-        "to": "77d49e4a73909f14b858f9ee730458a35eb8851b",
+        "at": "2026-10-22T10:51:52.128Z",
+        "from": "77d49e4a73909f14b858f9ee730458a35eb8851b",
+        "to": "3d8d2a07a6bac0708456a1d6953e788d010bf2fb",
         "actualDependenciesSha256": "0bbda0d618e431e680ad5c97137731060f034fe65807bba34c832fcb8e49a364",
         "actualSourceDependenciesUnchanged": true,
         "baseline305": "d4f82004ae0fe5b69b68705158c0e53ebccd3afa",
         "preservedOriginalGatePaths": 85,
-        "boundModules": 101,
+        "boundModules": 116,
         "changedConsumerSources": [
           {
             "status": "M",
-            "path": "src/ui/FeaturePanel.tsx"
+            "path": "src/cloud/CardStack.tsx"
           },
           {
             "status": "M",
-            "path": "src/ui/NumberInput.tsx"
+            "path": "src/cloud/CloudCardControl.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/cloud/CloudSave.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/cloud/QQLogin.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/standalone/LocalDice.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/Announcement.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/App.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/CloudRoomControl.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/CustomFieldHelp.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/LibraryFilters.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/MobilePlayActions.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/OverviewResourceDashboard.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/PlayerPermissionButton.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/RoomCardControl.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/SourceSettings.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/WorkbenchQQAccount.tsx"
+          },
+          {
+            "status": "M",
+            "path": "src/ui/tooltipWheel.ts"
           }
         ],
         "addedGatePaths": [
-          "src/core/displayCharacterEdit.ts",
-          "src/data/homebrewRecovery.ts",
-          "src/platform/characterPaletteSettings.ts",
-          "src/platform/paletteSettings.ts",
-          "src/ui/KeywordPreview.tsx",
-          "src/ui/NumberInput.tsx",
-          "src/ui/PaletteButton.tsx",
-          "src/ui/PaletteDrawer.tsx",
-          "src/ui/PaperFrame.tsx",
-          "src/ui/PlayerViewer.tsx",
-          "src/ui/ScopedPaletteDrawer.tsx",
-          "src/ui/cardPalettePresets.ts",
-          "src/ui/surfaceMotion.ts",
-          "src/ui/tooltipWheel.ts",
-          "src/ui/useSheetZoom.ts",
-          "src/ui/useSurfaceMotion.ts"
+          "src/cloud/CardStack.tsx",
+          "src/cloud/CloudCardControl.tsx",
+          "src/cloud/CloudSave.tsx",
+          "src/cloud/QQLogin.tsx",
+          "src/standalone/LocalDice.tsx",
+          "src/ui/Announcement.tsx",
+          "src/ui/CloudRoomControl.tsx",
+          "src/ui/CustomFieldHelp.tsx",
+          "src/ui/LibraryFilters.tsx",
+          "src/ui/MobilePlayActions.tsx",
+          "src/ui/OverviewResourceDashboard.tsx",
+          "src/ui/PlayerPermissionButton.tsx",
+          "src/ui/RoomCardControl.tsx",
+          "src/ui/SourceSettings.tsx",
+          "src/ui/WorkbenchQQAccount.tsx"
         ],
         "preserved": {
           "updatedAt": "2026-10-22T09:36:21.396Z",
@@ -301501,6 +301568,476 @@
           "sourcesSha256": "1e43a7c1893f708dcfccfd473a0d8a9cd34c245f915f0911cb0da26faa458b23",
           "inputsSha256": "e56d46b8a82ca0625665e7871404790e6da02d04fe177a79b7aaaedc236fa089",
           "snapshotSha256": "7ee119297b4a93c1193f52e35c3fa8dc5e819dabd71ee508de5747848c68759a"
+        },
+        "round": 2,
+        "fullReplayConsumer": "504e5f04d417e810f36ef560d83163f87784a70a",
+        "preservedPreviousGatePaths": 101,
+        "validatedDataCheckout": {
+          "revision": "67349a428204c25a93ec123968b31ef9889aae90",
+          "originalReplayProducer": "c766977d78c99a2e971a9ede15ff169a61a21719",
+          "checkoutIsOriginalReplayProducer": false,
+          "onlyKnownReportDocChanges": true,
+          "unchangedCommittedProducerFiles": 59
+        },
+        "previousBinding": {
+          "dataRevision": "67349a428204c25a93ec123968b31ef9889aae90",
+          "reportSha256": "cf70e61bb764ae204d4b29e78a720087ee0ba2bd8193666e42735f555f3a119b",
+          "consumer": {
+            "repository": "FullPeople/DND-card-web",
+            "revision": "77d49e4a73909f14b858f9ee730458a35eb8851b",
+            "modules": [
+              {
+                "path": "src/cloud/api.ts",
+                "sha256": "56fa8ea4277b19655bff6c7843af8d0b0b64985ffc643c7bae1eb4573f67fdab"
+              },
+              {
+                "path": "src/cloud/authorizationLease.ts",
+                "sha256": "ad8656538b81601bf8ca0da1c761be0a1ef178ccb868d2dbad0c08aa38b584b8"
+              },
+              {
+                "path": "src/cloud/room.ts",
+                "sha256": "a64a51c64f687f1e8e649f27a65a79185e04e04276993c12bd7db05854b5a52d"
+              },
+              {
+                "path": "src/cloud/sync.ts",
+                "sha256": "d3d615662a746ec99e2ded054b0df0f644285b33cf2c551b69a9d3743896c147"
+              },
+              {
+                "path": "src/core/automation/active.ts",
+                "sha256": "50b92cb03f42e6b3d3487e41b9a1270e159fb8b069697f1f50318de86d04eb99"
+              },
+              {
+                "path": "src/core/automation/backgroundAbilities.ts",
+                "sha256": "65f5b91d2819b0ebd9d32f0da7b236960aeb77bc0d025d0ebace16defc269c66"
+              },
+              {
+                "path": "src/core/automation/choices.ts",
+                "sha256": "1157a9a8f4b7dea93ea96ad00530bf7cbdaa46d4a8470938b785e18fc4191c2e"
+              },
+              {
+                "path": "src/core/automation/classChoiceEvidence.json",
+                "sha256": "aa3571986cb62851423345db23acec1ba78b370c5f700d7bd2384a8e4310dcca"
+              },
+              {
+                "path": "src/core/automation/classChoiceSourceGrant.ts",
+                "sha256": "3eeb060d54b5db8c352906eccde88589fd2748640bca17d211f2de4ae62bb385"
+              },
+              {
+                "path": "src/core/automation/classChoiceSupport.ts",
+                "sha256": "0a0c92a65254a3b63481f1475406206b4298717506862b03d1d97ae991579306"
+              },
+              {
+                "path": "src/core/automation/classSpellChoices.ts",
+                "sha256": "652e4aa60d1e12fa45fbfd4f30a8d962f13cf626f86844717f562b57eaa896bc"
+              },
+              {
+                "path": "src/core/automation/equipment.ts",
+                "sha256": "5366e18efa18be89c066aa7ea7d22750c9397dc38a1ccf79ee25f1abc69eaa17"
+              },
+              {
+                "path": "src/core/automation/featureArmor.ts",
+                "sha256": "57b0a790f11e6caa4c935cdfcbe9306d30f20227c2ed3c6365c768e236cdb8f8"
+              },
+              {
+                "path": "src/core/automation/featureResources.ts",
+                "sha256": "e3d85c9c4960525855a523d7656f812802e4b46c630798f9c8ce680bf2f08dbc"
+              },
+              {
+                "path": "src/core/automation/sourceClassChoices.ts",
+                "sha256": "a6e3bd594d17e0d6ac640adb7ed209a55b6e9af302e7647ac499b478b772bf40"
+              },
+              {
+                "path": "src/core/automation/sourceEquipment.ts",
+                "sha256": "03b37ab02ef56632432eaf0509384785e732b1f75b2bd5234c2a55ae6f8decda"
+              },
+              {
+                "path": "src/core/automation/sourceResourcePools.ts",
+                "sha256": "d7d4d341e6f5a0a0be789a4cc04012d01047f1a928a657391778c84ec528f4da"
+              },
+              {
+                "path": "src/core/automation/sourceSpellPlan.ts",
+                "sha256": "bad8f9ed9c527b4928d9a16c0494026e1b34cd3c07a834f2ac8c72c30c2d83f8"
+              },
+              {
+                "path": "src/core/automation/sourceSpellState.ts",
+                "sha256": "4f4efa38bb71171a9ab714521b86930a100579c47acc2242c49117727326f169"
+              },
+              {
+                "path": "src/core/automation/sourceSpells.ts",
+                "sha256": "bc4f3a245f8a33d7dc5cbe6e7cb7e2477aacd865465720a819a8d8e71b582e4e"
+              },
+              {
+                "path": "src/core/automation/state.ts",
+                "sha256": "0b9ab1e764e2b04ccde2ef3ee35ea77441b8d15adaf7445efd6c321457fca60d"
+              },
+              {
+                "path": "src/core/automation/training.ts",
+                "sha256": "d49949c9e7caafb7261dbe65bf8ff306e1b3299056f911ccbdad10baaf27239f"
+              },
+              {
+                "path": "src/core/automation/weapons.ts",
+                "sha256": "87a2ff6203cfe6809d2caf2909d3e88e7281395de93e7ea8c451bcbf13fca0f4"
+              },
+              {
+                "path": "src/core/cardMigrationIssues.ts",
+                "sha256": "83db4860fd29b0335ae4c315c16c41a9708749bf9012e9186fee80068b1a05bd"
+              },
+              {
+                "path": "src/core/castingSnapshot.ts",
+                "sha256": "135b682315b5dba826d448e3099cf2936f1816804dfb2c2580645a463e8bbc25"
+              },
+              {
+                "path": "src/core/characterDetails.ts",
+                "sha256": "df89b94dbe44a87127d670c43f2a5d59aa1591933bc69b6aa40ed62ca5f7ad16"
+              },
+              {
+                "path": "src/core/classMigrationQuery.ts",
+                "sha256": "1a392ab5ee84877b4a20086eb28e99301ad3e07fd30190461d128fa58aeb1aae"
+              },
+              {
+                "path": "src/core/displayCharacterEdit.ts",
+                "sha256": "41aa5374fc81e21c1bb59978928d85e8e42e85ac5256b9d29d770ef97858d548"
+              },
+              {
+                "path": "src/core/engine.ts",
+                "sha256": "f62a33ad7e1767dbeb9b70377d56d82a7fda0a7eaffc96e865b4b3c2bd97bbd7"
+              },
+              {
+                "path": "src/core/entryNameIndex.ts",
+                "sha256": "8e58de46bae9b1e8519411ac64ef362dc81d152d2b7c3ba56dd8513cd2c44bab"
+              },
+              {
+                "path": "src/core/entryReferences.ts",
+                "sha256": "b8ef8f503db0f0a00d0f7475b93c927580dca83bf170c95e3348b91f27afc7e7"
+              },
+              {
+                "path": "src/core/featureOwnership.ts",
+                "sha256": "4f7814394725d2f30fa66a91f3b3084c06df27f00159953111e67de3bfb049af"
+              },
+              {
+                "path": "src/core/hitPoints.ts",
+                "sha256": "b6f1f6d2dace8551832ea4470a81d5e74df524dc76d18ca3027bfd29fd098539"
+              },
+              {
+                "path": "src/core/model.ts",
+                "sha256": "2040ac38cac6258aa3096f887801bdc3d6420f7e79dd1bff60ebdcab8e861bfc"
+              },
+              {
+                "path": "src/core/numericExpression.ts",
+                "sha256": "51aa78b88d4605083dcdbff2f95144b60e52dc1d76fc5e9b70e8f9c0d347586f"
+              },
+              {
+                "path": "src/core/preparation.ts",
+                "sha256": "39370a4fb4cb00989eb6c9d3e84af1e0bb047a76215811f9b16fe8651e88c9e9"
+              },
+              {
+                "path": "src/core/proficiencyText.ts",
+                "sha256": "d589b6883da05bffadac1b25a0911161164f5e1d74fb340b99fbf837102aef2d"
+              },
+              {
+                "path": "src/core/quickbar.ts",
+                "sha256": "d7cec8c02e032a7c7389d9e4847e59c5c37eaf2ca2dc42cbec2a1aa0f0e90d7e"
+              },
+              {
+                "path": "src/core/racialAbilities.ts",
+                "sha256": "6e6e9b48b403ceb4cf9f4cbf294db3e815d33b40c735bf761c34b23035ee7763"
+              },
+              {
+                "path": "src/core/resourceWidgets.ts",
+                "sha256": "19ef0e9ebd19236f159e47d23708bc010457ef333fb11f684696f945e82a5907"
+              },
+              {
+                "path": "src/core/resources.ts",
+                "sha256": "01ca53c0159d8a4102a099e9ad0eedd59d6223aaabff8662ad349f1fc84ba81f"
+              },
+              {
+                "path": "src/core/runtimeCharacterEdit.ts",
+                "sha256": "2228a38d43790e662daa62b16d838e9717b19bcde94b80b218b0acd4ae52716f"
+              },
+              {
+                "path": "src/core/sheet.ts",
+                "sha256": "381848187afcaad6df7246ef24bcc7c20e756f807abc66b8c07159973765d4a2"
+              },
+              {
+                "path": "src/core/siteSources.ts",
+                "sha256": "57f7cc99458a0114a1b6a46a7f8af934baee7be588d695227c1c27d5bd670e7f"
+              },
+              {
+                "path": "src/core/sourceCorrections.ts",
+                "sha256": "0a12d51444945e04d504d2a67d35c542bd314242349cb3f84b1833090e2d9e75"
+              },
+              {
+                "path": "src/core/spellCapacity.ts",
+                "sha256": "0c8cf10754a06c19660501f7ed24d2cb166a79d8f898240babf39645a883588e"
+              },
+              {
+                "path": "src/core/spellResourceKeys.ts",
+                "sha256": "24e978e787e25eaa49294ea72fbd85d259230ed15640d1cd93c38e662bbb65d9"
+              },
+              {
+                "path": "src/core/spellWorkspace.ts",
+                "sha256": "4839a9748ea685b77e33d66110cef5b4c91f32d57c48ee435e5160f83a7e7f51"
+              },
+              {
+                "path": "src/core/spellcastingRules.ts",
+                "sha256": "b418a28e9ec8866ea168c67c3b57e6b68e5e8d3249b34fb11d05fee043b6922b"
+              },
+              {
+                "path": "src/core/spells.ts",
+                "sha256": "0ae5dcdf44a437983e562bd5e7557c7062812fc246d7ee31f8911db7ffb862a9"
+              },
+              {
+                "path": "src/core/validation.ts",
+                "sha256": "70164d8188e878526db2b1a71f53b4a0c5ee05bdec07e0b7390dfb1ca6fba0c0"
+              },
+              {
+                "path": "src/data/adapt.ts",
+                "sha256": "380ac9bc94b9ddff7950934211650894f521fb5a31344dbebb805f57adaea9aa"
+              },
+              {
+                "path": "src/data/catalog.ts",
+                "sha256": "612e37083e84549bb36d93d3a7d9fdb452a29a5ddda7ff75786c71f26002ba60"
+              },
+              {
+                "path": "src/data/catalogNormalizer.ts",
+                "sha256": "60a9e5835034862cf3401f7482e49af3e41342bb07ca892b322d1f5189b775cd"
+              },
+              {
+                "path": "src/data/catalogSnapshot.ts",
+                "sha256": "30c0d0354b41f0904ed82239fe621ae2fee9031ab7a81a924a1ebc41e8295e37"
+              },
+              {
+                "path": "src/data/catalogSource.ts",
+                "sha256": "606a0d0ec78329da078d47a42ce4b4890859586fecdb84d625f56e4d105981b1"
+              },
+              {
+                "path": "src/data/catalogTransport.ts",
+                "sha256": "f713ee0c9adf9c070626b1b71d11a0bc1a17a3afcfa0b8032fcae72b98a5916b"
+              },
+              {
+                "path": "src/data/expand.ts",
+                "sha256": "be28a83b74ca39d328beee2746b069af838b40a959640f8541e1017228eb13f3"
+              },
+              {
+                "path": "src/data/homebrew.ts",
+                "sha256": "e409edf591bfc1cda14729d61f6f91095b63508fdbd767769a60784c1f325b5e"
+              },
+              {
+                "path": "src/data/homebrewRecovery.ts",
+                "sha256": "1ad91a77e5c7e8d9649d58cfca77e5f2336a70fe1b9796237a42807742f1176f"
+              },
+              {
+                "path": "src/data/weaponTraining.ts",
+                "sha256": "a946a8aec891b2c1308c271fb1fad2c22e5316607fb7faaa8b2e83f60f7d42cf"
+              },
+              {
+                "path": "src/platform/buildMode.ts",
+                "sha256": "09ba2983f92f6213bfd49819f41d013a3e708b64310512c5eec397319d5586dd"
+              },
+              {
+                "path": "src/platform/cardViewReconciliation.ts",
+                "sha256": "a1e355acc8d95152876204c15ffde072e208cf3397bcd59c5b7042c80b78b5fc"
+              },
+              {
+                "path": "src/platform/characterPaletteSettings.ts",
+                "sha256": "bc08b253c2a02327d9a7e19333256f925a3e5cbb834524f1bcdd50bbabbcd07e"
+              },
+              {
+                "path": "src/platform/choiceReview.ts",
+                "sha256": "bbc61abafae0d85535c6714bf09bb2e87f475d6b6224ad27ddf4be3b3978b7aa"
+              },
+              {
+                "path": "src/platform/paletteSettings.ts",
+                "sha256": "4f333837492268663e47faea15a7fb39d5dafe2cde912f1259b52b0b51e27549"
+              },
+              {
+                "path": "src/platform/requestTimeout.ts",
+                "sha256": "e2a9ae6f0bd30bc3dba2f842b1eb0a36a1aac0cc98eca84ed307bddc7f3e1380"
+              },
+              {
+                "path": "src/platform/settledSnapshotCheck.ts",
+                "sha256": "296bcebd9ababdfc50250be558cc0ade1369f43bfaee368dc3a43274db07517c"
+              },
+              {
+                "path": "src/platform/snapshotMemo.ts",
+                "sha256": "3a51316be1a50bc2b9152f4688f95eef25e8304699f1a9226442c2c0a484ce94"
+              },
+              {
+                "path": "src/platform/standaloneCardViews.ts",
+                "sha256": "c99ebee450ac64fbcf5c86c679aa8857a6be0538cfcf3f44cc92ae5d44079598"
+              },
+              {
+                "path": "src/platform/standaloneCatalogPublication.ts",
+                "sha256": "2635ba678e2870e8c0d24f615af16441f5df9d8055bdf37e2316853be05f6770"
+              },
+              {
+                "path": "src/platform/storage.ts",
+                "sha256": "eeb31b10ca86d6015d96372db413119dda7cc9a307307b73e4e309a01b266533"
+              },
+              {
+                "path": "src/platform/workbenchMode.ts",
+                "sha256": "7620b3cb56cea694dad7d5930d2539c193c924ba5c5751c27f92037f78fb3c14"
+              },
+              {
+                "path": "src/platform/workspaceDatabase.ts",
+                "sha256": "7cc88eb29692a271270b8f8f5760ac9044eef55a877f219ab997feba58306df2"
+              },
+              {
+                "path": "src/platform/workspaceIdentity.ts",
+                "sha256": "8323a81b45c945d136d626e0a931aea19a0f7a59c369ddf3e02c0a7c82d7f9ab"
+              },
+              {
+                "path": "src/platform/workspaceNamespace.ts",
+                "sha256": "eb2509d68bf772144731a36a881ce3ff3ba2586fe09830b3ddda812130b7b278"
+              },
+              {
+                "path": "src/ui/App.tsx",
+                "sha256": "67283f3b465ff0a12dcdf65497c3ac56997922699c2fb1c1848ddcfee1c21ec1"
+              },
+              {
+                "path": "src/ui/AutomationPanel.tsx",
+                "sha256": "b412ccab8c6e100f434983d0494e41ab73d67431209516b09a8c8c6ba84be34f"
+              },
+              {
+                "path": "src/ui/CharacterTabs.tsx",
+                "sha256": "ab8f17c8fe0737735c55ef54fb7aeb3d7a476d7f9d95eaed5f168d5c9a20030f"
+              },
+              {
+                "path": "src/ui/ChoiceWorkspace.tsx",
+                "sha256": "9d32ffbb4758e20e758f644688de21b488e321c2b9e0117435b90b91643cf6bb"
+              },
+              {
+                "path": "src/ui/ClassChoiceRecords.tsx",
+                "sha256": "38235c054588ccba7ad5acdf32e8f5c2907459cac8a84f497d54397e5faf3b16"
+              },
+              {
+                "path": "src/ui/FeaturePanel.tsx",
+                "sha256": "9ed874aa04abc65998c7500042270b38b2dfef832344ae9ab13ae1d7d8335f53"
+              },
+              {
+                "path": "src/ui/KeywordPreview.tsx",
+                "sha256": "28baa201adad9651c9a883ea565f3fff4cf4a1dc405c24489839f9a847e20cc3"
+              },
+              {
+                "path": "src/ui/NumberInput.tsx",
+                "sha256": "4006d4524815568fcacb5efb2425fd3e7970923211a5de971c7886d8d72c95d6"
+              },
+              {
+                "path": "src/ui/Overview.tsx",
+                "sha256": "65ae6fadf78e9f563d59d19b9a3a1d829a27d35a6b99437cf39451203ef91e0b"
+              },
+              {
+                "path": "src/ui/OverviewChoiceOverlay.tsx",
+                "sha256": "49a588d9903a5872f3a19f767c95a426b91dc0d1980b2ccfe30a344bd43adb43"
+              },
+              {
+                "path": "src/ui/PaletteButton.tsx",
+                "sha256": "b243f6d781fed4d3f3315c6e157b94f03630e7018f9258d9bd243f7506a46a32"
+              },
+              {
+                "path": "src/ui/PaletteDrawer.tsx",
+                "sha256": "6beeea70ccdc6c8a870de96510818bb1f8db70d3f2ff83d12065f2ae0c60e3e3"
+              },
+              {
+                "path": "src/ui/PaperFrame.tsx",
+                "sha256": "4e3e843559d5096052d61086ffad37357a910627c24b0bcecfcc8d6c5f35ad34"
+              },
+              {
+                "path": "src/ui/PlayerViewer.tsx",
+                "sha256": "99644007c0fbbae96fe0e4ba01d2672e7924fdce99aa013325c8ef77944939af"
+              },
+              {
+                "path": "src/ui/ScopedPaletteDrawer.tsx",
+                "sha256": "43fa386f9f03fb3d2533f7934ec0681bd5b0bca71abcb1d1967f767ec422d8f2"
+              },
+              {
+                "path": "src/ui/SheetChoicesContext.ts",
+                "sha256": "12d6b054f9327a7596281be2d16f655b3a5ec3e1398be8c92a6e792ab01179c6"
+              },
+              {
+                "path": "src/ui/SourceSpellControls.tsx",
+                "sha256": "82e2aa6872b17ed69a3ae90d8e582dc712c20a4887987bbe7fced012e180266e"
+              },
+              {
+                "path": "src/ui/cardPalettePresets.ts",
+                "sha256": "b58c703143f6dd854bd9629aeeb3277acda99764efade5775c5dbd4f9987f901"
+              },
+              {
+                "path": "src/ui/choiceCatalog.ts",
+                "sha256": "53ed94ae9b11ba79bd5ebb20ed8b6a98ded497d8d0fa2dc62e3fde3c1c79922e"
+              },
+              {
+                "path": "src/ui/entryDragIntent.ts",
+                "sha256": "092b9b728a9f22f0555b083cb85a00da7349b3e765f307dff1c707cd693a1031"
+              },
+              {
+                "path": "src/ui/skillChoiceWarnings.ts",
+                "sha256": "f9c424e17917ac2485a3626e2366477b13ea2ac8c02c40c6f6b77085e8a3c252"
+              },
+              {
+                "path": "src/ui/surfaceMotion.ts",
+                "sha256": "f4036bf8171c718a69e184847d76ff13c263322b18a27ff6aa4b5d19f13eeda1"
+              },
+              {
+                "path": "src/ui/tooltipWheel.ts",
+                "sha256": "acb98aefc3a95303ce7fba97a5a38e333e6a6cdba0901f9fee2a9bac36806ef3"
+              },
+              {
+                "path": "src/ui/useSheetZoom.ts",
+                "sha256": "81965ac6b492c13fb72d66f920c94100e8ddf3a25c859e3117c5ab244ce8365e"
+              },
+              {
+                "path": "src/ui/useSurfaceMotion.ts",
+                "sha256": "660fef14e7f6f184557ec1efa07ca0faf68e1f597df6e10df5ad80b6ba85b179"
+              }
+            ]
+          },
+          "uiRebind": {
+            "kind": "consumer-binding-only-no-second-full-replay",
+            "at": "2026-10-22T09:59:09.739Z",
+            "from": "504e5f04d417e810f36ef560d83163f87784a70a",
+            "to": "77d49e4a73909f14b858f9ee730458a35eb8851b",
+            "actualDependenciesSha256": "0bbda0d618e431e680ad5c97137731060f034fe65807bba34c832fcb8e49a364",
+            "actualSourceDependenciesUnchanged": true,
+            "baseline305": "d4f82004ae0fe5b69b68705158c0e53ebccd3afa",
+            "preservedOriginalGatePaths": 85,
+            "boundModules": 101,
+            "changedConsumerSources": [
+              {
+                "status": "M",
+                "path": "src/ui/FeaturePanel.tsx"
+              },
+              {
+                "status": "M",
+                "path": "src/ui/NumberInput.tsx"
+              }
+            ],
+            "addedGatePaths": [
+              "src/core/displayCharacterEdit.ts",
+              "src/data/homebrewRecovery.ts",
+              "src/platform/characterPaletteSettings.ts",
+              "src/platform/paletteSettings.ts",
+              "src/ui/KeywordPreview.tsx",
+              "src/ui/NumberInput.tsx",
+              "src/ui/PaletteButton.tsx",
+              "src/ui/PaletteDrawer.tsx",
+              "src/ui/PaperFrame.tsx",
+              "src/ui/PlayerViewer.tsx",
+              "src/ui/ScopedPaletteDrawer.tsx",
+              "src/ui/cardPalettePresets.ts",
+              "src/ui/surfaceMotion.ts",
+              "src/ui/tooltipWheel.ts",
+              "src/ui/useSheetZoom.ts",
+              "src/ui/useSurfaceMotion.ts"
+            ],
+            "preserved": {
+              "updatedAt": "2026-10-22T09:36:21.396Z",
+              "recordsSha256": "d8652a7ca7912051d8cfb84de94043b43ccfc1789b79d758e53fca447f1f543b",
+              "sourcesSha256": "1e43a7c1893f708dcfccfd473a0d8a9cd34c245f915f0911cb0da26faa458b23",
+              "inputsSha256": "e56d46b8a82ca0625665e7871404790e6da02d04fe177a79b7aaaedc236fa089",
+              "snapshotSha256": "7ee119297b4a93c1193f52e35c3fa8dc5e819dabd71ee508de5747848c68759a"
+            }
+          }
         }
       }
     }
