@@ -219,7 +219,7 @@
 .keyword-preview header{padding:9px 12px 7px;flex:none}
 .keyword-preview header strong{font-size:15px;font-weight:600}
 .keyword-preview footer{flex:none;padding:5px 12px}
-.keyword-preview .keyword-content{min-height:0;overscroll-behavior:contain}
+.keyword-preview .keyword-content{min-height:0;overscroll-behavior:auto}
 .tooltip-pin{color:#62714f}
 @media(prefers-reduced-motion:reduce){.feature-bubble,.wiki-splitter span{transition:none}}
 
