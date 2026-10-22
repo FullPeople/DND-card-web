@@ -3,7 +3,8 @@ import {readFileSync} from 'node:fs';
 import {mockSource,suppressAnnouncement} from './fixtures';
 
 async function savedWorkspace(page:Page){return page.evaluate(async()=>{
- const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open('dnd-card-standalone');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
+ const module='/src/platform/workspaceIdentity.ts',name=(await import(module)).workspaceIdentity.database;
+ const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open(name);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
  try{return await new Promise<any>((resolve,reject)=>{const req=db.transaction('documents').objectStore('documents').get('workspace');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}finally{db.close();}
 });}
 async function savedCard(page:Page){const workspace=await savedWorkspace(page);return workspace.characters.find((card:any)=>card.id===workspace.activeId);}
@@ -12,7 +13,8 @@ async function chooseCard(page:Page,id:string){await page.getByRole('button',{na
 async function start(page:Page){
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/card/?intro=0');await expect(page.locator('.paper')).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.evaluate(async()=>{
-  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open('dnd-card-standalone');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
+  const module='/src/platform/workspaceIdentity.ts',name=(await import(module)).workspaceIdentity.database;
+  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const req=indexedDB.open(name);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
   const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),req=store.get('workspace');req.onsuccess=()=>{const workspace=req.result,original=workspace.characters.find((c:any)=>c.id===workspace.activeId);original.name='调色盘甲';original.palette={paper:'#DDEEFF',heading:'#445566'};original.componentPalette={abilities:{surface:'#AABBCC'}};original.runtime.hp=3;original.runtime.resources.paletteSpent={name:'配色验收已消耗资源',current:1,max:5};const second=structuredClone(original);second.id='scoped-palette-b';second.name='调色盘乙';second.palette={paper:'#FEDCBA'};second.componentPalette={spells:{surface:'#BBCCAA'}};workspace.characters.push(second);store.put(workspace,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();
  });await page.reload();await expect(page.locator('.paper')).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');
 }
