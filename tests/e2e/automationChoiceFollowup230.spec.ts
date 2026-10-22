@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
-import {raw,ready,workspace,dragWiki} from './automationChoiceFixture';
+import {raw,ready,openFeatures,workspace,dragWiki} from './automationChoiceFixture';
 
 test('230 expanded automation choices have clear collapse, fast navigation and focus return',async({page})=>{
- const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await ready(page);await openFeatures(page);
  const feature=page.locator('[data-feature-id="feature-0"]');await expect(feature).not.toHaveClass(/is-expanded/);await page.getByRole('button',{name:'展开全部职业特性',exact:true}).click();await expect(feature).toHaveClass(/is-expanded/);await expect(feature.getByRole('button',{name:'选择测试圣职 0/1',exact:true})).toBeVisible();
  await feature.getByRole('button',{name:'折叠测试圣职',exact:true}).click();await expect(feature).not.toHaveClass(/is-expanded/);await expect(feature.locator('.feature-prose')).toHaveCount(0);await feature.locator('.feature-caption').click();
  const navigation=page.getByRole('navigation',{name:'职业选择项'});await expect(navigation.getByRole('button')).toHaveCount(3);await workspace(page,'测试圣职').getByRole('button',{name:'保护者',exact:true}).click();await expect(workspace(page,'测试圣职').getByRole('status').first()).toContainText('已完成');
@@ -12,16 +12,16 @@ test('230 expanded automation choices have clear collapse, fast navigation and f
 });
 
 test('230 repeated drag, duplicate swap and rapid removal keep one saved allocation without drag clones',async({page})=>{
- await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await dragWiki(page,'运动',0);
+ await ready(page);const features=await openFeatures(page);await features.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await expect(features.getByRole('region',{name:'选择起始熟练项',exact:true})).toBeVisible();await expect(page.locator('.overview-choice-overlay')).toHaveCount(0);await dragWiki(page,'运动',0);
  await page.evaluate(()=>{const original=window.structuredClone;Object.assign(window,{choiceCloneCount:0});window.structuredClone=((...args:Parameters<typeof structuredClone>)=>{(window as any).choiceCloneCount++;return original(...args);}) as typeof structuredClone;});
  await dragWiki(page,'运动',0);expect(await page.evaluate(()=>(window as any).choiceCloneCount)).toBe(0);await expect(page.locator('.choice-slot-entry')).toHaveCount(1);
  await dragWiki(page,'察觉',1);await dragWiki(page,'运动',1);await expect(page.locator('.choice-slot').nth(0)).toContainText('察觉');await expect(page.locator('.choice-slot').nth(1)).toContainText('运动');
  await workspace(page,'起始熟练项').getByRole('button',{name:'移除察觉',exact:true}).click();await dragWiki(page,'历史',0);await workspace(page,'起始熟练项').getByRole('button',{name:'移除历史',exact:true}).click();await dragWiki(page,'历史',0);await workspace(page,'起始熟练项').getByRole('button',{name:'完成并返回',exact:true}).click();await expect(page.getByRole('button',{name:'起始熟练项 2/2',exact:true})).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');
- await page.reload({waitUntil:'domcontentloaded'});await page.getByRole('tab',{name:'特性',exact:true}).click();await page.getByRole('button',{name:'起始熟练项 2/2',exact:true}).click();await expect(page.locator('.choice-slot').nth(0)).toContainText('历史');await expect(page.locator('.choice-slot').nth(1)).toContainText('运动');await page.screenshot({path:'evidence/automation230-choice-saved.png'});
+ await page.reload({waitUntil:'domcontentloaded'});const restoredFeatures=await openFeatures(page);await restoredFeatures.getByRole('button',{name:'起始熟练项 2/2',exact:true}).click();await expect(restoredFeatures.getByRole('region',{name:'选择起始熟练项',exact:true})).toBeVisible();await expect(page.locator('.overview-choice-overlay')).toHaveCount(0);await expect(page.locator('.choice-slot').nth(0)).toContainText('历史');await expect(page.locator('.choice-slot').nth(1)).toContainText('运动');await page.screenshot({path:'evidence/automation230-choice-saved.png'});
 });
 
 test('230 Escape cancels an active drag before closing, outside drops and switching leave no ghosts',async({page})=>{
- await ready(page);await page.getByRole('tab',{name:'特性',exact:true}).click();await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();
+ await ready(page);await openFeatures(page);await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();
  const row=page.locator('.catalog-row').filter({hasText:'运动'}).first();const box=await row.boundingBox();await page.mouse.move(box!.x+30,box!.y+box!.height/2);await page.mouse.down();await page.mouse.move(box!.x+60,box!.y+box!.height/2,{steps:4});await expect(page.locator('.pointer-ghost')).toHaveCount(1);await page.keyboard.press('Escape');await page.mouse.up();await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(workspace(page,'起始熟练项')).toBeVisible();await expect(page.locator('.choice-slot-entry')).toHaveCount(0);
  const again=await row.boundingBox();await page.mouse.move(again!.x+30,again!.y+again!.height/2);await page.mouse.down();await page.mouse.move(again!.x+60,again!.y+again!.height/2,{steps:3});await page.mouse.move(4,4,{steps:16});await page.mouse.up();await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(page.locator('.choice-slot-entry')).toHaveCount(0);
  await page.getByRole('navigation',{name:'职业选择项'}).getByRole('button',{name:'起始装备 0/1',exact:true}).click();await page.getByRole('navigation',{name:'职业选择项'}).getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await dragWiki(page,'运动',0);await page.keyboard.press('Escape');await expect(page.locator('.choice-workspace')).toHaveCount(0);await expect(page.locator('.pointer-ghost')).toHaveCount(0);await expect(page.getByRole('button',{name:'起始熟练项 1/2',exact:true})).toBeVisible();
@@ -29,7 +29,7 @@ test('230 Escape cancels an active drag before closing, outside drops and switch
 
 test('230 delayed Wiki candidates preserve saved choices and the narrow workspace remains usable',async({page})=>{
  await page.setViewportSize({width:390,height:844});let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
- try{await ready(page,raw,{skillsGate:gate,savedSkills:['athletics','']});await page.getByRole('tab',{name:'特性',exact:true}).click();const beforePaper=await page.locator('.paper').boundingBox();const preference=await page.evaluate(()=>localStorage.getItem('dnd-card-sheet-display'));await page.getByRole('button',{name:'起始熟练项 1/2',exact:true}).click();
+ try{await ready(page,raw,{skillsGate:gate,savedSkills:['athletics','']});await openFeatures(page);const beforePaper=await page.locator('.paper').boundingBox();const preference=await page.evaluate(()=>localStorage.getItem('dnd-card-sheet-display'));await page.getByRole('button',{name:'起始熟练项 1/2',exact:true}).click();
  await expect(workspace(page,'起始熟练项')).toContainText('候选资料尚未加载');await expect(page.locator('.choice-slot').first()).toContainText('运动');await workspace(page,'起始熟练项').getByRole('button',{name:'收起选择',exact:true}).click();await expect(page.getByRole('button',{name:'起始熟练项 1/2',exact:true})).toBeVisible();release();
  await page.getByRole('button',{name:'起始熟练项 1/2',exact:true}).click();await workspace(page,'起始熟练项').getByRole('button',{name:'打开候选资料',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(3);await dragWiki(page,'察觉',1);await page.getByRole('button',{name:'查看选择',exact:true}).click();await expect(page.locator('.choice-loading')).toHaveCount(0);await expect(workspace(page,'起始熟练项').getByRole('button',{name:'收起选择',exact:true})).toBeVisible();
  const exportSize=await page.locator('.paper').evaluate(el=>{el.classList.add('sheet-export');try{const style=getComputedStyle(el);return {width:parseFloat(style.width),height:parseFloat(style.height)};}finally{el.classList.remove('sheet-export');}});expect(exportSize.width).toBe(680);expect(Math.abs(exportSize.width/exportSize.height-210/297)).toBeLessThan(.005);
@@ -38,7 +38,7 @@ test('230 delayed Wiki candidates preserve saved choices and the narrow workspac
 });
 
 test('230 large Wiki catalog keeps pointer movement free of character clones',async({page},testInfo)=>{
- const data=structuredClone(raw) as Record<string,any[]>;data.spell=Array.from({length:2000},(_,i)=>({name:`原创载荷法术${i}`,ENG_name:`Authored Load Spell ${i}`,source:'XPHB',level:1,entries:['原创性能回归条目。']}));await ready(page,data);await page.getByRole('tab',{name:'特性',exact:true}).click();await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(3);
+ const data=structuredClone(raw) as Record<string,any[]>;data.spell=Array.from({length:2000},(_,i)=>({name:`原创载荷法术${i}`,ENG_name:`Authored Load Spell ${i}`,source:'XPHB',level:1,entries:['原创性能回归条目。']}));await ready(page,data);await openFeatures(page);await page.getByRole('button',{name:'起始熟练项 0/2',exact:true}).click();await expect(page.locator('.catalog-row')).toHaveCount(3);
  await page.evaluate(()=>{
   const original=window.structuredClone,start=performance.now();
   const meter={clones:0,setupClones:0,pointerClones:0,phase:'setup' as 'setup'|'pointer',longTasks:[] as number[],calls:[] as Array<Record<string,unknown>>,pointerEvents:[] as Array<{type:string;at:number}>,pointer:{type:'not-started',at:0}};
@@ -62,15 +62,15 @@ test('230 large Wiki catalog keeps pointer movement free of character clones',as
 for(const choice of [{label:'起始熟练项',count:2},{label:'起始装备',count:1}])test(`source completion during a pointer press preserves the first ${choice.label} activation`,async({page})=>{
  let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
  try{
-  await ready(page,raw,{skillsGate:gate});await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');await page.getByRole('tab',{name:'特性',exact:true}).click();await expect(page.getByRole('tab',{name:'特性',exact:true})).toHaveAttribute('aria-selected','true');
-  const chip=page.getByRole('button',{name:`${choice.label} 0/${choice.count}`,exact:true}),banner=page.locator('.class-compatibility-banner');
+  await ready(page,raw,{skillsGate:gate});await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toHaveAttribute('aria-checked','true');const features=await openFeatures(page);
+  const chip=features.getByRole('button',{name:`${choice.label} 0/${choice.count}`,exact:true}),banner=page.locator('.class-compatibility-banner');
   await expect(chip).toBeVisible();await expect(banner).toHaveCount(0);await chip.scrollIntoViewIfNeeded();const before=await chip.boundingBox();expect(before).not.toBeNull();
   await page.mouse.move(before!.x+before!.width/2,before!.y+before!.height/2);await page.mouse.down();
   // Finish the real source queue while the physical button is held. A late
   // warning must not move the target between pointerdown and pointerup.
   release();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await expect(banner).toHaveCount(0);
   const held=await chip.boundingBox();expect(held).not.toBeNull();for(const key of ['x','y','width','height'] as const)expect(Math.abs(held![key]-before![key])).toBeLessThan(.5);
-  await page.mouse.up();await expect(workspace(page,choice.label)).toBeVisible();await expect(banner).toBeVisible();
+  await page.mouse.up();await expect(workspace(page,choice.label)).toBeVisible();await expect(features.getByRole('region',{name:`选择${choice.label}`,exact:true})).toBeVisible();await expect(page.locator('.overview-choice-overlay')).toHaveCount(0);await expect(banner).toBeVisible();
   if(choice.label==='起始熟练项')await expect(page.locator('.catalog-row')).toHaveCount(3);else await expect(workspace(page,choice.label).getByRole('button',{name:'方案 A',exact:true})).toBeVisible();
   await page.keyboard.press('Escape');await expect(page.locator('.choice-workspace')).toHaveCount(0);await expect(chip).toBeFocused();
  }finally{release();await page.mouse.up();}

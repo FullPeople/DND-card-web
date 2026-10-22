@@ -22,6 +22,11 @@ export async function ready(page:Page,data:Record<string,any[]>=raw,options:{ski
  if(!options.keepImportIgnored)await restoreAuthoredChoices(page);
 }
 
+export async function openFeatures(page:Page){
+ const tab=page.getByRole('tab',{name:'特性',exact:true});await tab.click();await expect(tab).toHaveAttribute('aria-selected','true');
+ const body=page.locator('.paper.page-1 .features-page-grid');await expect(body).toBeVisible();await expect(body.locator('.detail-class-features')).toBeVisible();await expect(page.locator('.overview-choice-overlay')).toHaveCount(0);
+ return body;
+}
 export const workspace=(page:Page,label:string)=>page.getByRole('region',{name:`选择${label}`,exact:true});
 export async function dragWiki(page:Page,name:string,index:number){
  const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();
