@@ -1,0 +1,4 @@
+.palette-toggle{display:inline-flex;align-items:center;justify-content:center;min-width:30px;min-height:27px;padding:3px!important}.palette-toggle svg{display:block}
+.paper-heading-right .card-palette-toggle{min-width:25px;min-height:25px;padding:3px!important;flex:none;background:var(--card-all-heading,#747474)!important;color:var(--card-all-headingInk,#fff)!important;border:1px solid var(--card-all-frame,#595959)!important;border-radius:4px}
+.sheet-export .card-palette-toggle{display:none!important}
+@media print{.card-palette-toggle{display:none!important}}

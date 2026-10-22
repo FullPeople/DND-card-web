@@ -51,7 +51,7 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
     {title:t('releasePending'),items:[t('releasePending1')]},
     ...(mode==='suite'?[{title:t('releaseSuite'),items:[t('releaseSuite1')]},{title:t('releaseInvestigating'),items:[t('releaseInvestigating1')]}]:[]),
   ];
-  return <dialog className="announcement" ref={ref} aria-labelledby="announcement-title" onCancel={event=>event.preventDefault()}>
+  return <dialog aria-modal="true" className="announcement" ref={ref} aria-labelledby="announcement-title" onCancel={event=>event.preventDefault()}>
     <SupporterMarquee fullScreen/>
     <div className="announcement-panel">
     <header className="announcement-head"><div className="announcement-heading-row"><h2 id="announcement-title">{t(mode==='suite'?'welcomeSuite':'welcomeSite')}</h2></div><p className="announcement-version">{releaseVersion ? t('version',{version:releaseVersion}) : t('version',{version})}{releaseVersion&&<small> · {language==='en'?'Notice':'公告'} {version}</small>}</p>

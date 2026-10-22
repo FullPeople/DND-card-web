@@ -16,7 +16,7 @@ function PermissionDialog({close}:{close:()=>void}){
   frame?.addEventListener('load',loaded);loaded();
   return()=>{frame?.removeEventListener('load',loaded);frameDocument?.removeEventListener('keydown',keydown);dialog.close();};
  },[]);
- return <dialog ref={root} className="player-permission-dialog" aria-label="关于玩家分配卡和权限" onCancel={event=>{event.preventDefault();close();}}><header><strong>DM 重要说明</strong><button type="button" onClick={close} aria-label="关闭权限说明"><CloseIcon/></button></header><WorkbenchPanel panel="permissions" close={close}/></dialog>;
+ return <dialog aria-modal="true" ref={root} className="player-permission-dialog" aria-label="关于玩家分配卡和权限" onCancel={event=>{event.preventDefault();close();}}><header><strong>DM 重要说明</strong><button type="button" onClick={close} aria-label="关闭权限说明"><CloseIcon/></button></header><WorkbenchPanel panel="permissions" close={close}/></dialog>;
 }
 export function PlayerPermissionButton({gm,online,request}:{gm:boolean;online:boolean;request:Request}){
  const [seen,setSeen]=useState(false),[opening,setOpening]=useState(false),refreshStatus=useRef(()=>{});

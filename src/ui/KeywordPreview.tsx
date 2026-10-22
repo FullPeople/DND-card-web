@@ -12,6 +12,7 @@ import { plainText } from '../core/export';
 import { ReferenceContext } from './Reference';
 
 import type { Point } from './pointerDrag';
+import {scrollTooltipWheel} from './tooltipWheel';
 import './reference176.css';
 
 const Pane=lazy(()=>import('./KeywordPreviewPane'));
@@ -74,7 +75,15 @@ export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCom
       }
       if (!(event.target instanceof Element) || !event.target.closest('[data-tooltip-id]')) close();
     };
-    const wheel=(event:WheelEvent)=>{const hit=(event.target as Element).closest<HTMLElement>('[data-tooltip-id]');const current=state.current.preview;const pane=hit||(current?.anchor.contains(event.target as Node)?document.getElementById(current.id):null);if(!pane){scrollingUntil.current=performance.now()+130;close();return;}event.preventDefault();event.stopImmediatePropagation();const content=pane.querySelector<HTMLElement>('.keyword-content');if(content)content.scrollTop+=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?content.clientHeight:1);};
+    const wheel=(event:WheelEvent)=>{
+      if(!(event.target instanceof Element)||event.ctrlKey||event.defaultPrevented||!event.cancelable)return;
+      const hit=event.target.closest<HTMLElement>('[data-tooltip-id]'),current=state.current.preview;
+      const pane=hit||(current?.anchor.contains(event.target)?document.getElementById(current.id):null);
+      if(!pane&&!event.target.closest('.tooltip-backdrop')){scrollingUntil.current=performance.now()+130;close();return;}
+      const result=scrollTooltipWheel(event,pane);
+      if(result.handled){event.preventDefault();event.stopImmediatePropagation();}
+      if(result.forwarded||!result.handled){scrollingUntil.current=performance.now()+130;close();}
+    };
     document.addEventListener('wheel',wheel,{capture:true,passive:false});
     document.addEventListener('pointerdown', down, true); document.addEventListener('contextmenu', menu, true); document.addEventListener('auxclick', menu, true);
     document.addEventListener('keydown', key); document.addEventListener('scroll', scroll, true); window.addEventListener('card-drag-start', close);
@@ -112,6 +121,6 @@ export function KeywordPreview({ children, resolve, open, sheetPreview, sheetCom
   }
   return <ReferenceContext.Provider value={{ show, move, leave, close, resolve:(reference,kind)=>sheetCallbacks.current.resolve(reference,kind), commit:(anchor,reference,kind,entry)=>{if(!anchor.closest('.paper,[data-wiki-preview]')||!sheetCallbacks.current.sheetCommit)return false;const found=sheetCallbacks.current.resolve(reference,kind)||entry;if(!found)return false;sheetCallbacks.current.sheetCommit(found);return true;}, active: visiblePreview?.anchor, activeId: visiblePreview?.id }}>
     {children}
-    {createPortal(<>{visiblePinned.length > 0 && <div className="tooltip-backdrop" data-testid="tooltip-backdrop" onPointerDown={e => { backdropPressed.current = true; e.preventDefault(); e.stopPropagation(); }} onPointerUp={e => { e.preventDefault(); e.stopPropagation(); if (e.button !== 0 && backdropPressed.current) { backdropPressed.current = false; suppressUntil.current = Date.now() + 800; clear(); } }} onClick={e => { e.preventDefault(); e.stopPropagation(); clear(); }} onContextMenu={e => e.preventDefault()} onWheel={e => e.stopPropagation()}/>}{(visiblePinned.length>0||visiblePreview)&&<ToolBoundary key={visiblePreview?.id||visiblePinned[0]?.id} label="条目说明" close={clear}><Suspense fallback={<aside className="keyword-preview" role="tooltip" style={{left:Math.max(8,Math.min(innerWidth-300,(visiblePreview?.point.x||8)+16)),top:Math.max(8,Math.min(innerHeight-100,(visiblePreview?.point.y||8)+18)),zIndex:(visiblePreview?.layer||100)+1}}>正在加载条目说明…</aside>}>{visiblePinned.map((value, index) => <Pane key={value.id} value={value} pinned index={index} keep={keep} leave={leave} open={open}/>)}{visiblePreview && <Pane key={visiblePreview.id} value={visiblePreview} pinned={false} index={visiblePinned.length} keep={keep} leave={leave} open={open}/>}</Suspense></ToolBoundary>}</>, document.body)}
+    {createPortal(<>{visiblePinned.length > 0 && <div className="tooltip-backdrop" data-testid="tooltip-backdrop" onPointerDown={e => { backdropPressed.current = true; e.preventDefault(); e.stopPropagation(); }} onPointerUp={e => { e.preventDefault(); e.stopPropagation(); if (e.button !== 0 && backdropPressed.current) { backdropPressed.current = false; suppressUntil.current = Date.now() + 800; clear(); } }} onClick={e => { e.preventDefault(); e.stopPropagation(); clear(); }} onContextMenu={e => e.preventDefault()} onWheel={e => e.stopPropagation()}/>}{(visiblePinned.length>0||visiblePreview)&&<ToolBoundary key={visiblePinned[0]?.id||visiblePreview?.id} label="条目说明" close={clear}><Suspense fallback={<aside className="keyword-preview" role="tooltip" style={{left:Math.max(8,Math.min(innerWidth-300,(visiblePreview?.point.x||8)+16)),top:Math.max(8,Math.min(innerHeight-100,(visiblePreview?.point.y||8)+18)),zIndex:(visiblePreview?.layer||100)+1}}>正在加载条目说明…</aside>}>{visiblePinned.map((value, index) => <Pane key={value.id} value={value} pinned index={index} keep={keep} leave={leave} open={open}/>)}{visiblePreview && <Pane key={visiblePreview.id} value={visiblePreview} pinned={false} index={visiblePinned.length} keep={keep} leave={leave} open={open}/>}</Suspense></ToolBoundary>}</>, document.body)}
   </ReferenceContext.Provider>;
 }

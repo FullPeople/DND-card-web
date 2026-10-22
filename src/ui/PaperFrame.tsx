@@ -40,7 +40,7 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const originalVisuals=useMemo(()=>adaptive?{active:new Set<import('./conditionVisuals').ConditionVisual>(),exhaustion:0}:visuals,[visualKey]);
   const paper=useRef<HTMLDivElement>(null);
   const capturing=useSheetCaptureActive();
-  useSurfaceMotion(paper,`${character.id}:${page}`,motionEnabled&&!displayOnly&&!capturing);
+  useSurfaceMotion(paper,page,motionEnabled&&!displayOnly&&!capturing,character.id);
   const [decoration,setDecoration]=useState<typeof import('./CardDecoration')>();
   useEffect(()=>{if(!effectsEnabled||!motionEnabled)return;return afterPaint(()=>{void import('./CardDecoration').then(setDecoration).catch(error=>console.warn('Card decoration unavailable:',error));});},[effectsEnabled,motionEnabled]);
   const viewport = useRef<HTMLDivElement>(null);

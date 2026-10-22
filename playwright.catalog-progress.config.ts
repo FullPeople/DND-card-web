@@ -1,0 +1,3 @@
+import {defineConfig} from '@playwright/test';
+const origin=`http://127.0.0.1:${process.env.CATALOG_PROGRESS_PORT||5492}`,output=process.env.CATALOG_PROGRESS_OUT||'test-results/catalog-progress';
+export default defineConfig({testDir:'./tests/e2e',testMatch:'catalog-progress.spec.ts',workers:1,retries:0,forbidOnly:!!process.env.CI,timeout:30000,expect:{timeout:6000},outputDir:output,reporter:[['list'],['json',{outputFile:output+'/results.json'}]],use:{baseURL:origin,channel:process.env.CI?undefined:'msedge',headless:true,trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:'node node_modules/vite/bin/vite.js --config tests/fixtures/catalog-progress/vite.config.ts',url:origin+'/tests/fixtures/catalog-progress/',reuseExistingServer:false}});

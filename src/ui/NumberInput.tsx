@@ -1,4 +1,4 @@
-import {useContext,useLayoutEffect,useRef,useState,type InputHTMLAttributes} from 'react';
+import {useContext,useRef,useState,type InputHTMLAttributes} from 'react';
 import {flushSync} from 'react-dom';
 import {ValueTraceContext,traceForInput} from './ValueTrace';
 import {numericExpression} from '../core/numericExpression';
@@ -11,7 +11,6 @@ export function NumberInput({value,displayValue,onChange,onBlur,arithmetic=false
  const display=displayValue??value;
  const [draft,setDraft]=useState(String(display??'')),[focused,setFocused]=useState(false);
  const traceOwnsFocus=useRef(false);
- useLayoutEffect(()=>{if(!focused)setDraft(String(display??''));},[display,focused]);
  const trace=(input:HTMLInputElement)=>{
   if(!context)return;
   const model=traceForInput(context,String(props['aria-label']||''),Number(value),n=>{input.value=String(n);onChange?.({target:input,currentTarget:input} as any);});
@@ -23,12 +22,12 @@ export function NumberInput({value,displayValue,onChange,onBlur,arithmetic=false
   // Take over before the browser focuses/selects the displayed total. The first
   // editable field painted is the overlay's stored base, already selected.
   event.preventDefault();flushSync(()=>context!.open(event.currentTarget,model));
- }} onClick={event=>{props.onClick?.(event);if(event.defaultPrevented)return;const model=trace(event.currentTarget);if(model){traceOwnsFocus.current=true;context!.open(event.currentTarget,model);}}} type={arithmetic?'text':'number'} inputMode={arithmetic?'text':props.inputMode} title={props.title||(arithmetic?'支持 + - * / 和括号；-5 扣除 5，=20 设为 20。':undefined)} value={draft} onFocus={event=>{
+ }} onClick={event=>{props.onClick?.(event);if(event.defaultPrevented)return;const model=trace(event.currentTarget);if(model){traceOwnsFocus.current=true;context!.open(event.currentTarget,model);}}} type={arithmetic?'text':'number'} inputMode={arithmetic?'text':props.inputMode} title={props.title||(arithmetic?'支持 + - * / 和括号；-5 扣除 5，=20 设为 20。':undefined)} value={focused?draft:String(display??'')} onFocus={event=>{
   traceOwnsFocus.current=false;
   if(!props.readOnly){
    // Keyboard/programmatic focus has no pointerdown. Replace the DOM value in
    // this event before native selection, then mount/focus the trace before paint.
-   if(displayValue!==undefined){event.currentTarget.value=String(value??'');setDraft(String(value??''));}
+   const stored=String(value??'');setDraft(stored);if(displayValue!==undefined)event.currentTarget.value=stored;
    setFocused(true);const model=displayValue!==undefined?trace(event.currentTarget):undefined;if(model){traceOwnsFocus.current=true;context!.open(event.currentTarget,model);}
   }
   props.onFocus?.(event);

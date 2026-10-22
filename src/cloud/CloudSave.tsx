@@ -132,7 +132,7 @@ function EnabledCloudSaveProvider({enabled,disabled,characters,readCharacter,rec
 function CloudUploadDialog({target,confirmed,busy,disabled,change,cancel,submit}:{target:{id:string;name:string;account?:string;temporary?:boolean;error?:string};confirmed:boolean;busy:boolean;disabled:boolean;change:(value:boolean)=>void;cancel:()=>void;submit:()=>Promise<void>}){
  const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{ref.current?.showModal();},[]);
  const temporary=target.temporary!==false;
- return <dialog ref={ref} className="cloud-save-dialog cloud-modal dialog" aria-label="保存到云端确认" onCancel={event=>{if(busy)event.preventDefault();else cancel();}}>
+ return <dialog aria-modal="true" ref={ref} className="cloud-save-dialog cloud-modal dialog" aria-label="保存到云端确认" onCancel={event=>{if(busy)event.preventDefault();else cancel();}}>
  <header className="cloud-modal-head"><span className="cloud-modal-icon"><CloudUploadIcon size={18}/></span><div className="cloud-modal-heading"><h2>保存到云端</h2><p>“{target.name||'未命名角色'}” → {temporary?'临时卡库':'当前 QQ 账号的私人卡库'}</p></div></header>
  <div className="cloud-modal-body">{target.account&&<UploadWarning temporary={temporary}/>}
  <p className="cloud-save-details">上传完整五页到{temporary?'临时卡库':'当前 QQ 账号的私人卡库'}。请保留本机完整 JSON 备份。确认后，这张卡的后续修改会自动同步；发生冲突时保留本机草稿。</p>
