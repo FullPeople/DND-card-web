@@ -20,3 +20,12 @@
 这些浏览器流程使用实际 `KeywordPreview`、正文与样式，以及原创隔离夹具；它们验证网页事件和滚动容器，不代表玩家原卡、实体触摸设备或真实枭熊房间验收。没有运行全仓测试或发布检查。
 
 接续紧凑提示后，专项服务器改用独立缓存与直接挂载夹具。组合重跑发现“没有 CSS 锁的模态框”用例有一次滚轮实际落在模态原生遮罩，立即读取零滚动的旧断言抢在浏览器滚动前通过；这不是 Tooltip 转发路径。现把模态框缩窄，使 Tooltip 实际伸出模态框，先验证指针命中 Tooltip，再分别核对模态内容边界和其外侧遮罩上的转发，均等绘制后检查背景不动。没有扩大为全局拦截非 Tooltip 模态事件。更严格的 12 项重新通过，证据与原组合失败均仅在本地保留。
+# Safari 15.4 选择器兼容修正
+
+WebKit 官方说明确认，Safari 15.4 已支持原生 `<dialog>`，但 `:modal` 到 Safari 15.6 才加入。项目仍以 Safari 15.4 为构建目标，直接把该伪类用于 `matches`、`closest` 或查询会有兼容风险。来源：[Safari 15.4](https://webkit.org/blog/12445/new-webkit-features-in-safari-15-4/)、[Safari 15.6](https://webkit.org/blog/13009/new-webkit-features-in-safari-15-6/)。
+
+滚轮边界现在每个文档只探测一次选择器；遇到 `SyntaxError` 时使用显式 `aria-modal="true"`。已逐一核对 16 个组件中 17 处调用 `showModal()` 的原生弹窗，并补上这一标记。`LibraryApp` 的 `<dialog open>` 是非模态窗口，保持原状；没有使用 `dialog[open]` 推断模态状态，也没有修改全局原生方法。
+
+独立端口 5491、独立缓存下，原有 12 条与新增 6 条真实 Edge 浏览器用例通过，7 条单元测试通过。新增用例主动令包含 `:modal` 的查询、匹配和祖先查找抛出 `SyntaxError`，验证普通阅读区、ARIA 模态边界、带显式标记的原生模态窗口、未标记的现代原生模态窗口，以及 `show()`／`open` 非模态窗口。该结果属于模拟选择器不受支持的浏览器检查，不是 Safari 15.4 实机验收。
+
+证据：私有控制目录 `next-six-20261022/tooltip-modal-compat/`。`tooltipWheel.ts` 位于当前 101 文件运行来源门禁，整合后仍须准确源码绑定；本修复未修改 Data 或放宽校验。

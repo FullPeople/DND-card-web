@@ -19,7 +19,7 @@ export function LibraryFilters({ tab, entries, filters, change, names }: { tab: 
   const label = (key: string, value: string) => key === 'source' && names[value] ? format(value) : key === 'level' ? `${value} 级 / 环` : value;
   const counts = useMemo(() => { const result = new Map<string, number>(); if (field) for (const e of entries) if (matchesFacets(e, filters, facets, field.key)) for (const v of new Set(field.values(e))) result.set(v, (result.get(v) || 0) + 1); return result; }, [entries, filters, facets, field]);
   return <><button className="filter-trigger" onClick={() => setOpen(true)}>筛选{count ? ` · ${count}` : ''}</button>{count > 0 && <button className="filter-reset" onClick={() => change({})}>清空</button>}
-    {open && <dialog className="library-filter-dialog" ref={ref} onCancel={() => setOpen(false)} onClick={e => { if (e.target === ref.current) setOpen(false); }} aria-label="筛选规则资料">
+    {open && <dialog aria-modal="true" className="library-filter-dialog" ref={ref} onCancel={() => setOpen(false)} onClick={e => { if (e.target === ref.current) setOpen(false); }} aria-label="筛选规则资料">
       <header><strong>筛选资料</strong><span>{entries.filter(e => matchesFacets(e, filters, facets)).length} / {entries.length} 条</span><button aria-label="关闭筛选" onClick={() => setOpen(false)}><CloseIcon/></button></header>
       <div className="filter-explanation">同组任选其一，不同组同时满足。勾选保留，点「排除」隐藏；未选条件表示不限。</div>
       <div className="active-filters">{facets.flatMap(f => (['include', 'exclude'] as const).flatMap(side => (filters[f.key]?.[side] || []).map(v => <button key={`${f.key}:${side}:${v}`} onClick={() => toggle(f.key, v, side === 'exclude')}>{side === 'exclude' ? '排除 ' : ''}{f.label}：{label(f.key, v)} ×</button>)))}{!count && <span>当前没有额外限制</span>}</div>

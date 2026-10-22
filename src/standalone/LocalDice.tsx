@@ -25,7 +25,7 @@ export function LocalDice(){
   const previous=document.activeElement;node.showModal();field.current?.focus();field.current?.select();
   return()=>{if(node.open)node.close();if(previous instanceof HTMLElement&&previous.isConnected)previous.focus({preventScroll:true});};
  },[isOpen]);
- return isOpen&&roll?createPortal(<dialog ref={dialog} className="local-dice-dialog" aria-label="本地投骰" onCancel={event=>{event.preventDefault();event.stopPropagation();close();}} onPointerDown={event=>{if(event.target===event.currentTarget){event.preventDefault();event.stopPropagation();close();}}}>
+ return isOpen&&roll?createPortal(<dialog aria-modal="true" ref={dialog} className="local-dice-dialog" aria-label="本地投骰" onCancel={event=>{event.preventDefault();event.stopPropagation();close();}} onPointerDown={event=>{if(event.target===event.currentTarget){event.preventDefault();event.stopPropagation();close();}}}>
   <form className="local-roll-console" data-phase={phase} onSubmit={event=>{event.preventDefault();presentation.current!.start(()=>localRoll(roll.expression,randomLocalFace));}}>
    <header><div><small>本地投骰</small><h2>{roll.label||'投骰'}</h2></div><button type="button" aria-label="关闭投骰" onClick={close}>×</button></header>
    <label className="local-roll-expression">表达式<input ref={field} autoFocus aria-label="骰子表达式" readOnly={phase==='rolling'} value={roll.expression} onChange={event=>{setRoll({...roll,expression:event.target.value});setResult(undefined);setError('');setPhase('ready');}}/></label>

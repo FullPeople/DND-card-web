@@ -2,7 +2,20 @@ type WheelPixels={x:number;y:number};
 type WheelInput=Pick<WheelEvent,'deltaX'|'deltaY'|'deltaMode'|'shiftKey'>;
 const epsilon=.01;
 const scrollable=(overflow:string)=>/^(auto|scroll|overlay)$/.test(overflow);
-const modalSelector='[aria-modal="true"],dialog:modal';
+const ariaModalSelector='[aria-modal="true"]';
+const modalSelectors=new WeakMap<Document,string>();
+/** Safari 15.4 supports dialogs but cannot parse :modal (added in Safari 15.6). */
+export function supportedModalSelector(query:(selector:string)=>unknown){
+  try{query('dialog:modal');return `${ariaModalSelector},dialog:modal`;}
+  // Project showModal dialogs declare aria-modal explicitly. Matching [open]
+  // instead would also trap ordinary show() dialogs and literal open dialogs.
+  catch(error){if((error as {name?:string})?.name!=='SyntaxError')throw error;return ariaModalSelector;}
+}
+function modalSelector(){
+  let selector=modalSelectors.get(document);
+  if(!selector){selector=supportedModalSelector(value=>document.querySelector(value));modalSelectors.set(document,selector);}
+  return selector;
+}
 
 export function wheelPixels(event:WheelInput,page:{width:number;height:number}):WheelPixels{
   const x=event.shiftKey&&!event.deltaX?event.deltaY:event.deltaX;
@@ -36,7 +49,7 @@ function scrollChain(start:HTMLElement,limit:HTMLElement|undefined,pixels:WheelP
       if(pixels.x&&canX&&/^(contain|none)$/.test(style.overscrollBehaviorX)){pixels.x=0;blocked=true;}
       if(pixels.y&&canY&&/^(contain|none)$/.test(style.overscrollBehaviorY)){pixels.y=0;blocked=true;}
     }
-    if(respectContainment&&node.matches(modalSelector)){
+    if(respectContainment&&node.matches(modalSelector())){
       blocked ||= !!(pixels.x||pixels.y);
       break;
     }
@@ -83,7 +96,8 @@ export function scrollTooltipWheel(event:WheelEvent,pane:HTMLElement|null){
     }else{
       // A modal backdrop is also a boundary, even when it does not use body
       // scroll locking. Never route through it to the document behind it.
-      if(!layer.closest(modalSelector)&&[...document.querySelectorAll<HTMLElement>(modalSelector)].some(modal=>modal.getClientRects().length&&!modal.inert))return {handled:true,forwarded};
+      const selector=modalSelector();
+      if(!layer.closest(selector)&&[...document.querySelectorAll<HTMLElement>(selector)].some(modal=>modal.getClientRects().length&&!modal.inert))return {handled:true,forwarded};
       const result=scrollChain(layer,undefined,pixels,true);
       handled ||= result.moved||result.blocked;forwarded ||= result.moved;
       break;

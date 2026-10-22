@@ -1,7 +1,19 @@
 import {describe,expect,it} from 'vitest';
-import {scrollPosition,wheelPixels} from '../src/ui/tooltipWheel';
+import {scrollPosition,supportedModalSelector,wheelPixels} from '../src/ui/tooltipWheel';
 const page={width:320,height:400};
 describe('tooltip wheel motion',()=>{
+  it('uses native modal matching only when its selector can be parsed',()=>{
+    const queried:string[]=[];
+    expect(supportedModalSelector(selector=>{queried.push(selector);return null;})).toBe('[aria-modal="true"],dialog:modal');
+    expect(queried).toEqual(['dialog:modal']);
+  });
+  it('keeps explicit modal boundaries when unsupported selectors throw without treating open dialogs as modal',()=>{
+    const selector=supportedModalSelector(()=>{throw new DOMException('Unsupported pseudo-class','SyntaxError');});
+    expect(selector).toBe('[aria-modal="true"]');expect(selector).not.toContain(':modal');expect(selector).not.toContain('[open]');
+  });
+  it('does not hide unrelated DOM failures behind a compatibility fallback',()=>{
+    const failure=new Error('Unrelated failure');expect(()=>supportedModalSelector(()=>{throw failure;})).toThrow(failure);
+  });
   it('preserves pixel axes and maps line/page units independently',()=>{
     expect(wheelPixels({deltaX:2,deltaY:-3,deltaMode:0,shiftKey:false},page)).toEqual({x:2,y:-3});
     expect(wheelPixels({deltaX:2,deltaY:-3,deltaMode:1,shiftKey:false},page)).toEqual({x:32,y:-48});

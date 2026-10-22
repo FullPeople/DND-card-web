@@ -124,3 +124,67 @@ test('control-wheel is left uncancelled for the browser zoom gesture',async({pag
   expect(await pane.locator('.keyword-content').evaluate(el=>el.scrollTop)).toBe(0);
   expect(await page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBe(0);
 });
+
+async function unsupportedModalSelectors(page:Page){
+  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.evaluate(()=>{
+    (window as any).__unsupportedModalCalls=0;
+    const reject=(selector:string)=>{if(selector.includes(':modal')){(window as any).__unsupportedModalCalls++;throw new DOMException('Simulated unsupported :modal selector','SyntaxError');}};
+    for(const prototype of [Document.prototype,Element.prototype])for(const method of ['querySelector','querySelectorAll']){
+      const original=(prototype as any)[method];(prototype as any)[method]=function(selector:string){reject(selector);return original.call(this,selector);};
+    }
+    for(const method of ['matches','closest']){
+      const original=(Element.prototype as any)[method];(Element.prototype as any)[method]=function(selector:string){reject(selector);return original.call(this,selector);};
+    }
+  });
+  return errors;
+}
+async function nativeDialog(page:Page,mode:'modal'|'show'|'open',annotated=false){
+  await page.evaluate(({mode,annotated})=>{
+    const dialog=document.createElement('dialog');dialog.id='native-wheel-dialog';dialog.setAttribute('aria-label','原生滚轮边界');
+    if(annotated)dialog.setAttribute('aria-modal','true');
+    dialog.style.cssText=`position:${mode==='modal'?'fixed':'relative'};inset:auto;margin:0;padding:10px;width:320px;background:white;${mode==='modal'?'left:80px;top:80px;':''}`;
+    dialog.innerHTML='<div id="native-reading" style="height:180px;overflow:auto;overscroll-behavior:auto"><div style="height:1200px"><aside id="native-wheel-tooltip" data-tooltip-id="native-wheel-tooltip" role="tooltip" style="position:sticky;top:0;width:260px;background:white;border:2px solid #444"><div class="keyword-content">原创原生窗口短说明。</div></aside></div></div>';
+    (mode==='modal'?document.body:document.querySelector('#reading-panel .fixture-reading-content')!).prepend(dialog);
+    if(mode==='modal')dialog.showModal();else if(mode==='show')dialog.show();else dialog.setAttribute('open','');
+  },{mode,annotated});
+  return page.locator('#native-wheel-tooltip');
+}
+async function nextFrames(page:Page){await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));}
+
+test('simulated unsupported modal selector is detected once and short tooltip scrolling still reaches its reader',async({page})=>{
+  const errors=await unsupportedModalSelectors(page),pane=await pin(page,'短说明');
+  await over(page,pane);await page.mouse.wheel(0,150);await expect.poll(()=>page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBeGreaterThan(80);
+  await over(page,pane);await page.mouse.wheel(0,150);await expect.poll(()=>page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBeGreaterThan(200);
+  expect(await page.evaluate(()=>(window as any).__unsupportedModalCalls)).toBe(1);expect(errors).toEqual([]);
+});
+
+test('simulated unsupported modal selector retains explicit ARIA modal boundaries without a body lock',async({page})=>{
+  const errors=await unsupportedModalSelectors(page);await page.getByRole('button',{name:'打开测试弹窗'}).click();
+  const pane=await pin(page,'短说明',page.locator('#modal-reading'));
+  await page.evaluate(()=>{document.body.style.overflow='';document.getElementById('modal-reading')!.style.overscrollBehavior='auto';});
+  await over(page,pane);await page.mouse.wheel(0,160);await expect.poll(()=>page.locator('#modal-reading').evaluate(el=>el.scrollTop)).toBeGreaterThan(80);
+  await page.locator('#modal-reading').evaluate(el=>el.scrollTop=el.scrollHeight);await over(page,pane);await page.mouse.wheel(0,160);await nextFrames(page);
+  expect(await page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBe(0);expect(await page.evaluate(()=>scrollY)).toBe(0);expect(errors).toEqual([]);
+});
+
+test('supported native modal matching protects an unannotated showModal dialog',async({page})=>{
+  const pane=await nativeDialog(page,'modal');await over(page,pane);await page.mouse.wheel(0,160);
+  await expect.poll(()=>page.locator('#native-reading').evaluate(el=>el.scrollTop)).toBeGreaterThan(80);
+  await page.locator('#native-reading').evaluate(el=>el.scrollTop=el.scrollHeight);await over(page,pane);await page.mouse.wheel(0,160);await nextFrames(page);
+  expect(await page.evaluate(()=>scrollY)).toBe(0);expect(await page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBe(0);
+});
+
+test('simulated unsupported modal selector protects an explicitly marked native showModal dialog',async({page})=>{
+  const errors=await unsupportedModalSelectors(page),pane=await nativeDialog(page,'modal',true);
+  await over(page,pane);await page.mouse.wheel(0,160);await expect.poll(()=>page.locator('#native-reading').evaluate(el=>el.scrollTop)).toBeGreaterThan(80);
+  await page.locator('#native-reading').evaluate(el=>el.scrollTop=el.scrollHeight);await over(page,pane);await page.mouse.wheel(0,160);await nextFrames(page);
+  expect(await page.evaluate(()=>scrollY)).toBe(0);expect(await page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBe(0);expect(errors).toEqual([]);
+});
+
+for(const mode of ['show','open'] as const)test(`simulated unsupported modal selector keeps a nonmodal ${mode} dialog in the ordinary scroll chain`,async({page})=>{
+  const errors=await unsupportedModalSelectors(page),pane=await nativeDialog(page,mode);
+  await page.locator('#native-reading').evaluate(el=>el.scrollTop=el.scrollHeight);await over(page,pane);await page.mouse.wheel(0,160);
+  await expect.poll(()=>page.locator('#reading-panel').evaluate(el=>el.scrollTop)).toBeGreaterThan(80);
+  expect(await page.evaluate(()=>scrollY)).toBe(0);expect(await page.locator('#native-wheel-dialog').getAttribute('aria-modal')).toBeNull();expect(errors).toEqual([]);
+});
