@@ -200,6 +200,9 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  const draft=choice.channel==='spells'?structuredClone(c):{...c,answers:{...c.answers},featureLayout:c.featureLayout?{...c.featureLayout,optionsVisible:c.featureLayout.optionsVisible?{...c.featureLayout.optionsVisible}:undefined}:undefined};
  if(choice.channel==='spells')setClassSpellSlot(draft,choice,index,option?.entry);
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
+  // Forgetting a learned infusion ends its owned target binding. A later
+  // relearn must be explicitly activated again; source suspension is separate.
+  if(choice.sourceProgression==='optional'&&c.infusions?.version===1)draft.infusions={...c.infusions,bindings:c.infusions.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
   if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }
  resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
