@@ -7,6 +7,7 @@ import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import {Reference} from './Reference';
 import {InfusionControl} from './InfusionControl';
 import {AsiAllocationControl} from './AsiAllocationControl';
+import {setAsiAllocation} from '../core/automation/asi';
 import {invocationRule} from '../core/automation/invocations';
 
 /** Display saved learning intent; activation requires a separate explicit edit. */
@@ -24,7 +25,12 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
   try{edit(draft=>{setInfusionTarget(draft,binding.choiceId,binding.entryId,null);applied=true;});setError(applied?'':'修改未提交，请查看卡面的只读或同步提示。');}
   catch(reason){setError(reason instanceof Error?reason.message:String(reason));}
  }
- const preservedAsi=mode==='feat'&&c.asiAllocations?.version===1?c.asiAllocations.bindings.filter(binding=>!choices.some(choice=>choice.id===binding.choiceId&&choice.slots?.includes(binding.entryId))):[];
+ const preservedAsi=mode==='feat'&&c.asiAllocations?.version===1?c.asiAllocations.bindings.filter(binding=>!choices.some(choice=>choice.id===binding.choiceId&&choice.slots?.some(value=>value===binding.entryId||binding.kind==='legacy-class'&&choice.options.some(option=>option.value===value&&option.entry.raw._classAbilityRecord)))):[];
+ function withdrawAsi(choiceId:string){
+  if(workspace.canEdit===false||!edit)return;let applied=false;
+  try{edit(draft=>{setAsiAllocation(draft,choiceId,null);applied=true;});setError(applied?'':'修改未提交，请查看卡面的只读或同步提示。');}
+  catch(reason){setError(reason instanceof Error?reason.message:String(reason));}
+ }
  if(!choices.length&&!preserved.length&&!preservedAsi.length)return null;
  return <div className="class-choice-records" aria-label={mode==='feat'?'职业授予专长':'职业学习记录'}>{choices.map(choice=>{
   const owner=c.selections.find(row=>row.id===choice.ownerId)!;
@@ -44,7 +50,7 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
 {mode==='optional'&&entry&&<InfusionControl key={`${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} ownerId={owner.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/>}</div>;
    })}</div>
   </section>;
- })}{preservedAsi.length>0&&<section aria-label="已保留属性提升记录"><strong>已保留属性提升记录</strong><small>原授予当前未选用或不适用，不增加属性；可以撤回原分配。</small>{preservedAsi.map(binding=>{const archived=Object.values(c.classChoiceArchive||{}).flatMap(row=>row.selections).find(row=>row.id===binding.selectionId),entry=archived?.entry||c.classChoiceSnapshots?.[binding.entryId]||catalog.find(row=>row.id===binding.entryId);return entry?<AsiAllocationControl key={`${binding.choiceId}:${binding.selectionId}`} c={c} choiceId={binding.choiceId} entry={entry} unavailable writable={workspace.canEdit!==false} edit={edit}/>:null;})}</section>}{preserved.length>0&&<section aria-label="已保留灌注记录">
+ })}{preservedAsi.length>0&&<section aria-label="已保留属性提升记录"><strong>已保留属性提升记录</strong><small>原授予当前未选用或不适用，不增加属性；可以撤回原分配。</small>{preservedAsi.map(binding=>{const archived=Object.values(c.classChoiceArchive||{}).flatMap(row=>row.selections).find(row=>row.id===binding.selectionId),entry=binding.kind==='legacy-class'?choices.find(choice=>choice.id===binding.choiceId)?.options.find(option=>option.entry.raw._classAbilityRecord)?.entry:archived?.entry||c.classChoiceSnapshots?.[binding.entryId]||catalog.find(row=>row.id===binding.entryId);return entry?<AsiAllocationControl key={`${binding.choiceId}:${binding.selectionId}`} c={c} choiceId={binding.choiceId} entry={entry} unavailable writable={workspace.canEdit!==false} edit={edit}/>:<div key={`${binding.choiceId}:${binding.selectionId}`}><small>原属性提升资料未载入；仅保留分配记录。</small><button type="button" disabled={workspace.canEdit===false||!edit} onClick={()=>withdrawAsi(binding.choiceId)}>撤回属性提升</button></div>;})}{error&&<small role="alert">{error}</small>}</section>}{preserved.length>0&&<section aria-label="已保留灌注记录">
   <strong>已保留灌注记录</strong><small>当前学习项未显示或已不适用；保留目标记录，不会重新激活。可明确撤回，不会移除物品。</small>
   {preserved.map((binding,index)=>{const entry=c.classChoiceSnapshots?.[binding.entryId]||catalog.find(row=>row.id===binding.entryId),target=c.selections.find(row=>row.id===binding.targetId);return <div key={`${binding.choiceId}:${binding.entryId}:${index}`}>
    <span>{entry?.name||'原灌注资料未载入'} → {target?.entry.name||'原目标已不存在'}</span>

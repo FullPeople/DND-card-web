@@ -1,12 +1,12 @@
 import {useEffect,useState} from 'react';
 import {ABILITIES,ABILITY_LABELS,type Ability,type Character,type Entry} from '../core/model';
-import {asiAllocationStatus,isSupportedAsi,setAsiAllocation} from '../core/automation/asi';
+import {asiAllocationStatus,isSupportedAsiChoice,setAsiAllocation} from '../core/automation/asi';
 
 type Props={c:Character;choiceId:string;entry:Entry;unavailable:boolean;writable:boolean;edit?:(action:(draft:Character)=>void)=>void};
 
 /** Explicit opt-in keeps historical, manually allocated base scores unchanged. */
 export function AsiAllocationControl({c,choiceId,entry,unavailable,writable,edit}:Props){
- const supported=isSupportedAsi(entry);
+ const supported=isSupportedAsiChoice(c,choiceId,entry);
  const status=supported?asiAllocationStatus(c,choiceId):{eligible:false,active:false,binding:undefined,reason:undefined},allocation=status.binding?.allocation;
  const saved=JSON.stringify(allocation||{});
  const [mode,setMode]=useState<'single'|'split'>('single'),[first,setFirst]=useState<Ability|' '>(' '),[second,setSecond]=useState<Ability|' '>(' '),[confirmed,setConfirmed]=useState(false),[error,setError]=useState('');
@@ -33,7 +33,7 @@ export function AsiAllocationControl({c,choiceId,entry,unavailable,writable,edit
  const options=<><option value=" ">请选择属性</option>{ABILITIES.map(a=><option key={a} value={a}>{ABILITY_LABELS[a]}</option>)}</>;
  return <div className="asi-allocation-control" data-asi-choice={choiceId} style={{minWidth:0,maxWidth:'100%',overflowWrap:'anywhere'}}>
   <small>{status.binding?status.active?'属性提升已生效':'属性提升记录已保留，当前不生效':'尚未确认属性提升'}</small>
-  <small>仅对本次已获得的 2024 属性值提升分配：一项 +2 或不同两项各 +1，上限 20。基础属性不改写；旧卡已经手工加过的部分请勿重复启用。</small>
+  <small>仅对本次已获得的 {choiceId.includes(':class-legacy-feat:')?'2014':'2024'} 属性值提升分配：一项 +2 或不同两项各 +1，上限 20。基础属性不改写；旧卡已经手工加过的部分请勿重复启用。</small>
   {status.binding&&<small>已保存：{ABILITIES.filter(a=>allocation?.[a]).map(a=>`${ABILITY_LABELS[a]} +${allocation![a]}`).join('、')}</small>}
   {status.reason&&<small>{status.reason}</small>}
   <div className="feature-choice-actions">

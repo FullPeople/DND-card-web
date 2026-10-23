@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "explicit-owned-legacy-class-asi-allocation",
+  "cap": 20,
+  "inputs": {
+    "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
+    "class/class-barbarian.json": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+    "class/class-bard.json": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+    "class/class-cleric.json": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+    "class/class-druid.json": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+    "class/class-fighter.json": "a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509",
+    "class/class-monk.json": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+    "class/class-paladin.json": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+    "class/class-ranger.json": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+    "class/class-rogue.json": "b5c62a8c5356438a09bc64bc96b71968fa3766d46102a0a1de11713e5ee0d251",
+    "class/class-sorcerer.json": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+    "class/class-warlock.json": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+    "class/class-wizard.json": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03"
+  },
+  "profiles": [
+    {
+      "owner": "Artificer|TCE",
+      "feature": "属性值提升|奇械师|TCE|4",
+      "level": 4,
+      "entryHash": "15ab494332298be52b81a227d8996ef555e215cbea744aef97bbf67ec62445bf"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "feature": "属性值提升|奇械师|TCE|8",
+      "level": 8,
+      "entryHash": "d8d3746d7b102afa1163cc6a5ad93afd4df5a49ddf7fe8ad25e2476970453756"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "feature": "属性值提升|奇械师|TCE|12",
+      "level": 12,
+      "entryHash": "5055f6ee30ef606a7adb7b124bc308370891192174895ca16a51a3a8c1d10e78"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "feature": "属性值提升|奇械师|TCE|16",
+      "level": 16,
+      "entryHash": "1fd5d443928b6f4f9eb61d1fbbe3a2cb9b89b75284bd09ecc696d5d785593afc"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "feature": "属性值提升|奇械师|TCE|19",
+      "level": 19,
+      "entryHash": "2747b932a5b7d86cbbbb0a89e2041294f762802a79118118ed876543c8a6f100"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "feature": "属性值提升|野蛮人||4",
+      "level": 4,
+      "entryHash": "31c3ad6efd15b57d4c4b29540fd926b70343c4cd53c7f0951cb963c02f540517"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "feature": "属性值提升|野蛮人||8",
+      "level": 8,
+      "entryHash": "17e5368c82ee23cbab1dca513f3f6b94460ff75ac315db81d05e228cd9f0dc4a"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "feature": "属性值提升|野蛮人||12",
+      "level": 12,
+      "entryHash": "520341c206d11194d62e892d753bcc8f3a2f4428d94f93fa11a53fc4ca901766"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "feature": "属性值提升|野蛮人||16",
+      "level": 16,
+      "entryHash": "8003514f72b34e137fdbd55240c8ad897cd2a07459eb5b113de8fd2baf551280"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "feature": "属性值提升|野蛮人||19",
+      "level": 19,
+      "entryHash": "e9e23bbae288bbadd648364a267ed46b5798e0166fc8a735dc7c52ca1cda7dcd"
+    },
+    {
+      "owner": "Bard|PHB",
+      "feature": "属性值提升|吟游诗人||4",
+      "level": 4,
+      "entryHash": "fb7a6129b1a5db145a692bc5667ba17ed55ee2b36aa1dfe3ddb8e2e01b8f84df"
+    },
+    {
+      "owner": "Bard|PHB",
+      "feature": "属性值提升|吟游诗人||8",
+      "level": 8,
+      "entryHash": "ab1cca974e404072dd7b53198cc2d18dc5993bdd08da8439bea02de18aaacc3a"
+    },
+    {
+      "owner": "Bard|PHB",
+      "feature": "属性值提升|吟游诗人||12",
+      "level": 12,
+      "entryHash": "700dd64dc6c9d5dd68035ad7e520e8dc98e80d50618e4e7475536f6e393b2ff3"
+    },
+    {
+      "owner": "Bard|PHB",
+      "feature": "属性值提升|吟游诗人||16",
+      "level": 16,
+      "entryHash": "069d5d0c6ed5c90a494a27ebc7553bc66c895767ea5d7d6d032e4b59451c1671"
+    },
+    {
+      "owner": "Bard|PHB",
+      "feature": "属性值提升|吟游诗人||19",
+      "level": 19,
+      "entryHash": "c2422715c96b73bf81ad5cc4ef96e608c03bbf5074f7b8e8918b2dd5cfe6c09f"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "feature": "属性值提升|牧师||4",
+      "level": 4,
+      "entryHash": "7d19c66cea4163aadcd77e26e36a2221b2d30f37b416cfa34c3654a86f1168a9"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "feature": "属性值提升|牧师||8",
+      "level": 8,
+      "entryHash": "c57aa8d55099122f5971b72d1c757df9cfd5febed15fddf9140efe3f0d13a50b"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "feature": "属性值提升|牧师||12",
+      "level": 12,
+      "entryHash": "7dd65ad1d4d0b5523625e58e0d3966430474370a3fcd71dbaf9ceae0dd8f1272"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "feature": "属性值提升|牧师||16",
+      "level": 16,
+      "entryHash": "8038c4fd88b829ce94750d8911a815ae0a82e192295fad09acab3a452882c957"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "feature": "属性值提升|牧师||19",
+      "level": 19,
+      "entryHash": "27d2bede74614e75ece8965c4c7ec146ff2e907f2be77a87a3e0457a65724222"
+    },
+    {
+      "owner": "Druid|PHB",
+      "feature": "属性值提升|德鲁伊||4",
+      "level": 4,
+      "entryHash": "d2f5332541bef50045b682d305de6ec8a6047a3303be2f562175e61b9b977d24"
+    },
+    {
+      "owner": "Druid|PHB",
+      "feature": "属性值提升|德鲁伊||8",
+      "level": 8,
+      "entryHash": "70be5556318982a89d7a11189d4b310b30b4e84b500e2b6eb37cf4ed605cab5e"
+    },
+    {
+      "owner": "Druid|PHB",
+      "feature": "属性值提升|德鲁伊||12",
+      "level": 12,
+      "entryHash": "17590280165ce2dec4c5d6ff73ed424d12a9d47ad17f697336a02a80b8466734"
+    },
+    {
+      "owner": "Druid|PHB",
+      "feature": "属性值提升|德鲁伊||16",
+      "level": 16,
+      "entryHash": "fc0e2b88c7406888977d5df71b698f56f3fce70372423d4442a45944cd886a34"
+    },
+    {
+      "owner": "Druid|PHB",
+      "feature": "属性值提升|德鲁伊||19",
+      "level": 19,
+      "entryHash": "22cc85ba08053fd53dbd1149e665584eddacfa0ff48600997caa8a19e9403e6d"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "feature": "属性值提升|战士||4",
+      "level": 4,
+      "entryHash": "ac086cf1ef21ef5c45f58ad3ed451817e5741b8dc11b20986cabbd34058fa0ca"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "feature": "属性值提升|战士||6",
+      "level": 6,
+      "entryHash": "5ac3697b8daa222bcfb3bd43ba2da7e262891b24f6f92088f507f790f79c55f1"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "feature": "属性值提升|战士||8",
+      "level": 8,
+      "entryHash": "780568025cbeaca1f8c1d043359a3d697784039a8c20580724983731bb7dd682"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "feature": "属性值提升|战士||12",
+      "level": 12,
+      "entryHash": "768c71236814a3b29af268dbaee15b368a46b229cf2f426510863102a826bd6c"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "feature": "属性值提升|战士||14",
+      "level": 14,
+      "entryHash": "5786ad6e646bc0482d6b30dc24eb11239ee78dedda2fa41cb8595cada87c3637"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "feature": "属性值提升|战士||16",
+      "level": 16,
+      "entryHash": "1d157529596a6d3df93c36596e72e80eb6445a67560b9b5ee561dd7e4e827a21"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "feature": "属性值提升|战士||19",
+      "level": 19,
+      "entryHash": "35f0ca60360ca35348af23a26e3e63f87f7d8ac1b897cf70aed24105405c23d7"
+    },
+    {
+      "owner": "Monk|PHB",
+      "feature": "属性值提升|武僧||4",
+      "level": 4,
+      "entryHash": "5f91234176ec752a363b98dc16525d34d8eef8dad21909b0ca17e5fbe49590de"
+    },
+    {
+      "owner": "Monk|PHB",
+      "feature": "属性值提升|武僧||8",
+      "level": 8,
+      "entryHash": "2cec09000acfd439937d5362b10f89f253eacbdcb8c2ab40146924dce3b3f8ba"
+    },
+    {
+      "owner": "Monk|PHB",
+      "feature": "属性值提升|武僧||12",
+      "level": 12,
+      "entryHash": "0036039fe65729211663fde5a04f9fb6cdd9e28dee8e46e60ed5f6f5dcad70c9"
+    },
+    {
+      "owner": "Monk|PHB",
+      "feature": "属性值提升|武僧||16",
+      "level": 16,
+      "entryHash": "4ff774d519461f35304647e4aef2b358e1df0ed64c68c58f13b995f017bcfd88"
+    },
+    {
+      "owner": "Monk|PHB",
+      "feature": "属性值提升|武僧||19",
+      "level": 19,
+      "entryHash": "3a392751771a09443584dc9626b8b3e008ecffd14bcb7f362117f3bc6254094c"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "feature": "属性值提升|圣武士||4",
+      "level": 4,
+      "entryHash": "3902e26b5cd452368cca4319022bf2779ac0da02e7bc1832e261954c38def7cd"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "feature": "属性值提升|圣武士||8",
+      "level": 8,
+      "entryHash": "26d79d89c1412e51460aa8f352e92c7e334809521344e597e484136db0b2575c"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "feature": "属性值提升|圣武士||12",
+      "level": 12,
+      "entryHash": "ea4e9eb2017dc2ec7abe91783e815721f24af7b952504196b7b85ef85f6c01bb"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "feature": "属性值提升|圣武士||16",
+      "level": 16,
+      "entryHash": "3e59e0659534e3ef55cefb4f8f275fcf42b76d4421e236e911c38bb56426fb6f"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "feature": "属性值提升|圣武士||19",
+      "level": 19,
+      "entryHash": "cc0570d39a8b52cafee6351e1657ba83dc1b1623ec945c0b9b4c3a07d84afcd8"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "feature": "属性值提升|游侠||4",
+      "level": 4,
+      "entryHash": "5f359b870d1e8aa2dd0073f6949498aef31761dbf138fa4157ad3f2f68d98301"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "feature": "属性值提升|游侠||8",
+      "level": 8,
+      "entryHash": "7ce8d081930df98cb809a158feabfe79ac7aaf0ff1ea34daabc784928e6929c6"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "feature": "属性值提升|游侠||12",
+      "level": 12,
+      "entryHash": "741836e102c86d6e9578409e79e1eb7a5743068e68c8eab60b44351621f4df60"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "feature": "属性值提升|游侠||16",
+      "level": 16,
+      "entryHash": "ea2ecc290466d6648ff5f10c2f522b2caca3e6e15651ab64dae4ec016098f6f7"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "feature": "属性值提升|游侠||19",
+      "level": 19,
+      "entryHash": "d25024429c91923b824e14ee1d7eaba2eb82d24e4b6a5289a18af9f3ef23b152"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "feature": "属性值提升|游荡者||4",
+      "level": 4,
+      "entryHash": "6f0bcb9e25c8d1ce4b23ee9f9ff71d68f7de1b4660f82386a1aee1028e5c1660"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "feature": "属性值提升|游荡者||8",
+      "level": 8,
+      "entryHash": "85720074ddbb7b1e33057e35997eca6c33ce43127062384a1dac7c145bf749ab"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "feature": "属性值提升|游荡者||10",
+      "level": 10,
+      "entryHash": "49624b617a2a33442981af56e2e3e5a5a2b02d9c7ae2b5c5683e8d9a3e034232"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "feature": "属性值提升|游荡者||12",
+      "level": 12,
+      "entryHash": "a094e506678810be56035b3cac4cb7664fdcded8a079f16c2d556424b60ca25c"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "feature": "属性值提升|游荡者||16",
+      "level": 16,
+      "entryHash": "d9a1fe450c05d6a66f10c1299f0361e448e5ac9ef64be2e1d85d15d0fb591c9d"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "feature": "属性值提升|游荡者||19",
+      "level": 19,
+      "entryHash": "3cc59ffd5abdb4e4ffedec0b2ac98cefa5903a0e6f7514ca9c78a91a9b0461de"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "feature": "属性值提升|术士||4",
+      "level": 4,
+      "entryHash": "92d03c1a3bf08f5ad688ce12eac9615ead66535f13bbf9d0b215fd99b93c6427"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "feature": "属性值提升|术士||8",
+      "level": 8,
+      "entryHash": "25b093303b5322d7cb1ca2171a46cc677bda00bbeb72e9959a710ea6f3ee83b8"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "feature": "属性值提升|术士||12",
+      "level": 12,
+      "entryHash": "260beb8a1b9cfe3977f459afc135c7fff23812f4302ae3ad6609b0f27fd1efa3"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "feature": "属性值提升|术士||16",
+      "level": 16,
+      "entryHash": "96ddb77c51948b141dcdb478e026e856d140765acef3212d14b5c7a72b583e48"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "feature": "属性值提升|术士||19",
+      "level": 19,
+      "entryHash": "c6236582a930473870340f1cb97927180d682429085c4072fc96c3dd254d563b"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "feature": "属性值提升|魔契师||4",
+      "level": 4,
+      "entryHash": "3eb9619ba558ce55f8a58174dd4aad9a42fe69fc0a543f4720bd3d93eb632ee5"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "feature": "属性值提升|魔契师||8",
+      "level": 8,
+      "entryHash": "66a664a14752cd91c96d7f3c21c4b2d29ec42adcd2c51fac4c3446dd99a68446"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "feature": "属性值提升|魔契师||12",
+      "level": 12,
+      "entryHash": "62a78a0e6f97a054b8bd51b3c3909e13fbec0f3a0a803fbce2a244ed82560d1c"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "feature": "属性值提升|魔契师||16",
+      "level": 16,
+      "entryHash": "5e47ffad882bc03369337e1cb8fe14fef134e1b4265af50d5462aa817ed968ad"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "feature": "属性值提升|魔契师||19",
+      "level": 19,
+      "entryHash": "674e3aea6b8fdb9a4bb6776b4e029acc613fbca5fcd76483e7ecb727a177d445"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "feature": "属性值提升|法师||4",
+      "level": 4,
+      "entryHash": "d52bd6af091b578219c80f36b031cbda61a9a021c09bebbef42da895824fe1b4"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "feature": "属性值提升|法师||8",
+      "level": 8,
+      "entryHash": "2762e9bcc5aa1985189b743312468166703728ebd11b825df09452665f657988"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "feature": "属性值提升|法师||12",
+      "level": 12,
+      "entryHash": "9d5c4b1ef05b52a3fe38c8435acf253de713a828158f7542a6b26083c594a30a"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "feature": "属性值提升|法师||16",
+      "level": 16,
+      "entryHash": "c3658786e7219043469fd6e64f1149c6dfbcb49280b8797bb3782f9067ff73cc"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "feature": "属性值提升|法师||19",
+      "level": 19,
+      "entryHash": "7f1eba99c34b672dd8d4b00e3c9bf69b97e1d72d60796ee59a0134f1c621db45"
+    }
+  ],
+  "boundary": "Only the 68 existing reviewed PHB class and TCE Artificer ASI grants. Synthetic manual-plan choice is not a feat; alternative feats, sidekicks and unknown identities remain manual."
+}

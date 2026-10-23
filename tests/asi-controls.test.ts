@@ -5,7 +5,7 @@ import {newCharacter,type Entry} from '../src/core/model';
 import {AsiAllocationControl} from '../src/ui/AsiAllocationControl';
 
 const mocked=vi.hoisted(()=>({status:{eligible:true,active:false} as any,supported:true}));
-vi.mock('../src/core/automation/asi',()=>({asiAllocationStatus:()=>mocked.status,isSupportedAsi:()=>mocked.supported,setAsiAllocation:vi.fn()}));
+vi.mock('../src/core/automation/asi',()=>({asiAllocationStatus:()=>mocked.status,isSupportedAsiChoice:()=>mocked.supported,setAsiAllocation:vi.fn()}));
 beforeEach(()=>{mocked.status={eligible:true,active:false};mocked.supported=true;});
 const entry:Entry={id:'asi',kind:'feat',name:'属性值提升',english:'Ability Score Improvement',source:'XPHB',edition:'2024',packId:'authored',revision:'1',entries:[],raw:{}};
 function fixture(){const c=newCharacter();c.abilities.str=16;c.notes='保留手工字段';return {c,choiceId:'fighter:grant4',entry,unavailable:false,writable:true,edit:(action:(draft:typeof c)=>void)=>action(c)};}

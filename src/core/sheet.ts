@@ -1,4 +1,4 @@
-import {retainedAsiSourceFeature} from './automation/asi';
+import {retainedAsiSourceFeature,preserveLegacyAsiGrants} from './automation/asi';
 import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEquipment';
 import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
@@ -61,7 +61,8 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
 type Grant = { key: string; entry?: Entry;quantity?:number };
 /** Attach declared content, never infer choices from prose or a named class/feature. */
 export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set<string>;refresh:boolean;equipmentPreview?:boolean},catalogNames?:ReadonlyMap<string,readonly Entry[]>): boolean {
-  let changed = preserveClassChoiceGrants(c,catalog);
+  let changed = preserveLegacyAsiGrants(c);
+  changed = preserveClassChoiceGrants(c,catalog)||changed;
   changed = (review?.equipmentPreview?false:syncSourceEquipment(c,catalog,c.selections.filter(row=>!review||review.owners.has(row.id))))||changed;
   for(const row of c.selections)if(row.entry.kind==='item'&&typeof row.entry.raw._equipmentRef==='string'){const entry=resolveEntryReference(row.entry.raw._equipmentRef,catalog,'item');if(entry&&!entry.raw._equipmentRef){row.entry=structuredClone(entry);changed=true;}}
   const selectedNames=entryNameIndex(c.selections.map(s=>s.entry)),publishedNames=catalogNames||entryNameIndex(catalog);
@@ -78,6 +79,10 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
   }
   const roots = c.selections.filter(s => ['class', 'subclass', 'race', 'background'].includes(s.entry.kind)&&(!review||review.owners.has(s.id)));
   for (const owner of roots) {
+    // Do not let automatic source removal consume a cyclic/missing owner tree.
+    const ancestors=new Set<string>();let ancestor:Selection|undefined=owner,unsafe=false;
+    while(ancestor){if(ancestors.has(ancestor.id)){unsafe=true;break;}ancestors.add(ancestor.id);if(!ancestor.parentId)break;ancestor=c.selections.find(row=>row.id===ancestor!.parentId);if(!ancestor){unsafe=true;break;}}
+    if(unsafe)continue;
     const raw = owner.entry.raw, grants: Grant[] = [];
     const parent = c.selections.find(s => belongsToClass(owner, s));
     if (parent && !owner.parentId) { owner.parentId = parent.id; changed = true; }
@@ -130,6 +135,9 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);
       if(attached){if(review?.refresh&&JSON.stringify(attached.entry)!==JSON.stringify(grant.entry)||attached.entry.raw._equipmentRef&&!grant.entry.raw._equipmentRef){attached.entry=structuredClone(grant.entry);changed=true;}continue;}
+      // A parked allocated legacy source owns this grant identity. Never create
+      // a replacement while its source is suspended; restoration keeps its IDs.
+      if(Object.values(c.classChoiceArchive||{}).some(archive=>archive.kind==='legacy-asi'&&archive.selections[0].parentId===owner.id&&archive.selections[0].grantKey===grant.key))continue;
       const existing = c.selections.find(s => s.entry.id === grant.entry!.id && !s.grantKey && (!s.parentId || s.parentId === owner.id) && (!s.requirementId || s.requirementId.startsWith(`${owner.id}:`)));
       if (existing) { existing.parentId = owner.id; existing.grantKey = grant.key; changed = true; continue; }
       if (c.selections.length >= 3000) break;

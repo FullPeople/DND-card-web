@@ -3,9 +3,10 @@ import {matchesReference} from '../entryReferences';
 import {automationEnabled} from './state';
 import {evaluate} from '../engine';
 import asiEvidence from './asiEvidence.json' with {type:'json'};
+import legacyAsiEvidence from './legacyAsiEvidence.json' with {type:'json'};
 import evidence from './classChoiceEvidence.json' with {type:'json'};
 
-export interface AsiBinding {selectionId:string;choiceId:string;entryId:string;allocation:Partial<Record<Ability,number>>}
+export interface AsiBinding {kind?:'legacy-class';selectionId:string;choiceId:string;entryId:string;allocation:Partial<Record<Ability,number>>}
 export interface AsiAllocationState {version:1;bindings:AsiBinding[]}
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 function validAllocation(value:unknown):value is AsiBinding['allocation']{
@@ -34,7 +35,7 @@ function activeAsiSelections(c:Character):Selection[]{
  return c.selections.filter(row=>{let current:Selection|undefined=row;const seen=new Set<string>();while(current){if(seen.has(current.id)||!selectionEffectsAllowed(c,current.entry))return false;seen.add(current.id);if(!current.parentId)return true;current=c.selections.find(parent=>parent.id===current!.parentId);}return false;});
 }
 
-function eligibleGrant(c:Character,choiceId:string,active=activeAsiSelections(c)):{row:Selection;level:number}|undefined{
+function eligibleModernGrant(c:Character,choiceId:string,active=activeAsiSelections(c)):{row:Selection;level:number}|undefined{
  if(!automationEnabled(c))return;
  const safe=new Set(activeAsiSelections(c).map(row=>row.id));active=active.filter(row=>safe.has(row.id));
  const rows=active.filter(row=>row.requirementId===choiceId&&asiRule(row.entry));if(rows.length!==1)return;
@@ -50,6 +51,51 @@ function eligibleGrant(c:Character,choiceId:string,active=activeAsiSelections(c)
  if(!declared||!feature.entry.entries.some(node=>typeof node==='string'&&[...node.matchAll(/\{@feat ([^}]+)\}/g)].some(match=>match[1].split('|').length===2&&match[1].split('|')[1]==='XPHB'&&matchesReference(row.entry,match[1]))))return;
  return {row,level:raw.level};
 }
+/** Legacy ASI is the class feature itself, not a synthetic feat grant. */
+function legacySourceIdentity(owner:Selection,feature:Selection,choiceId:string):boolean{
+ const e=feature.entry,r=e.raw;
+ if(owner.entry.kind!=='class'||owner.entry.edition!=='2014'||!['PHB','TCE'].includes(owner.entry.source)||owner.entry.raw._copy||owner.entry.raw._unresolvedParent||e.kind!=='feature'||!(e.edition==='2014'||e.edition==='both'&&e.source==='TCE'&&r._classEdition==='2014')||e.source!==owner.entry.source||e.english!=='Ability Score Improvement'||r._category!=='classFeature'||r._copy||r._unresolvedParent||r.ability!==undefined||e.effects?.length||e.choices?.length||feature.parentId!==owner.id||choiceId!==`${owner.id}:class-legacy-feat:${e.id}`)return false;
+ if(!legacyAsiEvidence.profiles.some(row=>row.owner===`${owner.entry.english}|${owner.entry.source}`&&row.level===r.level&&matchesReference(e,row.feature)))return false;
+ return Array.isArray(owner.entry.raw.classFeatures)&&owner.entry.raw.classFeatures.some((raw:unknown)=>{const ref=typeof raw==='string'?raw:object(raw)?raw.classFeature:undefined;return typeof ref==='string'&&feature.grantKey===`ref:${ref}`&&matchesReference(e,ref);});
+}
+function eligibleLegacyGrant(c:Character,choiceId:string,active=activeAsiSelections(c)):{row:Selection;level:number;kind:'legacy-class'}|undefined{
+ if(!automationEnabled(c))return;
+ const safe=new Set(activeAsiSelections(c).map(row=>row.id));active=active.filter(row=>safe.has(row.id));
+ const candidates=active.filter(row=>{const owner=active.find(parent=>parent.id===row.parentId);return owner&&legacySourceIdentity(owner,row,choiceId)&&Number.isSafeInteger(owner.level)&&owner.level>=row.entry.raw.level&&owner.level<=20&&!c.dismissedFeatures?.includes(`${owner.id}|${row.grantKey}`)&&c.answers[choiceId]?.length===1&&c.answers[choiceId][0]===`${owner.entry.id}#legacy-ability-record`;});
+ if(candidates.length!==1)return;return {row:candidates[0],level:candidates[0].entry.raw.level,kind:'legacy-class'};
+}
+function eligibleGrant(c:Character,choiceId:string,active=activeAsiSelections(c)):{row:Selection;level:number;kind?:'legacy-class'}|undefined{
+ return eligibleModernGrant(c,choiceId,active)||eligibleLegacyGrant(c,choiceId,active);
+}
+/** Display support only. Actual mutation and execution independently authenticate
+ * the live source-feature grant and explicitly chosen manual plan. */
+export function isSupportedAsiChoice(c:Character,choiceId:string,entry:Entry):boolean{
+ if(asiRule(entry))return true;
+ if(entry.raw._classAbilityRecord!==true)return false;
+ return c.selections.some(owner=>entry.id===`${owner.entry.id}#legacy-ability-record`&&[...c.selections,...Object.values(c.classChoiceArchive||{}).flatMap(a=>a.selections.slice(0,1))].some(feature=>legacySourceIdentity(owner,feature,choiceId)));
+}
+/** Only the explicitly allocated legacy feature tree may be parked. The
+ * archive owns the original IDs, manual descendants and unchanged runtime. */
+export function preserveLegacyAsiGrants(c:Character):boolean{
+ if(c.asiAllocations&&c.asiAllocations.version!==1)return false;let changed=false;
+ for(const binding of c.asiAllocations?.bindings||[]){
+  if(binding.kind!=='legacy-class')continue;
+  const root=c.selections.find(row=>row.id===binding.selectionId),owner=root&&c.selections.find(row=>row.id===root.parentId);
+  if(!root||!owner||root.entry.id!==binding.entryId||!legacySourceIdentity(owner,root,binding.choiceId)||owner.level>=root.entry.raw.level)continue;
+  if(c.classChoiceArchive?.[root.id])throw Error('职业属性提升保留身份冲突，请保留角色备份。');
+  const tree:Selection[]=[root],ids=new Set([root.id]);for(let i=0;i<tree.length;i++)for(const row of c.selections)if(row.parentId===tree[i].id&&!ids.has(row.id)){ids.add(row.id);tree.push(row);}
+  if(ids.has(owner.id))continue; // Malformed cycles must never archive their owner.
+  c.classChoiceArchive={...c.classChoiceArchive,[root.id]:{choiceId:binding.choiceId,kind:'legacy-asi',parent:structuredClone(owner),selections:structuredClone(tree)}};
+  c.selections=c.selections.filter(row=>!ids.has(row.id));changed=true;
+ }
+ for(const [id,archive] of Object.entries(c.classChoiceArchive||{})){
+  const root=archive.selections[0],owner=c.selections.find(row=>row.id===root.parentId);
+  if(archive.kind!=='legacy-asi'||!owner||!legacySourceIdentity(owner,root,archive.choiceId)||!Number.isSafeInteger(owner.level)||owner.level<root.entry.raw.level||owner.level>20||!activeAsiSelections(c).some(row=>row.id===owner.id)||!selectionEffectsAllowed(c,root.entry)||c.dismissedFeatures?.includes(`${owner.id}|${root.grantKey}`)||!archive.parent||owner.entry.id!==archive.parent.entry.id)continue;
+  if(archive.selections.some(row=>c.selections.some(current=>current.id===row.id))||c.selections.some(row=>row.parentId===owner.id&&row.grantKey===root.grantKey))continue;
+  c.selections.push(...structuredClone(archive.selections));delete c.classChoiceArchive![id];if(!Object.keys(c.classChoiceArchive!).length)delete c.classChoiceArchive;changed=true;
+ }
+ return changed;
+}
 export function evaluateAsiAllocations(c:Character,base:Record<Ability,number>,active=activeAsiSelections(c)){
  const bonuses=Object.fromEntries(ABILITIES.map(a=>[a,0])) as Record<Ability,number>,trace=Object.fromEntries(ABILITIES.map(a=>[a,[] as string[]])) as Record<Ability,string[]>;
  const issues:Issue[]=[],states=new Map<string,{active:boolean;reason?:string}>(),out={bonuses,trace,issues,states};
@@ -62,13 +108,13 @@ export function evaluateAsiAllocations(c:Character,base:Record<Ability,number>,a
  for(const binding of ordered){
   const grant=eligibleGrant(c,binding.choiceId,active);let reason:string|undefined;
   if(!automationEnabled(c))reason='自动化当前未启用';
-  else if(!grant||grant.row.id!==binding.selectionId||grant.row.entry.id!==binding.entryId)reason='本次职业授予、所选专长、等级或来源当前不可用';
+  else if(!grant||grant.row.id!==binding.selectionId||grant.row.entry.id!==binding.entryId||grant.kind!==binding.kind)reason='本次职业授予、所选专长、等级或来源当前不可用';
   else if(!validAllocation(binding.allocation))reason='属性分配结构无效';
   else if(bindings.filter(b=>b.selectionId===binding.selectionId||b.choiceId===binding.choiceId).length!==1)reason='本次授予存在重复分配记录';
   else if(ABILITIES.some(a=>binding.allocation[a]!==undefined&&(!Number.isFinite(base[a])||base[a]+bonuses[a]+binding.allocation[a]!>20)))reason='本次分配将超过属性上限 20，请调整分配或手工基础值';
   states.set(binding.selectionId,{active:!reason,reason});
   if(reason){issues.push({id:`asi:${binding.selectionId}`,selectionId:binding.selectionId,severity:'warning',message:`属性提升暂不生效：${reason}；原记录保留。`});continue;}
-  for(const ability of ABILITIES){const amount=binding.allocation[ability]||0;if(amount){bonuses[ability]+=amount;trace[ability].push(`${grant!.row.entry.name} · XPHB（职业 ${grant!.level} 级）：显式分配 +${amount}`);}}
+  for(const ability of ABILITIES){const amount=binding.allocation[ability]||0;if(amount){bonuses[ability]+=amount;trace[ability].push(`${grant!.row.entry.name} · ${grant!.row.entry.source}（职业 ${grant!.level} 级）：显式分配 +${amount}`);}}
  }
  return out;
 }
@@ -86,7 +132,7 @@ export function setAsiAllocation(c:Character,choiceId:string,allocation:AsiBindi
  if(allocation===null){if(c.asiAllocations)c.asiAllocations={...c.asiAllocations,version:1,bindings:other};return;}
  if(!validAllocation(allocation))throw Error('请选择一项属性 +2，或两项不同属性各 +1。');
  const grant=eligibleGrant(c,choiceId);if(!grant)throw Error('本次职业属性提升授予当前不可用。');
- const binding:AsiBinding={selectionId:grant.row.id,choiceId,entryId:grant.row.entry.id,allocation:{...allocation}},state:AsiAllocationState={...c.asiAllocations,version:1,bindings:[...other,binding]};
+ const binding:AsiBinding={...(grant.kind?{kind:grant.kind}:{}),selectionId:grant.row.id,choiceId,entryId:grant.row.entry.id,allocation:{...allocation}},state:AsiAllocationState={...c.asiAllocations,version:1,bindings:[...other,binding]};
  const base=evaluate({...c,asiAllocations:undefined}).abilities,planned=evaluateAsiAllocations({...c,asiAllocations:state},base);
  if(!planned.states.get(binding.selectionId)?.active)throw Error(planned.states.get(binding.selectionId)?.reason||'此属性提升当前不能生效。');
  // A replacement cannot silently deactivate another previously valid grant.
@@ -97,7 +143,7 @@ export function validateAsiAllocations(value:unknown):void{
  if(value===undefined)return;
  if(!object(value)||!Number.isSafeInteger(value.version)||Number(value.version)<1)throw Error('属性提升记录版本无效。');
  if(value.version!==1)return;
- if(!Array.isArray(value.bindings)||value.bindings.length>100||value.bindings.some(row=>!object(row)||['selectionId','choiceId','entryId'].some(key=>typeof row[key]!=='string'||!(row[key] as string).length||(row[key] as string).length>2000)||!validAllocation(row.allocation)))throw Error('属性提升分配记录无效。');
+ if(!Array.isArray(value.bindings)||value.bindings.length>100||value.bindings.some(row=>!object(row)||(row.kind!==undefined&&row.kind!=='legacy-class')||['selectionId','choiceId','entryId'].some(key=>typeof row[key]!=='string'||!(row[key] as string).length||(row[key] as string).length>2000)||!validAllocation(row.allocation)))throw Error('属性提升分配记录无效。');
 }
 
 /** A typed ASI's feat is class-parented, so its source feature is not the

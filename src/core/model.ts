@@ -61,7 +61,7 @@ export interface Character {
   /** Saved choice display snapshots; these never enter the effect evaluator. */
   classChoiceSnapshots?: Record<string,Entry>;
   /** Inactive class-grant trees retain identities, manual children and references. */
-  classChoiceArchive?: Record<string,{choiceId:string;parent?:Selection;selections:Selection[]}>;
+  classChoiceArchive?: Record<string,{choiceId:string;kind?:'legacy-asi';parent?:Selection;selections:Selection[]}>;
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];
