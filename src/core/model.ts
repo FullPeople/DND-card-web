@@ -33,6 +33,7 @@ export interface RuntimeResource {current:number;max:number;name?:string;type?:s
 export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number}
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
+  asiAllocations?:import('./automation/asi').AsiAllocationState;
   infusions?:import('./automation/infusions').InfusionState;
   automation?:import('./automation/state').AutomationState;
   /** Legacy score-ownership marker retained for backup compatibility. */

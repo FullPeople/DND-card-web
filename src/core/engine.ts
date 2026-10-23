@@ -1,3 +1,4 @@
+import {evaluateAsiAllocations} from './automation/asi';
 import {evaluateInfusions} from './automation/infusions';
 import {planFeatureResources} from './automation/featureResources';
 import {planRacialAbilities} from './racialAbilities';
@@ -71,6 +72,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Manual skill choices supplement source grants; clearing one cannot revoke a rule.
     else if (SKILLS[key] && value) grantSkill(key, '手动记录');
   }
+  const asi=evaluateAsiAllocations(c,abilities,active);issues.push(...asi.issues);
+  for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
   const modifiers = Object.fromEntries(ABILITIES.map(a => [a, Math.floor((abilities[a] - 10) / 2)])) as Record<Ability, number>;
   const skills = Object.fromEntries(Object.entries(SKILLS).map(([key, s]) => {
     const expertise = !!c.expertise?.[key], proficient = expertise || !!skillSources[key]?.length;

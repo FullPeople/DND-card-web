@@ -1,3 +1,4 @@
+import {validateAsiAllocations} from './automation/asi';
 import {invocationRecord} from './automation/invocations';
 import {validateInfusions} from './automation/infusions';
 import {validWidget,validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
@@ -129,6 +130,7 @@ export function validateCharacter(value: unknown): Character {
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
   validateInfusions(c.infusions);
+  validateAsiAllocations(c.asiAllocations);
   if(c.classChoiceSnapshots!==undefined){
     assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
     for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){

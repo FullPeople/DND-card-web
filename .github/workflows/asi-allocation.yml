@@ -1,0 +1,80 @@
+name: Verify explicit level-up ASI allocation
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/asi*.test.ts'
+      - 'tests/e2e/asiAllocation*.ts'
+      - 'docs/data/automation*'
+      - 'playwright.asi.config.ts'
+      - 'vite*.config.ts'
+      - 'package*.json'
+      - 'tsconfig*.json'
+      - '.github/workflows/asi-allocation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: asi-allocation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ASI_FROZEN_DIR: .local-evidence/asi-upstream
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - name: Verify frozen Fighter and feat sources without publishing source text
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision=e2623b204ddbdf2bcfa8317acfc962de89c676e2
+          mkdir -p "$ASI_FROZEN_DIR"
+          for path in class/class-fighter.json feats.json; do
+            filename="$(basename "$path")"
+            curl --disable --fail --silent --show-error --max-time 60 --max-filesize 3000000 --proto '=https' \
+              "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/$path" \
+              --output "$ASI_FROZEN_DIR/$filename"
+          done
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const inputs={
+            'class/class-fighter.json':'a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509',
+            'feats.json':'0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6'
+          };
+          const rows=[];
+          for(const [path,expected] of Object.entries(inputs)){
+            const filename=path.split('/').at(-1),bytes=readFileSync(`${process.env.ASI_FROZEN_DIR}/${filename}`);
+            const sha256=createHash('sha256').update(JSON.stringify(JSON.parse(bytes.toString('utf8')))).digest('hex');
+            if(sha256!==expected)throw Error('Frozen input mismatch: '+path);
+            rows.push({url:`https://5e.kiwee.top/data/${path}`,path:filename,sha256});
+          }
+          writeFileSync(`${process.env.ASI_FROZEN_DIR}/index.json`,JSON.stringify({rows}));
+          writeFileSync('.local-evidence/asi-source-verification.json',JSON.stringify({revision:'e2623b204ddbdf2bcfa8317acfc962de89c676e2',verified:true,rows},null,2)+'\n');
+          NODE
+      - name: Allocation, persistence, rollback and manual-data guards
+        run: npx vitest run tests/asi*.test.ts tests/class-choice-support.test.ts tests/class-choice-legacy-identity.test.ts tests/numberInput234.test.ts --maxWorkers=2
+      - run: npx tsc -b
+      - name: Formal standalone build with unchanged runtime coverage gate
+        run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone
+      - run: npx playwright install --with-deps chromium
+      - name: Actual desktop and narrow App allocation workflows
+        run: npx playwright test --config playwright.asi.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: asi-allocation-evidence
+          include-hidden-files: true
+          path: |
+            .local-evidence/asi-browser/
+            .local-evidence/asi-source-verification.json
+          if-no-files-found: warn
+          retention-days: 7

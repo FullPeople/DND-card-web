@@ -192,7 +192,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const id=`${owner.id}:class-typed-feat:${feature.id}`;
    if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
    const candidates=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
-   add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；只有既有已适配机制生效。ASI 属性分配仍手动填写，不会重复改变卡面基础属性。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；仅既有已适配机制生效，ASI 属性仍手动填写。'});
+   add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；仅已适配机制生效。已核对的 XPHB 属性值提升可在确认尚未计入手工基础值后单独分配，不改写基础属性；其他分配仍手动。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；已核对的 XPHB 属性值提升需另行明确确认和分配，其他未适配效果仍手动。'});
    // The chosen feat can differ from the typed ASI identity. Preserve both
    // references so catalog absence cannot turn a confirmed grant into no grant.
    out.at(-1)!.evidenceEntries=[feature,grant];out.at(-1)!.grantLevel=atGrant;
