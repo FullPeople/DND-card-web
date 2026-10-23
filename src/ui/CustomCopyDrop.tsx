@@ -1,11 +1,12 @@
-import {useContext,useLayoutEffect,useId,useRef,useState,type ReactNode} from 'react';
+import {useSheetContext} from './scopedSheetContext';
+import {useLayoutEffect,useId,useRef,useState,type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {DragContext} from './DragEntry';
 import type {Entry} from '../core/model';
 import './customCanvas.css';
 
 export function CustomCopyDrop({enabled,receive,children}:{enabled:boolean;receive:(entry:Entry)=>void;children:ReactNode}){
- const drag=useContext(DragContext),id=useId(),element=useRef<HTMLDivElement>(null),[rect,setRect]=useState<DOMRect>();
+ const drag=useSheetContext('drag',DragContext),id=useId(),element=useRef<HTMLDivElement>(null),[rect,setRect]=useState<DOMRect>();
  const active=enabled&&!!drag?.entry&&drag.over===id,register=drag?.register;
  useLayoutEffect(()=>{if(enabled&&element.current)return register?.(id,{element:element.current,onReceive:receive,authoring:true,accepts:()=>true});},[register,id,enabled,receive]);
  useLayoutEffect(()=>{if(!active)return;const update=()=>setRect(element.current?.getBoundingClientRect());update();window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update);},[active]);

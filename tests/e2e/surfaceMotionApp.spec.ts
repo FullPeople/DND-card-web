@@ -28,9 +28,12 @@ async function start(page:Page,displayMode:'screen'|'a4'){
     if(!state.switchTo)return;
     const target=state.switchTo;state.switchTo=undefined;state.cross={beforeSwitch:frame(node,animation),target};
     const observer=new MutationObserver(()=>{
-     if(node.dataset.characterId!==target)return;observer.disconnect();
-     requestAnimationFrame(()=>{state.cross.firstNewFrame=frame(node,animation);requestAnimationFrame(()=>{state.cross.secondNewFrame=frame(node,animation);});});
-    });observer.observe(node,{attributes:true,attributeFilter:['data-character-id']});
+     const active=document.querySelector<HTMLElement>('.paper[data-active-sheet="true"]');
+     if(!active||active.dataset.characterId!==target)return;observer.disconnect();
+     state.cross.oldPaperRetained=node.isConnected&&node.dataset.characterId===record.id;
+     state.cross.distinctActivePaper=active!==node;
+     requestAnimationFrame(()=>{state.cross.firstNewFrame=frame(active,animation);requestAnimationFrame(()=>{state.cross.secondNewFrame=frame(active,animation);});});
+    });observer.observe(node.closest('.retained-card-stack')!,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active-sheet','data-retained-card-active','data-character-id']});
     const tab=[...document.querySelectorAll<HTMLButtonElement>('.character-tabs [role="tab"]')].find(button=>button.textContent==='卡面动效乙');
     if(!tab||tab.disabled){state.errors.push('Target authored card tab unavailable');observer.disconnect();return;}
     // Use the real App tab handler in the first live animation frame, without pausing or extending the animation.
@@ -80,15 +83,17 @@ for(const mode of ['screen','a4'] as const){
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));const {before,status}=await start(page,mode);
   await test.info().attach('formal-cloud-build',{body:JSON.stringify(status,null,2),contentType:'application/json'});
   await page.evaluate(target=>{(window as any).__surfaceApp.switchTo=target;},second);
-  await page.locator('[data-sheet-tab="特性"]').click();await expect(page.locator('.paper')).toHaveAttribute('data-character-id',second);
+  await page.locator('[data-retained-card-active="true"] [data-sheet-tab="特性"]').click();await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id',second);
   await expect.poll(()=>page.evaluate(()=>(window as any).__surfaceApp.cross?.secondNewFrame)).toBeTruthy();
   await expect.poll(()=>page.evaluate(()=>(window as any).__surfaceApp.records[0]?.cancelled)).toBe(true);
-  const result=await evidence(page,'cross-card-first-frames');expect(result.errors).toEqual([]);expect(result.records).toHaveLength(1);expect(result.records[0].id).toBe(first);expect(result.records[0].finished).toBe(false);
+  const result=await evidence(page,'cross-card-first-frames');expect(result.errors).toEqual([]);expect(result.records).toHaveLength(1);expect(result.records[0].id).toBe(first);expect(result.records[0].finished).toBe(false);expect(result.cross.oldPaperRetained).toBe(true);expect(result.cross.distinctActivePaper).toBe(true);
   expect(result.cross.beforeSwitch.oldPlayState).toBe('running');expect(result.cross.beforeSwitch.opacity).toBeLessThan(1);
   for(const frame of [result.cross.firstNewFrame,result.cross.secondNewFrame]){expect(frame.id).toBe(second);expect(frame.page).toBe('page-1');expect(frame.opacity).toBe(1);expect(frame.oldPlayState).toBe('idle');expect(frame.surfaceMotion).toBeNull();expect(frame.ownAnimations).toEqual([]);}
   await page.screenshot({path:test.info().outputPath('new-card-opaque.png')});await unchanged(page,before);
   // The new card still owns subsequent ordinary page transitions.
-  await page.locator('[data-sheet-tab="背景"]').click();await expect.poll(()=>page.evaluate(()=>(window as any).__surfaceApp.records.length)).toBe(2);
-  expect(await page.evaluate(()=>(window as any).__surfaceApp.records[1].id)).toBe(second);await expect(page.locator('.paper')).not.toHaveAttribute('data-surface-motion','entering');await unchanged(page,before);expect(errors).toEqual([]);
+  await page.locator('[data-retained-card-active="true"] [data-sheet-tab="背景"]').click();await expect.poll(()=>page.evaluate(()=>(window as any).__surfaceApp.records.length)).toBe(2);
+  expect(await page.evaluate(()=>(window as any).__surfaceApp.records[1].id)).toBe(second);await expect(page.locator('.paper[data-active-sheet="true"]')).not.toHaveAttribute('data-surface-motion','entering');await unchanged(page,before);expect(errors).toEqual([]);
+  await page.locator('.character-tabs').getByRole('tab',{name:'卡面动效甲',exact:true}).click();await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id',first);await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveCSS('opacity','1');
+  expect(await page.evaluate(()=>(window as any).__surfaceApp.records.length)).toBe(2);await unchanged(page,before);
  });
 }

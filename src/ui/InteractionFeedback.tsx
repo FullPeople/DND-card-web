@@ -1,9 +1,10 @@
-import {createContext,useCallback,useContext,useEffect,useLayoutEffect,useMemo,useRef,useState,type ReactNode} from 'react';
+import {useSheetContext} from './scopedSheetContext';
+import {createContext,useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState,type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {cloudFeaturesEnabled} from '../cloud/availability';
 type Change={anchor:HTMLElement;label:string;before:number;after:number};
-const FeedbackContext=createContext<{scope:string;saveLabel:string;announce:(change:Change)=>void}|undefined>(undefined);
-export const useInteractionStatus=()=>useContext(FeedbackContext);
+export const FeedbackContext=createContext<{scope:string;saveLabel:string;announce:(change:Change)=>void}|undefined>(undefined);
+export const useInteractionStatus=()=>useSheetContext('feedback',FeedbackContext);
 
 export function InteractionFeedbackProvider({scope,saveLabel,undo,canUndo,children}:{scope:string;saveLabel:string;undo:()=>void;canUndo:boolean;children:ReactNode}){
  const [change,setChange]=useState<(Change&{scope:string;left:number;top:number;host:Element})>(),currentScope=useRef(scope);currentScope.current=scope;
@@ -16,7 +17,7 @@ export function InteractionFeedbackProvider({scope,saveLabel,undo,canUndo,childr
 
 /** Publish only after the controlled value reflects the user's submitted intent. */
 export function useVerifiedValueFeedback(value:number,label:string){
- const context=useContext(FeedbackContext),pending=useRef<(Change&{time:number;started:number;scope:string})|undefined>(undefined),frames=useRef<number[]>([]),scope=useRef(context?.scope);
+ const context=useSheetContext('feedback',FeedbackContext),pending=useRef<(Change&{time:number;started:number;scope:string})|undefined>(undefined),frames=useRef<number[]>([]),scope=useRef(context?.scope);
  const stop=()=>{frames.current.forEach(cancelAnimationFrame);frames.current=[];};
  useEffect(()=>stop,[]);
  useLayoutEffect(()=>{if(scope.current!==context?.scope){scope.current=context?.scope;stop();}const change=pending.current;if(!change)return;if(change.scope!==context?.scope){pending.current=undefined;return;}if(value===change.after&&Date.now()-change.time<5000){pending.current=undefined;if(cloudFeaturesEnabled){stop();change.anchor.dataset.valueCommitMs=(performance.now()-change.started).toFixed(2);delete change.anchor.dataset.valuePaintMs;frames.current.push(requestAnimationFrame(()=>{frames.current.push(requestAnimationFrame(()=>{if(change.anchor.isConnected)change.anchor.dataset.valuePaintMs=(performance.now()-change.started).toFixed(2);}));}));}context?.announce(change);}else if(value!==change.before||Date.now()-change.time>=5000)pending.current=undefined;},[value,context]);

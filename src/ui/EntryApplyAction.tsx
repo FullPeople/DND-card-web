@@ -1,4 +1,5 @@
-import {useContext,useLayoutEffect,useState} from 'react';
+import {useSheetContext} from './scopedSheetContext';
+import {useLayoutEffect,useState} from 'react';
 import {subclassOwner,type Character,type Entry} from '../core/model';
 import {requiresEditing} from './entryWritePolicy';
 import {entryDragIntent} from './entryDragIntent';
@@ -13,7 +14,7 @@ export function entryApplyDescription(c:Character,entry:Entry){
  return {label:entry.kind==='item'?'加入背包':entry.kind==='condition'?'添加状态':'填入角色',note:`目标：${c.name||'当前角色'}`,replace:false};
 }
 export function EntryApplyAction({entry,character,blocked,disabledReason,editing,editReady,enableEditing,apply}:{entry:Entry;character:Character;blocked?:string;disabledReason?:string;editing:boolean;editReady:boolean;enableEditing:()=>void;apply:()=>void}){
- const getTargets=useContext(EntryApplicationContext),[targets,setTargets]=useState<EntryApplicationTarget[]>([]),training=entryDragIntent(entry)==='training';
+ const getTargets=useSheetContext('application',EntryApplicationContext),[targets,setTargets]=useState<EntryApplicationTarget[]>([]),training=entryDragIntent(entry)==='training';
  useLayoutEffect(()=>{const next=getTargets?.(entry)||[];setTargets(old=>old.length===next.length&&old.every((target,index)=>target.id===next[index].id&&target.label===next[index].label)?old:next);},[getTargets,entry,character,editing]);
  const description=entryApplyDescription(character,entry),needsEditing=requiresEditing(entry)&&!editing;
  const [confirm,setConfirm]=useState(false);

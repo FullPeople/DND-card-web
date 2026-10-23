@@ -24,7 +24,7 @@ it('finishes real computations for three imported cards before any is selected, 
  const cards=[card(),card(),card()],original=JSON.stringify(cards),{views,remember,counts}=context(),progress=vi.fn();
  await prepareStandaloneCards(cards,views,{signal:new AbortController().signal,current:()=>true,yield:pause,progress});
  expect(progress).toHaveBeenLastCalledWith(3,3);
- expect(counts).toMatchObject({build:3,choices:3,review:3,derived:3});
+ expect(counts).toMatchObject({build:3,choices:3,review:3,'navigation-review':3,derived:3});
  const prepared={...counts};
  // These are the same reads performed by the visible sheet, on its very first selection.
  for(const c of [cards[2],cards[0],cards[1],cards[2]]){
@@ -71,9 +71,10 @@ it('rejects an obsolete context so an import cannot publish a stale readiness re
 });
 
 it('yields before each expensive stage and skips completed cards on later background passes',async()=>{
- const c=card(),{views}=context(),yieldTask=vi.fn(pause),options={signal:new AbortController().signal,current:()=>true,yield:yieldTask};
- await prepareStandaloneCards([c],views,options);expect(yieldTask).toHaveBeenCalledTimes(4);
- await prepareStandaloneCards([c],views,options);expect(yieldTask).toHaveBeenCalledTimes(4);
+ const c=card(),{views,counts}=context(),yieldTask=vi.fn(pause),options={signal:new AbortController().signal,current:()=>true,yield:yieldTask};let stages=0;
+ const monitored={...views,steps:(owner:Character)=>views.steps(owner).map(step=>()=>{expect(yieldTask).toHaveBeenCalledTimes(stages+1);step();stages++;})};
+ await prepareStandaloneCards([c],monitored,options);expect(stages).toBeGreaterThan(0);expect(counts['navigation-review']).toBe(1);
+ const completed=stages;await prepareStandaloneCards([c],monitored,options);expect(stages).toBe(completed);expect(yieldTask).toHaveBeenCalledTimes(completed);
 });
 
 it('cancels a scheduled preparation without leaving a pending idle or timer task',async()=>{

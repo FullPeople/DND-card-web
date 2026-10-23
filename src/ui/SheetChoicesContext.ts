@@ -1,4 +1,5 @@
-import {createContext,useContext,useMemo} from 'react';
+import {useSheetContext} from './scopedSheetContext';
+import {createContext,useMemo} from 'react';
 import {sheetChoices,type SheetChoice} from '../core/automation/choices';
 import {sameCharacterMechanics} from '../core/displayCharacterEdit';
 import type {Character,Entry} from '../core/model';
@@ -11,6 +12,6 @@ export function choicesForSnapshot(snapshot:SheetChoicesSnapshot|undefined,chara
 }
 /** Independently mounted previews retain a local, mutation-free fallback. */
 export function useSheetChoices(character:Character,catalog:Entry[]):SheetChoice[]{
- const snapshot=useContext(SheetChoicesContext);
+ const snapshot=useSheetContext('choices',SheetChoicesContext);
  return useMemo(()=>choicesForSnapshot(snapshot,character,catalog),[snapshot,character,catalog]);
 }

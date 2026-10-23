@@ -1,16 +1,17 @@
+import {activeSheet} from './activeSheet';
 import { downloadBlob } from './storage';
 import {beginSheetCapture} from '../ui/sheetDisplay';
 import {waitForRenderedSheet} from './sheetReady';
 export type SheetCaptureOptions={hidePortraits?:boolean;hideNotes?:boolean;hideConditions?:boolean;hideResources?:boolean};
 export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob> {
- const paper=document.querySelector<HTMLElement>('.paper');if(!paper)throw new Error('角色卡尚未显示');
+ const paper=activeSheet();if(!paper)throw new Error('角色卡尚未显示');
  const identity=paper.dataset.characterId,page=paper.getAttribute('aria-labelledby');
  const scrollPositions=[...paper.querySelectorAll<HTMLElement>('.spell-stock-cell .cell-content')].map(node=>({node,top:node.scrollTop,left:node.scrollLeft}));
  const release=beginSheetCapture();
  const restored:{node:HTMLElement;style:string|null}[]=[];
  try {
  await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
- await waitForRenderedSheet(()=>!paper.isConnected||paper.dataset.characterId!==identity||paper.getAttribute('aria-labelledby')!==page?'changed':paper.querySelector('.sheet-details-loading')?'loading':'ready',check=>{const observer=new MutationObserver(check);observer.observe(paper,{childList:true,subtree:true,attributes:true,attributeFilter:['data-character-id','aria-labelledby']});return()=>observer.disconnect();});
+ await waitForRenderedSheet(()=>!paper.isConnected||activeSheet()!==paper||paper.dataset.characterId!==identity||paper.getAttribute('aria-labelledby')!==page?'changed':paper.querySelector('.sheet-details-loading')?'loading':'ready',check=>{const observer=new MutationObserver(check);observer.observe(paper,{childList:true,subtree:true,attributes:true,attributeFilter:['data-character-id','aria-labelledby']});return()=>observer.disconnect();});
  paper.classList.add('sheet-export');
  const conceal=(selector:string,collapse=false)=>paper.querySelectorAll<HTMLElement>(selector).forEach(node=>{restored.push({node,style:node.getAttribute('style')});node.style.setProperty(collapse?'display':'visibility',collapse?'none':'hidden','important');});
  conceal('.card-lock,.portrait-controls,.feature-browse');
@@ -19,10 +20,10 @@ export async function captureSheet(options:SheetCaptureOptions={}): Promise<Blob
  if(options.hideConditions)conceal('.overview-conditions,.condition-bubbles,.edition-divider .feature-panel,.card-art-layer,.card-atmosphere,.card-art,.buff-atmosphere');
  if(options.hideResources)conceal('.spell-slot-summary,.spell-slot-resources,.hit-dice-groups,.hit-dice-resources,.resource179-flow,.resource-row,.resource-section,.resources-grid');
  await new Promise(requestAnimationFrame);await document.fonts.ready;
- if(!paper.isConnected||paper.dataset.characterId!==identity||paper.getAttribute('aria-labelledby')!==page)throw Error('角色或页面已切换，已停止导出');
+ if(!paper.isConnected||activeSheet()!==paper||paper.dataset.characterId!==identity||paper.getAttribute('aria-labelledby')!==page)throw Error('角色或页面已切换，已停止导出');
  const {toSvg}=await import('html-to-image');
  const svg=await toSvg(paper,{width:680,height:680*297/210,skipFonts:true,backgroundColor:'#ededeb',style:{transform:'none',margin:'0',boxShadow:'none'},filter:node=>!node.classList?.contains('edit-mode-toggle')});
- if(!paper.isConnected||paper.dataset.characterId!==identity||paper.getAttribute('aria-labelledby')!==page)throw Error('角色或页面已切换，已停止导出');
+ if(!paper.isConnected||activeSheet()!==paper||paper.dataset.characterId!==identity||paper.getAttribute('aria-labelledby')!==page)throw Error('角色或页面已切换，已停止导出');
  // The renderer deep-clones SVG without copying descendant CSS. Preserve the
  // computed presentation in the detached image so transparent effects stay so.
  const doc=new DOMParser().parseFromString(decodeURIComponent(svg.slice(svg.indexOf(',')+1)),'image/svg+xml');

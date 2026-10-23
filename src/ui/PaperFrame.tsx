@@ -1,3 +1,4 @@
+import {useSheetContext} from './scopedSheetContext';
 import {useSheetZoom} from './useSheetZoom';
 import {useUiLanguage} from './UiLanguage';
 import type {UiTextKey} from './uiText';
@@ -20,16 +21,24 @@ import {entryDragIntent,entryDragPage} from './entryDragIntent';
 
 
 import {afterPaint} from '../platform/afterPaint';
+import {useRetainedCardActive,useRetainedCaptureTarget} from './RetainedCardVisibility';
 export const SHEET_PAGES = ['主要', '特性', '背景', '法术', '背包'] as const;
 export type SheetPage = typeof SHEET_PAGES[number];
 const pageLabels:Record<SheetPage,UiTextKey>={'主要':'pageMain','特性':'pageFeatures','背景':'pageBackground','法术':'pageSpells','背包':'pageInventory'};
 const WIDTH = 680;
 const HEIGHT = WIDTH * 297 / 210;
 
+function SheetVisibilityEffects({paper,page,enabled,identity}:{paper:React.RefObject<HTMLDivElement|null>;page:string;enabled:boolean;identity:string}){
+ const active=useRetainedCardActive();
+ useLayoutEffect(()=>{if(paper.current)paper.current.dataset.activeSheet=String(active);},[paper,active]);
+ useSurfaceMotion(paper,page,enabled&&active,`${identity}:${active}`);
+ return null;
+}
+
 /** A4 scales as a page; screen mode uses the actual pane and readable reflow. */
 export function PaperFrame({ children, page, changePage, character, pages=SHEET_PAGES, effectsEnabled=true, motionEnabled=true, effectLayout,displayOnly=false }: { displayOnly?:boolean;pages?:readonly SheetPage[]; effectsEnabled?:boolean; motionEnabled?:boolean; effectLayout?:'adaptive'; character: Character; children: ReactNode; page: SheetPage; changePage: (page: SheetPage) => void }) {
   const {t}=useUiLanguage(),instance=useId(),panelId=`sheet-page-${instance}`,tabId=(name:string)=>`page-tab-${instance}-${name}`;
-  const editing = useContext(SheetEditContext);
+  const editing = useContext(SheetEditContext),activeTarget=useRetainedCaptureTarget(),active=activeTarget?.()??true;
   const preferredMode=useSheetRenderMode(),mode=displayOnly?'a4':preferredMode,compact=mode==='screen',tabsWidth=displayOnly?0:42;
   const [scale, setFit] = useState(0.5);
   const adaptive=effectsEnabled&&(compact||effectLayout==='adaptive');
@@ -40,13 +49,12 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const originalVisuals=useMemo(()=>adaptive?{active:new Set<import('./conditionVisuals').ConditionVisual>(),exhaustion:0}:visuals,[visualKey]);
   const paper=useRef<HTMLDivElement>(null);
   const capturing=useSheetCaptureActive();
-  useSurfaceMotion(paper,page,motionEnabled&&!displayOnly&&!capturing,character.id);
   const [decoration,setDecoration]=useState<typeof import('./CardDecoration')>();
   useEffect(()=>{if(!effectsEnabled||!motionEnabled)return;return afterPaint(()=>{void import('./CardDecoration').then(setDecoration).catch(error=>console.warn('Card decoration unavailable:',error));});},[effectsEnabled,motionEnabled]);
   const viewport = useRef<HTMLDivElement>(null);
   const {view:zoom,reset:resetZoom}=useSheetZoom(viewport,`${character.id}:${mode}`,!compact&&!displayOnly);
-  const drag = useContext(DragContext);
-  useEffect(()=>{const lift=(event:Event)=>{const detail=(event as CustomEvent).detail;if(detail?.preservePage)return;const entry=detail?.entry;const next=entry&&entryDragPage(entry,detail.intent||entryDragIntent(entry));if(next&&pages.includes(next)&&next!==page)changePage(next);};window.addEventListener('entry-drag-start',lift);return()=>window.removeEventListener('entry-drag-start',lift);},[page,pages,changePage]);
+  const drag = useSheetContext('drag',DragContext);
+  useEffect(()=>{const lift=(event:Event)=>{if(activeTarget&&!activeTarget()||!paper.current?.isConnected)return;const detail=(event as CustomEvent).detail;if(detail?.preservePage)return;const entry=detail?.entry;const next=entry&&entryDragPage(entry,detail.intent||entryDragIntent(entry));if(next&&pages.includes(next)&&next!==page)changePage(next);};window.addEventListener('entry-drag-start',lift);return()=>window.removeEventListener('entry-drag-start',lift);},[activeTarget,page,pages,changePage]);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => { if (!drag?.preservePage && drag?.entry && drag.hoverTab && drag.hoverTab !== page) hoverTimer.current = setTimeout(() => changePage(drag.hoverTab as SheetPage), 400); return () => clearTimeout(hoverTimer.current); }, [drag?.entry, drag?.hoverTab,drag?.preservePage, page]);
   useLayoutEffect(()=>{if(compact&&viewport.current)viewport.current.scrollTop=0;},[page,character.id,compact]);
@@ -60,7 +68,7 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   }, [compact,tabsWidth]);
   return <CardIdentityContext.Provider value={character.id}><CardVisualContext.Provider value={originalVisuals}><div className={`sheet-viewport ${compact?'screen-mode':'a4-mode'}`} data-sheet-display={mode} ref={viewport}>
     <div className="paper-stack" style={{ width:compact?'100%':WIDTH*scale+tabsWidth,height:compact?'auto':HEIGHT*scale,transform:displayOnly?'none':`translate(${zoom.x}px,${zoom.y}px) scale(${zoom.zoom})` }}>
-      <div ref={paper} data-character-id={character.id} data-visual-editing={editing} className={`paper has-card-art ${editing ? 'visual-editing' : ''} ${adaptive?adaptiveConditionClasses(visuals.active,editing):[...visuals.active].map(id => `condition-${id}`).join(' ')} page-${SHEET_PAGES.indexOf(page)}`} role={displayOnly?'img':'tabpanel'} id={panelId} aria-label={displayOnly?character.name:undefined} aria-labelledby={displayOnly?undefined:tabId(page)} style={{ ...sheetPaletteStyle(character.palette,character.componentPalette),width:compact?'100%':WIDTH,height:compact?'auto':HEIGHT,top:0,transform:compact?'none':`scale(${scale})` } as CSSProperties}>{effectsEnabled&&motionEnabled&&decoration&&<decoration.CardDecoration character={character} paper={paper} adaptive={adaptive} editing={editing} page={page} compact={compact}/>}{children}</div>
+      <div ref={paper} data-character-id={character.id} data-active-sheet={active} data-visual-editing={editing} className={`paper has-card-art ${editing ? 'visual-editing' : ''} ${adaptive?adaptiveConditionClasses(visuals.active,editing):[...visuals.active].map(id => `condition-${id}`).join(' ')} page-${SHEET_PAGES.indexOf(page)}`} role={displayOnly?'img':'tabpanel'} id={panelId} aria-label={displayOnly?character.name:undefined} aria-labelledby={displayOnly?undefined:tabId(page)} style={{ ...sheetPaletteStyle(character.palette,character.componentPalette),width:compact?'100%':WIDTH,height:compact?'auto':HEIGHT,top:0,transform:compact?'none':`scale(${scale})` } as CSSProperties}><SheetVisibilityEffects paper={paper} page={page} enabled={motionEnabled&&!displayOnly&&!capturing} identity={character.id}/>{effectsEnabled&&motionEnabled&&decoration&&<decoration.CardDecoration character={character} paper={paper} adaptive={adaptive} editing={editing} page={page} compact={compact}/>}{children}</div>
       {!displayOnly&&<nav className="sheet-pages" role="tablist" aria-label={t('sheetPages')} style={{ left: compact?0:WIDTH * scale, top: compact?0:25 }} aria-orientation={compact?'horizontal':'vertical'}>
         {pages.map((name, index) => <button key={name} id={tabId(name)} role="tab" aria-selected={page === name} aria-controls={panelId} tabIndex={page === name ? 0 : -1} onClick={() => changePage(name)} data-sheet-tab={name} onKeyDown={event => {
           const next = ['ArrowRight','ArrowDown'].includes(event.key) ? (index + 1) % pages.length : ['ArrowLeft','ArrowUp'].includes(event.key) ? (index + pages.length-1) % pages.length : event.key === 'Home' ? 0 : event.key === 'End' ? pages.length-1 : -1;

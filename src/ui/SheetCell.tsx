@@ -22,8 +22,9 @@ export function SheetCell({ label, children, style, className = '', missing = fa
   useLayoutEffect(() => {
     if (!ref.current) return;
     const observer = new ResizeObserver(([entry]) => {
+      if(!ref.current?.isConnected)return;
       const box = entry.borderBoxSize[0];
-      setSize({ width: box.inlineSize, height: box.blockSize });
+      setSize(old=>old.width===box.inlineSize&&old.height===box.blockSize?old:{ width: box.inlineSize, height: box.blockSize });
     });
     observer.observe(ref.current);
     return () => observer.disconnect();

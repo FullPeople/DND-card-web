@@ -18,6 +18,7 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
  const ready=new WeakSet<Character>();
  const reconciliationReady=new WeakSet<Character>();
  let names:ReturnType<typeof entryNameIndex>|undefined;
+ const nameIndex=()=>names??=entryNameIndex(entries);
  const build=(character:Character):Character=>{
   const base=runtimeCharacterBase(character);
   return remember('build',base,()=>{
@@ -34,15 +35,15 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
   const view=build(character);
   return character===runtimeCharacterBase(character)?view:{...view,runtime:character.runtime,spellSettings:character.spellSettings,revision:character.revision,updatedAt:character.updatedAt};
  });
+ const warning=(card:Character)=>remember('navigation-review',runtimeCharacterBase(card),()=>cardMigrationIssues(withSiteSources(card,sources,packs),entries).length>0);
  const reconcile=(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
   let draft:Character|undefined;
   checkReconciliation(runtimeCharacterBase(card),()=>{
-   names??=entryNameIndex(entries);
-   draft=reconciledCardView(display(card),entries,names,syncSourceSpells);return !!draft;
+   draft=reconciledCardView(display(card),entries,nameIndex(),syncSourceSpells);return !!draft;
   });
   return draft;
  };
- return {build,display,ready:(card:Character)=>ready.has(card),reconcile,
+ return {build,display,nameIndex,warning,ready:(card:Character)=>ready.has(card),reconcile,
   reconciliationReady:(card:Character)=>reconciliationReady.has(card),
   warmReconciliation:(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
    if(reconciliationReady.has(card))return;
@@ -52,6 +53,7 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
    ()=>{build(card);display(card);},
    ()=>remember('choices',build(card),()=>sheetChoices(build(card),entries)),
    ()=>remember('review',build(card),()=>cardMigrationIssues(build(card),entries)),
+   ()=>warning(card),
    ()=>remember('derived',display(card),()=>evaluate(display(card))),
   ],
   complete:(card:Character)=>{ready.add(card);},

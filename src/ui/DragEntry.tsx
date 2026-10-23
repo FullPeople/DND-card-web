@@ -1,4 +1,6 @@
-import { createContext, useCallback, useContext, useId, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode, type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import {useSheetContext} from './scopedSheetContext';
+import { createContext, useCallback, useId, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode, type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import {isActiveSheetTarget} from '../platform/activeSheet';
 import { candidateReason } from '../core/engine';
 import { type Character, type Entry, type Kind, type Requirement } from '../core/model';
 import { useSources } from './SourceName';
@@ -31,11 +33,11 @@ export function EntryDragProvider({ character, receive, children, editing=false,
   function find(hit: Element | null, item: Entry, intent:EntryDragIntent) {
     for(let node=hit?.closest<HTMLElement>('[data-drop-zone]');node;node=node.parentElement?.closest<HTMLElement>('[data-drop-zone]')){
       const id=node.dataset.dropZone,zone=id?zones.current.get(id):undefined;
-      if(zone&&compatible(latest.current.character,item,zone,intent))return {id,zone};
+      if(zone&&isActiveSheetTarget(zone.element)&&compatible(latest.current.character,item,zone,intent))return {id,zone};
       // A specific slot explains its constraint; do not reroute to its broad parent.
       if(zone?.rejectReason)return undefined;
     }
-    if (hit?.closest('.paper')) for (const [fallbackId, fallback] of zones.current) if (fallback.wholePaper && compatible(latest.current.character, item, fallback,intent)) return { id: fallbackId, zone: fallback };
+    if (hit?.closest('.paper')) for (const [fallbackId, fallback] of zones.current) if (isActiveSheetTarget(fallback.element)&&fallback.wholePaper && compatible(latest.current.character, item, fallback,intent)) return { id: fallbackId, zone: fallback };
     return undefined;
   }
   function start(event: PointerEvent, item: Entry) {
@@ -57,22 +59,22 @@ export function EntryDragProvider({ character, receive, children, editing=false,
   }
   function applicationTargets(item:Entry):EntryApplicationTarget[]{
     if(entryDragIntent(item)!=='training')return [];
-    return [...zones.current].filter(([,zone])=>zone.training&&!zone.wholePaper&&!!zone.onReceive&&compatible(latest.current.character,item,zone,'training')).map(([id,zone])=>({id,label:zone.element.querySelector('dt')?.textContent||'装备训练',apply:()=>{
+    return [...zones.current].filter(([,zone])=>isActiveSheetTarget(zone.element)&&zone.training&&!zone.wholePaper&&!!zone.onReceive&&compatible(latest.current.character,item,zone,'training')).map(([id,zone])=>({id,label:zone.element.querySelector('dt')?.textContent||'装备训练',apply:()=>{
       const state=latest.current,current=zones.current.get(id);
-      if(state.disabledReason||!state.editing||!current||!compatible(state.character,item,current,'training')){window.dispatchEvent(new CustomEvent('workbench-error',{detail:state.disabledReason||'当前填写位置或编辑权限已改变，请重新选择。'}));return;}
+      if(state.disabledReason||!state.editing||!current||!isActiveSheetTarget(current.element)||!compatible(state.character,item,current,'training')){window.dispatchEvent(new CustomEvent('workbench-error',{detail:state.disabledReason||'当前填写位置或编辑权限已改变，请重新选择。'}));return;}
       current.onReceive?.(item);window.dispatchEvent(new CustomEvent('workbench-error',{detail:`已填入「${item.name}」的${zone.element.querySelector('dt')?.textContent||'熟练项'}记录。`}));
     }}));
   }
   return <DragContext.Provider value={{ editing,preservePage,entry,intent, character, over, hoverTab, register, start }}><EntryApplicationContext.Provider value={applicationTargets}>{children}</EntryApplicationContext.Provider></DragContext.Provider>;
 }
 export function EntryDraggable({ entry, children, dragEnabled = true, onContextMenu, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { entry: Entry; dragEnabled?: boolean }) {
-  const drag = useContext(DragContext);
-  const menu=useEntryMenu(),preview=useContext(ReferenceContext);
+  const drag = useSheetContext('drag',DragContext);
+  const menu=useEntryMenu(),preview=useSheetContext('reference',ReferenceContext);
   const canDrag=dragEnabled;
   return <button {...props} data-entry-context-menu={!!menu} onContextMenu={event=>{if(onContextMenu){onContextMenu(event);return;}preview?.close();menu?.(event,entry);}} data-drag-enabled={canDrag} onPointerDown={event => { if (canDrag) drag?.start(event, entry); }} onDragStart={event => event.preventDefault()}>{children}</button>;
 }
 export function DropZone({ children, requirement, kinds, className = '', onReceive, allowExisting = false, accepts, rejectReason, wholePaper = false, referenceOnly=false, training=false, ...props }: HTMLAttributes<HTMLDivElement> & DropRules & { children: ReactNode; onReceive?: (entry: Entry) => void; wholePaper?: boolean }) {
-  const drag = useContext(DragContext), id = useId(), element = useRef<HTMLDivElement>(null);
+  const drag = useSheetContext('drag',DragContext), id = useId(), element = useRef<HTMLDivElement>(null);
   const register = drag?.register;
   useLayoutEffect(() => register?.(id, { element: element.current!, requirement, kinds, onReceive, allowExisting, accepts, rejectReason, wholePaper,referenceOnly,training }), [register, id, requirement, kinds, onReceive, allowExisting, accepts, rejectReason, wholePaper,referenceOnly,training]);
   const ready = !!drag?.entry && compatible(drag.character, drag.entry, { requirement, kinds, allowExisting, accepts,rejectReason,referenceOnly,training },drag.intent);

@@ -13,6 +13,7 @@ import {quickbarDrop} from './quickbarDrop';
 import {togglePreparedSpell} from '../core/spells';
 import {SheetEditContext} from './SheetEdit';
 import {useContext} from 'react';
+import {useSheetContextProvider} from './scopedSheetContext';
 import {entryLabel} from '../core/entryLabel';
 import {NumberInput} from './NumberInput';
 import { useSources } from './SourceName';
@@ -37,7 +38,7 @@ function featurePositions(panel:HTMLElement|null){
 }
 
 export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = false, inline = false, c, rows, receive, edit, browse, onLink, children, label = '特性', className = 'class-features', kinds = ['feature', 'rule'], grouped = true }: Props) {
-  const {format}=useSources(); const editing=useContext(SheetEditContext);
+  const {format}=useSources(); const editing=useContext(SheetEditContext),ChoiceProvider=useSheetContextProvider('choice',ChoiceWorkspaceContext);
   const screen=useSheetRenderMode()==='screen';
   const capturing=useSheetCaptureActive();
   const menu=useEntryMenu();
@@ -60,7 +61,7 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
   useLayoutEffect(()=>{
     if(!activeChoice||inline)return;
     const host=panel.current?.closest<HTMLElement>('.cell-content');if(!host)return;
-    const measure=()=>setInlineHeight(host.closest('.screen-mode')?300:Math.min(300,Math.max(40,Math.floor(host.clientHeight*.85))));
+    const measure=()=>{if(host.isConnected)setInlineHeight(host.closest('.screen-mode')?300:Math.min(300,Math.max(40,Math.floor(host.clientHeight*.85))));};
     measure();const observer=new ResizeObserver(measure);observer.observe(host);return()=>observer.disconnect();
   },[activeChoice,inline,screen]);
   const positions = useRef(new Map<string, DOMRect>());
@@ -127,7 +128,7 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
     else groups.push({ origin: item.origin, group: item.group, items: [item] });
   }
   for(const root of owners)if(!groups.some(g=>g.group===root.id))groups.push({group:root.id,origin:`${KIND_LABELS[root.entry.kind]} ${root.entry.name}${['class','subclass'].includes(root.entry.kind)?` Lv.${selectionLevel(c,root)}`:''}`,items:[]});
-  const contents = <ChoiceWorkspaceContext.Provider value={{...workspace,open:setChoiceId}}>
+  const contents = <ChoiceProvider value={{...workspace,open:setChoiceId}}>
     {activeChoice&&!inline&&!workspace.coverOverview&&<ChoiceWorkspace embedded height={inlineHeight} key={`${c.id}:${activeChoice}`} c={c} id={activeChoice} catalog={catalog} edit={edit} close={workspace.close}/>}
     <div ref={panel} className="feature-groups">
     {groups.map(group => <section className={`feature-group ${spells ? 'spell-level-group' : ''}`} data-spell-level={spells ? group.group : undefined} style={spells ? { '--spell-shade': `${6 + Math.min(9, Number(group.group)) * 6}%` } as CSSProperties : undefined} key={group.group}>{spells && <span className="spell-level-number" aria-label={`${group.group}环`}>{group.group}</span>}{grouped && <h4><button onContextMenu={event=>{const owner=c.selections.find(s=>s.id===group.group);if(owner)menu?.(event,owner.entry,{origin:'sheet',selectionId:owner.id,onlyActions:true,actions:[{requiresEditing:false,label:builtinOptionsVisible(c,owner.id,choices)?'隐藏自带选项':'显示自带选项',run:()=>edit(draft=>setBuiltinOptionsVisible(draft,owner.id,!builtinOptionsVisible(c,owner.id,choices)))}]});}} onClick={()=>{const ids=group.items.map(f=>f.id),all=ids.every(id=>expanded.has(id));saveLayout(ordered.map(f=>f.id),all?[...expanded].filter(id=>!ids.includes(id)):[...new Set([...expanded,...ids])]);}}>{group.origin}</button><span className="feature-heading-choices">{builtinChoices(c,group.group,choices).filter(()=>builtinOptionsVisible(c,group.group,choices)).map(choice=><Reference key={choice.id} reference={`entry:${c.selections.find(s=>s.id===choice.ownerId)!.entry.id}`} entry={c.selections.find(s=>s.id===choice.ownerId)!.entry} className={`sheet-choice-chip ${sheetChoicePending(c,choice)?'is-pending':''}`} commitOnClick={false} disabled={workspace.canEdit===false} menuOptions={{origin:'sheet',canRemove:false,reselect:()=>setChoiceId(choice.id)}} data-choice-id={choice.id} aria-label={`${choice.label} ${choice.selected.length}/${choice.count}`} onClick={()=>setChoiceId(choice.id)}>{choice.label} <span className={sheetChoicePending(c,choice)?'feature-choice-count is-pending':undefined}>{choice.selected.length}/{choice.count}{sheetChoicePending(c,choice)&&<ChoiceOutline/>}</span></Reference>)}</span></h4>}<div className="feature-flow">{group.items.map(f => <article key={f.id} data-entry-id={f.entry.id} data-feature-id={f.id} data-drag-enabled={editing||f.entry.kind==='condition'} className={`feature-bubble ${choicesFor(f.id).length?'has-choices':''} ${choicesFor(f.id).some(r=>sheetChoicePending(c,r))?'choice-pending':''} ${expanded.has(f.id) ? 'is-expanded' : ''} ${f.restricted ? 'is-restricted' : ''} ${dragging === f.id ? 'is-dragging' : ''}`} onDragStart={event => event.preventDefault()}>
@@ -162,7 +163,7 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
         {expanded.has(f.id) ? <strong><em>{f.name.replace(/[。.]$/, '')}。</em></strong> : f.name}{choicesFor(f.id).filter(r=>!r.complete).map(r=><span key={r.id} className={sheetChoicePending(c,r)?'feature-choice-count is-pending':undefined}> {r.selected.length}/{r.count}{sheetChoiceIgnored(c,r.id,r)&&'（已忽略）'}{sheetChoicePending(c,r)&&<ChoiceOutline/>}</span>)}
       </Reference>{editing&&!inline&&expanded.has(f.id)&&choicesFor(f.id).length>0&&<div className="feature-choice-actions">{choicesFor(f.id).map(choice=><button key={choice.id} onClick={()=>setChoiceId(choice.id)} data-choice-id={choice.id}>{choice.complete?'调整':'选择'}{choice.label} <span>{choice.selected.length}/{choice.count}</span></button>)}<button className="feature-choice-collapse" aria-label={`折叠${f.name}`} onClick={()=>toggle(f.id)}>折叠</button></div>}{inline && conditionVisual(f.entry) === 'exhaustion' && <NumberInput className="exhaustion-level" aria-label="力竭层数" type="number" min="1" max="6" value={c.selections.find(s => s.id === f.id)?.level || 1} onChange={event => edit(draft => { const row = draft.selections.find(s => s.id === f.id); if (row) row.level = Math.max(1, Math.min(6, Math.trunc(Number(event.target.value) || 1))); })}/>} {expanded.has(f.id) && <div className="feature-prose rules-prose"><ContentBoundary key={f.id}><Entries value={f.body} onLink={onLink}/>{f.restricted && <p className="inline-warning">来源未启用</p>}</ContentBoundary></div>}
     </article>)}</div></section>)}
-    </div>{kinds.includes('feature')&&label==='特性'&&<ClassChoiceRecords c={c} catalog={catalog} mode="optional"/>}{children}{!inline && !screen && <button className="feature-browse" onClick={browse}>＋ 查阅{label}</button>}</ChoiceWorkspaceContext.Provider>;
+    </div>{kinds.includes('feature')&&label==='特性'&&<ClassChoiceRecords c={c} catalog={catalog} mode="optional"/>}{children}{!inline && !screen && <button className="feature-browse" onClick={browse}>＋ 查阅{label}</button>}</ChoiceProvider>;
   if (inline) return <DropZone className="status-strip" kinds={kinds} onReceive={receive} wholePaper>{contents}</DropZone>;
   return <SheetCell label={label} headingInline={headingInline} trailing={screen?<button className="feature-browse-heading" aria-label={`查阅${label}`} title={`查阅${label}`} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();browse();}}>＋</button>:undefined} className={`${className} traits-box feature-panel`} dropKinds={kinds} onReceive={receive} wholePaper={kinds.length === 1 && kinds[0] === 'condition'} onHeadingClick={() => saveLayout(ordered.map(f => f.id), allOpen ? [] : ordered.map(f => f.id))} headingExpanded={allOpen} headingActionLabel={`${allOpen ? '折叠' : '展开'}全部${label}`}>{contents}</SheetCell>;
 }

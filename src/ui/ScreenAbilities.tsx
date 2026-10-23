@@ -11,6 +11,7 @@ export function ScreenAbilities({items}:{items:Item[]}){
     const region=root.current!;let pending=0;
     const place=()=>{
       pending=0;
+      if(!region.isConnected)return;
       const columns=Number(getComputedStyle(region).getPropertyValue('--ability-columns'))||3;
       const groups=columns===2?two:three,positions:Record<string,{top:number;column:number}>={};
       const heights=groups.map((group,column)=>{let top=0;for(const id of group){const node=region.querySelector<HTMLElement>(`[data-screen-ability="${id}"]`);if(!node)continue;positions[id]={top,column};top+=node.offsetHeight+4;}return Math.max(0,top-4);});

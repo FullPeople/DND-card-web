@@ -1,3 +1,4 @@
+import {useSheetContext} from './scopedSheetContext';
 import {EntryDraggable} from './DragEntry';
 import { Reference, ReferenceContext } from './Reference';
 import { inlineLabel } from '../core/inlineTags';
@@ -39,7 +40,7 @@ export function Inline({ text, onLink }: { text: string; onLink?: LinkHandler })
 }
 const ReferencePath=createContext<string[]>([]);
 function ExpandedReference({reference,onLink,depth,compact}:{reference:string;onLink?:LinkHandler;depth:number;compact?:boolean}){
- const context=useContext(ReferenceContext),path=useContext(ReferencePath),entry=context?.resolve?.(reference,'feature');
+ const context=useSheetContext('reference',ReferenceContext),path=useContext(ReferencePath),entry=context?.resolve?.(reference,'feature');
  if(!entry||path.includes(entry.id))return <p><Inline text={reference.split('|')[0]}/></p>;
  if(compact){
   const parts=Array.isArray(entry.entries)?entry.entries:[entry.entries].filter(v=>v!=null),first=typeof parts[0]==='string'?parts[0]:undefined;
