@@ -22,3 +22,11 @@ Canonical hashes mean SHA256 of JavaScript JSON.stringify(parsed JSON), not raw 
 ## Validation status
 
 Implementation and directed verification are in progress. No new passing checks, completed replay, release count or online percentage is claimed by this document. The previous stage's 18,789-record replay remains bound to its previous source; it is not evidence for these new source changes. Accurate final commits, directed results, real App desktop/narrow receipts and stage runtime report pairing will be appended before completion.
+
+## First remote checkpoint and exact-source failure retained
+
+Web PR105, source `d44bb0af01f7ec279c550f282b95cb1dbc1dfa08`, is stacked on PR104; Data PR59 producer `1525c6c9416f4a801c2e315511314741b2da2204` is stacked on PR58. The identical local tree passed 61 directed tests with 3 existing external-fixture skips, plus TypeScript. Six real App tests were discovered only.
+
+The separate exact frozen-source workflow proof then found an additional lifecycle gap: reopening without a catalog and downgrading correctly suspended the level-6 ASI, but restoring the class level without a catalog did not restore the source feature needed to activate the saved allocation. This assertion is retained and blocks completion. The stage-wide replay has not been started while this source fix is pending; old evidence is not reused as if it verified this case.
+
+The offline source-feature recovery is now narrowly implemented and directionally verified: 70 tests passed, 3 existing external-fixture skips; TypeScript passed. A concurrent unchanged-5-second source-test timeout is retained separately; the serial group passed without changing the timeout or assertions. The allocated feat instance and its archived descendants are retained; the reconstructed source feature receives a new selection ID from its saved entry snapshot, not an old source-feature child-tree restoration. Exact end-to-end proof is rerun against the next checkpoint.

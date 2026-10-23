@@ -1,3 +1,4 @@
+import {retainedAsiSourceFeature} from './automation/asi';
 import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEquipment';
 import {entryNameIndex} from './entryNameIndex';
 import {specialSpellResource} from './spellResourceKeys';
@@ -124,6 +125,7 @@ export function syncFeatures(c: Character, catalog: Entry[], review?:{owners:Set
       if(!grant.entry&&grant.key.startsWith('ref:')){
         const retained=retainedClassFeatureGrant(c,owner,grant.key.slice(4));
         if(retained)grant.entry=retained.entry;
+        else grant.entry=retainedAsiSourceFeature(c,owner,grant.key.slice(4));
       }
       if (!grant.entry || c.dismissedFeatures?.includes(`${owner.id}|${grant.key}`)) continue;
       const attached=c.selections.find(s => s.parentId === owner.id && s.grantKey === grant.key);

@@ -99,3 +99,18 @@ export function validateAsiAllocations(value:unknown):void{
  if(value.version!==1)return;
  if(!Array.isArray(value.bindings)||value.bindings.length>100||value.bindings.some(row=>!object(row)||['selectionId','choiceId','entryId'].some(key=>typeof row[key]!=='string'||!(row[key] as string).length||(row[key] as string).length>2000)||!validAllocation(row.allocation)))throw Error('属性提升分配记录无效。');
 }
+
+/** A typed ASI's feat is class-parented, so its source feature is not the
+ * archived feat's parent. Recover that already saved declaration offline only
+ * for the exact allocated selection instance, never from a display label. */
+export function retainedAsiSourceFeature(c:Character,owner:Selection,ref:string):Entry|undefined{
+ if(c.asiAllocations?.version!==1||owner.entry.kind!=='class'||owner.entry.source!=='XPHB'||owner.entry.edition!=='2024'||owner.entry.raw._copy||owner.entry.raw._unresolvedParent||!selectionEffectsAllowed(c,owner.entry)||!Number.isSafeInteger(owner.level)||owner.level<4||owner.level>20||c.dismissedFeatures?.includes(`${owner.id}|ref:${ref}`))return;
+ if(!Array.isArray(owner.entry.raw.classFeatures)||!owner.entry.raw.classFeatures.some((raw:unknown)=>(typeof raw==='string'?raw:object(raw)?raw.classFeature:undefined)===ref))return;
+ const snapshots=Object.values(c.classChoiceSnapshots||{}).filter(entry=>entry.kind==='feature'&&entry.english==='Ability Score Improvement'&&entry.source==='XPHB'&&entry.edition==='2024'&&entry.raw._category==='classFeature'&&!entry.raw._copy&&!entry.raw._unresolvedParent&&!entry.effects?.length&&selectionEffectsAllowed(c,entry)&&matchesReference(entry,ref)&&Number.isSafeInteger(entry.raw.level)&&entry.raw.level>=4&&entry.raw.level<=owner.level&&evidence.modernFeatChoices.some(record=>record.owner===`${owner.entry.english}|XPHB`&&record.level===entry.raw.level&&matchesReference(entry,record.feature)));
+ if(snapshots.length!==1)return;const feature=snapshots[0],choiceId=`${owner.id}:class-typed-feat:${feature.id}`,bindings=c.asiAllocations.bindings.filter(binding=>binding.choiceId===choiceId);if(bindings.length!==1)return;
+ const binding=bindings[0],rows=[...c.selections,...Object.values(c.classChoiceArchive||{}).filter(archive=>archive.choiceId===choiceId).flatMap(archive=>archive.selections.slice(0,1))].filter(row=>row.id===binding.selectionId);
+ if(rows.length!==1)return;const row=rows[0];
+ if(!asiRule(row.entry)||!selectionEffectsAllowed(c,row.entry)||row.parentId!==owner.id||row.requirementId!==choiceId||row.grantKey!==`choice:${choiceId}:${row.entry.id}`||row.entry.id!==binding.entryId||c.answers[choiceId]?.length!==1||c.answers[choiceId][0]!==row.entry.id||!validAllocation(binding.allocation))return;
+ if(!feature.entries.some(node=>typeof node==='string'&&[...node.matchAll(/\{@feat ([^}]+)\}/g)].some(match=>match[1].split('|').length===2&&match[1].split('|')[1]==='XPHB'&&matchesReference(row.entry,match[1]))))return;
+ return feature;
+}

@@ -76,3 +76,11 @@ it('does not let a later edit silently deactivate another valid grant at the cap
 it('suspends stale allocations even before reconciliation and keeps them through disabled downgrade/reopen',()=>{
  const {c,choices,entries}=setup();setAsiAllocation(c,choices[1].id,{dex:2});c.selections[0].level=3;expect(evaluate(c).abilities.dex).toBe(10);c.automation!.enabled=false;syncFeatures(c,entries);const restored=validateCharacter(JSON.parse(JSON.stringify(c)));restored.selections[0].level=6;restored.automation!.enabled=true;syncFeatures(restored,entries);expect(evaluate(restored).abilities.dex).toBe(12);
 });
+it('restores an allocated source feature from saved evidence without a catalog',()=>{
+ const {c,choices}=setup();setAsiAllocation(c,choices[1].id,{dex:2});const id=c.asiAllocations!.bindings[0].selectionId;c.selections[0].level=4;syncFeatures(c,[]);c.selections[0].level=6;syncFeatures(c,[]);expect(evaluate(c).abilities.dex).toBe(12);expect(c.selections.find(row=>row.id===id)).toBeDefined();expect(syncFeatures(c,[])).toBe(false);
+});
+it.each(['snapshot','english','declared','dismissed','answer','instance','binding-version','snapshot-copy','typed-reference','source'] as const)('does not recreate offline ASI source with invalid %s evidence',mode=>{
+ const {c,choices}=setup();setAsiAllocation(c,choices[1].id,{dex:2});c.selections[0].level=4;syncFeatures(c,[]);const feature=Object.values(c.classChoiceSnapshots!).find(entry=>entry.kind==='feature'&&entry.raw.level===6)!;
+ if(mode==='snapshot')delete c.classChoiceSnapshots![feature.id];if(mode==='english')feature.english='Unknown';if(mode==='declared')c.selections[0].entry.raw.classFeatures=['属性值提升|战士|XPHB|4'];if(mode==='dismissed')c.dismissedFeatures=[`${c.selections[0].id}|ref:属性值提升|战士|XPHB|6`];if(mode==='answer')c.answers[choices[1].id]=[];if(mode==='instance')c.asiAllocations!.bindings[0].selectionId='forged';if(mode==='binding-version')(c.asiAllocations as any).version=2;if(mode==='snapshot-copy')feature.raw._copy={};if(mode==='typed-reference')feature.entries=['{@feat Unknown|XPHB}'];if(mode==='source')c.profile.enabledSources=[];
+ c.selections[0].level=6;syncFeatures(c,[]);expect(evaluate(c).abilities.dex).toBe(10);expect(c.selections.some(row=>row.entry.id===feature.id)).toBe(false);
+});
