@@ -1,4 +1,5 @@
 import {evaluate} from '../engine';
+import {learnedInvocationRule} from './invocations';
 import {sourceOwnerIdentity} from './sourceSpellState';
 import {ABILITIES,selectionAllowed,type Ability,type Character,type Entry,type Issue,type Selection,type SpecialSpell} from '../model';
 import {matchesReference} from '../entryReferences';
@@ -80,7 +81,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       grants.push({id,owner,key,entry,eligible,config});
      }
     }
-    if(Array.isArray(value)){addList(value,'_',kind==='innate'?'check':'slot');continue;}
+    if(Array.isArray(value)){const reviewed=kind==='innate'&&gate==='_'&&index===0&&learnedInvocationRule(c,owner)?.mechanism==='spell';if(reviewed)issue('invocation-boundary',learnedInvocationRule(c,owner)!.boundary);addList(value,'_',kind==='innate'?(reviewed?'free':'check'):'slot');continue;}
     if(!object(value)){issue(`${kind}/${gate}`,'赠送法术配置未支持。');continue;}
     for(const [schedule,spells] of Object.entries(value)){
      if(schedule==='_'||schedule==='will'||schedule==='ritual'){addList(spells,schedule,schedule==='will'?'free':schedule==='ritual'?'ritual':kind==='innate'?'check':'slot');continue;}

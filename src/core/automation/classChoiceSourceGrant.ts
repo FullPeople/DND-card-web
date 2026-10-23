@@ -1,5 +1,6 @@
 import {selectionEffectsAllowed,type Character,type Selection} from '../model';
 import {matchesReference} from '../entryReferences';
+import {invocationRecord} from './invocations';
 
 /** Restore an already saved source grant, not a new rule inferred from a name.
  * Both the parked parent and the independently retained source snapshot must
@@ -13,7 +14,7 @@ export function retainedClassFeatureGrant(c:Character,owner:Selection,ref:string
  if(!declared)return;
  return Object.values(c.classChoiceArchive||{}).map(archive=>({archive,parent:archive.parent})).find(({archive,parent})=>{
   if(!parent||parent.entry.kind!=='feature'||parent.entry.raw._category!=='classFeature'||parent.parentId!==owner.id||parent.grantKey!==`ref:${ref}`||
-   archive.selections[0]?.parentId!==parent.id||![`${owner.id}:class-feat:`,`${owner.id}:class-typed-feat:`].some(prefix=>archive.choiceId.startsWith(prefix))||c.selections.some(row=>row.id===parent.id)||
+   archive.selections[0]?.parentId!==parent.id||!([`${owner.id}:class-feat:`,`${owner.id}:class-typed-feat:`].some(prefix=>archive.choiceId.startsWith(prefix))||archive.choiceId.startsWith(`${owner.id}:class-optional:`)&&invocationRecord(archive.selections[0].entry))||c.selections.some(row=>row.id===parent.id)||
    !selectionEffectsAllowed(c,parent.entry)||!matchesReference(parent.entry,ref))return false;
   const raw=parent.entry.raw,snapshot=c.classChoiceSnapshots?.[parent.entry.id];
   const key=(value:unknown)=>String(value??'').trim().toLowerCase(),ownerNames=[owner.entry.name,owner.entry.english,owner.entry.raw.name,owner.entry.raw.ENG_name].map(key).filter(Boolean);

@@ -1,3 +1,4 @@
+import {evaluateInfusions} from './automation/infusions';
 import {planFeatureResources} from './automation/featureResources';
 import {planRacialAbilities} from './racialAbilities';
 import {sheetChoices} from './automation/choices';
@@ -81,10 +82,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  ac += acBonus+(featureArmor?.bonus||0);
+  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;
+  ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[])];
+  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace];
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
   trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];

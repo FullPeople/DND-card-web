@@ -1,3 +1,5 @@
+import {invocationRecord} from './automation/invocations';
+import {validateInfusions} from './automation/infusions';
 import {validWidget,validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
 import {CARD_COMPONENTS,validCardPalette} from './palette';
 import {legacyTraining} from './legacyTraining';
@@ -98,7 +100,7 @@ export function validateCharacter(value: unknown): Character {
     assert(plain(c.classChoiceArchive)&&Object.keys(c.classChoiceArchive).length<=3000,'职业选择保留记录无效。');
     for(const [id,archive] of Object.entries(c.classChoiceArchive) as [string,any][]){
       assert(plain(archive)&&typeof archive.choiceId==='string'&&archive.choiceId.length<=2000&&Array.isArray(archive.selections)&&archive.selections.length>0&&archive.selections.length<=3000,'职业选择保留记录无效。');
-      const root=archive.selections[0];assert(plain(root)&&root.id===id&&root.entry?.kind==='feat'&&root.requirementId===archive.choiceId&&typeof root.grantKey==='string'&&root.grantKey.startsWith('choice:'),'职业选择保留身份无效。');
+      const root=archive.selections[0];assert(plain(root)&&root.id===id&&(root.entry?.kind==='feat'||plain(root.entry)&&plain(root.entry.raw)&&invocationRecord(root.entry as Entry)&&archive.choiceId.includes(':class-optional:'))&&root.requirementId===archive.choiceId&&typeof root.grantKey==='string'&&root.grantKey.startsWith('choice:'),'职业选择保留身份无效。');
       const linked=new Set([id]);for(let pass=0;pass<archive.selections.length;pass++){let added=false;for(const row of archive.selections)if(plain(row)&&linked.has(row.parentId)&&!linked.has(row.id)){linked.add(row.id);added=true;}if(!added)break;}
       assert(archive.selections.every((row:any)=>plain(row)&&linked.has(row.id)),'职业选择保留子项关联无效。');
       archivedSelections.push(...archive.selections);
@@ -126,6 +128,7 @@ export function validateCharacter(value: unknown): Character {
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
+  validateInfusions(c.infusions);
   if(c.classChoiceSnapshots!==undefined){
     assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
     for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){

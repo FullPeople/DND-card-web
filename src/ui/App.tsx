@@ -63,6 +63,7 @@ import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
 const AutomationPanel=lazy(()=>import('./AutomationPanel').then(module=>({default:module.AutomationPanel})));
 
 import {automationEnabled,automationNeedsInitialization,initializeAutomation,newAutomationState} from '../core/automation/state';
+import {reconcileInfusionHolding} from '../core/automation/infusions';
 import {reconcileEquipping} from '../core/automation/equipment';
 const Announcement=announcementPanel.Component;
 import {useUiLanguage} from './UiLanguage';
@@ -792,7 +793,7 @@ export default function App() {
     const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
     let draft:Character;
     if(displayDraft||runtimeDraft){draft=(displayDraft||runtimeDraft)!;if(draft===character)return;}
-    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime!.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
+    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); reconcileInfusionHolding(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime!.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
     if(!displayDraft&&!runtimeDraft&&inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
