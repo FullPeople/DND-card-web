@@ -1,5 +1,14 @@
 import {cloudFeaturesEnabled} from '../cloud/availability';
-export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-20':'2026-10-19';
+export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-23':'2026-10-19';
+const release306=():ReleaseSection[]=>[
+ {title:'切卡与保存',items:['连续切换已打开的角色卡时保留卡面，减少重复准备和闪烁；后台资料读取减少对卡面操作的干扰。','保留编辑保存、刷新恢复、云端更新、冲突检查和本机草稿保护。切换后关闭旧角色的操作菜单，避免误操作另一张卡。']},
+ {title:'阅读与填写',items:['说明浮层到达滚动边缘或没有可滚内容时，滚轮继续作用于下方的阅读区域。','待选特性提示缩小并尽量放在栏目标题右侧，保留填写入口和窄屏操作。']},
+ {title:'角色卡独立配色',items:['角色卡右上角新增独立调色盘，提供六套示例。网页配色和每张角色卡的配色分别保存。','保留配色撤回、重做及导入导出，修复部分旧配色文件导入后无法重新打开角色的问题。']},
+ {title:'资料读取',items:['两份主镜像失效的中文资料可从已核对的备用来源恢复，保留旧缓存、来源身份和失败重试。']},
+];
+const release305=():ReleaseSection[]=>[
+ {title:'角色卡与导出',items:['修正钱币折算的小数显示，恢复 Box、背包和物品格内部透明度。','导出后恢复原页、展开状态和阅读位置；恢复背包外框，修正法术格高度、边框和勾选位置，法术导出仅保留名称。','非 A4 选择窗口支持内部滚动；窄屏拖放后保留主动选择的页面。','补充 2014 职业技能重复熟练提醒，保留旧答案及主动更换后的保存。','感谢 Renown 支持 66 元。购点和随机生成属性功能已移除。']},
+];
 const release303=():ReleaseSection[]=>[
  {title:'QQ 登录与私人卡库',items:['正式单机版可使用 QQ 登录，读取和保存自己的云端角色卡，各账号的私人卡库保持隔离。','保留原本机角色、灰色切角样式和浏览器设置，不使用测试版数据覆盖正式库。']},
  {title:'切卡与保存',items:['减少切卡和修改数值时的重复计算，后台合并保存；账号变化、冲突或写入未确认时保留本机草稿。','统一初始化本机存储，缺失时可从完整 JSON 备份恢复，保留角色身份与填写内容。']},
@@ -482,8 +491,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'&&cloudFeaturesEnabled?release303():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release303()}]:[]),
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'&&cloudFeaturesEnabled?release306():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release306()},{title:'2026-10-22',sections:release305()},{title:'2026-10-20',sections:release303()}]:[]),
  {title:'2026-10-19',sections:release302(mode)},
  {title:'2026-10-18',sections:release301(mode)},
  ...(mode==='suite'?[{title:'2026-10-16-三',sections:release300()}]:[]),
