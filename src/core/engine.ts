@@ -82,7 +82,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);
+  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;
   ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);

@@ -6,6 +6,7 @@ import {useSheetChoices} from './SheetChoicesContext';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import {Reference} from './Reference';
 import {InfusionControl} from './InfusionControl';
+import {invocationRule} from '../core/automation/invocations';
 
 /** Display saved learning intent; activation requires a separate explicit edit. */
 export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:Entry[];mode:'feat'|'optional';edit?:(action:(draft:Character)=>void)=>void}){
@@ -31,12 +32,13 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
    {show?<button type="button" className={`sheet-choice-chip ${sheetChoicePending(c,choice)?'is-pending':''}`} data-choice-id={choice.id} disabled={workspace.canEdit===false} onClick={()=>workspace.open(choice.id)}>{owner.entry.name} · {owner.entry.source} · {choice.label} {choice.count?`${choice.selected.length}/${choice.count}`:'待核对'}{sheetChoiceIgnored(c,choice.id,choice)&&'（已忽略）'}</button>:<strong>{owner.entry.name} · {choice.label}</strong>}
    {choice.count===0&&choice.hint&&<small>{choice.hint}</small>}
    {choice.support&&<small>{choice.support.reason} 当前发布验证：待核实。</small>}
-   {mode==='optional'&&<small>已学记录；受支持的灌注需另选目标并确认，其他效果和物品操作仍手动处理</small>}
+   {mode==='optional'&&<small>已学记录；受支持的灌注需另选目标并确认，已适配祈唤按下方说明授予，其他效果和物品操作仍手动处理</small>}
    {!!choice.restricted&&<small>来源未启用，原记录保留</small>}
    <div>{choice.slots?.map((value,index)=>{
     if(!value)return null;const option=choice.options.find(row=>row.value===value),entry=option?.entry||c.classChoiceSnapshots?.[value];
-    const unavailable=choice.restricted||index>=choice.count||!option||!!option.unavailable;
-    return <div key={`${index}:${value}`} className={unavailable?'is-restricted':''} style={{minWidth:0,maxWidth:'100%'}}>{entry?<Reference entry={entry} reference={`entry:${entry.id}`}>{entry.name}</Reference>:value}{unavailable&&<small>（当前不可用，记录保留）</small>}{mode==='optional'&&entry&&<InfusionControl key={`${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} ownerId={owner.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/>}</div>;
+    const parked=Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&archive.selections[0].entry.id===value);
+    const unavailable=choice.restricted||index>=choice.count||!option||!!option.unavailable||parked;
+    return <div key={`${index}:${value}`} className={unavailable?'is-restricted':''} style={{minWidth:0,maxWidth:'100%'}}>{entry?<Reference entry={entry} reference={`entry:${entry.id}`}>{entry.name}</Reference>:value}{unavailable&&<small>（当前不可用，记录保留）</small>}{parked&&choice.hint&&<small>{choice.hint}</small>}{mode==='optional'&&entry&&invocationRule(entry)&&<small>{invocationRule(entry)!.boundary}</small>}{mode==='optional'&&entry&&<InfusionControl key={`${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} ownerId={owner.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/>}</div>;
    })}</div>
   </section>;
  })}{preserved.length>0&&<section aria-label="已保留灌注记录">

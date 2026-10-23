@@ -6,15 +6,18 @@ import {activeSelections} from './active';
 import {armorRule,armorType} from './equipment';
 import evidence from './infusionEvidence.json' with {type:'json'};
 
-export interface InfusionBinding {choiceId:string;entryId:string;targetId:string}
+export interface InfusionBinding {choiceId:string;entryId:string;targetId:string;held?:boolean}
 export interface InfusionState {version:1;bindings:InfusionBinding[]}
 type InfusionRule=typeof evidence.rules[number];
+// Registry references use canonical English + source; a renamed display label
+// must never turn an unrelated item, option or class into a reviewed identity.
+const matchesRuleIdentity=(entry:Entry,reference:string)=>matchesReference({...entry,name:entry.english},reference);
 export interface InfusionWeaponEffect {bonus:number;trace:string[]}
 /** Reviewed source-qualified identities, not display-name dispatch. Unknown
  * item/prerequisite families stay manual. Learning alone grants no effect. */
 export function infusionRule(entry:Entry){
  if(entry.kind!=='feature'||entry.raw._category!=='optionalfeature'||!Array.isArray(entry.raw.featureType)||entry.raw.featureType.length!==1||entry.raw.featureType[0]!=='AI'||entry.raw._copy||entry.effects?.length)return;
- return evidence.rules.find(rule=>matchesReference(entry,rule.reference));
+ return evidence.rules.find(rule=>matchesRuleIdentity(entry,rule.reference));
 }
 const code=(value:unknown)=>String(value??'').split('|')[0].toUpperCase();
 const supportedDamage=(value:unknown)=>typeof value==='string'&&/^(?:\d+d\d+|\d+)(?:[+-]\d+)?$/i.test(value.replace(/\s/g,''));
@@ -27,6 +30,7 @@ function nonmagical(row:Selection){
 }
 function targetAllowed(row:Selection,rule:InfusionRule){
  if(!nonmagical(row)||!rule.itemTypes.includes(code(row.entry.raw.type)))return false;
+ if(rule.mechanism==='spell-attack-bonus')return row.entry.raw.scfType===rule.focusType&&!!rule.targetReferences?.some(ref=>matchesRuleIdentity(row.entry,ref));
  if(rule.mechanism==='armor-bonus')return !!armorType(row.entry)&&!!armorRule(row).rule;
  if(rule.mechanism==='weapon-bonus'){
   const raw=row.entry.raw;
@@ -37,7 +41,7 @@ function targetAllowed(row:Selection,rule:InfusionRule){
  }
  return false;
 }
-function targetDescription(rule:InfusionRule){return rule.mechanism==='weapon-bonus'?`${rule.requiredProperties?.includes('T')?'具有投掷属性的':''}简易或军用武器（使用自动命中与伤害公式）`:'护甲或盾牌';}
+function targetDescription(rule:InfusionRule){return rule.mechanism==='spell-attack-bonus'?'已核对的 PHB 权杖、法杖或魔杖':rule.mechanism==='weapon-bonus'?`${rule.requiredProperties?.includes('T')?'具有投掷属性的':''}简易或军用武器（使用自动命中与伤害公式）`:'护甲或盾牌';}
 export function infusionTargets(c:Character,entry?:Entry):Selection[]{
  const rules=entry?[infusionRule(entry)].filter((rule):rule is InfusionRule=>!!rule):evidence.rules;
  return activeSelections(c).filter(row=>rules.some(rule=>targetAllowed(row,rule)));
@@ -46,10 +50,10 @@ function learned(c:Character,binding:InfusionBinding){
  const entry=c.classChoiceSnapshots?.[binding.entryId],rule=entry&&infusionRule(entry);
  if(!entry||!rule||!selectionEffectsAllowed(c,entry))return;
  for(const owner of activeSelections(c)){
-  if(owner.entry.kind!=='class'||!matchesReference(owner.entry,rule.owner)||owner.entry.edition==='2024'||!Number.isSafeInteger(owner.level)||owner.level<2||owner.level>20)continue;
+  if(owner.entry.kind!=='class'||!matchesRuleIdentity(owner.entry,rule.owner)||owner.entry.edition==='2024'||!Number.isSafeInteger(owner.level)||owner.level<2||owner.level>20)continue;
   const feature=evidence.classFeatureReference;
   if(!Array.isArray(owner.entry.raw.classFeatures)||!owner.entry.raw.classFeatures.some((raw:unknown)=>(typeof raw==='string'?raw:(raw as any)?.classFeature)===feature)||c.dismissedFeatures?.includes(`${owner.id}|ref:${feature}`))continue;
-  if(!activeSelections(c).some(row=>row.parentId===owner.id&&row.grantKey===`ref:${feature}`&&row.entry.raw._category==='classFeature'&&matchesReference(row.entry,feature)))continue;
+  if(!activeSelections(c).some(row=>row.parentId===owner.id&&row.grantKey===`ref:${feature}`&&row.entry.raw._category==='classFeature'&&row.entry.english===evidence.classFeatureEnglish&&matchesReference(row.entry,feature)))continue;
   const groups=owner.entry.raw.optionalfeatureProgression;
   if(!Array.isArray(groups))continue;
   for(const [index,group] of groups.entries()){
@@ -76,8 +80,27 @@ export function setInfusionTarget(c:Character,choiceId:string,entryId:string,tar
  if(other.length>=capacity)throw Error('已达注法物品上限，请先明确撤销一项；不会自动覆盖旧物品。');
  c.infusions={version:1,bindings:[...other,next]};
 }
-export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;trace:string[];issues:Issue[];weapons:Map<string,InfusionWeaponEffect>}{
- const out={bonus:0,trace:[] as string[],issues:[] as Issue[],weapons:new Map<string,InfusionWeaponEffect>()};
+/** Holding is separate explicit intent: neither equipping nor attuning grants it. */
+export function setInfusionHeld(c:Character,choiceId:string,entryId:string,held:boolean):void{
+ if(c.infusions?.version!==1)throw Error('此注法记录版本尚未支持或尚未指定目标。');
+ const binding=c.infusions.bindings.find(row=>row.choiceId===choiceId&&row.entryId===entryId);
+ if(!binding)throw Error('请先指定灌注目标。');
+ if(!held){delete binding.held;return;}
+ const known=learned(c,binding),target=activeSelections(c).find(row=>row.id===binding.targetId);
+ if(!automationEnabled(c)||known?.rule.mechanism!=='spell-attack-bonus'||!target||!targetAllowed(target,known.rule)||!target.equipped||target.attuned!==true)throw Error('请先启用来源，并装备及同调此灌注法器，再确认当前持握。');
+ binding.held=true;
+}
+/** An explicit equipment/attunement/removal edit ends that holding confirmation.
+ * Disabled sources only suspend effects and do not erase the player's intent. */
+export function reconcileInfusionHolding(before:Character,after:Character):void{
+ if(after.infusions?.version!==1)return;
+ for(const binding of after.infusions.bindings){
+  const previous=before.selections.find(row=>row.id===binding.targetId),target=after.selections.find(row=>row.id===binding.targetId);
+  if(binding.held&&previous&&(!target||previous.equipped&&!target.equipped||previous.attuned===true&&target.attuned!==true))delete binding.held;
+ }
+}
+export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;trace:string[];issues:Issue[];weapons:Map<string,InfusionWeaponEffect>;spellAttack:InfusionWeaponEffect}{
+ const out={bonus:0,trace:[] as string[],issues:[] as Issue[],weapons:new Map<string,InfusionWeaponEffect>(),spellAttack:{bonus:0,trace:[] as string[]}};
  if(!automationEnabled(c)||!c.infusions)return out;
  if(c.infusions.version!==1){out.issues.push({id:'infusion-version',severity:'warning',message:'注法记录版本尚未支持，原记录保留且未生效。'});return out;}
  const bindings=c.infusions.bindings;
@@ -92,6 +115,13 @@ export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;
   const rule=known!.rule;
   const bonus=rule.upgradeLevel!==undefined&&rule.upgradedBonus!==undefined&&known!.owner.level>=rule.upgradeLevel?rule.upgradedBonus:rule.bonus;
   const origin=`${known!.entry.name} · ${known!.entry.source} → ${target!.entry.name}：注法 +${bonus}`;
+  if(rule.mechanism==='spell-attack-bonus'){
+   out.issues.push({id:`infusion-effect-boundary:${binding.targetId}`,selectionId:binding.targetId,severity:'warning',message:`${target!.entry.name}：${rule.manualBoundary}`});
+   const missing=!target!.equipped?'未装备':target!.attuned!==true?'未同调':binding.held!==true?'未确认当前持握':undefined;
+   if(missing)out.spellAttack.trace.push(`${known!.entry.name}：${missing}，法术攻击加值未生效`);
+   else {out.spellAttack.bonus+=bonus;out.spellAttack.trace.push(origin,rule.manualBoundary!);}
+   continue;
+  }
   if(known!.rule.mechanism==='weapon-bonus'){
    // An infusion changes the magical nature of the item, but current attack
    // consumers do not adjudicate magical/nonmagical resistance or immunity.
@@ -116,5 +146,5 @@ export function validateInfusions(value:unknown):void{
  if(value===undefined)return;
  if(!value||typeof value!=='object'||Array.isArray(value)||!Number.isSafeInteger((value as any).version)||(value as any).version<1)throw Error('注法记录版本无效。');
  const state=value as InfusionState;if(state.version!==1)return;
- if(!Array.isArray(state.bindings)||state.bindings.length>100||state.bindings.some(row=>!row||typeof row!=='object'||['choiceId','entryId','targetId'].some(key=>typeof (row as any)[key]!=='string'||!(row as any)[key]||(row as any)[key].length>2000)))throw Error('注法目标记录无效。');
+ if(!Array.isArray(state.bindings)||state.bindings.length>100||state.bindings.some(row=>!row||typeof row!=='object'||row.held!==undefined&&typeof row.held!=='boolean'||['choiceId','entryId','targetId'].some(key=>typeof (row as any)[key]!=='string'||!(row as any)[key]||(row as any)[key].length>2000)))throw Error('注法目标记录无效。');
 }

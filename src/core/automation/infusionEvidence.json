@@ -22,8 +22,14 @@
       "reference": "Enhanced Weapon|TCE",
       "owner": "Artificer|TCE",
       "mechanism": "weapon-bonus",
-      "itemTypes": ["M", "R"],
-      "weaponCategories": ["simple", "martial"],
+      "itemTypes": [
+        "M",
+        "R"
+      ],
+      "weaponCategories": [
+        "simple",
+        "martial"
+      ],
       "bonus": 1,
       "upgradeLevel": 10,
       "upgradedBonus": 2,
@@ -33,12 +39,40 @@
       "reference": "Returning Weapon|TCE",
       "owner": "Artificer|TCE",
       "mechanism": "weapon-bonus",
-      "itemTypes": ["M", "R"],
-      "weaponCategories": ["simple", "martial"],
-      "requiredProperties": ["T"],
+      "itemTypes": [
+        "M",
+        "R"
+      ],
+      "weaponCategories": [
+        "simple",
+        "martial"
+      ],
+      "requiredProperties": [
+        "T"
+      ],
       "bonus": 1,
       "magicBoundary": "目标按注法视为魔法武器；抵抗、免疫及其他魔法武器交互仍需手动核对，攻击投影不自动裁定。",
       "manualBoundary": "使用此武器发动远程攻击后回到持用者手中的动作仍需手动处理；当前未记录持手／投出状态，灌注不会自动移动物品或结算回手。"
+    },
+    {
+      "reference": "Enhanced Arcane Focus|TCE",
+      "owner": "Artificer|TCE",
+      "mechanism": "spell-attack-bonus",
+      "itemTypes": [
+        "SCF"
+      ],
+      "targetReferences": [
+        "Rod|PHB",
+        "Staff|PHB",
+        "Wand|PHB"
+      ],
+      "focusType": "arcane",
+      "requiresAttunement": true,
+      "requiresHeld": true,
+      "bonus": 1,
+      "upgradeLevel": 10,
+      "upgradedBonus": 2,
+      "manualBoundary": "法术攻击忽略半身掩护仍需手动处理；当前不会自动计算目标掩护，也不增加法术 DC 或伤害。 外部背包／持手变化不自动清除旧的持握确认；请手动取消旧确认，并在装备及同调后重新确认当前持握。"
     }
   ],
   "knownProgression": [
@@ -86,15 +120,19 @@
     6
   ],
   "classFeatureReference": "物品注法|奇械师|TCE|2",
+  "classFeatureEnglish": "Infuse Item",
   "frozenRevision": "e2623b204ddbdf2bcfa8317acfc962de89c676e2",
   "inputs": {
     "optionalfeatures.json": "031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844",
-    "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7"
+    "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
+    "items-base.json": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff"
   },
   "entryHashes": {
     "Enhanced Defense|TCE": "c3ff5aa7aefeb54b8e2d0454d042aa6b89937d5a454af67eec7d9363084015b0",
     "Enhanced Weapon|TCE": "689d4e421ac5d106c43c8e90cd9b25b6a568e67c778a1a97e6d33ef34e7baddd",
     "Returning Weapon|TCE": "9b06dce9d856241dbc2fb57fe7b95a4945abee3cee21f969a102540fd83a4aa7",
-    "Infuse Item|Artificer|TCE|2": "5ea883f06ec7afaba3f78859d665806f32edba0d95c42d2dc35dc2675765b457"
-  }
+    "Infuse Item|Artificer|TCE|2": "5ea883f06ec7afaba3f78859d665806f32edba0d95c42d2dc35dc2675765b457",
+    "Enhanced Arcane Focus|TCE": "74a9b4756537cb2a3dc3eddd2da7311fcee4a0703e7550dde24d3705c4df851d"
+  },
+  "targetSource": "https://5e.kiwee.top/data/items-base.json"
 }

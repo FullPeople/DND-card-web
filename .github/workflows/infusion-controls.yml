@@ -1,12 +1,16 @@
-name: Verify explicit infusion controls
+name: Verify reviewed infusion and invocation controls
 on:
   pull_request:
     paths:
       - 'src/**'
       - 'tests/infusion-*.test.ts'
+      - 'tests/arcane-focus*.test.ts'
+      - 'tests/invocation*.test.ts'
       - 'tests/enhanced-weapon*.test.ts'
       - 'tests/returning-weapon*.test.ts'
       - 'tests/e2e/infusion*.ts'
+      - 'tests/e2e/arcaneFocus*.ts'
+      - 'tests/e2e/invocation*.ts'
       - 'tests/e2e/enhancedWeapon*.ts'
       - 'tests/e2e/returningWeapon*.ts'
       - 'tests/e2e/fixtures.ts'
@@ -24,10 +28,11 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       INFUSION_SOURCE_DIR: .local-evidence/infusion-upstream
       INFUSION_FROZEN_DIR: .local-evidence/infusion-upstream
+      INVOCATION_FROZEN_DIR: .local-evidence/infusion-upstream
     steps:
       - uses: actions/checkout@v6
         with:
@@ -37,44 +42,46 @@ jobs:
           node-version: '24.9.0'
           cache: npm
       - run: npm ci
-      - name: Fetch three frozen inputs without publishing source text
+      - name: Fetch five frozen inputs without publishing source text
         shell: bash
         run: |
           set -euo pipefail
           revision=e2623b204ddbdf2bcfa8317acfc962de89c676e2
           mkdir -p "$INFUSION_SOURCE_DIR"
-          curl --disable --fail --silent --show-error --max-time 60 --max-filesize 2000000 --proto '=https' \
-            "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/optionalfeatures.json" \
-            --output "$INFUSION_SOURCE_DIR/optionalfeatures-$revision.json"
-          curl --disable --fail --silent --show-error --max-time 60 --max-filesize 2000000 --proto '=https' \
-            "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/class/class-artificer.json" \
-            --output "$INFUSION_SOURCE_DIR/class-artificer-$revision.json"
-          curl --disable --fail --silent --show-error --max-time 60 --max-filesize 2000000 --proto '=https' \
-            "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/items-base.json" \
-            --output "$INFUSION_FROZEN_DIR/items-base.json"
+          for path in optionalfeatures.json class/class-artificer.json items-base.json class/class-warlock.json spells/spells-phb.json; do
+            filename="$(basename "$path" .json)-$revision.json"
+            curl --disable --fail --silent --show-error --max-time 60 --max-filesize 2000000 --proto '=https' \
+              "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/$path" \
+              --output "$INFUSION_SOURCE_DIR/$filename"
+          done
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
-          const evidence=JSON.parse(readFileSync('src/core/automation/infusionEvidence.json','utf8'));
+          const infusion=JSON.parse(readFileSync('src/core/automation/infusionEvidence.json','utf8'));
+          const invocation=JSON.parse(readFileSync('src/core/automation/invocationEvidence.json','utf8'));
           const revision='e2623b204ddbdf2bcfa8317acfc962de89c676e2';
-          if(evidence.frozenRevision!==revision)throw Error('Unexpected frozen infusion revision');
-          const results=[];
-          for(const [name,key] of [['optionalfeatures','optionalfeatures.json'],['class-artificer','class/class-artificer.json']]){
-            const bytes=readFileSync(`${process.env.INFUSION_SOURCE_DIR}/${name}-${revision}.json`);
-            const sha256=createHash('sha256').update(JSON.stringify(JSON.parse(bytes.toString('utf8')))).digest('hex');
-            if(sha256!==evidence.inputs[key])throw Error(`Frozen input hash mismatch: ${name}`);
-            results.push({name:key,bytes:bytes.length,sha256});
+          if(infusion.frozenRevision!==revision||invocation.frozenRevision!==revision)throw Error('Unexpected frozen source revision');
+          const expected=new Map();
+          for(const [path,hash] of [...Object.entries(infusion.inputs),...Object.entries(invocation.inputs),['items-base.json','8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff']]){
+            if(expected.has(path)&&expected.get(path)!==hash)throw Error('Conflicting evidence hash: '+path);
+            expected.set(path,hash);
           }
-          const base=JSON.parse(readFileSync(`${process.env.INFUSION_FROZEN_DIR}/items-base.json`,'utf8'));
-          const baseSha=createHash('sha256').update(JSON.stringify(base)).digest('hex');
-          if(baseSha!=='8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff')throw Error('Frozen base-item hash mismatch');
-          writeFileSync(`${process.env.INFUSION_FROZEN_DIR}/index.json`,JSON.stringify({rows:[{url:'https://5e.kiwee.top/data/items-base.json',path:'items-base.json',sha256:baseSha}]}));
-          results.push({name:'items-base.json',bytes:readFileSync(`${process.env.INFUSION_FROZEN_DIR}/items-base.json`).length,sha256:baseSha});
+          const results=[],rows=[];
+          for(const [path,hash] of expected){
+            const filename=path.split('/').at(-1).replace('.json',`-${revision}.json`);
+            const bytes=readFileSync(`${process.env.INFUSION_SOURCE_DIR}/${filename}`);
+            const sha256=createHash('sha256').update(JSON.stringify(JSON.parse(bytes.toString('utf8')))).digest('hex');
+            if(sha256!==hash)throw Error('Frozen input hash mismatch: '+path);
+            results.push({name:path,bytes:bytes.length,sha256});
+            rows.push({url:`https://5e.kiwee.top/data/${path}`,path:filename,sha256});
+          }
+          if(rows.length!==5)throw Error('Expected exactly five frozen source inputs');
+          writeFileSync(`${process.env.INFUSION_FROZEN_DIR}/index.json`,JSON.stringify({rows}));
           writeFileSync('.local-evidence/infusion-source-verification.json',JSON.stringify({revision,verified:true,inputs:results},null,2)+'\n');
-          console.log('Verified three frozen inputs; source text is not an artifact.');
+          console.log('Verified five frozen inputs; source text is not an artifact.');
           NODE
       - name: Source replay, persistence, restrictions and UI guards
-        run: npx vitest run tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/automation209-weapons.test.ts
+        run: npx vitest run tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone
