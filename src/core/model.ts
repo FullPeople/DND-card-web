@@ -33,6 +33,7 @@ export interface RuntimeResource {current:number;max:number;name?:string;type?:s
 export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number}
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
+  asiAllocations?:import('./automation/asi').AsiAllocationState;
   infusions?:import('./automation/infusions').InfusionState;
   automation?:import('./automation/state').AutomationState;
   /** Legacy score-ownership marker retained for backup compatibility. */
@@ -60,7 +61,7 @@ export interface Character {
   /** Saved choice display snapshots; these never enter the effect evaluator. */
   classChoiceSnapshots?: Record<string,Entry>;
   /** Inactive class-grant trees retain identities, manual children and references. */
-  classChoiceArchive?: Record<string,{choiceId:string;parent?:Selection;selections:Selection[]}>;
+  classChoiceArchive?: Record<string,{choiceId:string;kind?:'legacy-asi';parent?:Selection;selections:Selection[]}>;
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];

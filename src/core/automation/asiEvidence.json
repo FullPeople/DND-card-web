@@ -1,0 +1,14 @@
+{
+  "reference": "Ability Score Improvement|XPHB",
+  "english": "Ability Score Improvement",
+  "source": "XPHB",
+  "page": 202,
+  "mechanism": "explicit-owned-class-asi-allocation",
+  "cap": 20,
+  "inputs": {
+    "feats.json": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+    "class/class-fighter.json": "a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509"
+  },
+  "entryHash": "71a06ef648976dd0ce61241629f568ab8869a766d4f7c81ff2fb68bb04332e2e",
+  "boundary": "Only the reviewed XPHB feat selected from a verified typed class grant. Explicit allocation is separate from manual scores; legacy/background/untyped/unknown ability grants remain manual."
+}
