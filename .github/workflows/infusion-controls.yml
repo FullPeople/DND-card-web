@@ -27,6 +27,7 @@ jobs:
     timeout-minutes: 20
     env:
       INFUSION_SOURCE_DIR: .local-evidence/infusion-upstream
+      INFUSION_FROZEN_DIR: .local-evidence/infusion-upstream
     steps:
       - uses: actions/checkout@v6
         with:
@@ -36,7 +37,7 @@ jobs:
           node-version: '24.9.0'
           cache: npm
       - run: npm ci
-      - name: Fetch two frozen inputs without publishing source text
+      - name: Fetch three frozen inputs without publishing source text
         shell: bash
         run: |
           set -euo pipefail
@@ -48,6 +49,9 @@ jobs:
           curl --disable --fail --silent --show-error --max-time 60 --max-filesize 2000000 --proto '=https' \
             "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/class/class-artificer.json" \
             --output "$INFUSION_SOURCE_DIR/class-artificer-$revision.json"
+          curl --disable --fail --silent --show-error --max-time 60 --max-filesize 2000000 --proto '=https' \
+            "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/items-base.json" \
+            --output "$INFUSION_FROZEN_DIR/items-base.json"
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
@@ -61,8 +65,13 @@ jobs:
             if(sha256!==evidence.inputs[key])throw Error(`Frozen input hash mismatch: ${name}`);
             results.push({name:key,bytes:bytes.length,sha256});
           }
+          const base=JSON.parse(readFileSync(`${process.env.INFUSION_FROZEN_DIR}/items-base.json`,'utf8'));
+          const baseSha=createHash('sha256').update(JSON.stringify(base)).digest('hex');
+          if(baseSha!=='8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff')throw Error('Frozen base-item hash mismatch');
+          writeFileSync(`${process.env.INFUSION_FROZEN_DIR}/index.json`,JSON.stringify({rows:[{url:'https://5e.kiwee.top/data/items-base.json',path:'items-base.json',sha256:baseSha}]}));
+          results.push({name:'items-base.json',bytes:readFileSync(`${process.env.INFUSION_FROZEN_DIR}/items-base.json`).length,sha256:baseSha});
           writeFileSync('.local-evidence/infusion-source-verification.json',JSON.stringify({revision,verified:true,inputs:results},null,2)+'\n');
-          console.log('Verified both frozen infusion inputs; source text is not an artifact.');
+          console.log('Verified three frozen inputs; source text is not an artifact.');
           NODE
       - name: Source replay, persistence, restrictions and UI guards
         run: npx vitest run tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/automation209-weapons.test.ts
