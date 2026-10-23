@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "definition": "Source-reviewed mechanics, not complete class implementation or publication evidence",
+  "source": "https://5e.kiwee.top/data/optionalfeatures.json",
+  "classSource": "https://5e.kiwee.top/data/class/class-artificer.json",
+  "rules": [
+    {
+      "reference": "Enhanced Defense|TCE",
+      "owner": "Artificer|TCE",
+      "mechanism": "armor-bonus",
+      "itemTypes": [
+        "LA",
+        "MA",
+        "HA",
+        "S"
+      ],
+      "bonus": 1,
+      "upgradeLevel": 10,
+      "upgradedBonus": 2
+    }
+  ],
+  "knownProgression": [
+    0,
+    4,
+    4,
+    4,
+    4,
+    6,
+    6,
+    6,
+    6,
+    8,
+    8,
+    8,
+    8,
+    10,
+    10,
+    10,
+    10,
+    12,
+    12,
+    12
+  ],
+  "activeProgression": [
+    0,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    4,
+    4,
+    4,
+    4,
+    5,
+    5,
+    5,
+    5,
+    6,
+    6,
+    6
+  ],
+  "classFeatureReference": "物品注法|奇械师|TCE|2",
+  "frozenRevision": "e2623b204ddbdf2bcfa8317acfc962de89c676e2",
+  "inputs": {
+    "optionalfeatures.json": "031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844",
+    "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7"
+  },
+  "entryHashes": {
+    "Enhanced Defense|TCE": "c3ff5aa7aefeb54b8e2d0454d042aa6b89937d5a454af67eec7d9363084015b0",
+    "Infuse Item|Artificer|TCE|2": "5ea883f06ec7afaba3f78859d665806f32edba0d95c42d2dc35dc2675765b457"
+  }
+}

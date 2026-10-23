@@ -1,3 +1,4 @@
+import {validateInfusions} from './automation/infusions';
 import {validWidget,validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
 import {CARD_COMPONENTS,validCardPalette} from './palette';
 import {legacyTraining} from './legacyTraining';
@@ -126,6 +127,7 @@ export function validateCharacter(value: unknown): Character {
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
+  validateInfusions(c.infusions);
   if(c.classChoiceSnapshots!==undefined){
     assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
     for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){
