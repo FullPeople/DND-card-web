@@ -9,6 +9,7 @@ import {ResourceRow} from './ResourceRow';
 import {ResourceModuleFace,resourceAmount} from './ResourceModuleFace';
 import './resourceWidgets.css';
 import './resourceDashboard.css';
+import {RetainedCardHideEffect} from './RetainedCardVisibility';
 export function attackWidgetKey(c:Character){let id='__attacks__';while(Object.hasOwn(c.runtime.resources,id))id='_'+id;return id;}
 type Value=Character['runtime']['resources'][string];
 const handles=['nw','n','ne','e','se','s','sw','w'] as const;
@@ -80,6 +81,7 @@ export function ResourceWidgets({c,rows,editing,enabled,gm,edit,manage,attacks,s
  }
  const active=modules.find(module=>module.id===open);
  return <div className="resource-quickbar-split" data-has-attacks={!!attacks} style={{'--attack-split':`${dashboardSplit(current.attacks.split)*100}%`} as CSSProperties}>
+  <RetainedCardHideEffect hide={()=>{if(open)setOpen('');cancel.current?.();}}/>
   {attacks&&<aside className="resource-fixed-attacks" aria-label="固定武器与攻击区" data-resource-id="__attacks__">{attacks}</aside>}
   {attacks&&<button className="quickbar-divider" role="separator" aria-label="调整武器与资源分割线" aria-orientation="vertical" aria-valuemin={20} aria-valuemax={55} aria-valuenow={Math.round(dashboardSplit(current.attacks.split)*100)} disabled={!enabled} onPointerDown={splitPointer} onKeyDown={splitKeyboard}/>}
   <section className="resource-workspace" aria-label="资源模块快捷栏" data-layout-editing={writable}>

@@ -196,3 +196,34 @@ test('changing cards cancels an old portrait confirmation while preserving the u
  await page.locator('.character-tabs').getByRole('tab',{name:'保留卡面0',exact:true}).press('ArrowRight');await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-1');
  await expect(page.getByRole('alertdialog',{name:'删除头像',exact:true})).toHaveCount(0);expect((await saved(page)).characters.find((c:any)=>c.id==='retained-0').portrait).toEqual(original);
 });
+
+async function resourcePortalStart(page:Page){
+ await start(page);await page.evaluate(async()=>{
+  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const q=indexedDB.open('dnd-card-standalone');q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});
+  const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),read=store.get('workspace');read.onsuccess=()=>{const w=read.result;w.characters[0].runtime.resources['hit-die:6']={name:'生命骰',current:1,max:1,automatic:false};w.characters[0].runtime.resources['portal-test']={name:'弹层验收点数',current:2,max:5,automatic:false};store.put(w,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();
+ });await page.reload();await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
+}
+async function dismissOwnedPortalBySwitching(page:Page,portal:ReturnType<Page['locator']>){
+ const before=await saved(page);await page.evaluate(()=>{(window as any).portalOriginal=document.querySelector('.paper[data-active-sheet="true"]');});
+ await page.locator('.character-tabs').getByRole('tab',{name:'保留卡面0',exact:true}).press('ArrowRight');await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-1');await expect(portal).toHaveCount(0);
+ await page.locator('.character-tabs').getByRole('tab',{name:'保留卡面1',exact:true}).press('ArrowLeft');await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-0');await expect(portal).toHaveCount(0);expect(await page.evaluate(()=>(window as any).portalOriginal===document.querySelector('.paper[data-active-sheet="true"]'))).toBe(true);expect((await saved(page)).characters).toEqual(before.characters);
+}
+async function spellPortalStart(page:Page){
+ await start(page);await page.evaluate(async()=>{
+  const source='/card/src/data/catalog.ts',validation='/card/src/core/validation.ts';const {normalizeCatalogData}=await import(source),{validateCharacter}=await import(validation);
+  const entry=normalizeCatalogData({spell:[{name:'弹层验收法术',ENG_name:'Authored Portal Spell',source:'XPHB',level:1,entries:['仅用于软件弹层归属验收的原创法术。']}]},'authored-portal-fixture')[0];
+  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const q=indexedDB.open('dnd-card-standalone');q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),read=store.get('workspace');read.onsuccess=()=>{const w=read.result;w.characters[0].selections.push({id:'authored-portal-selection',entry,quantity:1,level:1,equipped:false});validateCharacter(w.characters[0]);store.put(w,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();
+ });await page.reload();await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
+}
+test('retained body portal: spell menu closes on keyboard card switching and stays closed on return',async({page})=>{
+ await spellPortalStart(page);await page.locator('[data-retained-card-active="true"] .sheet-pages').getByRole('tab',{name:'法术',exact:true}).click();await page.locator('.paper[data-active-sheet="true"] .spell-stock-tile').first().click({button:'right'});const portal=page.getByRole('menu',{name:'法术操作',exact:true});await expect(portal).toBeVisible();await dismissOwnedPortalBySwitching(page,portal);
+});
+test('retained body portal: special spell detail closes without changing uses or retaining an old action',async({page})=>{
+ await spellPortalStart(page);await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await page.locator('[data-retained-card-active="true"] .sheet-pages').getByRole('tab',{name:'法术',exact:true}).click();await page.locator('.paper[data-active-sheet="true"] .spell-stock-tile').first().click({button:'right'});await page.getByRole('menuitem',{name:'设置免费施放次数',exact:true}).click();await page.locator('.paper[data-active-sheet="true"] .spell-use-badge').first().click();const portal=page.getByRole('dialog',{name:/施放详情$/});await expect(portal).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');await dismissOwnedPortalBySwitching(page,portal);
+});
+test('retained body portal: hit-die detail closes without changing resource balances',async({page})=>{
+ await resourcePortalStart(page);await page.locator('.paper[data-active-sheet="true"] .hit-die').first().click();const portal=page.getByRole('dialog',{name:'生命骰',exact:true});await expect(portal).toBeVisible();await dismissOwnedPortalBySwitching(page,portal);
+});
+test('retained body portal: quickbar resource operation closes without changing resource balances',async({page})=>{
+ await resourcePortalStart(page);await page.locator('.paper[data-active-sheet="true"] [data-resource-id="portal-test"] .resource-widget-face').click();const portal=page.getByRole('dialog',{name:'弹层验收点数资源操作',exact:true});await expect(portal).toBeVisible();await dismissOwnedPortalBySwitching(page,portal);
+});
