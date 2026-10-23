@@ -93,6 +93,8 @@ export interface Derived {
   ac: number; initiative: number; speed: number; maxHp: number; passive: number;
   skills: Record<string, { value: number; proficient: boolean; expertise: boolean; sources: string[] }>;
   saves: Record<Ability, { value: number; proficient: boolean }>; requirements: Requirement[]; issues: Issue[];
+  /** Reviewed derived resistances only; damage application remains manual. */
+  resistances?: string[];
   trace: Record<string, string[]>; hitDice: string;
 }
 export const uid = () => crypto.randomUUID();
