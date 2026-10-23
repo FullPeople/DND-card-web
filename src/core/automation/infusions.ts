@@ -8,20 +8,40 @@ import evidence from './infusionEvidence.json' with {type:'json'};
 
 export interface InfusionBinding {choiceId:string;entryId:string;targetId:string}
 export interface InfusionState {version:1;bindings:InfusionBinding[]}
+type InfusionRule=typeof evidence.rules[number];
+export interface InfusionWeaponEffect {bonus:number;trace:string[]}
 /** Reviewed source-qualified identities, not display-name dispatch. Unknown
  * item/prerequisite families stay manual. Learning alone grants no effect. */
 export function infusionRule(entry:Entry){
  if(entry.kind!=='feature'||entry.raw._category!=='optionalfeature'||!Array.isArray(entry.raw.featureType)||entry.raw.featureType.length!==1||entry.raw.featureType[0]!=='AI'||entry.raw._copy||entry.effects?.length)return;
  return evidence.rules.find(rule=>matchesReference(entry,rule.reference));
 }
+const code=(value:unknown)=>String(value??'').split('|')[0].toUpperCase();
+const supportedDamage=(value:unknown)=>typeof value==='string'&&/^(?:\d+d\d+|\d+)(?:[+-]\d+)?$/i.test(value.replace(/\s/g,''));
 function nonmagical(row:Selection){
  const r=row.entry.raw;
- return row.quantity===1&&!!armorType(row.entry)&&!!armorRule(row).rule&&
+ return row.quantity===1&&row.entry.kind==='item'&&
   !r.reqAttune&&!r.magic&&!r.wondrous&&!r._copy&&!row.entry.effects?.length&&
   !Object.keys(r).some(key=>/^bonus/.test(key)&&r[key]!==undefined)&&
   r.rarity==='none'&&!r.tier&&!r.sentient&&!r.curse;
 }
-export function infusionTargets(c:Character):Selection[]{return activeSelections(c).filter(nonmagical);}
+function targetAllowed(row:Selection,rule:InfusionRule){
+ if(!nonmagical(row)||!rule.itemTypes.includes(code(row.entry.raw.type)))return false;
+ if(rule.mechanism==='armor-bonus')return !!armorType(row.entry)&&!!armorRule(row).rule;
+ if(rule.mechanism==='weapon-bonus'){
+  const raw=row.entry.raw;
+  const properties=(Array.isArray(raw.property)?raw.property:[]).map(code);
+  if(rule.requiredProperties?.some(property=>!properties.includes(property)))return false;
+  return !!rule.weaponCategories?.includes(raw.weaponCategory)&&raw.attackBonus===undefined&&supportedDamage(raw.dmg1)&&
+   (!properties.includes('V')||supportedDamage(raw.dmg2));
+ }
+ return false;
+}
+function targetDescription(rule:InfusionRule){return rule.mechanism==='weapon-bonus'?`${rule.requiredProperties?.includes('T')?'具有投掷属性的':''}简易或军用武器（使用自动命中与伤害公式）`:'护甲或盾牌';}
+export function infusionTargets(c:Character,entry?:Entry):Selection[]{
+ const rules=entry?[infusionRule(entry)].filter((rule):rule is InfusionRule=>!!rule):evidence.rules;
+ return activeSelections(c).filter(row=>rules.some(rule=>targetAllowed(row,rule)));
+}
 function learned(c:Character,binding:InfusionBinding){
  const entry=c.classChoiceSnapshots?.[binding.entryId],rule=entry&&infusionRule(entry);
  if(!entry||!rule||!selectionEffectsAllowed(c,entry))return;
@@ -49,15 +69,15 @@ export function setInfusionTarget(c:Character,choiceId:string,entryId:string,tar
  if(targetId===null){if(current)current.bindings=other;return;}
  const next={choiceId,entryId,targetId},known=learned(c,next);
  if(!automationEnabled(c)||!known)throw Error('注法未有效学习或来源/自动化未启用。');
- if(!infusionTargets(c).some(row=>row.id===targetId))throw Error('请选择单件、非魔法的护甲或盾牌；堆叠物品请先拆分。');
+ if(!infusionTargets(c,known.entry).some(row=>row.id===targetId))throw Error(`请选择单件、非魔法的${targetDescription(known.rule)}；堆叠物品请先拆分。`);
  if(other.some(row=>row.targetId===targetId))throw Error('这件物品已有注法，请先撤销原注法。');
  if(other.some(row=>{const entry=c.classChoiceSnapshots?.[row.entryId];return entry&&infusionRule(entry)?.reference===known.rule.reference;}))throw Error('同一注法同时只能作用于一件物品。');
  const capacity=evidence.activeProgression[known.owner.level-1];
  if(other.length>=capacity)throw Error('已达注法物品上限，请先明确撤销一项；不会自动覆盖旧物品。');
  c.infusions={version:1,bindings:[...other,next]};
 }
-export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;trace:string[];issues:Issue[]}{
- const out={bonus:0,trace:[] as string[],issues:[] as Issue[]};
+export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;trace:string[];issues:Issue[];weapons:Map<string,InfusionWeaponEffect>}{
+ const out={bonus:0,trace:[] as string[],issues:[] as Issue[],weapons:new Map<string,InfusionWeaponEffect>()};
  if(!automationEnabled(c)||!c.infusions)return out;
  if(c.infusions.version!==1){out.issues.push({id:'infusion-version',severity:'warning',message:'注法记录版本尚未支持，原记录保留且未生效。'});return out;}
  const bindings=c.infusions.bindings;
@@ -65,18 +85,30 @@ export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;
   const known=learned(c,binding),target=active.find(row=>row.id===binding.targetId);
   let reason:string|undefined;
   if(!known)reason='已学记录、职业等级或来源当前不可用';
-  else if(!target||!nonmagical(target))reason='目标不是可确认的单件非魔法护甲或盾牌';
+  else if(!target||!targetAllowed(target,known.rule))reason=`目标不是可确认的单件非魔法${targetDescription(known.rule)}`;
   else if(bindings.filter(row=>row.targetId===binding.targetId).length!==1||bindings.filter(row=>{const entry=c.classChoiceSnapshots?.[row.entryId];return entry&&infusionRule(entry)?.reference===known.rule.reference;}).length!==1)reason='重复注法或目标冲突';
   else if(bindings.length>evidence.activeProgression[known.owner.level-1])reason='当前注法数量超出上限，请明确撤销多余记录';
   if(reason){out.issues.push({id:`infusion:${binding.choiceId}:${binding.entryId}`,severity:'warning',message:`注法暂不生效：${reason}；原记录保留。`});continue;}
+  const rule=known!.rule;
+  const bonus=rule.upgradeLevel!==undefined&&rule.upgradedBonus!==undefined&&known!.owner.level>=rule.upgradeLevel?rule.upgradedBonus:rule.bonus;
+  const origin=`${known!.entry.name} · ${known!.entry.source} → ${target!.entry.name}：注法 +${bonus}`;
+  if(known!.rule.mechanism==='weapon-bonus'){
+   // An infusion changes the magical nature of the item, but current attack
+   // consumers do not adjudicate magical/nonmagical resistance or immunity.
+   // Preserve that boundary in both the sheet/export issues and attack trace.
+   const boundary=known!.rule.magicBoundary!;
+   out.issues.push({id:`infusion-magic-boundary:${binding.targetId}`,selectionId:binding.targetId,severity:'warning',message:`${target!.entry.name}：${boundary}`});
+   if(rule.manualBoundary)out.issues.push({id:`infusion-effect-boundary:${binding.targetId}`,selectionId:binding.targetId,severity:'warning',message:`${target!.entry.name}：${rule.manualBoundary}`});
+   if(target!.equipped)out.weapons.set(binding.targetId,{bonus,trace:[origin,boundary,...(rule.manualBoundary?[rule.manualBoundary]:[])]});
+   continue;
+  }
   if(!target!.equipped){out.trace.push(`${known!.entry.name}：目标未穿戴，注法 AC 未生效`);continue;}
   // Match armor evaluator's conflicting-slot behavior. Do not apply an orphan
   // bonus when neither of two simultaneously worn armors has a valid base.
   const slot=armorType(target!.entry)==='S';
   if(active.filter(row=>row.equipped&&row.quantity>0&&!!armorType(row.entry)&&(armorType(row.entry)==='S')===slot).length!==1)continue;
   if(c.edition==='2024'&&slot){out.issues.push({id:`infusion-cross-edition:${binding.targetId}`,severity:'warning',message:'2014 注法与 2024 盾牌资格的组合尚未核对，注法 AC 未自动生效；目标记录保留。'});continue;}
-  const bonus=known!.owner.level>=known!.rule.upgradeLevel?known!.rule.upgradedBonus:known!.rule.bonus;
-  out.bonus+=bonus;out.trace.push(`${known!.entry.name} · ${known!.entry.source} → ${target!.entry.name}：注法 +${bonus}`);
+  out.bonus+=bonus;out.trace.push(origin);
  }
  return out;
 }

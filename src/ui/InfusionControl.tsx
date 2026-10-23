@@ -12,8 +12,8 @@ export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,e
  const binding=supportedState?c.infusions?.bindings.find(row=>row.choiceId===choiceId&&row.entryId===entry.id):undefined;
  const [targetId,setTargetId]=useState(binding?.targetId||''),[error,setError]=useState('');
  useEffect(()=>{setTargetId(binding?.targetId||'');setError('');},[c.id,choiceId,entry.id,binding?.targetId]);
- if(!infusionRule(entry))return null;
- const targets=infusionTargets(c),owner=c.selections.find(row=>row.id===ownerId),target=c.selections.find(row=>row.id===binding?.targetId);
+ const rule=infusionRule(entry);if(!rule)return null;
+ const targets=infusionTargets(c,entry),owner=c.selections.find(row=>row.id===ownerId),target=c.selections.find(row=>row.id===binding?.targetId);
  const canEdit=writable&&!!edit&&supportedState;
  const blocked=!supportedState?'此灌注记录版本尚未支持，原数据保留且不能修改。':!canEdit?'当前角色卡只读，不能修改灌注。':!automationEnabled(c)?'自动计算当前不可用，原灌注记录保留。':unavailable||!owner||!selectionActive(c,owner)||!selectionEffectsAllowed(c,entry)||!canActivateInfusion(c,choiceId,entry.id)?'此已学选项或来源当前不可用，原灌注记录保留。':'';
  const canApply=!blocked&&!!targetId&&targets.some(row=>row.id===targetId)&&binding?.targetId!==targetId;
@@ -26,9 +26,12 @@ export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,e
   }catch(reason){setError(reason instanceof Error?reason.message:String(reason));}
  }
  return <div className="infusion-control" data-infusion-entry={entry.id} data-infusion-choice={choiceId} style={{minWidth:0,maxWidth:'100%',overflowWrap:'anywhere'}}>
-  <small>{!supportedState?'已有灌注记录待核对':binding?`已指定灌注目标：${target?.entry.name||'原目标已不存在'}${target?target.equipped?'（已装备）':'（未装备，不计 AC）':''}`:'尚未指定灌注目标'}</small>
+  <small>{!supportedState?'已有灌注记录待核对':binding?`已指定灌注目标：${target?.entry.name||'原目标已不存在'}${target?target.equipped?'（已装备）':rule.mechanism==='weapon-bonus'?'（未装备，不生成自动攻击）':'（未装备，不计 AC）':''}`:'尚未指定灌注目标'}</small>
   <small>学习不等于激活。确认灌注只绑定物品，不会自动装备或同调；未支持的其他能力仍手动处理。</small>
   <small>请在完成长休并触及物品后确认；死亡后的失效时点仍需手动撤回。</small>
+  {rule.mechanism==='weapon-bonus'&&<small>仅为可解析伤害的近战／远程简易或军用武器追加自动命中与伤害加值；手写公式、无伤害武器及法器类兼用武器仍手动处理。{rule.magicBoundary}</small>}
+  {rule.requiredProperties?.includes('T')&&<small>目标必须具有明确记录的投掷属性；持握或掷出动作本身不会改变灌注绑定。</small>}
+  {rule.manualBoundary&&<small>{rule.manualBoundary}</small>}
   <div className="feature-choice-actions">
    <label style={{minWidth:0,maxWidth:'100%'}}>灌注目标 <select style={{maxWidth:'100%'}} aria-label={`${entry.name}灌注目标`} value={targetId} disabled={!!blocked} onChange={event=>{setTargetId(event.target.value);setError('');}}>
     <option value="">请选择已有物品</option>

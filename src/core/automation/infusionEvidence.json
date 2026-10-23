@@ -17,6 +17,28 @@
       "bonus": 1,
       "upgradeLevel": 10,
       "upgradedBonus": 2
+    },
+    {
+      "reference": "Enhanced Weapon|TCE",
+      "owner": "Artificer|TCE",
+      "mechanism": "weapon-bonus",
+      "itemTypes": ["M", "R"],
+      "weaponCategories": ["simple", "martial"],
+      "bonus": 1,
+      "upgradeLevel": 10,
+      "upgradedBonus": 2,
+      "magicBoundary": "目标按注法视为魔法武器；抵抗、免疫及其他魔法武器交互仍需手动核对，攻击投影不自动裁定。"
+    },
+    {
+      "reference": "Returning Weapon|TCE",
+      "owner": "Artificer|TCE",
+      "mechanism": "weapon-bonus",
+      "itemTypes": ["M", "R"],
+      "weaponCategories": ["simple", "martial"],
+      "requiredProperties": ["T"],
+      "bonus": 1,
+      "magicBoundary": "目标按注法视为魔法武器；抵抗、免疫及其他魔法武器交互仍需手动核对，攻击投影不自动裁定。",
+      "manualBoundary": "使用此武器发动远程攻击后回到持用者手中的动作仍需手动处理；当前未记录持手／投出状态，灌注不会自动移动物品或结算回手。"
     }
   ],
   "knownProgression": [
@@ -71,6 +93,8 @@
   },
   "entryHashes": {
     "Enhanced Defense|TCE": "c3ff5aa7aefeb54b8e2d0454d042aa6b89937d5a454af67eec7d9363084015b0",
+    "Enhanced Weapon|TCE": "689d4e421ac5d106c43c8e90cd9b25b6a568e67c778a1a97e6d33ef34e7baddd",
+    "Returning Weapon|TCE": "9b06dce9d856241dbc2fb57fe7b95a4945abee3cee21f969a102540fd83a4aa7",
     "Infuse Item|Artificer|TCE|2": "5ea883f06ec7afaba3f78859d665806f32edba0d95c42d2dc35dc2675765b457"
   }
 }
