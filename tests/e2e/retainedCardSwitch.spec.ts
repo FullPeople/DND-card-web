@@ -115,7 +115,11 @@ test('hidden card animations pause and resume without scanning every warmed shee
  await expect.poll(()=>page.evaluate(()=>(window as any).retainedAnimationScans)).toBe(3);
  await page.getByRole('button',{name:'b',exact:true}).click();
  const animation=()=>page.evaluate(()=>{const animation=document.querySelector('[data-owned-animation="a"]')!.getAnimations()[0];return {state:animation.playState,time:Number(animation.currentTime)};});
- await expect.poll(async()=>(await animation()).state).toBe('paused');const paused=await animation();await page.waitForTimeout(100);expect((await animation()).time).toBe(paused.time);
+ await expect.poll(async()=>(await animation()).state).toBe('paused');
+ // playState changes before the browser's pending pause task settles.
+ // Wait for that task before comparing the frozen animation clock exactly.
+ await page.evaluate(async()=>{await document.querySelector('[data-owned-animation="a"]')!.getAnimations()[0].ready;});
+ const paused=await animation();await page.waitForTimeout(100);expect((await animation()).time).toBe(paused.time);
  await page.getByRole('button',{name:'a',exact:true}).click();await expect.poll(async()=>(await animation()).state).toBe('running');expect((await animation()).time).toBeGreaterThanOrEqual(paused.time);
  for(const id of ['c','b','a'])await page.getByRole('button',{name:id,exact:true}).click();expect(await page.evaluate(()=>(window as any).retainedAnimationScans)).toBe(3);
 });
