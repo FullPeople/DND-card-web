@@ -19,13 +19,25 @@ async function ready(page:Page,source?:'PHB'|'TCE'){
  await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
  await page.goto('/card/?intro=0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'asi-authored.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(card)))});
- const review=page.getByRole('dialog',{name:'导入前核对',exact:true});await expect(review).toContainText('导入后保留该角色自己的规则版本');await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();
- await expect(page.getByRole('tab',{name:/属性提升交互验收（导入）/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ // Same-edition imports finish directly; only conflicts need review. Wait
+ // for either real outcome before deciding, rather than racing isVisible().
+ const review=page.getByRole('dialog',{name:'导入前核对',exact:true}),imported=page.getByRole('tab',{name:/属性提升交互验收（导入）/});
+ await expect(review.or(imported)).toBeVisible();
+ if(await review.isVisible()){await expect(review).toContainText('导入后保留该角色自己的规则版本');await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();}
+ await expect(imported).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();
  const database=await page.evaluate(async()=>{const path='/card/src/platform/workspaceIdentity.ts';return (await import(path)).workspaceIdentity.database;});await restoreAuthoredChoices(page,database,{[card.selections[0].id]:true});
 }
 async function choose(page:Page,level:number,name='属性值提升'){
  const panel=await tab(page,'特性'),record=panel.locator('.detail-feats [data-class-choice]').filter({hasText:`职业 ${level} 级`});
+ await expect(record).toBeVisible();
+ // Completing every class choice hides its chips. Reopen through the same
+ // source-heading action a player uses; do not rewrite saved fixture state.
+ if(await record.locator('[data-choice-id]').count()===0){
+  const ownerHeading=panel.locator('.detail-class-features .feature-group h4 > button');await expect(ownerHeading).toHaveCount(1);await ownerHeading.click({button:'right'});
+  await page.getByRole('menuitem',{name:'显示自带选项',exact:true}).click();
+ }
+ await expect(record.locator('[data-choice-id]')).toBeVisible();
  await record.locator('[data-choice-id]').click();const workspace=panel.locator('.choice-workspace');await expect(workspace).toBeVisible();
  // A legacy synthetic plan deliberately uses inline options, not wiki drag.
  if((await record.getAttribute('data-class-choice'))?.includes(':class-legacy-feat:')){
@@ -47,7 +59,7 @@ async function allocate(control:Locator,first:string,second?:string){
 async function scores(page:Page,str:number,dex:number,con=19){
  const panel=await tab(page,'主要'),toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')==='true')await toggle.click();
  await expect(panel.getByRole('spinbutton',{name:'力量基础值',exact:true})).toHaveValue(String(str));await expect(panel.getByRole('spinbutton',{name:'敏捷基础值',exact:true})).toHaveValue(String(dex));await expect(panel.getByRole('spinbutton',{name:'体质基础值',exact:true})).toHaveValue(String(con));
- await toggle.click();
+ if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();await expect(toggle).toHaveAttribute('aria-checked','true');
 }
 function preserved(after:any,before:any){expect(after.abilities).toEqual(before.abilities);expect(after.notes).toBe(before.notes);expect(after.runtime.hp).toBe(before.runtime.hp);expect(after.sheetBonuses).toEqual(before.sheetBonuses);}
 
