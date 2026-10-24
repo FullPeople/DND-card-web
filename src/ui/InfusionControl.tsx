@@ -6,6 +6,7 @@ import {evaluate} from '../core/engine';
 import {automaticWeaponAttacks} from '../core/automation/weapons';
 import {activeSelections} from '../core/automation/active';
 import {automationEnabled} from '../core/automation/state';
+import {InfusionChargeControl} from './InfusionChargeControl';
 
 type Props={c:Character;choiceId:string;ownerId:string;entry:Entry;unavailable:boolean;writable:boolean;edit?:(action:(draft:Character)=>void)=>void};
 
@@ -20,6 +21,7 @@ export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,e
  const canEdit=writable&&!!edit&&supportedState;
  const unavailableReason=!automationEnabled(c)?'自动计算当前不可用，原灌注记录保留。':unavailable||!owner||!selectionActive(c,owner)||!selectionEffectsAllowed(c,entry)||!canActivateInfusion(c,choiceId,entry.id)?'此已学选项、职业等级或来源当前不可用，原灌注记录保留。':'';
  const blocked=!supportedState?'此灌注记录版本尚未支持，原数据保留且不能修改。':!canEdit?'当前角色卡只读，不能修改灌注。':unavailableReason;
+ const mind=rule.mechanism==='concentration-reaction';
  const focus=rule.mechanism==='spell-attack-bonus',resistance=rule.mechanism==='damage-resistance',heldRequired=rule.requiresHeld===true;
  const damageLabels:Record<string,string>={acid:'强酸',cold:'冷冻',fire:'火焰',force:'力场',lightning:'闪电',necrotic:'黯蚀',poison:'毒素',psychic:'心灵',radiant:'光耀',thunder:'雷鸣'};
  const damageLabel=(value:string)=>damageLabels[value]||value;
@@ -31,7 +33,7 @@ export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,e
  const supportedRangedMode=!binding||!rule.rangedOnly||!!rangedEffect&&automaticWeaponAttacks(c,evaluate(c)).attacks.some(attack=>attack.origin.selectionId===binding.targetId&&attack.modeLabel==='远程'&&attack.trace.includes(rangedEffect.trace[0]));
  const currentMissing=unavailableReason||issue?.message||(!target?.equipped?'未装备':rule.requiresAttunement&&!target?.attuned?'未同调':heldRequired&&!binding?.held?'未确认当前持握':!supportedRangedMode?'当前目标没有受支持的远程攻击模式，未追加自动命中与伤害加值':resistance&&!binding?.damageType?'尚未选择抗性伤害类型':resistance&&!evaluation.resistances.includes(binding?.damageType||'')?'当前护甲配置不满足生效条件':heldRequired&&!focus&&!evaluation.trace.some(line=>line.startsWith(`${entry.name} ·`))?'当前盾牌配置不满足生效条件':'');
  const holdLabel=focus?'确认当前持握此法器':'确认当前持握此盾牌';
- const targetStatus=focus?(!target?.equipped?'未装备，法术攻击加值未生效':!target.attuned?'未同调，法术攻击加值未生效':!binding?.held?'未确认当前持握，法术攻击加值未生效':'已装备、已同调并确认持握'):target?.equipped?'已装备':rule.mechanism==='weapon-bonus'?'未装备，不生成自动攻击':'未装备，不计 AC';
+ const targetStatus=mind?(unavailableReason||issue?.message?'当前不可用，不能使用反应充能':target?.equipped?'已穿戴，可核对反应触发':'未穿戴，不能使用反应充能'):focus?(!target?.equipped?'未装备，法术攻击加值未生效':!target.attuned?'未同调，法术攻击加值未生效':!binding?.held?'未确认当前持握，法术攻击加值未生效':'已装备、已同调并确认持握'):target?.equipped?'已装备':rule.mechanism==='weapon-bonus'?'未装备，不生成自动攻击':'未装备，不计 AC';
  const canApply=!blocked&&!!targetId&&targets.some(row=>row.id===targetId)&&(binding?.targetId!==targetId||resistance&&binding?.damageType!==damageType)&&(!resistance||INFUSION_DAMAGE_TYPES.some(value=>value===damageType));
  function save(next:string|null){
   if(!canEdit||next!==null&&!canApply)return;
@@ -56,6 +58,7 @@ export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,e
   {rule.mechanism==='weapon-bonus'&&<small>{rule.rangedOnly?'仅为具有弹药属性、已装备且已同调的简易或军用武器的远程攻击追加 +1 命中与伤害；':'仅为可解析伤害的近战／远程简易或军用武器追加自动命中与伤害加值；'}手写公式、无伤害武器及法器类兼用武器仍手动处理。{rule.magicBoundary}</small>}
   {rule.requiredProperties?.includes('T')&&<small>目标必须具有明确记录的投掷属性；持握或掷出动作本身不会改变灌注绑定。</small>}
   {focus&&<small>仅支持已核对的 PHB 权杖、法杖、魔杖；其他法器与自制物品仍手动处理。必须已装备、已同调，并明确确认当前持握才增加法术攻击；装备不等于持握；手部占用与同调总数仍需手动核对。本网页角色卡内取消装备或同调、换目标后需重新确认持握；外部背包流转不在本批完整生命周期范围内。</small>}
+  {mind&&<small>穿戴护甲或已核对的 PHB 长袍即可使用；无需同调，不增加 AC。维持法术专注的体质豁免失败时，须自行确认反应并应用结果。</small>}
   {resistance&&<small>仅显示当前已穿戴并同调护甲提供的所选抗性，不增加 AC；伤害结算和减免仍需手动处理。</small>}
   {heldRequired&&!focus&&<small>盾牌必须装备、同调并单独确认当前持握，才获得灌注 AC 加值；装备不等于持握。取消装备、同调或换目标后，需重新确认持握。</small>}
   {heldRequired&&binding&&<label><input type="checkbox" aria-label={holdLabel} checked={binding.held===true} disabled={!canEdit||!binding.held&&(!!blocked||!target?.equipped||!target.attuned)} onChange={event=>hold(event.target.checked)}/>{holdLabel}</label>}
@@ -72,6 +75,7 @@ export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,e
   </div>
   {blocked&&<small>{blocked}{binding&&canEdit?'仍可撤回此灌注。':''}</small>}
   {!targets.length&&!blocked&&<small>当前没有可用目标，请先在背包加入符合条件的物品。</small>}
+  <InfusionChargeControl c={c} choiceId={choiceId} entry={entry} unavailable={unavailable} writable={writable} edit={edit}/>
   {error&&<small role="alert">{error}</small>}
  </div>;
 }

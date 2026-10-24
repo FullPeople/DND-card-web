@@ -1,6 +1,7 @@
 import {validateAsiAllocations} from './automation/asi';
 import {invocationRecord} from './automation/invocations';
 import {validateInfusions} from './automation/infusions';
+import {validateInfusionChargeState} from './automation/infusionCharges';
 import {validWidget,validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
 import {CARD_COMPONENTS,validCardPalette} from './palette';
 import {legacyTraining} from './legacyTraining';
@@ -162,6 +163,7 @@ export function validateCharacter(value: unknown): Character {
   assert(c.profile.autoSourceDefaults === undefined || Array.isArray(c.profile.autoSourceDefaults) && c.profile.autoSourceDefaults.length <= 10000 && c.profile.autoSourceDefaults.every((id:unknown) => typeof id === 'string' && id.length <= 4000), '默认资料来源列表无效。');
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   validateActionState(c.runtime.automationActions);
+  validateInfusionChargeState(c.runtime.infusionCharges);
   for(const r of Object.values(c.runtime.resources) as any[])if(r.sourceSpellGrant!==undefined)assert(plain(r.sourceSpellGrant)&&typeof r.sourceSpellGrant.usageKey==='string'&&r.sourceSpellGrant.usageKey.length>0&&r.sourceSpellGrant.usageKey.length<=20000,'来源法术次数归属无效。');
   validateFeatureResourceState(c.runtime as Character['runtime']);
   validateRestState(c.runtime.rests);
