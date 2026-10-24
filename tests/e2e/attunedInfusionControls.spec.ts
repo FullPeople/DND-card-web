@@ -42,7 +42,7 @@ async function choose(page:Page,name:string,index:number){
  // instance IDs; resolve the saved slot and verify its canonical infusion identity.
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'功能页',exact:true}).click();
  await expect.poll(async()=>{const c=await saved(page),id=c.answers['attuned-owner:class-optional:0']?.[index],entry=c.classChoiceSnapshots?.[id];return entry&&{name:entry.name,english:entry.english,source:entry.source,category:entry.raw._category};}).toEqual({name,english:expected.ENG_name,source:expected.source,category:'optionalfeature'});
- await tab(page,'特性');await expect(slot).toContainText(name);await pane.getByRole('button',{name:'收起选择',exact:true}).click();const learned=await control(page,name);await expect(learned).toBeVisible();return learned;
+ await tab(page,'特性');if(!await slot.isVisible())await workspace(page);await expect(slot).toContainText(name);await pane.getByRole('button',{name:'收起选择',exact:true}).click();const learned=await control(page,name);await expect(learned).toBeVisible();return learned;
 }
 async function control(page:Page,name:string){const panel=await tab(page,'特性');return panel.locator('.detail-class-features [data-infusion-entry]').filter({has:page.getByLabel(`${name}灌注目标`,{exact:true})});}
 async function bind(control:Locator,name:string,target:string,type?:string){await control.getByLabel(`${name}灌注目标`,{exact:true}).selectOption(target);if(type)await control.getByLabel(`${name}抗性伤害类型`,{exact:true}).selectOption(type);await control.getByRole('button',{name:`确认${name}灌注`,exact:true}).click();}
