@@ -85,7 +85,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;
+  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=infusion.resistanceTrace;
   ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
@@ -124,7 +124,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
   return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive,
-    skills, saves, requirements, issues, trace,
+    skills, saves, requirements, issues, trace, resistances:[...new Set(infusion.resistances)],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }
 

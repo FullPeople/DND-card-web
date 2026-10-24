@@ -37,7 +37,7 @@ export function exportOwlbear(c: Character, d: Derived) {
     web_resources: c.runtime.resources,
     ...(c.quickbarLayout?.widgets?{web_resource_widgets:Object.fromEntries(Object.entries(c.quickbarLayout.widgets).filter(([id])=>Object.hasOwn(c.runtime.resources,id)))}:{}),
     ...(c.quickbarLayout?.attacks?{web_quickbar_attacks:c.quickbarLayout.attacks}:{}),
-    export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };
+    export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...(d.resistances?.length?[`已核对的注法抗性：${d.resistances.join('、')}；伤害结算仍需手动核对，未写入枭熊 defenses。`]:[]), ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };
 }
 export function plainText(value: unknown): string {
   if (typeof value === 'string') return value.replace(/\{@(\w+)(?:\s+([^{}]*))?\}/g, (_, tag: string, body = '') => inlineLabel(tag, body));
@@ -54,6 +54,7 @@ export function exportReview(c: Character, d: Derived, sourceName: (id:string)=>
     `<p>${esc(c.selections.filter(s => s.entry.kind === 'class').map(s => `${s.entry.name} ${s.level} 级`).join(' / '))} · ${esc(c.identity.gender)} · ${esc(c.identity.alignment)}</p>`,
     table(['属性', '基础', '最终值', '调整值', '豁免'], ABILITIES.map(a => [ABILITY_LABELS[a], c.abilities[a], d.abilities[a], signed(d.modifiers[a]), `${signed(d.saves[a].value)}${d.saves[a].proficient ? '（熟练）' : ''}`])),
     `<p>等级 ${d.level} · AC ${d.ac} · HP ${c.runtime.hp}/${d.maxHp}（临时 ${c.runtime.tempHp}）· 先攻 ${signed(d.initiative)} · 速度 ${d.speed} 尺 · 熟练 ${signed(d.proficiency)} · 被动察觉 ${d.passive} · 生命骰 ${esc(d.hitDice)}${c.size ? ` · 体型 ${esc(SIZE_LABELS[c.size])}` : ''}</p>`,
+    ...(d.resistances?.length?[`<h2>已核对的注法抗性</h2><p>${d.resistances.map(esc).join('、')}。仅显示已生效的注法抗性，不汇总手写或未知规则；伤害结算仍需手动核对。</p>`]:[]),
     '<h2>技能与熟练</h2>', table(['技能', '检定', '熟练来源'], Object.entries(SKILLS).map(([key, skill]) => [skill.name, signed(d.skills[key].value), d.skills[key].sources.join('；') || '无'])),
     '<h2>装备训练记录</h2>', table(['类别', '记录'], Object.entries(c.training || {})),
     '<h2>填写与核对</h2>', `<ul>${pending.map(r => `<li>${esc(r.label)} — ${esc(r.origin)}（${r.selected.length}/${r.count}）</li>`).join('') || '<li>本卡由玩家手动记录，不自动判定选择数量或前提是否合法；请由 DM 核对。</li>'}${d.issues.map(i => `<li>${esc(i.message)}</li>`).join('')}</ul>`,
