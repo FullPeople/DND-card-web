@@ -36,7 +36,7 @@ export function spellPayments(c:Character,id:string):{options:SpellPayment[];rea
  }else if(config.mode==='uses'){
   const resourceId=specialSpellResource(id,c),r=c.runtime.resources[resourceId],available=!!r&&Number.isSafeInteger(r.current)&&r.current>=1;
   options.push({id:'source',label:`${grant.resourceKey?'共享':'来源'}次数（${r?.current??0} / ${r?.max??config.max}）`,level,resourceId,cost:1,available,...(!available?{reason:'来源次数不足或计数器不可用。'}:{})});
- }else if(grant.usage==='free'||grant.usage==='ritual')options.push({id:grant.usage,label:grant.usage==='ritual'?'仪式施法（不消耗法术位）':'免费施法',level,cost:0,available:true});
+ }else if(grant.usage==='free'||grant.usage==='ritual')options.push({id:grant.usage,label:grant.usage==='ritual'?'仪式施法（不消耗法术位）':invocation?.selfOnly?'免费施法（仅自身）':'免费施法',level,cost:0,available:true});
  if(base>0&&(grant.usage==='slot'||grant.canUseSlots)){
   for(const [resourceId,r] of Object.entries(c.runtime.resources)){
    const match=/^(spell-slot|pact-slot):([1-9])$/.exec(resourceId);if(!match||Number(match[2])<level||!Number.isSafeInteger(r.max)||r.max<1)continue;

@@ -70,6 +70,14 @@ function ownedFightingStylePrerequisite(c:Character,owner:Selection,known:Entry[
 /** Unknown prerequisite shapes remain unavailable; a choice never repairs them. */
 export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[]=c.selections.map(row=>row.entry)):string|undefined{
  const alternatives=entry.raw.prerequisite;if(alternatives===undefined)return;
+ // Only these exact reviewed invocations omit class.source in their frozen
+ // prerequisite. Resolve that omission to their verified PHB owner, never to
+ // total character level, another class row, or a general PHB default.
+ const invocation=optional?invocationRule(entry):undefined;
+ if(invocation?.requiredClassLevel){
+  if(!list(owner.entry.raw.optionalfeatureProgression).some(group=>invocationProgression(owner.entry,group)))return '此前置条件的来源职业尚未核对。';
+  return level(owner)<invocation.requiredClassLevel?`尚未达到所需职业等级 ${invocation.requiredClassLevel}。`:undefined;
+ }
  if(!Array.isArray(alternatives)||!alternatives.length)return '此前置条件结构尚未核对。';
  let scores:ReturnType<typeof evaluate>['abilities']|undefined;
  const check=(rule:Record<string,unknown>):string|undefined=>{

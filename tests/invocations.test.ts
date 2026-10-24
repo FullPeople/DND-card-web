@@ -112,20 +112,21 @@ describe('invocation save, replace, suspension and restore lifecycle',()=>{
 
 const frozen=process.env.INVOCATION_FROZEN_DIR;
 const frozenGroups=[
- {name:'original PHB invocations',references:['Beguiling Influence|PHB','Eldritch Sight|PHB','Armor of Shadows|PHB'],spells:2,skills:true},
- {name:'additional PHB at-will invocations',references:['Beast Speech|PHB','Mask of Many Faces|PHB','Misty Visions|PHB'],spells:3,skills:false},
+ {name:'original PHB invocations',references:['Beguiling Influence|PHB','Eldritch Sight|PHB','Armor of Shadows|PHB'],spells:2,skills:true,level:5},
+ {name:'additional PHB at-will invocations',references:['Beast Speech|PHB','Mask of Many Faces|PHB','Misty Visions|PHB'],spells:3,skills:false,level:5},
+ {name:'level-nine PHB at-will invocations',references:['Otherworldly Leap|PHB','Ascendant Step|PHB','Whispers of the Grave|PHB'],spells:3,skills:false,level:9},
 ];
-it.skipIf(!frozen).each(frozenGroups)('replays exact frozen $name with source hashes and free spell lifecycle',({references,spells:spellCount,skills})=>{
+it.skipIf(!frozen).each(frozenGroups)('replays exact frozen $name with source hashes and free spell lifecycle',({references,spells:spellCount,skills,level})=>{
  expect(frozenGroups.flatMap(group=>group.references).sort()).toEqual(evidence.rules.map(rule=>rule.reference).sort());
  const index=JSON.parse(readFileSync(`${frozen}/index.json`,'utf8')),hash=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
  const read=(path:string)=>{const row=index.rows.find((row:any)=>row.url===`https://5e.kiwee.top/data/${path}`)!;expect(row).toBeDefined();const data=JSON.parse(readFileSync(`${frozen}/${row.path}`,'utf8'));expect(hash(data)).toBe(evidence.inputs[path as keyof typeof evidence.inputs]);expect(row.sha256).toBe(hash(data));return data;};
  const classes=read('class/class-warlock.json'),optional=read('optionalfeatures.json'),spells=read('spells/spells-phb.json');
  const owner=classes.class.find((r:any)=>r.ENG_name==='Warlock'&&r.source==='PHB'),feature=classes.classFeature.find((r:any)=>r.ENG_name==='Eldritch Invocations'&&r.source==='PHB');expect(hash(owner)).toBe(evidence.entryHashes['Warlock|PHB']);expect(hash(feature)).toBe(evidence.entryHashes['Eldritch Invocations|Warlock|PHB|2']);
- for(const rule of evidence.rules){const raw=optional.optionalfeature.find((r:any)=>`${r.ENG_name}|${r.source}`===rule.reference);expect(hash(raw)).toBe(evidence.entryHashes[rule.reference as keyof typeof evidence.entryHashes]);expect(raw.page).toBe(rule.page);expect(raw.prerequisite).toBeUndefined();}
- const entries=normalizeData({...classes,...optional,...spells},'frozen-20261022'),c=newCharacter('2014');c.automation=newAutomationState();c.profile.enabledSources=['PHB'];c.selections=[{id:'warlock',entry:entries.find(e=>e.english==='Warlock'&&e.source==='PHB')!,quantity:1,level:5,equipped:false}];sync(c,entries);
- // Each level-5 character legally learns three invocations. Keep the original
- // group intact rather than silently accepting six answers beyond its capacity.
- expect(sheetChoices(c,entries).find(row=>row.id==='warlock:class-optional:0')?.count).toBe(3);
+ for(const rule of evidence.rules){const raw=optional.optionalfeature.find((r:any)=>`${r.ENG_name}|${r.source}`===rule.reference);expect(hash(raw)).toBe(evidence.entryHashes[rule.reference as keyof typeof evidence.entryHashes]);expect(raw.page).toBe(rule.page);expect(raw.prerequisite).toEqual(rule.requiredClassLevel===9?evidence.level9Prerequisite:undefined);}
+ const entries=normalizeData({...classes,...optional,...spells},'frozen-20261022'),c=newCharacter('2014');c.automation=newAutomationState();c.profile.enabledSources=['PHB'];c.selections=[{id:'warlock',entry:entries.find(e=>e.english==='Warlock'&&e.source==='PHB')!,quantity:1,level,equipped:false}];sync(c,entries);
+ // Keep the original level-five groups intact. The new group explicitly uses
+ // Warlock nine and learns its three invocations within the five-entry limit.
+ expect(sheetChoices(c,entries).find(row=>row.id==='warlock:class-optional:0')?.count).toBe(evidence.knownProgression[level-1]);
  for(const [slot,reference] of references.entries()){const entry=entries.find(e=>`${e.english}|${e.source}`===reference)!;expect(invocationRule(entry)).toBeDefined();learn(c,entries,entry,slot);}
  expect(c.selections.filter(row=>row.grantKey?.startsWith('choice:')&&row.entry.raw.featureType?.includes('EI'))).toHaveLength(3);
  expect(evaluate(c).skills.deception.proficient).toBe(skills);expect(evaluate(c).skills.persuasion.proficient).toBe(skills);expect(c.selections.filter(row=>row.grantKey?.startsWith('source-spell:'))).toHaveLength(spellCount);
