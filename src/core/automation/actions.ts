@@ -5,6 +5,7 @@ import {sourceSpellEnabled,rememberSourceSpellUses} from './sourceSpellState';
 import {automationEnabled} from './state';
 import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../bookRituals';
 import {planSourceSpells} from './sourceSpellPlan';
+import {learnedInvocationRule,invocationSpellMatches} from './invocations';
 
 export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string}
 export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long'}
@@ -23,6 +24,8 @@ export function spellPayments(c:Character,id:string):{options:SpellPayment[];rea
  if(!sourceSpellEnabled(c,id))return {options:[],reason:'此来源法术当前不可用。'};
  const current=planSourceSpells(c).grants.find(candidate=>candidate.id===id),declared=current?.config.sourceGrant;
  if(!declared?.active||declared.ownerId!==grant.ownerId||declared.key!==grant.key||declared.usage!==grant.usage||declared.resourceKey!==grant.resourceKey||declared.resourceCost!==grant.resourceCost||declared.resourceName!==grant.resourceName)return {options:[],reason:'来源声明或资源归属已变化，请同步当前卡后再施法。'};
+ const invocation=learnedInvocationRule(c,current!.owner);
+ if(invocation?.mechanism==='spell'&&(row.parentId!==current!.owner.id||row.grantKey!==current!.key||row.entry.id!==current!.entry.id||!invocationSpellMatches(row.entry,invocation)))return {options:[],reason:'祈唤法术的身份或授予归属已变化，请核对保留记录。'};
  config=current!.config;grant=declared;
  const base=Number(row.entry.raw.level),level=grant.castLevel??base;
  if(!Number.isInteger(base)||base<0||base>9||level<base)return {options:[],reason:'法术环阶未支持，请人工核对。'};

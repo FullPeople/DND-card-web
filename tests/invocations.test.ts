@@ -111,14 +111,25 @@ describe('invocation save, replace, suspension and restore lifecycle',()=>{
 });
 
 const frozen=process.env.INVOCATION_FROZEN_DIR;
-it.skipIf(!frozen)('replays exact frozen PHB class and three invocation entries with source hashes and free spell lifecycle',()=>{
+const frozenGroups=[
+ {name:'original PHB invocations',references:['Beguiling Influence|PHB','Eldritch Sight|PHB','Armor of Shadows|PHB'],spells:2,skills:true},
+ {name:'additional PHB at-will invocations',references:['Beast Speech|PHB','Mask of Many Faces|PHB','Misty Visions|PHB'],spells:3,skills:false},
+];
+it.skipIf(!frozen).each(frozenGroups)('replays exact frozen $name with source hashes and free spell lifecycle',({references,spells:spellCount,skills})=>{
+ expect(frozenGroups.flatMap(group=>group.references).sort()).toEqual(evidence.rules.map(rule=>rule.reference).sort());
  const index=JSON.parse(readFileSync(`${frozen}/index.json`,'utf8')),hash=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
  const read=(path:string)=>{const row=index.rows.find((row:any)=>row.url===`https://5e.kiwee.top/data/${path}`)!;expect(row).toBeDefined();const data=JSON.parse(readFileSync(`${frozen}/${row.path}`,'utf8'));expect(hash(data)).toBe(evidence.inputs[path as keyof typeof evidence.inputs]);expect(row.sha256).toBe(hash(data));return data;};
  const classes=read('class/class-warlock.json'),optional=read('optionalfeatures.json'),spells=read('spells/spells-phb.json');
  const owner=classes.class.find((r:any)=>r.ENG_name==='Warlock'&&r.source==='PHB'),feature=classes.classFeature.find((r:any)=>r.ENG_name==='Eldritch Invocations'&&r.source==='PHB');expect(hash(owner)).toBe(evidence.entryHashes['Warlock|PHB']);expect(hash(feature)).toBe(evidence.entryHashes['Eldritch Invocations|Warlock|PHB|2']);
- for(const rule of evidence.rules){const raw=optional.optionalfeature.find((r:any)=>`${r.ENG_name}|${r.source}`===rule.reference);expect(hash(raw)).toBe(evidence.entryHashes[rule.reference as keyof typeof evidence.entryHashes]);expect(raw.page).toBe(110);expect(raw.prerequisite).toBeUndefined();}
+ for(const rule of evidence.rules){const raw=optional.optionalfeature.find((r:any)=>`${r.ENG_name}|${r.source}`===rule.reference);expect(hash(raw)).toBe(evidence.entryHashes[rule.reference as keyof typeof evidence.entryHashes]);expect(raw.page).toBe(rule.page);expect(raw.prerequisite).toBeUndefined();}
  const entries=normalizeData({...classes,...optional,...spells},'frozen-20261022'),c=newCharacter('2014');c.automation=newAutomationState();c.profile.enabledSources=['PHB'];c.selections=[{id:'warlock',entry:entries.find(e=>e.english==='Warlock'&&e.source==='PHB')!,quantity:1,level:5,equipped:false}];sync(c,entries);
- for(const [slot,rule] of evidence.rules.entries()){const entry=entries.find(e=>`${e.english}|${e.source}`===rule.reference)!;expect(invocationRule(entry)).toBeDefined();learn(c,entries,entry,slot);}
- expect(evaluate(c).skills.deception.proficient).toBe(true);expect(evaluate(c).skills.persuasion.proficient).toBe(true);expect(c.selections.filter(row=>row.grantKey?.startsWith('source-spell:'))).toHaveLength(2);const saved=roundtrip(c);sync(saved,[]);for(const row of saved.selections.filter(row=>row.grantKey?.startsWith('source-spell:'))){expect(spellPayments(saved,row.id).options.map(row=>row.id)).toEqual(['free']);expect(performSpellAction(saved,spellActionRequest(saved,row.id,'free',row.id.slice(0,100))).status).toBe('applied');}expect(evaluate(saved).ac).toBe(10);
+ // Each level-5 character legally learns three invocations. Keep the original
+ // group intact rather than silently accepting six answers beyond its capacity.
+ expect(sheetChoices(c,entries).find(row=>row.id==='warlock:class-optional:0')?.count).toBe(3);
+ for(const [slot,reference] of references.entries()){const entry=entries.find(e=>`${e.english}|${e.source}`===reference)!;expect(invocationRule(entry)).toBeDefined();learn(c,entries,entry,slot);}
+ expect(c.selections.filter(row=>row.grantKey?.startsWith('choice:')&&row.entry.raw.featureType?.includes('EI'))).toHaveLength(3);
+ expect(evaluate(c).skills.deception.proficient).toBe(skills);expect(evaluate(c).skills.persuasion.proficient).toBe(skills);expect(c.selections.filter(row=>row.grantKey?.startsWith('source-spell:'))).toHaveLength(spellCount);
+ c.runtime.resources.manual={current:1,max:7};c.runtime.resources['pact-slot:3']={current:0,max:2};const resources=structuredClone(c.runtime.resources);
+ const saved=roundtrip(c);sync(saved,[]);for(let attempt=0;attempt<2;attempt++)for(const [index,row] of saved.selections.filter(row=>row.grantKey?.startsWith('source-spell:')).entries()){expect(spellPayments(saved,row.id).options.map(row=>row.id)).toEqual(['free']);expect(performSpellAction(saved,spellActionRequest(saved,row.id,'free',`frozen-${attempt}-${index}`)).status).toBe('applied');}expect(evaluate(saved).ac).toBe(10);expect(saved.runtime.resources).toEqual(resources);validateCharacter(saved);
  const ids=saved.selections.map(row=>row.id);saved.profile.enabledSources=[];sync(saved,[]);expect(evaluate(saved).skills.deception.proficient).toBe(false);const restored=roundtrip(saved);restored.profile.enabledSources=['PHB'];sync(restored,[]);expect(restored.selections.map(row=>row.id).sort()).toEqual(ids.sort());
 });
