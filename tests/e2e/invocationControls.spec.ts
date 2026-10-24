@@ -144,10 +144,31 @@ test('three learned at-will spells cast, reopen and revoke without adopting an i
  let workspace=await learning(page);await drag(page,workspace,'魔能视界',0);await closeLearning(page,workspace);
  await expect.poll(async()=>(await saved(page)).selections.some((row:any)=>row.id===ids[0].spellId)).toBe(false);
  let panel=await tab(page,'法术');await expect(panel.getByRole('button',{name:'动物交谈施放详情',exact:true})).toHaveCount(0);await freeCast(page,'侦测魔法','魔能视界');
+ const replacementCard=await saved(page),replacementOwner=replacementCard.selections.find((row:any)=>row.entry.english==='Eldritch Sight'&&row.grantKey?.startsWith('choice:'));expect(replacementOwner).toBeDefined();
+ const replacementTree=replacementCard.selections.filter((row:any)=>row.id===replacementOwner.id||row.parentId===replacementOwner.id);expect(replacementTree).toHaveLength(2);
  for(const name of ['千面之脸','迷雾幻影','魔能视界']){workspace=await learning(page);await workspace.getByRole('button',{name:`移除${name}`,exact:true}).click();await closeLearning(page,workspace);}
  await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);
  await page.reload();panel=await tab(page,'法术');await expect(panel.locator('[data-source-spell="true"]')).toHaveCount(0);await expect(panel.locator('[data-source-cantrip-group="manual"]').getByRole('button',{name:'无声幻影施放详情',exact:true})).toContainText('免费 1/3');
- const after=await saved(page);for(const id of ids)expect(after.spellSettings.special[id.spellId]?.sourceGrant?.active).not.toBe(true);manualStatePreserved(after,before);
+ const after=await saved(page);
+ // Archival intentionally retains old special-spell settings for restoration.
+ // Authorization requires an active selection, not that preserved config flag.
+ for(const id of ids){
+  expect(after.selections.some((row:any)=>row.id===id.ownerId||row.id===id.spellId)).toBe(false);
+  const archive=after.classChoiceArchive[id.ownerId];expect(archive.choiceId).toBe('warlock:class-optional:0');
+  for(const rowId of [id.ownerId,id.spellId])expect(archive.selections.find((row:any)=>row.id===rowId)).toEqual(reopened.selections.find((row:any)=>row.id===rowId));
+ }
+ expect(after.classChoiceArchive[replacementOwner.id].selections).toEqual(replacementTree);
+ expect(after.selections.some((row:any)=>replacementTree.some((previous:any)=>previous.id===row.id))).toBe(false);
+ const archivedIds=Object.values(after.classChoiceArchive).flatMap((archive:any)=>archive.selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).map((row:any)=>({spellId:row.id})));expect(archivedIds).toHaveLength(4);
+ // The UI has removed every granted action. Probe stale action IDs with current
+ // revision/sequence on detached saved-card copies, never by editing live state.
+ const denied=await page.evaluate(async({card,ids})=>{
+  const actionsPath='/card/src/core/automation/actions.ts',statePath='/card/src/core/automation/sourceSpellState.ts';
+  const {spellPayments,spellActionRequest,performSpellAction}=await import(actionsPath),{sourceSpellEnabled}=await import(statePath);
+  return ids.map((id,index)=>{const copy=structuredClone(card),before=JSON.stringify(copy),enabled=sourceSpellEnabled(copy,id.spellId),offer=spellPayments(copy,id.spellId),result=performSpellAction(copy,spellActionRequest(copy,id.spellId,'free',`revoked-at-will-${index}`));return {enabled,offer,result,unchanged:JSON.stringify(copy)===before};});
+ },{card:after,ids:archivedIds});
+ for(const result of denied){expect(result.enabled).toBe(false);expect(result.offer.options).toEqual([]);expect(result.result).toMatchObject({status:'rejected',message:'此来源法术当前不可用。'});expect(result.unchanged).toBe(true);}
+ expect(await saved(page)).toEqual(after);manualStatePreserved(after,before);
  await page.screenshot({path:info.outputPath('invocation-three-spells-manual-preserved.png'),fullPage:true});expect(errors).toEqual([]);
 });
 
