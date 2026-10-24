@@ -153,6 +153,52 @@
         "recovery": "dawn-1d4"
       },
       "manualBoundary": "穿戴者维持法术专注的体质豁免失败时，可确认使用反应及 1 充能，把该次结果改为成功；本卡只记充能，不自动改写豁免、专注状态或每轮反应。 每日黎明恢复须确认实际 1d4，不随长休恢复。 注法的长休激活、触摸、死亡及交给其他穿戴者仍需手动处理。"
+    },
+    {
+      "reference": "Radiant Weapon|TCE",
+      "owner": "Artificer|TCE",
+      "mechanism": "weapon-bonus",
+      "itemTypes": [
+        "M",
+        "R"
+      ],
+      "weaponCategories": [
+        "simple",
+        "martial"
+      ],
+      "minLevel": 6,
+      "requiresAttunement": true,
+      "requiresHeld": true,
+      "bonus": 1,
+      "charges": {
+        "max": 4,
+        "use": 1,
+        "recovery": "dawn-1d4"
+      },
+      "magicBoundary": "目标按注法视为魔法武器；抵抗、免疫及其他魔法武器交互仍需手动核对，攻击投影不自动裁定。",
+      "manualBoundary": "持握者被近战攻击命中时，须明确确认立即使用反应并消耗 1 充能；攻击者对抗奇械师法术豁免 DC 的体质豁免及失败后目盲至攻击者下个回合结束仍需手动裁定。 不自动产生无豁免效果，也不推离目标。 附赠动作开关 30 尺明亮光照及外延 30 尺微光仍手动；每日黎明恢复须确认实际 1d4，不随长休恢复。 不自动跟踪反应、游戏时钟或其他持用者；外部持握变化及注法长休激活、触摸、死亡仍需手动处理。"
+    },
+    {
+      "reference": "Spell-Refueling Ring|TCE",
+      "owner": "Artificer|TCE",
+      "mechanism": "spell-refueling",
+      "itemTypes": [
+        "G"
+      ],
+      "targetReferences": [
+        "Signet Ring|PHB"
+      ],
+      "minLevel": 6,
+      "requiresAttunement": true,
+      "bonus": 0,
+      "manualBoundary": "穿戴并同调后，以一个动作恢复一个已消耗且不高于 3 环的法术位；每日黎明恢复一次使用资格，不是充能或长休恢复。 仅支持已核对职业来源的现有自动有限法术位池；不会接管手工池，不能判断历史上是否曾被其他同步接管。 不自动跟踪动作、游戏时钟、其他穿戴者或注法长休激活、触摸、死亡。",
+      "refueling": {
+        "max": 1,
+        "use": 1,
+        "recovery": "dawn",
+        "maxSlotLevel": 3,
+        "action": "action"
+      }
     }
   ],
   "knownProgression": [
@@ -206,7 +252,8 @@
     "optionalfeatures.json": "031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844",
     "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
     "items-base.json": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
-    "items.json": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+    "items.json": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+    "class/class-warlock.json": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4"
   },
   "entryHashes": {
     "Enhanced Defense|TCE": "c3ff5aa7aefeb54b8e2d0454d042aa6b89937d5a454af67eec7d9363084015b0",
@@ -220,7 +267,13 @@
     "Mind Sharpener|TCE": "d8a1185d43052a39b5ddd0ae50758fb34acbc7bd9765474898957305c3591f84",
     "Robes|PHB": "6bfbf76315967903d54c62cd91771b280d4e3063c737fc9e2d9835450831ada9",
     "Shield|PHB": "b83f2a31bea90264a7897c65cea8573da00915f5fef7db19308b2c960c378985",
-    "Artificer|TCE": "2c4248ad45438e0dd27a57a7a274c15756308e8e23c410b0f0f58bc7eadfc5e1"
+    "Artificer|TCE": "2c4248ad45438e0dd27a57a7a274c15756308e8e23c410b0f0f58bc7eadfc5e1",
+    "Radiant Weapon|TCE": "fe3bd279c34d94541e26a8b3fbb113f0154194fd09b5d2942a4de4656832301e",
+    "Spell-Refueling Ring|TCE": "5ad5a802bbd8769717ecf6d54990a953bab9b1a0777abbf5be4ed71f6a180ce4",
+    "Signet Ring|PHB": "157759344ac477dd06caf047439a9ff233886f84f5b83e8a056b899943c3a007",
+    "Spellcasting|Artificer|TCE|1": "aae73a44790df6e2f55ef846ac90dc8b2d8a381ea2b6936bab648b0dc386bd6b",
+    "Warlock|PHB": "179a4e48b79fef7ae2244e88e614d04a0828caca4a854b6f65de61b6df802385",
+    "Pact Magic|Warlock|PHB|1": "da68ce072732185a89c9b7d4354f20eb1a92717c87cf267e2af39f55b64bfd3a"
   },
   "targetSource": "https://5e.kiwee.top/data/items-base.json",
   "additionalTargetSource": "https://5e.kiwee.top/data/items.json"

@@ -110,7 +110,7 @@ it('rejects changed IDs, payload fingerprints, keys and original stale requests 
  for(const patch of [{key:'other'},{sequence:0},{revision:0},{id:''},{basis:''},{action:{...use,rest:'long'}}])unchangedReject(f,{...request(f.c,f.choiceId,f.infusion.id,'bad',use),...patch} as any);
 });
 it('preserves unknown charge versions on import and rejects actions without mutation',()=>{
- const f=bound();(f.c.runtime as any).infusionCharges={version:2,future:{keep:[1,2,3]}};const before=JSON.stringify(f.c);expect(offer(f.c,f.choiceId,f.infusion.id)).toMatchObject({supported:true,canInitialize:false,canUse:false,canDawn:false});expect(validateCharacter(JSON.parse(before))).toEqual(f.c);unchangedReject(f,request(f.c,f.choiceId,f.infusion.id,'init',{kind:'initialize',initial:4}));
+ const f=bound();(f.c.runtime as any).infusionCharges={version:3,future:{keep:[1,2,3]}};const before=JSON.stringify(f.c);expect(offer(f.c,f.choiceId,f.infusion.id)).toMatchObject({supported:true,canInitialize:false,canUse:false,canDawn:false});expect(validateCharacter(JSON.parse(before))).toEqual(f.c);unchangedReject(f,request(f.c,f.choiceId,f.infusion.id,'init',{kind:'initialize',initial:4}));
 });
 it.each(['max','current','unlimited','ownership','record-key','sequence','last','receipt-after','receipt-dawn','extra-state'])('rejects malformed own charge store (%s), never repairs or overwrites it',change=>{
  const f=initialized('Mind Sharpener',2),state=f.c.runtime.infusionCharges!,key=Object.keys(state.records)[0];

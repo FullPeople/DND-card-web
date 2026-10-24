@@ -4,6 +4,10 @@ on:
     paths:
       - 'src/**'
       - 'tests/infusion-*.test.ts'
+      - 'tests/radiant-*.test.ts'
+      - 'tests/refueling-*.test.ts'
+      - 'tests/fixtures/radiantRefueling*.ts'
+      - 'tests/e2e/radiantRefueling*.ts'
       - 'tests/attuned-infusion*.test.ts'
       - 'tests/e2e/attunedInfusion*.ts'
       - 'tests/arcane-focus*.test.ts'
@@ -36,6 +40,9 @@ jobs:
       INFUSION_FROZEN_DIR: .local-evidence/infusion-upstream
       INVOCATION_FROZEN_DIR: .local-evidence/infusion-upstream
       INFUSION_LEGACY_REQUIRED: '1'
+      REFUELING_LEGACY_REQUIRED: '1'
+      REFUELING_FROZEN_DIR: .local-evidence/infusion-upstream
+      REFUELING_FROZEN_REQUIRED: '1'
     steps:
       - uses: actions/checkout@v6
         with:
@@ -87,8 +94,10 @@ jobs:
           NODE
       - name: Fetch exact old consumer for charge-preservation verification
         run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
+      - name: Fetch ninth-stage consumer for localized-v2 and ring preservation
+        run: git fetch --no-tags --depth=1 origin 2f8bb8938c55a0f1a937efe95bdbf30222680f86
       - name: Source replay, persistence, restrictions and UI guards
-        run: npx vitest run tests/infusion-charge*.test.ts tests/attuned-infusion*.test.ts tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-spell-expansion.test.ts tests/invocation-level9.test.ts tests/invocation-atwill-final.test.ts tests/invocation-skill-guard.test.ts tests/invocation-dual-payment.test.ts tests/invocation-dual-controls.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
+        run: npx vitest run tests/radiant-*.test.ts tests/refueling-*.test.ts tests/infusion-charge*.test.ts tests/attuned-infusion*.test.ts tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-spell-expansion.test.ts tests/invocation-level9.test.ts tests/invocation-atwill-final.test.ts tests/invocation-skill-guard.test.ts tests/invocation-dual-payment.test.ts tests/invocation-dual-controls.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone

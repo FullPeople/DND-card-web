@@ -3,11 +3,11 @@ import {activeSelections} from './active';
 import {armorType} from './equipment';
 import {infusionRule,resolveInfusionBinding,validateInfusions,type InfusionResolution} from './infusions';
 
-export type InfusionChargeAction={kind:'initialize';initial:number}|{kind:'use';triggerConfirmed:boolean;reactionConfirmed:boolean}|{kind:'dawn';dawnConfirmed:boolean;roll:number};
+export type InfusionChargeAction={kind:'initialize';initial:number;upgradeConfirmed?:boolean}|{kind:'use';triggerConfirmed:boolean;reactionConfirmed:boolean}|{kind:'dawn';dawnConfirmed:boolean;roll:number};
 export interface InfusionChargeRecord {ownerId:string;ruleRef:string;targetId:string;current:number;max:4}
 export interface InfusionChargeRequest {id:string;revision:number;sequence:number;basis:string;choiceId:string;entryId:string;key:string;action:InfusionChargeAction}
 export interface InfusionChargeReceipt {id:string;sequence:number;fingerprint:string;key:string;kind:InfusionChargeAction['kind'];action:InfusionChargeAction;before?:number;after:number}
-export interface InfusionChargeState {version:number;sequence:number;last?:InfusionChargeReceipt;records:Record<string,InfusionChargeRecord>}
+export interface InfusionChargeState {version:number;sequence:number;last?:InfusionChargeReceipt;records:Record<string,InfusionChargeRecord>;v1History?:{version:1;sequence:number;last?:InfusionChargeReceipt;records:Record<string,InfusionChargeRecord>}}
 export interface InfusionChargeOffer {supported:boolean;key?:string;current?:number;max:4;canInitialize:boolean;canUse:boolean;canDawn:boolean;reason?:string;useReason?:string;boundary:string}
 export type InfusionChargeResult={status:'applied'|'duplicate';receipt:InfusionChargeReceipt;message:string}|{status:'rejected';message:string};
 
@@ -18,23 +18,30 @@ const allowedKeys=(value:object,keys:string[])=>Object.keys(value).every(key=>ke
 const BASIS_LIMIT=1000000;
 const FINGERPRINT_LIMIT=BASIS_LIMIT+20000;
 const CHARGE_REFS=['Repulsion Shield|TCE','Mind Sharpener|TCE'];
+const RADIANT_REF='Radiant Weapon|TCE';
 /** Physical class and item selections own history, never catalog IDs or labels. */
 export const infusionChargeKey=(ownerId:string,ruleRef:string,targetId:string)=>JSON.stringify([ownerId,ruleRef,targetId]);
 function validAction(value:unknown):value is InfusionChargeAction{
  if(!object(value))return false;
- if(value.kind==='initialize')return allowedKeys(value,['kind','initial'])&&balance(value.initial);
+ if(value.kind==='initialize')return allowedKeys(value,['kind','initial','upgradeConfirmed'])&&balance(value.initial)&&(!Object.hasOwn(value,'upgradeConfirmed')||value.upgradeConfirmed===true);
  if(value.kind==='use')return allowedKeys(value,['kind','triggerConfirmed','reactionConfirmed'])&&value.triggerConfirmed===true&&value.reactionConfirmed===true;
  return value.kind==='dawn'&&allowedKeys(value,['kind','dawnConfirmed','roll'])&&value.dawnConfirmed===true&&Number.isSafeInteger(value.roll)&&value.roll>=1&&value.roll<=4;
 }
 /** Unknown versions survive imports untouched. Invalid v1 data rejects the import
- * and every charge action without repairing, clearing or taking ownership of it. */
+ * and every charge action without repairing, clearing or taking ownership of it.
+ * v2 adds Radiant only; v1 is promoted solely by an explicitly confirmed action. */
 export function validateInfusionChargeState(value:unknown):void{
  if(value===undefined)return;
  if(!object(value)||!Number.isSafeInteger(value.version)||value.version<1)throw Error('注法充能记录版本无效，原记录保留。');
- if(value.version!==1)return;
- if(!allowedKeys(value,['version','sequence','last','records'])||!Number.isSafeInteger(value.sequence)||value.sequence<0||!object(value.records)||Object.keys(value.records).length>10000)throw Error('注法充能记录无效，原记录保留。');
+ if(value.version!==1&&value.version!==2)return;
+ if(!allowedKeys(value,value.version===2?['version','sequence','last','records','v1History']:['version','sequence','last','records'])||!Number.isSafeInteger(value.sequence)||value.sequence<0||!object(value.records)||Object.keys(value.records).length>10000)throw Error('注法充能记录无效，原记录保留。');
  for(const [key,row] of Object.entries(value.records)){
-  if(!object(row)||!allowedKeys(row,['ownerId','ruleRef','targetId','current','max'])||!text(row.ownerId)||!text(row.targetId)||!CHARGE_REFS.includes(row.ruleRef)||row.max!==4||!balance(row.current)||key!==infusionChargeKey(row.ownerId,row.ruleRef,row.targetId))throw Error('注法充能归属或余额无效，原记录保留。');
+  if(!object(row)||!allowedKeys(row,['ownerId','ruleRef','targetId','current','max'])||!text(row.ownerId)||!text(row.targetId)||!(CHARGE_REFS.includes(row.ruleRef)||value.version===2&&row.ruleRef===RADIANT_REF)||row.max!==4||!balance(row.current)||key!==infusionChargeKey(row.ownerId,row.ruleRef,row.targetId))throw Error('注法充能归属或余额无效，原记录保留。');
+ }
+ if(value.v1History!==undefined){
+  if(value.version!==2||!object(value.v1History)||value.v1History.version!==1||value.v1History.sequence>=value.sequence)throw Error('注法旧版历史无效，原记录保留。');
+  validateInfusionChargeState(value.v1History);
+  for(const [key,row] of Object.entries(value.v1History.records) as [string,InfusionChargeRecord][]){const current=value.records[key];if(!current||current.ownerId!==row.ownerId||current.ruleRef!==row.ruleRef||current.targetId!==row.targetId)throw Error('注法旧版归属历史丢失，原记录保留。');}
  }
  const receipt=value.last;
  if(value.sequence===0&&(receipt!==undefined||Object.keys(value.records).length))throw Error('注法充能序号与历史不一致。');
@@ -42,6 +49,7 @@ export function validateInfusionChargeState(value:unknown):void{
  if(receipt!==undefined){
   if(!object(receipt)||!allowedKeys(receipt,['id','sequence','fingerprint','key','kind','action','before','after'])||!text(receipt.id,128)||!Number.isSafeInteger(receipt.sequence)||receipt.sequence!==value.sequence-1||!text(receipt.fingerprint,FINGERPRINT_LIMIT)||!text(receipt.key,6500)||!validAction(receipt.action)||receipt.kind!==receipt.action.kind||!balance(receipt.after)||!Object.hasOwn(value.records,receipt.key)||value.records[receipt.key].current!==receipt.after)throw Error('注法充能回执无效，原记录保留。');
   const action=receipt.action;
+  if(value.version===1&&action.kind==='initialize'&&Object.hasOwn(action,'upgradeConfirmed'))throw Error('旧版充能回执不得包含新版升级字段。');
   const validTransition=action.kind==='initialize'?receipt.before===undefined&&receipt.after===action.initial:
    action.kind==='use'?balance(receipt.before)&&receipt.before>=1&&receipt.after===receipt.before-1:
    balance(receipt.before)&&receipt.before<4&&receipt.after===Math.min(4,receipt.before+action.roll);
@@ -50,7 +58,7 @@ export function validateInfusionChargeState(value:unknown):void{
 }
 function storeReason(c:Character):string|undefined{
  try {validateInfusionChargeState(c.runtime.infusionCharges);}catch(error){return (error as Error).message;}
- if(c.runtime.infusionCharges&&c.runtime.infusionCharges.version!==1)return '此注法充能记录版本尚未支持，原记录保留且未修改。';
+ if(c.runtime.infusionCharges&&c.runtime.infusionCharges.version!==1&&c.runtime.infusionCharges.version!==2)return '此注法充能记录版本尚未支持，原记录保留且未修改。';
 }
 function resolve(c:Character,choiceId:string,entryId:string):InfusionResolution{
  try {validateInfusions(c.infusions);}catch{return {available:false,reason:'注法目标记录无效，原记录保留。'};}
@@ -63,7 +71,7 @@ function useReason(c:Character,resolved:Extract<InfusionResolution,{available:tr
  const {rule,target,binding}=resolved;
  if(!target.equipped)return '目标当前未穿戴或装备。';
  if(rule.requiresAttunement&&target.attuned!==true)return '请先同调此注法物品。';
- if(rule.requiresHeld&&binding.held!==true)return '请先明确确认当前持握此盾牌。';
+ if(rule.requiresHeld&&binding.held!==true)return '请先明确确认当前持握此注法物品。';
  const type=armorType(target.entry);
  if(type&&activeSelections(c).filter(row=>row.equipped&&row.quantity>0&&armorType(row.entry)&&(armorType(row.entry)==='S')===(type==='S')).length!==1)return '同时穿戴的护甲或持用盾牌存在冲突，请先明确一件。';
 }
@@ -111,11 +119,14 @@ export function performInfusionChargeAction(c:Character,request:InfusionChargeRe
  const {action}=request,before=offer.current;
  if(action.kind==='initialize'&&!offer.canInitialize||action.kind==='use'&&!offer.canUse||action.kind==='dawn'&&!offer.canDawn)return reject((action.kind==='use'?offer.useReason:offer.reason)||'此充能操作当前不可用。');
  if(action.kind==='initialize'&&state&&Object.keys(state.records).length>=10000)return reject('注法充能历史已达支持上限，原记录保留。');
+ const upgrade=state?.version===1&&resolved.rule.reference===RADIANT_REF;
+ if(action.kind==='initialize'&&Object.hasOwn(action,'upgradeConfirmed')&&!upgrade)return reject('升级确认只用于把现有 v1 充能记录明确升级为光耀武器 v2，未执行。');
+ if(upgrade&&(action.kind!=='initialize'||action.upgradeConfirmed!==true))return reject('须明确确认升级充能记录至 v2；旧余额、序号及回执将保留，旧版不能操作 v2。');
  const after=action.kind==='initialize'?action.initial:action.kind==='use'?before!-1:Math.min(4,before!+action.roll);
  if(!balance(after))return reject('注法充能余额无效，未执行。');
  const record:InfusionChargeRecord={ownerId:resolved.owner.id,ruleRef:resolved.rule.reference,targetId:resolved.target.id,current:after,max:4};
  const receipt:InfusionChargeReceipt={id:request.id,sequence,fingerprint,key:request.key,kind:action.kind,action:{...action},...(before===undefined?{}:{before}),after};
- const next:InfusionChargeState={version:1,sequence:sequence+1,last:receipt,records:{...state?.records,[request.key]:record}};
+ const next:InfusionChargeState={version:state?.version===2||resolved.rule.reference===RADIANT_REF?2:1,sequence:sequence+1,last:receipt,records:{...state?.records,[request.key]:record},...(upgrade?{v1History:structuredClone(state) as NonNullable<InfusionChargeState['v1History']>}:state?.v1History?{v1History:state.v1History}:{})};
  try {validateInfusionChargeState(next);}catch(error){return reject((error as Error).message);}
  // No mutation occurs before this assignment, including receipt validation.
  c.runtime.infusionCharges=next;

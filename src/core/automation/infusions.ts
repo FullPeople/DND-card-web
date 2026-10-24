@@ -32,7 +32,8 @@ function nonmagical(row:Selection){
   r.rarity==='none'&&!r.tier&&!r.sentient&&!r.curse;
 }
 function targetAllowed(row:Selection,rule:InfusionRule){
- if(!nonmagical(row)||rule.charges&&!identityConsistent(row.entry)||!rule.itemTypes.includes(code(row.entry.raw.type)))return false;
+ if(!nonmagical(row)||(rule.charges||rule.mechanism==='spell-refueling')&&!identityConsistent(row.entry)||!rule.itemTypes.includes(code(row.entry.raw.type)))return false;
+ if(rule.mechanism==='spell-refueling')return row.entry.raw.type==='G'&&!!rule.targetReferences?.some(ref=>matchesRuleIdentity(row.entry,ref));
  if(rule.mechanism==='concentration-reaction')return code(row.entry.raw.type)==='G'?row.entry.raw.type==='G'&&!!rule.targetReferences?.some(ref=>matchesRuleIdentity(row.entry,ref)):!!armorType(row.entry)&&!!armorRule(row).rule;
  if(rule.mechanism==='spell-attack-bonus')return row.entry.raw.scfType===rule.focusType&&!!rule.targetReferences?.some(ref=>matchesRuleIdentity(row.entry,ref));
  if(rule.mechanism==='armor-bonus'||rule.mechanism==='damage-resistance')return !!armorType(row.entry)&&!!armorRule(row).rule;
@@ -45,7 +46,7 @@ function targetAllowed(row:Selection,rule:InfusionRule){
  }
  return false;
 }
-function targetDescription(rule:InfusionRule){return rule.mechanism==='concentration-reaction'?'护甲（不含盾牌）或已核对的 PHB 长袍':rule.mechanism==='spell-attack-bonus'?'已核对的 PHB 权杖、法杖或魔杖':rule.mechanism==='weapon-bonus'?`${rule.requiredProperties?.includes('T')?'具有投掷属性的':rule.requiredProperties?.includes('A')?'具有弹药属性的':''}简易或军用武器（使用自动命中与伤害公式）`:rule.mechanism==='damage-resistance'?'护甲（不含盾牌）':rule.itemTypes.length===1?'盾牌':'护甲或盾牌';}
+function targetDescription(rule:InfusionRule){return rule.mechanism==='spell-refueling'?'已核对的 PHB 玺戒':rule.mechanism==='concentration-reaction'?'护甲（不含盾牌）或已核对的 PHB 长袍':rule.mechanism==='spell-attack-bonus'?'已核对的 PHB 权杖、法杖或魔杖':rule.mechanism==='weapon-bonus'?`${rule.requiredProperties?.includes('T')?'具有投掷属性的':rule.requiredProperties?.includes('A')?'具有弹药属性的':''}简易或军用武器（使用自动命中与伤害公式）`:rule.mechanism==='damage-resistance'?'护甲（不含盾牌）':rule.itemTypes.length===1?'盾牌':'护甲或盾牌';}
 export function infusionTargets(c:Character,entry?:Entry):Selection[]{
  const rules=entry?[infusionRule(entry)].filter((rule):rule is InfusionRule=>!!rule):evidence.rules;
  return activeSelections(c).filter(row=>rules.some(rule=>targetAllowed(row,rule)));
@@ -131,7 +132,7 @@ export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;
   const known=resolved,target=resolved.target;
   const rule=known!.rule;
   // Charge-only effects must never fall through into the default armor bonus.
-  if(rule.mechanism==='concentration-reaction'){out.issues.push({id:`infusion-effect-boundary:${binding.targetId}`,selectionId:binding.targetId,severity:'warning',message:`${target.entry.name}：${rule.manualBoundary}`});continue;}
+  if(rule.mechanism==='concentration-reaction'||rule.mechanism==='spell-refueling'){out.issues.push({id:`infusion-effect-boundary:${binding.targetId}`,selectionId:binding.targetId,severity:'warning',message:`${target.entry.name}：${rule.manualBoundary}`});continue;}
   const bonus=rule.upgradeLevel!==undefined&&rule.upgradedBonus!==undefined&&known!.owner.level>=rule.upgradeLevel?rule.upgradedBonus:rule.bonus;
   const origin=`${known!.entry.name} · ${known!.entry.source} → ${target!.entry.name}：注法 +${bonus}`;
   if(rule.mechanism==='spell-attack-bonus'){

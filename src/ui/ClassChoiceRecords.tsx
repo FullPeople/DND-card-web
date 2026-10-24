@@ -6,6 +6,7 @@ import {useSheetChoices} from './SheetChoicesContext';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import {Reference} from './Reference';
 import {InfusionControl} from './InfusionControl';
+import {refuelingRingBindingEdit} from './refuelingRingSubmission';
 import {AsiAllocationControl} from './AsiAllocationControl';
 import {setAsiAllocation} from '../core/automation/asi';
 import {invocationRule} from '../core/automation/invocations';
@@ -22,7 +23,7 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
  function withdraw(binding:InfusionBinding){
   if(workspace.canEdit===false||!edit)return;
   let applied=false;
-  try{edit(draft=>{setInfusionTarget(draft,binding.choiceId,binding.entryId,null);applied=true;});setError(applied?'':'修改未提交，请查看卡面的只读或同步提示。');}
+  try{const entry=c.classChoiceSnapshots?.[binding.entryId];edit(entry&&infusionRule(entry)?.reference==='Spell-Refueling Ring|TCE'?refuelingRingBindingEdit(binding.choiceId,binding.entryId,null,()=>{applied=true;}):draft=>{setInfusionTarget(draft,binding.choiceId,binding.entryId,null);applied=true;});setError(applied?'':'修改未提交，请查看卡面的只读或同步提示。');}
   catch(reason){setError(reason instanceof Error?reason.message:String(reason));}
  }
  const preservedAsi=mode==='feat'&&c.asiAllocations?.version===1?c.asiAllocations.bindings.filter(binding=>!choices.some(choice=>choice.id===binding.choiceId&&choice.slots?.some(value=>value===binding.entryId||binding.kind==='legacy-class'&&choice.options.some(option=>option.value===value&&option.entry.raw._classAbilityRecord)))):[];
