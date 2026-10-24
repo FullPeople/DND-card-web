@@ -2,11 +2,12 @@ import {selectionEffectsAllowed,type Character,type Entry,type Selection} from '
 import {matchesReference} from '../entryReferences';
 import evidence from './invocationEvidence.json' with {type:'json'};
 import dualEvidence from './invocationDualEvidence.json' with {type:'json'};
+import atWillEvidence from './invocationAtWillEvidence.json' with {type:'json'};
 import {activeSelections} from './active';
 import {casterProfiles} from '../spellcastingRules';
 
 export interface ReviewedInvocationRule {reference:string;page:number;mechanism:string;skills?:string[];spell?:string;spellReference?:string;spellLevel?:number;requiredClassLevel?:number;selfOnly?:boolean;payment?:'pact-and-use';boundary:string}
-const reviewedRules:ReviewedInvocationRule[]=[...evidence.rules,...dualEvidence.rules as ReviewedInvocationRule[]];
+const reviewedRules:ReviewedInvocationRule[]=[...evidence.rules,...dualEvidence.rules as ReviewedInvocationRule[],...atWillEvidence.rules];
 
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 const matchesIdentity=(entry:Entry,reference:string)=>matchesReference({...entry,name:entry.english},reference);
@@ -37,11 +38,13 @@ export function invocationProgression(owner:Entry,group:unknown):boolean{
  const raw=group as {featureType?:unknown;progression?:unknown}|undefined;
  return owner.kind==='class'&&owner.edition==='2014'&&!owner.raw._copy&&!owner.raw._unresolvedParent&&owner.raw.edition!=='one'&&consistentIdentity(owner,evidence.owner)&&!!raw&&same(raw.featureType,['EI'])&&same(raw.progression,evidence.knownProgression);
 }
-/** The parent must be the active declared grant, not a manual same-name feature. */
+/** The parent must be the active declared grant, not a manual same-name feature.
+ * Recheck its raw identity and supported shape as well as the normalized label:
+ * a previously saved free-cast grant must not survive a forged source snapshot. */
 export function invocationSource(c:Character,owner:Selection,group:unknown):Selection|undefined{
  if(!invocationProgression(owner.entry,group)||!selectionEffectsAllowed(c,owner.entry)||!Number.isSafeInteger(owner.level)||owner.level<2||owner.level>20)return;
  const refs=Array.isArray(owner.entry.raw.classFeatures)?owner.entry.raw.classFeatures.flatMap((raw:unknown)=>{const ref=typeof raw==='string'?raw:(raw as {classFeature?:unknown})?.classFeature;return typeof ref==='string'?[ref]:[];}):[];
- const rows=c.selections.filter(row=>row.parentId===owner.id&&row.entry.raw._category==='classFeature'&&row.entry.raw.level===2&&row.entry.english===evidence.classFeatureEnglish&&!row.entry.raw._copy&&!row.entry.raw._unresolvedParent&&row.entry.edition==='2014'&&matchesReference(row.entry,evidence.classFeatureReference)&&selectionEffectsAllowed(c,row.entry)&&refs.some(ref=>row.grantKey===`ref:${ref}`&&matchesReference(row.entry,ref)&&!c.dismissedFeatures?.includes(`${owner.id}|ref:${ref}`)));
+ const rows=c.selections.filter(row=>row.parentId===owner.id&&row.entry.kind==='feature'&&row.entry.raw._category==='classFeature'&&row.entry.raw.level===2&&row.entry.english===evidence.classFeatureEnglish&&row.entry.raw.ENG_name===evidence.classFeatureEnglish&&row.entry.raw.source==='PHB'&&row.entry.raw.edition!=='one'&&!row.entry.effects?.length&&!row.entry.choices?.length&&!row.entry.raw._copy&&!row.entry.raw._unresolvedParent&&row.entry.edition==='2014'&&matchesReference(row.entry,evidence.classFeatureReference)&&selectionEffectsAllowed(c,row.entry)&&refs.some(ref=>row.grantKey===`ref:${ref}`&&matchesReference(row.entry,ref)&&!c.dismissedFeatures?.includes(`${owner.id}|ref:${ref}`)));
  return rows.length===1?rows[0]:undefined;
 }
 export const invocationChoiceHint='已核对的 PHB 祈唤自动授予技能熟练、随意施法或次数与契约位双消耗施法资格；法术实际效果与替换时机仍手动处理。未适配祈唤只保留学习记录。';
