@@ -30,7 +30,13 @@ async function tab(page:Page,name:string){
  const button=page.getByRole('tab',{name,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');
  const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(name)}(?: |$)`));await expect(panel).toBeVisible();return panel;
 }
-async function editor(page:Page){const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();await expect(toggle).toHaveAttribute('aria-checked','true');}
+async function editor(page:Page){
+ const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});
+ // On reload the persisted edit intent is temporarily unchecked while its
+ // runtime loads. Read only the enabled, settled control, not that placeholder.
+ await expect(toggle).toBeEnabled();await expect(toggle).toHaveAttribute('aria-busy','false');
+ if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();await expect(toggle).toHaveAttribute('aria-checked','true');
+}
 async function ready(page:Page,options:{level?:number;manualSpell?:boolean;secondaryClass?:boolean}={}){
  await mock(page);await page.goto('/card/?intro=0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const c=newCharacter('2014');c.automation=newAutomationState();c.profile.enabledSources=['PHB'];
