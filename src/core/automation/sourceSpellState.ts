@@ -23,9 +23,12 @@ export function sourceOwnerIdentity(c:Character,row:Selection):string{
 }
 // A zero counter may hide spent uses above a lowered maximum; only an explicit positive restoration clears that debt.
 export function rememberSourceSpellUses(c:Character,id?:string,preserveOverflow=true){
+ // Canonical invocation pools survive aliases and inactive learning trees. Their
+ // owned key, not mutable cached spell metadata, is the expenditure identity.
+ for(const [key,r] of Object.entries(c.runtime.resources)){const usageKey=r.sourceSpellGrant?.usageKey;if(!usageKey||key!==`source-spell-pool:${encodeURIComponent(usageKey)}`||r.max!==1||!Number.isSafeInteger(r.current)||r.current<0||r.current>1||r.unlimited||id&&specialSpellResource(id,c)!==key)continue;(c.runtime.sourceSpellSpent||={})[usageKey]=1-r.current;}
  for(const [selectionId,config] of Object.entries(c.spellSettings?.special||{})){
-  if(id&&selectionId!==id||!config.sourceGrant?.usageKey||config.mode!=='uses')continue;
-  const r=c.runtime.resources[specialSpellResource(selectionId,c)];if(!r)continue;
+  if(id&&selectionId!==id||!config.sourceGrant?.usageKey||config.mode!=='uses'||config.sourceGrant.usage==='invocation-pact')continue;
+  const r=c.runtime.resources[specialSpellResource(selectionId,c)];if(!r||r.sourceSpellGrant)continue;
   const ledger=c.runtime.sourceSpellSpent||={};ledger[config.sourceGrant.usageKey]=Math.max(0,r.max-r.current,preserveOverflow&&r.current===0?ledger[config.sourceGrant.usageKey]||0:0);
  }
 }
