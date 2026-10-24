@@ -52,10 +52,11 @@ jobs:
           revision=e2623b204ddbdf2bcfa8317acfc962de89c676e2
           mkdir -p "$INFUSION_SOURCE_DIR"
           for path in optionalfeatures.json class/class-artificer.json items-base.json items.json class/class-warlock.json spells/spells-phb.json; do
+            input_revision="$revision"; if [ "$path" = items.json ]; then input_revision=5cc0bbe2c2b241a334e731af4448bdba2168e8bd; fi
             filename="$(basename "$path" .json)-$revision.json"
             limit=2000000; if [ "$path" = items.json ]; then limit=8000000; fi
             curl --disable --fail --silent --show-error --max-time 60 --max-filesize "$limit" --proto '=https' \
-              "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/$path" \
+              "https://raw.githubusercontent.com/tjliqy/5etools-cn/$input_revision/data/$path" \
               --output "$INFUSION_SOURCE_DIR/$filename"
           done
           node --input-type=module <<'NODE'
@@ -76,7 +77,7 @@ jobs:
             const bytes=readFileSync(`${process.env.INFUSION_SOURCE_DIR}/${filename}`);
             const sha256=createHash('sha256').update(JSON.stringify(JSON.parse(bytes.toString('utf8')))).digest('hex');
             if(sha256!==hash)throw Error('Frozen input hash mismatch: '+path);
-            results.push({name:path,bytes:bytes.length,sha256});
+            results.push({name:path,revision:path==='items.json'?'5cc0bbe2c2b241a334e731af4448bdba2168e8bd':revision,bytes:bytes.length,sha256});
             rows.push({url:`https://5e.kiwee.top/data/${path}`,path:filename,sha256});
           }
           if(rows.length!==6)throw Error('Expected exactly six frozen source inputs');
