@@ -10,13 +10,17 @@
   "classFeaturePage": 105,
   "classFeatureEnglish": "Eldritch Invocations",
   "knownProgression": [0,2,2,2,3,3,4,4,5,5,5,6,6,6,7,7,7,8,8,8],
+  "level9Prerequisite": [{"level":{"level":9,"class":{"ENG_name":"Warlock","name":"魔契师"}}}],
   "rules": [
     {"reference":"Beguiling Influence|PHB","page":110,"mechanism":"skills","skills":["deception","persuasion"],"boundary":"自动授予欺瞒和游说熟练，不叠加专精；手工熟练记录保留。"},
-    {"reference":"Eldritch Sight|PHB","page":110,"mechanism":"spell","spell":"侦测魔法","spellReference":"Detect Magic|PHB","boundary":"可不消耗法术位随意施展侦测魔法；目标、专注、持续时间与侦测结果仍手动处理。"},
-    {"reference":"Armor of Shadows|PHB","page":110,"mechanism":"spell","spell":"法师护甲","spellReference":"Mage Armor|PHB","boundary":"仅对自身，可不消耗法术位和材料成分随意施展法师护甲；自身目标、未穿甲条件、AC 和持续时间仍手动处理，不自动加护甲。"},
-    {"reference":"Beast Speech|PHB","page":110,"mechanism":"spell","spell":"动物交谈","spellReference":"Speak with Animals|PHB","boundary":"可不消耗法术位随意施展动物交谈；自身目标、持续时间、交流内容与说服结果仍手动处理。"},
-    {"reference":"Mask of Many Faces|PHB","page":111,"mechanism":"spell","spell":"易容术","spellReference":"Disguise Self|PHB","boundary":"可不消耗法术位随意施展易容术；自身目标、外貌变化、持续时间与识破检定仍手动处理。"},
-    {"reference":"Misty Visions|PHB","page":111,"mechanism":"spell","spell":"无声幻影","spellReference":"Silent Image|PHB","boundary":"可不消耗法术位和材料成分随意施展无声幻影；目标位置、影像变化、专注、持续时间与识破交互仍手动处理。"}
+    {"reference":"Eldritch Sight|PHB","page":110,"mechanism":"spell","spell":"侦测魔法","spellReference":"Detect Magic|PHB","spellLevel":1,"boundary":"可不消耗法术位随意施展侦测魔法；目标、专注、持续时间与侦测结果仍手动处理。"},
+    {"reference":"Armor of Shadows|PHB","page":110,"mechanism":"spell","spell":"法师护甲","spellReference":"Mage Armor|PHB","spellLevel":1,"boundary":"仅对自身，可不消耗法术位和材料成分随意施展法师护甲；自身目标、未穿甲条件、AC 和持续时间仍手动处理，不自动加护甲。"},
+    {"reference":"Beast Speech|PHB","page":110,"mechanism":"spell","spell":"动物交谈","spellReference":"Speak with Animals|PHB","spellLevel":1,"boundary":"可不消耗法术位随意施展动物交谈；自身目标、持续时间、交流内容与说服结果仍手动处理。"},
+    {"reference":"Mask of Many Faces|PHB","page":111,"mechanism":"spell","spell":"易容术","spellReference":"Disguise Self|PHB","spellLevel":1,"boundary":"可不消耗法术位随意施展易容术；自身目标、外貌变化、持续时间与识破检定仍手动处理。"},
+    {"reference":"Misty Visions|PHB","page":111,"mechanism":"spell","spell":"无声幻影","spellReference":"Silent Image|PHB","spellLevel":1,"boundary":"可不消耗法术位和材料成分随意施展无声幻影；目标位置、影像变化、专注、持续时间与识破交互仍手动处理。"},
+    {"reference":"Otherworldly Leap|PHB","page":111,"mechanism":"spell","spell":"跳跃术","spellReference":"Jump|PHB","spellLevel":1,"requiredClassLevel":9,"selfOnly":true,"boundary":"仅对自身，可不消耗法术位和材料成分随意施展跳跃术；言语、姿势成分、自身目标、跳跃距离与持续时间仍手动处理，不自动改变移动或跳跃。"},
+    {"reference":"Ascendant Step|PHB","page":110,"mechanism":"spell","spell":"浮空术","spellReference":"Levitate|PHB","spellLevel":2,"requiredClassLevel":9,"selfOnly":true,"boundary":"仅对自身，可不消耗法术位和材料成分随意施展浮空术；言语、姿势成分、自身目标、升降移动、专注与持续时间仍手动处理，不自动改变移动或浮空。"},
+    {"reference":"Whispers of the Grave|PHB","page":111,"mechanism":"spell","spell":"死者交谈","spellReference":"Speak with Dead|PHB","spellLevel":3,"requiredClassLevel":9,"selfOnly":false,"boundary":"可不消耗法术位随意施展死者交谈，不豁免材料成分；言语、姿势成分、尸体条件、目标、十日限制、提问、回答与持续时间仍手动处理。"}
   ],
   "inputs": {
     "optionalfeatures.json":"031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844",
@@ -30,6 +34,9 @@
     "Beast Speech|PHB":"516c62ba6c799d5deff83c6a33b8714cdbe14b4f3a961904a919f84d8842e978",
     "Mask of Many Faces|PHB":"095dc9175d7ee1545f0fe86977960bd95ba5b02e4e3cbd6811583dbe16e9e28e",
     "Misty Visions|PHB":"9be6539a0fddc9781839a5c1cd03d8ffeb9838c7f1444907ab9b63ee0f4fd247",
+    "Otherworldly Leap|PHB":"e0b80fb0d7c63b199d7041924c7eeff175952e0faa85c089af855df7dc88a5d7",
+    "Ascendant Step|PHB":"efc917bafee5bef8afb9a9fd78cd5e2a40da7bfa62059a5a98127a8d2f8a244a",
+    "Whispers of the Grave|PHB":"9764be33324ce89d932f4f26abe3b25241da9251b8ed698214f1a55d300ea101",
     "Warlock|PHB":"179a4e48b79fef7ae2244e88e614d04a0828caca4a854b6f65de61b6df802385",
     "Eldritch Invocations|Warlock|PHB|2":"a482142444ed3639690525945c024d4b2476ac84bbe5e981ef3f7f0d323eaa8f"
   }

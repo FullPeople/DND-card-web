@@ -4,6 +4,7 @@ import evidence from './invocationEvidence.json' with {type:'json'};
 
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 const matchesIdentity=(entry:Entry,reference:string)=>matchesReference({...entry,name:entry.english},reference);
+const consistentIdentity=(entry:Entry,reference:string)=>matchesIdentity(entry,reference)&&matchesIdentity({...entry,english:entry.raw.ENG_name||entry.raw.name,source:entry.raw.source},reference);
 /** Stable family discriminator also accepts retained, edited historical records.
  * It authorizes archival storage, never automatic mechanics. */
 export function invocationRecord(entry:Entry){return entry.kind==='feature'&&entry.raw._category==='optionalfeature'&&same(entry.raw.featureType,['EI']);}
@@ -12,21 +13,23 @@ export function invocationRecord(entry:Entry){return entry.kind==='feature'&&ent
 export function invocationRule(entry:Entry){
  if(!invocationRecord(entry)||entry.edition!=='2014'||entry.effects?.length||entry.choices?.length)return;
  const raw=entry.raw;
- if(Object.keys(raw).some(key=>!['name','ENG_name','source','page','srd','reprintedAs','featureType','skillProficiencies','additionalSpells','entries','translator','_category'].includes(key)))return;
- const rule=evidence.rules.find(rule=>matchesIdentity(entry,rule.reference));if(!rule)return;
+ if(Object.keys(raw).some(key=>!['name','ENG_name','source','page','srd','reprintedAs','featureType','prerequisite','skillProficiencies','additionalSpells','entries','translator','_category'].includes(key)))return;
+ const rule=evidence.rules.find(rule=>consistentIdentity(entry,rule.reference));if(!rule)return;
+ if(!same(raw.prerequisite,rule.requiredClassLevel===9?evidence.level9Prerequisite:undefined))return;
  if(rule.mechanism==='skills')return raw.additionalSpells===undefined&&same(raw.skillProficiencies,[Object.fromEntries(rule.skills!.map(skill=>[skill,true]))])?rule:undefined;
  return raw.skillProficiencies===undefined&&same(raw.additionalSpells,[{innate:{_:[rule.spell]}}])?rule:undefined;
 }
 /** A reviewed free payment belongs to the exact PHB spell identity, not a
- * translated display-name match, copied identity, or custom mechanics. All
- * currently reviewed spell grants cast a 1st-level spell. */
+ * translated display-name match, copied identity, or custom mechanics. The
+ * reviewed spell level is declared per rule; higher-level grants never inherit
+ * a first-level payment or authorize an arbitrary same-label spell. */
 export function invocationSpellMatches(entry:Entry,rule:NonNullable<ReturnType<typeof invocationRule>>):boolean{
  const raw=entry.raw;
- return rule.mechanism==='spell'&&!!rule.spellReference&&entry.kind==='spell'&&entry.edition==='2014'&&raw._category==='spell'&&raw.edition!=='one'&&raw.level===1&&!raw._copy&&!raw._unresolvedParent&&!entry.effects?.length&&!entry.choices?.length&&matchesIdentity(entry,rule.spellReference)&&matchesIdentity({...entry,english:raw.ENG_name||raw.name,source:raw.source},rule.spellReference);
+ return rule.mechanism==='spell'&&!!rule.spellReference&&entry.kind==='spell'&&entry.edition==='2014'&&raw._category==='spell'&&raw.edition!=='one'&&raw.level===rule.spellLevel&&!raw._copy&&!raw._unresolvedParent&&!entry.effects?.length&&!entry.choices?.length&&matchesIdentity(entry,rule.spellReference)&&matchesIdentity({...entry,english:raw.ENG_name||raw.name,source:raw.source},rule.spellReference);
 }
 export function invocationProgression(owner:Entry,group:unknown):boolean{
  const raw=group as {featureType?:unknown;progression?:unknown}|undefined;
- return owner.kind==='class'&&owner.edition==='2014'&&!owner.raw._copy&&!owner.raw._unresolvedParent&&matchesIdentity(owner,evidence.owner)&&!!raw&&same(raw.featureType,['EI'])&&same(raw.progression,evidence.knownProgression);
+ return owner.kind==='class'&&owner.edition==='2014'&&!owner.raw._copy&&!owner.raw._unresolvedParent&&owner.raw.edition!=='one'&&consistentIdentity(owner,evidence.owner)&&!!raw&&same(raw.featureType,['EI'])&&same(raw.progression,evidence.knownProgression);
 }
 /** The parent must be the active declared grant, not a manual same-name feature. */
 export function invocationSource(c:Character,owner:Selection,group:unknown):Selection|undefined{
@@ -41,7 +44,7 @@ export const invocationChoiceHint='已核对的 PHB 祈唤自动授予技能熟�
  * directly imported/manual invocations or other grant mechanisms. */
 export function learnedInvocationRule(c:Character,row:Selection){
  const rule=invocationRule(row.entry);if(!rule||!row.requirementId||row.grantKey!==`choice:${row.requirementId}:${row.entry.id}`)return;
- const source=c.selections.find(parent=>parent.id===row.parentId),owner=source&&c.selections.find(parent=>parent.id===source.parentId&&parent.entry.kind==='class');if(!owner)return;
+ const source=c.selections.find(parent=>parent.id===row.parentId),owner=source&&c.selections.find(parent=>parent.id===source.parentId&&parent.entry.kind==='class');if(!owner||owner.level<(rule.requiredClassLevel??2))return;
  const prefix=`${owner.id}:class-optional:`,index=row.requirementId.startsWith(prefix)?row.requirementId.slice(prefix.length):'';if(!/^\d+$/.test(index))return;
  const group=owner.entry.raw.optionalfeatureProgression?.[Number(index)];if(invocationSource(c,owner,group)?.id!==source!.id)return;
  const answers=(c.answers[row.requirementId]||[]).slice(0,evidence.knownProgression[owner.level-1]),position=answers.indexOf(row.entry.id);if(position<0)return;
