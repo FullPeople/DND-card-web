@@ -44,7 +44,8 @@ async function ready(page:Page,options:{level?:number;manualSpell?:boolean;secon
  const entries:Entry[]=Object.entries(data).flatMap(([category,rows])=>rows.map(raw=>({id:`dual-payment-fixture:${category}:${raw.name}`,name:raw.name,english:raw.ENG_name,source:raw.source,edition:'2014' as const,kind:(category==='classFeature'||category==='optionalfeature'?'feature':category) as Entry['kind'],packId:'authored-dual-payment',revision:'1',entries:[],raw:{...raw,_category:category}})));
  c.selections=[{id:'warlock',entry:entries.find(e=>e.kind==='class')!,level:options.level??15,quantity:1,equipped:false},{id:'invocations-source',entry:entries.find(e=>e.raw._category==='classFeature')!,level:1,quantity:1,equipped:false,parentId:'warlock',grantKey:'ref:魔能祈唤|魔契师||2'}];
  c.name='双支付祈唤交互验收';c.notes='目标、材料、豁免、专注和法术效果仍由玩家处理';c.proficiencies={insight:true};c.abilities.str=14;c.baseHp=42;c.sheetBonuses={speed:5};c.runtime.hp=17;c.runtime.tempHp=4;
- c.runtime.resources['pact-slot:5']={max:3,current:3};
+ // Leave pact slots absent: the real imported Warlock must create its own
+ // automatic pool. A hand-authored counter must never be adopted as automatic.
  c.runtime.resources['manual-dual-payment-check']={name:'手工保留资源',max:7,current:2};
  c.runtime.resources['spell-slot:3']={name:'手工三环法术位',max:3,current:3};
  const authored=(id:string,kind:Entry['kind'],name:string):Selection=>({id,entry:{id:`${id}-entry`,kind,name,english:name,source:'PHB',edition:'2014',packId:'authored-dual-payment',revision:'1',entries:[],raw:{_category:kind}},level:1,quantity:2,equipped:false});
@@ -63,6 +64,8 @@ async function ready(page:Page,options:{level?:number;manualSpell?:boolean;secon
  // Every learned choice, level change, replacement and cast below uses real UI.
  const database=await page.evaluate(async()=>{const path='/card/src/platform/workspaceIdentity.ts';return (await import(path)).workspaceIdentity.database;});await restoreAuthoredChoices(page,database,{warlock:true});
  await expect.poll(async()=>(await saved(page)).selections.find(row=>row.id==='warlock')?.level).toBe(options.level??15);
+ await expect.poll(async()=>(await saved(page)).runtime.resources[pactId]).toMatchObject({name:'5环契约位',automatic:true,max:3,current:3});
+ expect((await saved(page)).runtime.resources['spell-slot:3']).toEqual(c.runtime.resources['spell-slot:3']);
 }
 async function learning(page:Page){
  if((page.viewportSize()?.width||0)<=760){const main=page.getByRole('button',{name:'功能页',exact:true});if(await main.isVisible())await main.click();}
