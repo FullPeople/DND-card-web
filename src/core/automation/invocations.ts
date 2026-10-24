@@ -44,15 +44,27 @@ export function invocationProgression(owner:Entry,group:unknown):boolean{
 export function invocationSource(c:Character,owner:Selection,group:unknown):Selection|undefined{
  if(!invocationProgression(owner.entry,group)||!selectionEffectsAllowed(c,owner.entry)||!Number.isSafeInteger(owner.level)||owner.level<2||owner.level>20)return;
  const refs=Array.isArray(owner.entry.raw.classFeatures)?owner.entry.raw.classFeatures.flatMap((raw:unknown)=>{const ref=typeof raw==='string'?raw:(raw as {classFeature?:unknown})?.classFeature;return typeof ref==='string'?[ref]:[];}):[];
- const rows=c.selections.filter(row=>row.parentId===owner.id&&row.entry.kind==='feature'&&row.entry.raw._category==='classFeature'&&row.entry.raw.level===2&&row.entry.english===evidence.classFeatureEnglish&&row.entry.raw.ENG_name===evidence.classFeatureEnglish&&row.entry.raw.source==='PHB'&&row.entry.raw.edition!=='one'&&!row.entry.effects?.length&&!row.entry.choices?.length&&!row.entry.raw._copy&&!row.entry.raw._unresolvedParent&&row.entry.edition==='2014'&&matchesReference(row.entry,evidence.classFeatureReference)&&selectionEffectsAllowed(c,row.entry)&&refs.some(ref=>row.grantKey===`ref:${ref}`&&matchesReference(row.entry,ref)&&!c.dismissedFeatures?.includes(`${owner.id}|ref:${ref}`)));
+ const rows=c.selections.filter(row=>row.parentId===owner.id&&row.entry.kind==='feature'&&row.entry.raw._category==='classFeature'&&row.entry.raw.level===2&&row.entry.english===evidence.classFeatureEnglish&&row.entry.raw.ENG_name===evidence.classFeatureEnglish&&row.entry.raw.source==='PHB'&&row.entry.raw.edition!=='one'&&row.entry.raw.skillProficiencies===undefined&&row.entry.raw.effects===undefined&&row.entry.raw.choices===undefined&&!row.entry.effects?.length&&!row.entry.choices?.length&&!row.entry.raw._copy&&!row.entry.raw._unresolvedParent&&row.entry.edition==='2014'&&matchesReference(row.entry,evidence.classFeatureReference)&&selectionEffectsAllowed(c,row.entry)&&refs.some(ref=>row.grantKey===`ref:${ref}`&&matchesReference(row.entry,ref)&&!c.dismissedFeatures?.includes(`${owner.id}|ref:${ref}`)));
  return rows.length===1?rows[0]:undefined;
 }
 export const invocationChoiceHint='已核对的 PHB 祈唤自动授予技能熟练、随意施法或次数与契约位双消耗施法资格；法术实际效果与替换时机仍手动处理。未适配祈唤只保留学习记录。';
 
-/** Invocation payment is this class-learning grant only, not an automatic upgrade of
+/** Reviewed invocation mechanics belong to this class-learning grant only, not an upgrade of
  * directly imported/manual invocations or other grant mechanisms. */
 export function learnedInvocationRule(c:Character,row:Selection){
  const rule=invocationRule(row.entry);if(!rule||!row.requirementId||row.grantKey!==`choice:${row.requirementId}:${row.entry.id}`)return;
+ const saved=c.classChoiceSnapshots?.[row.entry.id];if(saved&&invocationRule(saved)?.reference!==rule.reference)return;
+ // Saved source effects do not change edition when the card does. Still reject
+ // missing/cyclic ancestry; the catalog's stricter new-selection filter is not
+ // a substitute for the saved-effect ownership contract.
+ let current:Selection|undefined=row;const seen=new Set<string>();
+ while(current){
+  if(seen.has(current.id)||!selectionEffectsAllowed(c,current.entry))return;
+  seen.add(current.id);if(!current.parentId)break;
+  current=c.selections.find(parent=>parent.id===current!.parentId);if(!current)return;
+ }
+ const active=activeSelections(c);
+ if(active.some(other=>other.requirementId!==row.requirementId&&!other.grantKey?.startsWith('choice:')&&invocationRule(other.entry)?.reference===rule.reference))return;
  const source=c.selections.find(parent=>parent.id===row.parentId),owner=source&&c.selections.find(parent=>parent.id===source.parentId&&parent.entry.kind==='class');if(!owner||owner.level<(rule.requiredClassLevel??2))return;
  const prefix=`${owner.id}:class-optional:`,index=row.requirementId.startsWith(prefix)?row.requirementId.slice(prefix.length):'';if(!/^\d+$/.test(index))return;
  const group=owner.entry.raw.optionalfeatureProgression?.[Number(index)];if(invocationSource(c,owner,group)?.id!==source!.id)return;
@@ -66,6 +78,36 @@ export function learnedInvocationRule(c:Character,row:Selection){
  * to the generic daily-free-cast adapter. It grants no mechanics by itself. */
 export function invocationCandidate(entry:Entry):boolean{
  return entry.raw._category==='optionalfeature'&&Array.isArray(entry.raw.featureType)&&entry.raw.featureType.includes('EI')||reviewedRules.some(rule=>matchesIdentity(entry,rule.reference));
+}
+/** Recognize only the reviewed skill identity, its source, and retained automatic
+ * invocation grants. This is a deny/fallback boundary, not authorization: saved
+ * snapshots and ancestry cannot themselves grant a skill. Ordinary custom manual
+ * features (including unrelated optional features) retain their generic effects. */
+export function invocationSkillScope(c:Character,row:Selection):'source'|'grant'|undefined{
+ const rawIdentity=(entry:Entry):Entry=>({...entry,english:entry.raw.ENG_name||entry.raw.name,source:entry.raw.source});
+ const sourceIdentity=(entry:Entry)=>[entry,rawIdentity(entry)].some(value=>value.english===evidence.classFeatureEnglish&&value.source==='PHB');
+ // A retained declared source must not escape the deny boundary by editing both
+ // labels before a choice snapshot exists. Reference provenance is independent
+ // of current learning eligibility; it never authorizes skills or other effects.
+ const sourceRecord=(candidate:Selection)=>{
+  const snapshot=c.classChoiceSnapshots?.[candidate.entry.id];
+  if(sourceIdentity(candidate.entry)||candidate.grantKey?.startsWith('ref:')&&snapshot&&sourceIdentity(snapshot))return true;
+  const owner=c.selections.find(parent=>parent.id===candidate.parentId);
+  if(!owner||![owner.entry,rawIdentity(owner.entry)].some(entry=>matchesIdentity(entry,evidence.owner)))return false;
+  const [name,className,classSource,level,source]=evidence.classFeatureReference.split('|');
+  const expected:Entry={...candidate.entry,kind:'feature',name,english:evidence.classFeatureEnglish,source:source||classSource||'PHB',raw:{className,classSource:classSource||'PHB',level:Number(level)}};
+  const refs=Array.isArray(owner.entry.raw.classFeatures)?owner.entry.raw.classFeatures:[];
+  return refs.some((value:unknown)=>{const ref=typeof value==='string'?value:(value as {classFeature?:unknown})?.classFeature;return typeof ref==='string'&&candidate.grantKey===`ref:${ref}`&&matchesReference(expected,ref);});
+ };
+ if(sourceRecord(row))return 'source';
+ const automatic=!!(row.requirementId?.includes(':class-optional:')||row.grantKey?.startsWith('choice:')&&row.grantKey.includes(':class-optional:'));
+ const saved=c.classChoiceSnapshots?.[row.entry.id];
+ const candidates=[row.entry,...(saved&&automatic?[saved]:[])];
+ if(candidates.some(entry=>reviewedRules.some(rule=>rule.mechanism==='skills'&&(matchesIdentity(entry,rule.reference)||matchesIdentity(rawIdentity(entry),rule.reference)))))return 'grant';
+ if(automatic){
+  const parent=c.selections.find(parent=>parent.id===row.parentId);
+  if(candidates.some(invocationCandidate)||parent&&sourceRecord(parent))return 'grant';
+ }
 }
 /** One current PHB Warlock and its actual Pact Magic grant own this global slot
  * pool. Multiple pact casters cannot be disambiguated by a bare resource ID. */
