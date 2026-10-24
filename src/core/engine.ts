@@ -1,5 +1,6 @@
 import {evaluateAsiAllocations} from './automation/asi';
 import {evaluateInfusions} from './automation/infusions';
+import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
 import {planFeatureResources} from './automation/featureResources';
 import {planRacialAbilities} from './racialAbilities';
 import {sheetChoices} from './automation/choices';
@@ -33,8 +34,17 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   let speed = typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
   const sizes = new Set<string>();
   const effectTrace:Record<string,string[]>={ac:[],hp:[],speed:[]};
+  const invocationSkillsApplied=new Set<string>();
   for (const selection of active) {
     const e = selection.entry; const origin = `${e.name} · ${e.source}`; const raw = e.raw;
+    const invocationScope=invocationSkillScope(c,selection);
+    const invocation=invocationScope==='grant'?learnedInvocationRule(c,selection):undefined;
+    const skillInvocation=invocation?.mechanism==='skills'?invocation:undefined;
+    if(skillInvocation&&!invocationSkillsApplied.has(skillInvocation.reference)){
+      for(const skill of skillInvocation.skills!)grantSkill(skill,origin);
+      invocationSkillsApplied.add(skillInvocation.reference);
+    }
+    if(invocationScope==='grant'&&!invocation)issues.push({id:`invocation-skills:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：祈唤未通过当前职业学习授权或声明已变化；保留记录，不自动授予技能熟练，手工熟练与专精仍保留。`});
     if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(unhandledFeatureArmorText(e)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
     // Background ability choices are annotations. The sheet's base scores
     // already contain the player's allocation, so do not apply it a second time.
@@ -49,14 +59,14 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     }
     if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
     // Choices are explicit saved answers; evaluation never creates an answer or grant.
-    const skillBlocks = e.kind === 'class' ? (selection.id===classes[0]?.id?raw.startingProficiencies?.skills:raw.multiclassing?.proficienciesGained?.skills) : raw.skillProficiencies;
+    const skillBlocks = invocationScope ? undefined : e.kind === 'class' ? (selection.id===classes[0]?.id?raw.startingProficiencies?.skills:raw.multiclassing?.proficienciesGained?.skills) : raw.skillProficiencies;
     for (const block of Array.isArray(skillBlocks) ? skillBlocks : []) {
       for (const [key, value] of Object.entries(block || {})) if (value === true) grantSkill(key, origin);
     }
     if (selection.id === classes[0]?.id && Array.isArray(raw.proficiency)) raw.proficiency.forEach((a: string) => proficientSaves.add(a));
     // Retain already recorded skill choices from older backups, without quota limits.
-    for (const [key, values] of Object.entries(c.answers)) if (key.startsWith(`${selection.id}:skills:`) || key.startsWith(`${selection.id}:custom:`)) values.forEach(value => grantSkill(value, origin));
-    for (const effect of e.effects || []) {
+    if(!invocationScope)for (const [key, values] of Object.entries(c.answers)) if (key.startsWith(`${selection.id}:skills:`) || key.startsWith(`${selection.id}:custom:`)) values.forEach(value => grantSkill(value, origin));
+    for (const effect of invocationScope ? [] : e.effects || []) {
       if (effect.op === 'proficiency') grantSkill(effect.skill, origin);
       else if (ABILITIES.includes(effect.target as Ability)) {
         if(e.kind==='background')continue;
