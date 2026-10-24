@@ -111,7 +111,12 @@
       "requiresAttunement": true,
       "requiresHeld": true,
       "bonus": 1,
-      "manualBoundary": "盾牌充能、每日黎明恢复、反应与击退仍需手动处理，不自动修改资源或位置。 外部背包／持手变化不自动清除旧的持握确认；请手动取消旧确认，并在装备及同调后重新确认当前持握。 注法的长休、死亡等生命周期仍需手动处理。"
+      "manualBoundary": "反应充能须手动确认近战攻击命中、使用反应及每日黎明实际 1d4；击退至多 15 尺仍需手动移动，不另造豁免。 不自动跟踪回合反应、游戏时钟或其他持用者。 外部背包／持手变化不自动清除旧的持握确认；请手动取消旧确认，并在装备及同调后重新确认当前持握。 注法的长休激活、触摸、死亡等生命周期仍需手动处理。",
+      "charges": {
+        "max": 4,
+        "use": 1,
+        "recovery": "dawn-1d4"
+      }
     },
     {
       "reference": "Resistant Armor|TCE",
@@ -126,6 +131,28 @@
       "requiresAttunement": true,
       "bonus": 0,
       "manualBoundary": "只展示所选伤害抗性，不自动结算伤害；注法的长休、死亡等生命周期仍需手动处理。"
+    },
+    {
+      "reference": "Mind Sharpener|TCE",
+      "owner": "Artificer|TCE",
+      "mechanism": "concentration-reaction",
+      "itemTypes": [
+        "LA",
+        "MA",
+        "HA",
+        "G"
+      ],
+      "targetReferences": [
+        "Robes|PHB"
+      ],
+      "minLevel": 2,
+      "bonus": 0,
+      "charges": {
+        "max": 4,
+        "use": 1,
+        "recovery": "dawn-1d4"
+      },
+      "manualBoundary": "穿戴者维持法术专注的体质豁免失败时，可确认使用反应及 1 充能，把该次结果改为成功；本卡只记充能，不自动改写豁免、专注状态或每轮反应。 每日黎明恢复须确认实际 1d4，不随长休恢复。 注法的长休激活、触摸、死亡及交给其他穿戴者仍需手动处理。"
     }
   ],
   "knownProgression": [
@@ -178,7 +205,8 @@
   "inputs": {
     "optionalfeatures.json": "031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844",
     "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
-    "items-base.json": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff"
+    "items-base.json": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+    "items.json": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
   },
   "entryHashes": {
     "Enhanced Defense|TCE": "c3ff5aa7aefeb54b8e2d0454d042aa6b89937d5a454af67eec7d9363084015b0",
@@ -188,7 +216,12 @@
     "Enhanced Arcane Focus|TCE": "74a9b4756537cb2a3dc3eddd2da7311fcee4a0703e7550dde24d3705c4df851d",
     "Repeating Shot|TCE": "2c0d16d8243af25a3845ae161a9be7f0cfcb195cb80ac7f9aafe9d8bfd56dde7",
     "Repulsion Shield|TCE": "28ec9c4a9c276621b12dd971841d6837b5d2bfc3132d286b6e51d1acd885f64b",
-    "Resistant Armor|TCE": "338fac5826a0f5823dd84c16ab1a8856af870ec37c0b3d01e0c2b431326fc61e"
+    "Resistant Armor|TCE": "338fac5826a0f5823dd84c16ab1a8856af870ec37c0b3d01e0c2b431326fc61e",
+    "Mind Sharpener|TCE": "d8a1185d43052a39b5ddd0ae50758fb34acbc7bd9765474898957305c3591f84",
+    "Robes|PHB": "6bfbf76315967903d54c62cd91771b280d4e3063c737fc9e2d9835450831ada9",
+    "Shield|PHB": "b83f2a31bea90264a7897c65cea8573da00915f5fef7db19308b2c960c378985",
+    "Artificer|TCE": "2c4248ad45438e0dd27a57a7a274c15756308e8e23c410b0f0f58bc7eadfc5e1"
   },
-  "targetSource": "https://5e.kiwee.top/data/items-base.json"
+  "targetSource": "https://5e.kiwee.top/data/items-base.json",
+  "additionalTargetSource": "https://5e.kiwee.top/data/items.json"
 }

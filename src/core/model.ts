@@ -83,7 +83,7 @@ export interface Character {
   /** Evidence retained when the user explicitly resolves a legacy AC override. */
   armorAdjustmentHistory?: {version:1;action:'restore'|'convert';records:{id:string;target:'ac'|string;value:number;reason:string}[];previousBonus:number;previousTotal:number;ruleTotal:number;resultingBonus:number}[];
   externalSnapshot?: Raw;
-  runtime: { rests?:import('./automation/rest').RestState; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
+  runtime: { infusionCharges?:import('./automation/infusionCharges').InfusionChargeState; rests?:import('./automation/rest').RestState; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
 }
 export interface RulePack { schemaVersion: 1; id: string; name: string; version: string; author?: string; editions: Edition[]; requires: { id: string; version: string }[]; conflicts: string[]; entries: Entry[] }
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }

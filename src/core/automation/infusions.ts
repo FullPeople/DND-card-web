@@ -8,17 +8,18 @@ import evidence from './infusionEvidence.json' with {type:'json'};
 
 export interface InfusionBinding {choiceId:string;entryId:string;targetId:string;held?:boolean;damageType?:string}
 export interface InfusionState {version:1;bindings:InfusionBinding[]}
-type InfusionRule=typeof evidence.rules[number];
+export type InfusionRule=typeof evidence.rules[number];
 // Registry references use canonical English + source; a renamed display label
 // must never turn an unrelated item, option or class into a reviewed identity.
-const matchesRuleIdentity=(entry:Entry,reference:string)=>matchesReference({...entry,name:entry.english},reference);
+const identityConsistent=(entry:Entry)=>entry.english===(entry.raw.ENG_name||entry.raw.name)&&entry.source===entry.raw.source;
+const matchesRuleIdentity=(entry:Entry,reference:string)=>identityConsistent(entry)&&matchesReference({...entry,name:entry.english},reference);
 export const INFUSION_DAMAGE_TYPES=['acid','cold','fire','force','lightning','necrotic','poison','psychic','radiant','thunder'] as const;
 const validDamageType=(value:unknown):value is typeof INFUSION_DAMAGE_TYPES[number]=>typeof value==='string'&&INFUSION_DAMAGE_TYPES.some(type=>type===value);
 export interface InfusionWeaponEffect {bonus:number;trace:string[];rangedOnly?:boolean}
 /** Reviewed source-qualified identities, not display-name dispatch. Unknown
  * item/prerequisite families stay manual. Learning alone grants no effect. */
 export function infusionRule(entry:Entry){
- if(entry.kind!=='feature'||entry.raw._category!=='optionalfeature'||!Array.isArray(entry.raw.featureType)||entry.raw.featureType.length!==1||entry.raw.featureType[0]!=='AI'||entry.raw._copy||entry.effects?.length)return;
+ if(entry.kind!=='feature'||entry.raw._category!=='optionalfeature'||!Array.isArray(entry.raw.featureType)||entry.raw.featureType.length!==1||entry.raw.featureType[0]!=='AI'||entry.raw._copy||entry.raw._unresolvedParent||entry.raw.edition==='one'||entry.effects?.length||entry.choices?.length)return;
  return evidence.rules.find(rule=>matchesRuleIdentity(entry,rule.reference));
 }
 const code=(value:unknown)=>String(value??'').split('|')[0].toUpperCase();
@@ -26,12 +27,13 @@ const supportedDamage=(value:unknown)=>typeof value==='string'&&/^(?:\d+d\d+|\d+
 function nonmagical(row:Selection){
  const r=row.entry.raw;
  return row.quantity===1&&row.entry.kind==='item'&&
-  !r.reqAttune&&!r.magic&&!r.wondrous&&!r._copy&&!row.entry.effects?.length&&
+  !r.reqAttune&&!r.magic&&!r.wondrous&&!r._copy&&!r._unresolvedParent&&!row.entry.effects?.length&&
   !Object.keys(r).some(key=>/^bonus/.test(key)&&r[key]!==undefined)&&
   r.rarity==='none'&&!r.tier&&!r.sentient&&!r.curse;
 }
 function targetAllowed(row:Selection,rule:InfusionRule){
- if(!nonmagical(row)||!rule.itemTypes.includes(code(row.entry.raw.type)))return false;
+ if(!nonmagical(row)||rule.charges&&!identityConsistent(row.entry)||!rule.itemTypes.includes(code(row.entry.raw.type)))return false;
+ if(rule.mechanism==='concentration-reaction')return code(row.entry.raw.type)==='G'?row.entry.raw.type==='G'&&!!rule.targetReferences?.some(ref=>matchesRuleIdentity(row.entry,ref)):!!armorType(row.entry)&&!!armorRule(row).rule;
  if(rule.mechanism==='spell-attack-bonus')return row.entry.raw.scfType===rule.focusType&&!!rule.targetReferences?.some(ref=>matchesRuleIdentity(row.entry,ref));
  if(rule.mechanism==='armor-bonus'||rule.mechanism==='damage-resistance')return !!armorType(row.entry)&&!!armorRule(row).rule;
  if(rule.mechanism==='weapon-bonus'){
@@ -43,7 +45,7 @@ function targetAllowed(row:Selection,rule:InfusionRule){
  }
  return false;
 }
-function targetDescription(rule:InfusionRule){return rule.mechanism==='spell-attack-bonus'?'已核对的 PHB 权杖、法杖或魔杖':rule.mechanism==='weapon-bonus'?`${rule.requiredProperties?.includes('T')?'具有投掷属性的':rule.requiredProperties?.includes('A')?'具有弹药属性的':''}简易或军用武器（使用自动命中与伤害公式）`:rule.mechanism==='damage-resistance'?'护甲（不含盾牌）':rule.itemTypes.length===1?'盾牌':'护甲或盾牌';}
+function targetDescription(rule:InfusionRule){return rule.mechanism==='concentration-reaction'?'护甲（不含盾牌）或已核对的 PHB 长袍':rule.mechanism==='spell-attack-bonus'?'已核对的 PHB 权杖、法杖或魔杖':rule.mechanism==='weapon-bonus'?`${rule.requiredProperties?.includes('T')?'具有投掷属性的':rule.requiredProperties?.includes('A')?'具有弹药属性的':''}简易或军用武器（使用自动命中与伤害公式）`:rule.mechanism==='damage-resistance'?'护甲（不含盾牌）':rule.itemTypes.length===1?'盾牌':'护甲或盾牌';}
 export function infusionTargets(c:Character,entry?:Entry):Selection[]{
  const rules=entry?[infusionRule(entry)].filter((rule):rule is InfusionRule=>!!rule):evidence.rules;
  return activeSelections(c).filter(row=>rules.some(rule=>targetAllowed(row,rule)));
@@ -52,10 +54,10 @@ function learned(c:Character,binding:InfusionBinding){
  const entry=c.classChoiceSnapshots?.[binding.entryId],rule=entry&&infusionRule(entry);
  if(!entry||!rule||!selectionEffectsAllowed(c,entry))return;
  for(const owner of activeSelections(c)){
-  if(owner.entry.kind!=='class'||!matchesRuleIdentity(owner.entry,rule.owner)||owner.entry.edition==='2024'||!Number.isSafeInteger(owner.level)||owner.level<rule.minLevel||owner.level>20)continue;
+  if(owner.entry.kind!=='class'||owner.entry.raw._category!=='class'||owner.entry.raw._copy||owner.entry.raw._unresolvedParent||owner.entry.raw.edition==='one'||!matchesRuleIdentity(owner.entry,rule.owner)||owner.entry.edition==='2024'||!Number.isSafeInteger(owner.level)||owner.level<rule.minLevel||owner.level>20)continue;
   const feature=evidence.classFeatureReference;
   if(!Array.isArray(owner.entry.raw.classFeatures)||!owner.entry.raw.classFeatures.some((raw:unknown)=>(typeof raw==='string'?raw:(raw as any)?.classFeature)===feature)||c.dismissedFeatures?.includes(`${owner.id}|ref:${feature}`))continue;
-  if(!activeSelections(c).some(row=>row.parentId===owner.id&&row.grantKey===`ref:${feature}`&&row.entry.raw._category==='classFeature'&&row.entry.english===evidence.classFeatureEnglish&&matchesReference(row.entry,feature)))continue;
+  if(!activeSelections(c).some(row=>row.parentId===owner.id&&row.grantKey===`ref:${feature}`&&row.entry.kind==='feature'&&row.entry.raw._category==='classFeature'&&identityConsistent(row.entry)&&row.entry.raw.level===2&&!row.entry.raw._copy&&!row.entry.raw._unresolvedParent&&row.entry.raw.edition!=='one'&&!row.entry.effects?.length&&!row.entry.choices?.length&&row.entry.english===evidence.classFeatureEnglish&&matchesReference(row.entry,feature)))continue;
   const groups=owner.entry.raw.optionalfeatureProgression;
   if(!Array.isArray(groups))continue;
   for(const [index,group] of groups.entries()){
@@ -64,6 +66,21 @@ function learned(c:Character,binding:InfusionBinding){
    if(answers.includes(entry.id))return {entry,rule,owner};
   }
  }
+}
+export type InfusionResolution={available:true;binding:InfusionBinding;entry:Entry;rule:InfusionRule;owner:Selection;target:Selection}|{available:false;reason:string};
+/** Shared read-only authorization for projection and charge operations. Equipment
+ * is intentionally separate: dawn recovery is not wearing/holding gated. */
+export function resolveInfusionBinding(c:Character,binding:InfusionBinding,active=activeSelections(c)):InfusionResolution{
+ if(!automationEnabled(c))return {available:false,reason:'来源自动计算未启用'};
+ try {validateInfusions(c.infusions);}catch{return {available:false,reason:'注法目标记录无效，原记录保留'};}
+ if(c.infusions?.version!==1)return {available:false,reason:'注法目标尚未指定或记录版本不支持'};
+ const known=learned(c,binding),target=active.find(row=>row.id===binding.targetId),bindings=c.infusions.bindings;
+ if(!known)return {available:false,reason:'已学记录、职业等级或来源当前不可用'};
+ if(!target||!targetAllowed(target,known.rule))return {available:false,reason:`目标不是可确认的单件非魔法${targetDescription(known.rule)}`};
+ if(known.rule.mechanism==='damage-resistance'&&!validDamageType(binding.damageType))return {available:false,reason:'尚未选择有效的单一伤害抗性'};
+ if(bindings.filter(row=>row.choiceId===binding.choiceId&&row.entryId===binding.entryId&&row.targetId===binding.targetId).length!==1||bindings.filter(row=>row.targetId===binding.targetId).length!==1||bindings.filter(row=>{const entry=c.classChoiceSnapshots?.[row.entryId];return entry&&infusionRule(entry)?.reference===known.rule.reference;}).length!==1)return {available:false,reason:'重复注法或目标冲突'};
+ if(bindings.length>evidence.activeProgression[known.owner.level-1])return {available:false,reason:'当前注法数量超出上限，请明确撤销多余记录'};
+ return {available:true,binding,...known,target};
 }
 export function canActivateInfusion(c:Character,choiceId:string,entryId:string):boolean{return automationEnabled(c)&&!!learned(c,{choiceId,entryId,targetId:''});}
 /** Explicit activation/withdrawal modifies owned intent only, never equipment,
@@ -109,15 +126,12 @@ export function evaluateInfusions(c:Character,active:Selection[]):{bonus:number;
  if(c.infusions.version!==1){out.issues.push({id:'infusion-version',severity:'warning',message:'注法记录版本尚未支持，原记录保留且未生效。'});return out;}
  const bindings=c.infusions.bindings;
  for(const binding of bindings){
-  const known=learned(c,binding),target=active.find(row=>row.id===binding.targetId);
-  let reason:string|undefined;
-  if(!known)reason='已学记录、职业等级或来源当前不可用';
-  else if(!target||!targetAllowed(target,known.rule))reason=`目标不是可确认的单件非魔法${targetDescription(known.rule)}`;
-  else if(known.rule.mechanism==='damage-resistance'&&!validDamageType(binding.damageType))reason='尚未选择有效的单一伤害抗性';
-  else if(bindings.filter(row=>row.targetId===binding.targetId).length!==1||bindings.filter(row=>{const entry=c.classChoiceSnapshots?.[row.entryId];return entry&&infusionRule(entry)?.reference===known.rule.reference;}).length!==1)reason='重复注法或目标冲突';
-  else if(bindings.length>evidence.activeProgression[known.owner.level-1])reason='当前注法数量超出上限，请明确撤销多余记录';
-  if(reason){out.issues.push({id:`infusion:${binding.choiceId}:${binding.entryId}`,severity:'warning',message:`注法暂不生效：${reason}；原记录保留。`});continue;}
+  const resolved=resolveInfusionBinding(c,binding,active);
+  if(!resolved.available){out.issues.push({id:`infusion:${binding.choiceId}:${binding.entryId}`,severity:'warning',message:`注法暂不生效：${resolved.reason}；原记录保留。`});continue;}
+  const known=resolved,target=resolved.target;
   const rule=known!.rule;
+  // Charge-only effects must never fall through into the default armor bonus.
+  if(rule.mechanism==='concentration-reaction'){out.issues.push({id:`infusion-effect-boundary:${binding.targetId}`,selectionId:binding.targetId,severity:'warning',message:`${target.entry.name}：${rule.manualBoundary}`});continue;}
   const bonus=rule.upgradeLevel!==undefined&&rule.upgradedBonus!==undefined&&known!.owner.level>=rule.upgradeLevel?rule.upgradedBonus:rule.bonus;
   const origin=`${known!.entry.name} · ${known!.entry.source} → ${target!.entry.name}：注法 +${bonus}`;
   if(rule.mechanism==='spell-attack-bonus'){
