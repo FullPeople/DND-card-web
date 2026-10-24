@@ -34,13 +34,14 @@ async function workspace(page:Page){
 async function choose(page:Page,name:string,index:number){
  const pane=await workspace(page);
  if((page.viewportSize()?.width||0)<=760)await pane.getByRole('button',{name:'打开候选资料',exact:true}).click();
- const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();const entryId=await row.getAttribute('data-entry-id');expect(entryId).toBeTruthy();
+ const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();const expected=attunedInfusionData.optionalfeature.find(entry=>entry.name===name)!;await expect(row.locator('.entry-name')).toContainText(expected.ENG_name);
  const from=await row.boundingBox();await page.mouse.move(from!.x+25,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+40,from!.y+from!.height/2,{steps:3});
  const slot=pane.locator('.choice-slot').nth(index);await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();
  // Narrow drag returns to Wiki, so return through the actual player navigation
- // before asserting the sheet. Verify the exact persisted catalog identity too.
+ // before asserting the sheet. Imported snapshots and catalog rows have distinct
+ // instance IDs; resolve the saved slot and verify its canonical infusion identity.
  if((page.viewportSize()?.width||0)<=760)await page.getByRole('button',{name:'功能页',exact:true}).click();
- await expect.poll(async()=>(await saved(page)).answers['attuned-owner:class-optional:0']?.[index]).toBe(entryId);
+ await expect.poll(async()=>{const c=await saved(page),id=c.answers['attuned-owner:class-optional:0']?.[index],entry=c.classChoiceSnapshots?.[id];return entry&&{name:entry.name,english:entry.english,source:entry.source,category:entry.raw._category};}).toEqual({name,english:expected.ENG_name,source:expected.source,category:'optionalfeature'});
  await tab(page,'特性');await expect(slot).toContainText(name);await pane.getByRole('button',{name:'收起选择',exact:true}).click();const learned=await control(page,name);await expect(learned).toBeVisible();return learned;
 }
 async function control(page:Page,name:string){const panel=await tab(page,'特性');return panel.locator('.detail-class-features [data-infusion-entry]').filter({has:page.getByLabel(`${name}灌注目标`,{exact:true})});}
@@ -82,10 +83,10 @@ test('shield target changes clear held intent; forgetting clears binding and rel
  await mark(page,'attuned-item-1','equipped',false);await mark(page,'attuned-item-3','equipped',true);await mark(page,'attuned-item-3','attuned',true);shield=await control(page,'斥力盾牌');await expect(shield.getByRole('checkbox',{name:'确认当前持握此盾牌',exact:true})).not.toBeChecked();await shield.getByRole('checkbox',{name:'确认当前持握此盾牌',exact:true}).check();await stats(page,16);
  await mark(page,'attuned-item-3','attuned',false);shield=await control(page,'斥力盾牌');await expect(shield.getByRole('checkbox',{name:'确认当前持握此盾牌',exact:true})).not.toBeChecked();await expect.poll(async()=>(await saved(page)).infusions.bindings[0].held).toBeUndefined();await stats(page,15);
  await mark(page,'attuned-item-3','attuned',true);shield=await control(page,'斥力盾牌');await expect(shield.getByRole('checkbox',{name:'确认当前持握此盾牌',exact:true})).not.toBeChecked();await shield.getByRole('checkbox',{name:'确认当前持握此盾牌',exact:true}).check();await stats(page,16);
- const learnedBefore=(await saved(page)).answers['attuned-owner:class-optional:0'],pane=await workspace(page);await pane.getByRole('button',{name:'移除斥力盾牌',exact:true}).click();await pane.getByRole('button',{name:'收起选择',exact:true}).click();
+ const learnedBefore=(await saved(page)).answers['attuned-owner:class-optional:0'],pane=await workspace(page),slotCount=await pane.locator('.choice-slot').count(),forgotten=Array.from({length:Math.max(learnedBefore.length,slotCount)},(_,index)=>index===1?'':learnedBefore[index]||'');await pane.getByRole('button',{name:'移除斥力盾牌',exact:true}).click();await pane.getByRole('button',{name:'收起选择',exact:true}).click();
  // Explicitly forgetting is not source suspension: it removes the owned binding
  // atomically, while retaining the other learned options and every inventory item.
- await expect.poll(async()=>(await saved(page)).answers['attuned-owner:class-optional:0']).toEqual([learnedBefore[0],'',learnedBefore[2]]);
+ await expect.poll(async()=>(await saved(page)).answers['attuned-owner:class-optional:0']).toEqual(forgotten);
  await expect.poll(async()=>(await saved(page)).infusions.bindings).toEqual([]);
  const panel=await tab(page,'特性');await expect(panel.getByLabel('已保留灌注记录',{exact:true})).toHaveCount(0);await expect(await control(page,'斥力盾牌')).toHaveCount(0);await stats(page,15);preserved(await saved(page),before);
  await page.reload();await expect.poll(async()=>(await saved(page)).infusions.bindings).toEqual([]);await expect(await control(page,'斥力盾牌')).toHaveCount(0);await stats(page,15);
