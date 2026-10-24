@@ -1,8 +1,10 @@
 import {ABILITIES,selectionEffectsAllowed,type Character,type Entry,type Selection} from '../model';
 import {candidateReason,evaluate} from '../engine';
+import {activeSelections} from './active';
 import {resolveEntryReference,matchesReference} from '../entryReferences';
 import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
+import {invocationRule,invocationProgression,invocationSource,invocationChoiceHint} from './invocations';
 
 const list=(value:unknown):unknown[]=>Array.isArray(value)?value:[];
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
@@ -68,6 +70,14 @@ function ownedFightingStylePrerequisite(c:Character,owner:Selection,known:Entry[
 /** Unknown prerequisite shapes remain unavailable; a choice never repairs them. */
 export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[]=c.selections.map(row=>row.entry)):string|undefined{
  const alternatives=entry.raw.prerequisite;if(alternatives===undefined)return;
+ // Only these exact reviewed invocations omit class.source in their frozen
+ // prerequisite. Resolve that omission to their verified PHB owner, never to
+ // total character level, another class row, or a general PHB default.
+ const invocation=optional?invocationRule(entry):undefined;
+ if(invocation?.requiredClassLevel){
+  if(!list(owner.entry.raw.optionalfeatureProgression).some(group=>invocationProgression(owner.entry,group)))return '此前置条件的来源职业尚未核对。';
+  return level(owner)<invocation.requiredClassLevel?`尚未达到所需职业等级 ${invocation.requiredClassLevel}。`:undefined;
+ }
  if(!Array.isArray(alternatives)||!alternatives.length)return '此前置条件结构尚未核对。';
  let scores:ReturnType<typeof evaluate>['abilities']|undefined;
  const check=(rule:Record<string,unknown>):string|undefined=>{
@@ -133,6 +143,20 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    if(count===0&&!c.answers[`${owner.id}:class-optional:${index}`]?.some(Boolean))return;
    const candidates=types.length?known.filter(entry=>entry.kind==='feature'&&entry.raw._category==='optionalfeature'&&list(entry.raw.featureType).some(type=>types.includes(key(type)))&&(entry.edition==='both'||entry.edition===owner.entry.edition)):[];
    add(`${owner.id}:class-optional:${index}`,group.name||'职业可选特性',count??0,count===undefined?[]:candidates,true,count===undefined?'此来源的进度结构尚未核对；已有记录保留。':undefined,true,optionalChoiceSupport(owner.entry,types,count,at,group.progression));
+   if(invocationProgression(owner.entry,group)){
+    const choice=out.at(-1)!,source=invocationSource(c,owner,group);choice.hint=invocationChoiceHint;
+    if(source){choice.grantOwnerId=source.id;choice.evidenceEntries=[source.entry];}
+    choice.support={rule:'verified',execution:'existing-grants',publication:'unverified',reason:invocationChoiceHint};
+    for(const option of choice.options){
+     const rule=invocationRule(option.entry);if(!rule)continue;
+     const active=activeSelections(c);option.unavailable=candidateReason({...sourceCard,selections:active.filter(row=>row.requirementId!==choice.id)},option.entry)||sourceChoicePrerequisite(c,option.entry,owner,true,known);
+     const manual=active.some(row=>row.requirementId!==choice.id&&!row.grantKey?.startsWith('choice:')&&invocationRule(row.entry)?.reference===rule.reference);
+     if(manual)option.unavailable||='同来源祈唤已有手工条目，未重复授予；手工记录保留。';
+     if(!source)option.unavailable||='魔能祈唤的来源职业特性当前不可用；学习记录保留。';
+     if(source&&!option.unavailable)option.grant=option.entry;
+    }
+    choice.selected=restricted?[]:choice.slots!.slice(0,choice.count).filter((value,index,values)=>choice.options.some(option=>option.value===value&&!option.unavailable)&&(values.indexOf(value)===index||choice.options.find(option=>option.value===value)?.entry.raw.repeatable===true));choice.complete=choice.selected.length===choice.count&&choice.count>0;
+   }
   });
   list(owner.entry.raw.featProgression).forEach((raw,index)=>{
    if(!raw||typeof raw!=='object')return;const group=raw as {name?:string;ENG_name?:string;category?:unknown;progression?:unknown};
@@ -159,9 +183,9 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const feature=resolveEntryReference(ref,known,'feature');if(!feature)continue;
    if(legacyFeatEvidence(owner.entry,feature)){
     const id=`${owner.id}:class-legacy-feat:${feature.id}`;if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
-    const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升（手动填写）',english:'Recorded ability improvement',entries:['保存本次属性提升方案；请在卡面手动填写属性，不重复叠加。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
+    const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升方案',english:'Recorded ability improvement',entries:['保存本次属性提升方案；已核对的职业授予可另行明确分配，未确认前不改变属性。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
     const feats=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
-    add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。这里只保存方案；属性及专长效果仍手动处理。',true,legacyRecordSupport);
+    add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。已核对的职业 ASI 可在确认尚未计入基础值后单独分配；替代专长效果仍手动。',true,legacyRecordSupport);
     out.at(-1)!.evidenceEntries=[feature];out.at(-1)!.grantLevel=atGrant;
     continue;
    }
@@ -176,7 +200,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    const id=`${owner.id}:class-typed-feat:${feature.id}`;
    if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
    const candidates=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
-   add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；只有既有已适配机制生效。ASI 属性分配仍手动填写，不会重复改变卡面基础属性。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；仅既有已适配机制生效，ASI 属性仍手动填写。'});
+   add(id,`${feature.name}（职业 ${atGrant} 级）`,atGrant<=at?1:0,candidates,false,'记录本次职业授予的专长；仅已适配机制生效。已核对的 XPHB 属性值提升可在确认尚未计入手工基础值后单独分配，不改写基础属性；其他分配仍手动。',false,{rule:modernFeatEvidence(owner.entry,feature)?'verified':'source-declared',execution:'existing-grants',publication:'unverified',reason:'专长选择关联已实现；已核对的 XPHB 属性值提升需另行明确确认和分配，其他未适配效果仍手动。'});
    // The chosen feat can differ from the typed ASI identity. Preserve both
    // references so catalog absence cannot turn a confirmed grant into no grant.
    out.at(-1)!.evidenceEntries=[feature,grant];out.at(-1)!.grantLevel=atGrant;
@@ -193,6 +217,12 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
    option.unavailable||='此不可重复专长已在其他有效职业授予中选择；原记录保留。';
   choice.selected=choice.selected.filter(value=>choice.options.some(option=>option.value===value&&!option.unavailable));
   choice.complete=choice.selected.length===choice.count&&choice.count>0;
+ }
+ const invocations=new Map<string,{choice:string;value:string}>();
+ for(const choice of out)if(choice.sourceProgression==='optional'&&choice.grantOwnerId&&!choice.restricted)for(const value of choice.selected){const rule=invocationRule(choice.options.find(option=>option.value===value)!.entry);if(rule&&!invocations.has(rule.reference))invocations.set(rule.reference,{choice:choice.id,value});}
+ for(const choice of out)if(choice.sourceProgression==='optional'){
+  for(const option of choice.options){const rule=invocationRule(option.entry),claimed=rule&&invocations.get(rule.reference);if(claimed&&(claimed.choice!==choice.id||claimed.value!==option.value)){option.unavailable||='同来源祈唤已在另一学习位置选择；原记录保留。';delete option.grant;}}
+  choice.selected=choice.selected.filter(value=>choice.options.some(option=>option.value===value&&!option.unavailable));choice.complete=choice.selected.length===choice.count&&choice.count>0;
  }
  return out;
 }

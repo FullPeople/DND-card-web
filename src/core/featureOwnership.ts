@@ -1,3 +1,4 @@
+import {invocationRecord} from './automation/invocations';
 import {classMatches,type Character,type Entry,type Selection} from './model';
 export {classMatches} from './model';
 
@@ -11,6 +12,9 @@ export function parentClass(c:Character,row:Selection){
 export function selectionLevel(c:Character,row:Selection){return row.entry.kind==='subclass'?parentClass(c,row)?.level??row.level:row.level;}
 export function featureOwner(c:Character,row:Selection,seen=new Set<string>()):Selection|undefined{
  if(seen.has(row.id))return undefined;seen.add(row.id);
+ // Reviewed invocation choice grants depend on the declared class feature,
+ // not merely the class named by their learning-slot requirement.
+ if(invocationRecord(row.entry)&&row.grantKey?.startsWith('choice:')&&row.requirementId?.includes(':class-optional:'))return c.selections.find(parent=>parent.id===row.parentId);
  const explicit=c.selections.find(parent=>parent.id===row.parentId||row.requirementId?.startsWith(`${parent.id}:`));
  const raw=row.entry.raw;
  if(raw.subclassShortName||raw.subclassName){

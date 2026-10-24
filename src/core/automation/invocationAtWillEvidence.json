@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "definition": "Three reviewed PHB at-will invocation qualifications only; temporary HP, transformation, sensor effects, components and duration adjudication remain manual.",
+  "frozenRevision": "e2623b204ddbdf2bcfa8317acfc962de89c676e2",
+  "rules": [
+    {
+      "reference": "Fiendish Vigor|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "spell": "虚假生命",
+      "spellReference": "False Life|PHB",
+      "spellLevel": 1,
+      "selfOnly": true,
+      "boundary": "仅对自身，可不消耗法术位和材料成分随意施展 1 环虚假生命；言语、姿势成分、1d4+4 临时生命值与一小时持续时间仍手动处理，不自动增加或替换临时生命值，不采用 2024 版最大值。"
+    },
+    {
+      "reference": "Master of Myriad Forms|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "spell": "变身术",
+      "spellReference": "Alter Self|PHB",
+      "spellLevel": 2,
+      "requiredClassLevel": 15,
+      "selfOnly": true,
+      "boundary": "仅对自身，可不消耗法术位随意施展 2 环变身术；本法术无材料成分，言语、姿势成分、形态选项、水栖适应、外貌、天生武器、专注与持续时间仍手动处理，不自动改变形态或角色数值。"
+    },
+    {
+      "reference": "Visions of Distant Realms|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "spell": "秘法眼",
+      "spellReference": "Arcane Eye|PHB",
+      "spellLevel": 4,
+      "requiredClassLevel": 15,
+      "selfOnly": false,
+      "boundary": "可不消耗法术位随意施展 4 环秘法眼，不豁免材料成分；言语、姿势成分、30 尺施法距离、传感器位置、视觉、移动、障碍、专注与持续时间仍手动处理，不自动创建或移动传感器。"
+    }
+  ],
+  "entryHashes": {
+    "Fiendish Vigor|PHB": "2ee65d3e6f574dbf89909617ee0401a97ca2cd209b4054e385e69f9bf12a4a47",
+    "Master of Myriad Forms|PHB": "1b140781b1dae4ddd4117ee454984e7156ed8ef767330c7f8a2b58e232b950bb",
+    "Visions of Distant Realms|PHB": "757d3105f2fa1ec7a2f94ef3413389f4adf0c806deb938909012c68b61567200",
+    "False Life|PHB": "05126f60c10a2a74bb62a6df5f1ccb86b28a28b5fbb9277f59dbaeecff2fd745",
+    "Alter Self|PHB": "ecc05d8ae14df11abbdf8e468666f813cebd1c9b9f9478c5d52058ecdde677d3",
+    "Arcane Eye|PHB": "08bc21c42b722e8185524b350534af02631f6f42f4a9c72ce15a9837197e242d"
+  }
+}

@@ -33,4 +33,4 @@ export function optionalChoiceSupport(owner:Entry,types:string[],count:number|un
  const verified=matches&&!!row&&(keys.includes('ei')||keys.includes('ai')&&at===2&&count===4);
  return {rule:verified?'verified':'source-declared',execution:'record-only',publication:'unverified',reason:verified?'已核对此来源的学习数量；具体效果和替换限制仍手动处理。':'数量取自来源声明，尚不代表完整规则核对；只保存学习记录。'};
 }
-export const legacyRecordSupport:ClassChoiceSupport={rule:'verified',execution:'record-only',publication:'unverified',reason:'2014 ASI 与可选专长替代规则已核对；这里只保存方案，不自动改属性或激活专长效果。'};
+export const legacyRecordSupport:ClassChoiceSupport={rule:'verified',execution:'record-only',publication:'unverified',reason:'2014 ASI 与可选专长替代规则已核对；保存方案不等于加点。已核对的职业 ASI 需另行明确分配，替代专长效果仍手动。'};

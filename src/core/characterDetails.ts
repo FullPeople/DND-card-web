@@ -1,4 +1,6 @@
-import {type Character,type Selection,type SpellSettings,type Derived,ABILITIES} from './model';
+import {evaluateInfusions} from './automation/infusions';
+import {activeSelections} from './automation/active';
+import {type Character,type Selection,type SpellSettings,type Derived,type Ability,ABILITIES} from './model';
 import {inferredSpellMode,casterProfiles} from './spellcastingRules';
 import {preparationBase} from './preparation';
 export function inventoryState(c:Character){return c.inventory||{view:'grid' as const,order:[],attunementLimit:3,coins:{cp:0,sp:0,ep:0,gp:0,pp:0}};}
@@ -12,6 +14,6 @@ export function spellState(c:Character):SpellSettings{
  const adjustment=stored.capacityAdjustment??(stored.capacity>0?stored.capacity-(base||0):0);
  return {...stored,ability:stored.abilityOverride?stored.ability:ability,capacityAdjustment:adjustment,capacity:Math.max(0,Math.min(100,(base||0)+adjustment)),mode:stored.modeOverride?stored.mode:inferredSpellMode(c)||stored.mode};
 }
-export function spellValues(c:Character,d:Derived){const s=spellState(c),mod=d.modifiers[s.ability]||0;return {attack:mod+d.proficiency+s.attackBonus,dc:8+mod+d.proficiency+s.dcBonus};}
+export function spellValues(c:Character,d:Derived,ability?:Ability){const s=spellState(c),mod=d.modifiers[ability||s.ability]||0,infusion=evaluateInfusions(c,activeSelections(c));return {attack:mod+d.proficiency+s.attackBonus+infusion.spellAttack.bonus,dc:8+mod+d.proficiency+s.dcBonus};}
 export function itemWeight(s:Selection){return typeof s.entry.raw.weight==='number'&&Number.isFinite(s.entry.raw.weight)?s.entry.raw.weight*s.quantity:undefined;}
 export function carriedWeight(c:Character){const items=c.selections.filter(s=>s.entry.kind==='item');return {items:items.reduce((sum,s)=>sum+(itemWeight(s)||0),0),coins:Object.values(inventoryState(c).coins).reduce((sum,n)=>sum+n,0)/50,unknown:items.filter(s=>itemWeight(s)===undefined).length};}

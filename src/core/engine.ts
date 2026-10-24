@@ -1,3 +1,6 @@
+import {evaluateAsiAllocations} from './automation/asi';
+import {evaluateInfusions} from './automation/infusions';
+import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
 import {planFeatureResources} from './automation/featureResources';
 import {planRacialAbilities} from './racialAbilities';
 import {sheetChoices} from './automation/choices';
@@ -31,8 +34,17 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   let speed = typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
   const sizes = new Set<string>();
   const effectTrace:Record<string,string[]>={ac:[],hp:[],speed:[]};
+  const invocationSkillsApplied=new Set<string>();
   for (const selection of active) {
     const e = selection.entry; const origin = `${e.name} · ${e.source}`; const raw = e.raw;
+    const invocationScope=invocationSkillScope(c,selection);
+    const invocation=invocationScope==='grant'?learnedInvocationRule(c,selection):undefined;
+    const skillInvocation=invocation?.mechanism==='skills'?invocation:undefined;
+    if(skillInvocation&&!invocationSkillsApplied.has(skillInvocation.reference)){
+      for(const skill of skillInvocation.skills!)grantSkill(skill,origin);
+      invocationSkillsApplied.add(skillInvocation.reference);
+    }
+    if(invocationScope==='grant'&&!invocation)issues.push({id:`invocation-skills:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：祈唤未通过当前职业学习授权或声明已变化；保留记录，不自动授予技能熟练，手工熟练与专精仍保留。`});
     if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(unhandledFeatureArmorText(e)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
     // Background ability choices are annotations. The sheet's base scores
     // already contain the player's allocation, so do not apply it a second time.
@@ -47,14 +59,14 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     }
     if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
     // Choices are explicit saved answers; evaluation never creates an answer or grant.
-    const skillBlocks = e.kind === 'class' ? (selection.id===classes[0]?.id?raw.startingProficiencies?.skills:raw.multiclassing?.proficienciesGained?.skills) : raw.skillProficiencies;
+    const skillBlocks = invocationScope ? undefined : e.kind === 'class' ? (selection.id===classes[0]?.id?raw.startingProficiencies?.skills:raw.multiclassing?.proficienciesGained?.skills) : raw.skillProficiencies;
     for (const block of Array.isArray(skillBlocks) ? skillBlocks : []) {
       for (const [key, value] of Object.entries(block || {})) if (value === true) grantSkill(key, origin);
     }
     if (selection.id === classes[0]?.id && Array.isArray(raw.proficiency)) raw.proficiency.forEach((a: string) => proficientSaves.add(a));
     // Retain already recorded skill choices from older backups, without quota limits.
-    for (const [key, values] of Object.entries(c.answers)) if (key.startsWith(`${selection.id}:skills:`) || key.startsWith(`${selection.id}:custom:`)) values.forEach(value => grantSkill(value, origin));
-    for (const effect of e.effects || []) {
+    if(!invocationScope)for (const [key, values] of Object.entries(c.answers)) if (key.startsWith(`${selection.id}:skills:`) || key.startsWith(`${selection.id}:custom:`)) values.forEach(value => grantSkill(value, origin));
+    for (const effect of invocationScope ? [] : e.effects || []) {
       if (effect.op === 'proficiency') grantSkill(effect.skill, origin);
       else if (ABILITIES.includes(effect.target as Ability)) {
         if(e.kind==='background')continue;
@@ -70,6 +82,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Manual skill choices supplement source grants; clearing one cannot revoke a rule.
     else if (SKILLS[key] && value) grantSkill(key, '手动记录');
   }
+  const asi=evaluateAsiAllocations(c,abilities,active);issues.push(...asi.issues);
+  for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
   const modifiers = Object.fromEntries(ABILITIES.map(a => [a, Math.floor((abilities[a] - 10) / 2)])) as Record<Ability, number>;
   const skills = Object.fromEntries(Object.entries(SKILLS).map(([key, s]) => {
     const expertise = !!c.expertise?.[key], proficient = expertise || !!skillSources[key]?.length;
@@ -81,10 +95,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  ac += acBonus+(featureArmor?.bonus||0);
+  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=infusion.resistanceTrace;
+  ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[])];
+  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace];
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
   trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
@@ -119,7 +134,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
   return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive,
-    skills, saves, requirements, issues, trace,
+    skills, saves, requirements, issues, trace, resistances:[...new Set(infusion.resistances)],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }
 
