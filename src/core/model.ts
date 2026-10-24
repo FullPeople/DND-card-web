@@ -34,6 +34,7 @@ export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:numb
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
   asiAllocations?:import('./automation/asi').AsiAllocationState;
+  reviewedFeats?:import('./automation/reviewedFeats').ReviewedFeatState;
   infusions?:import('./automation/infusions').InfusionState;
   automation?:import('./automation/state').AutomationState;
   /** Legacy score-ownership marker retained for backup compatibility. */
@@ -58,7 +59,7 @@ export interface Character {
   inventory?: {sourceEquipment?:Record<string,SourceEquipmentReceipt>;capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
   backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
-  /** Saved choice display snapshots; these never enter the effect evaluator. */
+  /** Saved choice snapshots. Reviewed explicit intents authenticate their source; snapshots alone never authorize effects. */
   classChoiceSnapshots?: Record<string,Entry>;
   /** Inactive class-grant trees retain identities, manual children and references. */
   classChoiceArchive?: Record<string,{choiceId:string;kind?:'legacy-asi';parent?:Selection;selections:Selection[]}>;

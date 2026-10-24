@@ -1,4 +1,4 @@
-import {evaluateAsiAllocations} from './automation/asi';
+import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
 import {planFeatureResources} from './automation/featureResources';
@@ -77,13 +77,15 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
       else if (effect.target === 'hp') { if (effect.op === 'set') hpOverride = effect.value; else hpBonus += effect.value;effectTrace.hp.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }
     }
   }
+  const {asi,reviewed:reviewedFeats}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
+  for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
+  issues.push(...reviewedFeats.issues);
+  for(const a of ABILITIES){abilities[a]+=reviewedFeats.bonuses[a];trace[a].push(...reviewedFeats.trace[a]);if(reviewedFeats.saves.has(a))proficientSaves.add(a);}
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
     if (key.startsWith('save:')) { if (value) proficientSaves.add(key.slice(5)); else proficientSaves.delete(key.slice(5)); }
     // Manual skill choices supplement source grants; clearing one cannot revoke a rule.
     else if (SKILLS[key] && value) grantSkill(key, '手动记录');
   }
-  const asi=evaluateAsiAllocations(c,abilities,active);issues.push(...asi.issues);
-  for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
   const modifiers = Object.fromEntries(ABILITIES.map(a => [a, Math.floor((abilities[a] - 10) / 2)])) as Record<Ability, number>;
   const skills = Object.fromEntries(Object.entries(SKILLS).map(([key, s]) => {
     const expertise = !!c.expertise?.[key], proficient = expertise || !!skillSources[key]?.length;
@@ -128,10 +130,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   speed += c.sheetBonuses?.speed || 0;
   passive += c.sheetBonuses?.passive || 0;
   maxHp += c.sheetBonuses?.hp || 0;
+  maxHp += reviewedFeats.hpBonus;trace.hp.push(...reviewedFeats.hpTrace);
   for (const [target, value] of Object.entries(c.sheetBonuses || {})) if (value) (trace[target] ??= []).push(`卡面调整 ${value >= 0 ? '+' : ''}${value}`);
   issues.push(...planFeatureResources(c).issues);
   for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
-  for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
+  for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
   return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive,
     skills, saves, requirements, issues, trace, resistances:[...new Set(infusion.resistances)],

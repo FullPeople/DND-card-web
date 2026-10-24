@@ -121,7 +121,7 @@ export function chooseSheetOption(c:Character,id:string,value:string,catalog:Ent
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
   const saved=c.answers[id]||[];
-  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
+  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];withdrawMissingReviewedFeats(c,id,slots);resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
   const index=choice.count===1?0:choice.slots!.findIndex((v,i)=>i<choice.count&&!v);
   if(index<0)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
   setSheetChoiceSlot(c,id,index,value,catalog);return;
@@ -188,6 +188,9 @@ function finishBuiltinChoices(c:Character,before:SheetChoice[],catalog:Entry[]){
  const after=sheetChoices(c,catalog),sources=new Set(before.filter(r=>!r.complete).map(r=>choiceSource(c,r)));
  for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>!sheetChoicePending(c,r))&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
 }
+function withdrawMissingReviewedFeats(c:Character,id:string,slots:string[]){
+ if(id.includes(':class-legacy-feat:')&&c.reviewedFeats?.version===1)c.reviewedFeats={...c.reviewedFeats,bindings:c.reviewedFeats.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
+}
 /** Slot edits validate and replace atomically, including already full choices. */
 export function setSheetChoiceSlot(c:Character,id:string,index:number,value:string|undefined,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id);
@@ -203,6 +206,9 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
   // Forgetting a learned infusion ends its owned target binding. A later
   // relearn must be explicitly activated again; source suspension is separate.
+  // Explicitly forgetting/replacing a reviewed feat withdraws its consent.
+  // Source disable and level suspension never edit the answer or intent.
+  withdrawMissingReviewedFeats(draft,id,slots);
   if(choice.sourceProgression==='optional'&&c.infusions?.version===1)draft.infusions={...c.infusions,bindings:c.infusions.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
   if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }

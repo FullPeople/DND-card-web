@@ -185,7 +185,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     const id=`${owner.id}:class-legacy-feat:${feature.id}`;if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
     const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升方案',english:'Recorded ability improvement',entries:['保存本次属性提升方案；已核对的职业授予可另行明确分配，未确认前不改变属性。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
     const feats=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
-    add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。已核对的职业 ASI 可在确认尚未计入基础值后单独分配；替代专长效果仍手动。',true,legacyRecordSupport);
+    add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。已核对的职业 ASI 可在确认尚未计入基础值后单独分配；已适配替代专长需另行明确确认，其他专长效果仍手动。',true,legacyRecordSupport);
     out.at(-1)!.evidenceEntries=[feature];out.at(-1)!.grantLevel=atGrant;
     continue;
    }
