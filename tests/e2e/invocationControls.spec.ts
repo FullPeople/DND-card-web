@@ -36,7 +36,21 @@ async function ready(page:Page,manualSpell=false){
  const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});if(await toggle.getAttribute('aria-checked')!=='true')await toggle.click();
  const database=await page.evaluate(async()=>{const path='/card/src/platform/workspaceIdentity.ts';return (await import(path)).workspaceIdentity.database;});await restoreAuthoredChoices(page,database,{warlock:true});
 }
-async function learning(page:Page){if((page.viewportSize()?.width||0)<=760){const main=page.getByRole('button',{name:'功能页',exact:true});if(await main.isVisible())await main.click();}const panel=await tab(page,'特性');await panel.locator('[data-class-choice="warlock:class-optional:0"] [data-choice-id="warlock:class-optional:0"]').click();const workspace=panel.getByRole('region',{name:'选择魔能祈唤',exact:true});await expect(workspace).toBeVisible();return workspace;}
+async function learning(page:Page){
+ if((page.viewportSize()?.width||0)<=760){const main=page.getByRole('button',{name:'功能页',exact:true});if(await main.isVisible())await main.click();}
+ const panel=await tab(page,'特性'),workspace=panel.getByRole('region',{name:'选择魔能祈唤',exact:true}),record=panel.locator('[data-class-choice="warlock:class-optional:0"]');await expect(record).toBeVisible();
+ // A completed third drop leaves the real workspace open while the redundant
+ // choice chip automatically hides. Return to the visible sheet and reuse it.
+ if(await workspace.isVisible())return workspace;
+ const entrance=record.locator('[data-choice-id="warlock:class-optional:0"]');
+ // Reopening completed choices follows the same visible title menu as players;
+ // never inject the presentation setting or assume the unfinished chip survives.
+ if(!await entrance.isVisible()){
+  await panel.locator('.detail-class-features .feature-group h4').getByRole('button',{name:'职业 魔契师 Lv.5',exact:true}).click({button:'right'});
+  await page.getByRole('menuitem',{name:'显示自带选项',exact:true}).click();
+ }
+ await entrance.click();await expect(workspace).toBeVisible();return workspace;
+}
 async function drag(page:Page,workspace:Locator,name:string,index:number){
  if((page.viewportSize()?.width||0)<=760)await workspace.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();await page.mouse.move(from!.x+25,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+40,from!.y+from!.height/2,{steps:3});
@@ -98,8 +112,9 @@ async function learnSpellInvocations(page:Page){
  });
 }
 async function manualSpellCounter(page:Page){
- const panel=await tab(page,'法术'),capacity=panel.getByLabel('职业法术上限调整',{exact:true});await capacity.fill('1');await capacity.press('Enter');
- const tile=panel.locator('.known-active-group [data-spell-id="manual-silent-image"]');await expect(tile).toBeVisible();await tile.click({button:'right'});
+ // This minimal class metadata has no known-spell progression: the imported
+ // independent spell is in the visible library, not a class-known spell slot.
+ const panel=await tab(page,'法术'),tile=panel.locator('.spell-library [data-spell-id="manual-silent-image"]');await expect(tile).toBeVisible();await tile.click({button:'right'});
  await page.getByRole('menuitem',{name:'设置免费施放次数',exact:true}).click();
  const group=panel.locator('[data-source-cantrip-group="manual"]');await group.getByRole('button',{name:'无声幻影施放详情',exact:true}).click();
  const detail=page.getByRole('dialog',{name:'无声幻影施放详情',exact:true});await detail.getByLabel('次数上限',{exact:true}).fill('3');await detail.getByLabel('次数上限',{exact:true}).press('Enter');
@@ -139,7 +154,12 @@ test('three learned at-will spells cast, reopen and revoke without adopting an i
 test('three at-will grants suspend with their source and restore exact ownership while readonly casting cannot commit',async({page,context},info)=>{
  test.setTimeout(120000);const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await ready(page);const ids=await learnSpellInvocations(page);for(const row of spellInvocations)await freeCast(page,row.spell,row.name);
  const active=await saved(page),answers=active.answers['warlock:class-optional:0'];
- const other=await context.newPage();await mock(other);await other.goto('/card/?intro=0');const readonly=await tab(other,'特性');await expect(readonly.locator('[data-class-choice="warlock:class-optional:0"] [data-choice-id="warlock:class-optional:0"]')).toBeDisabled();
+ const other=await context.newPage();await mock(other);await other.goto('/card/?intro=0');const readonly=await tab(other,'特性');
+ await expect(other.locator('.card-permission-banner')).toContainText('另一标签页正在编辑');await expect(other.getByRole('switch',{name:'编辑模式',exact:true})).toBeDisabled();
+ // All three records remain readable. Completed choices have a text heading,
+ // not the disabled unfinished-choice chip used by the older one-slot case.
+ const readonlyRecords=readonly.locator('[data-class-choice="warlock:class-optional:0"]');for(const row of spellInvocations)await expect(readonlyRecords.getByRole('button',{name:row.name,exact:true})).toBeVisible();
+ await expect(readonlyRecords.locator('[data-choice-id="warlock:class-optional:0"]:not([disabled])')).toHaveCount(0);
  const readonlyBefore=await saved(other),spells=await tab(other,'法术');await spells.getByRole('button',{name:'无声幻影施放详情',exact:true}).click();const detail=other.getByRole('dialog',{name:'无声幻影施放详情',exact:true});await detail.getByRole('button',{name:'使用',exact:true}).click();await expect(other.locator('.suite-toast')).toContainText('此标签页为只读');await expect(detail.locator('.spell-action-feedback')).not.toHaveAttribute('data-phase','applied');expect(await saved(other)).toEqual(readonlyBefore);await other.close();
  await source(page,false);await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);
  let panel=await tab(page,'特性');await expect(panel.locator('[data-class-choice="warlock:class-optional:0"]')).toContainText('来源未启用，原记录保留');
