@@ -32,7 +32,7 @@ export function SpellActionFeedback({action}:{action?:Action}){
  return <section key={action.id} className="spell-action-feedback" data-phase={action.phase} role="status" aria-live="polite">
   <div className="action-seal" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 2 43 13V35L24 46 5 35V13Z"/><path className="action-seal-check" d="m14 24 7 7 14-15"/></svg></div>
   <div><small>{action.mode==='restore'?'次数恢复':action.phase==='applied'?'施法已记录':action.phase==='rejected'?'未执行':'等待卡面确认'}</small><strong>{action.title}</strong><span>{action.message||action.payment}</span>
-   {action.phase==='applied'&&<>{receipt?.resourceId?<p className="spell-action-cost"><span>{receipt.before}</span><i>→</i><b>{receipt.after}</b></p>:<p className="spell-action-cost-free">不消耗资源</p>}<small className="action-save-state">{status?.saveLabel||'请查看卡面保存状态'}</small></>}
+   {action.phase==='applied'&&<>{receipt?.spent?.length?<><small>{receipt.level} 环施法 · 已同时扣除两项资源</small>{receipt.spent.map(row=><div key={row.resourceId} data-spent-resource={row.resourceId}><small>{/^pact-slot:([1-9])$/.test(row.resourceId)?`${row.resourceId.split(':')[1]}环契约位`:'本祈唤次数'}</small><p className="spell-action-cost"><span>{row.before}</span><i>→</i><b>{row.after}</b></p></div>)}</>:receipt?.resourceId?<p className="spell-action-cost"><span>{receipt.before}</span><i>→</i><b>{receipt.after}</b></p>:<p className="spell-action-cost-free">不消耗资源</p>}<small className="action-save-state">{status?.saveLabel||'请查看卡面保存状态'}</small></>}
   </div>
  </section>;
 }

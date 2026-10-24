@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "definition": "Seven reviewed PHB invocation dual payments only; spell effects, replacement timing and complete rest workflows remain manual.",
+  "frozenRevision": "e2623b204ddbdf2bcfa8317acfc962de89c676e2",
+  "pactFeatureReference": "契约魔法|魔契师|PHB|1",
+  "pactFeatureEnglish": "Pact Magic",
+  "rules": [
+    {
+      "reference": "Bewitching Whispers|PHB",
+      "page": 110,
+      "mechanism": "spell",
+      "payment": "pact-and-use",
+      "spell": "强迫术",
+      "spellReference": "Compulsion|PHB",
+      "spellLevel": 4,
+      "requiredClassLevel": 7,
+      "boundary": "每长休一次，施法同时消耗本祈唤次数和当前魔契师契约位各 1；不豁免材料成分，目标、豁免、专注、持续时间与法术实际效果仍手动处理。"
+    },
+    {
+      "reference": "Dreadful Word|PHB",
+      "page": 110,
+      "mechanism": "spell",
+      "payment": "pact-and-use",
+      "spell": "困惑术",
+      "spellReference": "Confusion|PHB",
+      "spellLevel": 4,
+      "requiredClassLevel": 7,
+      "boundary": "每长休一次，施法同时消耗本祈唤次数和当前魔契师契约位各 1；不豁免材料成分，目标、豁免、专注、持续时间与法术实际效果仍手动处理。"
+    },
+    {
+      "reference": "Minions of Chaos|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "payment": "pact-and-use",
+      "spell": "咒唤元素",
+      "spellReference": "Conjure Elemental|PHB",
+      "spellLevel": 5,
+      "requiredClassLevel": 9,
+      "boundary": "每长休一次，施法同时消耗本祈唤次数和当前魔契师契约位各 1；不豁免材料成分，目标、豁免、专注、持续时间与法术实际效果仍手动处理。"
+    },
+    {
+      "reference": "Mire the Mind|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "payment": "pact-and-use",
+      "spell": "缓慢术",
+      "spellReference": "Slow|PHB",
+      "spellLevel": 3,
+      "requiredClassLevel": 5,
+      "boundary": "每长休一次，施法同时消耗本祈唤次数和当前魔契师契约位各 1；不豁免材料成分，目标、豁免、专注、持续时间与法术实际效果仍手动处理。"
+    },
+    {
+      "reference": "Sculptor of Flesh|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "payment": "pact-and-use",
+      "spell": "变形术",
+      "spellReference": "Polymorph|PHB",
+      "spellLevel": 4,
+      "requiredClassLevel": 7,
+      "boundary": "每长休一次，施法同时消耗本祈唤次数和当前魔契师契约位各 1；不豁免材料成分，目标、豁免、专注、持续时间与法术实际效果仍手动处理。"
+    },
+    {
+      "reference": "Sign of Ill Omen|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "payment": "pact-and-use",
+      "spell": "降咒",
+      "spellReference": "Bestow Curse|PHB",
+      "spellLevel": 3,
+      "requiredClassLevel": 5,
+      "boundary": "每长休一次，施法同时消耗本祈唤次数和当前魔契师契约位各 1；不豁免材料成分，目标、豁免、专注、持续时间与法术实际效果仍手动处理。"
+    },
+    {
+      "reference": "Thief of Five Fates|PHB",
+      "page": 111,
+      "mechanism": "spell",
+      "payment": "pact-and-use",
+      "spell": "灾祸术",
+      "spellReference": "Bane|PHB",
+      "spellLevel": 1,
+      "boundary": "每长休一次，施法同时消耗本祈唤次数和当前魔契师契约位各 1；不豁免材料成分，目标、豁免、专注、持续时间与法术实际效果仍手动处理。"
+    }
+  ],
+  "entryHashes": {
+    "Bewitching Whispers|PHB": "2b01c6f5c3a0936f16b08008047c4c7bea593977dacbeb0d2a352d08a4e9cccb",
+    "Compulsion|PHB": "187f36ef68dfcb15d15cae952b059f2faac44d1d18f047f2d6134a3f42c04bef",
+    "Dreadful Word|PHB": "ae980c2360187ded3bf6e2cdc6125d30a07edca6c269667049469cb30085296b",
+    "Confusion|PHB": "7fd08189f91cfa1bbaa0daf89590cb8fac75a9befde8e9c60327f7fa91ac2a6d",
+    "Minions of Chaos|PHB": "c5cc2ec5af6403af7a472b069b1d47d35bffe3010c652e72197e84d9664a0f58",
+    "Conjure Elemental|PHB": "1db2f2b5485076fdc6fd8c4514940abe55e47fdae6d92700167fc19c7823fea4",
+    "Mire the Mind|PHB": "88afa2a72c37e4f983fd3b41981119f7088d3d42c16977b77f95eeef5eb047cf",
+    "Slow|PHB": "1fdf4f4f0cde450e6e6546ae92fbd6d6fefca4e81422d655aebbc53a12d003eb",
+    "Sculptor of Flesh|PHB": "77e71d1e54204e58582f77d9f347de1db27f0862cdd7b7da0b474728fd0c959a",
+    "Polymorph|PHB": "ed1eee19e5d34fa9cafd8786b9ccd3945dc1a1480d7af6a706593ecdeeb8229b",
+    "Sign of Ill Omen|PHB": "df0504d6ffd05ee46396de3b464bbe03ae43f0a9633691e00085a5efa0c03c2e",
+    "Bestow Curse|PHB": "29d6907015769a875d5d44d39f64b4a896b2eeb2abeaff01e9b0ec39f811d709",
+    "Thief of Five Fates|PHB": "e9d5064cb44797e36af3981434ebab5e1883c74b6867ee63fe2f8c1f6abdbd10",
+    "Bane|PHB": "57bbf3771331106e6ceef509dcfb78440825cefe0ce2f1e044f20794468e6bff",
+    "Pact Magic|Warlock|PHB|1": "da68ce072732185a89c9b7d4354f20eb1a92717c87cf267e2af39f55b64bfd3a"
+  }
+}

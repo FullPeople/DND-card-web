@@ -41,7 +41,11 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
     if(!Object.keys(c.classChoiceArchive).length)delete c.classChoiceArchive;
   }
   rememberSourceSpellUses(c);
-  const spellCounters=[...removed].map(id=>specialSpellResource(id,c));
+  const spellCounters=[...removed].flatMap(id=>{const key=specialSpellResource(id,c),grant=c.spellSettings?.special?.[id]?.sourceGrant;
+   // Refusing a pre-existing manual counter must also preserve it on deletion.
+   if(grant?.usage==='invocation-pact'&&c.runtime.resources[key]?.sourceSpellGrant?.usageKey!==grant.usageKey)return [];
+   return [key];
+  });
   // Automatic level removal parks a class-choice tree first. Keep saved UI
   // references to its source snapshot so restoring the old ID restores pins.
   const retainedParents=new Set(dismiss?[]:Object.values(c.classChoiceArchive||{}).flatMap(archive=>archive.parent?[archive.parent.id]:[]));

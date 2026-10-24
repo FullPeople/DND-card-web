@@ -1,5 +1,5 @@
 import {evaluate} from '../engine';
-import {learnedInvocationRule,invocationSpellMatches} from './invocations';
+import {learnedInvocationRule,invocationSpellMatches,invocationCandidate} from './invocations';
 import {sourceOwnerIdentity} from './sourceSpellState';
 import {ABILITIES,selectionAllowed,type Ability,type Character,type Entry,type Issue,type Selection,type SpecialSpell} from '../model';
 import {matchesReference} from '../entryReferences';
@@ -26,6 +26,8 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   const issue=(path:string,message:string)=>{const id=`source-spell:${owner.id}:${path}:${message}`;if(!issues.some(i=>i.id===id))issues.push({id,selectionId:owner.id,severity:'warning',message:`${owner.entry.name}：${message}`});};
   if(owner.entry.kind==='item'){issue('item','物品赠送施法与充能尚未接入，请按原文记录。');continue;}
   const reviewedInvocation=learnedInvocationRule(c,owner);
+  const unreviewedInvocation=invocationCandidate(owner.entry)&&!reviewedInvocation;
+  if(unreviewedInvocation)issue('invocation-owner','祈唤尚未通过当前职业学习授权或声明已变化；保留记录，不自动授予施法。');
   const blocks=owner.entry.raw.additionalSpells;if(!Array.isArray(blocks)){issue('shape','额外法术数据格式未支持。');continue;}
   const selectedSet=blocks.length===1?0:c.automation?.spellSets?.[owner.id];
   if(blocks.length>1){choices.push({ownerId:owner.id,key:owner.id,label:owner.entry.name+'的施法方案',sets:blocks.map((b,i)=>b?.name||`方案 ${i+1}`)});if(selectedSet===undefined){issue('set','有多个施法方案，请选择一项；尚未自动赠送。');continue;}}
@@ -65,22 +67,23 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       return selected;
      });
     }
-    function addList(list:unknown,path:string,usage:'slot'|'free'|'ritual'|'check'|'resource',count?:number,recovery?:SpecialSpell['recovery'],shared=false,resource?:{name:string;cost:number;key:string}){
+    function addList(list:unknown,path:string,usage:NonNullable<SpecialSpell['sourceGrant']>['usage'],count?:number,recovery?:SpecialSpell['recovery'],shared=false,resource?:{name:string;cost:number;key:string}){
      if(!Array.isArray(list)){issue(path,'赠送列表格式未支持。');return;}
+     if(unreviewedInvocation){usage='check';count=undefined;recovery=undefined;resource=undefined;shared=false;}
      for(const ref of resolveList(list,path)){
       const [uid,castLevel]=ref.split('#'),parts=uid.split('|'),reference=`${parts[0]}|${parts[1]||'PHB'}`;
       if(castLevel&&!/^(c|[1-9])$/.test(castLevel)){issue(path,'施法环阶后缀未支持。');continue;}
-      const invocationSpell=usage==='free'&&reviewedInvocation?.mechanism==='spell'?reviewedInvocation:undefined;
+      const invocationSpell=(usage==='free'||usage==='invocation-pact')&&reviewedInvocation?.mechanism==='spell'?reviewedInvocation:undefined;
       const entries=known.filter(e=>invocationSpell?invocationSpellMatches(e,invocationSpell):matchesReference(e,reference));
       if(entries.length!==1){issue(path+':'+ref,entries.length?'法术引用存在多个身份，未自动任选一条。':`尚未找到 ${reference}，资料加载后再关联。`);continue;}
       const entry=entries[0];
       if(castLevel==='c'&&Number(entry.raw.level)!==0){issue(path+':'+ref,'声明的戏法与条目环阶不符。');continue;}
       const key=`source-spell:${index}/${kind}/${gate}/${path}/${ref.toLowerCase()}`,id=`auto-spell:${owner.id}:${encodeURIComponent(key)}`;
-      const poolPath=`source-spell:${index}/${kind}/${gate}/${path}`,usageKey=JSON.stringify([sourceOwnerIdentity(c,owner),shared?poolPath:key]);
-      const resourceKey=resource?.key||(shared?`source-spell-pool:${encodeURIComponent(usageKey)}`:undefined);
+      const poolPath=`source-spell:${index}/${kind}/${gate}/${path}`,usageKey=usage==='invocation-pact'?JSON.stringify(['invocation-pact',cls!.id,reviewedInvocation!.reference]):JSON.stringify([sourceOwnerIdentity(c,owner),shared?poolPath:key]);
+      const resourceKey=resource?.key||(shared||usage==='invocation-pact'?`source-spell-pool:${encodeURIComponent(usageKey)}`:undefined);
       const enabled=automationEnabled(c)&&active.has(owner.id)&&eligible&&selectionAllowed(c,entry);
-      const label=resource?'来源资源施法':kind==='prepared'?'始终预备':count?'来源次数施法':usage==='free'?'随意施法':usage==='ritual'?'仅仪式':kind==='known'?'来源已知法术':'来源天生施法';
-      const config:SpecialSpell={mode:count?'uses':'locked',...(count?{max:count,recovery}:{}),label,sourceGrant:{ownerId:owner.id,key,usageKey,resourceKey,...(resource?{resourceName:resource.name,resourceCost:resource.cost}:{}),canUseSlots:!resource&&(kind==='known'||kind==='prepared'),ability,active:enabled,usage:usage==='slot'&&Number(entry.raw.level)===0?'free':usage,castLevel:castLevel&&castLevel!=='c'?Number(castLevel):undefined,reason:enabled?undefined:!automationEnabled(c)?'自动计算已关闭':!eligible?'尚未达到来源等级':'来源、版本或依赖未启用'}};
+      const label=usage==='invocation-pact'?'祈唤次数＋魔契师契约位':resource?'来源资源施法':kind==='prepared'?'始终预备':count?'来源次数施法':usage==='free'?'随意施法':usage==='ritual'?'仅仪式':kind==='known'?'来源已知法术':'来源天生施法';
+      const config:SpecialSpell={mode:count?'uses':'locked',...(count?{max:count,recovery}:{}),label,sourceGrant:{ownerId:owner.id,key,usageKey,resourceKey,...(resource?{resourceName:resource.name,resourceCost:resource.cost}:{}),canUseSlots:!unreviewedInvocation&&!resource&&(kind==='known'||kind==='prepared'),ability,active:enabled,usage:usage==='slot'&&Number(entry.raw.level)===0?'free':usage,castLevel:castLevel&&castLevel!=='c'?Number(castLevel):undefined,reason:enabled?undefined:!automationEnabled(c)?'自动计算已关闭':!eligible?'尚未达到来源等级':'来源、版本或依赖未启用'}};
       grants.push({id,owner,key,entry,eligible,config});
      }
     }
@@ -114,7 +117,9 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
        if(!mode){issue(`${schedule}/${count}`,'多个法术的次数归属未明确，请核对原文后选择各自次数或共用次数。');continue;}
        shared=mode==='shared';
       }
-      addList(refs,`${schedule}/${count}`,'free',maximum,schedule==='rest'?'short':'long',shared);
+      const dual=reviewedInvocation?.payment==='pact-and-use';
+      if(dual)issue('invocation-boundary',reviewedInvocation.boundary);
+      addList(refs,`${schedule}/${count}`,dual?'invocation-pact':'free',maximum,schedule==='rest'?'short':'long',shared);
      }
     }
    }
