@@ -137,17 +137,23 @@ async function cast(page:Page,row:Learned,index:number){
 async function pactBalance(page:Page,value:number,cancel=false){
  // The player uses the existing visible resource editor. No card, resource or
  // action is injected in page.evaluate to replenish the three real pact slots.
-  const before=cancel?await saved(page):undefined;
+ const before=cancel?await saved(page):undefined;
  await editor(page);const panel=await tab(page,'主要'),module=panel.locator(`[data-resource-id="${pactId}"] .resource-widget-face`);await module.scrollIntoViewIfNeeded();await module.click();
  const config=page.getByRole('dialog',{name:'资源配置',exact:true});await expect(config.getByRole('spinbutton',{name:'资源上限',exact:true})).toHaveValue('3');await config.getByRole('spinbutton',{name:'资源剩余',exact:true}).fill(String(value));
-  if(cancel){
-   // The inline editor intentionally hides its standalone Cancel button. Use
-   // the player's visible header close, which discards this unsaved draft.
-   await expect(config.getByRole('spinbutton',{name:'资源剩余',exact:true})).toHaveValue(String(value));
-   await config.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(config).toHaveCount(0);expect(await saved(page)).toEqual(before);
-   await module.click();await expect(config.getByRole('spinbutton',{name:'资源剩余',exact:true})).toHaveValue(String(before!.runtime.resources[pactId].current));
-   await config.getByRole('button',{name:'关闭弹窗',exact:true}).click();expect(await saved(page)).toEqual(before);
+ if(cancel){
+  // The inline editor hides its standalone Cancel button. Its visible header
+  // close uses App's shared draft guard: reject first, then confirm discard.
+  await expect(config.getByRole('spinbutton',{name:'资源剩余',exact:true})).toHaveValue(String(value));
+  for(const discard of [false,true]){
+   const confirmation=page.waitForEvent('dialog'),click=config.getByRole('button',{name:'关闭弹窗',exact:true}).click(),prompt=await confirmation;
+   expect(prompt.type()).toBe('confirm');expect(prompt.message()).toBe('仪表盘有未保存的修改。确定放弃这些修改并离开吗？');
+   if(discard)await prompt.accept();else await prompt.dismiss();await click;expect(await saved(page)).toEqual(before);
+   if(discard)await expect(config).toHaveCount(0);
+   else{await expect(config).toBeVisible();await expect(config.getByRole('spinbutton',{name:'资源剩余',exact:true})).toHaveValue(String(value));}
   }
+  await module.click();await expect(config.getByRole('spinbutton',{name:'资源剩余',exact:true})).toHaveValue(String(before!.runtime.resources[pactId].current));
+  await config.getByRole('button',{name:'关闭弹窗',exact:true}).click();expect(await saved(page)).toEqual(before);
+ }
  else{await config.getByRole('button',{name:'保存',exact:true}).click();await expect.poll(async()=>(await saved(page)).runtime.resources[pactId]?.current).toBe(value);}
  await expect(config).toHaveCount(0);
 }
