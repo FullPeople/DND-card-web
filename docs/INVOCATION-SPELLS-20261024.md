@@ -23,3 +23,11 @@ An incremental branch preserves prior verified work. This stage is not merged or
 The first child-spell negative test pass recorded 24 failures and 9 passes. Existing free-payment authorization could accept a matching translated name with a different canonical spell identity, edition or copied payload, or an altered child parent/grant key. The bounded fix revalidates the reviewed PHB spell and the exact source ownership at planning/payment time, without assigning free usage to manual spells or unrelated innate arrays. Additional review covers the parent choice grant receipt and display-name-only edits. These failures remain part of the record rather than being counted as passes.
 
 First final directed result: 10 files, 352 tests passed, zero skips, including both exact frozen-source groups. TypeScript and diff whitespace checks pass. An independent review reran 15 identity/payment negative or display-edit positive probes, confirmed mutation-free rejection, and found no blocking issue in the bounded scope. These are not the still-pending browser, stage-wide replay or release receipts.
+
+## Frozen stage result
+
+The one full replay completed at 2026-10-24T04:19:10.395Z: 18,789 records, 229 exact frozen inputs, 169 consumer modules (all prior gates retained, actions.ts added). Consumer source is bbf9df7c588a24c50b7faaf39ec938eec658cdf5; producer source is 1c6b16493d09d1b4ccfbcbf4736772ba46b325cd. Report SHA256: 354601e62e9a07389910133fceb534f5b4fa5034a76d6d7d48ffbe532708708f. Data authority: c43d0b6ba8525a7578597e05bced812e94d46f27. Exact-source workflow: 58 passed. Remote dedicated tests on source: 646 passed, 2 existing conditional skips, 28 files; TypeScript passed.
+
+Reviewed 4,561 / at-least-one-mechanism witness 6,537 / unavailable 522 / unresolved 0 remain unchanged. These are not whole-rule or online counts. No second full replay was started.
+
+A legitimate local paired candidate passed provenance checks, but Chromium startup failed with socket permission denial before UI interactions; 8 attempts recorded the same launch condition before the suite was stopped (exit 130). No sandbox/launch security flags were changed, and no local browser bypass was attempted. The standard remote CI is still required to execute the final 26 player workflows. Final exact-head CI and browser receipts remain pending.
