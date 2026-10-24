@@ -137,9 +137,17 @@ async function cast(page:Page,row:Learned,index:number){
 async function pactBalance(page:Page,value:number,cancel=false){
  // The player uses the existing visible resource editor. No card, resource or
  // action is injected in page.evaluate to replenish the three real pact slots.
+  const before=cancel?await saved(page):undefined;
  await editor(page);const panel=await tab(page,'主要'),module=panel.locator(`[data-resource-id="${pactId}"] .resource-widget-face`);await module.scrollIntoViewIfNeeded();await module.click();
  const config=page.getByRole('dialog',{name:'资源配置',exact:true});await expect(config.getByRole('spinbutton',{name:'资源上限',exact:true})).toHaveValue('3');await config.getByRole('spinbutton',{name:'资源剩余',exact:true}).fill(String(value));
- if(cancel){page.once('dialog',confirmation=>void confirmation.accept());await config.getByRole('button',{name:'取消',exact:true}).click();}
+  if(cancel){
+   // The inline editor intentionally hides its standalone Cancel button. Use
+   // the player's visible header close, which discards this unsaved draft.
+   await expect(config.getByRole('spinbutton',{name:'资源剩余',exact:true})).toHaveValue(String(value));
+   await config.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(config).toHaveCount(0);expect(await saved(page)).toEqual(before);
+   await module.click();await expect(config.getByRole('spinbutton',{name:'资源剩余',exact:true})).toHaveValue(String(before!.runtime.resources[pactId].current));
+   await config.getByRole('button',{name:'关闭弹窗',exact:true}).click();expect(await saved(page)).toEqual(before);
+  }
  else{await config.getByRole('button',{name:'保存',exact:true}).click();await expect.poll(async()=>(await saved(page)).runtime.resources[pactId]?.current).toBe(value);}
  await expect(config).toHaveCount(0);
 }
