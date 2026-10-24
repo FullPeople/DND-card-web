@@ -1,5 +1,5 @@
 import {evaluate} from '../engine';
-import {learnedInvocationRule} from './invocations';
+import {learnedInvocationRule,invocationSpellMatches} from './invocations';
 import {sourceOwnerIdentity} from './sourceSpellState';
 import {ABILITIES,selectionAllowed,type Ability,type Character,type Entry,type Issue,type Selection,type SpecialSpell} from '../model';
 import {matchesReference} from '../entryReferences';
@@ -25,6 +25,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  for(const owner of c.selections.filter(s=>s.entry.kind!=='spell'&&s.entry.raw.additionalSpells!=null)){
   const issue=(path:string,message:string)=>{const id=`source-spell:${owner.id}:${path}:${message}`;if(!issues.some(i=>i.id===id))issues.push({id,selectionId:owner.id,severity:'warning',message:`${owner.entry.name}：${message}`});};
   if(owner.entry.kind==='item'){issue('item','物品赠送施法与充能尚未接入，请按原文记录。');continue;}
+  const reviewedInvocation=learnedInvocationRule(c,owner);
   const blocks=owner.entry.raw.additionalSpells;if(!Array.isArray(blocks)){issue('shape','额外法术数据格式未支持。');continue;}
   const selectedSet=blocks.length===1?0:c.automation?.spellSets?.[owner.id];
   if(blocks.length>1){choices.push({ownerId:owner.id,key:owner.id,label:owner.entry.name+'的施法方案',sets:blocks.map((b,i)=>b?.name||`方案 ${i+1}`)});if(selectedSet===undefined){issue('set','有多个施法方案，请选择一项；尚未自动赠送。');continue;}}
@@ -69,9 +70,11 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
      for(const ref of resolveList(list,path)){
       const [uid,castLevel]=ref.split('#'),parts=uid.split('|'),reference=`${parts[0]}|${parts[1]||'PHB'}`;
       if(castLevel&&!/^(c|[1-9])$/.test(castLevel)){issue(path,'施法环阶后缀未支持。');continue;}
-      const entries=known.filter(e=>matchesReference(e,reference));
+      const invocationSpell=usage==='free'&&reviewedInvocation?.mechanism==='spell'?reviewedInvocation:undefined;
+      const entries=known.filter(e=>invocationSpell?invocationSpellMatches(e,invocationSpell):matchesReference(e,reference));
       if(entries.length!==1){issue(path+':'+ref,entries.length?'法术引用存在多个身份，未自动任选一条。':`尚未找到 ${reference}，资料加载后再关联。`);continue;}
-      const entry=entries[0];if(castLevel==='c'&&Number(entry.raw.level)!==0){issue(path+':'+ref,'声明的戏法与条目环阶不符。');continue;}
+      const entry=entries[0];
+      if(castLevel==='c'&&Number(entry.raw.level)!==0){issue(path+':'+ref,'声明的戏法与条目环阶不符。');continue;}
       const key=`source-spell:${index}/${kind}/${gate}/${path}/${ref.toLowerCase()}`,id=`auto-spell:${owner.id}:${encodeURIComponent(key)}`;
       const poolPath=`source-spell:${index}/${kind}/${gate}/${path}`,usageKey=JSON.stringify([sourceOwnerIdentity(c,owner),shared?poolPath:key]);
       const resourceKey=resource?.key||(shared?`source-spell-pool:${encodeURIComponent(usageKey)}`:undefined);
@@ -81,7 +84,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       grants.push({id,owner,key,entry,eligible,config});
      }
     }
-    if(Array.isArray(value)){const reviewed=kind==='innate'&&gate==='_'&&index===0&&learnedInvocationRule(c,owner)?.mechanism==='spell';if(reviewed)issue('invocation-boundary',learnedInvocationRule(c,owner)!.boundary);addList(value,'_',kind==='innate'?(reviewed?'free':'check'):'slot');continue;}
+    if(Array.isArray(value)){const reviewed=kind==='innate'&&gate==='_'&&index===0&&reviewedInvocation?.mechanism==='spell';if(reviewed)issue('invocation-boundary',reviewedInvocation!.boundary);addList(value,'_',kind==='innate'?(reviewed?'free':'check'):'slot');continue;}
     if(!object(value)){issue(`${kind}/${gate}`,'赠送法术配置未支持。');continue;}
     for(const [schedule,spells] of Object.entries(value)){
      if(schedule==='_'||schedule==='will'||schedule==='ritual'){addList(spells,schedule,schedule==='will'?'free':schedule==='ritual'?'ritual':kind==='innate'?'check':'slot');continue;}

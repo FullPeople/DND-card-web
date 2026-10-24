@@ -17,6 +17,13 @@ export function invocationRule(entry:Entry){
  if(rule.mechanism==='skills')return raw.additionalSpells===undefined&&same(raw.skillProficiencies,[Object.fromEntries(rule.skills!.map(skill=>[skill,true]))])?rule:undefined;
  return raw.skillProficiencies===undefined&&same(raw.additionalSpells,[{innate:{_:[rule.spell]}}])?rule:undefined;
 }
+/** A reviewed free payment belongs to the exact PHB spell identity, not a
+ * translated display-name match, copied identity, or custom mechanics. All
+ * currently reviewed spell grants cast a 1st-level spell. */
+export function invocationSpellMatches(entry:Entry,rule:NonNullable<ReturnType<typeof invocationRule>>):boolean{
+ const raw=entry.raw;
+ return rule.mechanism==='spell'&&!!rule.spellReference&&entry.kind==='spell'&&entry.edition==='2014'&&raw._category==='spell'&&raw.edition!=='one'&&raw.level===1&&!raw._copy&&!raw._unresolvedParent&&!entry.effects?.length&&!entry.choices?.length&&matchesIdentity(entry,rule.spellReference)&&matchesIdentity({...entry,english:raw.ENG_name||raw.name,source:raw.source},rule.spellReference);
+}
 export function invocationProgression(owner:Entry,group:unknown):boolean{
  const raw=group as {featureType?:unknown;progression?:unknown}|undefined;
  return owner.kind==='class'&&owner.edition==='2014'&&!owner.raw._copy&&!owner.raw._unresolvedParent&&matchesIdentity(owner,evidence.owner)&&!!raw&&same(raw.featureType,['EI'])&&same(raw.progression,evidence.knownProgression);
@@ -33,7 +40,7 @@ export const invocationChoiceHint='已核对的 PHB 祈唤自动授予技能熟�
 /** Free payment is this class-learning grant only, not an automatic upgrade of
  * directly imported/manual invocations or other grant mechanisms. */
 export function learnedInvocationRule(c:Character,row:Selection){
- const rule=invocationRule(row.entry);if(!rule||!row.grantKey?.startsWith('choice:')||!row.requirementId)return;
+ const rule=invocationRule(row.entry);if(!rule||!row.requirementId||row.grantKey!==`choice:${row.requirementId}:${row.entry.id}`)return;
  const source=c.selections.find(parent=>parent.id===row.parentId),owner=source&&c.selections.find(parent=>parent.id===source.parentId&&parent.entry.kind==='class');if(!owner)return;
  const prefix=`${owner.id}:class-optional:`,index=row.requirementId.startsWith(prefix)?row.requirementId.slice(prefix.length):'';if(!/^\d+$/.test(index))return;
  const group=owner.entry.raw.optionalfeatureProgression?.[Number(index)];if(invocationSource(c,owner,group)?.id!==source!.id)return;
