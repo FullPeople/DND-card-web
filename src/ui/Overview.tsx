@@ -16,6 +16,8 @@ import {TraceValue} from './ValueTrace';
 import {selectionActive} from '../core/automation/choices';
 import {classMatches} from '../core/model';
 import {effectiveTrainingDeclarations} from '../core/automation/training';
+import {appendReviewedSkilledTools} from './skilledToolDisplay';
+import {reviewedSkilledIdentity} from '../core/automation/reviewedFeatIdentity';
 import {trainingDisplayText} from './trainingReferences';
 import {spellIsReady} from '../core/spellWorkspace';
 import {spellState} from '../core/characterDetails';
@@ -97,13 +99,15 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const activeTraining=c.selections.filter(s=>selectionActive(c,s)&&(!s.grantKey?.startsWith('choice:')||c.automation?.enabled));
   return [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
-    const values = key==='armor'||key==='weapons'?effectiveTrainingDeclarations(c,activeTraining,key):activeTraining.flatMap(s => {
+    let values = key==='armor'||key==='weapons'?effectiveTrainingDeclarations(c,activeTraining,key):activeTraining.flatMap(s => {
+      if(reviewedSkilledIdentity(s.entry))return [];
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
       return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
     });
     values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.flatMap(v=>{const option=r.options.find(o=>o.value===v);return key==='tools'?(option&&!option.unavailable?[option.label]:[]):[option?.label||v];})));
+    if(key==='tools')values=appendReviewedSkilledTools(c,values);
     return { key, label, values: [...new Set<string>(values.map(v => names[v] || trainingDisplayText(v,c.edition==='2024'?'XPHB':'PHB',key,trainingNames.get(v.toLowerCase())||[])))] };
   });
   },[c,choices,trainingNames]);

@@ -1,4 +1,5 @@
-import {reviewedWeaponMasterIdentity} from './automation/reviewedFeatIdentity';
+import {evaluateReviewedSkilled} from './automation/reviewedSkilled';
+import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity} from './automation/reviewedFeatIdentity';
 import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
@@ -45,6 +46,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Preserve the existing unsupported-choice notice, including for XPHB,
     // but never let a manual/edited Weapon Master raw or effects field bypass
     // the separate explicitly owned PHB training/ability grant.
+    if(reviewedSkilledIdentity(e)){issues.push({id:`reviewed-skilled-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工熟习条目保留。本批只支持真实职业属性提升位置中另行确认的三项技能或工具熟练；此条目不自动授予效果。'});continue;}
     if(reviewedWeaponMasterIdentity(e))continue;
     // Background ability choices are annotations. The sheet's base scores
     // already contain the player's allocation, so do not apply it a second time.
@@ -68,6 +70,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
       else if (effect.target === 'hp') { if (effect.op === 'set') hpOverride = effect.value; else hpBonus += effect.value;effectTrace.hp.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }
     }
   }
+  const skilled=evaluateReviewedSkilled(c,active);issues.push(...skilled.issues);for(const skill of skilled.skills)grantSkill(skill.key,skill.source);
   const {asi,reviewed:reviewedFeats}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
   for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
   issues.push(...reviewedFeats.issues);

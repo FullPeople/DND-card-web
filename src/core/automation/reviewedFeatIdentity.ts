@@ -26,3 +26,12 @@ export function retainedModernArmorRule(entry:Entry){
 export function reviewedWeaponMasterIdentity(entry:Entry):boolean{
  return entry.english==='Weapon Master'||entry.raw.ENG_name==='Weapon Master';
 }
+
+/** Block manual/forged PHB copies from generic raw/effects execution. The
+ * independently identified modern origin feat keeps its existing path. */
+export function reviewedSkilledIdentity(entry:Entry):boolean{
+ if(entry.english!=='Skilled'&&entry.raw.ENG_name!=='Skilled')return false;
+ const raw=entry.raw;
+ const modern=entry.kind==='feat'&&entry.english==='Skilled'&&raw.ENG_name==='Skilled'&&entry.source==='XPHB'&&raw.source==='XPHB'&&entry.edition==='2024'&&raw._category==='feat'&&raw.category==='O'&&raw.repeatable===true&&raw.repeatableHidden===true&&entry.page===201&&raw.page===201&&!entry.effects?.length&&!entry.choices?.length&&Object.keys(raw).every(key=>['ENG_name','name','source','page','srd52','basicRules2024','category','repeatable','repeatableHidden','skillToolLanguageProficiencies','entries','translator','_category'].includes(key))&&JSON.stringify(raw.skillToolLanguageProficiencies)==='[{"choose":[{"from":["任意技能","任意工具"],"count":3}]}]';
+ return !modern;
+}

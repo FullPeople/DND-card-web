@@ -11,6 +11,8 @@ import {AsiAllocationControl} from './AsiAllocationControl';
 import {setAsiAllocation} from '../core/automation/asi';
 import {invocationRule} from '../core/automation/invocations';
 import {ReviewedFeatControl} from './ReviewedFeatControl';
+import {SkilledControl} from './SkilledControl';
+import {reviewedSkilledBindings,reviewedSkilledRule,setReviewedSkilledIntent} from '../core/automation/reviewedSkilled';
 import {reviewedFeatBindings,reviewedFeatRule,setReviewedFeatIntent} from '../core/automation/reviewedFeats';
 
 /** Display saved learning intent; activation requires a separate explicit edit. */
@@ -38,6 +40,13 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
   if(value!==binding.entryId)return false;
   const entry=choice.options.find(option=>option.value===value)?.entry||c.classChoiceSnapshots?.[value];return !!entry&&!!reviewedFeatRule(entry);
  }))):[];
+ const preservedSkilled=mode==='feat'?reviewedSkilledBindings(c).filter(binding=>!choices.some(choice=>choice.id===binding.choiceId&&choice.slots?.some(value=>{if(value!==binding.entryId)return false;const entry=choice.options.find(option=>option.value===value)?.entry||c.classChoiceSnapshots?.[value];return !!entry&&!!reviewedSkilledRule(entry);} ))):[];
+ const unknownSkilled=mode==='feat'&&!!c.reviewedSkilled&&c.reviewedSkilled.version!==1;
+ function withdrawSkilled(choiceId:string,entryId:string){
+  if(workspace.canEdit===false||!edit)return;let applied=false;const previous=JSON.stringify(c.reviewedSkilled),characterId=c.id;
+  try{edit(draft=>{if(draft.id!==characterId||JSON.stringify(draft.reviewedSkilled)!==previous)throw Error('熟习记录已变化，请重新核对。');setReviewedSkilledIntent(draft,choiceId,entryId,null);applied=true;});setError(applied?'':'修改未提交，请查看卡面的只读或同步提示。');}
+  catch(reason){setError(reason instanceof Error?reason.message:String(reason));}
+ }
  const unknownWeaponMaster=mode==='feat'&&!!c.reviewedWeaponMaster&&c.reviewedWeaponMaster.version!==1;
  const unknownFeats=mode==='feat'&&!!c.reviewedFeats&&c.reviewedFeats.version!==1;
  function withdrawFeat(choiceId:string,entryId:string){
@@ -45,7 +54,7 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
   try{edit(draft=>{setReviewedFeatIntent(draft,choiceId,entryId,null);applied=true;});setError(applied?'':'修改未提交，请查看卡面的只读或同步提示。');}
   catch(reason){setError(reason instanceof Error?reason.message:String(reason));}
  }
- if(!choices.length&&!preserved.length&&!preservedAsi.length&&!preservedFeats.length&&!unknownFeats&&!unknownWeaponMaster)return null;
+ if(!choices.length&&!preserved.length&&!preservedAsi.length&&!preservedFeats.length&&!unknownFeats&&!unknownWeaponMaster&&!preservedSkilled.length&&!unknownSkilled)return null;
  return <div className="class-choice-records" aria-label={mode==='feat'?'职业授予专长':'职业学习记录'}>{choices.map(choice=>{
   const owner=c.selections.find(row=>row.id===choice.ownerId)!;
   const show=builtinOptionsVisible(c,owner.id,allChoices);
@@ -60,7 +69,7 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
     if(!value)return null;const option=choice.options.find(row=>row.value===value),entry=option?.entry||c.classChoiceSnapshots?.[value];
     const parked=Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&archive.selections[0].entry.id===value);
     const unavailable=choice.restricted||index>=choice.count||!option||!!option.unavailable||parked;
-    return <div key={`${index}:${value}`} className={unavailable?'is-restricted':''} style={{minWidth:0,maxWidth:'100%'}}>{entry?<Reference entry={entry} reference={`entry:${entry.id}`}>{entry.name}</Reference>:value}{unavailable&&<small>（当前不可用，记录保留）</small>}{parked&&choice.hint&&<small>{choice.hint}</small>}{mode==='optional'&&entry&&invocationRule(entry)&&<small>{invocationRule(entry)!.boundary}</small>}{mode==='feat'&&entry&&<><AsiAllocationControl key={`asi:${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/><ReviewedFeatControl catalog={catalog} key={`feat:${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/></>}
+    return <div key={`${index}:${value}`} className={unavailable?'is-restricted':''} style={{minWidth:0,maxWidth:'100%'}}>{entry?<Reference entry={entry} reference={`entry:${entry.id}`}>{entry.name}</Reference>:value}{unavailable&&<small>（当前不可用，记录保留）</small>}{parked&&choice.hint&&<small>{choice.hint}</small>}{mode==='optional'&&entry&&invocationRule(entry)&&<small>{invocationRule(entry)!.boundary}</small>}{mode==='feat'&&entry&&<><AsiAllocationControl key={`asi:${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/><ReviewedFeatControl catalog={catalog} key={`feat:${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/>{reviewedSkilledRule(entry)&&<SkilledControl catalog={catalog} key={`skilled:${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/>}</>}
 {mode==='optional'&&entry&&<InfusionControl key={`${c.id}:${choice.id}:${entry.id}`} c={c} choiceId={choice.id} ownerId={owner.id} entry={entry} unavailable={!!unavailable} writable={workspace.canEdit!==false} edit={edit}/>}</div>;
    })}</div>
   </section>;
@@ -74,5 +83,5 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
  </section>}{preservedFeats.length>0&&<section aria-label="已保留被动专长记录"><strong>已保留被动专长记录</strong><small>原职业选择当前未选用或不适用，不增加属性、护甲训练、武器熟练、豁免熟练或生命值；可以撤回原确认，不改动手工字段。</small>{preservedFeats.map((binding,index)=>{
   const entry=c.classChoiceSnapshots?.[binding.entryId]||catalog.find(row=>row.id===binding.entryId);
   return entry&&reviewedFeatRule(entry)?<ReviewedFeatControl catalog={catalog} key={`${binding.choiceId}:${binding.entryId}:${index}`} c={c} choiceId={binding.choiceId} entry={entry} unavailable writable={workspace.canEdit!==false} edit={edit}/>:<div key={`${binding.choiceId}:${binding.entryId}:${index}`}><small>原被动专长资料未载入或声明不再匹配；仅保留确认记录。</small><button type="button" disabled={workspace.canEdit===false||!edit} onClick={()=>withdrawFeat(binding.choiceId,binding.entryId)}>撤回被动专长记录</button></div>;
- })}{error&&<small role="alert">{error}</small>}</section>}{unknownFeats&&<small>此被动专长记录版本尚未支持，原数据保留且不能修改。</small>}{unknownWeaponMaster&&<small>此武器大师记录版本尚未支持，原数据保留且不能修改。</small>}</div>;
+ })}{error&&<small role="alert">{error}</small>}</section>}{preservedSkilled.length>0&&<section aria-label="已保留熟习记录"><strong>已保留熟习记录</strong><small>原职业选择当前未选用或不适用，不授予技能或工具熟练；原确认保留，可明确撤回。</small>{preservedSkilled.map((binding,index)=>{const entry=c.classChoiceSnapshots?.[binding.entryId]||catalog.find(row=>row.id===binding.entryId);return entry&&reviewedSkilledRule(entry)?<SkilledControl catalog={catalog} key={`${binding.choiceId}:${binding.entryId}:${index}`} c={c} choiceId={binding.choiceId} entry={entry} unavailable writable={workspace.canEdit!==false} edit={edit}/>:<div key={`${binding.choiceId}:${binding.entryId}:${index}`}><small>原熟习资料未载入或声明不再匹配；仅保留确认记录。</small><button type="button" disabled={workspace.canEdit===false||!edit} onClick={()=>withdrawSkilled(binding.choiceId,binding.entryId)}>撤回熟习记录</button></div>;})}{error&&<small role="alert">{error}</small>}</section>}{unknownSkilled&&<small>此熟习记录版本尚未支持，原数据保留且不能修改。</small>}{unknownFeats&&<small>此被动专长记录版本尚未支持，原数据保留且不能修改。</small>}{unknownWeaponMaster&&<small>此武器大师记录版本尚未支持，原数据保留且不能修改。</small>}</div>;
 }
