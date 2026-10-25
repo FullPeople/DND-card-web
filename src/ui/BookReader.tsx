@@ -15,6 +15,7 @@ export function BookReader({kind}:{kind:'book'|'adventure'}){
  const [volumes,setVolumes]=useState<ReadingVolume[]>([]),[query,setQuery]=useState(''),[id,setId]=useState<string>(initial.id||stored.id||''),[chapter,setChapter]=useState<number>(initial.id?initial.chapter:Number(stored.chapter)||0),[chapters,setChapters]=useState<Raw[]>([]),[error,setError]=useState(''),[loading,setLoading]=useState(false),[loadingList,setLoadingList]=useState(true),[retry,setRetry]=useState(0),[message,setMessage]=useState(''),[images,setImages]=useState(false);
  const [displayed,setDisplayed]=useState<{volume:ReadingVolume;chapters:Raw[];chapter:number}>();
  const pane=useRef<HTMLElement>(null),positions=useRef<Record<string,number>>(stored.positions&&typeof stored.positions==='object'&&!Array.isArray(stored.positions)?stored.positions:{});
+ const scrollSave=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
  const requested=useRef({id,chapter});requested.current={id,chapter};
  const selected=volumes.find(volume=>volume.id.toLowerCase()===String(id).toLowerCase());
  useEffect(()=>{const controller=new AbortController();setLoadingList(true);setError('');readingVolumes(kind,controller.signal,retry>0).then(value=>{if(!controller.signal.aborted)setVolumes(value);}).catch(error=>{if(!controller.signal.aborted)setError(String(error?.message||error));}).finally(()=>{if(!controller.signal.aborted)setLoadingList(false);});return()=>controller.abort();},[kind,retry]);
@@ -26,9 +27,16 @@ export function BookReader({kind}:{kind:'book'|'adventure'}){
  },[kind,selected?.id,retry]);
  useEffect(()=>{setDisplayed(value=>value?.volume.id===id?{...value,chapter}:value);},[id,chapter]);
  useEffect(()=>{const pop=()=>{const next=readingRoute();if(next.kind===kind){setId(next.id);setChapter(next.chapter);}};window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop);},[kind]);
- useEffect(()=>{if(!id)return;try{localStorage.setItem(storeKey(kind),JSON.stringify({id,chapter,positions:positions.current}));}catch{}},[id,chapter]);
+ function saveReading(){clearTimeout(scrollSave.current);scrollSave.current=undefined;const current=requested.current;if(!current.id)return;try{localStorage.setItem(storeKey(kind),JSON.stringify({...current,positions:positions.current}));}catch{}}
+ useEffect(()=>{saveReading();},[id,chapter]);
+ useEffect(()=>{
+  const flush=()=>{if(scrollSave.current!==undefined)saveReading();};
+  const hide=()=>{if(document.hidden)flush();};
+  window.addEventListener('pagehide',flush);document.addEventListener('visibilitychange',hide);
+  return()=>{flush();window.removeEventListener('pagehide',flush);document.removeEventListener('visibilitychange',hide);};
+ },[]);
  useEffect(()=>{if(pane.current&&displayed)pane.current.scrollTop=positions.current[displayed.volume.id+':'+displayed.chapter]||0;},[displayed]);
- function rememberScroll(){if(!pane.current||!displayed)return;positions.current[displayed.volume.id+':'+displayed.chapter]=pane.current.scrollTop;try{localStorage.setItem(storeKey(kind),JSON.stringify({id,chapter,positions:positions.current}));}catch{}}
+ function rememberScroll(immediate=true){if(!pane.current||!displayed)return;positions.current[displayed.volume.id+':'+displayed.chapter]=pane.current.scrollTop;if(immediate)saveReading();else{clearTimeout(scrollSave.current);scrollSave.current=setTimeout(saveReading,180);}}
  function navigate(nextId:string,nextChapter:number){rememberScroll();setId(nextId);setChapter(nextChapter);setImages(false);history.pushState(null,'',readingUrl(kind,nextId,nextChapter));}
  async function copy(){const url=new URL('https://dnd.center/wiki/');url.searchParams.set('reading',kind);url.searchParams.set('book',displayed?.volume.id||id);url.searchParams.set('chapter',String(displayed?.chapter??chapter));try{await navigator.clipboard.writeText(url.href);setMessage('已复制章节链接。');}catch{setMessage('复制失败；章节地址为 '+url.href);}}
  function openReference(reference:string,referenceKind?:string){const url=new URL('https://dnd.center/wiki/');url.searchParams.set('reference',reference.includes('|')?reference:reference+'|'+(displayed?.volume.source||displayed?.volume.id||''));url.searchParams.set('referenceKind',referenceKind||'rule');window.open(url.href,'_blank','noopener');}
@@ -38,7 +46,7 @@ export function BookReader({kind}:{kind:'book'|'adventure'}){
  return <section className="reading-volume" aria-label={kind==='book'?'书籍阅读':'冒险阅读'} onKeyDown={event=>{if((event.target as HTMLElement).matches('input,textarea,select,[contenteditable=true]'))return;if(loading)return;if(event.key==='['&&chapter>0){event.preventDefault();navigate(id,chapter-1);}if(event.key===']'&&chapter<chapters.length-1){event.preventDefault();navigate(id,chapter+1);}}}>
   <div className="reading-volume-tools"><input aria-label={kind==='book'?'搜索书籍':'搜索冒险'} placeholder="搜索中文名、英文名、来源或译者" value={query} onChange={event=>setQuery(event.target.value)}/><span>{loadingList?'正在读取目录…':`${filtered.length} 份资料`}</span><button disabled={loading||loadingList} onClick={()=>setRetry(value=>value+1)}>更新阅读资料</button><a href={`https://5e.kiwee.top/${kind==='book'?'books':'adventures'}.html`} target="_blank" rel="noopener noreferrer">资料来源 ↗</a></div>
   <div className="reading-volume-body"><nav className="reading-volume-list" aria-label="出版资料目录">{filtered.map(volume=><button key={volume.id} aria-current={selected?.id===volume.id} onClick={()=>navigate(volume.id,0)}>{volume.name}<small>{volume.id}{volume.published?' · '+volume.published:''}</small></button>)}</nav>
-   <article className="reading-volume-content" ref={pane} aria-busy={loading} tabIndex={0} onScroll={rememberScroll}>
+   <article className="reading-volume-content" ref={pane} aria-busy={loading} tabIndex={0} onScroll={()=>rememberScroll(false)}>
     {viewVolume&&<><header className="reading-volume-heading"><h2>{viewVolume.name}</h2>{viewVolume.ENG_name&&<small>{viewVolume.ENG_name}</small>}<TranslationNotice raw={viewVolume}/></header>
      {viewChapters.length>0&&<div className="reading-chapters"><button disabled={loading||viewChapter===0} onClick={()=>navigate(viewVolume.id,viewChapter-1)}>上一章</button><select aria-label="选择章节" disabled={loading} value={viewChapter} onChange={event=>navigate(viewVolume.id,Number(event.target.value))}>{viewChapters.map((value,index)=><option key={index} value={index}>{viewVolume.contents?.[index]?.name||value.name||`章节 ${index+1}`}</option>)}</select><button disabled={loading||viewChapter===viewChapters.length-1} onClick={()=>navigate(viewVolume.id,viewChapter+1)}>下一章</button><button onClick={()=>void copy()}>复制章节链接</button><button aria-pressed={images} onClick={()=>setImages(old=>!old)}>{images?'收起插图':'显示插图'}</button></div>}
     </>}

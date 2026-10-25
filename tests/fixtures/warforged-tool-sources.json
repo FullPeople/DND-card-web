@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-10-18",
+  "checkedAt": "2026-10-25",
   "dataRevision": "9acd4d5e7c5bed9cf34150db4319a7aeec6751e8",
   "evidenceBoundary": "Two Warforged structured proficiency declarations and four real tool identities only; no rule prose or player data",
   "inputs": [
     {
       "url": "https://5e.kiwee.top/data/races.json",
-      "bytes": 603906,
-      "sha256": "636af963e6476cccc1740462fa3ae532f9e9b4a48e44f04920c8c3059046a7bc"
+      "bytes": 603959,
+      "sha256": "2934cc5f5c8ffeef6c81aea8ca97005d52f56812e0af06d12c5292a14a389dc5"
     },
     {
       "url": "https://5e.kiwee.top/data/items-base.json",
@@ -80,5 +80,6 @@
       }
     ]
   },
-  "inputVerification": "Current public bytes rechecked against the unchanged mechanical projections; dataRevision records the original projection provenance."
+  "inputVerification": "Current public bytes rechecked against the unchanged mechanical projections; dataRevision records the original projection provenance.",
+  "inputLockBasis": "Live HTTPS bytes checked on checkedAt. dataRevision and manifest, when present, identify the original unchanged mechanical projection; this is not a new rule replay."
 }

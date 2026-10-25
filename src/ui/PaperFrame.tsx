@@ -56,7 +56,19 @@ export function PaperFrame({ children, page, changePage, character, pages=SHEET_
   const drag = useSheetContext('drag',DragContext);
   useEffect(()=>{const lift=(event:Event)=>{if(activeTarget&&!activeTarget()||!paper.current?.isConnected)return;const detail=(event as CustomEvent).detail;if(detail?.preservePage)return;const entry=detail?.entry;const next=entry&&entryDragPage(entry,detail.intent||entryDragIntent(entry));if(next&&pages.includes(next)&&next!==page)changePage(next);};window.addEventListener('entry-drag-start',lift);return()=>window.removeEventListener('entry-drag-start',lift);},[activeTarget,page,pages,changePage]);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => { if (!drag?.preservePage && drag?.entry && drag.hoverTab && drag.hoverTab !== page) hoverTimer.current = setTimeout(() => changePage(drag.hoverTab as SheetPage), 400); return () => clearTimeout(hoverTimer.current); }, [drag?.entry, drag?.hoverTab,drag?.preservePage, page]);
+  const hoverNavigation=useRef({activeTarget,changePage,pages});
+  useLayoutEffect(()=>{hoverNavigation.current={activeTarget,changePage,pages};});
+  const hoverPagesKey=pages.join('|');
+  useEffect(() => {
+    const next=drag?.hoverTab as SheetPage|undefined;
+    const current=hoverNavigation.current;
+    if(!drag?.preservePage&&drag?.entry&&next&&next!==page&&current.pages.includes(next)&&(!current.activeTarget||current.activeTarget()))hoverTimer.current=setTimeout(()=>{
+      // The user can switch cards while this delayed hover is still pending.
+      const latest=hoverNavigation.current;
+      if((!latest.activeTarget||latest.activeTarget())&&paper.current?.isConnected&&latest.pages.includes(next))latest.changePage(next);
+    },400);
+    return()=>clearTimeout(hoverTimer.current);
+  },[active,character.id,drag?.entry,drag?.hoverTab,drag?.preservePage,page,hoverPagesKey]);
   useLayoutEffect(()=>{if(compact&&viewport.current)viewport.current.scrollTop=0;},[page,character.id,compact]);
   useLayoutEffect(() => {
     const node=viewport.current!;

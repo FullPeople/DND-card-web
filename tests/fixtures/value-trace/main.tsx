@@ -10,6 +10,7 @@ function make(id='first'){
 }
 function App(){
  const [c,setC]=useState(make),[edits,setEdits]=useState(0),[enabled,setEnabled]=useState(true);const d=evaluate(c);
+ (window as any).valueTraceFixture={publishStrengthBonus:(value:number)=>setC(old=>({...old,selections:old.selections.map(row=>({...row,entry:{...row.entry,effects:row.entry.effects?.map(effect=>'target' in effect&&effect.target==='str'?{...effect,value}:effect)}}))}))};
  const change=(ability:Ability,value:string)=>{setEdits(n=>n+1);setC(old=>({...old,abilities:{...old.abilities,[ability]:Number(value)}}));};
  return <main style={{margin:'120px',fontFamily:'Arial'}}><button aria-label="之前">之前</button><ValueTraceProvider c={c} d={d} enabled={enabled}><section style={{display:'flex',gap:'340px',margin:'80px 0'}}>{([['str','力量'],['dex','敏捷']] as const).map(([ability,name])=><NumberInput key={ability} aria-label={`${name}基础值`} value={c.abilities[ability]} displayValue={d.abilities[ability]} readOnly={!enabled} onChange={e=>change(ability,e.target.value)} style={{width:80,height:44,fontSize:28,textAlign:'center'}}/>)}<NumberInput aria-label="体质基础值" value={c.abilities.con} displayValue={d.abilities.con} readOnly style={{width:80,height:44,fontSize:28}}/></section></ValueTraceProvider><button aria-label="之后">之后</button><button onClick={()=>setC(make('second'))}>切换角色</button><button onClick={()=>setEnabled(value=>!value)}>切换编辑</button><pre id="data">{JSON.stringify({abilities:c.abilities,edits,id:c.id})}</pre></main>;
 }

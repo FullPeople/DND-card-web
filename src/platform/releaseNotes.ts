@@ -1,5 +1,9 @@
 import {cloudFeaturesEnabled} from '../cloud/availability';
-export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-23':'2026-10-19';
+export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-25':'2026-10-19';
+const release307=():ReleaseSection[]=>[
+ {title:'角色卡操作',items:['优化数值编辑、滚动、分栏调整和拖放的响应，减少无关内容重复刷新。','修复中文输入法确认时误提交数值、取消拖动后操作残留，以及拖拽悬停切页被后台更新打断的问题。保留五页、A4、配色和保存保护。']},
+ {title:'资料搜索与阅读',items:['优化 Wiki 筛选、搜索和长正文阅读；使用方向键选择搜索结果时，输入框继续保留焦点。','修复切换资料类别后旧正文仍留在页面的问题。书籍阅读位置合并保存，切换章节或离开页面时及时保存。']},
+];
 const release306=():ReleaseSection[]=>[
  {title:'切卡与保存',items:['连续切换已打开的角色卡时保留卡面，减少重复准备和闪烁；后台资料读取减少对卡面操作的干扰。','保留编辑保存、刷新恢复、云端更新、冲突检查和本机草稿保护。切换后关闭旧角色的操作菜单，避免误操作另一张卡。']},
  {title:'阅读与填写',items:['说明浮层到达滚动边缘或没有可滚内容时，滚轮继续作用于下方的阅读区域。','待选特性提示缩小并尽量放在栏目标题右侧，保留填写入口和窄屏操作。']},
@@ -491,8 +495,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'&&cloudFeaturesEnabled?release306():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release306()},{title:'2026-10-22',sections:release305()},{title:'2026-10-20',sections:release303()}]:[]),
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'&&cloudFeaturesEnabled?release307():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release307()},{title:'2026-10-23',sections:release306()},{title:'2026-10-22',sections:release305()},{title:'2026-10-20',sections:release303()}]:[]),
  {title:'2026-10-19',sections:release302(mode)},
  {title:'2026-10-18',sections:release301(mode)},
  ...(mode==='suite'?[{title:'2026-10-16-三',sections:release300()}]:[]),
