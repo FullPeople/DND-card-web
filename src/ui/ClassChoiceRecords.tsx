@@ -70,7 +70,7 @@ export function ClassChoiceRecords({c,catalog,mode,edit}:{c:Character;catalog:En
    <button type="button" disabled={workspace.canEdit===false||!edit} onClick={()=>withdraw(binding)} aria-label={`撤回${entry?.name||'原记录'}灌注`}>撤回灌注</button>
   </div>;})}
   {error&&<small role="alert">{error}</small>}
- </section>}{preservedFeats.length>0&&<section aria-label="已保留被动专长记录"><strong>已保留被动专长记录</strong><small>原职业选择当前未选用或不适用，不增加属性、豁免熟练或生命值；可以撤回原确认，不改动手工字段。</small>{preservedFeats.map((binding,index)=>{
+ </section>}{preservedFeats.length>0&&<section aria-label="已保留被动专长记录"><strong>已保留被动专长记录</strong><small>原职业选择当前未选用或不适用，不增加属性、护甲训练、豁免熟练或生命值；可以撤回原确认，不改动手工字段。</small>{preservedFeats.map((binding,index)=>{
   const entry=c.classChoiceSnapshots?.[binding.entryId]||catalog.find(row=>row.id===binding.entryId);
   return entry&&reviewedFeatRule(entry)?<ReviewedFeatControl key={`${binding.choiceId}:${binding.entryId}:${index}`} c={c} choiceId={binding.choiceId} entry={entry} unavailable writable={workspace.canEdit!==false} edit={edit}/>:<div key={`${binding.choiceId}:${binding.entryId}:${index}`}><small>原被动专长资料未载入或声明不再匹配；仅保留确认记录。</small><button type="button" disabled={workspace.canEdit===false||!edit} onClick={()=>withdrawFeat(binding.choiceId,binding.entryId)}>撤回被动专长记录</button></div>;
  })}{error&&<small role="alert">{error}</small>}</section>}{unknownFeats&&<small>此被动专长记录版本尚未支持，原数据保留且不能修改。</small>}</div>;

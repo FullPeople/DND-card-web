@@ -15,7 +15,13 @@ export async function restoreAuthoredChoices(page:Page,database?:string,visibili
   try{
    const transaction=db.transaction('documents','readwrite'),store=transaction.objectStore('documents');
    const workspace=await new Promise<any>((resolve,reject)=>{const request=store.get('workspace');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
-   const card=workspace.characters.find((row:any)=>row.id===workspace.activeId);
+   // Navigation persists independently from the document. A stale embedded
+   // activeId must not resume choices on a different card. Invalid present
+   // navigation is an error, never permission to fall back to another card.
+   const navigation=await new Promise<any>((resolve,reject)=>{const request=store.get('workspace-active-id');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+   const activeId=navigation===undefined?workspace.activeId:navigation;
+   if(typeof activeId!=='string'||!workspace.characters.some((row:any)=>row.id===activeId))throw Error('Invalid durable active character');
+   const card=workspace.characters.find((row:any)=>row.id===activeId);
    if(card.featureLayout){delete card.featureLayout.ignoredChoices;delete card.featureLayout.ignoredClassGrants;delete card.featureLayout.resumedChoices;if(visibility)card.featureLayout.optionsVisible=visibility;else delete card.featureLayout.optionsVisible;}
    store.put(workspace,'workspace');await new Promise<void>((resolve,reject)=>{transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error);});
   }finally{db.close();}

@@ -44,6 +44,7 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.1",
     "fake-indexeddb": "6.2.5",
+    "jsdom": "26.1.0",
     "lucide-static": "^1.55.0",
     "typescript": "7.0.2",
     "vite": "8.3.0",

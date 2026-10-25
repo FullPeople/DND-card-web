@@ -4,6 +4,11 @@ import {activeSelections} from './active';
 import {resolveEntryReference,matchesReference} from '../entryReferences';
 import {legacyFeatEvidence,modernFeatEvidence,legacyRecordSupport,optionalChoiceSupport,completeOptionalProgression,fightingStylePrerequisiteEvidence,fightingStyleAlternativeEvidence,type ClassChoiceSupport} from './classChoiceSupport';
 import type {ChoiceOption,SheetChoice} from './choices';
+import {reviewedFeatRule} from './reviewedFeats';
+import {eligibleLegacySource} from './asi';
+import {effectiveTrainingDeclarations,trainingDeclarations} from './training';
+import {activeEffectSelections} from './active';
+import {equipmentTraining} from '../proficiencyText';
 import {invocationRule,invocationProgression,invocationSource,invocationChoiceHint} from './invocations';
 
 const list=(value:unknown):unknown[]=>Array.isArray(value)?value:[];
@@ -68,7 +73,7 @@ function ownedFightingStylePrerequisite(c:Character,owner:Selection,known:Entry[
   refs.some(ref=>row.grantKey===`ref:${ref}`&&resolveEntryReference(ref,known,'feature')?.id===row.entry.id));
 }
 /** Unknown prerequisite shapes remain unavailable; a choice never repairs them. */
-export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[]=c.selections.map(row=>row.entry)):string|undefined{
+export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[]=c.selections.map(row=>row.entry),choiceId?:string):string|undefined{
  const alternatives=entry.raw.prerequisite;if(alternatives===undefined)return;
  // Only these exact reviewed invocations omit class.source in their frozen
  // prerequisite. Resolve that omission to their verified PHB owner, never to
@@ -97,6 +102,12 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
     const groups=list(value) as Record<string,unknown>[];
     const current=scores;
     if(!groups.length||!groups.some(group=>Object.entries(group).every(([ability,minimum])=>Object.hasOwn(current,ability)&&typeof minimum==='number'&&current[ability as keyof typeof current]>=minimum)))return '尚未满足属性前置条件。';
+   }else if(field==='proficiency'&&!optional){
+    const reviewed=reviewedFeatRule(entry);
+    if(!reviewed?.requiredArmor)return '此前置条件结构尚未核对。';
+    const active=activeEffectSelections(c),grant=choiceId?eligibleLegacySource(c,choiceId,active):undefined;
+    const training=grant?effectiveTrainingDeclarations(c,active,'armor',{level:grant.level,choiceId:choiceId!,selectionId:grant.row.id}):trainingDeclarations(c,active,'armor');
+    if(!training.some(value=>equipmentTraining(value)?.[0]===reviewed.requiredArmor))return `尚未具备此前授予时有效的${reviewed.requiredArmor==='light'?'轻甲':'中甲'}熟练。`;
    }else if(field==='feat'&&!optional){
     if(!Array.isArray(value)||!value.length||value.some(ref=>typeof ref!=='string'||!ref.trim()||!ref.split('|')[0].trim()||ref.split('|').length>2))return '此专长前置结构尚未核对。';
     if(!value.some(ref=>activeOwnedFeat(c,entry,ref)))return '尚未具备来源和版本匹配且当前有效的所需专长。';
@@ -131,7 +142,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
   const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string,recordOnly=optional,support?:ClassChoiceSupport,duplicateChoiceIds:string[]=[])=>{
    candidates=candidates.filter((entry,index)=>candidates.findIndex(other=>other.id===entry.id)===index);
    const saved=c.answers[id]??duplicateChoiceIds.flatMap(alias=>c.answers[alias]||[]),options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
-    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||''))},entry)||sourceChoicePrerequisite(c,entry,owner,optional,known)}));
+    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||''))},entry)||sourceChoicePrerequisite(c,entry,owner,optional,known,id)}));
    const slots=Array.from({length:Math.max(count,saved.length)},(_,index)=>saved[index]||'');
    const selected=restricted?[]:saved.slice(0,count).filter((value,index,values)=>options.some(option=>option.value===value&&!option.unavailable)&&(values.indexOf(value)===index||options.find(option=>option.value===value)?.entry.raw.repeatable===true));
    out.push({id,ownerId:owner.id,label,count,options,slots,selected,complete:selected.length===count&&count>0,restricted,channel:'content',catalogKind:optional?'feature':'feat',sourceProgression:optional?'optional':'feat',ownerEdition:owner.entry.edition,support,duplicateChoiceIds,
@@ -185,7 +196,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     const id=`${owner.id}:class-legacy-feat:${feature.id}`;if(atGrant>at&&!c.answers[id]?.some(Boolean))continue;
     const ability:Entry={...feature,id:`${owner.entry.id}#legacy-ability-record`,name:'属性提升方案',english:'Recorded ability improvement',entries:['保存本次属性提升方案；已核对的职业授予可另行明确分配，未确认前不改变属性。'],raw:{_choiceConcept:true,_classAbilityRecord:true},effects:undefined,choices:undefined};
     const feats=known.filter(entry=>entry.kind==='feat'&&(entry.edition==='both'||entry.edition===owner.entry.edition));
-    add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。已核对的职业 ASI 可在确认尚未计入基础值后单独分配；已适配替代专长需另行明确确认，其他专长效果仍手动。',true,legacyRecordSupport);
+    add(id,`${feature.name} / 可选专长（职业 ${atGrant} 级）`,atGrant<=at?1:0,[ability,...feats],false,'选择属性提升方案，或在规则设置允许可选专长时记录替代专长。已核对的职业 ASI 可在确认尚未计入基础值后单独分配；已适配替代专长需另行明确确认，其他专长效果仍手动。护甲前提按来源职业等级及稳定来源顺序保守核对，不推断兼职升级时间线；先后不明确的同级原始训练不能充当前提。',true,legacyRecordSupport);
     out.at(-1)!.evidenceEntries=[feature];out.at(-1)!.grantLevel=atGrant;
     continue;
    }

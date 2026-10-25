@@ -13,6 +13,11 @@ on:
       - 'tests/arcane-focus*.test.ts'
       - 'tests/invocation*.test.ts'
       - 'tests/reviewed-feats*.test.ts'
+      - 'tests/reviewed-armor-*.test.ts'
+      - 'tests/training-chips-editing.test.ts'
+      - 'tests/e2e/reviewedArmorFeat*.ts'
+      - 'tests/e2e/armorFeatControls.spec.ts'
+      - 'tests/e2e/reviewedRuleBrowserState.ts'
       - 'tests/helpers/frozenReviewedFeatLegacy.ts'
       - 'tests/e2e/reviewedPassiveFeat*.ts'
       - 'tests/enhanced-weapon*.test.ts'
@@ -23,6 +28,7 @@ on:
       - 'tests/e2e/enhancedWeapon*.ts'
       - 'tests/e2e/returningWeapon*.ts'
       - 'tests/e2e/fixtures.ts'
+      - 'tests/e2e/authoredChoicesFixture.ts'
       - 'docs/data/automation*'
       - 'playwright.infusions.config.ts'
       - 'vite*.config.ts'
@@ -145,7 +151,7 @@ jobs:
       - name: Source replay, persistence, restrictions and UI guards
         run: npx vitest run tests/radiant-*.test.ts tests/refueling-*.test.ts tests/infusion-charge*.test.ts tests/attuned-infusion*.test.ts tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-spell-expansion.test.ts tests/invocation-level9.test.ts tests/invocation-atwill-final.test.ts tests/invocation-skill-guard.test.ts tests/invocation-dual-payment.test.ts tests/invocation-dual-controls.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
       - name: Reviewed passive-feat source, lifecycle and player controls
-        run: npx vitest run tests/reviewed-feats*.test.ts --maxWorkers=1
+        run: npx vitest run tests/reviewed-feats*.test.ts tests/reviewed-armor-*.test.ts tests/training-chips-editing.test.ts --maxWorkers=1
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone

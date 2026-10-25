@@ -15,6 +15,7 @@ import {useSheetRenderMode} from './sheetDisplay';
 import {TraceValue} from './ValueTrace';
 import {selectionActive} from '../core/automation/choices';
 import {classMatches} from '../core/model';
+import {effectiveTrainingDeclarations} from '../core/automation/training';
 import {trainingDisplayText} from './trainingReferences';
 import {spellIsReady} from '../core/spellWorkspace';
 import {spellState} from '../core/characterDetails';
@@ -96,7 +97,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const activeTraining=c.selections.filter(s=>selectionActive(c,s)&&(!s.grantKey?.startsWith('choice:')||c.automation?.enabled));
   return [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
-    const values = activeTraining.flatMap(s => {
+    const values = key==='armor'?effectiveTrainingDeclarations(c,activeTraining,'armor'):activeTraining.flatMap(s => {
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
@@ -120,7 +121,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       </div>;
   const death = <SheetCell label="死亡豁免" className="death-saves-cell"><div className="death-saves">{(['success', 'failure'] as const).map(key => <div key={key}><span>{key === 'success' ? '成功' : '失败'}</span>{[1, 2, 3].map(n => <input key={n} type="checkbox" aria-label={`死亡豁免${key === 'success' ? '成功' : '失败'}${n}`} checked={(c.runtime.deathSaves?.[key] || 0) >= n} onChange={() => edit(draft => { const saves = draft.runtime.deathSaves ||= { success: 0, failure: 0 }; saves[key] = saves[key] >= n ? n - 1 : n; })}/>)}</div>)}</div></SheetCell>;
   const proficiency = <SheetCell label="熟练加值" className="proficiency-cell" hint={d.trace.proficiency.join('；')}><AdjustedValue c={c} value={d.proficiency} target="proficiency" label="熟练加值" sign edit={edit}/></SheetCell>;
-  const trainingCell = <SheetCell label="装备训练与其他熟练" className="training-cell" training dropKinds={['rule', 'item', 'feature']} wholePaper accepts={entry => !!trainingCategory(entry)} allowExisting onReceive={entry => receiveTraining(entry,trainingCategory(entry)!)} onHeadingClick={editing ? () => setTrainingEditor(v => !v) : undefined} headingActionLabel="编辑装备训练与其他熟练" headingExpanded={editing && trainingEditor}><dl>{training.map(t => <DropZone key={t.key} className="training-row" training kinds={['item','rule','feature']} accepts={entry=>trainingCategory(entry)===t.key} allowExisting onReceive={entry=>receiveTraining(entry,t.key)}><dt>{t.label}</dt><dd><TrainingChips group={t.key} source={c.edition==='2024'?'XPHB':'PHB'} editAll={trainingEditor} label={t.label} value={c.training?.[t.key] ?? t.values.join('、')} onChange={value => edit(draft => { (draft.training ||= {})[t.key] = value; })}/></dd></DropZone>)}</dl></SheetCell>;
+  const trainingCell = <SheetCell label="装备训练与其他熟练" className="training-cell" training dropKinds={['rule', 'item', 'feature']} wholePaper accepts={entry => !!trainingCategory(entry)} allowExisting onReceive={entry => receiveTraining(entry,trainingCategory(entry)!)} onHeadingClick={editing ? () => setTrainingEditor(v => !v) : undefined} headingActionLabel="编辑装备训练与其他熟练" headingExpanded={editing && trainingEditor}><dl>{training.map(t => <DropZone key={t.key} className="training-row" training kinds={['item','rule','feature']} accepts={entry=>trainingCategory(entry)===t.key} allowExisting onReceive={entry=>receiveTraining(entry,t.key)}><dt>{t.label}</dt><dd><TrainingChips key={`${c.id}:${t.key}`} group={t.key} source={c.edition==='2024'?'XPHB':'PHB'} editAll={trainingEditor} label={t.label} value={c.training?.[t.key] ?? t.values.join('、')} onChange={value => edit(draft => { (draft.training ||= {})[t.key] = value; })}/></dd></DropZone>)}</dl></SheetCell>;
   const initiative = <SheetCell label="先攻" className="initiative-cell"><AdjustedValue c={c} value={d.initiative} target="initiative" label="先攻" sign edit={edit}/></SheetCell>;
   const speed = <SheetCell label="速度" className="speed-cell"><AdjustedValue c={c} value={d.speed} target="speed" label="速度" unit="尺" edit={edit}/></SheetCell>;
   const sizeCell = <SheetCell label="体型" className="size-cell" dropKinds={['rule']} accepts={entry => entry.raw._category === 'size'} onReceive={entry => edit(draft => { draft.size = entry.raw.size; })} dashed missing={!sizeCode} onFill={() => browse('size')} onHeadingClick={() => { if (sizeInfo) inspect(sizeInfo); }}>

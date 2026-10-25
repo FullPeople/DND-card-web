@@ -2,7 +2,8 @@ import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
 import {planFeatureResources} from './automation/featureResources';
-import {planRacialAbilities} from './racialAbilities';
+import {activeEffectSelections} from './automation/active';
+import {baseAbilityScores} from './automation/baseAbilities';
 import {sheetChoices} from './automation/choices';
 import {matchesReference} from './entryReferences';
 import {hitPointLevels} from './hitPoints';
@@ -12,18 +13,11 @@ import {evaluateFeatureArmor,unhandledFeatureArmorText} from './automation/featu
 import { ABILITIES, ABILITY_LABELS, SKILLS, skillKey, selectionAllowed, selectionEffectsAllowed, editionAllows, entryEdition, subclassOwner, type Ability, type Character, type Derived, type Entry, type Requirement } from './model';
 
 export function evaluate(c: Character, excluded = new Set<string>(), inheritedIssues: Derived['issues'] = []): Derived {
-  const abilities = { ...c.abilities }; const trace: Record<string, string[]> = {};
-  ABILITIES.forEach(a => trace[a] = [`基础 ${abilities[a]}`]);
   const issues: Derived['issues'] = [...inheritedIssues]; const requirements: Requirement[] = [];
   const compatibility=automationCompatibilityIssue(c);if(compatibility)issues.push(compatibility);
-  const active = c.selections.filter(s => {
-    if(s.grantKey?.startsWith('choice:')&&!automationEnabled(c))return false;
-    if (excluded.has(s.id)) return false;
-    let owner = s; const seen = new Set<string>();
-    while (owner.parentId && !seen.has(owner.id)) { seen.add(owner.id); const parent = c.selections.find(p => p.id === owner.parentId); if (!parent || !selectionEffectsAllowed(c, parent.entry)) return false; owner = parent; }
-    if (selectionEffectsAllowed(c, s.entry)) return true;
-    issues.push({ id: `disabled:${s.id}`, message: `${s.entry.name} 的来源、依赖或规则选项未启用，保留内容但不计效果。`, selectionId: s.id, severity: 'error' }); return false;
-  });
+  const active=activeEffectSelections(c,excluded);
+  for(const s of c.selections)if(!excluded.has(s.id)&&!selectionEffectsAllowed(c,s.entry))issues.push({id:`disabled:${s.id}`,message:`${s.entry.name} 的来源、依赖或规则选项未启用，保留内容但不计效果。`,selectionId:s.id,severity:'error'});
+  const baseAbilities=baseAbilityScores(c,active),abilities=baseAbilities.abilities,trace:Record<string,string[]>=baseAbilities.trace;issues.push(...baseAbilities.issues);
   const classes = active.filter(s => s.entry.kind === 'class');
   const level = classes.reduce((sum, s) => sum + s.level, 0);
   const proficiency = 2 + Math.floor((Math.max(1, level) - 1) / 4) + (c.sheetBonuses?.proficiency || 0);
@@ -50,12 +44,6 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // already contain the player's allocation, so do not apply it a second time.
     if (e.kind === 'race') {
       (raw.size || []).forEach((s: string) => sizes.add(s));
-      const racial = planRacialAbilities(c, selection);
-      issues.push(...racial.issues);
-      for (const a of ABILITIES) {
-        abilities[a] += racial.bonuses[a] || 0;
-        if (racial.trace[a]) trace[a].push(...racial.trace[a]!);
-      }
     }
     if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
     // Choices are explicit saved answers; evaluation never creates an answer or grant.
@@ -69,9 +57,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     for (const effect of invocationScope ? [] : e.effects || []) {
       if (effect.op === 'proficiency') grantSkill(effect.skill, origin);
       else if (ABILITIES.includes(effect.target as Ability)) {
-        if(e.kind==='background')continue;
-        const a = effect.target as Ability; abilities[a] = effect.op === 'set' ? effect.value : abilities[a] + effect.value;
-        trace[a].push(`${origin} ${effect.op === 'set' ? '=' : '+'}${effect.value}`);
+        // Applied once by the shared pre-advancement score layer.
       } else if (effect.target === 'speed') {speed = effect.op === 'set' ? effect.value : speed + effect.value;effectTrace.speed.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`);}
       else if (effect.target === 'ac') { if (effect.op === 'set') acOverride = effect.value; else acBonus += effect.value;effectTrace.ac.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }
       else if (effect.target === 'hp') { if (effect.op === 'set') hpOverride = effect.value; else hpBonus += effect.value;effectTrace.hp.push(`${origin} ${effect.op==='set'?'=':effect.value<0?'':'+'}${effect.value}`); }

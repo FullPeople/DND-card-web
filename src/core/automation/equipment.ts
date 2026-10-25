@@ -1,7 +1,7 @@
 import type {Character,Entry,Selection,Issue} from '../model';
 import {equipmentTraining} from '../proficiencyText';
 import {automationEnabled,supportedAutomation} from './state';
-import {trainingDeclarations} from './training';
+import {effectiveTrainingDeclarations} from './training';
 
 export type ArmorType='LA'|'MA'|'HA'|'S';
 export interface EquipmentOrigin {selectionId:string;entryId:string;source:string;edition:Entry['edition'];revision:string;path:string}
@@ -23,7 +23,7 @@ export function armorRule(row:Selection):{rule?:ArmorRule;issues:Issue[]}{
  return {issues,rule:{origin:{selectionId:row.id,entryId:row.entry.id,source:row.entry.source,edition:row.entry.edition,revision:row.entry.revision,path:'raw.ac'},slot:type==='S'?'shield':'armor',type,base,usesDex:type==='LA'||type==='MA',...(type==='MA'?{dexCap:2}:{}),bonus:bonus!==undefined&&Math.abs(bonus)<=100?bonus:0,attunementRequired:!!raw.reqAttune}};
 }
 export function armorTraining(c:Character,active:Selection[]):Set<string>{
- return new Set(trainingDeclarations(c,active,'armor').map(s=>equipmentTraining(s)?.[0]).filter((s):s is NonNullable<typeof s>=>!!s));
+ return new Set(effectiveTrainingDeclarations(c,active,'armor').map(s=>equipmentTraining(s)?.[0]).filter((s):s is NonNullable<typeof s>=>!!s));
 }
 /** Called only for an explicit equip action, in the same draft/undo transaction. */
 export function equipSelection(c:Character,id:string,equipped:boolean):void{

@@ -2,7 +2,8 @@ import {evaluateAbilityAdvancements} from './abilityAdvancements';
 import {ABILITIES,selectionEffectsAllowed,type Ability,type Character,type Entry,type Issue,type Selection} from '../model';
 import {matchesReference} from '../entryReferences';
 import {automationEnabled} from './state';
-import {evaluate} from '../engine';
+import {baseAbilityScores} from './baseAbilities';
+import {activeEffectSelections} from './active';
 import asiEvidence from './asiEvidence.json' with {type:'json'};
 import legacyAsiEvidence from './legacyAsiEvidence.json' with {type:'json'};
 import evidence from './classChoiceEvidence.json' with {type:'json'};
@@ -137,7 +138,7 @@ export interface AsiAllocationStatus {selectionId?:string;eligible:boolean;bindi
 export function asiAllocationStatus(c:Character,choiceId:string):AsiAllocationStatus{
  if(c.asiAllocations&&c.asiAllocations.version!==1)return {eligible:false,active:false,reason:'此属性提升记录版本尚未支持，原记录保留。'};
  const grant=eligibleGrant(c,choiceId),binding=c.asiAllocations?.bindings.find(row=>row.choiceId===choiceId);
- const base=evaluate({...c,asiAllocations:undefined,reviewedFeats:undefined}).abilities,state=binding?evaluateAbilityAdvancements(c,base).asi.states.get(binding.selectionId):undefined;
+ const base=baseAbilityScores(c,activeEffectSelections(c)).abilities,state=binding?evaluateAbilityAdvancements(c,base).asi.states.get(binding.selectionId):undefined;
  return {selectionId:grant?.row.id,eligible:!!grant,binding,active:state?.active??false,reason:state?.reason||(!grant?'请先确认有效的职业授予和属性值提升专长。':undefined)};
 }
 /** Explicit intent only. Never write c.abilities or grant fresh points on load. */
@@ -148,7 +149,7 @@ export function setAsiAllocation(c:Character,choiceId:string,allocation:AsiBindi
  if(!validAllocation(allocation))throw Error('请选择一项属性 +2，或两项不同属性各 +1。');
  const grant=eligibleGrant(c,choiceId);if(!grant)throw Error('本次职业属性提升授予当前不可用。');
  const binding:AsiBinding={...(grant.kind?{kind:grant.kind}:{}),selectionId:grant.row.id,choiceId,entryId:grant.row.entry.id,allocation:{...allocation}},state:AsiAllocationState={...c.asiAllocations,version:1,bindings:[...other,binding]};
- const base=evaluate({...c,asiAllocations:undefined,reviewedFeats:undefined}).abilities,allPlanned=evaluateAbilityAdvancements({...c,asiAllocations:state},base),planned=allPlanned.asi;
+ const base=baseAbilityScores(c,activeEffectSelections(c)).abilities,allPlanned=evaluateAbilityAdvancements({...c,asiAllocations:state},base),planned=allPlanned.asi;
  if(!planned.states.get(binding.selectionId)?.active)throw Error(planned.states.get(binding.selectionId)?.reason||'此属性提升当前不能生效。');
  // A replacement cannot silently deactivate another previously valid grant.
  const allBefore=evaluateAbilityAdvancements(c,base),before=allBefore.asi;for(const old of other)if(before.states.get(old.selectionId)?.active&&!planned.states.get(old.selectionId)?.active)throw Error('本次分配会令另一项属性提升超过上限，请先调整原分配。');
