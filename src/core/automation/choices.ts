@@ -1,4 +1,4 @@
-import {reviewedSkilledIdentity} from './reviewedFeatIdentity';
+import {reviewedSkilledIdentity,reviewedLinguistIdentity} from './reviewedFeatIdentity';
 import {SKILLS,skillKey,selectionAllowed,selectionEffectsAllowed,uid,type Character,type Entry,type Selection} from '../model';
 import {inventoryState} from '../characterDetails';
 import {resolveEntryReference} from '../entryReferences';
@@ -37,7 +37,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
  if(!automationEnabled(c))return [];
  const out:SheetChoice[]=[],known=[...c.selections.map(s=>s.entry),...catalog];
  for(const row of c.selections){
-  if(reviewedSkilledIdentity(row.entry))continue;
+  if(reviewedSkilledIdentity(row.entry)||reviewedLinguistIdentity(row.entry))continue;
   const raw=row.entry.raw,restricted=!selectionActive(c,row);
   const push=(path:string,label:string,count:number,options:ChoiceOption[],channel:SheetChoice['channel'],equipmentIndex?:number)=>{
    if(!Number.isSafeInteger(count)||count<1||count>100)return;
@@ -191,6 +191,7 @@ function finishBuiltinChoices(c:Character,before:SheetChoice[],catalog:Entry[]){
  for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>!sheetChoicePending(c,r))&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
 }
 function withdrawMissingReviewedFeats(c:Character,id:string,slots:string[]){
+ if(id.includes(':class-legacy-feat:')&&c.reviewedLinguist?.version===1)c.reviewedLinguist={...c.reviewedLinguist,bindings:c.reviewedLinguist.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
  if(id.includes(':class-legacy-feat:')&&c.reviewedSkilled?.version===1)c.reviewedSkilled={...c.reviewedSkilled,bindings:c.reviewedSkilled.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
  for(const field of ['reviewedFeats','reviewedWeaponMaster'] as const){const store=c[field];if(id.includes(':class-legacy-feat:')&&store?.version===1)c[field]={...store,bindings:store.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};}
 }

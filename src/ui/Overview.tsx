@@ -17,7 +17,8 @@ import {selectionActive} from '../core/automation/choices';
 import {classMatches} from '../core/model';
 import {effectiveTrainingDeclarations} from '../core/automation/training';
 import {appendReviewedSkilledTools} from './skilledToolDisplay';
-import {reviewedSkilledIdentity} from '../core/automation/reviewedFeatIdentity';
+import {appendReviewedLinguistLanguages,sourceQualifiedLinguistLanguage} from './linguistLanguageDisplay';
+import {reviewedSkilledIdentity,reviewedLinguistIdentity} from '../core/automation/reviewedFeatIdentity';
 import {trainingDisplayText} from './trainingReferences';
 import {spellIsReady} from '../core/spellWorkspace';
 import {spellState} from '../core/characterDetails';
@@ -100,17 +101,19 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   return [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
     let values = key==='armor'||key==='weapons'?effectiveTrainingDeclarations(c,activeTraining,key):activeTraining.flatMap(s => {
-      if(reviewedSkilledIdentity(s.entry))return [];
+      if(reviewedSkilledIdentity(s.entry)||reviewedLinguistIdentity(s.entry))return [];
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
-      return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
+      const declared=[...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
+      return key==='languages'?declared.map(value=>sourceQualifiedLinguistLanguage(value,s.entry.source,catalog)):declared;
     });
-    values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.flatMap(v=>{const option=r.options.find(o=>o.value===v);return key==='tools'?(option&&!option.unavailable?[option.label]:[]):[option?.label||v];})));
+    values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.flatMap(v=>{const option=r.options.find(o=>o.value===v);return key==='tools'?(option&&!option.unavailable?[option.label]:[]):key==='languages'&&option?.entry.raw._category==='language'?[`{@language ${option.entry.english}|${option.entry.source}|${option.entry.name}}`]:[option?.label||v];})));
     if(key==='tools')values=appendReviewedSkilledTools(c,values);
+    if(key==='languages')values=appendReviewedLinguistLanguages(c,values);
     return { key, label, values: [...new Set<string>(values.map(v => names[v] || trainingDisplayText(v,c.edition==='2024'?'XPHB':'PHB',key,trainingNames.get(v.toLowerCase())||[])))] };
   });
-  },[c,choices,trainingNames]);
+  },[c,choices,trainingNames,catalog]);
     const identity = <div className="identity-main overview-identity">
         <SheetCell label="角色名" className="identity-name">{!editing&&inWorkbench?<button className="assign-token-name" onClick={()=>void workbenchRequest('assignName',{name:c.name}).catch(e=>window.dispatchEvent(new CustomEvent('workbench-error',{detail:String(e)})))}>{c.name}</button>:screen?<AutoSheetName value={c.name} readOnly={!editing} change={value=>edit(displayCharacterEdit('name',value),'name')}/>:<input aria-label="角色姓名" readOnly={!editing} value={c.name} onChange={e => edit(displayCharacterEdit('name',e.target.value), 'name')}/>}<input aria-label="玩家姓名" readOnly={!editing} placeholder="玩家姓名" value={c.player} onChange={e => edit(displayCharacterEdit('player',e.target.value), 'player')}/></SheetCell>
         {identityCell('background', '背景')}{identityCell('class', multi ? '职业与子职' : '职业')}{identityCell('race', '种族')}{!multi && identityCell('subclass', '子职')}

@@ -1,0 +1,14 @@
+import {expect,it} from 'vitest';
+import {normalizeData} from '../src/data/catalog';
+import {EQUIPMENT_TRAINING_ENTRIES} from '../src/data/weaponTraining';
+import {syncFeatures} from '../src/core/sheet';
+import {sheetChoices,setSheetChoiceSlot} from '../src/core/automation/choices';
+import {setReviewedLinguistIntent,reviewedLinguistOptions,reviewedLinguistLanguageRows} from '../src/core/automation/reviewedLinguist';
+import {evaluate} from '../src/core/engine';
+import {readCharacter} from '../src/core/validation';
+import {exportCharacter} from '../src/core/export';
+import {reviewedLinguistData,reviewedLinguistFixture,linguistValues,linguistRestrictedValues} from './e2e/reviewedLinguistFixture';
+function setup(int=19){const c=reviewedLinguistFixture(int),catalog=[...normalizeData(reviewedLinguistData,'linguist-browser-fixture'),...structuredClone(EQUIPMENT_TRAINING_ENTRIES)];syncFeatures(c,catalog);const choice=sheetChoices(c,catalog).find(row=>row.grantLevel===4)!,entry=catalog.find(row=>row.english==='Linguist')!;setSheetChoiceSlot(c,choice.id,0,entry.id,catalog);return {c,catalog,choice,entry};}
+// These arithmetic/native predictions are not Chromium or layout acceptance.
+it.each([19,20,22])('authored browser INT%d fixture reaches genuine legacy ownership and native reopen without rewriting base/training/runtime',int=>{const s=setup(int);expect(s.c.selections.filter(row=>row.entry.kind==='feat')).toEqual([]);expect(reviewedLinguistOptions(s.c,s.catalog)).toHaveLength(18);expect(reviewedLinguistOptions(s.c,s.catalog).every(row=>!row.unavailable)).toBe(true);const before=structuredClone(s.c);expect(evaluate(s.c).abilities.int).toBe(int);setReviewedLinguistIntent(s.c,s.choice.id,s.entry.id,{kind:'linguist',languages:linguistValues,confirmedManualAbilityExcluded:true,dmAllowedLanguages:[]},s.catalog);expect(evaluate(s.c).abilities.int).toBe(int<20?int+1:int);expect(reviewedLinguistLanguageRows(s.c)).toHaveLength(3);for(const key of ['abilities','training','runtime','quickbarActions','selections'] as const)expect(s.c[key]).toEqual(before[key]);expect(evaluate(readCharacter(exportCharacter(s.c)).character)).toEqual(evaluate(s.c));});
+it('standard-only and exact restricted sets stay separate, and a manual empty override does not disable INT',()=>{const s=setup();const intent={kind:'linguist' as const,languages:linguistRestrictedValues,confirmedManualAbilityExcluded:true as const,dmAllowedLanguages:[] as string[]};expect(()=>setReviewedLinguistIntent(s.c,s.choice.id,s.entry.id,intent,s.catalog)).toThrow();setReviewedLinguistIntent(s.c,s.choice.id,s.entry.id,{...intent,dmAllowedLanguages:linguistRestrictedValues},s.catalog);expect(reviewedLinguistLanguageRows(s.c).map(row=>row.reference)).toEqual(linguistRestrictedValues);s.c.training!.languages='';expect(reviewedLinguistLanguageRows(s.c)).toEqual([]);expect(evaluate(s.c).abilities.int).toBe(20);expect(s.c.training!.languages).toBe('');});

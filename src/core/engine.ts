@@ -1,5 +1,5 @@
 import {evaluateReviewedSkilled} from './automation/reviewedSkilled';
-import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity} from './automation/reviewedFeatIdentity';
+import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity} from './automation/reviewedFeatIdentity';
 import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
@@ -46,6 +46,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Preserve the existing unsupported-choice notice, including for XPHB,
     // but never let a manual/edited Weapon Master raw or effects field bypass
     // the separate explicitly owned PHB training/ability grant.
+    if(reviewedLinguistIdentity(e)){issues.push({id:`reviewed-linguist-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工语言学家条目与旧手工语言答案保留；旧机制不属于本批受审。固定智力和三语言只支持真实职业属性提升位置另行确认；密码、解码与教学仍手工。'});continue;}
     if(reviewedSkilledIdentity(e)){issues.push({id:`reviewed-skilled-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工熟习条目保留。本批只支持真实职业属性提升位置中另行确认的三项技能或工具熟练；此条目不自动授予效果。'});continue;}
     if(reviewedWeaponMasterIdentity(e))continue;
     // Background ability choices are annotations. The sheet's base scores
@@ -71,9 +72,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     }
   }
   const skilled=evaluateReviewedSkilled(c,active);issues.push(...skilled.issues);for(const skill of skilled.skills)grantSkill(skill.key,skill.source);
-  const {asi,reviewed:reviewedFeats}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
+  const {asi,reviewed:reviewedFeats,linguist}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
   for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
-  issues.push(...reviewedFeats.issues);
+  issues.push(...reviewedFeats.issues,...linguist.issues);
+  for(const a of ABILITIES){abilities[a]+=linguist.bonuses[a];trace[a].push(...linguist.trace[a]);}
   for(const a of ABILITIES){abilities[a]+=reviewedFeats.bonuses[a];trace[a].push(...reviewedFeats.trace[a]);if(reviewedFeats.saves.has(a))proficientSaves.add(a);}
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
     if (key.startsWith('save:')) { if (value) proficientSaves.add(key.slice(5)); else proficientSaves.delete(key.slice(5)); }
