@@ -134,6 +134,11 @@ export function setReviewedLinguistIntent(c:Character,choiceId:string,entryId:st
  if(intent===null){if(store)c.reviewedLinguist={...store,bindings:other};return;}
  if(!validIntent(intent))throw Error('请确认三种不同的规范 PHB 语言、智力未计入手工值，以及本次受限语言的准确 DM 许可。');
  const current=eligibility(c,choiceId,entryId);if(!current.grant||current.reason)throw Error(current.reason||'本次语言学家授予当前不可用。');
+ // Re-confirmation is not an ownership-repair operation. In particular, do
+ // not filter duplicate saved claims away and silently reactivate this grant.
+ const claims=(store?.bindings||[]).filter(row=>row.choiceId===choiceId||row.selectionId===current.grant!.row.id);
+ if(claims.length>1)throw Error('本次语言学家存在重复授予确认，请先核对并明确撤回冲突记录，再重新确认；原记录保留。');
+ if(claims.some(row=>row.choiceId===choiceId&&row.entryId===entryId&&row.selectionId!==current.grant!.row.id))throw Error('原语言学家确认不属于当前职业授予实例，请先核对并明确撤回旧记录，再重新确认；原记录保留。');
  const featMatches=catalog.filter(entry=>entry.id===evidence.feat.entryId||entry.id===entryId||entry.english==='Linguist'&&entry.source==='PHB'||entry.raw.ENG_name==='Linguist'&&entry.raw.source==='PHB');
  if(featMatches.some(entry=>!reviewedLinguistRule(entry)))throw Error('语言学家资料身份或机械声明冲突，待适配。');
  const options=reviewedLinguistOptions(c,catalog);for(const ref of intent.languages){const option=options.find(row=>row.value===ref);if(option?.unavailable)throw Error(option.unavailable);}
