@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-10-18",
+  "checkedAt": "2026-10-25",
   "dataRevision": "9acd4d5e7c5bed9cf34150db4319a7aeec6751e8",
   "manifest": "reports/g1/inputs-sha256.json",
   "evidenceBoundary": "Only mechanical field projection of two real class and two real shield identities; no copied rule prose or player data",
   "inputs": [
     {
       "url": "https://5e.kiwee.top/data/class/class-fighter.json",
-      "bytes": 170412,
-      "sha256": "8aeee8edd8fce87db2e4bed6aae540d7748d2a70d046d2375c6d7f16104813ee"
+      "bytes": 170404,
+      "sha256": "553d0043cf5c1c2aabc155c53407045dbe4b3031a112068844a6f671307022ab"
     },
     {
       "url": "https://5e.kiwee.top/data/items-base.json",
@@ -104,5 +104,6 @@
       }
     ]
   },
-  "inputVerification": "Current public bytes rechecked against the unchanged mechanical projections; dataRevision records the original projection provenance."
+  "inputVerification": "Current public bytes rechecked against the unchanged mechanical projections; dataRevision records the original projection provenance.",
+  "inputLockBasis": "Live HTTPS bytes checked on checkedAt. dataRevision and manifest, when present, identify the original unchanged mechanical projection; this is not a new rule replay."
 }
