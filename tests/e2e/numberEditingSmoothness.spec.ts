@@ -65,6 +65,17 @@ test('delayed drag tab navigation belongs only to the still-visible card',async(
  await expect(page.locator('#current-page')).toHaveText('特性');
 });
 
+test('hover navigation ignores parent callback churn and uses the latest committed callback once',async({page},info)=>{
+ await page.goto('/tests/fixtures/paper-hover/');
+ await page.getByRole('button',{name:'持续更新并拖到特性页签',exact:true}).click();
+ await expect(page.locator('#current-page')).toHaveText('特性',{timeout:950});
+ await page.waitForTimeout(750);
+ const calls=await page.evaluate(()=>(window as any).hoverCalls as {page:string;revision:number;elapsed:number}[]);
+ expect(calls).toHaveLength(1);expect(calls[0].page).toBe('特性');expect(calls[0].revision).toBeGreaterThanOrEqual(2);
+ expect(calls[0].elapsed).toBeGreaterThanOrEqual(350);expect(calls[0].elapsed).toBeLessThan(850);
+ await info.attach('hover-callback-churn.json',{body:JSON.stringify({parentUpdateEveryMs:120,updateDurationMs:1080,calls},null,2),contentType:'application/json'});
+});
+
 test('real narrow card keeps its numeric editor aligned and focused through resize',async({page},info)=>{
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);await page.goto('/');
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
