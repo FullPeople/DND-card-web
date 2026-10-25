@@ -5,6 +5,7 @@ import {reviewedArmorFeatData as data,reviewedArmorFeatFixture} from './reviewed
 import {exportCharacter} from '../../src/core/export';
 import type {Character} from '../../src/core/model';
 import {savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState';
+import {armorFeatOption as featOption} from './reviewedArmorFeatOptions';
 
 type ArmorKind='lightly-armored'|'moderately-armored'|'heavily-armored';
 const names:Record<ArmorKind,string>={'lightly-armored':'轻甲运用','moderately-armored':'中甲运用','heavily-armored':'重甲运用'};
@@ -36,10 +37,7 @@ async function workspace(page:Page,level:number){
  if(await record.locator('[data-choice-id]').count()===0){const heading=panel.locator('.detail-class-features .feature-group h4 > button');await expect(heading).toHaveCount(1);await heading.click({button:'right'});await page.getByRole('menuitem',{name:'显示自带选项',exact:true}).click();}
  await record.locator('[data-choice-id]').click();const choices=panel.locator('.choice-workspace');await expect(choices).toBeVisible();return choices;
 }
-// Choice hints are adjacent SMALL nodes: textContent concatenates them, while
-// the actual accessible button name separates the rendered hint from its name.
-function featOption(workspace:Locator,name:string){return workspace.getByRole('button',{name:new RegExp(`^${name}(?:\\s|$)`)}).and(workspace.locator('.choice-option'));}
-async function choose(page:Page,level:number,name:string,selected=true){const choices=await workspace(page,level),option=featOption(choices,name);await expect(option).toHaveCount(1);await expect(option).toHaveAttribute('aria-disabled','false');await option.click();await expect(option).toHaveAttribute('aria-pressed',String(selected));await choices.getByRole('button',{name:'收起选择',exact:true}).click();}
+async function choose(page:Page,level:number,name:string,selected=true){const choices=await workspace(page,level),option=await featOption(choices,name);await expect(option).toHaveCount(1);await expect(option).toHaveAttribute('aria-disabled','false');await option.click();await expect(option).toHaveAttribute('aria-pressed',String(selected));await choices.getByRole('button',{name:'收起选择',exact:true}).click();}
 async function control(page:Page,kind:ArmorKind){const panel=await tab(page,'特性'),value=panel.locator(`.detail-feats [data-reviewed-feat-kind="${kind}"]`);await expect(value).toHaveCount(1);await expect(value).toBeVisible();return value;}
 async function confirm(page:Page,kind:ArmorKind,ability?:'str'|'dex'){
  const value=await control(page,kind),name=names[kind];if(kind!=='heavily-armored')await value.getByLabel(`${name}提升属性`,{exact:true}).selectOption(ability!);else await expect(value.locator('select')).toHaveCount(0);
@@ -57,7 +55,7 @@ async function fits(value:Locator){await value.scrollIntoViewIfNeeded();const bo
 async function chain(page:Page){await choose(page,4,'轻甲运用');await confirm(page,'lightly-armored','dex');await choose(page,6,'中甲运用');await confirm(page,'moderately-armored','str');await choose(page,8,'重甲运用');await confirm(page,'heavily-armored');await expect.poll(async()=>(await saved(page)).reviewedFeats?.bindings.length).toBe(3);}
 
 test('armor feats require earlier confirmed training, preserve the full chain across reopen and retract dependent effects after withdrawal or replacement',async({page},info)=>{
- test.setTimeout(150000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));const before=await ready(page);const options=await workspace(page,6);for(const name of ['中甲运用','重甲运用']){const option=featOption(options,name);await expect(option).toHaveCount(1);await expect(option).toHaveAttribute('aria-disabled','true');}await options.getByRole('button',{name:'收起选择',exact:true}).click();
+ test.setTimeout(150000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));const before=await ready(page);const options=await workspace(page,6);for(const name of ['中甲运用','重甲运用']){const option=await featOption(options,name);await expect(option).toHaveCount(1);await expect(option).toHaveAttribute('aria-disabled','true');}await options.getByRole('button',{name:'收起选择',exact:true}).click();
  await choose(page,4,'轻甲运用');await expect(await control(page,'lightly-armored')).toContainText('尚未确认轻甲运用');await summary(page,13,13,[],14);expect((await saved(page)).reviewedFeats).toBeUndefined();
  await confirm(page,'lightly-armored','dex');await summary(page,13,14,['轻甲'],15);await choose(page,6,'中甲运用');await confirm(page,'moderately-armored','str');await summary(page,14,14,['轻甲','中甲','盾牌'],15);await choose(page,8,'重甲运用');await confirm(page,'heavily-armored');await summary(page,15,14,['轻甲','中甲','重甲','盾牌'],15);
  const active=await saved(page);protectedState(active,before);await page.reload();await summary(page,15,14,['轻甲','中甲','重甲','盾牌'],15);expect((await saved(page)).reviewedFeats).toEqual(active.reviewedFeats);
