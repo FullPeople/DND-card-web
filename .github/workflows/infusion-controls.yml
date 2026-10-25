@@ -16,7 +16,7 @@ on:
       - 'tests/reviewed-armor-*.test.ts'
       - 'tests/reviewed-modern-*.test.ts'
       - 'tests/reviewed-weapon-master*.test.ts'
-      - 'tests/e2e/reviewedWeaponMasterFixture.ts'
+      - 'tests/e2e/reviewedWeaponMaster*.ts'
       - 'tests/e2e/weaponMasterControls.spec.ts'
       - 'tests/training-chips-editing.test.ts'
       - 'tests/e2e/reviewedArmorFeat*.ts'
