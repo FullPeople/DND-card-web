@@ -1,6 +1,6 @@
 import {readFile} from 'node:fs/promises';
 import {test,expect,type Page,type Locator} from '@playwright/test';
-import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 import {restoreAuthoredChoices} from './authoredChoicesFixture';
 import {pointerChoiceDrop} from './pointerChoiceDrop';
 import {radiantRefuelingData as data} from '../fixtures/radiantRefuelingData';
@@ -8,7 +8,7 @@ import {newCharacter,type Character,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
 import {inventoryState} from '../../src/core/characterDetails';
-import type {Workspace} from '../../src/platform/storage';
+import {storedWorkspace as stored,savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState';
 
 const choiceId='artificer:class-optional:0',sourceKey='ref:物品注法|奇械师|TCE|2',name='光耀与法力恢复交互验收',shield='光耀武器',mind='思维砥石',ring='法力恢复戒指';
 // Only the initial blank authoring card is imported. All learned selections,
@@ -21,18 +21,6 @@ async function mock(page:Page){
  await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:data.optionalfeature}}));
  await page.route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:data.baseitem}}));
 }
-// Read the durable document and its independent navigation metadata, never
-// the optimistic App draft. A present invalid navigation key is a test failure.
-async function stored(page:Page):Promise<Workspace>{return page.evaluate(async()=>{
- const path='/card/src/platform/workspaceIdentity.ts',database=(await import(path)).workspaceIdentity.database;
- const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open(database);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
- try{const store=db.transaction('documents','readonly').objectStore('documents'),read=(key:string)=>new Promise<any>((resolve,reject)=>{const request=store.get(key);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
-  const [workspace,navigation]=await Promise.all([read('workspace'),read('workspace-active-id')]),activeId=navigation===undefined?workspace.activeId:navigation;
-  if(typeof activeId!=='string'||!workspace.characters.some((row:any)=>row.id===activeId))throw Error('Invalid durable active character');
-  return {...workspace,activeId};
- }finally{db.close();}
-});}
-async function saved(page:Page):Promise<Character>{const workspace=await stored(page);return workspace.characters.find(row=>row.id===workspace.activeId)!;}
 async function tab(page:Page,label:string){
  const button=page.getByRole('tab',{name:label,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(label)}(?: |$)`));await expect(panel).toBeVisible();return panel;
 }
@@ -94,7 +82,7 @@ async function initialize(page:Page,label:string,n:number){const sequence=(await
 async function useDialog(page:Page,label:string){const node=await control(page,label);await node.getByRole('button',{name:`使用${label}反应充能`,exact:true}).click();return page.getByRole('dialog',{name:`${label} · 使用反应充能`,exact:true});}
 async function use(page:Page,label:string,after:number,double=false){const sequence=(await saved(page)).runtime.infusionCharges!.sequence;const dialog=await useDialog(page,label);await expect(dialog.getByRole('button',{name:'确认充能操作',exact:true})).toBeDisabled();await dialog.getByRole('checkbox',{name:label===mind?'确认维持法术专注的体质豁免失败':'确认被近战攻击命中',exact:true}).check();await expect(dialog.getByRole('button',{name:'确认充能操作',exact:true})).toBeDisabled();await dialog.getByRole('checkbox',{name:'确认本次使用反应',exact:true}).check();await dialog.getByRole('button',{name:'确认充能操作',exact:true}).click({clickCount:double?2:1});await actionSaved(page,label,after,sequence,{kind:'use',triggerConfirmed:true,reactionConfirmed:true});const node=await control(page,label);await expect(node.getByTestId('infusion-charge-feedback')).toHaveAttribute('data-phase','applied');await expect(node.getByTestId('infusion-charge-feedback')).toContainText('已保存到本机');}
 async function dawn(page:Page,label:string,roll:number,after:number){const sequence=(await saved(page)).runtime.infusionCharges!.sequence;const node=await control(page,label);await node.getByRole('button',{name:`恢复${label}黎明充能`,exact:true}).click();const dialog=page.getByRole('dialog',{name:`${label} · 黎明充能恢复`,exact:true});await expect(dialog.getByRole('button',{name:'确认充能操作',exact:true})).toBeDisabled();await dialog.getByRole('checkbox',{name:'确认游戏内已到新的黎明',exact:true}).check();await expect(dialog.getByRole('button',{name:'确认充能操作',exact:true})).toBeDisabled();await dialog.getByLabel('实际 d4 结果',{exact:true}).selectOption(String(roll));await dialog.getByRole('button',{name:'确认充能操作',exact:true}).click();await actionSaved(page,label,after,sequence,{kind:'dawn',dawnConfirmed:true,roll});}
-async function source(page:Page,enabled:boolean){await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'TCE');const book=page.locator('.source-book').filter({has:page.locator('button[aria-label="设置来源 TCE"]')});await book.locator('input[type=checkbox]').first().setChecked(enabled);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect.poll(async()=>(await stored(page)).siteSources?.enabledSources.includes('TCE')).toBe(enabled);}
+async function source(page:Page,enabled:boolean){await setSiteSource(page,'TCE',enabled);}
 async function reload(page:Page){await page.reload();await expect(page.locator('.save-status')).toContainText('已保存到本机');await editor(page);}
 async function backup(page:Page){await expect(page.locator('.save-status')).toContainText('已保存到本机');await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();const wait=page.waitForEvent('download');await page.getByRole('button',{name:'下载 JSON',exact:true}).click();const download=await wait,path=await download.path();expect(path).not.toBeNull();const buffer=await readFile(path!);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();return buffer;}
 function protectedState(c:Character,before:Character){for(const key of ['notes','baseHp','abilities'] as const)expect(c[key]).toEqual(before[key]);for(const key of ['hp','tempHp','inspiration','deathSaves'] as const)expect(c.runtime[key]).toEqual(before.runtime[key]);expect(c.runtime.resources['manual-infusion']).toEqual(before.runtime.resources['manual-infusion']);expect(c.runtime.automationActions).toEqual(before.runtime.automationActions);expect(inventoryState(c).coins).toEqual(inventoryState(before).coins);expect(inventoryState(c).attunementLimit).toBe(inventoryState(before).attunementLimit);expect(c.selections.filter(row=>row.entry.kind==='item').map(row=>[row.id,row.quantity])).toEqual(before.selections.filter(row=>row.entry.kind==='item').map(row=>[row.id,row.quantity]));}

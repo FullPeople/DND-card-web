@@ -1,9 +1,10 @@
 import {test,expect,type Page,type Locator} from '@playwright/test';
-import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 import {restoreAuthoredChoices} from './authoredChoicesFixture';
 import {reviewedPassiveFeatData as data,reviewedPassiveFeatFixture} from './reviewedPassiveFeatFixture';
 import {exportCharacter} from '../../src/core/export';
 import type {Character} from '../../src/core/model';
+import {savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState';
 
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
@@ -12,11 +13,6 @@ async function mock(page:Page){
  await page.route('**/data/class/class-passive-feats.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
  await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
 }
-async function saved(page:Page):Promise<Character>{return page.evaluate(async()=>{
- const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;
- const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open(name);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
- try{const workspace=await new Promise<any>((resolve,reject)=>{const request=db.transaction('documents').objectStore('documents').get('workspace');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});return workspace.characters.find((card:any)=>card.id===workspace.activeId);}finally{db.close();}
-});}
 async function tab(page:Page,name:string){
  const button=page.getByRole('tab',{name,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');
  const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(name)}(?: |$)`));await expect(panel).toBeVisible();return panel;
@@ -69,9 +65,7 @@ async function level(page:Page,value:number){
 async function constitutionBase(page:Page,value:number){
  await editor(page);const panel=await tab(page,'主要');await panel.getByRole('spinbutton',{name:'体质基础值',exact:true}).click();const trace=page.getByRole('dialog',{name:'体质数据追溯',exact:true});await expect(trace).toBeVisible();const input=trace.getByRole('spinbutton',{name:'体质追溯输入',exact:true});await input.fill(String(value));await input.press('Enter');await expect(trace).toHaveCount(0);await expect.poll(async()=>(await saved(page)).abilities.con).toBe(value);
 }
-async function source(page:Page,enabled:boolean){
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'PHB');const book=page.locator('.source-book').filter({has:page.locator('button[aria-label="设置来源 PHB"]')});await book.locator('input[type=checkbox]').first().setChecked(enabled);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect.poll(async()=>(await saved(page)).profile.enabledSources.includes('PHB')).toBe(enabled);
-}
+async function source(page:Page,enabled:boolean){await setSiteSource(page,'PHB',enabled);}
 function protectedState(after:Character,before:Character){
  for(const field of ['abilities','baseHp','sheetBonuses','saveBonuses','proficiencies','notes','adjustments','inventory'] as const)expect(after[field]).toEqual(before[field]);
  expect(after.runtime).toEqual(before.runtime);expect(after.selections.filter(row=>row.entry.kind==='feat')).toEqual([]);
