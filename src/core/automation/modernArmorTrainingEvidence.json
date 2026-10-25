@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "preserve-existing-modern-armor-training",
+  "source": "XPHB",
+  "edition": "2024",
+  "input": {
+    "path": "feats.json",
+    "sha256": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+    "retrievalRevision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd"
+  },
+  "rules": [
+    {
+      "reference": "Lightly Armored|XPHB",
+      "english": "Lightly Armored",
+      "page": 205,
+      "entryHash": "423fb6efa58add6c891b114c273e96e135977ab6f06d9db8daa7c70d2a6a10d9",
+      "minimumLevel": 4,
+      "abilities": [
+        "str",
+        "dex"
+      ],
+      "armorTraining": [
+        "light",
+        "shield"
+      ],
+      "typedChoiceSupported": true
+    },
+    {
+      "reference": "Moderately Armored|XPHB",
+      "english": "Moderately Armored",
+      "page": 205,
+      "entryHash": "b86f5aeef2bc39ce9b9d03e863b8d4fd10097b6273b9afbf37e62e1954ed1c35",
+      "minimumLevel": 4,
+      "abilities": [
+        "str",
+        "dex"
+      ],
+      "armorTraining": [
+        "medium"
+      ],
+      "requiredArmor": "light",
+      "typedChoiceSupported": false
+    },
+    {
+      "reference": "Heavily Armored|XPHB",
+      "english": "Heavily Armored",
+      "page": 204,
+      "entryHash": "6ef86668d2f7d2d91d829769f34758fbecb3e52b0487445378ce595524b569af",
+      "minimumLevel": 4,
+      "abilities": [
+        "con",
+        "str"
+      ],
+      "armorTraining": [
+        "heavy"
+      ],
+      "requiredArmor": "medium",
+      "typedChoiceSupported": false
+    }
+  ],
+  "boundary": "Preserve only previously supported armor training from exact XPHB records at level4 or higher and with current prerequisite training. This is not PHB consent, new ability automation, or new modern feat-choice support. Unqualified level1 probes are not lawful acquisition evidence. Only Lightly Armored had a supported typed-class choice; Moderately and Heavily Armored retain lawful existing manual-record training only and their unsupported typed prerequisites remain closed."
+}

@@ -14,6 +14,7 @@ on:
       - 'tests/invocation*.test.ts'
       - 'tests/reviewed-feats*.test.ts'
       - 'tests/reviewed-armor-*.test.ts'
+      - 'tests/reviewed-modern-*.test.ts'
       - 'tests/training-chips-editing.test.ts'
       - 'tests/e2e/reviewedArmorFeat*.ts'
       - 'tests/e2e/armorFeatControls.spec.ts'
@@ -109,12 +110,12 @@ jobs:
           writeFileSync('.local-evidence/infusion-source-verification.json',JSON.stringify({revision,verified:true,inputs:results},null,2)+'\n');
           console.log('Verified six frozen inputs; source text is not an artifact.');
           NODE
-      - name: Verify four reviewed passive-feat inputs without publishing source text
+      - name: Verify eight reviewed passive and armor feat inputs without publishing source text
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$REVIEWED_FEATS_FROZEN_DIR"
-          for path in feats.json class/class-fighter.json class/class-artificer.json variantrules.json; do
+          for path in feats.json class/class-fighter.json class/class-artificer.json class/class-wizard.json class/class-bard.json class/class-cleric.json items-base.json variantrules.json; do
             revision=e2623b204ddbdf2bcfa8317acfc962de89c676e2
             if [ "$path" = feats.json ]; then revision=5cc0bbe2c2b241a334e731af4448bdba2168e8bd; fi
             curl --disable --fail --silent --show-error --max-time 60 --max-filesize 3000000 --proto '=https' \
@@ -128,6 +129,10 @@ jobs:
             'feats.json':'0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6',
             'class/class-fighter.json':'a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509',
             'class/class-artificer.json':'c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7',
+            'class/class-wizard.json':'7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03',
+            'class/class-bard.json':'ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c',
+            'class/class-cleric.json':'011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344',
+            'items-base.json':'8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff',
             'variantrules.json':'21eef107d25cf438eb85894387fb6f834478d80bc467791c54fe66db9e498c44',
           };
           const rows=[];
@@ -138,9 +143,10 @@ jobs:
             const revision=path==='feats.json'?'5cc0bbe2c2b241a334e731af4448bdba2168e8bd':'e2623b204ddbdf2bcfa8317acfc962de89c676e2';
             rows.push({url:`https://5e.kiwee.top/data/${path}`,path:filename,sha256,revision,retrievalUrl:`https://raw.githubusercontent.com/tjliqy/5etools-cn/${revision}/data/${path}`});
           }
+          if(rows.length!==8)throw Error('Expected exactly eight reviewed feat source inputs');
           writeFileSync(`${process.env.REVIEWED_FEATS_FROZEN_DIR}/index.json`,JSON.stringify({rows}));
           writeFileSync('.local-evidence/passive-feat-source-verification.json',JSON.stringify({verified:true,rows},null,2)+'\n');
-          console.log('Verified four reviewed passive-feat inputs; source text is not an artifact.');
+          console.log('Verified eight reviewed passive and armor feat inputs; source text is not an artifact.');
           NODE
       - name: Fetch exact old consumer for charge-preservation verification
         run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
@@ -151,7 +157,7 @@ jobs:
       - name: Source replay, persistence, restrictions and UI guards
         run: npx vitest run tests/radiant-*.test.ts tests/refueling-*.test.ts tests/infusion-charge*.test.ts tests/attuned-infusion*.test.ts tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-spell-expansion.test.ts tests/invocation-level9.test.ts tests/invocation-atwill-final.test.ts tests/invocation-skill-guard.test.ts tests/invocation-dual-payment.test.ts tests/invocation-dual-controls.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
       - name: Reviewed passive-feat source, lifecycle and player controls
-        run: npx vitest run tests/reviewed-feats*.test.ts tests/reviewed-armor-*.test.ts tests/training-chips-editing.test.ts --maxWorkers=1
+        run: npx vitest run tests/reviewed-feats*.test.ts tests/reviewed-armor-*.test.ts tests/reviewed-modern-*.test.ts tests/training-chips-editing.test.ts --maxWorkers=1
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone

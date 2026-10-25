@@ -2,7 +2,9 @@ import type {Character,Selection} from '../model';
 import {evaluateAbilityAdvancements,type AdvancementBoundary} from './abilityAdvancements';
 import {baseAbilityScores} from './baseAbilities';
 import {activeEffectSelections} from './active';
-import {reviewedArmorFeatIdentity} from './reviewedFeatIdentity';
+import {reviewedArmorFeatIdentity,retainedModernArmorRule} from './reviewedFeatIdentity';
+import {matchesReference} from '../entryReferences';
+import {modernFeatEvidence} from './classChoiceSupport';
 import {equipmentTraining} from '../proficiencyText';
 
 function declarations(value:unknown):string[]{
@@ -37,21 +39,46 @@ function armorSourceAvailable(c:Character,row:Selection,active:Selection[],befor
  }
  return false;
 }
+/** A retained modern automatic feat still follows its own declared source.
+ * Manual records have no acquisition timestamp and cannot prove an earlier ASI
+ * prerequisite; ordinary final equipment display retains their legal training. */
+function modernTrainingAvailable(c:Character,row:Selection,active:Selection[],rule:NonNullable<ReturnType<typeof retainedModernArmorRule>>,before?:AdvancementBoundary):boolean{
+ const classes=active.filter(value=>value.entry.kind==='class');
+ if(!classes.length||classes.some(value=>!Number.isSafeInteger(value.level)||value.level<1||value.level>20)||classes.reduce((sum,value)=>sum+value.level,0)<4)return false;
+ if(!row.requirementId&&!row.grantKey?.startsWith('choice:'))return !before;
+ if(!rule.typedChoiceSupported)return false;
+ const owner=active.find(value=>value.id===row.parentId),prefix=`${owner?.id}:class-typed-feat:`;
+ if(!owner||owner.entry.kind!=='class'||owner.entry.edition!=='2024'||owner.entry.source!=='XPHB'||!row.requirementId?.startsWith(prefix)||row.grantKey!==`choice:${row.requirementId}:${row.entry.id}`||c.answers[row.requirementId]?.length!==1||c.answers[row.requirementId][0]!==row.entry.id)return false;
+ if(owner.entry.raw._category!=='class'||owner.entry.raw.source!==owner.entry.source||owner.entry.raw.ENG_name!==owner.entry.english||owner.entry.raw._copy||owner.entry.raw._unresolvedParent||owner.entry.effects?.length||owner.entry.choices?.length||!['one',undefined].includes(owner.entry.raw.edition)||active.filter(value=>value.entry.kind==='class'&&value.entry.english===owner.entry.english&&value.entry.source===owner.entry.source&&value.entry.edition===owner.entry.edition).length!==1)return false;
+ const featureId=row.requirementId.slice(prefix.length),sources=active.filter(value=>value.entry.id===featureId&&value.parentId===owner.id);
+ if(sources.length!==1)return false;const source=sources[0];
+ const raw=source.entry.raw;
+ if(source.entry.kind!=='feature'||source.entry.edition!=='2024'||source.entry.source!=='XPHB'||raw._category!=='classFeature'||raw.source!=='XPHB'||raw.ENG_name!==source.entry.english||raw.className!==owner.entry.raw.name||raw.classSource!=='XPHB'||raw._copy||raw._unresolvedParent||source.entry.effects?.length||source.entry.choices?.length||raw.effects!==undefined||raw.choices!==undefined||!['one',undefined].includes(raw.edition)||raw._classEdition!==undefined&&raw._classEdition!=='2024')return false;
+ if(!Array.isArray(owner.entry.raw.classFeatures)||!owner.entry.raw.classFeatures.some((value:unknown)=>{const ref=typeof value==='string'?value:value&&typeof value==='object'?(value as {classFeature?:unknown}).classFeature:undefined;return typeof ref==='string'&&source.grantKey===`ref:${ref}`&&matchesReference(source.entry,ref);})||active.filter(value=>value.parentId===owner.id&&value.entry.english===source.entry.english&&value.entry.source===source.entry.source&&value.entry.raw.level===raw.level).length!==1)return false;
+ if(!modernFeatEvidence(owner.entry,source.entry)||source.entry.raw.level>owner.level||!armorSourceAvailable(c,source,active,before))return false;
+ return !before||source.entry.raw.level<before.level;
+}
 /** Manual declarations replace inferred training, including an explicitly empty list. */
 export function trainingDeclarations(c:Character,active:Selection[],group:'armor'|'weapons',reviewedArmor:string[]=[],before?:AdvancementBoundary):string[]{
  if(c.training?.[group]!==undefined)return c.training[group]!.split(/[,，、;；\n]+/).map(s=>s.trim()).filter(Boolean).map(categoryDeclaration);
  const first=c.selections.find(s=>s.entry.kind==='class'),field=group==='armor'?'armorProficiencies':'weaponProficiencies';
+ const modern:{row:Selection;rule:NonNullable<ReturnType<typeof retainedModernArmorRule>>}[]=[];
  const declared=active.flatMap(row=>{
   const raw=row.entry.raw;
   if(group==='armor'&&!armorSourceAvailable(c,row,active,before))return [];
   // These reviewed feats need explicit owned consent. A manual drag (or edited
   // same-identity copy) is not an alternate automatic training grant.
-  if(group==='armor'&&reviewedArmorFeatIdentity(row.entry))return [];
+  if(group==='armor'&&reviewedArmorFeatIdentity(row.entry)){const rule=retainedModernArmorRule(row.entry);if(rule&&modernTrainingAvailable(c,row,active,rule,before))modern.push({row,rule});return [];}
   if(row.entry.kind==='item'&&(!row.equipped||raw.reqAttune&&!row.attuned))return [];
   const declared=row.entry.kind==='class'?(row.id===first?.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;
   return [...declarations(declared?.[group]??declared?.[field]),...declarations(raw[field])];
  }).map(categoryDeclaration);
- return [...declared,...(group==='armor'?reviewedArmor:[])];
+ const result=[...declared,...(group==='armor'?reviewedArmor:[])];
+ // The three existing modern categories form a small acyclic chain. Never
+ // derive prerequisite training from the candidate itself or an unknown rule.
+ const pending=[...modern];let progressed=true;
+ while(progressed&&pending.length){progressed=false;for(let index=0;index<pending.length;){const {rule}=pending[index];if(rule.requiredArmor&&!result.some(value=>equipmentTraining(value)?.[0]===rule.requiredArmor)){index++;continue;}result.push(...rule.armorTraining);pending.splice(index,1);progressed=true;}}
+ return result;
 }
 
 /** Single effective projection for equipment, prerequisites and sheet display.
