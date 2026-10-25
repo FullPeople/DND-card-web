@@ -1,5 +1,6 @@
 import {it,expect} from 'vitest';
 import {normalizeData} from '../src/data/catalog';
+import {EQUIPMENT_TRAINING_ENTRIES} from '../src/data/weaponTraining';
 import {type Character,type Entry} from '../src/core/model';
 import {sheetChoices,setSheetChoiceSlot,chooseSheetOption} from '../src/core/automation/choices';
 import {syncFeatures} from '../src/core/sheet';
@@ -106,4 +107,37 @@ it.each(['extra-state','extra-binding','extra-intent','wrong-version','bindings-
 });
 it('repeated confirmation stores exactly one owned binding and does not touch a second feat domain',()=>{
  const {c,confirm,choice,feat}=setup();confirm();const first=JSON.stringify(c);for(let i=0;i<3;i++)setReviewedSkilledIntent(c,choice.id,feat.id,intent());expect(c.reviewedSkilled!.bindings).toHaveLength(1);expect(JSON.stringify(c)).toBe(first);
+});
+
+// loadCatalog always injects these project-authored handles before remote rows.
+// normalizeData-only fixtures previously omitted this real App integration seam.
+it('the actual App catalog seed keeps both exact PHB vehicle kinds available, without accepting other authored groups',()=>{
+ const {c}=setup(),catalog=structuredClone(EQUIPMENT_TRAINING_ENTRIES),options=reviewedSkilledOptions(c,catalog);
+ expect(options).toHaveLength(57);expect(options.every(row=>!row.unavailable)).toBe(true);
+ for(const key of ['land-vehicles','water-vehicles']){
+  const entry=catalog.find(row=>row.id===`dnd-card.weapon-training:2014:${key}`)!;
+  expect(reviewedSkilledReference(entry)).toEqual({kind:'tool',reference:`${entry.english}|PHB`});
+ }
+ expect(catalog.filter(row=>reviewedSkilledReference(row))).toHaveLength(2);
+});
+it.each(['id','pack','source','edition','kind','raw-category','raw-extra','effects','choices','dependencies','revision','english','effects-object','choices-object','dependencies-object'] as const)('a forged %s same-name authored vehicle handle stays blocked',mode=>{
+ const {c}=setup(),entry=structuredClone(EQUIPMENT_TRAINING_ENTRIES.find(row=>row.id==='dnd-card.weapon-training:2014:land-vehicles')!);
+ if(mode==='id')entry.id='forged';if(mode==='pack')entry.packId='custom';if(mode==='source')entry.source='XPHB';if(mode==='edition')entry.edition='2024';if(mode==='kind')entry.kind='item';if(mode==='raw-category')entry.raw._category='item';if(mode==='raw-extra')entry.raw.bonusWeapon='+1';if(mode==='effects')entry.effects=[{op:'add',target:'str',value:3}];if(mode==='choices')entry.choices=[{} as any];if(mode==='dependencies')entry.dependencies=[{} as any];if(mode==='revision')entry.revision='future';if(mode==='english')entry.english='Other';if(mode==='effects-object')(entry as any).effects={};if(mode==='choices-object')(entry as any).choices={};if(mode==='dependencies-object')(entry as any).dependencies={};
+ expect(reviewedSkilledReference(entry)).toBeUndefined();
+ // Reusing a canonical App handle ID conflicts even after English/source edits.
+ expect(reviewedSkilledOptions(c,[entry]).find(row=>row.choice.reference==='Vehicles (Land)|PHB')!.unavailable).toBeTruthy();
+});
+it('both historic table-backed and actual App category disable IDs suspend vehicle proficiency, never a Cart item ID',()=>{
+ for(const [key,reference] of [['land-vehicles','Vehicles (Land)|PHB'],['water-vehicles','Vehicles (Water)|PHB']])for(const id of [`reviewed-skilled:PHB:${key}`,`dnd-card.weapon-training:2014:${key}`]){
+  const {c,confirm,choice,feat}=setup();confirm(intent([picks[0],picks[1],{kind:'tool',reference}]));const stored=JSON.stringify(c.reviewedSkilled);c.profile.disabledEntries=[id];
+  expect(reviewedSkilledOptions(c,EQUIPMENT_TRAINING_ENTRIES).find(row=>row.choice.reference===reference)!.unavailable,id).toBeTruthy();
+  expect(reviewedSkilledStatus(c,choice.id,feat.id).active,id).toBe(false);expect(evaluate(c).skills.perception.proficient,id).toBe(false);expect(JSON.stringify(c.reviewedSkilled)).toBe(stored);
+  c.profile.disabledEntries=[];expect(reviewedSkilledStatus(c,choice.id,feat.id).active).toBe(true);
+ }
+ const {c,confirm,choice,feat}=setup();confirm();c.profile.disabledEntries=['kiwee:item:phb:cart::::::'];expect(reviewedSkilledStatus(c,choice.id,feat.id).active).toBe(true);
+});
+
+it('a valid authored handle never masks a duplicate conflicting row in either catalog order',()=>{
+ const {c}=setup(),valid=structuredClone(EQUIPMENT_TRAINING_ENTRIES.find(row=>row.id==='dnd-card.weapon-training:2014:land-vehicles')!),bad=structuredClone(valid);bad.raw._copy={name:'Other'};
+ for(const catalog of [[valid,bad],[bad,valid]])expect(reviewedSkilledOptions(c,catalog).find(row=>row.choice.reference==='Vehicles (Land)|PHB')!.unavailable).toBeTruthy();
 });

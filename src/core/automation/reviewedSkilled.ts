@@ -56,9 +56,26 @@ function sourceEntry(choice:ReviewedSkilledChoice):Entry{
  if('key' in row)return {id:`reviewed-skilled:PHB:${row.key}`,kind:'rule',name:row.name,english:row.reference.split('|')[0],source:'PHB',edition:'2014',packId:'kiwee',revision:evidence.inputs['generated/gendata-tables.json'],page:154,entries:[],raw:{_category:'reviewedToolKind'}};
  return {id:row.entryId,kind:choice.kind==='skill'?'rule':'item',name:row.name,english:row.english,source:'PHB',edition:'2014',packId:'kiwee',revision:'entryHash' in row?row.entryHash:'',page:row.page,entries:[],raw:{name:row.name,ENG_name:row.english,source:'PHB',page:row.page,...('rawEdition' in row?{edition:row.rawEdition}:{}),...row.mechanics,_category:row.category}};
 }
+const vehicleHandleId=(key:string)=>`dnd-card.weapon-training:2014:${key}`;
+/** The actual App catalog includes project-authored training category handles.
+ * They are not publisher item rows. Authenticate only these two exact v2 PHB
+ * handles, never all same-name rules or all authored equipment groups. */
+const absentOrEmpty=(value:unknown)=>value===undefined||Array.isArray(value)&&value.length===0;
+function vehicleReference(entry:Entry):ReviewedSkilledChoice|undefined{
+ const row=evidence.vehicles.find(row=>entry.id===vehicleHandleId(row.key));
+ if(!row||entry.kind!=='rule'||entry.packId!=='dnd-card.weapon-training'||entry.revision!=='2'||entry.english!==row.reference.split('|')[0]||entry.source!=='PHB'||entry.edition!=='2014'||entry.page!==undefined||!absentOrEmpty(entry.effects)||!absentOrEmpty(entry.choices)||!absentOrEmpty(entry.dependencies)||!same(entry.raw,{_category:'itemProperty',_trainingCategory:'tools',_authoredBy:'DND Card 项目整理'}))return;
+ return {kind:'tool',reference:row.reference};
+}
+/** Both the historic table-backed identity and the App category handle refer
+ * to this proficiency kind. Neither can bypass the other's disable boundary. */
+function choiceAllowed(c:Character,choice:ReviewedSkilledChoice):boolean{
+ const entry=sourceEntry(choice),row=choice.kind==='tool'?evidence.vehicles.find(row=>row.reference===choice.reference):undefined;
+ return selectionEffectsAllowed(c,entry)&&(!row||selectionEffectsAllowed(c,{...entry,id:vehicleHandleId(row.key)}));
+}
 /** Validate catalog candidates independently. Renames are display-only; raw
  * source/edition, category, ID and all mechanics must retain reviewed identity. */
 export function reviewedSkilledReference(entry:Entry):ReviewedSkilledChoice|undefined{
+ const vehicle=vehicleReference(entry);if(vehicle)return vehicle;
  const row=evidence.skills.find(row=>row.entryId===entry.id)||evidence.tools.find(row=>row.entryId===entry.id);if(!row)return;
  const raw=entry.raw,kind=row.category==='skill'?'skill':'tool';
  if(entry.kind!==(kind==='skill'?'rule':'item')||entry.packId!=='kiwee'||entry.english!==row.english||raw.ENG_name!==row.english||entry.source!=='PHB'||raw.source!=='PHB'||entry.edition!=='2014'||entry.page!==row.page||raw.page!==row.page||raw._category!==row.category||raw.edition!==('rawEdition' in row?row.rawEdition:undefined)||entry.effects?.length||entry.choices?.length||entry.dependencies?.length)return;
@@ -69,13 +86,13 @@ export interface ReviewedSkilledOption {value:string;label:string;choice:Reviewe
 export function reviewedSkilledOptions(c:Character,catalog:Entry[]=[]):ReviewedSkilledOption[]{
  const choices:ReviewedSkilledChoice[]=[...evidence.skills.map(row=>({kind:'skill' as const,reference:row.reference})),...evidence.tools.map(row=>({kind:'tool' as const,reference:row.reference})),...evidence.vehicles.map(row=>({kind:'tool' as const,reference:row.reference}))];
  return choices.map(choice=>{
-  const fallback=sourceEntry(choice),matches=catalog.filter(entry=>entry.id===fallback.id||entry.english===fallback.english&&entry.source==='PHB'),conflict=matches.some(entry=>!same(reviewedSkilledReference(entry),choice));
+  const fallback=sourceEntry(choice),vehicle=choice.kind==='tool'?evidence.vehicles.find(row=>row.reference===choice.reference):undefined,matches=catalog.filter(entry=>entry.id===fallback.id||vehicle&&entry.id===vehicleHandleId(vehicle.key)||entry.english===fallback.english&&entry.source==='PHB'),conflict=matches.some(entry=>!same(reviewedSkilledReference(entry),choice));
   const entry=matches.length&&!conflict?matches[0]:fallback;
-  return {value:`${choice.kind}:${choice.reference}`,label:`${entry.name} · ${choice.kind==='skill'?'技能':'工具'} · PHB`,choice,entry,unavailable:conflict?'此种类的资料身份或机械声明与已核对来源冲突，待适配。':!selectionEffectsAllowed(c,entry)?'此种类的来源或条目当前未启用。':undefined};
+  return {value:`${choice.kind}:${choice.reference}`,label:`${entry.name} · ${choice.kind==='skill'?'技能':'工具'} · PHB`,choice,entry,unavailable:conflict?'此种类的资料身份或机械声明与已核对来源冲突，待适配。':!choiceAllowed(c,choice)||!selectionEffectsAllowed(c,entry)?'此种类的来源或条目当前未启用。':undefined};
  });
 }
 function unavailable(c:Character,choices:ReviewedSkilledChoice[]){
- const stopped=choices.find(choice=>!selectionEffectsAllowed(c,sourceEntry(choice)));
+ const stopped=choices.find(choice=>!choiceAllowed(c,choice));
  return stopped?`${proof(stopped)!.name} 的来源或条目当前未启用，三项熟练暂不生效。`:undefined;
 }
 function sourceFeat(c:Character,choiceId:string,entryId:string,active:Selection[]){

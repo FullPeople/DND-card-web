@@ -6,6 +6,7 @@ import {RetainedCardVisibility} from '../src/ui/RetainedCardVisibility';
 import {FeedbackContext} from '../src/ui/InteractionFeedback';
 import {SkilledControl} from '../src/ui/SkilledControl';
 import {normalizeData} from '../src/data/catalog';
+import {EQUIPMENT_TRAINING_ENTRIES} from '../src/data/weaponTraining';
 import {syncFeatures} from '../src/core/sheet';
 import {sheetChoices,setSheetChoiceSlot} from '../src/core/automation/choices';
 import {reviewedSkilledStatus,reviewedSkilledToolLabels,setReviewedSkilledIntent} from '../src/core/automation/reviewedSkilled';
@@ -15,7 +16,7 @@ import {reviewedSkilledData,reviewedSkilledFixture,skilledValues} from './e2e/re
 let root:Root|undefined,host:HTMLDivElement|undefined;
 afterEach(async()=>{if(root)await act(()=>root!.unmount());root=undefined;host?.remove();host=undefined;});
 async function setup(){
- let c=reviewedSkilledFixture();const catalog=normalizeData(reviewedSkilledData,'skilled-interactions');syncFeatures(c,catalog);const choice=sheetChoices(c,catalog).find(row=>row.grantLevel===4)!,entry=catalog.find(row=>row.english==='Skilled')!;setSheetChoiceSlot(c,choice.id,0,entry.id,catalog);
+ let c=reviewedSkilledFixture();const catalog=[...normalizeData(reviewedSkilledData,'skilled-interactions'),...structuredClone(EQUIPMENT_TRAINING_ENTRIES)];syncFeatures(c,catalog);const choice=sheetChoices(c,catalog).find(row=>row.grantLevel===4)!,entry=catalog.find(row=>row.english==='Skilled')!;setSheetChoiceSlot(c,choice.id,0,entry.id,catalog);
  host=document.createElement('div');document.body.appendChild(host);root=createRoot(host);let active=true,saveLabel='已保存到本机',writable=true,unavailable=false,submit=true,mutate:((draft:typeof c)=>void)|undefined;
  const edit=vi.fn((fn:(draft:typeof c)=>void)=>{if(!submit)return;const draft=structuredClone(c);mutate?.(draft);fn(draft);c=draft;draw();});
  function draw(){root!.render(createElement(RetainedCardVisibility.Provider,{value:active},createElement(FeedbackContext.Provider,{value:{scope:c.id,saveLabel,announce:()=>{}}},createElement(SkilledControl,{c,catalog,choiceId:choice.id,entry,writable,unavailable,edit}))));}
