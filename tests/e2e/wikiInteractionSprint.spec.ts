@@ -3,6 +3,18 @@ import {mockSource} from './fixtures';
 
 test.beforeEach(async({page})=>{await mockSource(page);});
 
+test('cross-category navigation replaces the old facts and body without leaving duplicate documents',async({page})=>{
+ await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
+ await page.locator('.catalog-row').filter({hasText:'测试法师'}).first().click();
+ const article=page.locator('.entry-detail');await expect(article).toContainText('初始特性');await expect(article.locator('.entry-facts')).toHaveCount(1);
+ const input=page.getByRole('textbox',{name:'搜索规则资料',exact:true}),results=page.getByRole('region',{name:'全局搜索结果'});
+ await input.fill('微光术');await expect(results).toHaveAttribute('aria-busy','false');await expect(results.locator('.global-result')).toHaveCount(1);
+ await input.press('ArrowDown');await input.press('Enter');await expect(article).toHaveAttribute('data-entry-kind','spell');
+ await expect(article.locator('.entry-facts')).toHaveCount(1);await expect(article.locator('.entry-facts')).toContainText('学派');await expect(article.locator('.entry-facts')).not.toContainText('生命骰');
+ await expect(article).toContainText('为测试而创作的一点微光');await expect(article).not.toContainText('起始熟练项');await expect(article.locator('.raw-details')).toHaveCount(1);await expect(article.locator('.library-document')).toHaveCount(1);
+ await page.goBack();await expect(article).toHaveAttribute('data-entry-kind','class');await expect(article.locator('.entry-facts')).toHaveCount(1);await expect(article.locator('.entry-facts')).toContainText('生命骰');await expect(article.locator('.library-document')).toHaveCount(1);await expect(article.locator('.raw-details')).toHaveCount(1);await expect(article).not.toContainText('为测试而创作的一点微光');
+});
+
 test('global search keeps typing focus, wraps to the last virtual result and opens it with Enter',async({page})=>{
  await page.route('**/data/items.json',route=>route.fulfill({json:{item:Array.from({length:1000},(_,index)=>({name:`检索物品${String(index).padStart(4,'0')}`,ENG_name:`Lookup Item ${index}`,source:'XPHB',entries:['原创搜索键盘验收正文。']}))}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
