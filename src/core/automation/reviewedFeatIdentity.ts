@@ -20,3 +20,9 @@ export function retainedModernArmorRule(entry:Entry){
  if(!block||typeof block!=='object'||Array.isArray(block)||Object.keys(block).some(key=>!['ENG_name','name','type','entries'].includes(key))||block.ENG_name!=='Armor Training'||typeof block.name!=='string'||!block.name.trim()||block.type!=='entries'||!Array.isArray(block.entries)||block.entries.length!==1||typeof block.entries[0]!=='string'||!block.entries[0].trim())return;
  return rule;
 }
+
+/** This deny-family prevents manual/forged copies from bypassing explicit PHB
+ * consent. It does not execute the distinct XPHB weapon-mastery feat. */
+export function reviewedWeaponMasterIdentity(entry:Entry):boolean{
+ return entry.english==='Weapon Master'||entry.raw.ENG_name==='Weapon Master';
+}

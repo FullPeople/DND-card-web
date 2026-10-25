@@ -76,6 +76,21 @@
         "heavy"
       ],
       "requiredArmor": "medium"
+    },
+    {
+      "kind": "weapon-master",
+      "reference": "Weapon Master|PHB",
+      "english": "Weapon Master",
+      "page": 170,
+      "entryHash": "058b1e469d74445bb81c838588ef6452732d7ac1e4a3a1eefbc6d274d9d19008",
+      "abilityBonus": 1,
+      "cap": 20,
+      "abilities": [
+        "str",
+        "dex"
+      ],
+      "weaponCount": 4,
+      "weaponFilter": "type=军用武器;寻常武器|miscellaneous=平凡的"
     }
   ],
   "boundary": "Only explicit intents for one reviewed PHB2014 feat selected through an authenticated legacy class ASI alternative. No manual feat drag activation, no changes to base scores, manual HP, proficiency flags or current resources. Unknown, duplicate and unsupported source records remain visible and inactive. Armor training is a derived layer shared by equipment and source-order prerequisites; explicit manual armor declarations, including empty strings, replace it. 2014 shield training never adds AC by itself. No automatic casting restrictions, disadvantage, heavy-armor strength/speed or equip lifecycle.",

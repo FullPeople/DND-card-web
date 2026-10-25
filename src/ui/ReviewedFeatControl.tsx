@@ -1,12 +1,14 @@
 import {useEffect,useState} from 'react';
 import {ABILITIES,ABILITY_LABELS,type Ability,type Character,type Entry} from '../core/model';
-import {reviewedFeatRule,reviewedFeatStatus,setReviewedFeatIntent,type ReviewedFeatIntent} from '../core/automation/reviewedFeats';
+import {reviewedFeatRule,reviewedFeatStatus,setReviewedFeatIntent,type ReviewedFeatIntent,type ReviewedArmorFeatKind} from '../core/automation/reviewedFeats';
 
-type Props={c:Character;choiceId:string;entry:Entry;unavailable:boolean;writable:boolean;edit?:(action:(draft:Character)=>void)=>void};
+import {WeaponMasterControl} from './WeaponMasterControl';
+
+type Props={catalog?:Entry[];c:Character;choiceId:string;entry:Entry;unavailable:boolean;writable:boolean;edit?:(action:(draft:Character)=>void)=>void};
 const names={tough:'健壮',resilient:'强健','lightly-armored':'轻甲运用','moderately-armored':'中甲运用','heavily-armored':'重甲运用'};
 
 /** A saved class-slot choice is not consent to alter a historical manual sheet. */
-export function ReviewedFeatControl({c,choiceId,entry,unavailable,writable,edit}:Props){
+export function ReviewedFeatControl({c,catalog=[],choiceId,entry,unavailable,writable,edit}:Props){
  const rule=reviewedFeatRule(entry),status=rule?reviewedFeatStatus(c,choiceId,entry.id):{eligible:false,active:false,binding:undefined,reason:undefined};
  const intent=status.binding?.intent,saved=JSON.stringify(intent||{});
  const [ability,setAbility]=useState<Ability|''>(''),[confirmed,setConfirmed]=useState(false),[error,setError]=useState('');
@@ -14,6 +16,7 @@ export function ReviewedFeatControl({c,choiceId,entry,unavailable,writable,edit}
  useEffect(()=>{setAbility(intent&&intent.kind!=='tough'?intent.ability:'');setConfirmed(false);setError('');},[c.id,choiceId,entry.id,saved]);
  useEffect(()=>setConfirmed(false),[manualBasis,status.eligible,unavailable,writable]);
  if(!rule)return null;
+ if(rule.kind==='weapon-master')return <WeaponMasterControl c={c} catalog={catalog} choiceId={choiceId} entry={entry} unavailable={unavailable} writable={writable} edit={edit}/>;
  const tough=rule.kind==='tough',resilient=rule.kind==='resilient',heavy=rule.kind==='heavily-armored';
  const known=!c.reviewedFeats||c.reviewedFeats.version===1,canEdit=writable&&!!edit&&known;
  const blocked=!known?'此被动专长记录版本尚未支持，原数据保留且不能修改。':!canEdit?'当前角色卡只读，不能修改被动专长。':unavailable||!status.eligible?(status.reason||'此职业选择、等级或来源当前不可用，原记录保留。'):'';
@@ -25,7 +28,7 @@ export function ReviewedFeatControl({c,choiceId,entry,unavailable,writable,edit}
   if(!canEdit||!remove&&(!!blocked||!valid||!confirmed))return;
   let applied=false;
   try{
-   const next:ReviewedFeatIntent|null=remove?null:tough?{kind:'tough',confirmedManualHpExcluded:true}:resilient?{kind:'resilient',ability:selectedAbility as Ability,confirmedManualAbilityExcluded:true}:{kind:rule!.kind as Exclude<ReviewedFeatIntent['kind'],'tough'|'resilient'>,ability:selectedAbility as 'str'|'dex',confirmedManualAbilityExcluded:true};
+   const next:ReviewedFeatIntent|null=remove?null:tough?{kind:'tough',confirmedManualHpExcluded:true}:resilient?{kind:'resilient',ability:selectedAbility as Ability,confirmedManualAbilityExcluded:true}:{kind:rule!.kind as ReviewedArmorFeatKind,ability:selectedAbility as 'str'|'dex',confirmedManualAbilityExcluded:true};
    edit!(draft=>{setReviewedFeatIntent(draft,choiceId,entry.id,next);applied=true;});
    if(applied)setConfirmed(false);
    setError(applied?'':'修改未提交，请查看卡面的只读或同步提示。');

@@ -189,7 +189,7 @@ function finishBuiltinChoices(c:Character,before:SheetChoice[],catalog:Entry[]){
  for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>!sheetChoicePending(c,r))&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
 }
 function withdrawMissingReviewedFeats(c:Character,id:string,slots:string[]){
- if(id.includes(':class-legacy-feat:')&&c.reviewedFeats?.version===1)c.reviewedFeats={...c.reviewedFeats,bindings:c.reviewedFeats.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
+ for(const field of ['reviewedFeats','reviewedWeaponMaster'] as const){const store=c[field];if(id.includes(':class-legacy-feat:')&&store?.version===1)c[field]={...store,bindings:store.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};}
 }
 /** Slot edits validate and replace atomically, including already full choices. */
 export function setSheetChoiceSlot(c:Character,id:string,index:number,value:string|undefined,catalog:Entry[]=[]){

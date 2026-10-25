@@ -1,4 +1,4 @@
-import {validateReviewedFeats} from './automation/reviewedFeats';
+import {validateReviewedFeats,validateReviewedWeaponMaster} from './automation/reviewedFeats';
 import {validateAsiAllocations} from './automation/asi';
 import {invocationRecord} from './automation/invocations';
 import {validateInfusions} from './automation/infusions';
@@ -135,6 +135,7 @@ export function validateCharacter(value: unknown): Character {
   validateInfusions(c.infusions);
   validateAsiAllocations(c.asiAllocations);
   validateReviewedFeats(c.reviewedFeats);
+  validateReviewedWeaponMaster(c.reviewedWeaponMaster);
   if(c.classChoiceSnapshots!==undefined){
     assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
     for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){

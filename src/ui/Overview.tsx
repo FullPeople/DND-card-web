@@ -97,7 +97,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const activeTraining=c.selections.filter(s=>selectionActive(c,s)&&(!s.grantKey?.startsWith('choice:')||c.automation?.enabled));
   return [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
-    const values = key==='armor'?effectiveTrainingDeclarations(c,activeTraining,'armor'):activeTraining.flatMap(s => {
+    const values = key==='armor'||key==='weapons'?effectiveTrainingDeclarations(c,activeTraining,key):activeTraining.flatMap(s => {
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];

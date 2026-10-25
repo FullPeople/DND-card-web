@@ -2,7 +2,7 @@ import type {Character,Selection} from '../model';
 import {evaluateAbilityAdvancements,type AdvancementBoundary} from './abilityAdvancements';
 import {baseAbilityScores} from './baseAbilities';
 import {activeEffectSelections} from './active';
-import {reviewedArmorFeatIdentity,retainedModernArmorRule} from './reviewedFeatIdentity';
+import {reviewedArmorFeatIdentity,reviewedWeaponMasterIdentity,retainedModernArmorRule} from './reviewedFeatIdentity';
 import {matchesReference} from '../entryReferences';
 import {modernFeatEvidence} from './classChoiceSupport';
 import {equipmentTraining} from '../proficiencyText';
@@ -68,6 +68,7 @@ export function trainingDeclarations(c:Character,active:Selection[],group:'armor
   if(group==='armor'&&!armorSourceAvailable(c,row,active,before))return [];
   // These reviewed feats need explicit owned consent. A manual drag (or edited
   // same-identity copy) is not an alternate automatic training grant.
+  if(group==='weapons'&&reviewedWeaponMasterIdentity(row.entry))return [];
   if(group==='armor'&&reviewedArmorFeatIdentity(row.entry)){const rule=retainedModernArmorRule(row.entry);if(rule&&modernTrainingAvailable(c,row,active,rule,before))modern.push({row,rule});return [];}
   if(row.entry.kind==='item'&&(!row.equipped||raw.reqAttune&&!row.attuned))return [];
   const declared=row.entry.kind==='class'?(row.id===first?.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;
@@ -81,11 +82,21 @@ export function trainingDeclarations(c:Character,active:Selection[],group:'armor
  return result;
 }
 
+/** The explicit new layer is exposed separately from ordinary training so a
+ * consumer retaining an older edition filter never mistakes another domain's
+ * ordinary declarations for newly authorized Weapon Master effects. */
+export function reviewedWeaponTrainingDeclarations(c:Character,active:Selection[]=activeEffectSelections(c),before?:AdvancementBoundary):string[]{
+ if(c.training?.weapons!==undefined||c.reviewedWeaponMaster?.version!==1)return [];
+ const safe=new Set(activeEffectSelections(c).map(row=>row.id));active=active.filter(row=>safe.has(row.id));
+ return evaluateAbilityAdvancements(c,baseAbilityScores(c,active).abilities,active,before).reviewed.weaponTraining;
+}
+
 /** Single effective projection for equipment, prerequisites and sheet display.
  * A supplied boundary includes only earlier authenticated advancements. */
 export function effectiveTrainingDeclarations(c:Character,active:Selection[]=activeEffectSelections(c),group:'armor'|'weapons'='armor',before?:AdvancementBoundary):string[]{
  const safe=new Set(activeEffectSelections(c).map(row=>row.id));active=active.filter(row=>safe.has(row.id));
- if(group!=='armor'||c.training?.armor!==undefined)return trainingDeclarations(c,active,group,[],before);
+ if(c.training?.[group]!==undefined)return trainingDeclarations(c,active,group,[],before);
+ if(group==='weapons')return [...trainingDeclarations(c,active,group,[],before),...reviewedWeaponTrainingDeclarations(c,active,before)];
  const reviewed=evaluateAbilityAdvancements(c,baseAbilityScores(c,active).abilities,active,before).reviewed;
  return trainingDeclarations(c,active,group,reviewed.armorTraining,before);
 }

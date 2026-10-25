@@ -34,6 +34,7 @@ export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:numb
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
   asiAllocations?:import('./automation/asi').AsiAllocationState;
+  reviewedWeaponMaster?:import('./automation/reviewedFeats').ReviewedWeaponMasterState;
   reviewedFeats?:import('./automation/reviewedFeats').ReviewedFeatState;
   infusions?:import('./automation/infusions').InfusionState;
   automation?:import('./automation/state').AutomationState;

@@ -1,3 +1,4 @@
+import {reviewedWeaponMasterIdentity} from './automation/reviewedFeatIdentity';
 import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
@@ -40,12 +41,16 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     }
     if(invocationScope==='grant'&&!invocation)issues.push({id:`invocation-skills:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：祈唤未通过当前职业学习授权或声明已变化；保留记录，不自动授予技能熟练，手工熟练与专精仍保留。`});
     if(selection.grantKey?.startsWith('choice:')&&!e.effects?.length&&!['skillProficiencies','armorProficiencies','weaponProficiencies','toolProficiencies','additionalSpells'].some(key=>raw[key])&&/(?:获得|学会).*(?:加值|熟练|受训|戏法|法术)/.test(unhandledFeatureArmorText(e)))issues.push({id:`choice-rule:${selection.id}`,selectionId:selection.id,severity:'warning',message:`${e.name}：选择已记录，正文中的数值、熟练或授予规则待适配。`});
+    if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
+    // Preserve the existing unsupported-choice notice, including for XPHB,
+    // but never let a manual/edited Weapon Master raw or effects field bypass
+    // the separate explicitly owned PHB training/ability grant.
+    if(reviewedWeaponMasterIdentity(e))continue;
     // Background ability choices are annotations. The sheet's base scores
     // already contain the player's allocation, so do not apply it a second time.
     if (e.kind === 'race') {
       (raw.size || []).forEach((s: string) => sizes.add(s));
     }
-    if (raw._copy || raw._unresolvedParent) issues.push({ id: `copy:${selection.id}`, message: `${e.name} 使用尚未完整展开的继承资料，部分效果需要人工核对。`, severity: 'warning', selectionId: selection.id });
     // Choices are explicit saved answers; evaluation never creates an answer or grant.
     const skillBlocks = invocationScope ? undefined : e.kind === 'class' ? (selection.id===classes[0]?.id?raw.startingProficiencies?.skills:raw.multiclassing?.proficienciesGained?.skills) : raw.skillProficiencies;
     for (const block of Array.isArray(skillBlocks) ? skillBlocks : []) {

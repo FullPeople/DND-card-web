@@ -2,9 +2,10 @@ import {ABILITY_LABELS,signed,type Ability,type Character,type Derived,type Entr
 import {equipmentTraining} from '../proficiencyText';
 import {matchesReference} from '../entryReferences';
 import type {WeaponAttack} from '../weaponAttacks';
-import {activeSelections} from './active';
+import {activeEffectSelections,activeSelections} from './active';
 import {automationEnabled} from './state';
-import {trainingDeclarations} from './training';
+import {reviewedWeaponTrainingMatches} from './reviewedWeapons';
+import {reviewedWeaponTrainingDeclarations,trainingDeclarations} from './training';
 import type {EquipmentOrigin} from './equipment';
 import {evaluateInfusions} from './infusions';
 
@@ -31,11 +32,11 @@ function trained(entry:Entry,declared:string[]):boolean{
 /** Derived actions only: evaluating never adds selections, spends ammunition or writes resources. */
 export function automaticWeaponAttacks(c:Character,d:Derived):{attacks:AutomaticWeaponAttack[];issues:Issue[]}{
  const attacks:AutomaticWeaponAttack[]=[],issues:Issue[]=[];if(!automationEnabled(c))return {attacks,issues};
- const active=activeSelections(c),training=trainingDeclarations(c,active,'weapons'),infusions=evaluateInfusions(c,active);
+ const active=activeSelections(c),training=trainingDeclarations(c,active,'weapons'),reviewedTraining=reviewedWeaponTrainingDeclarations(c,activeEffectSelections(c)),infusions=evaluateInfusions(c,active);
  for(const row of active.filter(s=>s.equipped&&s.quantity>0&&weaponType(s.entry))){
   const entry=row.entry,raw=entry.raw,type=weaponType(entry),properties=new Set((Array.isArray(raw.property)?raw.property:[]).map(code));
   const issue=(key:string,message:string)=>issues.push({id:`weapon-${key}:${row.id}`,selectionId:row.id,severity:'warning',message:`${entry.name}：${message}`});
-  const automaticAbility=automaticWeaponAbility(entry,d),ability=row.weaponAbility??automaticAbility,mod=d.modifiers[ability],proficient=trained(entry,training);
+  const automaticAbility=automaticWeaponAbility(entry,d),ability=row.weaponAbility??automaticAbility,mod=d.modifiers[ability],proficient=trained(entry,training)||reviewedTraining.some(ref=>reviewedWeaponTrainingMatches(entry,ref));
   const enchanted=!raw.reqAttune||row.attuned;
   const bonus=(field:string)=>{if(raw[field]===undefined)return 0;const value=number(raw[field]);if(value===undefined||Math.abs(value)>100){issue(field,`${field} 加值未支持，需人工核对。`);return undefined;}return enchanted?value:0;};
   const generic=bonus('bonusWeapon'),attack=bonus('bonusWeaponAttack'),damage=bonus('bonusWeaponDamage');
