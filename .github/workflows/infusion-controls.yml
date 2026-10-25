@@ -208,6 +208,8 @@ jobs:
           path: |
             .local-evidence/infusion-browser/
             !.local-evidence/infusion-browser/.playwright-artifacts*/**
+            !.local-evidence/infusion-browser/linguistControls-*/**
+            .local-evidence/linguist-browser-safe/
             .local-evidence/infusion-source-verification.json
             .local-evidence/passive-feat-source-verification.json
           if-no-files-found: warn
