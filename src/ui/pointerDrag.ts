@@ -8,6 +8,7 @@ export type Landing = Point | {element?:HTMLElement;resolve?:()=>HTMLElement|nul
 export const landingWithin=(region:HTMLElement,resolve?:()=>HTMLElement|null):Landing=>({region,resolve});
 type Gesture = { appearance?:'source'; title: string; subtitle?: string; outside?: (hit: Element | null) => boolean; start?: () => void; move: (point: Point, hit: Element | null) => void; finish: (point: Point, hit: Element | null) => Landing | void; cancel: () => void };
 let cancelActive: (() => void) | undefined;
+const scrollableRegions = '.cell-content,.box-content,.catalog-list,.entry-detail,.stock-drop-zone,.dm-console,.sheet-viewport,.sheet-pane';
 window.addEventListener('sheet-gesture',()=>cancelActive?.());
 
 function suppressTouchClick() {
@@ -29,27 +30,37 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
   const width = gesture.appearance==='source'?bounds.width:Math.max(48, Math.min(240, bounds.width)), height = gesture.appearance==='source'?bounds.height:Math.max(24, Math.min(80, bounds.height));
   const grab = { x: Math.max(0, Math.min(width, (event.clientX - bounds.x) / Math.max(1, bounds.width) * width)), y: Math.max(0, Math.min(height, (event.clientY - bounds.y) / Math.max(1, bounds.height) * height)) };
   const origin = { x: event.clientX, y: event.clientY };
-  let point = origin, painted = origin, active = false, finished = false, frame = 0, ghost: HTMLDivElement | undefined, layer: HTMLDivElement | undefined;
+  let point = origin, painted: Point | undefined, lastHit: Element | null | undefined, active = false, finished = false, frame = 0, ghost: HTMLDivElement | undefined, layer: HTMLDivElement | undefined;
   let hold: ReturnType<typeof setTimeout> | undefined, touchMoved = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function paint() {
     if (!ghost) return;
-    painted = point;
-    ghost.style.transform = `translate3d(${painted.x - grab.x}px,${painted.y - grab.y}px,0) rotate(${reduced ? 0 : 3}deg)`;
     const hit = document.elementFromPoint(point.x, point.y);
-    ghost.classList.toggle('removal-preview', !!gesture.outside?.(hit));
-    gesture.move(point, hit);
-    let scroller = hit?.closest<HTMLElement>('.cell-content,.box-content,.catalog-list,.stock-drop-zone,.dm-console,.sheet-pane');
+    // Read scroll geometry before callbacks change drop highlights or reorder chips.
+    // Keep hit testing while stationary: scrolling and hover-tab changes can move
+    // a new target under the pointer without another pointermove event.
+    let scrollTarget: HTMLElement | undefined, scrollTop = 0;
+    let scroller = hit?.closest<HTMLElement>(scrollableRegions);
     while (scroller) {
       if (scroller.scrollHeight > scroller.clientHeight && /auto|scroll/.test(getComputedStyle(scroller).overflowY)) {
         const bounds = scroller.getBoundingClientRect();
-        if (point.y < bounds.top + 24) scroller.scrollTop -= 7;
-        else if (point.y > bounds.bottom - 24) scroller.scrollTop += 7;
-        break;
+        const delta = point.y < bounds.top + 24 ? -7 : point.y > bounds.bottom - 24 ? 7 : 0;
+        const next = Math.max(0, Math.min(scroller.scrollHeight - scroller.clientHeight, scroller.scrollTop + delta));
+        if (next !== scroller.scrollTop) { scrollTarget = scroller; scrollTop = next; break; }
+        // A saturated inner region must not block the enclosing pane's edge scroll.
       }
-      scroller = scroller.parentElement?.closest<HTMLElement>('.cell-content,.box-content,.catalog-list,.stock-drop-zone,.dm-console,.sheet-pane') || null;
+      scroller = scroller.parentElement?.closest<HTMLElement>(scrollableRegions) || null;
     }
-    frame = requestAnimationFrame(paint);
+    if (!painted || painted.x !== point.x || painted.y !== point.y) {
+      ghost.style.transform = `translate3d(${point.x - grab.x}px,${point.y - grab.y}px,0) rotate(${reduced ? 0 : 3}deg)`;
+    }
+    if (!painted || painted.x !== point.x || painted.y !== point.y || hit !== lastHit || scrollTarget) {
+      ghost.classList.toggle('removal-preview', !!gesture.outside?.(hit));
+      gesture.move(point, hit);
+    }
+    painted = point; lastHit = hit;
+    if (scrollTarget) scrollTarget.scrollTop = scrollTop;
+    if (!finished) frame = requestAnimationFrame(paint);
   }
   function lift() {
     if (finished || active || !source.isConnected) return;
@@ -88,7 +99,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
     clearTimeout(hold);
     document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', cancel);
     document.removeEventListener('touchmove',touchMove,true);document.removeEventListener('pointerdown',extraContact,true);document.removeEventListener('contextmenu',touchMenu,true);document.removeEventListener('scroll',scroll,true);
-    document.removeEventListener('keydown', key); window.removeEventListener('blur', cancel);
+    document.removeEventListener('keydown', key); document.removeEventListener('visibilitychange', visibility); window.removeEventListener('blur', cancel);
     cancelAnimationFrame(frame); cancelActive = undefined; document.body.classList.remove('pointer-dragging');
     if (touchReading && (active || touchMoved)) suppressTouchClick();
     if (!active) return;
@@ -136,6 +147,7 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
   function extraContact(e: PointerEvent) { if (e.pointerId !== event.pointerId) finish(true); }
   function touchMenu(e: MouseEvent) { if (source.contains(e.target as Node) || active) { e.preventDefault(); e.stopImmediatePropagation(); } }
   function scroll() { if (!active) finish(true); }
+  function visibility() { if (document.hidden) finish(true); }
   function key(e: KeyboardEvent) { if (e.key === 'Escape') { e.preventDefault(); cancel(); } }
   cancelActive = cancel;
   if (touchReading) {
@@ -144,6 +156,6 @@ export function pointerDrag(event: ReactPointerEvent, gesture: Gesture) {
     document.addEventListener('contextmenu',touchMenu,true);document.addEventListener('scroll',scroll,true);
   }
   document.addEventListener('pointermove', move, { passive: false }); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', cancel);
-  document.addEventListener('keydown', key); window.addEventListener('blur', cancel);
+  document.addEventListener('keydown', key); document.addEventListener('visibilitychange', visibility); window.addEventListener('blur', cancel);
   return cancel;
 }

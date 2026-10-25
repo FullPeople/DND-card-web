@@ -1,7 +1,7 @@
 import {resolveEntryReference} from '../core/entryReferences';
 import {SpellLearners} from './SpellLearners';
 import { explicitlyExcluded, librarySourceEnabled } from './libraryData';
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { classMatches, entryEdition, editionAllows, type Character, type Entry } from '../core/model';
 import { ContentBoundary, Entries, Inline } from './Entries';
 import { EntryDraggable } from './DragEntry';
@@ -12,7 +12,21 @@ import {EntryReadingExtras} from './EntryReadingExtras';
 import {SubclassComparison} from './SubclassComparison';
 
 type Section = { id: string; name: string; english?: string; level?: number; source?: string; page?: number; body: unknown; depth: number; reference?: Entry; excluded?:boolean; subclassHeading?:boolean; starting?:boolean; training?:boolean };
-export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false,editionFilter='character' }: { editionFilter?:string;subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void }) {
+type LibraryDocumentProps = { editionFilter?:string;subclassesOpen?:boolean; preview?:boolean; highlight?:number; focus?: string; character: Character; entry: Entry; entries: Entry[]; onLink: (reference: string, kind?: string) => void; inspect: (entry: Entry) => void; collapsed: string[]; onCollapse: (ids: string[]) => void };
+const emptyCollapsed:string[]=[];
+
+export function LibraryDocument(props:LibraryDocumentProps) {
+  const current=useRef(props);
+  useLayoutEffect(()=>{current.current=props;});
+  const callbacks=useMemo(()=>({
+    onLink:(reference:string,kind?:string)=>current.current.onLink(reference,kind),
+    inspect:(entry:Entry)=>current.current.inspect(entry),
+    onCollapse:(ids:string[])=>current.current.onCollapse(ids),
+  }),[]);
+  return <MemoLibraryDocument {...props} {...callbacks} collapsed={props.collapsed.length?props.collapsed:emptyCollapsed}/>;
+}
+
+const MemoLibraryDocument=memo(function LibraryDocumentContent({ entry, entries, onLink, inspect, collapsed, onCollapse, focus, character, preview, highlight,subclassesOpen=false,editionFilter='character' }: LibraryDocumentProps) {
   const {registry}=useSources();
   const showSubclasses=subclassesOpen&&['class','subclass'].includes(entry.kind);
   const roots=useMemo(()=>{if(!showSubclasses||entry.kind==='subclass')return [entry];const parent=entry.kind==='class'?entry:entries.find(e=>classMatches(entry,e));return parent?entries.filter(e=>e.kind==='subclass'&&classMatches(e,parent)&&librarySourceEnabled(character,e)&&wikiEditionAllows(e,character,editionFilter)).sort((a,b)=>compareSources(a.source,b.source,registry)||a.name.localeCompare(b.name,'zh')):[entry];},[entry,entries,showSubclasses,registry,character.profile.enabledSources,character.profile.exceptions,character.edition,character.profile.optional.legacy,editionFilter]);
@@ -110,4 +124,4 @@ export function LibraryDocument({ entry, entries, onLink, inspect, collapsed, on
       {!effectiveCollapsed.includes(s.id) && <Entries compact={entry.kind==='feature'||s.reference?.kind==='feature'} value={s.body} onLink={onLink}/>}
     </section>)}<SpellLearners entry={entry} onLink={onLink}/></ContentBoundary></div>
   </div>;
-}
+});

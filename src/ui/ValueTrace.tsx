@@ -1,4 +1,4 @@
-import {createContext,useContext,useLayoutEffect,useRef,useState,type ReactNode,type CSSProperties} from 'react';
+import {createContext,useContext,useLayoutEffect,useMemo,useRef,useState,type ReactNode,type CSSProperties} from 'react';
 import {isActiveSheetTarget} from '../platform/activeSheet';
 import {CloseIcon} from './icons';
 import {createPortal} from 'react-dom';
@@ -32,21 +32,33 @@ export function TraceValue({target,label,value,children}:{target:string;label:st
 function TracePanel({element,model,focusRequest,c,d:current,close}:{element:HTMLElement;model:TraceModel;focusRequest:number;c:Character;d:Derived;close:()=>void}){
  const panel=useRef<HTMLDivElement>(null),field=useRef<HTMLInputElement>(null),[anchor,setAnchor]=useState(()=>element.getBoundingClientRect()),[draft,setDraft]=useState(String(model.value)),cancel=useRef(false),commitRef=useRef(()=>{}),committed=useRef(model.value);
  // Existing field remains the layout anchor; the overlay matches screen dimensions at any A4 zoom.
- useLayoutEffect(()=>{const update=()=>{if(!element.isConnected){close();return;}setAnchor(element.getBoundingClientRect());};const observer=new ResizeObserver(update);observer.observe(element);window.addEventListener('resize',update);window.addEventListener('scroll',update,true);return()=>{observer.disconnect();window.removeEventListener('resize',update);window.removeEventListener('scroll',update,true);};},[element]);
+ useLayoutEffect(()=>{
+  let frame=0;
+  const measure=()=>{frame=0;if(!element.isConnected){close();return;}const next=element.getBoundingClientRect();setAnchor(previous=>previous.x===next.x&&previous.y===next.y&&previous.width===next.width&&previous.height===next.height?previous:next);};
+  const update=()=>{if(!frame)frame=requestAnimationFrame(measure);};
+  const observer=new ResizeObserver(update);observer.observe(element);window.addEventListener('resize',update);window.addEventListener('scroll',update,true);
+  return()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('resize',update);window.removeEventListener('scroll',update,true);};
+ },[element]);
  // An accessibility/programmatic focus request can land on the covered anchor.
  // Return focus to this same editor without remounting or discarding its draft.
  useLayoutEffect(()=>{field.current?.focus({preventScroll:true});field.current?.select();},[element,focusRequest]);
- useLayoutEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){cancel.current=true;close();}};const down=(e:PointerEvent)=>{if(!panel.current?.contains(e.target as Node)&&e.target!==element){commitRef.current();close();}};window.addEventListener('keydown',key);window.addEventListener('pointerdown',down,true);return()=>{window.removeEventListener('keydown',key);window.removeEventListener('pointerdown',down,true);};},[element]);
+ useLayoutEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape'&&!e.defaultPrevented&&!e.isComposing&&e.keyCode!==229){cancel.current=true;close();}};const down=(e:PointerEvent)=>{if(!panel.current?.contains(e.target as Node)&&e.target!==element){commitRef.current();close();}};window.addEventListener('keydown',key);window.addEventListener('pointerdown',down,true);return()=>{window.removeEventListener('keydown',key);window.removeEventListener('pointerdown',down,true);};},[element]);
  const key=Object.entries(labels).find(([,v])=>v===model.title)?.[0] as SheetBonus|undefined;
- let preview=c,d=current;const number=Number(draft),ability=Object.entries(ABILITY_LABELS).find(([,name])=>name===model.title)?.[0] as Ability|undefined;
- if(model.change&&draft.trim()&&Number.isInteger(number)&&Number.isFinite(number)&&number!==model.value){preview=structuredClone(c);const value=Math.max(model.min??-9999,Math.min(model.max??9999,number));
-  if(ability)preview.abilities[ability]=value;else if(key)(preview.sheetBonuses||={})[key]=value;else if(model.title==='法术攻击'||model.title==='法术DC'){preview.spellSettings||=structuredClone(spellState(preview));preview.spellSettings[model.title==='法术攻击'?'attackBonus':'dcBonus']=value;}d=evaluate(preview);
- }
+ const ability=Object.entries(ABILITY_LABELS).find(([,name])=>name===model.title)?.[0] as Ability|undefined;
+ // Scrolling and focus requests only move the editor; they do not change rules.
+ // Incoming character and derived updates still invalidate this live preview.
+ const {preview,d}=useMemo(()=>{
+  const number=Number(draft);
+  if(!model.change||!draft.trim()||!Number.isInteger(number)||!Number.isFinite(number)||number===model.value)return {preview:c,d:current};
+  const preview=structuredClone(c),value=Math.max(model.min??-9999,Math.min(model.max??9999,number));
+  if(ability)preview.abilities[ability]=value;else if(key)(preview.sheetBonuses||={})[key]=value;else if(model.title==='法术攻击'||model.title==='法术DC'){preview.spellSettings||=structuredClone(spellState(preview));preview.spellSettings[model.title==='法术攻击'?'attackBonus':'dcBonus']=value;}
+  return {preview,d:evaluate(preview)};
+ },[c,current,draft,model,ability,key]);
  const fresh=traceForInput({c:preview,d,open:()=>{}},`${model.title}基础值`,Number(draft),model.change||(()=>{}));
  const skill=Object.entries(SKILLS).find(([,s])=>s.name===model.title)?.[0],save=Object.entries(ABILITY_LABELS).find(([,s])=>`${s}豁免`===model.title)?.[0] as Ability|undefined;
  const result=key?(key==='hp'?d.maxHp:d[key]):skill?d.skills[skill].value:save?d.saves[save].value:model.title==='法术攻击'?spellValues(preview,d).attack:model.title==='法术DC'?spellValues(preview,d).dc:fresh?.result??model.result;
  const left=Math.max(8,Math.min(anchor.left-12,innerWidth-286)),top=Math.max(4,anchor.top-40),fieldTop=anchor.top-top;
- const style=getComputedStyle(element);
+ const style=useMemo(()=>{const value=getComputedStyle(element);return {fontSize:value.fontSize,fontWeight:value.fontWeight,textAlign:value.textAlign as CSSProperties['textAlign'],padding:value.padding};},[element,anchor.width,anchor.height]);
  const commit=()=>{const n=Number(draft);if(!cancel.current&&draft.trim()&&Number.isFinite(n)&&Number.isInteger(n)){const value=Math.max(model.min??-9999,Math.min(model.max??9999,n));if(value!==committed.current){committed.current=value;model.change?.(value);}}};
  commitRef.current=commit;
  const tab=(backward:boolean)=>{
@@ -55,5 +67,5 @@ function TracePanel({element,model,focusRequest,c,d:current,close}:{element:HTML
   const targets=[...document.querySelectorAll<HTMLElement>('input:not([disabled]),button:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(target=>isActiveSheetTarget(target)&&!panel.current?.contains(target)&&target.tabIndex>=0&&target.getClientRects().length>0);
   const index=targets.indexOf(element),next=targets[index+(backward?-1:1)];commit();close();next?.focus();
  };
- return createPortal(<div ref={panel} className="value-trace-panel" role="dialog" aria-label={`${model.title}数据追溯`} style={{left,top,width:270}}><header style={{height:Math.max(24,fieldTop-10)}}><strong>{model.title}</strong><button aria-label="关闭数据追溯" onClick={()=>{commit();close();}}><CloseIcon/></button></header><div style={{height:anchor.height,marginLeft:anchor.left-left-14}}><input ref={field} className="trace-field" aria-label={`${model.title}追溯输入`} type="number" readOnly={!model.change} value={draft} style={{width:anchor.width,height:anchor.height,fontSize:style.fontSize,fontWeight:style.fontWeight,textAlign:style.textAlign as CSSProperties["textAlign"],padding:style.padding,boxSizing:'border-box'}} onChange={e=>setDraft(e.target.value)} onBlur={commit} onKeyDown={e=>{if(e.key==='Tab'){e.preventDefault();tab(e.shiftKey);}if(e.key==='Enter'){commit();close();}if(e.key==='Escape')cancel.current=true;}}/></div><ul>{(key?d.trace[key]||[]:fresh?.rows||model.rows).map((row,i)=><li key={i}>{row}</li>)}</ul><div className="trace-result"><span>最终结果</span><strong>{result}</strong></div></div>,document.body);
+ return createPortal(<div ref={panel} className="value-trace-panel" role="dialog" aria-label={`${model.title}数据追溯`} style={{left,top,width:270}}><header style={{height:Math.max(24,fieldTop-10)}}><strong>{model.title}</strong><button aria-label="关闭数据追溯" onClick={()=>{commit();close();}}><CloseIcon/></button></header><div style={{height:anchor.height,marginLeft:anchor.left-left-14}}><input ref={field} className="trace-field" aria-label={`${model.title}追溯输入`} type="number" readOnly={!model.change} value={draft} style={{width:anchor.width,height:anchor.height,...style,boxSizing:'border-box'}} onChange={e=>setDraft(e.target.value)} onBlur={commit} onKeyDown={e=>{if(e.defaultPrevented||e.nativeEvent.isComposing||e.nativeEvent.keyCode===229)return;if(e.key==='Tab'){e.preventDefault();tab(e.shiftKey);}if(e.key==='Enter'){e.preventDefault();commit();close();}if(e.key==='Escape')cancel.current=true;}}/></div><ul>{(key?d.trace[key]||[]:fresh?.rows||model.rows).map((row,i)=><li key={i}>{row}</li>)}</ul><div className="trace-result"><span>最终结果</span><strong>{result}</strong></div></div>,document.body);
 }

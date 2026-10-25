@@ -10,7 +10,7 @@ function rememberShare(ratio:number){try{localStorage.setItem(KEY,String(ratio))
 
 export function WorkspaceSplitter(){
  const {t}=useUiLanguage();
- const ref=useRef<HTMLDivElement>(null),start=useRef<number|undefined>(undefined);
+ const ref=useRef<HTMLDivElement>(null),start=useRef<{ratio:number;pointerId:number;x:number}|undefined>(undefined),frame=useRef(0);
  const [ratio,setRatio]=useState(()=>{try{return savedWorkspaceShare(localStorage.getItem(KEY));}catch{return DEFAULT_SHEET_SHARE;}});
  const [hiddenSide,setHiddenSide]=useState(()=>{try{return savedWorkspaceSide(localStorage.getItem(WORKSPACE_HIDDEN_KEY));}catch{return undefined;}});
  const [resetMount,setResetMount]=useState<HTMLElement|null>(null);
@@ -33,29 +33,40 @@ export function WorkspaceSplitter(){
   else {delete workspace.dataset.hiddenSide;if(tabs)delete tabs.dataset.hiddenSide;}
   try{if(hiddenSide)localStorage.setItem(WORKSPACE_HIDDEN_KEY,hiddenSide);else localStorage.removeItem(WORKSPACE_HIDDEN_KEY);}catch{}
  },[hiddenSide]);
- function cancel(){if(start.current===undefined)return;setRatio(start.current);start.current=undefined;setPreview(undefined);}
+ function cancel(){
+  const gesture=start.current;if(!gesture)return;
+  cancelAnimationFrame(frame.current);frame.current=0;start.current=undefined;
+  setRatio(gesture.ratio);setPreview(undefined);
+  if(ref.current?.hasPointerCapture(gesture.pointerId))ref.current.releasePointerCapture(gesture.pointerId);
+ }
  useEffect(()=>{
   const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&start.current!==undefined){event.preventDefault();cancel();}};
   window.addEventListener('keydown',escape);window.addEventListener('blur',cancel);
-  return()=>{window.removeEventListener('keydown',escape);window.removeEventListener('blur',cancel);};
+  return()=>{cancelAnimationFrame(frame.current);window.removeEventListener('keydown',escape);window.removeEventListener('blur',cancel);};
  },[]);
  function update(x:number){
   const box=ref.current!.parentElement!.getBoundingClientRect(),share=(x-box.left)/box.width;
   const next=Math.max(MIN,Math.min(MAX,share)),side:WorkspaceSide|undefined=share<MIN?'sheet':share>MAX?'wiki':undefined;
   setRatio(next);
-  setPreview(side?{side,left:box.left+(side==='wiki'?next*box.width+8:0),width:side==='sheet'?next*box.width:box.width-next*box.width-8}:undefined);
+  const nextPreview=side?{side,left:box.left+(side==='wiki'?next*box.width+8:0),width:side==='sheet'?next*box.width:box.width-next*box.width-8}:undefined;
+  setPreview(previous=>previous?.side===nextPreview?.side&&previous?.left===nextPreview?.left&&previous?.width===nextPreview?.width?previous:nextPreview);
   return {ratio:next,side};
  }
  return <><div ref={ref} className="workspace-splitter" role="separator" aria-label="调整角色卡与规则资料宽度" title="拖向边缘并松手隐藏该区域，拖回取消" aria-orientation="vertical" aria-valuemin={30} aria-valuemax={70} aria-valuenow={Math.round(ratio*100)} tabIndex={0}
-  onPointerDown={event=>{if(event.button!==0)return;event.preventDefault();start.current=ratio;event.currentTarget.setPointerCapture(event.pointerId);}}
-  onPointerMove={event=>{if(start.current!==undefined)update(event.clientX);}}
+  onPointerDown={event=>{if(!event.isPrimary||event.button!==0||start.current)return;event.preventDefault();start.current={ratio,pointerId:event.pointerId,x:event.clientX};event.currentTarget.setPointerCapture(event.pointerId);}}
+  onPointerMove={event=>{
+   const gesture=start.current;if(!gesture||gesture.pointerId!==event.pointerId)return;
+   gesture.x=event.clientX;
+   if(!frame.current)frame.current=requestAnimationFrame(()=>{frame.current=0;if(start.current)update(start.current.x);});
+  }}
   onPointerUp={event=>{
-   if(start.current===undefined)return;
-   const initial=start.current,result=update(event.clientX);start.current=undefined;setPreview(undefined);
+   const gesture=start.current;if(!gesture||gesture.pointerId!==event.pointerId)return;
+   cancelAnimationFrame(frame.current);frame.current=0;
+   const initial=gesture.ratio,result=update(event.clientX);start.current=undefined;setPreview(undefined);
    if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
    if(result.side){setRatio(initial);setHiddenSide(result.side);}else rememberShare(result.ratio);
   }}
-  onPointerCancel={cancel} onLostPointerCapture={cancel}
+  onPointerCancel={event=>{if(start.current?.pointerId===event.pointerId)cancel();}} onLostPointerCapture={event=>{if(start.current?.pointerId===event.pointerId)cancel();}}
   onKeyDown={event=>{
    if(start.current!==undefined)return;
    if(event.key==='ArrowLeft'||event.key==='ArrowRight'||event.key==='Home'){
