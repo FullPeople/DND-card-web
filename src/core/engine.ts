@@ -93,7 +93,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   }));
   const armor=automationEnabled(c)?evaluateArmor(c,active,modifiers.dex):undefined;
   if(armor)issues.push(...armor.issues);
-  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active):undefined;
+  // A recognized, unreviewed Observant payload is manual in every generic
+  // executor, including the separate prose-based armor pass. Genuine XPHB
+  // entries retain their existing generic route through the identity exception.
+  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry))):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
   const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=infusion.resistanceTrace;
