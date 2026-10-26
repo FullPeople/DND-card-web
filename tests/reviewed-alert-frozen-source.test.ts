@@ -23,7 +23,7 @@ describe.skipIf(!alertDirectory)('exact private frozen Alert source authenticati
  it('authenticates both complete source records and all three PHB clause hashes without publishing their prose',()=>{
   const body=alertFrozenInput('feats.json',evidence.inputs['feats.json']),entries=feats();
   for(const proof of [evidence.feat,evidence.modern]){
-   const raw=body.feat.filter((row:any)=>row.ENG_name==='Alert'&&row.source===proof.reference.split('|')[1]);expect(raw).toHaveLength(1);expect(alertSnapshot(raw[0])).toBe(proof.entryHash);expect(Object.keys(raw[0])).toEqual(proof.rawKeys);
+   const raw=body.feat.filter((row:any)=>row.ENG_name==='Alert'&&row.source===proof.reference.split('|')[1]);expect(raw.length).toBe(1);expect(alertSnapshot(raw[0])).toBe(proof.entryHash);expect(Object.keys(raw[0])).toEqual(proof.rawKeys);
    const entry=entries.find(row=>row.id===proof.entryId)!;expect(entry).toBeDefined();expect(entry.packId).toBe('kiwee');expect(entry.kind).toBe('feat');expect(entry.raw._category).toBe('feat');
   }
   const phb=entries.find(row=>row.id===evidence.feat.entryId)!,modern=entries.find(row=>row.id===evidence.modern.entryId)!;

@@ -25,6 +25,7 @@ it('new actual App cases retain real normalization and all five flows without ra
  expect(locators).toContain('observantFeatOption as alertFeatOption');
  expect(spec).not.toContain('expect(alertSources).toHaveLength(');
  expect(spec).toContain('expect(alertSources.length).toBe(2)');
+ const frozen=readFileSync(new URL('./reviewed-alert-frozen-source.test.ts',import.meta.url),'utf8');expect(frozen).not.toContain('expect(raw).toHaveLength(');expect(frozen).toContain('expect(raw.length).toBe(1)');
  expect(spec).not.toContain('expect(await saved(page)).toEqual(');
  expect(spec).not.toContain('expect(await persisted(page)).toEqual(');
  expect(spec).toContain('await layoutModes(page,info)');

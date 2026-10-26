@@ -19,6 +19,8 @@ on:
       - 'tests/reviewed-skilled*.test.ts'
       - 'tests/reviewed-linguist*.test.ts'
       - 'tests/reviewed-alert*.test.ts'
+      - 'tools/fetchReviewedAlertCorpus.*'
+      - 'tools/reviewedAlertCorpusSources.json'
       - 'tests/e2e/reviewedAlert*.ts'
       - 'tests/e2e/alertControls.spec.ts'
       - 'tests/helpers/frozenReviewedAlertLegacy.ts'
@@ -215,6 +217,18 @@ jobs:
           writeFileSync('.local-evidence/observant-passive-baseline-verification.json',JSON.stringify({verified:true,separateFromCorpus229:true,separateFromReviewedSourceIndex21:true,revision:'e2623b204ddbdf2bcfa8317acfc962de89c676e2',path:'data/book/book-phb.json',bytes:bytes.length,byteSha256,gitBlob,canonicalSha256,entryPath:['data',7,'entries',9,'entries',7],entrySha256,publisherProsePrivate:true},null,2)+'\n');
           console.log('Verified the separate private PHB175 input and node; only hash metadata is an artifact.');
           NODE
+      - name: Materialize all 229 original inputs privately from two immutable mirrors
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/fetchReviewedAlertCorpus.mjs \
+            --report docs/data/automation-runtime-coverage.json \
+            --output .local-evidence/reviewed-alert-full-upstream \
+            --receipt .local-evidence/alert-full-source-verification.json \
+            --cache "$REVIEWED_FEATS_FROZEN_DIR" \
+            --cache "$INFUSION_FROZEN_DIR"
+          printf '%s\n' 'REVIEWED_FEATS_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'PASSIVE_FEAT_TEST_INPUTS=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
       - name: Fetch exact old consumer for charge-preservation verification
         run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
       - name: Fetch ninth-stage consumer for localized-v2 and ring preservation
@@ -258,5 +272,6 @@ jobs:
             .local-evidence/infusion-source-verification.json
             .local-evidence/passive-feat-source-verification.json
             .local-evidence/observant-passive-baseline-verification.json
+            .local-evidence/alert-full-source-verification.json
           if-no-files-found: warn
           retention-days: 7
