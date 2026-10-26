@@ -4,10 +4,10 @@ import {execFileSync} from 'node:child_process';
 import {resolve,dirname,basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseArgs,isDeepStrictEqual} from 'node:util';
-// Exact historical bytes matching the unchanged fixture locks; one pinned request, no fallback.
+// Exact snapshot matching the preserved main-307 fixture locks; one pinned request, no fallback.
 const retrievalUrls=new Map([
- ['https://5e.kiwee.top/data/races.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/aab030c8f691c6ba12c61803dce9c0774f6254eb/data/races.json'],
- ['https://5e.kiwee.top/data/items-base.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/aab030c8f691c6ba12c61803dce9c0774f6254eb/data/items-base.json'],
+ ['https://5e.kiwee.top/data/races.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/races.json'],
+ ['https://5e.kiwee.top/data/items-base.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/items-base.json'],
 ]);
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {values}=parseArgs({options:{directory:{type:'string'},'verify-only':{type:'boolean'}}});

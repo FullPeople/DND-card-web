@@ -83,6 +83,11 @@ test('drop uses release coordinates even when no move event reached that target'
 test('dragging at the responsive card viewport edge scrolls without committing a cancelled drop',async({page},info)=>{
   await page.setViewportSize({width:1512,height:650});await mockSource(page,{displayMode:'screen'});await page.goto('/');
   await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
+  const announcement=page.locator('.announcement[open]');
+  if(await announcement.isVisible()){
+    await announcement.getByRole('button',{name:'我知道了',exact:true}).click();
+    await expect(announcement).toBeHidden();
+  }
   await page.getByRole('switch',{name:'编辑模式'}).click();
   const viewport=page.locator('.sheet-viewport'),source=(await page.locator('.catalog-row').filter({hasText:'测试法师'}).first().boundingBox())!;
   expect(await viewport.evaluate(node=>node.scrollHeight-node.clientHeight)).toBeGreaterThan(40);

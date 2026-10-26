@@ -8,10 +8,10 @@ import {isDeepStrictEqual} from 'node:util';
 
 // Validate only two existing public inputs. No retries, redirects, corpus downloads,
 // or fixture fallback on failed verification. Dynamic upstream drift is not accepted.
-// Exact historical bytes matching the unchanged fixture locks; one pinned request, no fallback.
+// Exact snapshot matching the preserved main-307 fixture locks; one pinned request, no fallback.
 const retrievalUrls=new Map([
- ['https://5e.kiwee.top/data/class/class-fighter.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/aab030c8f691c6ba12c61803dce9c0774f6254eb/data/class/class-fighter.json'],
- ['https://5e.kiwee.top/data/items-base.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/aab030c8f691c6ba12c61803dce9c0774f6254eb/data/items-base.json'],
+ ['https://5e.kiwee.top/data/class/class-fighter.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/class/class-fighter.json'],
+ ['https://5e.kiwee.top/data/items-base.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/items-base.json'],
 ]);
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {values}=parseArgs({options:{directory:{type:'string'},'verify-only':{type:'boolean'}}});
