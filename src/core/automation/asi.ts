@@ -1,3 +1,4 @@
+import {reviewedAlertBindings} from './reviewedAlert';
 import {reviewedObservantBindings} from './reviewedObservant';
 import {reviewedLinguistBindings} from './reviewedLinguist';
 import {reviewedSkilledBindings} from './reviewedSkilled';
@@ -96,7 +97,7 @@ export function preserveLegacyAsiGrants(c:Character):boolean{
  // cannot authorize moving a tree whose ASI ownership version is unsupported.
  if(c.asiAllocations&&c.asiAllocations.version!==1)return false;
  let changed=false;
- const bindings=[...(c.asiAllocations?.version===1?c.asiAllocations.bindings.filter(row=>row.kind==='legacy-class'):[]),...[...reviewedFeatBindings(c),...reviewedSkilledBindings(c),...reviewedLinguistBindings(c),...reviewedObservantBindings(c)].map(row=>({selectionId:row.selectionId,choiceId:row.choiceId,entryId:undefined}))];
+ const bindings=[...(c.asiAllocations?.version===1?c.asiAllocations.bindings.filter(row=>row.kind==='legacy-class'):[]),...[...reviewedFeatBindings(c),...reviewedSkilledBindings(c),...reviewedLinguistBindings(c),...reviewedObservantBindings(c),...reviewedAlertBindings(c)].map(row=>({selectionId:row.selectionId,choiceId:row.choiceId,entryId:undefined}))];
  for(const binding of bindings){
   const root=c.selections.find(row=>row.id===binding.selectionId),owner=root&&c.selections.find(row=>row.id===root.parentId);
   if(!root||!owner||binding.entryId!==undefined&&root.entry.id!==binding.entryId||!legacySourceIdentity(owner,root,binding.choiceId)||owner.level>=root.entry.raw.level)continue;

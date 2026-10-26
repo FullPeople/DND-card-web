@@ -1,3 +1,4 @@
+import {validateReviewedAlert} from './automation/reviewedAlert';
 import {validateReviewedObservant} from './automation/reviewedObservant';
 import {validateReviewedLinguist} from './automation/reviewedLinguist';
 import {validateReviewedSkilled} from './automation/reviewedSkilled';
@@ -142,6 +143,7 @@ export function validateCharacter(value: unknown): Character {
   validateReviewedSkilled(c.reviewedSkilled);
   validateReviewedLinguist(c.reviewedLinguist);
   validateReviewedObservant(c.reviewedObservant);
+  validateReviewedAlert(c.reviewedAlert);
   if(c.classChoiceSnapshots!==undefined){
     assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
     for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){

@@ -1,3 +1,4 @@
+import {reviewedAlertIdentity} from './reviewedFeatIdentity';
 import {planRacialAbilities} from '../racialAbilities';
 import {numericExpression} from '../numericExpression';
 import {type Character,type Selection,type Issue,type RuntimeResource,type Ability} from '../model';
@@ -50,7 +51,7 @@ function tableUses(row:Selection,cls:Selection|undefined,level:number):{max:numb
 function refersToUsesColumn(text:string,column:string){
  return clean(text).split(/[。；]/).some(clause=>/(?:次数|数量)/.test(clause)&&/(?:参见|详见|见|列于|列出)/.test(clause)&&/(?:表|一栏|列)/.test(clause)&&clause.includes(column));
 }
-function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
+function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&!reviewedAlertIdentity(row.entry)&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
 function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();const classes=c.selections.filter(s=>s.entry.kind==='class'&&selectionActive(c,s)),total=classes.reduce((n,s)=>n+s.level,0);return {cls,classes,total,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,total)-1)/4)+(c.sheetBonuses?.proficiency||0)};}
 function formulaText(c:Character,row:Selection,formula:string):string{
  const {cls,classes,total,level,prof}=context(c,row);
@@ -74,6 +75,9 @@ function numericMax(c:Character,row:Selection,value:unknown){if(typeof value==='
 export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues:Issue[]}{
  const grants:ResourceGrant[]=[],issues:Issue[]=[];if(!automationEnabled(c))return {grants,issues};
  for(const row of c.selections){
+  // Reviewed PHB/forged Alert is never an implicit resource or formula grant.
+  // Genuine XPHB keeps its separate preexisting compatibility path.
+  if(reviewedAlertIdentity(row.entry))continue;
   if(!['feature','feat','race','background','class','subclass'].includes(row.entry.kind)||!selectionActive(c,row))continue;
   const raw=row.entry.raw,text=strings(row.entry.entries).join(' '),{cls,level}=context(c,row);
   const explicit=Array.isArray(raw.resources)?raw.resources:plain(raw.resource)?[raw.resource]:plain(raw.uses)?[{...raw.uses,name:row.entry.name,recovery:raw.uses.recovery||raw.uses.per}]:plain(raw.system?.uses)&&raw.system.uses.max!==undefined?[{...raw.system.uses,name:row.entry.name}]:[];

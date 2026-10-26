@@ -41,3 +41,5 @@ export function reviewedSkilledIdentity(entry:Entry):boolean{
 export function reviewedLinguistIdentity(entry:Entry):boolean{return entry.id==='kiwee:feat:phb:linguist::::::'||entry.english==='Linguist'||entry.raw.ENG_name==='Linguist';}
 
 export {reviewedObservantIdentity,reviewedModernObservantRule} from './reviewedObservantSource';
+
+export {reviewedAlertIdentity,reviewedModernAlertRule} from './reviewedAlertSource';

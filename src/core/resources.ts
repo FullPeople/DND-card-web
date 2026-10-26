@@ -1,3 +1,4 @@
+import {reviewedAlertIdentity} from './automation/reviewedFeatIdentity';
 import type {Character} from './model';
 import {syncFeatureResources} from './automation/featureResources';
 import {spellState} from './characterDetails';
@@ -13,9 +14,9 @@ export function syncAutoResources(c:Character,before?:Character){
  const protectedSlots=new Set(Object.entries(resources).filter(([id,pool])=>/^(?:spell|pact)-slot:[1-9]$/.test(id)&&(pool.automatic!==true||pool.locked===true)).map(([id])=>id));
  if(before)for(const [level,slot] of Object.entries(c.spellSettings?.slots||{})){if(!protectedSlots.has(`spell-slot:${level}`)&&slot.used!==before.spellSettings?.slots[level]?.used&&resources[`spell-slot:${level}`])resources[`spell-slot:${level}`].current=Math.max(0,slot.max-slot.used);}
  function ensure(id:string,name:string,max:number,initial=max){needed.add(id);if(protectedSlots.has(id))return;const old=resources[id];const used=old?Math.max(0,old.max-old.current):max-initial;resources[id]={...old,name,max,current:Math.max(0,max-used),type:old?.type||'count',icon:old?.icon||'gem',automatic:true};}
- const classes=c.selections.filter(s=>s.entry.kind==='class'),dice:Record<string,number>={};let caster=0,pact=0;
+ const classes=c.selections.filter(s=>s.entry.kind==='class'&&!reviewedAlertIdentity(s.entry)),dice:Record<string,number>={};let caster=0,pact=0;
  for(const cls of classes){const raw=cls.entry.raw,faces=Number(raw.hd?.faces||(classes.length===1?c.externalSnapshot?.core_stats?.hit_dice?.die_size:0));if(faces>0)dice[faces]=(dice[faces]||0)+cls.level;
-  const sub=c.selections.find(s=>s.entry.kind==='subclass'&&parentClass(c,s)?.id===cls.id),progression=sub?.entry.raw.casterProgression||raw.casterProgression;
+  const sub=c.selections.find(s=>s.entry.kind==='subclass'&&!reviewedAlertIdentity(s.entry)&&parentClass(c,s)?.id===cls.id),progression=sub?.entry.raw.casterProgression||raw.casterProgression;
   if(progression==='full')caster+=cls.level;
   else if(progression==='1/2'||progression==='half')caster+=classes.length===1||c.edition==='2024'?Math.ceil(cls.level/2):Math.floor(cls.level/2);
   else if(progression==='artificer')caster+=Math.ceil(cls.level/2);
@@ -25,8 +26,8 @@ export function syncAutoResources(c:Character,before?:Character){
  for(const [faces,max] of Object.entries(dice))ensure(`hit-die:${faces}`,`生命骰 d${faces}`,max,Math.min(max,c.externalSnapshot?.core_stats?.hit_dice?.current??max));
  let slots=fullSlots[Math.min(20,caster)]||[];
  // Single-class source tables take precedence over multiclass arithmetic.
- if(classes.length===1){const cls=classes[0],sub=c.selections.find(s=>s.entry.kind==='subclass'&&parentClass(c,s)?.id===cls.id);for(const group of [...(cls.entry.raw.classTableGroups||[]),...(sub?.entry.raw.subclassTableGroups||[])]){const row=group.rowsSpellProgression?.[cls.level-1];if(Array.isArray(row)&&row.every((n:any)=>typeof n==='number'))slots=row;}}
- const hasCasting=(card:Character)=>card.selections.some(s=>['class','subclass'].includes(s.entry.kind)&&(s.entry.raw.casterProgression||[...(s.entry.raw.classTableGroups||[]),...(s.entry.raw.subclassTableGroups||[])].some(group=>group.rowsSpellProgression)));
+ if(classes.length===1){const cls=classes[0],sub=c.selections.find(s=>s.entry.kind==='subclass'&&!reviewedAlertIdentity(s.entry)&&parentClass(c,s)?.id===cls.id);for(const group of [...(cls.entry.raw.classTableGroups||[]),...(sub?.entry.raw.subclassTableGroups||[])]){const row=group.rowsSpellProgression?.[cls.level-1];if(Array.isArray(row)&&row.every((n:any)=>typeof n==='number'))slots=row;}}
+ const hasCasting=(card:Character)=>card.selections.some(s=>['class','subclass'].includes(s.entry.kind)&&!reviewedAlertIdentity(s.entry)&&(s.entry.raw.casterProgression||[...(s.entry.raw.classTableGroups||[]),...(s.entry.raw.subclassTableGroups||[])].some(group=>group.rowsSpellProgression)));
  const automaticSlots=hasCasting(c)||!!before&&hasCasting(before);
  if((slots.some(n=>n>0)||pact)&&!c.spellSettings){c.spellSettings=structuredClone(spellState(c));for(const id of protectedSlots)if(id.startsWith('spell-slot:'))delete c.spellSettings.slots[id.split(':')[1]];}
  const knownSlots=c.spellSettings?.slots||{};

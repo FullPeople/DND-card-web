@@ -1,6 +1,7 @@
+import {evaluateReviewedAlert} from './automation/reviewedAlert';
 import {reviewedObservantHasRetainedBinding} from './automation/reviewedObservant';
 import {evaluateReviewedSkilled} from './automation/reviewedSkilled';
-import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity,reviewedObservantIdentity} from './automation/reviewedFeatIdentity';
+import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity,reviewedObservantIdentity,reviewedAlertIdentity} from './automation/reviewedFeatIdentity';
 import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
@@ -47,6 +48,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Preserve the existing unsupported-choice notice, including for XPHB,
     // but never let a manual/edited Weapon Master raw or effects field bypass
     // the separate explicitly owned PHB training/ability grant.
+    if(reviewedAlertIdentity(e)){issues.push({id:`reviewed-alert-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工警觉条目与旧答案保留；只有真实职业属性提升位置另行确认先攻 +5 未计入手工数值后才生效。突袭、未见攻击者、状态与掷骰顺序仍手工。'});continue;}
     if(reviewedObservantIdentity(e)){issues.push({id:`reviewed-observant-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工观察力与旧答案保留；此历史机制不属于本批受审。真实职业属性提升须另行确认属性与两项被动值未计入手工数值；唇读和情境优势／劣势仍手工。'});continue;}
     if(reviewedLinguistIdentity(e)){issues.push({id:`reviewed-linguist-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工语言学家条目与旧手工语言答案保留；旧机制不属于本批受审。固定智力和三语言只支持真实职业属性提升位置另行确认；密码、解码与教学仍手工。'});continue;}
     if(reviewedSkilledIdentity(e)){issues.push({id:`reviewed-skilled-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工熟习条目保留。本批只支持真实职业属性提升位置中另行确认的三项技能或工具熟练；此条目不自动授予效果。'});continue;}
@@ -96,7 +98,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   // A recognized, unreviewed Observant payload is manual in every generic
   // executor, including the separate prose-based armor pass. Genuine XPHB
   // entries retain their existing generic route through the identity exception.
-  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry))):undefined;
+  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry)&&!reviewedAlertIdentity(row.entry))):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
   const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=infusion.resistanceTrace;
@@ -107,8 +109,9 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
   trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
-  let initiative = modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value + observant.passivePerceptionBonus;
-  trace.initiative=[`敏捷调整值 ${modifiers.dex}`,...(c.jackOfAllTrades&&c.edition==='2014'?[`万事通 +${Math.floor(proficiency/2)}`]:[])];
+  const alert=evaluateReviewedAlert(c,active);issues.push(...alert.issues);
+  let initiative = alert.initiativeBonus + modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value + observant.passivePerceptionBonus;
+  trace.initiative=[`敏捷调整值 ${modifiers.dex}`,...(c.jackOfAllTrades&&c.edition==='2014'?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...alert.trace];
   trace.passive=[`基础 10 + 察觉 ${skills.perception.value}`,...observant.passivePerceptionTrace];
   for (const adjustment of c.adjustments || []) {
     if (!adjustment.reason.trim()) continue;
@@ -130,6 +133,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const passiveInvestigation=Number.isFinite(skills.investigation.value)&&reviewedObservantHasRetainedBinding(c)?10+skills.investigation.value+observant.passiveInvestigationBonus:undefined;
   if(passiveInvestigation!==undefined)trace.passiveInvestigation=[`基础 10 + 调查最终检定 ${skills.investigation.value}`,...observant.passiveInvestigationTrace,...(observant.passiveInvestigationBonus?[]:['观察力确认保留但当前暂停；此处仅显示自然被动调查，未授予 +5。']),'唇读与情境优势／劣势仍需手工裁定。'];
   if((c.adjustments||[]).some(a=>a.target==='passive'&&a.reason.trim())&&observant.passivePerceptionBonus){trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}；自然被动察觉 ${10+skills.perception.value+observant.passivePerceptionBonus}`;trace.passive.push('人工最终被动察觉覆盖自然结果（含观察力 +5）；不会再次叠加该加值，也不取消独立的被动调查与属性分量。');}
+  if(alert.initiativeBonus&&(c.adjustments||[]).some(a=>a.target==='initiative'&&a.reason.trim()))trace.initiative.push('人工最终先攻覆盖自然结果（含警觉 +5）；不会再次叠加该加值，卡面独立调整仍在覆盖之后叠加。');
   ac += c.sheetBonuses?.ac || 0;
   initiative += c.sheetBonuses?.initiative || 0;
   speed += c.sheetBonuses?.speed || 0;

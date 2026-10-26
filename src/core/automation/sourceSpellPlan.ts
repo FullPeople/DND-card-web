@@ -1,3 +1,4 @@
+import {reviewedAlertIdentity} from './reviewedFeatIdentity';
 import {evaluate} from '../engine';
 import {learnedInvocationRule,invocationSpellMatches,invocationCandidate} from './invocations';
 import {sourceOwnerIdentity} from './sourceSpellState';
@@ -19,10 +20,14 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  const grants:SourceSpellPlan[]=[],issues:Issue[]=[],choices:SourceSpellChoice[]=[];
  let resourceGrants:ReturnType<typeof planFeatureResources>['grants']|undefined;
  if(!supportedAutomation(c))return {grants,issues,choices};
- const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
+ const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'&&!reviewedAlertIdentity(s.entry)),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
  // Saved snapshots win over a newly downloaded edition/revision of the same entry.
  const known=[...new Map([...c.selections.map(s=>s.entry),...catalog].map(e=>[e.id,e] as const).reverse()).values()].filter(e=>e.kind==='spell');
  for(const owner of c.selections.filter(s=>s.entry.kind!=='spell'&&s.entry.raw.additionalSpells!=null)){
+  // Alert's authenticated PHB adapter grants only initiative; edited family
+  // copies cannot bypass it through generic additionalSpells or use pools.
+  // The genuine XPHB compatibility exception retains its original route.
+  if(reviewedAlertIdentity(owner.entry))continue;
   const issue=(path:string,message:string)=>{const id=`source-spell:${owner.id}:${path}:${message}`;if(!issues.some(i=>i.id===id))issues.push({id,selectionId:owner.id,severity:'warning',message:`${owner.entry.name}：${message}`});};
   if(owner.entry.kind==='item'){issue('item','物品赠送施法与充能尚未接入，请按原文记录。');continue;}
   const reviewedInvocation=learnedInvocationRule(c,owner);
@@ -35,6 +40,9 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   const index=selectedSet!,block=blocks[index],blockKey=`${owner.id}:${index}`;
   let cls=owner.entry.kind==='class'?owner:parentClass(c,owner),parent=owner;const seen=new Set<string>();
   while(!cls&&parent.parentId&&!seen.has(parent.id)){seen.add(parent.id);const next=c.selections.find(s=>s.id===parent.parentId);if(!next)break;parent=next;cls=parent.entry.kind==='class'?parent:parentClass(c,parent);}
+  // Implicit raw class metadata is not permission to borrow a forged Alert's
+  // level. Other real-class metadata resolution retains its existing route.
+  if(cls&&reviewedAlertIdentity(cls.entry))continue;
   let ability:Ability|undefined=ABILITIES.includes(block.ability)?block.ability:undefined;
   if(object(block.ability)&&Array.isArray(block.ability.choose)){
    const options=block.ability.choose.filter((a:any)=>ABILITIES.includes(a)) as Ability[];choices.push({ownerId:owner.id,key:blockKey,label:owner.entry.name+'的施法属性',abilities:options});

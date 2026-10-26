@@ -1,3 +1,4 @@
+import {reviewedAlertIdentity} from './reviewedFeatIdentity';
 import {classMatches,type Character,type Selection,type ClassPoolMetadata,type SpecialSpell} from '../model';
 import {activeSelections} from './active';
 import {sourceOwnerIdentity} from './sourceSpellState';
@@ -49,7 +50,7 @@ export function planClassResourcePools(c:Character,featureGrants:ResourceGrant[]
  const active=new Set(activeSelections(c).map(row=>row.id)),requested=new Map<string,{cls:Selection;column:string}>();
  const request=(cls:Selection,column:string)=>requested.set(classPoolKey(c,cls,column),{cls,column});
  for(const owner of c.selections){
-  if(!active.has(owner.id)||owner.entry.kind==='item')continue;
+  if(reviewedAlertIdentity(owner.entry)||!active.has(owner.id)||owner.entry.kind==='item')continue;
   const cls=resourceClass(c,owner),blocks=owner.entry.raw.additionalSpells;if(!cls||!active.has(cls.id)||!Array.isArray(blocks))continue;
   const index=blocks.length===1?0:c.automation?.spellSets?.[owner.id],block=Number.isInteger(index)?blocks[index!]:undefined;
   if(!object(block)||Object.keys(block).some(key=>!['name','ENG_name','ability','known','prepared','innate','expanded','resourceName'].includes(key))||typeof block.resourceName!=='string'||!block.resourceName.trim()||block.resourceName.length>160)continue;
@@ -72,7 +73,9 @@ export function planClassResourcePools(c:Character,featureGrants:ResourceGrant[]
 }
 
 export function sourceResourcePool(c:Character,owner:Selection,index:number,name:string,grants:ResourceGrant[]):{grant?:ResourceGrant;key:string;columns:ResourceColumn[];reason?:string}{
- const cls=resourceClass(c,owner),key=sourceResourceBindingKey(c,owner,index,name),columns=cls?resourceColumns(cls):[];
+ const key=sourceResourceBindingKey(c,owner,index,name);
+ if(reviewedAlertIdentity(owner.entry))return {key,columns:[],reason:'警觉的本批规则不授予法术或来源施法资源；原记录保留。'};
+ const cls=resourceClass(c,owner),columns=cls?resourceColumns(cls):[];
  if(!cls||!activeSelections(c).some(row=>row.id===cls.id))return {key,columns,reason:'资源缺少唯一且已启用的所属职业。'};
  const chosen=c.automation?.spellResourceColumns?.[key];
  const matches=grants.filter(grant=>owns(c,grant,cls)&&(chosen!==undefined?grant.classPool?.label===chosen:same(label(grant.name),label(name))));

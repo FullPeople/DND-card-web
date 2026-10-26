@@ -1,3 +1,4 @@
+import {reviewedAlertIdentity} from './automation/reviewedAlertSource';
 import type {CardComponent,CardPalette} from './palette';
 export type Edition = '2014' | '2024';
 export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule' | 'monster';
@@ -34,6 +35,7 @@ export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:numb
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
   asiAllocations?:import('./automation/asi').AsiAllocationState;
+  reviewedAlert?:import('./automation/reviewedAlert').ReviewedAlertState;
   reviewedObservant?:import('./automation/reviewedObservant').ReviewedObservantState;
   reviewedLinguist?:import('./automation/reviewedLinguist').ReviewedLinguistState;
   reviewedSkilled?:import('./automation/reviewedSkilled').ReviewedSkilledState;
@@ -123,6 +125,9 @@ export function editionAllows(e:Entry,edition:Edition,legacy=false){const requir
 /** Saved sources keep their declared mechanics when the card edition changes.
  * Availability, dependencies and explicit opt-outs still govern their effects. */
 export function selectionEffectsAllowed(c: Character, e: Entry): boolean {
+  // A known Alert identity cannot impersonate a class/race/other executor,
+  // even through a retained exception. Genuine feat availability is unchanged.
+  if(e.kind!=='feat'&&reviewedAlertIdentity(e))return false;
   if (c.profile.disabledEntries?.includes(e.id)) return false;
   if (c.profile.exceptions[e.id]?.trim()) return true;
   // Unmapped external card records have no publisher source to enable. Keep
