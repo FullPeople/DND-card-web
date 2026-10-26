@@ -1,3 +1,29 @@
+# 2026-10-26 · Observant exact-source pairing — draft, not merged or deployed
+
+This independent candidate is stacked on Linguist Web `0478305fb20ddc9b65538fc50d5740d622c1589c` / Data `af9334b7eb271d39a29c81d943c7156018920a27`, not unrelated current main. Product source is Web `a340189f98c1dcfb3cf726d1e848a36eb4052a5e`, source tree `ae3ae366ea3e70d096426410b5badc711164353e`; source-proof/replay producer is Data `3a5b8ec12d11692cf375f12de1c4f141a008414f`.
+
+## Source-bound evidence and paired report
+
+Clean-source proofs passed **Observant262 /Linguist692 /Skilled271 /Weapon209 /Armor503 /Passive235**, zero failures/skips. The Observant proof constructs the real229-input29,505-entry App directory, checks68 authentic class-ASI identities and the actual old0478 boundary, and binds the separately pinned PHB175 passive baseline and committed layout CSS. No book/source prose is distributed.
+
+The **sole** complete replay finished `2026-10-26T05:36:23.058Z`: **208 module gates**, retaining all200 previous paths;229 unchanged inputs,18,789 identities,4,561 reviewed,6,534 partial witnesses,522 unavailable,0 unresolved; **zero record/review/witness changes**. No generic witness was added merely to advertise new support. Data [draft PR77](https://github.com/FullPeople/dnd5e-automation-data/pull/77), exact `9fda6dcc75d5187d3cede212911f808236eb89dd`, commits the identical report bytes. SHA256 `9a07d4498bf4fa933dd3b5e0a17b4ea3b80279b1cc983c8c73a4d37e5a2c95cb`; Git blob `b90f6bd65910bb5db6608cc5adfa5077d1303f4e`.
+
+The first official audit exposed a forged snapshot key/entry-ID mismatch that incorrectly displayed baseline Investigation14 with inactive bonuses. Three red regressions now pass. A subsequent audit exposed a recognized forged nonarray-effects payload reaching generic armor execution; four red regressions now pass. Both original failures are retained, with strict assertions unchanged. The resulting targeted core/source/old-client/UI group passed285/285, compiler clean; adjacent armor17 passed/1 existing conditional skip. True XPHB existing behavior, aliases, suspended intent, manual values and resources remain protected.
+
+Post-pairing full local Web passed **4699 tests /153 existing conditional skips /0 failures**; the original17 stale-ledger failures were resolved by actual committed-report pairing, not waived. The required authored progress subset passed355/20 conditional skips (overlapping the full suite, not additional passes). Compiler, ordinary/standalone/formal card+library builds, startup boundary and strict runtime/report provenance checks passed. The old rule-export provenance check initially lacked historical52dd locally; exact API-returned Git commit/tree/blob identities were recovered without changing its lock, and the unchanged strict check then passed. This did not replay the original review chain.
+
+Final exact-head aggregate checks and **124 actual App cases (62 desktop +62 narrow)** are separately reported in the PR technical summary. Source/API proof, static discovery and local CSS arithmetic do not substitute for actual screen/A4/print/restore geometry, persistence or exact-head browser acceptance. Conditional skips are not passes. The historical17 old-ledger failures below are not waived; pairing the completed source-bound report is required before aggregate acceptance.
+
+## Known limits retained
+
+Support is bounded to genuine reviewed PHB2014 legacy class-ASI consent: explicit INT/WIS+1 cap20 and two independent passive5 bonuses. Active checks/proficiency are not granted by passive bonuses. Existing manual absolute Perception totals and its sheet offset keep their ownership; Investigation remains independent and read-only, without a new saved override or external bridge protocol. Lip-reading, language/visibility conditions and situational advantage/disadvantage remain manual.
+
+Actual old0478 opaque retention is **not safe editing**: clear/reselect or manual edits may preserve stale consent, and downgrade can lose owned identity; withdraw/review/reconfirm on a supporting client. Partial witnesses are not whole-rule or production/account acceptance. No merge, deployment, server change or other-owner mainline adoption is claimed.
+
+---
+
+The following initial authoring/pre-freeze notes are historical, not the latest source/replay checkpoint.
+
 # PHB2014 Observant bounded candidate, not published
 
 Independent branch `codex/cloud-reviewed-observant-20261025` starts at Web `0478305fb20ddc9b65538fc50d5740d622c1589c` / Data `af9334b7eb271d39a29c81d943c7156018920a27`, not unrelated current main. No merge, deployment, server/account change or user-computer work.
