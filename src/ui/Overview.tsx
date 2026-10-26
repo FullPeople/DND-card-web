@@ -15,6 +15,10 @@ import {useSheetRenderMode} from './sheetDisplay';
 import {TraceValue} from './ValueTrace';
 import {selectionActive} from '../core/automation/choices';
 import {classMatches} from '../core/model';
+import {effectiveTrainingDeclarations} from '../core/automation/training';
+import {appendReviewedSkilledTools} from './skilledToolDisplay';
+import {appendReviewedLinguistLanguages,sourceQualifiedLinguistLanguage} from './linguistLanguageDisplay';
+import {reviewedSkilledIdentity,reviewedLinguistIdentity} from '../core/automation/reviewedFeatIdentity';
 import {trainingDisplayText} from './trainingReferences';
 import {spellIsReady} from '../core/spellWorkspace';
 import {spellState} from '../core/characterDetails';
@@ -96,16 +100,20 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const activeTraining=c.selections.filter(s=>selectionActive(c,s)&&(!s.grantKey?.startsWith('choice:')||c.automation?.enabled));
   return [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
-    const values = activeTraining.flatMap(s => {
+    let values = key==='armor'||key==='weapons'?effectiveTrainingDeclarations(c,activeTraining,key):activeTraining.flatMap(s => {
+      if(reviewedSkilledIdentity(s.entry)||reviewedLinguistIdentity(s.entry))return [];
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
-      return [...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
+      const declared=[...fixed, ...(Array.isArray(extra) ? extra.flatMap(v => Object.entries(v || {}).filter(([k, val]) => val === true && k !== 'choose').map(([k]) => k)) : [])];
+      return key==='languages'?declared.map(value=>sourceQualifiedLinguistLanguage(value,s.entry.source,catalog)):declared;
     });
-    values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.flatMap(v=>{const option=r.options.find(o=>o.value===v);return key==='tools'?(option&&!option.unavailable?[option.label]:[]):[option?.label||v];})));
+    values.push(...choices.filter(r=>!r.restricted&&r.channel===key).flatMap(r=>r.selected.flatMap(v=>{const option=r.options.find(o=>o.value===v);return key==='tools'?(option&&!option.unavailable?[option.label]:[]):key==='languages'&&option?.entry.raw._category==='language'?[`{@language ${option.entry.english}|${option.entry.source}|${option.entry.name}}`]:[option?.label||v];})));
+    if(key==='tools')values=appendReviewedSkilledTools(c,values);
+    if(key==='languages')values=appendReviewedLinguistLanguages(c,values);
     return { key, label, values: [...new Set<string>(values.map(v => names[v] || trainingDisplayText(v,c.edition==='2024'?'XPHB':'PHB',key,trainingNames.get(v.toLowerCase())||[])))] };
   });
-  },[c,choices,trainingNames]);
+  },[c,choices,trainingNames,catalog]);
     const identity = <div className="identity-main overview-identity">
         <SheetCell label="角色名" className="identity-name">{!editing&&inWorkbench?<button className="assign-token-name" onClick={()=>void workbenchRequest('assignName',{name:c.name}).catch(e=>window.dispatchEvent(new CustomEvent('workbench-error',{detail:String(e)})))}>{c.name}</button>:screen?<AutoSheetName value={c.name} readOnly={!editing} change={value=>edit(displayCharacterEdit('name',value),'name')}/>:<input aria-label="角色姓名" readOnly={!editing} value={c.name} onChange={e => edit(displayCharacterEdit('name',e.target.value), 'name')}/>}<input aria-label="玩家姓名" readOnly={!editing} placeholder="玩家姓名" value={c.player} onChange={e => edit(displayCharacterEdit('player',e.target.value), 'player')}/></SheetCell>
         {identityCell('background', '背景')}{identityCell('class', multi ? '职业与子职' : '职业')}{identityCell('race', '种族')}{!multi && identityCell('subclass', '子职')}
@@ -120,7 +128,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
       </div>;
   const death = <SheetCell label="死亡豁免" className="death-saves-cell"><div className="death-saves">{(['success', 'failure'] as const).map(key => <div key={key}><span>{key === 'success' ? '成功' : '失败'}</span>{[1, 2, 3].map(n => <input key={n} type="checkbox" aria-label={`死亡豁免${key === 'success' ? '成功' : '失败'}${n}`} checked={(c.runtime.deathSaves?.[key] || 0) >= n} onChange={() => edit(draft => { const saves = draft.runtime.deathSaves ||= { success: 0, failure: 0 }; saves[key] = saves[key] >= n ? n - 1 : n; })}/>)}</div>)}</div></SheetCell>;
   const proficiency = <SheetCell label="熟练加值" className="proficiency-cell" hint={d.trace.proficiency.join('；')}><AdjustedValue c={c} value={d.proficiency} target="proficiency" label="熟练加值" sign edit={edit}/></SheetCell>;
-  const trainingCell = <SheetCell label="装备训练与其他熟练" className="training-cell" training dropKinds={['rule', 'item', 'feature']} wholePaper accepts={entry => !!trainingCategory(entry)} allowExisting onReceive={entry => receiveTraining(entry,trainingCategory(entry)!)} onHeadingClick={editing ? () => setTrainingEditor(v => !v) : undefined} headingActionLabel="编辑装备训练与其他熟练" headingExpanded={editing && trainingEditor}><dl>{training.map(t => <DropZone key={t.key} className="training-row" training kinds={['item','rule','feature']} accepts={entry=>trainingCategory(entry)===t.key} allowExisting onReceive={entry=>receiveTraining(entry,t.key)}><dt>{t.label}</dt><dd><TrainingChips group={t.key} source={c.edition==='2024'?'XPHB':'PHB'} editAll={trainingEditor} label={t.label} value={c.training?.[t.key] ?? t.values.join('、')} onChange={value => edit(draft => { (draft.training ||= {})[t.key] = value; })}/></dd></DropZone>)}</dl></SheetCell>;
+  const trainingCell = <SheetCell label="装备训练与其他熟练" className="training-cell" training dropKinds={['rule', 'item', 'feature']} wholePaper accepts={entry => !!trainingCategory(entry)} allowExisting onReceive={entry => receiveTraining(entry,trainingCategory(entry)!)} onHeadingClick={editing ? () => setTrainingEditor(v => !v) : undefined} headingActionLabel="编辑装备训练与其他熟练" headingExpanded={editing && trainingEditor}><dl>{training.map(t => <DropZone key={t.key} className="training-row" training kinds={['item','rule','feature']} accepts={entry=>trainingCategory(entry)===t.key} allowExisting onReceive={entry=>receiveTraining(entry,t.key)}><dt>{t.label}</dt><dd><TrainingChips key={`${c.id}:${t.key}`} group={t.key} source={c.edition==='2024'?'XPHB':'PHB'} editAll={trainingEditor} label={t.label} value={c.training?.[t.key] ?? t.values.join('、')} onChange={value => edit(draft => { (draft.training ||= {})[t.key] = value; })}/></dd></DropZone>)}</dl></SheetCell>;
   const initiative = <SheetCell label="先攻" className="initiative-cell"><AdjustedValue c={c} value={d.initiative} target="initiative" label="先攻" sign edit={edit}/></SheetCell>;
   const speed = <SheetCell label="速度" className="speed-cell"><AdjustedValue c={c} value={d.speed} target="speed" label="速度" unit="尺" edit={edit}/></SheetCell>;
   const sizeCell = <SheetCell label="体型" className="size-cell" dropKinds={['rule']} accepts={entry => entry.raw._category === 'size'} onReceive={entry => edit(draft => { draft.size = entry.raw.size; })} dashed missing={!sizeCode} onFill={() => browse('size')} onHeadingClick={() => { if (sizeInfo) inspect(sizeInfo); }}>
@@ -130,7 +138,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const quickbar = <SheetCell label="快捷栏" className="quickbar-cell" missing={!pins.length} onHeadingClick={openResources} headingActionLabel="打开快捷栏编辑器">
             <DropZone referenceOnly onReceive={pinDrop} className="quickbar-copy-zone"><Quickbar c={c} d={d} edit={edit} inspect={inspect} manage={openResources} manageQuickbar={openQuickbar}/></DropZone>
         </SheetCell>;
-  const heritageCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>row.entry.kind==='background')} receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}><ClassChoiceRecords c={c} catalog={catalog} mode="feat"/></FeaturePanel>;
+  const heritageCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>row.entry.kind==='background')} receive={entry => addEntry(entry, 'heritage')} c={c} rows={heritage} edit={edit} browse={() => browse('feat')} onLink={onLink} label="背景与专长" className="heritage-features" kinds={['feat', 'feature', 'rule']}><ClassChoiceRecords c={c} catalog={catalog} mode="feat" edit={edit}/></FeaturePanel>;
   const featuresCell = <FeaturePanel catalog={catalog} owners={c.selections.filter(row=>['class','subclass','race'].includes(row.entry.kind))} receive={entry => addEntry(entry, 'features')} c={c} rows={classFeatures} edit={edit} browse={() => browse('feature')} onLink={onLink}/>;
   const spellsHidden=c.overviewSpellsHidden===true;
   const spellCell = spellsHidden&&!editing?null:contentCell(spells.mode==='prepared'?'已预备法术':'法术', readySpells, ['spell'], `overview-spells spells-box ${spellsHidden?'overview-spells-hidden':''}`,editing?<button type="button" className="overview-spells-visibility" aria-label="隐藏主要页法术框" aria-pressed={spellsHidden} title={spellsHidden?'退出编辑后隐藏法术框':'隐藏主要页法术框'} onKeyDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();edit(displayCharacterEdit('overviewSpellsHidden',!spellsHidden));}}><VisibilityEye hidden={spellsHidden}/></button>:undefined);

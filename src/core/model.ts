@@ -25,14 +25,20 @@ export interface Entry {
 }
 export interface SourceEquipmentReceipt { received:string[]; choices:Record<string,string>; itemIds:string[]; ownerIds:string[]; completed:boolean }
 export interface Selection { catalogReview?:{edition:Edition;entryId:string;source:string;kind:Kind}; id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; weaponAbility?:Ability; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
-export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;resourceName?:string;resourceCost?:number;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check'|'resource';castLevel?:number}}
+export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;resourceName?:string;resourceCost?:number;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check'|'resource'|'invocation-pact';castLevel?:number}}
 export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; classSpells?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface ClassPoolMetadata {entryId:string;label:string}
-export interface RuntimeResource {current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string;classPool?:ClassPoolMetadata}}
+export interface RuntimeResource {sourceSpellGrant?:{usageKey:string};current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string;classPool?:ClassPoolMetadata}}
 export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number}
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
+  asiAllocations?:import('./automation/asi').AsiAllocationState;
+  reviewedLinguist?:import('./automation/reviewedLinguist').ReviewedLinguistState;
+  reviewedSkilled?:import('./automation/reviewedSkilled').ReviewedSkilledState;
+  reviewedWeaponMaster?:import('./automation/reviewedFeats').ReviewedWeaponMasterState;
+  reviewedFeats?:import('./automation/reviewedFeats').ReviewedFeatState;
+  infusions?:import('./automation/infusions').InfusionState;
   automation?:import('./automation/state').AutomationState;
   /** Legacy score-ownership marker retained for backup compatibility. */
   racialAbilityMode?:'separate-v1';
@@ -56,10 +62,10 @@ export interface Character {
   inventory?: {sourceEquipment?:Record<string,SourceEquipmentReceipt>;capacityAdjustment?:string;displayEquipment?:string[];displayAttunement?:string[];positions?:Record<string,number>;view:'grid'|'list';order:string[];attunementLimit:number;coins:Record<'cp'|'sp'|'ep'|'gp'|'pp',number>;grantedCoins?:Record<string,number>};
   backgroundChoices?: Record<string,{abilities?:Partial<Record<Ability,number>>;equipment?:Record<string,string>}>;
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
-  /** Saved choice display snapshots; these never enter the effect evaluator. */
+  /** Saved choice snapshots. Reviewed explicit intents authenticate their source; snapshots alone never authorize effects. */
   classChoiceSnapshots?: Record<string,Entry>;
   /** Inactive class-grant trees retain identities, manual children and references. */
-  classChoiceArchive?: Record<string,{choiceId:string;parent?:Selection;selections:Selection[]}>;
+  classChoiceArchive?: Record<string,{choiceId:string;kind?:'legacy-asi';parent?:Selection;selections:Selection[]}>;
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};
   profile: RuleProfile; notes: string;
   rulePacks?: RulePack[];
@@ -81,7 +87,7 @@ export interface Character {
   /** Evidence retained when the user explicitly resolves a legacy AC override. */
   armorAdjustmentHistory?: {version:1;action:'restore'|'convert';records:{id:string;target:'ac'|string;value:number;reason:string}[];previousBonus:number;previousTotal:number;ruleTotal:number;resultingBonus:number}[];
   externalSnapshot?: Raw;
-  runtime: { rests?:import('./automation/rest').RestState; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
+  runtime: { refuelingRing?:import('./automation/refuelingRing').RefuelingRingState; infusionCharges?:import('./automation/infusionCharges').InfusionChargeState; rests?:import('./automation/rest').RestState; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
 }
 export interface RulePack { schemaVersion: 1; id: string; name: string; version: string; author?: string; editions: Edition[]; requires: { id: string; version: string }[]; conflicts: string[]; entries: Entry[] }
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }
@@ -91,6 +97,8 @@ export interface Derived {
   ac: number; initiative: number; speed: number; maxHp: number; passive: number;
   skills: Record<string, { value: number; proficient: boolean; expertise: boolean; sources: string[] }>;
   saves: Record<Ability, { value: number; proficient: boolean }>; requirements: Requirement[]; issues: Issue[];
+  /** Reviewed derived resistances only; damage application remains manual. */
+  resistances?: string[];
   trace: Record<string, string[]>; hitDice: string;
 }
 export const uid = () => crypto.randomUUID();

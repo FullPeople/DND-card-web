@@ -1,0 +1,89 @@
+name: Verify explicit level-up ASI allocation
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/asi*.test.ts'
+      - 'tests/e2e/asiAllocation*.ts'
+      - 'tests/e2e/rulesIntegrationPrivacyReporter.ts'
+      - 'tests/rules-integration-privacy.test.ts'
+      - 'docs/data/automation*'
+      - 'playwright.asi.config.ts'
+      - 'playwright.infusions.config.ts'
+      - 'vite*.config.ts'
+      - 'package*.json'
+      - 'tsconfig*.json'
+      - '.github/workflows/asi-allocation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: asi-allocation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ASI_FROZEN_DIR: .local-evidence/asi-upstream
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - name: Verify fourteen frozen class and feat sources without publishing source text
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$ASI_FROZEN_DIR"
+          for path in class/class-artificer.json class/class-barbarian.json class/class-bard.json class/class-cleric.json class/class-druid.json class/class-fighter.json class/class-monk.json class/class-paladin.json class/class-ranger.json class/class-rogue.json class/class-sorcerer.json class/class-warlock.json class/class-wizard.json feats.json; do
+            filename="$(basename "$path")"
+            revision=e2623b204ddbdf2bcfa8317acfc962de89c676e2
+            if [ "$path" = feats.json ]; then revision=5cc0bbe2c2b241a334e731af4448bdba2168e8bd; fi
+            curl --disable --fail --silent --show-error --max-time 60 --max-filesize 3000000 --proto '=https' \
+              "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/$path" \
+              --output "$ASI_FROZEN_DIR/$filename"
+          done
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const modern=JSON.parse(readFileSync('src/core/automation/asiEvidence.json','utf8'));
+          const legacy=JSON.parse(readFileSync('src/core/automation/legacyAsiEvidence.json','utf8'));
+          const inputs={...modern.inputs};
+          for(const [path,hash] of Object.entries(legacy.inputs)){
+            if(inputs[path]&&inputs[path]!==hash)throw Error('Conflicting source hash: '+path);
+            inputs[path]=hash;
+          }
+          if(Object.keys(inputs).length!==14)throw Error('Expected exactly fourteen source inputs');
+          const rows=[];
+          for(const [path,expected] of Object.entries(inputs)){
+            const filename=path.split('/').at(-1),bytes=readFileSync(`${process.env.ASI_FROZEN_DIR}/${filename}`);
+            const sha256=createHash('sha256').update(JSON.stringify(JSON.parse(bytes.toString('utf8')))).digest('hex');
+            if(sha256!==expected)throw Error('Frozen input mismatch: '+path);
+            const revision=path==='feats.json'?'5cc0bbe2c2b241a334e731af4448bdba2168e8bd':'e2623b204ddbdf2bcfa8317acfc962de89c676e2';
+            rows.push({url:`https://5e.kiwee.top/data/${path}`,path:filename,sha256,retrievalUrl:`https://raw.githubusercontent.com/tjliqy/5etools-cn/${revision}/data/${path}`});
+          }
+          writeFileSync(`${process.env.ASI_FROZEN_DIR}/index.json`,JSON.stringify({rows}));
+          writeFileSync('.local-evidence/asi-source-verification.json',JSON.stringify({verified:true,rows},null,2)+'\n');
+          NODE
+      - name: Allocation, persistence, rollback and manual-data guards
+        run: npx vitest run tests/asi*.test.ts tests/class-choice-support.test.ts tests/class-choice-legacy-identity.test.ts tests/numberInput234.test.ts --maxWorkers=1
+      - run: npx tsc -b
+      - name: Formal standalone build with unchanged runtime coverage gate
+        run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone
+      - run: npx playwright install --with-deps chromium
+      - name: Actual desktop and narrow App allocation workflows
+        run: npx playwright test --config playwright.asi.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: asi-allocation-evidence
+          include-hidden-files: true
+          path: |
+            .local-evidence/rules-browser-safe/
+            .local-evidence/asi-source-verification.json
+          if-no-files-found: warn
+          retention-days: 7

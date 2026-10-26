@@ -1,3 +1,4 @@
+import {reviewedSkilledIdentity,reviewedLinguistIdentity} from './reviewedFeatIdentity';
 import {SKILLS,skillKey,selectionAllowed,selectionEffectsAllowed,uid,type Character,type Entry,type Selection} from '../model';
 import {inventoryState} from '../characterDetails';
 import {resolveEntryReference} from '../entryReferences';
@@ -11,9 +12,10 @@ export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
 import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
 import type {ClassChoiceSupport} from './classChoiceSupport';
+import {invocationRecord} from './invocations';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
-export type SheetChoice={id:string;ownerId:string;grantLevel?:number;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntries?:Entry[];duplicateChoiceIds?:string[];hint?:string};
+export type SheetChoice={id:string;ownerId:string;grantOwnerId?:string;grantLevel?:number;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntries?:Entry[];duplicateChoiceIds?:string[];hint?:string};
 export const equipmentTypeLabel=(type:string)=>({weaponMartial:'军用武器',weaponSimple:'简易武器',toolArtisan:'工匠工具',instrumentMusical:'乐器',setGaming:'赌具',focusSpellcastingHoly:'圣徽',focusSpellcastingArcane:'奥术法器',focusSpellcastingDruidic:'德鲁伊法器'} as Record<string,string>)[type]||'尚未适配的装备类别';
 const blocks=(v:unknown):any[]=>Array.isArray(v)?v:[];
 export function equipmentOptionConcept(entry:Entry,index:number,value:string):Entry{return concept(entry,`equipment:${index}:${value}`,`起始装备 · 方案 ${value}`,blocks(equipmentBlocks(entry)[index]?.[value]).map(item=>typeof item==='string'?`{@item ${item}}`:item?.item?`${item.quantity||1} × {@item ${item.item}}`:item?.special||(item?.equipmentType?equipmentTypeLabel(item.equipmentType):undefined)||(item?.value!==undefined||item?.containsValue!==undefined?`${(item.value??item.containsValue)/100} GP`:'尚未支持的装备条目')));}
@@ -35,6 +37,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
  if(!automationEnabled(c))return [];
  const out:SheetChoice[]=[],known=[...c.selections.map(s=>s.entry),...catalog];
  for(const row of c.selections){
+  if(reviewedSkilledIdentity(row.entry)||reviewedLinguistIdentity(row.entry))continue;
   const raw=row.entry.raw,restricted=!selectionActive(c,row);
   const push=(path:string,label:string,count:number,options:ChoiceOption[],channel:SheetChoice['channel'],equipmentIndex?:number)=>{
    if(!Number.isSafeInteger(count)||count<1||count>100)return;
@@ -108,7 +111,7 @@ export function sheetChoices(c:Character,catalog:Entry[]=[]):SheetChoice[]{
   }
  }
  const sourceChoices=sourceClassChoices(c,known),duplicates=new Set(sourceChoices.flatMap(choice=>choice.duplicateChoiceIds||[]));
- for(const choice of sourceChoices)if(choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&choice.selected.includes(archive.selections[0].entry.id)&&!c.selections.some(row=>row.requirementId===choice.id&&row.entry.id===archive.selections[0].entry.id))){
+ for(const choice of sourceChoices)if(choice.sourceProgression&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&choice.selected.includes(archive.selections[0].entry.id)&&!c.selections.some(row=>row.requirementId===choice.id&&row.entry.id===archive.selections[0].entry.id))){
   choice.complete=false;choice.hint='原授予与子项记录已保留，关联恢复前不会生效；来源特性停用时请先恢复原来源。';
  }
  return [...out.filter(choice=>!duplicates.has(choice.id)),...sourceChoices,...classSpellChoices(c,catalog)];
@@ -120,7 +123,7 @@ export function chooseSheetOption(c:Character,id:string,value:string,catalog:Ent
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
   const saved=c.answers[id]||[];
-  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
+  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];withdrawMissingReviewedFeats(c,id,slots);resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
   const index=choice.count===1?0:choice.slots!.findIndex((v,i)=>i<choice.count&&!v);
   if(index<0)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
   setSheetChoiceSlot(c,id,index,value,catalog);return;
@@ -187,6 +190,11 @@ function finishBuiltinChoices(c:Character,before:SheetChoice[],catalog:Entry[]){
  const after=sheetChoices(c,catalog),sources=new Set(before.filter(r=>!r.complete).map(r=>choiceSource(c,r)));
  for(const source of sources)if(after.some(r=>choiceSource(c,r)===source)&&after.filter(r=>choiceSource(c,r)===source).every(r=>!sheetChoicePending(c,r))&&c.featureLayout?.optionsVisible)delete c.featureLayout.optionsVisible[source];
 }
+function withdrawMissingReviewedFeats(c:Character,id:string,slots:string[]){
+ if(id.includes(':class-legacy-feat:')&&c.reviewedLinguist?.version===1)c.reviewedLinguist={...c.reviewedLinguist,bindings:c.reviewedLinguist.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
+ if(id.includes(':class-legacy-feat:')&&c.reviewedSkilled?.version===1)c.reviewedSkilled={...c.reviewedSkilled,bindings:c.reviewedSkilled.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
+ for(const field of ['reviewedFeats','reviewedWeaponMaster'] as const){const store=c[field];if(id.includes(':class-legacy-feat:')&&store?.version===1)c[field]={...store,bindings:store.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};}
+}
 /** Slot edits validate and replace atomically, including already full choices. */
 export function setSheetChoiceSlot(c:Character,id:string,index:number,value:string|undefined,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id);
@@ -200,11 +208,18 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
  const draft=choice.channel==='spells'?structuredClone(c):{...c,answers:{...c.answers},featureLayout:c.featureLayout?{...c.featureLayout,optionsVisible:c.featureLayout.optionsVisible?{...c.featureLayout.optionsVisible}:undefined}:undefined};
  if(choice.channel==='spells')setClassSpellSlot(draft,choice,index,option?.entry);
  else {const slots=[...(choice.slots||choice.selected)];while(slots.length<choice.count)slots.push('');const old=slots[index],from=value?slots.indexOf(value):-1;if(from>=0&&from!==index)slots[from]=old||'';slots[index]=value||'';draft.answers[id]=slots;
+  // Forgetting a learned infusion ends its owned target binding. A later
+  // relearn must be explicitly activated again; source suspension is separate.
+  // Explicitly forgetting/replacing a reviewed feat withdraws its consent.
+  // Source disable and level suspension never edit the answer or intent.
+  withdrawMissingReviewedFeats(draft,id,slots);
+  if(choice.sourceProgression==='optional'&&c.infusions?.version===1)draft.infusions={...c.infusions,bindings:c.infusions.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
   if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }
  resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
 }
 const classFeatRequirement=(id:string|undefined)=>!!id&&/:(?:class-feat|class-typed-feat):/.test(id);
+const classChoiceGrant=(row:Selection)=>row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)||invocationRecord(row.entry)&&!!row.requirementId?.includes(':class-optional:');
 function parkClassChoiceGrant(c:Character,root:Selection){
  if(c.classChoiceArchive?.[root.id])throw Error('职业选择保留身份冲突，请保留角色备份。');
  const children=new Map<string,Selection[]>();for(const row of c.selections)if(row.parentId)children.set(row.parentId,[...children.get(row.parentId)||[],row]);
@@ -217,9 +232,14 @@ function parkClassChoiceGrant(c:Character,root:Selection){
 }
 /** Normalize only proven aliases, before source-feature removal can cascade. */
 export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
- if(!automationEnabled(c))return false;
+ if(!automationEnabled(c)){
+  // Source features can still disappear during a disabled-automation level edit.
+  // Park invocation descendants before that cascade, retaining manual children.
+  let parked=false;for(const row of [...c.selections])if(invocationRecord(row.entry)&&classChoiceGrant(row)&&row.grantKey?.startsWith('choice:')&&c.selections.some(current=>current.id===row.id)){parkClassChoiceGrant(c,row);parked=true;}
+  return parked;
+ }
  let changed=false;
- const choices=sheetChoices(c,catalog).filter(choice=>choice.sourceProgression==='feat');
+ const choices=sheetChoices(c,catalog).filter(choice=>!!choice.sourceProgression);
  for(const choice of choices)if(choice.duplicateChoiceIds?.length){
   if(!Object.hasOwn(c.answers,choice.id)&&choice.slots?.some(Boolean)){c.answers={...c.answers,[choice.id]:[...choice.slots]};changed=true;}
   for(const row of c.selections)if(row.entry.kind==='feat'&&choice.duplicateChoiceIds.some(alias=>row.requirementId===alias&&row.grantKey===`choice:${alias}:${row.entry.id}`)){
@@ -228,15 +248,15 @@ export function preserveClassChoiceGrants(c:Character,catalog:Entry[]):boolean{
    c.classChoiceSnapshots={...c.classChoiceSnapshots,[row.entry.id]:structuredClone(row.entry),...(parent?.entry.kind==='feature'?{[parent.entry.id]:structuredClone(parent.entry)}:{})};changed=true;
   }
  }
- for(const row of [...c.selections])if(row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)&&row.grantKey?.startsWith('choice:')){
+ for(const row of [...c.selections])if(classChoiceGrant(row)&&row.grantKey?.startsWith('choice:')){
   const choice=choices.find(choice=>choice.id===row.requirementId);
-  if(!choice?.selected.includes(row.entry.id)){parkClassChoiceGrant(c,row);changed=true;}
+  if(!choice?.selected.includes(row.entry.id)||!choice.options.find(option=>option.value===row.entry.id)?.grant||invocationRecord(row.entry)&&row.parentId!==choice.grantOwnerId){parkClassChoiceGrant(c,row);changed=true;}
  }
  for(const [id,archive] of Object.entries(c.classChoiceArchive||{})){
-  const root=archive.selections[0],choice=sheetChoices(c,catalog).find(choice=>choice.id===archive.choiceId&&choice.sourceProgression==='feat');
-  if(!choice?.selected.includes(root.entry.id)||!choice.options.find(option=>option.value===root.entry.id)?.grant)continue;
+  const root=archive.selections[0],choice=sheetChoices(c,catalog).find(choice=>choice.id===archive.choiceId&&!!choice.sourceProgression);
+  if(!choice?.selected.includes(root.entry.id)||!choice.options.find(option=>option.value===root.entry.id)?.grant||invocationRecord(root.entry)&&root.parentId!==choice.grantOwnerId)continue;
   // Historical duplicate grants remain parked once a single identity is active.
-  if(c.selections.some(row=>row.entry.kind==='feat'&&row.requirementId===choice.id&&row.entry.id===root.entry.id))continue;
+  if(c.selections.some(row=>row.requirementId===choice.id&&row.entry.id===root.entry.id))continue;
   let parent=c.selections.find(row=>row.id===root.parentId),restoreParent:Selection|undefined;
   if(parent&&archive.parent&&(parent.entry.id!==archive.parent.entry.id||parent.grantKey!==archive.parent.grantKey||parent.parentId!==archive.parent.parentId))continue;
   if(!parent&&archive.parent){
@@ -265,16 +285,16 @@ export function syncChoiceContent(c:Character,catalog:Entry[]){
   let added=false;
   for(const choice of sheetChoices(c,catalog))if(choice.channel==='content')for(const value of choice.selected){
    const option=choice.options.find(o=>o.value===value);if(!option?.grant)continue;
-   const retained=choice.sourceProgression==='feat'?c.selections.find(row=>row.requirementId===choice.id&&row.entry.id===option.entry.id&&row.grantKey?.startsWith('choice:')):undefined;
+   const retained=choice.sourceProgression?c.selections.find(row=>row.requirementId===choice.id&&row.entry.id===option.entry.id&&row.grantKey?.startsWith('choice:')):undefined;
    // An un-restorable saved tree must never be replaced by a fresh active grant.
-   if(!retained&&choice.sourceProgression==='feat'&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&archive.selections[0].entry.id===value))continue;
-   const key=retained?.grantKey||`choice:${choice.id}:${value}`;desired.set(key,{owner:choice.ownerId,entry:option.grant,requirementId:choice.id});
-   if(!c.selections.some(s=>s.grantKey===key)){const hash=(text:string)=>{let a=2166136261,b=5381;for(const ch of text){a=Math.imul(a^ch.charCodeAt(0),16777619);b=Math.imul(b,33)^ch.charCodeAt(0);}return `${a>>>0}-${b>>>0}`;};const id=`chosen:${hash(key)}`;if(c.selections.some(s=>s.id===id))throw Error('选择条目身份冲突，请保留角色备份。');c.selections.push({id,entry:structuredClone(option.grant),level:1,quantity:1,equipped:false,parentId:choice.ownerId,grantKey:key,requirementId:choice.id});changed=added=true;}
+   if(!retained&&choice.sourceProgression&&Object.values(c.classChoiceArchive||{}).some(archive=>archive.choiceId===choice.id&&archive.selections[0].entry.id===value))continue;
+   const key=retained?.grantKey||`choice:${choice.id}:${value}`;desired.set(key,{owner:choice.grantOwnerId||choice.ownerId,entry:option.grant,requirementId:choice.id});
+   if(!c.selections.some(s=>s.grantKey===key)){const hash=(text:string)=>{let a=2166136261,b=5381;for(const ch of text){a=Math.imul(a^ch.charCodeAt(0),16777619);b=Math.imul(b,33)^ch.charCodeAt(0);}return `${a>>>0}-${b>>>0}`;};const id=`chosen:${hash(key)}`;if(c.selections.some(s=>s.id===id))throw Error('选择条目身份冲突，请保留角色备份。');c.selections.push({id,entry:structuredClone(option.grant),level:1,quantity:1,equipped:false,parentId:choice.grantOwnerId||choice.ownerId,grantKey:key,requirementId:choice.id});changed=added=true;}
   }
   if(!added)break;
  }
  const removed=new Set(c.selections.filter(s=>s.grantKey?.startsWith('choice:')&&!desired.has(s.grantKey)).map(s=>s.id));
- for(const row of [...c.selections])if(removed.has(row.id)&&row.entry.kind==='feat'&&classFeatRequirement(row.requirementId)){parkClassChoiceGrant(c,row);changed=true;}
+ for(const row of [...c.selections])if(removed.has(row.id)&&classChoiceGrant(row)){parkClassChoiceGrant(c,row);changed=true;}
  // A real removal must clean dependent spell settings and preserve spent-use
  // receipts, just like the direct remove button. Parked class-choice trees
  // have already left active selections and keep their archived references.

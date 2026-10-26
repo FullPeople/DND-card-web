@@ -6,8 +6,13 @@ import {fileURLToPath} from 'node:url';
 import {parseArgs} from 'node:util';
 import {isDeepStrictEqual} from 'node:util';
 
-// Validate only two existing public inputs. No retries, alternate sources,
-// redirects, corpus downloads, or fixture fallback on failed verification.
+// Validate only two existing public inputs. No retries, redirects, corpus downloads,
+// or fixture fallback on failed verification. Dynamic upstream drift is not accepted.
+// Exact snapshot matching the preserved main-307 fixture locks; one pinned request, no fallback.
+const retrievalUrls=new Map([
+ ['https://5e.kiwee.top/data/class/class-fighter.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/class/class-fighter.json'],
+ ['https://5e.kiwee.top/data/items-base.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/items-base.json'],
+]);
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {values}=parseArgs({options:{directory:{type:'string'},'verify-only':{type:'boolean'}}});
 const directory=resolve(values.directory||resolve(root,'.local-evidence/shield-training/upstream'));
@@ -19,7 +24,8 @@ const receipt={schemaVersion:1,verifiedAt:new Date().toISOString(),dataRevision:
 for(const [index,input] of fixture.inputs.entries()){
  const url=new URL(input.url),file=resolve(directory,basename(url.pathname));
  if(url.protocol!=='https:'||url.hostname!=='5e.kiwee.top'||!['/data/class/class-fighter.json','/data/items-base.json'].includes(url.pathname))throw Error('Unexpected input URL');
- if(!values['verify-only'])execFileSync('curl',['--disable','--fail','--silent','--show-error','--proto','=https','--max-time','30','--max-filesize',String(input.bytes),'--output',file,input.url],{stdio:['ignore','ignore','pipe']});
+ const retrievalUrl=retrievalUrls.get(input.url);if(!retrievalUrl)throw Error('Missing pinned input URL');
+ if(!values['verify-only'])execFileSync('curl',['--disable','--fail','--silent','--show-error','--proto','=https','--max-time','30','--max-filesize',String(input.bytes),'--output',file,retrievalUrl],{stdio:['ignore','ignore','pipe']});
  const bytes=readFileSync(file),sha256=createHash('sha256').update(bytes).digest('hex');
  if(bytes.length!==input.bytes||sha256!==input.sha256)throw Error(`Locked input mismatch: ${url.pathname}`);
  const body=JSON.parse(bytes),category=index===0?'class':'baseitem';
@@ -33,7 +39,7 @@ for(const [index,input] of fixture.inputs.entries()){
   }:{name:raw.name,ENG_name:raw.ENG_name,source:raw.source,edition:raw.edition,type:raw.type,ac:raw.ac,page:raw.page};
   if(!isDeepStrictEqual(actual,expected))throw Error(`Mechanical projection mismatch: ${category}/${expected.source}`);
  }
- receipt.inputs.push({url:input.url,bytes:bytes.length,sha256,identities:fixture.projection[category].length});
+ receipt.inputs.push({url:input.url,...(!values['verify-only']?{retrievalUrl}:{}),bytes:bytes.length,sha256,identities:fixture.projection[category].length});
 }
 mkdirSync(dirname(out),{recursive:true});writeFileSync(out,JSON.stringify(receipt,null,2)+'\n');
 console.log(JSON.stringify(receipt));

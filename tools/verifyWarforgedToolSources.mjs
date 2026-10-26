@@ -4,6 +4,11 @@ import {execFileSync} from 'node:child_process';
 import {resolve,dirname,basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseArgs,isDeepStrictEqual} from 'node:util';
+// Exact snapshot matching the preserved main-307 fixture locks; one pinned request, no fallback.
+const retrievalUrls=new Map([
+ ['https://5e.kiwee.top/data/races.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/races.json'],
+ ['https://5e.kiwee.top/data/items-base.json','https://raw.githubusercontent.com/tjliqy/5etools-cn/ac8cf3cbe31dcd9f1e1bba5eb70566f013629c4e/data/items-base.json'],
+]);
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const {values}=parseArgs({options:{directory:{type:'string'},'verify-only':{type:'boolean'}}});
 const directory=resolve(values.directory||resolve(root,'.local-evidence/warforged/upstream'));
@@ -14,8 +19,9 @@ const fields=new Set(['name','ENG_name','source','edition','skillProficiencies',
 for(const [index,input] of fixture.inputs.entries()){
  const url=new URL(input.url),file=resolve(directory,basename(url.pathname));
  if(url.protocol!=='https:'||url.hostname!=='5e.kiwee.top'||!['/data/races.json','/data/items-base.json'].includes(url.pathname))throw Error('Unexpected input URL');
- // Fixed existing inputs; no redirects, mirrors, retries or fixture fallback.
- if(!values['verify-only'])execFileSync('curl',['--disable','--fail','--silent','--show-error','--proto','=https','--max-time','30','--max-filesize',String(input.bytes),'--output',file,input.url],{stdio:['ignore','ignore','pipe']});
+ // Fixed existing input bytes; no redirects, retries or fixture fallback.
+ const retrievalUrl=retrievalUrls.get(input.url);if(!retrievalUrl)throw Error('Missing pinned input URL');
+ if(!values['verify-only'])execFileSync('curl',['--disable','--fail','--silent','--show-error','--proto','=https','--max-time','30','--max-filesize',String(input.bytes),'--output',file,retrievalUrl],{stdio:['ignore','ignore','pipe']});
  const bytes=readFileSync(file),sha256=createHash('sha256').update(bytes).digest('hex');
  if(bytes.length!==input.bytes||sha256!==input.sha256)throw Error(`Locked input mismatch: ${url.pathname}`);
  const body=JSON.parse(bytes),category=index===0?'race':'baseitem';
@@ -25,6 +31,6 @@ for(const [index,input] of fixture.inputs.entries()){
   const actual=Object.fromEntries(Object.keys(expected).map(key=>[key,key==='entries'?[]:rows[0][key]]));
   if(!isDeepStrictEqual(actual,expected))throw Error(`Mechanical projection mismatch: ${category}/${expected.source}`);
  }
- receipt.inputs.push({url:input.url,bytes:bytes.length,sha256,identities:fixture.projection[category].length});
+ receipt.inputs.push({url:input.url,...(!values['verify-only']?{retrievalUrl}:{}),bytes:bytes.length,sha256,identities:fixture.projection[category].length});
 }
 writeFileSync(out,JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt));
