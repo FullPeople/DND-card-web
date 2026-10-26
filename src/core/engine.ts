@@ -1,5 +1,6 @@
+import {reviewedObservantHasRetainedBinding} from './automation/reviewedObservant';
 import {evaluateReviewedSkilled} from './automation/reviewedSkilled';
-import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity} from './automation/reviewedFeatIdentity';
+import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity,reviewedObservantIdentity} from './automation/reviewedFeatIdentity';
 import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
@@ -46,6 +47,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Preserve the existing unsupported-choice notice, including for XPHB,
     // but never let a manual/edited Weapon Master raw or effects field bypass
     // the separate explicitly owned PHB training/ability grant.
+    if(reviewedObservantIdentity(e)){issues.push({id:`reviewed-observant-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工观察力与旧答案保留；此历史机制不属于本批受审。真实职业属性提升须另行确认属性与两项被动值未计入手工数值；唇读和情境优势／劣势仍手工。'});continue;}
     if(reviewedLinguistIdentity(e)){issues.push({id:`reviewed-linguist-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工语言学家条目与旧手工语言答案保留；旧机制不属于本批受审。固定智力和三语言只支持真实职业属性提升位置另行确认；密码、解码与教学仍手工。'});continue;}
     if(reviewedSkilledIdentity(e)){issues.push({id:`reviewed-skilled-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工熟习条目保留。本批只支持真实职业属性提升位置中另行确认的三项技能或工具熟练；此条目不自动授予效果。'});continue;}
     if(reviewedWeaponMasterIdentity(e))continue;
@@ -72,9 +74,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     }
   }
   const skilled=evaluateReviewedSkilled(c,active);issues.push(...skilled.issues);for(const skill of skilled.skills)grantSkill(skill.key,skill.source);
-  const {asi,reviewed:reviewedFeats,linguist}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
+  const {asi,reviewed:reviewedFeats,linguist,observant}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
   for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
-  issues.push(...reviewedFeats.issues,...linguist.issues);
+  issues.push(...reviewedFeats.issues,...linguist.issues,...observant.issues);
+  for(const a of ABILITIES){abilities[a]+=observant.bonuses[a];trace[a].push(...observant.trace[a]);}
   for(const a of ABILITIES){abilities[a]+=linguist.bonuses[a];trace[a].push(...linguist.trace[a]);}
   for(const a of ABILITIES){abilities[a]+=reviewedFeats.bonuses[a];trace[a].push(...reviewedFeats.trace[a]);if(reviewedFeats.saves.has(a))proficientSaves.add(a);}
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
@@ -101,9 +104,9 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
   trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
-  let initiative = modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value;
+  let initiative = modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value + observant.passivePerceptionBonus;
   trace.initiative=[`敏捷调整值 ${modifiers.dex}`,...(c.jackOfAllTrades&&c.edition==='2014'?[`万事通 +${Math.floor(proficiency/2)}`]:[])];
-  trace.passive=[`基础 10 + 察觉 ${skills.perception.value}`];
+  trace.passive=[`基础 10 + 察觉 ${skills.perception.value}`,...observant.passivePerceptionTrace];
   for (const adjustment of c.adjustments || []) {
     if (!adjustment.reason.trim()) continue;
     const { target, value } = adjustment;
@@ -120,7 +123,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   }
   // Like skill offsets, saving-throw offsets supplement any retained legacy total.
   for (const a of ABILITIES) saves[a].value += c.saveBonuses?.[a] || 0;
-  if (!(c.adjustments || []).some(a => a.target === 'passive')) {passive = 10 + skills.perception.value;trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}`;}
+  if (!(c.adjustments || []).some(a => a.target === 'passive')) {passive = 10 + skills.perception.value + observant.passivePerceptionBonus;trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}`;}
+  const passiveInvestigation=Number.isFinite(skills.investigation.value)&&reviewedObservantHasRetainedBinding(c)?10+skills.investigation.value+observant.passiveInvestigationBonus:undefined;
+  if(passiveInvestigation!==undefined)trace.passiveInvestigation=[`基础 10 + 调查最终检定 ${skills.investigation.value}`,...observant.passiveInvestigationTrace,...(observant.passiveInvestigationBonus?[]:['观察力确认保留但当前暂停；此处仅显示自然被动调查，未授予 +5。']),'唇读与情境优势／劣势仍需手工裁定。'];
+  if((c.adjustments||[]).some(a=>a.target==='passive'&&a.reason.trim())&&observant.passivePerceptionBonus){trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}；自然被动察觉 ${10+skills.perception.value+observant.passivePerceptionBonus}`;trace.passive.push('人工最终被动察觉覆盖自然结果（含观察力 +5）；不会再次叠加该加值，也不取消独立的被动调查与属性分量。');}
   ac += c.sheetBonuses?.ac || 0;
   initiative += c.sheetBonuses?.initiative || 0;
   speed += c.sheetBonuses?.speed || 0;
@@ -132,7 +138,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
   for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
-  return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive,
+  return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),
     skills, saves, requirements, issues, trace, resistances:[...new Set(infusion.resistances)],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }

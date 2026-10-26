@@ -1,3 +1,4 @@
+import {validateReviewedObservant} from './automation/reviewedObservant';
 import {validateReviewedLinguist} from './automation/reviewedLinguist';
 import {validateReviewedSkilled} from './automation/reviewedSkilled';
 import {validateReviewedFeats,validateReviewedWeaponMaster} from './automation/reviewedFeats';
@@ -140,6 +141,7 @@ export function validateCharacter(value: unknown): Character {
   validateReviewedWeaponMaster(c.reviewedWeaponMaster);
   validateReviewedSkilled(c.reviewedSkilled);
   validateReviewedLinguist(c.reviewedLinguist);
+  validateReviewedObservant(c.reviewedObservant);
   if(c.classChoiceSnapshots!==undefined){
     assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
     for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){

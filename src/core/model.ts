@@ -34,6 +34,7 @@ export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:numb
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
   asiAllocations?:import('./automation/asi').AsiAllocationState;
+  reviewedObservant?:import('./automation/reviewedObservant').ReviewedObservantState;
   reviewedLinguist?:import('./automation/reviewedLinguist').ReviewedLinguistState;
   reviewedSkilled?:import('./automation/reviewedSkilled').ReviewedSkilledState;
   reviewedWeaponMaster?:import('./automation/reviewedFeats').ReviewedWeaponMasterState;
@@ -94,7 +95,7 @@ export interface Requirement extends ChoiceDefinition { id: string; origin: stri
 export interface Issue { id: string; message: string; selectionId?: string; severity: 'warning' | 'error' }
 export interface Derived {
   abilities: Record<Ability, number>; modifiers: Record<Ability, number>; level: number; proficiency: number;
-  ac: number; initiative: number; speed: number; maxHp: number; passive: number;
+  ac: number; initiative: number; speed: number; maxHp: number; passive: number; passiveInvestigation?:number;
   skills: Record<string, { value: number; proficient: boolean; expertise: boolean; sources: string[] }>;
   saves: Record<Ability, { value: number; proficient: boolean }>; requirements: Requirement[]; issues: Issue[];
   /** Reviewed derived resistances only; damage application remains manual. */

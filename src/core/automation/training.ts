@@ -2,7 +2,7 @@ import type {Character,Selection} from '../model';
 import {evaluateAbilityAdvancements,type AdvancementBoundary} from './abilityAdvancements';
 import {baseAbilityScores} from './baseAbilities';
 import {activeEffectSelections} from './active';
-import {reviewedArmorFeatIdentity,reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity,retainedModernArmorRule} from './reviewedFeatIdentity';
+import {reviewedArmorFeatIdentity,reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity,reviewedObservantIdentity,retainedModernArmorRule} from './reviewedFeatIdentity';
 import {matchesReference} from '../entryReferences';
 import {modernFeatEvidence} from './classChoiceSupport';
 import {equipmentTraining} from '../proficiencyText';
@@ -68,7 +68,7 @@ export function trainingDeclarations(c:Character,active:Selection[],group:'armor
   if(group==='armor'&&!armorSourceAvailable(c,row,active,before))return [];
   // These reviewed feats need explicit owned consent. A manual drag (or edited
   // same-identity copy) is not an alternate automatic training grant.
-  if(reviewedLinguistIdentity(row.entry)||reviewedSkilledIdentity(row.entry)||group==='weapons'&&reviewedWeaponMasterIdentity(row.entry))return [];
+  if(reviewedObservantIdentity(row.entry)||reviewedLinguistIdentity(row.entry)||reviewedSkilledIdentity(row.entry)||group==='weapons'&&reviewedWeaponMasterIdentity(row.entry))return [];
   if(group==='armor'&&reviewedArmorFeatIdentity(row.entry)){const rule=retainedModernArmorRule(row.entry);if(rule&&modernTrainingAvailable(c,row,active,rule,before))modern.push({row,rule});return [];}
   if(row.entry.kind==='item'&&(!row.equipped||raw.reqAttune&&!row.attuned))return [];
   const declared=row.entry.kind==='class'?(row.id===first?.id?raw.startingProficiencies:raw.multiclassing?.proficienciesGained):undefined;

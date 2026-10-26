@@ -4,6 +4,7 @@ import {useReadViewMemo} from './useReadViewMemo';
 import {catalogTrainingIndex} from './catalogTrainingIndex';
 import {OverviewChoiceOverlay} from './OverviewChoiceOverlay';
 import {ClassChoiceRecords} from './ClassChoiceRecords';
+import {ObservantPassiveInvestigation} from './ObservantPassiveInvestigation';
 import {useSheetChoices} from './SheetChoicesContext';
 import {displayCharacterEdit} from '../core/displayCharacterEdit';
 import {ScreenAbilities} from './ScreenAbilities';
@@ -18,7 +19,7 @@ import {classMatches} from '../core/model';
 import {effectiveTrainingDeclarations} from '../core/automation/training';
 import {appendReviewedSkilledTools} from './skilledToolDisplay';
 import {appendReviewedLinguistLanguages,sourceQualifiedLinguistLanguage} from './linguistLanguageDisplay';
-import {reviewedSkilledIdentity,reviewedLinguistIdentity} from '../core/automation/reviewedFeatIdentity';
+import {reviewedSkilledIdentity,reviewedLinguistIdentity,reviewedObservantIdentity} from '../core/automation/reviewedFeatIdentity';
 import {trainingDisplayText} from './trainingReferences';
 import {spellIsReady} from '../core/spellWorkspace';
 import {spellState} from '../core/characterDetails';
@@ -101,7 +102,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   return [['护甲', 'armor'], ['武器', 'weapons'], ['工具', 'tools'], ['语言', 'languages']].map(([label, key]) => {
     const names: Record<string, string> = { common: '通用语', elvish: '精灵语' };
     let values = key==='armor'||key==='weapons'?effectiveTrainingDeclarations(c,activeTraining,key):activeTraining.flatMap(s => {
-      if(reviewedSkilledIdentity(s.entry)||reviewedLinguistIdentity(s.entry))return [];
+      if(reviewedSkilledIdentity(s.entry)||reviewedLinguistIdentity(s.entry)||reviewedObservantIdentity(s.entry))return [];
       const raw = s.entry.raw; const block = raw.startingProficiencies?.[key];
       const fixed = Array.isArray(block) ? block.filter((v: unknown) => typeof v === 'string') : [];
       const extra = raw[({ armor: 'armorProficiencies', weapons: 'weaponProficiencies', tools: 'toolProficiencies', languages: 'languageProficiencies' } as Record<string, string>)[key]];
@@ -134,7 +135,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const sizeCell = <SheetCell label="体型" className="size-cell" dropKinds={['rule']} accepts={entry => entry.raw._category === 'size'} onReceive={entry => edit(draft => { draft.size = entry.raw.size; })} dashed missing={!sizeCode} onFill={() => browse('size')} onHeadingClick={() => { if (sizeInfo) inspect(sizeInfo); }}>
           {editing ? <select aria-label="体型" value={c.size || ''} onChange={e => edit(draft => { draft.size = e.target.value ? e.target.value as Size : undefined; })}><option value="">{race ? `种族 · ${size}` : '—'}</option>{Object.entries(SIZE_LABELS).map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select> : sizeInfo ? <Reference className="size-value" reference={`entry:${sizeInfo.id}`} entry={sizeInfo} onClick={() => inspect(sizeInfo)}>{size}</Reference> : null}
         </SheetCell>;
-  const passive = <SheetCell label="被动察觉"><AdjustedValue c={c} value={d.passive} target="passive" label="被动察觉" edit={edit}/></SheetCell>;
+  const passive = <SheetCell label="被动察觉" className={d.passiveInvestigation!==undefined?'observant-passive-cell':''} headingInline={<ObservantPassiveInvestigation d={d}/>}><AdjustedValue c={c} value={d.passive} target="passive" label="被动察觉" edit={edit}/></SheetCell>;
   const quickbar = <SheetCell label="快捷栏" className="quickbar-cell" missing={!pins.length} onHeadingClick={openResources} headingActionLabel="打开快捷栏编辑器">
             <DropZone referenceOnly onReceive={pinDrop} className="quickbar-copy-zone"><Quickbar c={c} d={d} edit={edit} inspect={inspect} manage={openResources} manageQuickbar={openQuickbar}/></DropZone>
         </SheetCell>;

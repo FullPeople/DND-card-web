@@ -120,7 +120,7 @@ export function reviewedLinguistStatus(c:Character,choiceId:string,entryId:strin
  if(store&&!reviewedLinguistStateValid(store))return {...empty,reason:'语言学家确认记录结构无效，原记录保留。'};
  const current=eligibility(c,choiceId,entryId),grant=current.grant,binding=reviewedLinguistBindings(c).find(row=>row.choiceId===choiceId&&row.entryId===entryId),active=activeEffectSelections(c),base=baseAbilityScores(c,active).abilities;
  const state=binding?evaluateAbilityAdvancements(c,base,active).linguist.states.get(`${choiceId}|${entryId}`):undefined;
- const prior=grant?evaluateAbilityAdvancements(c,base,active,{level:grant.level,choiceId,entryId,selectionId:grant.row.id}):undefined,abilityBefore=prior?base.int+prior.asi.bonuses.int+prior.reviewed.bonuses.int+prior.linguist.bonuses.int:base.int;
+ const prior=grant?evaluateAbilityAdvancements(c,base,active,{level:grant.level,choiceId,entryId,selectionId:grant.row.id}):undefined,abilityBefore=prior?base.int+prior.asi.bonuses.int+prior.reviewed.bonuses.int+prior.linguist.bonuses.int+prior.observant.bonuses.int:base.int;
  return {...empty,eligible:!!grant&&!current.reason,abilityBefore,abilityBonus:!current.reason&&Number.isSafeInteger(abilityBefore)&&abilityBefore<20?1:0,...state,binding,reason:state?.reason||current.reason,selectionId:grant?.row.id,rule:grant?.rule};
 }
 export function reviewedLinguistLanguageRows(c:Character,active?:Selection[]):{reference:string;label:string}[]{
