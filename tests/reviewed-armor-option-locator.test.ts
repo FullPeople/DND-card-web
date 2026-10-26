@@ -1,14 +1,20 @@
+// @vitest-environment jsdom
 import {afterEach,expect,it,vi} from 'vitest';
 import {createRequire} from 'node:module';
 import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
 import type {Locator} from '@playwright/test';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {Reference} from '../src/ui/Reference';
+import {observantFeatOption} from './e2e/reviewedObservantLocators';
 // Use the real Playwright polling implementation offline, with only this unit
 // harness's deadline shortened. The browser helper keeps the suite default.
 vi.mock('@playwright/test',async importOriginal=>{const actual=await importOriginal<typeof import('@playwright/test')>();return {...actual,expect:actual.expect.configure({timeout:250})};});
 import {armorFeatOption} from './e2e/reviewedArmorFeatOptions';
 
 const {JSDOM}=createRequire(import.meta.url)('jsdom');
-const css=readFileSync(new URL('../src/ui/automationChoices.css',import.meta.url),'utf8');
+const css=readFileSync(resolve('src/ui/automationChoices.css'),'utf8');
 const prefix=css.match(/\.choice-option\.is-picked:before\s*\{\s*content:'([^']*)'/)?.[1];
 const reference='undefined:entry:kiwee:feat:phb:lightly%20armored::::::';
 let dom:any;
@@ -25,6 +31,7 @@ class DomLocator {
  getByRole(role:string,{name}:{name:RegExp}){expect(role).toBe('button');return new DomLocator(()=>this.locator('button').all().filter(node=>name.test(node.getAttribute('data-offline-accessible-name')!)));}
  and(other:DomLocator){return new DomLocator(()=>this.all().filter(node=>other.all().includes(node)));}
  async evaluateAll<A,R>(callback:(nodes:Element[],arg:A)=>R,arg:A){return callback(this.all(),arg);}
+ async getAttribute(name:string){const rows=this.all();if(rows.length!==1)throw Error('Expected one exact DOM reference');return rows[0].getAttribute(name);}
 }
 function setup(){dom=new JSDOM('<!doctype html><div id="active"><div class="choice-workspace"></div></div><div id="retained"></div>',{url:'https://example.test/'});return dom.window.document.querySelector('.choice-workspace') as HTMLElement;}
 function button(root:HTMLElement,name='轻甲运用',ref=reference,selected=false,hint=''){
@@ -67,4 +74,20 @@ it('waits within the existing expect budget when the workspace opens before its 
 });
 it.each(['same-name','missing-reference','duplicate-reference'])('does not retry an invalid %s identity as if it were still loading',async kind=>{
  const root=setup(),value=button(root);if(kind==='same-name')button(root,'轻甲运用',reference.replace(':phb:',':xphb:'));if(kind==='missing-reference')value.removeAttribute('data-reference');if(kind==='duplicate-reference')button(root,'其他记录',reference);const read=vi.spyOn(DomLocator.prototype,'evaluateAll');try{await expect(armorFeatOption(rootLocator(root),'轻甲运用')).rejects.toThrow();expect(read).toHaveBeenCalledTimes(1);}finally{read.mockRestore();}
+});
+
+it('resolves actual Reference-rendered Observant and replacement identities through optional preview-kind wrappers',async()=>{
+ const root=setup();
+ for(const [name,id] of [['观察力','kiwee:feat:phb:observant::::::'],['原创替代记录','kiwee:feat:phb:authored%20observant%20replacement::::::']])for(const kind of [undefined,'feat']){
+  root.innerHTML=renderToStaticMarkup(createElement(Reference,{reference:`entry:${id}`,kind,className:'choice-option','aria-disabled':false,'aria-pressed':false,commitOnClick:false},name));
+  const actual=root.querySelector<HTMLButtonElement>('button')!,fullReference=actual.getAttribute('data-reference');
+  expect(fullReference).not.toBe(`entry:${id}`);
+  const option=await observantFeatOption(rootLocator(root),name,id);expect(elements(option)).toEqual([actual]);
+  for(const selected of [true,false,true]){state(actual,selected);expect(elements(option)).toEqual([actual]);expect(actual.getAttribute('aria-pressed')).toBe(String(selected));expect(actual.getAttribute('data-reference')).toBe(fullReference);}
+  actual.setAttribute('aria-disabled','true');expect(elements(option)[0].getAttribute('aria-disabled')).toBe('true');
+ }
+});
+it.each(['kiwee:feat:xphb:observant::::::','kiwee:feat:phb:other::::::'])('rejects a sole actual Reference candidate with wrong exact source identity %s',async id=>{
+ const root=setup();root.innerHTML=renderToStaticMarkup(createElement(Reference,{reference:`entry:${id}`,className:'choice-option',commitOnClick:false},'观察力'));
+ await expect(observantFeatOption(rootLocator(root),'观察力','kiwee:feat:phb:observant::::::')).rejects.toThrow();
 });

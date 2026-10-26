@@ -14,6 +14,12 @@ Post-pairing full local Web passed **4699 tests /153 existing conditional skips 
 
 Final exact-head aggregate checks and **124 actual App cases (62 desktop +62 narrow)** are separately reported in the PR technical summary. Source/API proof, static discovery and local CSS arithmetic do not substitute for actual screen/A4/print/restore geometry, persistence or exact-head browser acceptance. Conditional skips are not passes. The historical17 old-ledger failures below are not waived; pairing the completed source-bound report is required before aggregate acceptance.
 
+## First actual App candidate and test-only correction
+
+The first paired head `5de93d7adefb53f7c7e06e0a76c4850da504b12c` passed nine workflows, but its actual App run had **57 passed /5 failed on each project**, not124 accepted. Every new Observant case stopped before its first feat selection: the test guessed an undecorated reference instead of the actual Reference component attribute. Both complete first-failure logs/artifacts remain retained; raw source-bearing case artifacts were excluded.
+
+An actual Reference-rendered regression reproduced3 failures alongside16 retained helper passes. The corrected test resolver reuses the verified DOM-reference helper, binds its unique complete actual attribute and checks the entire exact entry payload independently of optional preview-kind decoration; wrong-source and wrong-ID candidates are rejected.19/19 focused locator checks and the complete local4702/153 conditional-skip suite passed, compiler/required progress passed. All five scenarios,124 project tuples, original expectation calls, uniqueness/enabled/selected assertions, timeout settings and zero retries remain. The208 product-module bytes, separate CSS hash, report and Data lock are unchanged; the completed full replay is reused, not repeated. Actual acceptance must come from the corrected exact head, never by splicing the earlier57 passes.
+
 ## Known limits retained
 
 Support is bounded to genuine reviewed PHB2014 legacy class-ASI consent: explicit INT/WIS+1 cap20 and two independent passive5 bonuses. Active checks/proficiency are not granted by passive bonuses. Existing manual absolute Perception totals and its sheet offset keep their ownership; Investigation remains independent and read-only, without a new saved override or external bridge protocol. Lip-reading, language/visibility conditions and situational advantage/disadvantage remain manual.
