@@ -1,0 +1,1070 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "reviewed-phb2014-linguist",
+  "source": "PHB",
+  "edition": "2014",
+  "inputs": {
+    "feats.json": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+    "languages.json": "fae8ff63ba6d28b71a132f37da85dfb53c8a3dce9f931d49d2b7e12214afae98",
+    "variantrules.json": "21eef107d25cf438eb85894387fb6f834478d80bc467791c54fe66db9e498c44"
+  },
+  "feat": {
+    "reference": "Linguist|PHB",
+    "entryId": "kiwee:feat:phb:linguist::::::",
+    "english": "Linguist",
+    "name": "语言学家",
+    "page": 167,
+    "entryHash": "c5e7c9c993357d49d4cc7ea1beca5033f7d31753fdb5a03c70359cf7ad4c6015",
+    "rawKeys": [
+      "ENG_name",
+      "name",
+      "source",
+      "page",
+      "ability",
+      "languageProficiencies",
+      "entries",
+      "translator"
+    ],
+    "mechanics": {
+      "ability": [
+        {
+          "int": 1
+        }
+      ],
+      "languageProficiencies": [
+        {
+          "any": 3
+        }
+      ]
+    }
+  },
+  "languages": [
+    {
+      "reference": "Abyssal|PHB",
+      "entryId": "kiwee:rule:phb:abyssal:::::::language",
+      "name": "深渊语",
+      "english": "Abyssal",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "typicalSpeakers": [
+          "{@filter 恶魔|bestiary|tag=恶魔}"
+        ],
+        "script": "炼狱语"
+      },
+      "type": "exotic",
+      "entryHash": "c0e387c3b5d91a0c1f4b51e708ad8ab68c5de279ebe9926952f59e4695c93c71"
+    },
+    {
+      "reference": "Celestial|PHB",
+      "entryId": "kiwee:rule:phb:celestial:::::::language",
+      "name": "天界语",
+      "english": "Celestial",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "typicalSpeakers": [
+          "{@filter 天族|bestiary|type=celestial}"
+        ],
+        "script": "天界语"
+      },
+      "type": "exotic",
+      "entryHash": "83ea0856186b461b11aef612e6502630ab9c7f482abe88c7543005420178752e"
+    },
+    {
+      "reference": "Common|PHB",
+      "entryId": "kiwee:rule:phb:common:::::::language",
+      "name": "通用语",
+      "english": "Common",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "fonts"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@filter 人类|bestiary|type=humanoid|tag=任意种族;人类}"
+        ],
+        "script": "通用语",
+        "fonts": [
+          "fonts/languages/PHB/Human/Harpers.ttf"
+        ]
+      },
+      "type": "standard",
+      "entryHash": "985a34a64414e06eb0adb23dd621de2ee328ee28b7a38c9ae6ec0d2ed27979dc"
+    },
+    {
+      "reference": "Deep Speech|PHB",
+      "entryId": "kiwee:rule:phb:deep%20speech:::::::language",
+      "name": "深潜语",
+      "english": "Deep Speech",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "typicalSpeakers": [
+          "{@creature 夺心魔||夺心魔们}",
+          "{@creature 眼魔||眼魔}"
+        ],
+        "script": "none"
+      },
+      "type": "exotic",
+      "entryHash": "569827c05e629ab99c0e3f6ed8fc35726eabf431bce0413d9c2afae973bccdac"
+    },
+    {
+      "reference": "Draconic|PHB",
+      "entryId": "kiwee:rule:phb:draconic:::::::language",
+      "name": "龙语",
+      "english": "Draconic",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "entries",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "typicalSpeakers": [
+          "{@filter 龙|bestiary|type=dragon}",
+          "{@race 龙裔}"
+        ],
+        "script": "龙语"
+      },
+      "type": "exotic",
+      "entryHash": "7798a0aea1d9abf3f7fa7bf358c9013712d73fdfd103e7918cc9d28aefc6cc1e"
+    },
+    {
+      "reference": "Druidic|PHB",
+      "entryId": "kiwee:rule:phb:druidic:::::::language",
+      "name": "德鲁伊语",
+      "english": "Druidic",
+      "page": 64,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "entries"
+      ],
+      "mechanics": {
+        "type": "secret",
+        "typicalSpeakers": [
+          "{@class 德鲁伊||德鲁伊}/{@creature 德鲁伊||德鲁伊}",
+          "{@creature 树人||树人}"
+        ]
+      },
+      "type": "secret",
+      "entryHash": "22c623efcdf81501ff1423c0eb1397ec25beca15c7fce3d99fa671bb77f72fe9"
+    },
+    {
+      "reference": "Dwarvish|PHB",
+      "entryId": "kiwee:rule:phb:dwarvish:::::::language",
+      "name": "矮人语",
+      "english": "Dwarvish",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "entries",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@filter 矮人|bestiary|type=humanoid|tag=任意种族;矮人}"
+        ],
+        "script": "矮人语"
+      },
+      "type": "standard",
+      "entryHash": "4763aba3d9671a1a5785510912928b89b9133074d353fdd708b9f0b19f7f4f44"
+    },
+    {
+      "reference": "Elvish|PHB",
+      "entryId": "kiwee:rule:phb:elvish:::::::language",
+      "name": "精灵语",
+      "english": "Elvish",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "entries",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@filter 精灵|bestiary|type=humanoid|tag=任意种族;精灵}"
+        ],
+        "script": "精灵语"
+      },
+      "type": "standard",
+      "entryHash": "69b126cbd133475a3090ff15559010fe0e58170096b438e682b78c874a633137"
+    },
+    {
+      "reference": "Giant|PHB",
+      "entryId": "kiwee:rule:phb:giant:::::::language",
+      "name": "巨人语",
+      "english": "Giant",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@creature 食人魔||食人魔}",
+          "{@filter 巨人|bestiary|type=giant}"
+        ],
+        "script": "矮人语"
+      },
+      "type": "standard",
+      "entryHash": "f26fc43198bc34aeb936c63dfe720c996a815086b792a08923428740a7ad3816"
+    },
+    {
+      "reference": "Gnomish|PHB",
+      "entryId": "kiwee:rule:phb:gnomish:::::::language",
+      "name": "侏儒语",
+      "english": "Gnomish",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "entries",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@filter 侏儒|bestiary|type=humanoid|tag=任意种族;侏儒}"
+        ],
+        "script": "矮人语"
+      },
+      "type": "standard",
+      "entryHash": "484ab70e71de11955865cea3468d3b50673ff2550b1f1fe65bcf8766229c5c61"
+    },
+    {
+      "reference": "Goblin|PHB",
+      "entryId": "kiwee:rule:phb:goblin:::::::language",
+      "name": "地精语",
+      "english": "Goblin",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@filter 类地精|bestiary|tag=类地精}"
+        ],
+        "script": "矮人语"
+      },
+      "type": "standard",
+      "entryHash": "56866d1ab503740b2f60c3abe326ee0ac60f6b2b281717e82b4d4c7e84c2f266"
+    },
+    {
+      "reference": "Halfling|PHB",
+      "entryId": "kiwee:rule:phb:halfling:::::::language",
+      "name": "半身人语",
+      "english": "Halfling",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "entries"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@filter 半身人|bestiary|type=humanoid|tag=任意种族;半身人语}"
+        ],
+        "script": "通用语"
+      },
+      "type": "standard",
+      "entryHash": "f5ca56b779a2b9427ca28c7674e7d9c61470dd1b88cb3c78afb65aee652d1887"
+    },
+    {
+      "reference": "Infernal|PHB",
+      "entryId": "kiwee:rule:phb:infernal:::::::language",
+      "name": "炼狱语",
+      "english": "Infernal",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "typicalSpeakers": [
+          "{@filter 魔鬼|bestiary|tag=魔鬼}"
+        ],
+        "script": "炼狱语"
+      },
+      "type": "exotic",
+      "entryHash": "d526c0a20421ead4ee8e127386ee9c0d472a77daa6c0bdaa581ff17c60dbeb33"
+    },
+    {
+      "reference": "Orc|PHB",
+      "entryId": "kiwee:rule:phb:orc:::::::language",
+      "name": "兽人语",
+      "english": "Orc",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "entries",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "standard",
+        "typicalSpeakers": [
+          "{@filter 兽人|bestiary|tag=兽人语}"
+        ],
+        "script": "矮人语"
+      },
+      "type": "standard",
+      "entryHash": "2b20082641d5a5003bca520bcf0fdd1b2fa3ef6a27736c00a6c5d8e3298a913c"
+    },
+    {
+      "reference": "Primordial|PHB",
+      "entryId": "kiwee:rule:phb:primordial:::::::language",
+      "name": "原初语",
+      "english": "Primordial",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "dialects",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "entries",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "dialects": [
+          "气族语",
+          "水族语",
+          "火族语",
+          "土族语"
+        ],
+        "typicalSpeakers": [
+          "{@filter 元素|bestiary|type=elemental}"
+        ],
+        "script": "矮人语"
+      },
+      "type": "exotic",
+      "entryHash": "ec4805c6bd3a22426febcfcbb4abf34c7acf4f543497b9379d931c72c97ff096"
+    },
+    {
+      "reference": "Sylvan|PHB",
+      "entryId": "kiwee:rule:phb:sylvan:::::::language",
+      "name": "木族语",
+      "english": "Sylvan",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "typicalSpeakers": [
+          "{@filter 精类生物|bestiary|type=fey}"
+        ],
+        "script": "精灵语"
+      },
+      "type": "exotic",
+      "entryHash": "747d9a019ed5646f80a42ab521c7f6a04e8aa351371ef548fcb1bf6a4f0135ad"
+    },
+    {
+      "reference": "Thieves' Cant|PHB",
+      "entryId": "kiwee:rule:phb:thieves'%20cant:::::::language",
+      "name": "盗贼黑话",
+      "english": "Thieves' Cant",
+      "page": 94,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "entries"
+      ],
+      "mechanics": {
+        "type": "secret",
+        "typicalSpeakers": [
+          "{@creature 刺客||刺客}",
+          "{@class 游荡者||游荡者}"
+        ]
+      },
+      "type": "secret",
+      "entryHash": "e2596f1dea6e591a398e89495238e8ee5960cda32ee76ace71907d2df5d86269"
+    },
+    {
+      "reference": "Undercommon|PHB",
+      "entryId": "kiwee:rule:phb:undercommon:::::::language",
+      "name": "地底通用语",
+      "english": "Undercommon",
+      "page": 123,
+      "category": "language",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "typicalSpeakers",
+        "script",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "exotic",
+        "typicalSpeakers": [
+          "幽暗地域商人"
+        ],
+        "script": "精灵语"
+      },
+      "type": "exotic",
+      "entryHash": "3e0a4d169173deebc7ffda225a625c0100ce3040b0ae294c7b3f40fd034f2773"
+    }
+  ],
+  "dialectAliases": [
+    {
+      "alias": "Auran",
+      "reference": "Primordial|PHB"
+    },
+    {
+      "alias": "Aquan",
+      "reference": "Primordial|PHB"
+    },
+    {
+      "alias": "Ignan",
+      "reference": "Primordial|PHB"
+    },
+    {
+      "alias": "Terran",
+      "reference": "Primordial|PHB"
+    },
+    {
+      "alias": "气族语",
+      "reference": "Primordial|PHB"
+    },
+    {
+      "alias": "水族语",
+      "reference": "Primordial|PHB"
+    },
+    {
+      "alias": "火族语",
+      "reference": "Primordial|PHB"
+    },
+    {
+      "alias": "土族语",
+      "reference": "Primordial|PHB"
+    }
+  ],
+  "abilityDefault": {
+    "max": 20,
+    "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+    "blob": "fd559e0baad858c2bc59a813603a55e41972a1f4",
+    "path": "js/render.js",
+    "startLine": 7093,
+    "endLine": 7123,
+    "expression": "abilityObj.max ?? 20"
+  },
+  "legacyClassInputs": {
+    "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
+    "class/class-barbarian.json": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+    "class/class-bard.json": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+    "class/class-cleric.json": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+    "class/class-druid.json": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+    "class/class-fighter.json": "a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509",
+    "class/class-monk.json": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+    "class/class-paladin.json": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+    "class/class-ranger.json": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+    "class/class-rogue.json": "b5c62a8c5356438a09bc64bc96b71968fa3766d46102a0a1de11713e5ee0d251",
+    "class/class-sorcerer.json": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+    "class/class-warlock.json": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+    "class/class-wizard.json": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03"
+  },
+  "legacyClassSlots": [
+    {
+      "owner": "Artificer|TCE",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::19:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::4:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::8:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::12:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::16:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::19:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::4:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::8:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::12:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::16:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::19:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::19:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::4:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::8:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::12:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::16:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::19:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::4:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 6,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::6:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::8:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::12:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 14,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::14:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::16:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::19:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::4:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::8:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::12:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::16:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::19:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::4:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::8:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::12:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::16:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::19:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::4:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::8:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::12:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::16:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::19:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::4:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::8:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 10,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::10:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::12:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::16:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::19:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::4:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::8:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::12:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::16:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::19:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::19:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::19:"
+    }
+  ]
+}

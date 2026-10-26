@@ -16,7 +16,7 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
  // Ordinary version retirement does not create this receipt.
  plan.grants=plan.grants.filter(grant=>!c.dismissedFeatures?.includes(grant.owner.id+'|'+grant.key));
  const transfers=new Map<string,{max:number;old:Set<string>}>();
- for(const grant of plan.grants){const old=c.spellSettings?.special?.[grant.id];if(old?.mode!=='uses'||grant.config.mode!=='uses')continue;
+ for(const grant of plan.grants){if(grant.config.sourceGrant?.usage==='invocation-pact')continue;const old=c.spellSettings?.special?.[grant.id];if(old?.mode!=='uses'||grant.config.mode!=='uses')continue;
   const previousKey=specialSpellResource(grant.id,c),nextKey=grant.config.sourceGrant?.resourceKey||`innate-spell:${grant.id}`;
   if(previousKey===nextKey)continue;const transfer=transfers.get(nextKey)||{max:grant.config.max!,old:new Set<string>()};transfer.old.add(previousKey);transfers.set(nextKey,transfer);
  }
@@ -32,7 +32,8 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
   if(grant.config.mode==='uses'){
    const key=specialSpellResource(row.id,c),resource=c.runtime.resources[key],max=grant.config.max!;
    // A missing counter on an already saved grant is not permission to replenish it.
-   if(!resource)c.runtime.resources[key]={name:grant.config.sourceGrant?.resourceKey?`${grant.owner.entry.name}共享施法次数`:`${row.entry.name} · ${grant.owner.entry.name}`,max,current:!fresh?0:c.runtime.sourceSpellSpent?.[grant.config.sourceGrant!.usageKey!]!==undefined?Math.max(0,max-c.runtime.sourceSpellSpent[grant.config.sourceGrant!.usageKey!]):max,type:'count'};
+   if(!resource)c.runtime.resources[key]={name:grant.config.sourceGrant?.usage==='invocation-pact'?`${grant.owner.entry.name}祈唤次数`:grant.config.sourceGrant?.resourceKey?`${grant.owner.entry.name}共享施法次数`:`${row.entry.name} · ${grant.owner.entry.name}`,max,current:!fresh?0:c.runtime.sourceSpellSpent?.[grant.config.sourceGrant!.usageKey!]!==undefined?Math.max(0,max-c.runtime.sourceSpellSpent[grant.config.sourceGrant!.usageKey!]):max,type:'count',...(grant.config.sourceGrant?.usage==='invocation-pact'?{sourceSpellGrant:{usageKey:grant.config.sourceGrant.usageKey!}}:{})};
+   else if(grant.config.sourceGrant?.usage==='invocation-pact')continue; // Never repair/adopt a manual collision or an edited invocation balance.
    else {resource.name||=grant.config.sourceGrant?.resourceKey?`${grant.owner.entry.name}共享施法次数`:`${row.entry.name} · ${grant.owner.entry.name}`;if(resource.max!==max){const spent=Math.max(0,resource.max-resource.current,resource.current===0?c.runtime.sourceSpellSpent?.[grant.config.sourceGrant!.usageKey!]||0:0);resource.max=max;resource.current=Math.max(0,max-spent);}}
   }
  }

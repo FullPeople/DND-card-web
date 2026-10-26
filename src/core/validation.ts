@@ -1,3 +1,11 @@
+import {validateReviewedLinguist} from './automation/reviewedLinguist';
+import {validateReviewedSkilled} from './automation/reviewedSkilled';
+import {validateReviewedFeats,validateReviewedWeaponMaster} from './automation/reviewedFeats';
+import {validateAsiAllocations} from './automation/asi';
+import {invocationRecord} from './automation/invocations';
+import {validateInfusions} from './automation/infusions';
+import {validateInfusionChargeState} from './automation/infusionCharges';
+import {validateRefuelingRingState} from './automation/refuelingRing';
 import {validWidget,validWidgets,type ResourceWidgetLayout} from './resourceWidgets';
 import {CARD_COMPONENTS,validCardPalette} from './palette';
 import {legacyTraining} from './legacyTraining';
@@ -98,7 +106,7 @@ export function validateCharacter(value: unknown): Character {
     assert(plain(c.classChoiceArchive)&&Object.keys(c.classChoiceArchive).length<=3000,'职业选择保留记录无效。');
     for(const [id,archive] of Object.entries(c.classChoiceArchive) as [string,any][]){
       assert(plain(archive)&&typeof archive.choiceId==='string'&&archive.choiceId.length<=2000&&Array.isArray(archive.selections)&&archive.selections.length>0&&archive.selections.length<=3000,'职业选择保留记录无效。');
-      const root=archive.selections[0];assert(plain(root)&&root.id===id&&root.entry?.kind==='feat'&&root.requirementId===archive.choiceId&&typeof root.grantKey==='string'&&root.grantKey.startsWith('choice:'),'职业选择保留身份无效。');
+      const root=archive.selections[0];assert(plain(root)&&root.id===id&&((root.entry?.kind==='feat'||plain(root.entry)&&plain(root.entry.raw)&&invocationRecord(root.entry as Entry)&&archive.choiceId.includes(':class-optional:'))&&root.requirementId===archive.choiceId&&typeof root.grantKey==='string'&&root.grantKey.startsWith('choice:')||root.entry?.kind==='feature'&&root.entry.raw?._category==='classFeature'&&root.entry.english==='Ability Score Improvement'&&(root.entry.edition==='2014'||root.entry.edition==='both'&&root.entry.source==='TCE'&&root.entry.raw._classEdition==='2014')&&['PHB','TCE'].includes(root.entry.source)&&typeof root.grantKey==='string'&&root.grantKey.startsWith('ref:')&&archive.choiceId===`${root.parentId}:class-legacy-feat:${root.entry.id}`&&archive.kind==='legacy-asi'),'职业选择保留身份无效。');
       const linked=new Set([id]);for(let pass=0;pass<archive.selections.length;pass++){let added=false;for(const row of archive.selections)if(plain(row)&&linked.has(row.parentId)&&!linked.has(row.id)){linked.add(row.id);added=true;}if(!added)break;}
       assert(archive.selections.every((row:any)=>plain(row)&&linked.has(row.id)),'职业选择保留子项关联无效。');
       archivedSelections.push(...archive.selections);
@@ -126,6 +134,12 @@ export function validateCharacter(value: unknown): Character {
     assert(!s.entry.dependencies || Array.isArray(s.entry.dependencies) && s.entry.dependencies.every((v: unknown) => typeof v === 'string'), '条目依赖列表无效。');
   }
   assert(plain(c.answers) && Object.values(c.answers).every(a => Array.isArray(a) && a.every(v => typeof v === 'string')), '角色选择记录不正确。');
+  validateInfusions(c.infusions);
+  validateAsiAllocations(c.asiAllocations);
+  validateReviewedFeats(c.reviewedFeats);
+  validateReviewedWeaponMaster(c.reviewedWeaponMaster);
+  validateReviewedSkilled(c.reviewedSkilled);
+  validateReviewedLinguist(c.reviewedLinguist);
   if(c.classChoiceSnapshots!==undefined){
     assert(plain(c.classChoiceSnapshots)&&Object.keys(c.classChoiceSnapshots).length<=3000,'职业选择快照记录无效。');
     for(const [id,entry] of Object.entries(c.classChoiceSnapshots)){
@@ -157,6 +171,9 @@ export function validateCharacter(value: unknown): Character {
   assert(c.profile.autoSourceDefaults === undefined || Array.isArray(c.profile.autoSourceDefaults) && c.profile.autoSourceDefaults.length <= 10000 && c.profile.autoSourceDefaults.every((id:unknown) => typeof id === 'string' && id.length <= 4000), '默认资料来源列表无效。');
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   validateActionState(c.runtime.automationActions);
+  validateInfusionChargeState(c.runtime.infusionCharges);
+  validateRefuelingRingState(c.runtime.refuelingRing);
+  for(const r of Object.values(c.runtime.resources) as any[])if(r.sourceSpellGrant!==undefined)assert(plain(r.sourceSpellGrant)&&typeof r.sourceSpellGrant.usageKey==='string'&&r.sourceSpellGrant.usageKey.length>0&&r.sourceSpellGrant.usageKey.length<=20000,'来源法术次数归属无效。');
   validateFeatureResourceState(c.runtime as Character['runtime']);
   validateRestState(c.runtime.rests);
   if(c.spellSettings?.cantrips!==undefined){const groups=c.spellSettings.cantrips;assert(plain(groups)&&Object.keys(groups).length<=100&&Object.values(groups).every(ids=>Array.isArray(ids)&&ids.length<=3000&&ids.every(id=>typeof id==='string')&&new Set(ids.filter(Boolean)).size===ids.filter(Boolean).length),'职业戏法格记录无效。');}
@@ -190,7 +207,8 @@ export function validateCharacter(value: unknown): Character {
    // Keep the exact snapshot and counter without restoring an active selection.
    assert(storedSelections.some(row=>row.id===id&&row.entry.kind==='spell')&&plain(value)&&['locked','uses'].includes(value.mode)&&(value.mode!=='uses'||Number.isInteger(value.max)&&value.max>=1&&value.max<=100)&&(value.recovery===undefined||['long','short','manual'].includes(value.recovery))&&(value.label===undefined||typeof value.label==='string'&&value.label.length<=160),'固定与次数法术设置无效。');
    if(value.sourceGrant!==undefined){const g=value.sourceGrant;
-    assert(plain(g)&&typeof g.ownerId==='string'&&typeof g.key==='string'&&g.key.startsWith('source-spell:')&&typeof g.active==='boolean'&&(g.ability===undefined||ABILITIES.includes(g.ability))&&['slot','free','ritual','check','resource'].includes(g.usage)&&(g.reason===undefined||typeof g.reason==='string')&&(g.usageKey===undefined||typeof g.usageKey==='string'&&g.usageKey.length<=20000)&&(g.canUseSlots===undefined||typeof g.canUseSlots==='boolean')&&(g.castLevel===undefined||Number.isInteger(g.castLevel)&&g.castLevel>=1&&g.castLevel<=9),'来源法术关系无效。');
+    assert(plain(g)&&typeof g.ownerId==='string'&&typeof g.key==='string'&&g.key.startsWith('source-spell:')&&typeof g.active==='boolean'&&(g.ability===undefined||ABILITIES.includes(g.ability))&&['slot','free','ritual','check','resource','invocation-pact'].includes(g.usage)&&(g.reason===undefined||typeof g.reason==='string')&&(g.usageKey===undefined||typeof g.usageKey==='string'&&g.usageKey.length<=20000)&&(g.canUseSlots===undefined||typeof g.canUseSlots==='boolean')&&(g.castLevel===undefined||Number.isInteger(g.castLevel)&&g.castLevel>=1&&g.castLevel<=9),'来源法术关系无效。');
+    if(g.usage==='invocation-pact')assert(value.mode==='uses'&&value.max===1&&value.recovery==='long'&&g.canUseSlots===false&&g.resourceKey===`source-spell-pool:${encodeURIComponent(g.usageKey)}`&&g.resourceCost===undefined&&g.resourceName===undefined&&typeof g.usageKey==='string','祈唤双资源声明无效。');
     if(g.usage==='resource'){
      assert(value.mode==='locked'&&typeof g.resourceName==='string'&&g.resourceName.trim()&&g.resourceName.length<=160&&Number.isSafeInteger(g.resourceCost)&&g.resourceCost>=1&&g.resourceCost<=10000&&typeof g.resourceKey==='string'&&g.resourceKey.length<=40000,'来源法术资源声明无效。');
      // Validate a parked source against its saved ancestry too; accepting its

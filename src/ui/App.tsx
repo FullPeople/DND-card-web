@@ -32,6 +32,7 @@ import {LibraryDisplaySettings} from './LibraryDisplaySettings';
 import {CharacterTabs} from './CharacterTabs';
 import {applyDisplayCharacterEdit,sameCharacterMechanics} from '../core/displayCharacterEdit';
 import {applyRuntimeCharacterEdit,runtimeCharacterBase} from '../core/runtimeCharacterEdit';
+import {applyRefuelingRingEdit,refuelingAwareChoiceSlotEdit} from './refuelingRingSubmission';
 import {workbenchDerived} from '../platform/workbenchDerivation';
 import {snapshotSaveQueue} from '../platform/snapshotSaveQueue';
 import {snapshotMemo} from '../platform/snapshotMemo';
@@ -63,6 +64,7 @@ import {rememberSourceSpellUses} from '../core/automation/sourceSpellState';
 const AutomationPanel=lazy(()=>import('./AutomationPanel').then(module=>({default:module.AutomationPanel})));
 
 import {automationEnabled,automationNeedsInitialization,initializeAutomation,newAutomationState} from '../core/automation/state';
+import {reconcileInfusionHolding} from '../core/automation/infusions';
 import {reconcileEquipping} from '../core/automation/equipment';
 const Announcement=announcementPanel.Component;
 import {useUiLanguage} from './UiLanguage';
@@ -130,7 +132,7 @@ import {ignoreUnfilledSheetChoices} from '../core/automation/choices';
 import {acknowledgedView,recordReviewedRoots} from '../platform/choiceReview';
 import {ChoiceWorkspaceContext} from './ChoiceWorkspaceContext';
 import {usePointerStableValue} from './usePointerStableValue';
-import {sheetChoices,setSheetChoiceSlot} from '../core/automation/choices';
+import {sheetChoices} from '../core/automation/choices';
 import {SheetChoicesContext} from './SheetChoicesContext';
 import {choiceCatalog} from './choiceCatalog';
 const SpellsPage=lazy(()=>import('./SpellsPage').then(m=>({default:m.SpellsPage})));
@@ -783,16 +785,18 @@ export default function App() {
     {const blocked=cloudAccessRef.current[character.id];if(blocked){setNotice(blocked);return;}}
     if(workbenchUncertain.current.has(character.id)){setNotice('上一项修改的结果尚未确认，本地修改已保留。请先核对枭熊数据。');return;}
     if(inWorkbench&&character.id.startsWith('suite:')&&(!wb.online||!wb.target?.write||workbenchCharacterId(wb.target)!==character.id)){setNotice('当前棋子不可编辑或已经切换');return;}
+    const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
     const displayDraft=applyDisplayCharacterEdit(character,action);
     const runtimeDraft=displayDraft?undefined:applyRuntimeCharacterEdit(character,action);
-    if(!automationRuntime&&!displayDraft&&!runtimeDraft){pendingRuntimeEdits.current.push({id:character.id,target:wb.target?.key,action,key});setRuntimeInteractionRequested(true);return;}
+    const ringDraft=displayDraft||runtimeDraft?undefined:applyRefuelingRingEdit(effective,action);
+    if(ringDraft===effective)return;
+    if(!automationRuntime&&!displayDraft&&!runtimeDraft&&!ringDraft){pendingRuntimeEdits.current.push({id:character.id,target:wb.target?.key,action,key});setRuntimeInteractionRequested(true);return;}
     const record = history.current.get(character.id) || { past: [], future: [], time: 0 };
     if (!key || record.key !== key || Date.now() - record.time > 900) record.past = [...record.past.slice(-59), character];
     record.future = []; record.key = key; record.time = Date.now(); history.current.set(character.id, record);
-    const effective=inWorkbench&&roomRules?{...character,edition:roomRules.edition,profile:roomProfile!,rulePacks:roomRules.packs}:localSources?withSiteSources(character,current.siteSources,current.packs):character;
     let draft:Character;
-    if(displayDraft||runtimeDraft){draft=(displayDraft||runtimeDraft)!;if(draft===character)return;}
-    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime!.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
+    if(displayDraft||runtimeDraft||ringDraft){draft=(displayDraft||runtimeDraft||ringDraft)!;if(draft===character)return;}
+    else {draft=structuredClone(effective); const defaultChanged=initializeAutomation(draft); hydrateImportedCasting(draft,allEntries);if(defaultChanged){syncFeatures(draft,allEntries,undefined,catalogNames);syncAutoResources(draft,effective);} rememberSourceSpellUses(draft); action(draft); reconcileEquipping(effective,draft); reconcileInfusionHolding(effective,draft); syncFeatures(draft, allEntries,undefined,catalogNames); automationRuntime!.syncSourceSpells(draft,allEntries); syncAutoResources(draft,effective); for(const id of Object.keys(draft.runtime.resources))if(!Object.hasOwn(effective.runtime.resources,id))ensureResourceWidget(draft,id); pruneQuickbar(draft); if(sameValue(effective,draft))return;} draft.updatedAt = new Date().toISOString(); draft.revision++;
     // Room rules are an evaluation view, not a migration of a character's identity.
     if(!displayDraft&&!runtimeDraft&&inWorkbench&&roomRules){draft.edition=character.edition;draft.profile=structuredClone(character.profile);draft.rulePacks=character.rulePacks;}
     persist({ ...current, characters: current.characters.map(x => x.id === draft.id ? draft : x) });
@@ -925,7 +929,7 @@ export default function App() {
       const choice=learningDrop.choice;
       openChoice(choice.id);
       const option=choice.options.find(option=>option.entry.id===entry.id)!,slot=choice.slots?.findIndex((value,index)=>index<choice.count&&!value)??-1;
-      if(!choice.restricted&&!option.unavailable&&slot>=0&&!choice.slots?.includes(entry.id)){edit(draft=>setSheetChoiceSlot(draft,choice.id,slot,option.value,allEntries));setNotice(`已记录学习「${entry.name}」；具体效果及物品操作仍需手动处理。`);}
+      if(!choice.restricted&&!option.unavailable&&slot>=0&&!choice.slots?.includes(entry.id)){edit(refuelingAwareChoiceSlotEdit(c,choice.id,slot,option.value,allEntries));setNotice(`已记录学习「${entry.name}」；具体效果及物品操作仍需手动处理。`);}
       else setNotice(option.unavailable||'已打开学习记录，可明确选择或替换一个槽位。');
       return;
     }

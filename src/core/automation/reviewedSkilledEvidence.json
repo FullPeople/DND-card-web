@@ -1,0 +1,1637 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "reviewed-phb2014-skilled",
+  "source": "PHB",
+  "edition": "2014",
+  "inputs": {
+    "feats.json": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+    "variantrules.json": "21eef107d25cf438eb85894387fb6f834478d80bc467791c54fe66db9e498c44",
+    "items-base.json": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+    "items.json": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+    "skills.json": "313019e6987bffdcdb4c74bdd05edd475c6f33410637f7b42f85760c5beb8941",
+    "generated/gendata-tables.json": "904e726f5b361f20456f2f2569f52bc82607ff0285d393e60d6cc947497806cf"
+  },
+  "feat": {
+    "entryHash": "6050748f7163ce8110abcc187db99a03f2d2acb5309afbd08e4a9e80b89a3bd7",
+    "reference": "Skilled|PHB",
+    "english": "Skilled",
+    "page": 170,
+    "rawKeys": [
+      "ENG_name",
+      "name",
+      "source",
+      "page",
+      "reprintedAs",
+      "skillToolLanguageProficiencies",
+      "entries",
+      "translator"
+    ],
+    "mechanics": {
+      "skillToolLanguageProficiencies": [
+        {
+          "choose": [
+            {
+              "from": [
+                "任意技能",
+                "任意工具"
+              ],
+              "count": 3
+            }
+          ]
+        }
+      ]
+    },
+    "entryId": "kiwee:feat:phb:skilled::::::"
+  },
+  "skills": [
+    {
+      "reference": "acrobatics",
+      "english": "Acrobatics",
+      "name": "特技",
+      "page": 176,
+      "entryId": "kiwee:rule:phb:acrobatics:::::::skill",
+      "entryHash": "8ca32b64f30bb2b8ab2c4564827711691f4db1f2c3dc53ec2e8e0145e9f7ba3e",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "dex"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "animalHandling",
+      "english": "Animal Handling",
+      "name": "驯兽",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:animal%20handling:::::::skill",
+      "entryHash": "64edc7cd9cd44d1414a7fcd13709bf4806f4daecac410d3ff1a2d6518844ae21",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "wis"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "arcana",
+      "english": "Arcana",
+      "name": "奥秘",
+      "page": 177,
+      "entryId": "kiwee:rule:phb:arcana:::::::skill",
+      "entryHash": "476e3200e969ad709c046bcb65c96af2cbf91b6eaf190e1330f0248430eeada8",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "int"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "athletics",
+      "english": "Athletics",
+      "name": "运动",
+      "page": 175,
+      "entryId": "kiwee:rule:phb:athletics:::::::skill",
+      "entryHash": "bcc1907431ee4a1906218c4c464c9841335ee2aee571383dfd153ffd318837ee",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "str"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "deception",
+      "english": "Deception",
+      "name": "欺瞒",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:deception:::::::skill",
+      "entryHash": "ddf5a235155b72507c8e6135937bc4f9f268e11815eeb00378bd1185fd64b32d",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "cha"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "history",
+      "english": "History",
+      "name": "历史",
+      "page": 177,
+      "entryId": "kiwee:rule:phb:history:::::::skill",
+      "entryHash": "3f6103d27363ff7b59bdc5b36144281d939b943266180704e8af508051ac34c9",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "int"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "insight",
+      "english": "Insight",
+      "name": "洞悉",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:insight:::::::skill",
+      "entryHash": "a41a2b1729f75540024bbc4b337b3320e32aea7a4a53489b1e0b5f8e5070c61e",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "wis"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "intimidation",
+      "english": "Intimidation",
+      "name": "威吓",
+      "page": 179,
+      "entryId": "kiwee:rule:phb:intimidation:::::::skill",
+      "entryHash": "a9ce376e19d35ca098c7be425e7ca6f44629c98469f89262f91cfacfbd9167eb",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "cha"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "investigation",
+      "english": "Investigation",
+      "name": "调查",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:investigation:::::::skill",
+      "entryHash": "5915454863649f5f793a61418155e2855cbd0769e5530de14d9c3c07e9b1e375",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "int"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "medicine",
+      "english": "Medicine",
+      "name": "医药",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:medicine:::::::skill",
+      "entryHash": "26cbb49ffb3f641e0b24ab69da89020e5c436f1f70f0380c0272f59ad7ee531b",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "wis"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "nature",
+      "english": "Nature",
+      "name": "自然",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:nature:::::::skill",
+      "entryHash": "a8707f8629513d8c065ea9e4f2690400724e135000dc90db8ee5e4d26608bab2",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "int"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "perception",
+      "english": "Perception",
+      "name": "察觉",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:perception:::::::skill",
+      "entryHash": "060fc6677cc3153be884a2756af73f62258b03b10167b0d0021310851e97526c",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "wis"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "performance",
+      "english": "Performance",
+      "name": "表演",
+      "page": 179,
+      "entryId": "kiwee:rule:phb:performance:::::::skill",
+      "entryHash": "fafc3968477e47d9c61bf77eca7d99dee37fcc332ae1d9a33926b48749545694",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "cha"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "persuasion",
+      "english": "Persuasion",
+      "name": "游说",
+      "page": 179,
+      "entryId": "kiwee:rule:phb:persuasion:::::::skill",
+      "entryHash": "d5c98ff4544176b41898d4aa0593fc74a1587bd021a1120b44ddb0f69ad892a3",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "cha"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "religion",
+      "english": "Religion",
+      "name": "宗教",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:religion:::::::skill",
+      "entryHash": "8d928d69b55dc1a1bbc0d257de046ba22f47671539558ec0c79d94abd58ae526",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "int"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "sleightOfHand",
+      "english": "Sleight of Hand",
+      "name": "巧手",
+      "page": 177,
+      "entryId": "kiwee:rule:phb:sleight%20of%20hand:::::::skill",
+      "entryHash": "af110b4b63488d1f608c2a6d2a114f59e203278a1a5b217bd3cfab8b0bb765cb",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "dex"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "stealth",
+      "english": "Stealth",
+      "name": "隐匿",
+      "page": 177,
+      "entryId": "kiwee:rule:phb:stealth:::::::skill",
+      "entryHash": "e2db551a74512d011cec77a3d281d3f130852cbd13011df556259defd7886ffc",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "dex"
+      },
+      "category": "skill"
+    },
+    {
+      "reference": "survival",
+      "english": "Survival",
+      "name": "求生",
+      "page": 178,
+      "entryId": "kiwee:rule:phb:survival:::::::skill",
+      "entryHash": "96702e7698e9771af1f8687b65a20364f57a00f305fa338ed761543a4dba023b",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "ability",
+        "entries",
+        "translator"
+      ],
+      "mechanics": {
+        "ability": "wis"
+      },
+      "category": "skill"
+    }
+  ],
+  "tools": [
+    {
+      "reference": "Alchemist's Supplies|PHB",
+      "english": "Alchemist's Supplies",
+      "name": "炼金工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:alchemist's%20supplies::::::",
+      "entryHash": "4dd1b27022f8813541c0c8faaf5f775b06ee03ea97df28114f3ac169c091a1fd",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 8,
+        "value": 5000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Bagpipes|PHB",
+      "english": "Bagpipes",
+      "name": "风笛",
+      "page": 154,
+      "entryId": "kiwee:item:phb:bagpipes::::::",
+      "entryHash": "5e44b93b785206afac053a81d2b13c415c35bb2cc38341d184aa78a37053ff06",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 6,
+        "value": 3000
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Brewer's Supplies|PHB",
+      "english": "Brewer's Supplies",
+      "name": "酿酒工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:brewer's%20supplies::::::",
+      "entryHash": "1b20016d759f77999d880a4771ba43971a8862acd7a60c32f932c22964d8c364",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 9,
+        "value": 2000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Calligrapher's Supplies|PHB",
+      "english": "Calligrapher's Supplies",
+      "name": "书法工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:calligrapher's%20supplies::::::",
+      "entryHash": "fb236a954fa497de621dfb30d43b9727b32e92e80126cd9dea429aca31500a24",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 5,
+        "value": 1000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Carpenter's Tools|PHB",
+      "english": "Carpenter's Tools",
+      "name": "木匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:carpenter's%20tools::::::",
+      "entryHash": "8b10a8b9e16f5b54b22aea535699360ddbfec960763a3e5330596adc133d5aff",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 6,
+        "value": 800
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Cartographer's Tools|PHB",
+      "english": "Cartographer's Tools",
+      "name": "制图工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:cartographer's%20tools::::::",
+      "entryHash": "1d873f82e4ddffacfefe0a74f707d8ac5a3f2bca2fa181349fc04c66b5317fc2",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 6,
+        "value": 1500
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Cobbler's Tools|PHB",
+      "english": "Cobbler's Tools",
+      "name": "鞋匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:cobbler's%20tools::::::",
+      "entryHash": "5ec78cdf915f457033db15a2d26384bb8c8706063d51b44b281c04264c30022e",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 5,
+        "value": 500
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Cook's Utensils|PHB",
+      "english": "Cook's Utensils",
+      "name": "厨师工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:cook's%20utensils::::::",
+      "entryHash": "60e5977440997a250301ebc91c4dd7302d7074279ad161ac3d83557e716755c8",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 8,
+        "value": 100
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Drum|PHB",
+      "english": "Drum",
+      "name": "鼓",
+      "page": 154,
+      "entryId": "kiwee:item:phb:drum::::::",
+      "entryHash": "000b83c8b7bdf4359d85243c1d927314d7e60bb89e38c040994d70bb1fadb1d7",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 3,
+        "value": 600
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Dulcimer|PHB",
+      "english": "Dulcimer",
+      "name": "扬琴",
+      "page": 154,
+      "entryId": "kiwee:item:phb:dulcimer::::::",
+      "entryHash": "66366cb575930f2993db97498ef257d47602b32346f254968811ec4f20d58d13",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 10,
+        "value": 2500
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Flute|PHB",
+      "english": "Flute",
+      "name": "长笛",
+      "page": 154,
+      "entryId": "kiwee:item:phb:flute::::::",
+      "entryHash": "3d78618cafb450ece1690e8897dbc8e4e681dbc49641e9ad90b3e1139c7dedb1",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 1,
+        "value": 200
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Glassblower's Tools|PHB",
+      "english": "Glassblower's Tools",
+      "name": "玻璃匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:glassblower's%20tools::::::",
+      "entryHash": "8efa61c4a684d41357d728770e077ada991d88dbcdce7d08e664b7fed2f457c5",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 5,
+        "value": 3000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Horn|PHB",
+      "english": "Horn",
+      "name": "号角",
+      "page": 154,
+      "entryId": "kiwee:item:phb:horn::::::",
+      "entryHash": "1c1e542b506a829604bd664b603439533e49ec59fe9d3bf44e1f2e78f296e896",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 2,
+        "value": 300
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Jeweler's Tools|PHB",
+      "english": "Jeweler's Tools",
+      "name": "珠宝匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:jeweler's%20tools::::::",
+      "entryHash": "09dbc1bb1f2186ecaa436d43cd443335bd58b3ed4c403c8426a9cacc260f418f",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 2,
+        "value": 2500
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Leatherworker's Tools|PHB",
+      "english": "Leatherworker's Tools",
+      "name": "皮匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:leatherworker's%20tools::::::",
+      "entryHash": "32c7ab8234facd5ad62a2f13a5cfcfb3636f3e78a97bd49aff252cc412708421",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 5,
+        "value": 500
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Lute|PHB",
+      "english": "Lute",
+      "name": "鲁特琴",
+      "page": 154,
+      "entryId": "kiwee:item:phb:lute::::::",
+      "entryHash": "b900cbbaa80e0fc837583367df624b8a1dc35ec9963d8024923962e91f4f0606",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 2,
+        "value": 3500
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Lyre|PHB",
+      "english": "Lyre",
+      "name": "里拉琴",
+      "page": 154,
+      "entryId": "kiwee:item:phb:lyre::::::",
+      "entryHash": "dc913d631432983248cd5348cd84e20df958cfa2ee5367770d4c8d1707488261",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 2,
+        "value": 3000
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Mason's Tools|PHB",
+      "english": "Mason's Tools",
+      "name": "石匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:mason's%20tools::::::",
+      "entryHash": "7102a58c2eb896d19c6391dee72dd461ca7226008b0fec15fea0a17a116e0b71",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 8,
+        "value": 1000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Painter's Supplies|PHB",
+      "english": "Painter's Supplies",
+      "name": "画家工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:painter's%20supplies::::::",
+      "entryHash": "83eae9470eddb9799e6529c057e77921e1f50fc90a4aac99809a472ee2171230",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 5,
+        "value": 1000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Pan Flute|PHB",
+      "english": "Pan Flute",
+      "name": "排箫",
+      "page": 154,
+      "entryId": "kiwee:item:phb:pan%20flute::::::",
+      "entryHash": "2be9f8c00e9b518ad458d0e95f4216997764dbc2248bccd339b6228365a520b8",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 2,
+        "value": 1200
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Potter's Tools|PHB",
+      "english": "Potter's Tools",
+      "name": "陶匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:potter's%20tools::::::",
+      "entryHash": "2e074dd46205b4b4ae4a8e22b8ae06a59d3ec9e66605543d14a7fc8b9d858fcf",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 3,
+        "value": 1000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Shawm|PHB",
+      "english": "Shawm",
+      "name": "芦笛",
+      "page": 154,
+      "entryId": "kiwee:item:phb:shawm::::::",
+      "entryHash": "a60788238253a55bcfa066967fbd7a4c6e5b70dd6304ceea5f632fad89c58ffb",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 1,
+        "value": 200
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Smith's Tools|PHB",
+      "english": "Smith's Tools",
+      "name": "铁匠工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:smith's%20tools::::::",
+      "entryHash": "f0e4b09e24cd46c02151be90421f9fba57e96e5b7066bda64cd437133651e28a",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 8,
+        "value": 2000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Tinker's Tools|PHB",
+      "english": "Tinker's Tools",
+      "name": "修补工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:tinker's%20tools::::::",
+      "entryHash": "daa3058f1cd0471fe4142bcb2edeb62843bee9111485121fa91b8423ac7b0e73",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 10,
+        "value": 5000
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Viol|PHB",
+      "english": "Viol",
+      "name": "提琴",
+      "page": 154,
+      "entryId": "kiwee:item:phb:viol::::::",
+      "entryHash": "1a008742d9e24b3fd86475a5a715083bff57094a8944aa69e7aacaa87c0bb94d",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "edition",
+        "rarity",
+        "weight",
+        "value"
+      ],
+      "mechanics": {
+        "type": "INS",
+        "rarity": "none",
+        "weight": 1,
+        "value": 3000
+      },
+      "category": "baseitem",
+      "rawEdition": "classic"
+    },
+    {
+      "reference": "Weaver's Tools|PHB",
+      "english": "Weaver's Tools",
+      "name": "织布工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:weaver's%20tools::::::",
+      "entryHash": "c72eedda99754a5c54e9ae60e8b838d1c15de8d281ecacd39e96c1c25e31c664",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 5,
+        "value": 100
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Woodcarver's Tools|PHB",
+      "english": "Woodcarver's Tools",
+      "name": "木雕工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:woodcarver's%20tools::::::",
+      "entryHash": "54c9a66190b512c533c895ef5df953872b89541e0ae31e382563ea03406f6fbf",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "AT",
+        "rarity": "none",
+        "weight": 5,
+        "value": 100
+      },
+      "category": "baseitem"
+    },
+    {
+      "reference": "Dice Set|PHB",
+      "english": "Dice Set",
+      "name": "骰子组",
+      "page": 154,
+      "entryId": "kiwee:item:phb:dice%20set::::::",
+      "entryHash": "5ae79c5acbf50d7c4195adc3b4282423bc89cf705ba01b0fe6ea4458dee236e6",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "reprintedAs",
+        "rarity",
+        "value",
+        "translator"
+      ],
+      "mechanics": {
+        "type": "GS",
+        "rarity": "none",
+        "value": 10
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Disguise Kit|PHB",
+      "english": "Disguise Kit",
+      "name": "易容工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:disguise%20kit::::::",
+      "entryHash": "29f6aad9607b0274175c9a16462f4b47d1da042e9a60e8008a342fbe80027cb0",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "entries",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "T",
+        "rarity": "none",
+        "weight": 3,
+        "value": 2500
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Dragonchess Set|PHB",
+      "english": "Dragonchess Set",
+      "name": "龙棋组",
+      "page": 154,
+      "entryId": "kiwee:item:phb:dragonchess%20set::::::",
+      "entryHash": "28e4e703896040f3dfbc7b9724d5f78a5fa02c317520261fc23ae9879a0e9646",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "translator"
+      ],
+      "mechanics": {
+        "type": "GS",
+        "rarity": "none",
+        "weight": 0.5,
+        "value": 100
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Forgery Kit|PHB",
+      "english": "Forgery Kit",
+      "name": "文书伪造工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:forgery%20kit::::::",
+      "entryHash": "201c193074a7ef5d417d29e11d01d9b534a21b9da3bcc78d273549e1778228d1",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "entries",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "T",
+        "rarity": "none",
+        "weight": 5,
+        "value": 1500
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Herbalism Kit|PHB",
+      "english": "Herbalism Kit",
+      "name": "草药工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:herbalism%20kit::::::",
+      "entryHash": "d2ec551c6273d6af0db5d3b983b7b35f64171601d08f11e7663bd0d61593f3ad",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "entries",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "T",
+        "rarity": "none",
+        "weight": 3,
+        "value": 500
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Navigator's Tools|PHB",
+      "english": "Navigator's Tools",
+      "name": "领航工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:navigator's%20tools::::::",
+      "entryHash": "12e693c80dfb79d32c8c79ba667d0c54ddb3d7efa98493e0ba3d90f624fe0734",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "entries",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "T",
+        "rarity": "none",
+        "weight": 2,
+        "value": 2500
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Playing Card Set|PHB",
+      "english": "Playing Card Set",
+      "name": "整副纸牌",
+      "page": 154,
+      "entryId": "kiwee:item:phb:playing%20card%20set::::::",
+      "entryHash": "1226b7acd675e843fbda69fd989f16ee691c59e20ca5a18aa8e23f4372413c34",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "value",
+        "translator"
+      ],
+      "mechanics": {
+        "type": "GS",
+        "rarity": "none",
+        "value": 50
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Poisoner's Kit|PHB",
+      "english": "Poisoner's Kit",
+      "name": "毒药工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:poisoner's%20kit::::::",
+      "entryHash": "60ee5b454a4f52fe27b11387c1dc16db39be2de43b0bdcff28e038d878ba12c0",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "entries",
+        "additionalEntries"
+      ],
+      "mechanics": {
+        "type": "T",
+        "rarity": "none",
+        "weight": 2,
+        "value": 5000
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Thieves' Tools|PHB",
+      "english": "Thieves' Tools",
+      "name": "盗贼工具",
+      "page": 154,
+      "entryId": "kiwee:item:phb:thieves'%20tools::::::",
+      "entryHash": "f650903c1be950c0fe447322b6b09b7f8cc8b906d4038c19a4dfa5b37fe40d46",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "srd",
+        "basicRules",
+        "additionalSources",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "weight",
+        "value",
+        "entries",
+        "additionalEntries",
+        "hasFluffImages"
+      ],
+      "mechanics": {
+        "type": "T",
+        "rarity": "none",
+        "weight": 1,
+        "value": 2500
+      },
+      "category": "item"
+    },
+    {
+      "reference": "Three-Dragon Ante Set|PHB",
+      "english": "Three-Dragon Ante Set",
+      "name": "整副三龙牌",
+      "page": 154,
+      "entryId": "kiwee:item:phb:three-dragon%20ante%20set::::::",
+      "entryHash": "10dd9caffb31eeb533f4f5cdd8845ec609b22322d3b234f3146e601d025ff601",
+      "rawKeys": [
+        "ENG_name",
+        "name",
+        "type",
+        "source",
+        "page",
+        "basicRules",
+        "referenceSources",
+        "reprintedAs",
+        "rarity",
+        "value",
+        "translator"
+      ],
+      "mechanics": {
+        "type": "GS",
+        "rarity": "none",
+        "value": 100
+      },
+      "category": "item"
+    }
+  ],
+  "vehicles": [
+    {
+      "reference": "Vehicles (Land)|PHB",
+      "name": "陆上载具",
+      "key": "land-vehicles"
+    },
+    {
+      "reference": "Vehicles (Water)|PHB",
+      "name": "水上载具",
+      "key": "water-vehicles"
+    }
+  ],
+  "tables": {
+    "tools": {
+      "page": 154,
+      "entryHash": "b9a6b73ae9591063611bd752b9c0c8c9a0e172c61b18479ccf10f14d73ff3234"
+    },
+    "skills": {
+      "page": 174,
+      "entryHash": "11c9ab01a028d562939f7d68f89fbe4626441432af5962850787746770a2df5f"
+    }
+  }
+}

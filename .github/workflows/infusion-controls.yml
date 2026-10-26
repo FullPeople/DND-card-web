@@ -1,0 +1,216 @@
+name: Verify reviewed infusion and invocation controls
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/infusion-*.test.ts'
+      - 'tests/radiant-*.test.ts'
+      - 'tests/refueling-*.test.ts'
+      - 'tests/fixtures/radiantRefueling*.ts'
+      - 'tests/e2e/radiantRefueling*.ts'
+      - 'tests/attuned-infusion*.test.ts'
+      - 'tests/e2e/attunedInfusion*.ts'
+      - 'tests/arcane-focus*.test.ts'
+      - 'tests/invocation*.test.ts'
+      - 'tests/reviewed-feats*.test.ts'
+      - 'tests/reviewed-armor-*.test.ts'
+      - 'tests/reviewed-modern-*.test.ts'
+      - 'tests/reviewed-weapon-master*.test.ts'
+      - 'tests/reviewed-skilled*.test.ts'
+      - 'tests/reviewed-linguist*.test.ts'
+      - 'tests/e2e/reviewedLinguist*.ts'
+      - 'tests/e2e/linguistControls.spec.ts'
+      - 'tests/helpers/frozenReviewedLinguistLegacy.ts'
+      - 'tests/e2e/reviewedSkilled*.ts'
+      - 'tests/e2e/skilledControls.spec.ts'
+      - 'tests/helpers/frozenReviewedSkilledLegacy.ts'
+      - 'tests/helpers/installedPlaywrightSelectors.ts'
+      - 'tests/e2e/reviewedWeaponMaster*.ts'
+      - 'tests/e2e/weaponMasterControls.spec.ts'
+      - 'tests/training-chips-editing.test.ts'
+      - 'tests/e2e/reviewedArmorFeat*.ts'
+      - 'tests/e2e/armorFeatControls.spec.ts'
+      - 'tests/e2e/reviewedRuleBrowserState.ts'
+      - 'tests/helpers/frozenReviewedFeatLegacy.ts'
+      - 'tests/helpers/frozenReviewedWeaponLegacy.ts'
+      - 'tests/e2e/reviewedPassiveFeat*.ts'
+      - 'tests/enhanced-weapon*.test.ts'
+      - 'tests/returning-weapon*.test.ts'
+      - 'tests/e2e/infusion*.ts'
+      - 'tests/e2e/arcaneFocus*.ts'
+      - 'tests/e2e/invocation*.ts'
+      - 'tests/e2e/enhancedWeapon*.ts'
+      - 'tests/e2e/returningWeapon*.ts'
+      - 'tests/e2e/fixtures.ts'
+      - 'tests/e2e/authoredChoicesFixture.ts'
+      - 'docs/data/automation*'
+      - 'playwright.infusions.config.ts'
+      - 'vite*.config.ts'
+      - 'package*.json'
+      - 'tsconfig*.json'
+      - '.github/workflows/infusion-controls.yml'
+permissions:
+  contents: read
+concurrency:
+  group: infusion-controls-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: verify (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop, narrow]
+    env:
+      INFUSION_SOURCE_DIR: .local-evidence/infusion-upstream
+      INFUSION_FROZEN_DIR: .local-evidence/infusion-upstream
+      INVOCATION_FROZEN_DIR: .local-evidence/infusion-upstream
+      INFUSION_LEGACY_REQUIRED: '1'
+      REFUELING_LEGACY_REQUIRED: '1'
+      REFUELING_FROZEN_DIR: .local-evidence/infusion-upstream
+      REFUELING_FROZEN_REQUIRED: '1'
+      REVIEWED_FEATS_FROZEN_DIR: .local-evidence/passive-feat-upstream
+      PASSIVE_FEAT_TEST_INPUTS: .local-evidence/passive-feat-upstream
+      REVIEWED_FEAT_LEGACY_REQUIRED: '1'
+      REVIEWED_WEAPON_LEGACY_REQUIRED: '1'
+      REVIEWED_SKILLED_LEGACY_REQUIRED: '1'
+      REVIEWED_LINGUIST_LEGACY_REQUIRED: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - name: Fetch six frozen inputs without publishing source text
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision=e2623b204ddbdf2bcfa8317acfc962de89c676e2
+          mkdir -p "$INFUSION_SOURCE_DIR"
+          for path in optionalfeatures.json class/class-artificer.json items-base.json items.json class/class-warlock.json spells/spells-phb.json; do
+            input_revision="$revision"; if [ "$path" = items.json ]; then input_revision=5cc0bbe2c2b241a334e731af4448bdba2168e8bd; fi
+            filename="$(basename "$path" .json)-$revision.json"
+            limit=2000000; if [ "$path" = items.json ]; then limit=8000000; fi
+            curl --disable --fail --silent --show-error --max-time 60 --max-filesize "$limit" --proto '=https' \
+              "https://raw.githubusercontent.com/tjliqy/5etools-cn/$input_revision/data/$path" \
+              --output "$INFUSION_SOURCE_DIR/$filename"
+          done
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const infusion=JSON.parse(readFileSync('src/core/automation/infusionEvidence.json','utf8'));
+          const invocation=JSON.parse(readFileSync('src/core/automation/invocationEvidence.json','utf8'));
+          const revision='e2623b204ddbdf2bcfa8317acfc962de89c676e2';
+          if(infusion.frozenRevision!==revision||invocation.frozenRevision!==revision)throw Error('Unexpected frozen source revision');
+          const expected=new Map();
+          for(const [path,hash] of [...Object.entries(infusion.inputs),...Object.entries(invocation.inputs),['items-base.json','8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff']]){
+            if(expected.has(path)&&expected.get(path)!==hash)throw Error('Conflicting evidence hash: '+path);
+            expected.set(path,hash);
+          }
+          const results=[],rows=[];
+          for(const [path,hash] of expected){
+            const filename=path.split('/').at(-1).replace('.json',`-${revision}.json`);
+            const bytes=readFileSync(`${process.env.INFUSION_SOURCE_DIR}/${filename}`);
+            const sha256=createHash('sha256').update(JSON.stringify(JSON.parse(bytes.toString('utf8')))).digest('hex');
+            if(sha256!==hash)throw Error('Frozen input hash mismatch: '+path);
+            results.push({name:path,revision:path==='items.json'?'5cc0bbe2c2b241a334e731af4448bdba2168e8bd':revision,bytes:bytes.length,sha256});
+            rows.push({url:`https://5e.kiwee.top/data/${path}`,path:filename,sha256});
+          }
+          if(rows.length!==6)throw Error('Expected exactly six frozen source inputs');
+          writeFileSync(`${process.env.INFUSION_FROZEN_DIR}/index.json`,JSON.stringify({rows}));
+          writeFileSync('.local-evidence/infusion-source-verification.json',JSON.stringify({revision,verified:true,inputs:results},null,2)+'\n');
+          console.log('Verified six frozen inputs; source text is not an artifact.');
+          NODE
+      - name: Verify twenty-one reviewed feat, language and class inputs without publishing source text
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$REVIEWED_FEATS_FROZEN_DIR"
+          for path in class/class-artificer.json class/class-barbarian.json class/class-bard.json class/class-cleric.json class/class-druid.json class/class-fighter.json class/class-monk.json class/class-paladin.json class/class-ranger.json class/class-rogue.json class/class-sorcerer.json class/class-warlock.json class/class-wizard.json feats.json variantrules.json items-base.json items.json skills.json generated/gendata-tables.json magicvariants.json languages.json; do
+            revision=e2623b204ddbdf2bcfa8317acfc962de89c676e2
+            if [ "$path" = feats.json ] || [ "$path" = items.json ] || [ "$path" = magicvariants.json ] || [ "$path" = languages.json ] || [ "$path" = generated/gendata-tables.json ]; then revision=5cc0bbe2c2b241a334e731af4448bdba2168e8bd; fi
+            limit=3000000; if [ "$path" = items.json ] || [ "$path" = generated/gendata-tables.json ]; then limit=10000000; fi
+            curl --disable --fail --silent --show-error --max-time 60 --max-filesize "$limit" --proto '=https' \
+              "https://raw.githubusercontent.com/tjliqy/5etools-cn/$revision/data/$path" \
+              --output "$REVIEWED_FEATS_FROZEN_DIR/$(basename "$path")"
+          done
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const expected={
+            "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
+            "class/class-barbarian.json": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+            "class/class-bard.json": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+            "class/class-cleric.json": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+            "class/class-druid.json": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+            "class/class-fighter.json": "a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509",
+            "class/class-monk.json": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+            "class/class-paladin.json": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+            "class/class-ranger.json": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+            "class/class-rogue.json": "b5c62a8c5356438a09bc64bc96b71968fa3766d46102a0a1de11713e5ee0d251",
+            "class/class-sorcerer.json": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "class/class-warlock.json": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+            "class/class-wizard.json": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03",
+            "feats.json": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+            "variantrules.json": "21eef107d25cf438eb85894387fb6f834478d80bc467791c54fe66db9e498c44",
+            "items-base.json": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+            "items.json": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+            "skills.json": "313019e6987bffdcdb4c74bdd05edd475c6f33410637f7b42f85760c5beb8941",
+            "generated/gendata-tables.json": "904e726f5b361f20456f2f2569f52bc82607ff0285d393e60d6cc947497806cf",
+            "magicvariants.json": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+            "languages.json": "fae8ff63ba6d28b71a132f37da85dfb53c8a3dce9f931d49d2b7e12214afae98"
+          };
+          const rows=[];
+          for(const [path,hash] of Object.entries(expected)){
+            const filename=path.split('/').at(-1),bytes=readFileSync(`${process.env.REVIEWED_FEATS_FROZEN_DIR}/${filename}`);
+            const sha256=createHash('sha256').update(JSON.stringify(JSON.parse(bytes.toString('utf8')))).digest('hex');
+            if(sha256!==hash)throw Error('Frozen passive-feat input mismatch: '+path);
+            const revision=['feats.json','items.json','magicvariants.json','generated/gendata-tables.json','languages.json'].includes(path)?'5cc0bbe2c2b241a334e731af4448bdba2168e8bd':'e2623b204ddbdf2bcfa8317acfc962de89c676e2';
+            rows.push({url:`https://5e.kiwee.top/data/${path}`,path:filename,sha256,revision,retrievalUrl:`https://raw.githubusercontent.com/tjliqy/5etools-cn/${revision}/data/${path}`});
+          }
+          if(rows.length!==21)throw Error('Expected exactly twenty-one reviewed feat source inputs');
+          writeFileSync(`${process.env.REVIEWED_FEATS_FROZEN_DIR}/index.json`,JSON.stringify({rows}));
+          writeFileSync('.local-evidence/passive-feat-source-verification.json',JSON.stringify({verified:true,rows},null,2)+'\n');
+          console.log('Verified twenty-one reviewed feat, language and class inputs; source text is not an artifact.');
+          NODE
+      - name: Fetch exact old consumer for charge-preservation verification
+        run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
+      - name: Fetch ninth-stage consumer for localized-v2 and ring preservation
+        run: git fetch --no-tags --depth=1 origin 2f8bb8938c55a0f1a937efe95bdbf30222680f86
+      - name: Fetch accepted pre-feat consumer for retained-intent compatibility
+        run: git fetch --no-tags --depth=1 origin a5cdee8682a4b96fe77f946a55e95d76250c7118
+      - name: Fetch exact accepted pre-Weapon Master consumer
+        run: git fetch --no-tags --depth=1 origin d3540abcf9f9600cdb683433e7b05a767a1dd0a8
+      - name: Fetch exact accepted pre-Skilled consumer
+        run: git fetch --no-tags --depth=1 origin 52d5be10e161464d5e0846d1dc2202ea1169754b
+      - name: Fetch exact accepted pre-Linguist consumer
+        run: git fetch --no-tags --depth=1 origin 78e1fac62bddc52e36d5ad7a2cc4d18e8f0acc0e
+      - name: Source replay, persistence, restrictions and UI guards
+        run: npx vitest run tests/radiant-*.test.ts tests/refueling-*.test.ts tests/infusion-charge*.test.ts tests/attuned-infusion*.test.ts tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-spell-expansion.test.ts tests/invocation-level9.test.ts tests/invocation-atwill-final.test.ts tests/invocation-skill-guard.test.ts tests/invocation-dual-payment.test.ts tests/invocation-dual-controls.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
+      - name: Reviewed passive-feat source, lifecycle and player controls
+        run: npx vitest run tests/reviewed-feats*.test.ts tests/reviewed-armor-*.test.ts tests/reviewed-modern-*.test.ts tests/reviewed-weapon-master*.test.ts tests/reviewed-skilled*.test.ts tests/reviewed-linguist*.test.ts tests/training-chips-editing.test.ts --maxWorkers=1
+      - run: npx tsc -b
+      - name: Formal standalone build with the required runtime coverage gate
+        run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone
+      - run: npx playwright install --with-deps chromium
+      - name: Real App target activation, reload, withdrawal, source restriction and read-only tabs
+        run: npx playwright test --config playwright.infusions.config.ts --project=${{ matrix.project }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: infusion-control-evidence-${{ matrix.project }}
+          include-hidden-files: true
+          path: |
+            .local-evidence/infusion-browser/
+            !.local-evidence/infusion-browser/.playwright-artifacts*/**
+            !.local-evidence/infusion-browser/linguistControls-*/**
+            .local-evidence/linguist-browser-safe/
+            .local-evidence/infusion-source-verification.json
+            .local-evidence/passive-feat-source-verification.json
+          if-no-files-found: warn
+          retention-days: 7

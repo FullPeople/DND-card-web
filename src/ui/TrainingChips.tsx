@@ -11,19 +11,25 @@ export function TrainingChips({ label, value, onChange, editAll = false,group,so
   const allowed = useContext(SheetEditContext), preview = useSheetContext('reference',ReferenceContext);
   const [editing, setEditing] = useState(false), [text, setText] = useState(value), [order, setOrder] = useState<string[]>();
   const ref = useRef<HTMLDivElement>(null), cancel = useRef<(() => void) | undefined>(undefined);
+  // Passive blur must not turn displayed automatic training into an override.
+  // Enter is an explicit save; refs guard its following blur in the same turn.
+  const dirty = useRef(false), committed = useRef(value);
   const items = order || value.split(/[、\n；;]/).map(s => s.trim()).filter(Boolean);
   const live = useRef(items); live.current = items;
-  useEffect(() => { setText(value); setOrder(undefined); }, [value]);
+  useEffect(() => { dirty.current = false; committed.current = value; setText(value); setOrder(undefined); }, [value, allowed, editAll]);
   useEffect(() => () => cancel.current?.(), []);
-  function save() { if (allowed) onChange(text); setEditing(false); }
+  function save(explicit = false) {
+    if (allowed && (dirty.current || explicit)) { dirty.current = false; committed.current = text; onChange(text); }
+    setEditing(false);
+  }
   return <div className="training-chips" ref={ref}>
-    {allowed && (editing || editAll) ? <input autoFocus aria-label={`${label}熟练记录`} value={text} onChange={e => setText(e.target.value)} onBlur={save} onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setText(value); setEditing(false); } }}/>
+    {allowed && (editing || editAll) ? <input autoFocus aria-label={`${label}熟练记录`} value={text} onChange={e => { dirty.current = e.target.value !== committed.current; setText(e.target.value); }} onBlur={() => save()} onKeyDown={e => { if (e.key === 'Enter') save(true); if (e.key === 'Escape') { dirty.current = false; committed.current = value; setText(value); setEditing(false); } }}/>
       : <>{items.map((name, index) => {
         const chip = trainingChipReference(name,label === '语言' ? 'language' : 'item',preview?.resolve,group&&source?{group,source}:undefined);
         // Reading/commit consumers resolve again: keep that lookup on the typed
         // category handle while leaving the user's editable token untouched.
         const reference=chip.kind==='itemProperty'&&chip.entry?.raw._trainingCategory?`entry:${chip.entry.id}`:chip.reference;
-        return <span className="feature-bubble" data-training-index={index} key={`${name}:${index}`}><Reference className="feature-caption" menuOptions={{origin:'sheet',canRemove:allowed,remove:()=>onChange(items.filter((_,i)=>i!==index).join('、'))}} reference={reference} kind={chip.kind} entry={chip.entry} onClick={() => { if (allowed) { setText(value); setEditing(true); } }} onPointerDown={event => {
+        return <span className="feature-bubble" data-training-index={index} key={`${name}:${index}`}><Reference className="feature-caption" menuOptions={{origin:'sheet',canRemove:allowed,remove:()=>onChange(items.filter((_,i)=>i!==index).join('、'))}} reference={reference} kind={chip.kind} entry={chip.entry} onClick={() => { if (allowed) { dirty.current = false; committed.current = value; setText(value); setEditing(true); } }} onPointerDown={event => {
 
           if(!allowed)return;
           let current = index;

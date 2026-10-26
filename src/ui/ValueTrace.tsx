@@ -16,7 +16,7 @@ export function traceForInput(context:Context,label:string,value:number,change:(
  const {c,d}=context;
  for(const [a,name] of Object.entries(ABILITY_LABELS))if(label===`${name}基础值`)return {title:name,value,result:d.abilities[a as Ability],rows:d.trace[a]?.slice()||[],change,min:1,max:30};
  for(const [target,name] of Object.entries(labels))if(label===`${name}调整值`)return {title:name,value,result:target==='hp'?d.maxHp:d[target as Exclude<SheetBonus,'hp'>],rows:d.trace[target]||[],change,min:-9999,max:9999};
- if(label==='法术攻击调整值'||label==='法术DC调整值'){const settings=spellState(c),values=spellValues(c,d);return {title:label.replace('调整值',''),value,result:label==='法术攻击调整值'?values.attack:values.dc,rows:[`施法属性：${ABILITY_LABELS[settings.ability]} ${d.modifiers[settings.ability]}`,`熟练加值 ${d.proficiency}`,...(label==='法术DC调整值'?['基础 DC 8']:[]),`手动调整 ${value}`],change,min:-100,max:100};}
+ if(label==='法术攻击调整值'||label==='法术DC调整值'){const settings=spellState(c),values=spellValues(c,d);return {title:label.replace('调整值',''),value,result:label==='法术攻击调整值'?values.attack:values.dc,rows:[`施法属性：${ABILITY_LABELS[settings.ability]} ${d.modifiers[settings.ability]}`,`熟练加值 ${d.proficiency}`,...(label==='法术DC调整值'?['基础 DC 8']:d.trace.spellAttack||[]),`手动调整 ${value}`],change,min:-100,max:100};}
  return undefined;
 }
 export function ValueTraceProvider({c,d,enabled=true,children}:{c:Character;d:Derived;enabled?:boolean;children:ReactNode}){

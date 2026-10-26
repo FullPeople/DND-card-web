@@ -1,0 +1,23 @@
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {it,expect,vi} from 'vitest';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+vi.mock('../src/ui/Reference',()=>({Reference:({children}:any)=>createElement('span',null,children)}));
+import {normalizeData} from '../src/data/catalog';
+import {newCharacter} from '../src/core/model';
+import {newAutomationState} from '../src/core/automation/state';
+import {sheetChoices,setSheetChoiceSlot} from '../src/core/automation/choices';
+import {syncFeatures} from '../src/core/sheet';
+import {evaluate} from '../src/core/engine';
+import {ClassChoiceRecords} from '../src/ui/ClassChoiceRecords';
+import {ChoiceWorkspaceContext} from '../src/ui/ChoiceWorkspaceContext';
+const directory=process.env.REVIEWED_FEATS_FROZEN_DIR;
+it.skipIf(!directory)('actual frozen PHB Wizard4 ASI exposes one shared three-kind Skilled control without manual feat drops or unconfirmed effects',()=>{
+ const hashes={'feats.json':'0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6','class/class-wizard.json':'7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03'},index=JSON.parse(readFileSync(`${directory}/index.json`,'utf8'));
+ const catalog=Object.entries(hashes).flatMap(([suffix,expected])=>{const row=index.rows.find((row:any)=>row.url.endsWith(`/data/${suffix}`));expect(row).toBeDefined();const data=JSON.parse(readFileSync(`${directory}/${row.path}`,'utf8'));expect(createHash('sha256').update(JSON.stringify(data)).digest('hex')).toBe(expected);return normalizeData(data,'skilled-frozen-controls');});
+ const c=newCharacter('2014');c.automation=newAutomationState();c.abilities={str:10,dex:10,con:10,int:10,wis:10,cha:10};c.runtime.hp=7;c.runtime.tempHp=3;c.runtime.resources.manual={name:'保留资源',max:4,current:1};c.selections=[{id:'skilled-wizard',entry:catalog.find(row=>row.kind==='class'&&row.english==='Wizard'&&row.source==='PHB')!,level:4,quantity:1,equipped:false}];syncFeatures(c,catalog);
+ const choice=sheetChoices(c,catalog).find(row=>row.id.includes(':class-legacy-feat:')&&row.grantLevel===4)!,feat=catalog.find(row=>row.kind==='feat'&&row.english==='Skilled'&&row.source==='PHB')!;expect(choice).toBeDefined();setSheetChoiceSlot(c,choice.id,0,feat.id,catalog);expect(c.selections.filter(row=>row.entry.kind==='feat')).toEqual([]);expect(c.classChoiceSnapshots?.[feat.id]).toEqual(feat);expect(evaluate(c).skills.perception).toMatchObject({value:0,proficient:false});expect(evaluate(c).passive).toBe(10);
+ const before=JSON.stringify(c),edit=vi.fn(),html=renderToStaticMarkup(createElement(ChoiceWorkspaceContext.Provider,{value:{canEdit:true,open:()=>{},close:()=>{}}},createElement(ClassChoiceRecords,{c,catalog,mode:'feat',edit})));
+ expect(html.match(/data-reviewed-feat-kind="skilled"/g)).toHaveLength(1);expect(html.match(/aria-label="熟习选择 [1-3]"/g)).toHaveLength(3);expect(html).toContain('已选 0/3');expect(html).toContain('共 3 项');expect(JSON.stringify(c)).toBe(before);expect(edit).not.toHaveBeenCalled();
+});

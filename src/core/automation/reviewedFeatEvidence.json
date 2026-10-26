@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "explicit-owned-legacy-passive-feat",
+  "source": "PHB",
+  "edition": "2014",
+  "inputs": {
+    "feats.json": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+    "variantrules.json": "21eef107d25cf438eb85894387fb6f834478d80bc467791c54fe66db9e498c44"
+  },
+  "rules": [
+    {
+      "kind": "tough",
+      "reference": "Tough|PHB",
+      "english": "Tough",
+      "page": 170,
+      "entryHash": "8536c66d7553dfd58e14c195a886b241c62e174251fb248f45d0634eef15115f",
+      "hpPerTotalLevel": 2
+    },
+    {
+      "kind": "resilient",
+      "reference": "Resilient|PHB",
+      "english": "Resilient",
+      "page": 168,
+      "entryHash": "19c5167ba7f0f74652805354c71c2ed037177dc38d3db53f4a4dc0fac3abcdf7",
+      "abilityBonus": 1,
+      "cap": 20,
+      "sameAbilitySave": true,
+      "requiresUnproficientSave": false
+    },
+    {
+      "kind": "lightly-armored",
+      "reference": "Lightly Armored|PHB",
+      "english": "Lightly Armored",
+      "page": 167,
+      "entryHash": "5e87f09b022c56e00d9283ce52708ee38059e7349d815443d3bb2c5da5a41a42",
+      "abilityBonus": 1,
+      "cap": 20,
+      "abilities": [
+        "str",
+        "dex"
+      ],
+      "armorTraining": [
+        "light"
+      ]
+    },
+    {
+      "kind": "moderately-armored",
+      "reference": "Moderately Armored|PHB",
+      "english": "Moderately Armored",
+      "page": 168,
+      "entryHash": "98b557e88aeeb29328dddf9924ddce14a695945979de06cd766ed7cb119708fa",
+      "abilityBonus": 1,
+      "cap": 20,
+      "abilities": [
+        "str",
+        "dex"
+      ],
+      "armorTraining": [
+        "medium",
+        "shield"
+      ],
+      "requiredArmor": "light"
+    },
+    {
+      "kind": "heavily-armored",
+      "reference": "Heavily Armored|PHB",
+      "english": "Heavily Armored",
+      "page": 167,
+      "entryHash": "5a822e4ac8cba9147dfa9b28f0a6a5ccf80dcd4f30c047e879af62c4ec15d297",
+      "abilityBonus": 1,
+      "cap": 20,
+      "abilities": [
+        "str"
+      ],
+      "armorTraining": [
+        "heavy"
+      ],
+      "requiredArmor": "medium"
+    },
+    {
+      "kind": "weapon-master",
+      "reference": "Weapon Master|PHB",
+      "english": "Weapon Master",
+      "page": 170,
+      "entryHash": "058b1e469d74445bb81c838588ef6452732d7ac1e4a3a1eefbc6d274d9d19008",
+      "abilityBonus": 1,
+      "cap": 20,
+      "abilities": [
+        "str",
+        "dex"
+      ],
+      "weaponCount": 4,
+      "weaponFilter": "type=军用武器;寻常武器|miscellaneous=平凡的"
+    }
+  ],
+  "boundary": "Only explicit intents for one reviewed PHB2014 feat selected through an authenticated legacy class ASI alternative. No manual feat drag activation, no changes to base scores, manual HP, proficiency flags or current resources. Unknown, duplicate and unsupported source records remain visible and inactive. Armor training is a derived layer shared by equipment and source-order prerequisites; explicit manual armor declarations, including empty strings, replace it. 2014 shield training never adds AC by itself. No automatic casting restrictions, disadvantage, heavy-armor strength/speed or equip lifecycle.",
+  "retrievalRevisions": {
+    "feats.json": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+    "variantrules.json": "e2623b204ddbdf2bcfa8317acfc962de89c676e2"
+  },
+  "supportingEntryHashes": {
+    "Feats|PHB": "75b2156dacae2a779a04406c4f12fe1feb5541631d463f22c3ccaab53dc50269",
+    "Multiclassing|PHB": "dbfd50fed582b56c5069992230c886e5e6d710fed98aedc25833d918af0871fc"
+  }
+}
