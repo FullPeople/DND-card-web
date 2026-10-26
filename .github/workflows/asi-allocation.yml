@@ -5,8 +5,11 @@ on:
       - 'src/**'
       - 'tests/asi*.test.ts'
       - 'tests/e2e/asiAllocation*.ts'
+      - 'tests/e2e/rulesIntegrationPrivacyReporter.ts'
+      - 'tests/rules-integration-privacy.test.ts'
       - 'docs/data/automation*'
       - 'playwright.asi.config.ts'
+      - 'playwright.infusions.config.ts'
       - 'vite*.config.ts'
       - 'package*.json'
       - 'tsconfig*.json'
@@ -80,7 +83,7 @@ jobs:
           name: asi-allocation-evidence
           include-hidden-files: true
           path: |
-            .local-evidence/asi-browser/
+            .local-evidence/rules-browser-safe/
             .local-evidence/asi-source-verification.json
           if-no-files-found: warn
           retention-days: 7

@@ -1,0 +1,44 @@
+name: Verify rules integration with main 307 interactions
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'docs/data/automation*'
+      - 'tools/**'
+      - 'package*.json'
+      - '*.config.ts'
+      - '.github/workflows/rules-integration.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: rules-integration-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  main-307-interactions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: npm
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npm run build:wiki
+      - run: npx playwright install --with-deps chromium
+      - name: Preserve numeric edits, retained cards, saves, drag ownership, search and Wiki reading
+        run: npx playwright test --config playwright.rules-integration.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rules-integration-authored-browser-evidence
+          include-hidden-files: true
+          path: .local-evidence/rules-integration-browser/
+          retention-days: 7

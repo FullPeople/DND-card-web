@@ -19,6 +19,8 @@ on:
       - 'tests/reviewed-skilled*.test.ts'
       - 'tests/reviewed-linguist*.test.ts'
       - 'tests/e2e/reviewedLinguist*.ts'
+      - 'tests/e2e/rulesIntegrationPrivacyReporter.ts'
+      - 'tests/rules-integration-privacy.test.ts'
       - 'tests/e2e/linguistControls.spec.ts'
       - 'tests/helpers/frozenReviewedLinguistLegacy.ts'
       - 'tests/e2e/reviewedSkilled*.ts'
@@ -206,7 +208,7 @@ jobs:
           name: infusion-control-evidence-${{ matrix.project }}
           include-hidden-files: true
           path: |
-            .local-evidence/infusion-browser/
+            .local-evidence/rules-browser-safe/
             !.local-evidence/infusion-browser/.playwright-artifacts*/**
             !.local-evidence/infusion-browser/linguistControls-*/**
             .local-evidence/linguist-browser-safe/
