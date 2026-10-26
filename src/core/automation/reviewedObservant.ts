@@ -45,7 +45,8 @@ export function reviewedObservantHasRetainedBinding(c:Character):boolean{
  const bindings=reviewedObservantBindings(c),archives=Object.values(c.classChoiceArchive||{}),rows=[...c.selections,...archives.flatMap(a=>a.selections)],active=activeEffectSelections(c);
  const completeAncestry=(start:Selection,pool:Selection[])=>{let current:Selection|undefined=start;const seen=new Set<string>();while(current){if(seen.has(current.id)||pool.filter(row=>row.id===current!.id).length!==1)return false;seen.add(current.id);if(!current.parentId)return true;const parentId:string=current.parentId;current=pool.find(row=>row.id===parentId);if(!current)return false;}return false;};
  return bindings.some(binding=>{
-  if(bindings.filter(row=>row.choiceId===binding.choiceId||row.selectionId===binding.selectionId).length!==1||!reviewedObservantRule(c.classChoiceSnapshots?.[binding.entryId])||c.answers[binding.choiceId]?.length!==1||c.answers[binding.choiceId][0]!==binding.entryId)return false;
+  const entry=c.classChoiceSnapshots?.[binding.entryId];
+  if(!entry||entry.id!==binding.entryId||bindings.filter(row=>row.choiceId===binding.choiceId||row.selectionId===binding.selectionId).length!==1||!reviewedObservantRule(entry)||c.answers[binding.choiceId]?.length!==1||c.answers[binding.choiceId][0]!==binding.entryId)return false;
   // An actually active authenticated grant always exposes both passive scores.
   const current=eligibility(c,binding.choiceId,binding.entryId,active);if(current.grant&&!current.reason&&current.grant.row.id===binding.selectionId)return true;
   const roots=rows.filter(row=>row.id===binding.selectionId);if(roots.length!==1)return false;const row=roots[0],owners=c.selections.filter(s=>s.id===row.parentId);if(owners.length!==1)return false;const owner=owners[0];
