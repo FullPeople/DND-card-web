@@ -1,3 +1,4 @@
+import {validateLimitedSourceUseState} from './automation/limitedSourceUses';
 import {validateReviewedAlert} from './automation/reviewedAlert';
 import {validateReviewedObservant} from './automation/reviewedObservant';
 import {validateReviewedLinguist} from './automation/reviewedLinguist';
@@ -175,6 +176,8 @@ export function validateCharacter(value: unknown): Character {
   assert(c.profile.autoSourceDefaults === undefined || Array.isArray(c.profile.autoSourceDefaults) && c.profile.autoSourceDefaults.length <= 10000 && c.profile.autoSourceDefaults.every((id:unknown) => typeof id === 'string' && id.length <= 4000), '默认资料来源列表无效。');
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   validateActionState(c.runtime.automationActions);
+  validateLimitedSourceUseState(c.runtime.limitedSourceUses);
+  for(const r of Object.values(c.runtime.resources) as any[])if(r.limitedSourceUseGrant!==undefined)assert(plain(r.limitedSourceUseGrant)&&typeof r.limitedSourceUseGrant.key==='string'&&r.limitedSourceUseGrant.key.length>0&&r.limitedSourceUseGrant.key.length<=20000,'有限来源计数标记无效。');
   validateInfusionChargeState(c.runtime.infusionCharges);
   validateRefuelingRingState(c.runtime.refuelingRing);
   for(const r of Object.values(c.runtime.resources) as any[])if(r.sourceSpellGrant!==undefined)assert(plain(r.sourceSpellGrant)&&typeof r.sourceSpellGrant.usageKey==='string'&&r.sourceSpellGrant.usageKey.length>0&&r.sourceSpellGrant.usageKey.length<=20000,'来源法术次数归属无效。');
@@ -211,7 +214,8 @@ export function validateCharacter(value: unknown): Character {
    // Keep the exact snapshot and counter without restoring an active selection.
    assert(storedSelections.some(row=>row.id===id&&row.entry.kind==='spell')&&plain(value)&&['locked','uses'].includes(value.mode)&&(value.mode!=='uses'||Number.isInteger(value.max)&&value.max>=1&&value.max<=100)&&(value.recovery===undefined||['long','short','manual'].includes(value.recovery))&&(value.label===undefined||typeof value.label==='string'&&value.label.length<=160),'固定与次数法术设置无效。');
    if(value.sourceGrant!==undefined){const g=value.sourceGrant;
-    assert(plain(g)&&typeof g.ownerId==='string'&&typeof g.key==='string'&&g.key.startsWith('source-spell:')&&typeof g.active==='boolean'&&(g.ability===undefined||ABILITIES.includes(g.ability))&&['slot','free','ritual','check','resource','invocation-pact'].includes(g.usage)&&(g.reason===undefined||typeof g.reason==='string')&&(g.usageKey===undefined||typeof g.usageKey==='string'&&g.usageKey.length<=20000)&&(g.canUseSlots===undefined||typeof g.canUseSlots==='boolean')&&(g.castLevel===undefined||Number.isInteger(g.castLevel)&&g.castLevel>=1&&g.castLevel<=9),'来源法术关系无效。');
+    assert(plain(g)&&typeof g.ownerId==='string'&&typeof g.key==='string'&&g.key.startsWith('source-spell:')&&typeof g.active==='boolean'&&(g.ability===undefined||ABILITIES.includes(g.ability))&&['slot','free','ritual','check','resource','invocation-pact','limited'].includes(g.usage)&&(g.reason===undefined||typeof g.reason==='string')&&(g.usageKey===undefined||typeof g.usageKey==='string'&&g.usageKey.length<=20000)&&(g.canUseSlots===undefined||typeof g.canUseSlots==='boolean')&&(g.castLevel===undefined||Number.isInteger(g.castLevel)&&g.castLevel>=(g.usage==='limited'?0:1)&&g.castLevel<=9),'来源法术关系无效。');
+    if(g.usage==='limited')assert(value.mode==='uses'&&value.recovery==='manual'&&g.canUseSlots===false&&typeof g.resourceKey==='string'&&g.resourceKey===g.usageKey&&g.resourceKey.startsWith('limited-source-use:')&&g.resourceCost===undefined&&g.resourceName===undefined,'有限来源次数声明无效。');
     if(g.usage==='invocation-pact')assert(value.mode==='uses'&&value.max===1&&value.recovery==='long'&&g.canUseSlots===false&&g.resourceKey===`source-spell-pool:${encodeURIComponent(g.usageKey)}`&&g.resourceCost===undefined&&g.resourceName===undefined&&typeof g.usageKey==='string','祈唤双资源声明无效。');
     if(g.usage==='resource'){
      assert(value.mode==='locked'&&typeof g.resourceName==='string'&&g.resourceName.trim()&&g.resourceName.length<=160&&Number.isSafeInteger(g.resourceCost)&&g.resourceCost>=1&&g.resourceCost<=10000&&typeof g.resourceKey==='string'&&g.resourceKey.length<=40000,'来源法术资源声明无效。');
@@ -220,7 +224,7 @@ export function validateCharacter(value: unknown): Character {
      const savedParents=Object.values(c.classChoiceArchive||{}).flatMap((archive:any)=>archive.parent&&!selectionIds.has(archive.parent.id)?[archive.parent]:[]);
      const sourceCard=archivedSelections.some(row=>row.id===id)?{...c,selections:[...storedSelections,...savedParents]}:c;
      validateSourceResourceLink(sourceCard as Character,g as NonNullable<import('./model').SpecialSpell['sourceGrant']>);
-    }else assert(g.resourceKey===undefined||typeof g.resourceKey==='string'&&g.resourceKey.startsWith('source-spell-pool:')&&g.resourceKey.length<=40000,'来源法术关系无效。');
+    }else if(g.usage!=='limited')assert(g.resourceKey===undefined||typeof g.resourceKey==='string'&&g.resourceKey.startsWith('source-spell-pool:')&&g.resourceKey.length<=40000,'来源法术关系无效。');
    }
   }}
   if(c.spellSettings!==undefined){const s=c.spellSettings;assert(plain(s)&&['known','prepared'].includes(s.mode)&&(s.modeOverride===undefined||typeof s.modeOverride==='boolean')&&(s.abilityOverride===undefined||typeof s.abilityOverride==='boolean')&&(s.abilityClassId===undefined||typeof s.abilityClassId==='string')&&ABILITIES.includes(s.ability)&&Number.isInteger(s.capacity)&&s.capacity>=0&&s.capacity<=100&&(s.capacityAdjustment===undefined||Number.isInteger(s.capacityAdjustment)&&Math.abs(s.capacityAdjustment)<=100)&&['attackBonus','dcBonus'].every(k=>Number.isFinite(s[k])&&Math.abs(s[k])<=100)&&Array.isArray(s.prepared)&&s.prepared.length<=3000&&s.prepared.every((id:unknown)=>typeof id==='string')&&new Set(s.prepared.filter(Boolean)).size===s.prepared.filter(Boolean).length&&plain(s.slots)&&Object.entries(s.slots).every(([level,v])=>/^[1-9]$/.test(level)&&plain(v)&&Number.isInteger(v.max)&&v.max>=0&&v.max<=30&&Number.isInteger(v.used)&&v.used>=0&&v.used<=v.max),'法术设置无效。');}

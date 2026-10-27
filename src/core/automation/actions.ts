@@ -1,3 +1,4 @@
+import {limitedSourceSpellOffer,limitedSourceSpellBasis,spendLimitedSourceSpell,ownedLimitedSourceResource} from './limitedSourceUses';
 import {ordinarySpellOffer,ordinarySpellActionBasis,ordinaryCastingClassContextMalformed} from './ordinarySpellCasting';
 import {spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
 export type {SpellActionAuthority} from './spellActionAuthority';
@@ -11,7 +12,7 @@ import {planSourceSpells} from './sourceSpellPlan';
 import {learnedInvocationRule,invocationSpellMatches,invocationPactSlot} from './invocations';
 
 export interface SpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;debits?:{resourceId:string;cost:number}[]}
-export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long';basis?:string;casterId?:string}
+export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long';basis?:string;casterId?:string;limitedIntent?:{confirmedLimitedSourceValid:true}}
 export interface SpellActionReceipt {id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number;recovered?:{resourceId:string;before:number;after:number}[];spent?:{resourceId:string;before:number;after:number}[]}
 export interface ActionState {version:number;sequence:number;last?:SpellActionReceipt}
 export type SpellActionResult={status:'applied'|'duplicate';receipt:SpellActionReceipt;message:string}|{status:'rejected';message:string};
@@ -33,7 +34,7 @@ function invocationUseCounter(c:Character,id:string,grant:NonNullable<ReturnType
 }
 
 /** A read-only offer. Reading the menu never spends or creates resources. */
-function sourceSpellPayments(c:Character,id:string):{options:SpellPayment[];reason?:string}{
+function sourceSpellPayments(c:Character,id:string,authority?:SpellActionAuthority):{options:SpellPayment[];reason?:string}{
  const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell');let config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;
  if(!row||!automationEnabled(c))return {options:[],reason:'此来源法术当前不可用。'};
  if(!grant){
@@ -44,6 +45,7 @@ function sourceSpellPayments(c:Character,id:string):{options:SpellPayment[];reas
  const verified=currentSourceSpell(c,id);
  if(!verified)return {options:[],reason:'来源声明、身份或授予归属已变化，请同步当前卡后再施法。'};
  const {current,invocation}=verified;config=verified.config;grant=verified.grant;
+ if(grant.usage==='limited'){const finite=limitedSourceSpellOffer(c,id,authority);return {options:finite?[finite.payment]:[],...(!finite?{reason:'有限来源历史、归属或计数镜像当前不可用；未改用其他支付。'}:{})};}
  const base=Number(row.entry.raw.level),level=grant.castLevel??base;
  if(!Number.isInteger(base)||base<0||base>9||level<base)return {options:[],reason:'法术环阶未支持，请人工核对。'};
  const options:SpellPayment[]=[];
@@ -75,7 +77,7 @@ function sourceSpellPayments(c:Character,id:string):{options:SpellPayment[];reas
 /** The UI exposes this single-counter confirmation only for the seven reviewed
  * invocations. It is not a complete long-rest operation or a slot refill. */
 export function spellPayments(c:Character,id:string,authority?:SpellActionAuthority,casterId?:string){
- const ordinary=ordinarySpellOffer(c,id,casterId,authority),source=!c.spellSettings?.special?.[id]?.sourceGrant&&ordinaryCastingClassContextMalformed(c)?{options:[],reason:'已识别的职业快照已修改，未调用旧施法解码或仪式回退。'}:sourceSpellPayments(c,id);
+ const ordinary=ordinarySpellOffer(c,id,casterId,authority),source=!c.spellSettings?.special?.[id]?.sourceGrant&&ordinaryCastingClassContextMalformed(c)?{options:[],reason:'已识别的职业快照已修改，未调用旧施法解码或仪式回退。'}:sourceSpellPayments(c,id,authority);
  const options=[...ordinary.options,...source.options].map(option=>{const reason=spellActionAuthorityReason(c,authority,[...(option.resourceId?[option.resourceId]:[]),...(option.debits?.map(d=>d.resourceId)||[])]);return reason?{...option,available:false,reason}:option;});
  return {...ordinary,options,ordinaryReason:ordinary.reason,reason:ordinary.casters.length?ordinary.reason:source.reason||ordinary.reason};
 }
@@ -104,7 +106,7 @@ export function sourceSpellRestPlan(c:Character,kind:'short'|'long',authority?:S
   const verified=currentSourceSpell(c,id);if(!verified)return {resources:[],reason:'来源声明或授予归属已变化，整批未恢复。'};
   if(verified.grant.usage==='invocation-pact'&&(!invocationUseCounter(c,id,verified.grant)||verified.config.recovery!=='long'))return {resources:[],reason:'祈唤次数记录无效，整批未恢复。'};
   if(!(verified.config.recovery==='short'||kind==='long'&&verified.config.recovery==='long'))continue;
-  const resourceId=specialSpellResource(id,c);if(seen.has(resourceId))continue;seen.add(resourceId);
+  const resourceId=specialSpellResource(id,c);if(ownedLimitedSourceResource(c,resourceId))continue;if(seen.has(resourceId))continue;seen.add(resourceId);
   const r=c.runtime.resources[resourceId],locked=spellActionAuthorityReason(c,authority,[resourceId]);if(locked)return {resources:[],reason:locked};
   if(!r||r.unlimited||!Number.isSafeInteger(r.max)||r.max<1||!Number.isSafeInteger(r.current)||r.current<0||r.current>r.max)return {resources:[],reason:'来源次数记录无效，整批未恢复。'};
   if(r.current<r.max)resources.push({resourceId,before:r.current,after:r.max});
@@ -116,9 +118,10 @@ export function sourceSpellRestRequest(c:Character,kind:'short'|'long',id:string
 }
 
 /** Request identity is supplied by the application, keeping the core independent of randomness. */
-export function spellActionRequest(c:Character,selectionId:string,paymentId:string,id:string,mode:'cast'|'restore'='cast',casterId?:string):SpellActionRequest{
+export function spellActionRequest(c:Character,selectionId:string,paymentId:string,id:string,mode:'cast'|'restore'='cast',casterId?:string,limitedIntent?:{confirmedLimitedSourceValid:true}):SpellActionRequest{
  const request:SpellActionRequest={id,selectionId,paymentId,mode,revision:c.revision,sequence:c.runtime.automationActions?.sequence??0};
  if(paymentId.startsWith('ordinary:')){request.casterId=casterId||ordinarySpellOffer(c,selectionId).casterId;request.basis=ordinarySpellActionBasis(c,selectionId,request.casterId);}
+ if(c.spellSettings?.special?.[selectionId]?.sourceGrant?.usage==='limited'){request.basis=limitedSourceSpellBasis(c,selectionId);request.limitedIntent=limitedIntent;}
  if(c.spellSettings?.special?.[selectionId]?.sourceGrant?.usage==='invocation-pact')request.basis=invocationActionBasis(c,selectionId);
  return request;
 }
@@ -133,7 +136,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest,author
  if(!request||typeof request.selectionId!=='string'||request.selectionId.length>2000||typeof request.paymentId!=='string'||!request.paymentId||request.paymentId.length>4000||typeof request.id!=='string'||!request.id.trim()||request.id.length>128||!Number.isSafeInteger(request.sequence)||request.sequence<0||!Number.isSafeInteger(request.revision)||!['cast','restore'].includes(request.mode)||request.basis!==undefined&&(typeof request.basis!=='string'||request.basis.length>30000)||request.casterId!==undefined&&(typeof request.casterId!=='string'||!request.casterId||request.casterId.length>2000))return reject('施法操作格式无效。');
  const state=c.runtime.automationActions;
  if(state&&state.version!==1)return reject('此卡的动作记录版本尚未支持。');
- const fingerprint=JSON.stringify([request.revision,request.selectionId,request.mode,request.paymentId,...(request.rest!==undefined?[request.rest]:[]),...(request.basis!==undefined?[request.basis]:[]),...(request.casterId!==undefined?[request.casterId]:[])]);
+ const fingerprint=JSON.stringify([request.revision,request.selectionId,request.mode,request.paymentId,...(request.rest!==undefined?[request.rest]:[]),...(request.basis!==undefined?[request.basis]:[]),...(request.casterId!==undefined?[request.casterId]:[]),...(request.limitedIntent!==undefined?[request.limitedIntent]:[])]);
  if(fingerprint.length>40000)return reject('施法操作记录超出支持范围。');
  if(state?.last?.id===request.id){
   if(state.last.sequence===request.sequence&&state.last.fingerprint===fingerprint)return {status:'duplicate',receipt:state.last,message:'该操作已经记录，未重复扣费。'};
@@ -155,7 +158,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest,author
  if(config?.sourceGrant){const verified=currentSourceSpell(c,request.selectionId);if(!verified)return reject('来源声明、身份或授予归属已变化，未执行。');config=verified.config;if(verified.grant.usage==='invocation-pact'&&(typeof request.basis!=='string'||request.basis!==invocationActionBasis(c,request.selectionId)))return reject('祈唤来源或资源已变化，请重新操作。');}
  let payment:SpellPayment|undefined;
  if(request.mode==='restore'){
-  if(!config?.sourceGrant||config.mode!=='uses'||request.paymentId!=='source')return reject('这个法术没有可恢复的来源次数。');
+  if(!config?.sourceGrant||config.sourceGrant.usage==='limited'||config.mode!=='uses'||request.paymentId!=='source')return reject('这个法术没有可恢复的来源次数。');
   const resourceId=specialSpellResource(request.selectionId,c),r=c.runtime.resources[resourceId];
   if(!validCounter(r)||config.sourceGrant.usage==='invocation-pact'&&!invocationUseCounter(c,request.selectionId,config.sourceGrant))return reject('次数记录无效，未恢复。');
   if(r.current>=r.max)return reject('次数已经充足。');
@@ -167,6 +170,11 @@ export function performSpellAction(c:Character,request:SpellActionRequest,author
   if(!payment.available)return reject(payment.reason||'所需资源不足。');
  }
  const locked=spellActionAuthorityReason(c,authority,[...(payment.resourceId?[payment.resourceId]:[]),...(payment.debits?.map(d=>d.resourceId)||[])]);if(locked)return reject(locked);
+ if(payment.id==='limited'){
+  if(request.mode!=='cast'||!request.limitedIntent||Array.isArray(request.limitedIntent)||Object.keys(request.limitedIntent).length!==1||!Object.hasOwn(request.limitedIntent,'confirmedLimitedSourceValid')||request.limitedIntent.confirmedLimitedSourceValid!==true||typeof request.basis!=='string')return reject('请重新确认本次有限来源仍有效。');
+  const spent=spendLimitedSourceSpell(c,request.selectionId,request.id,request.basis,true,authority);if(!spent)return reject('有限来源、历史或余额已变化，未执行。');
+  const receipt:SpellActionReceipt={id:request.id,sequence,fingerprint,selectionId:request.selectionId,mode:'cast',level:payment.level,resourceId:spent.key,before:spent.before,after:spent.after};c.runtime.automationActions={version:1,sequence:sequence+1,last:receipt};return {status:'applied',receipt,message:'已扣除1次有限来源次数；不会按休息或刷新恢复。'};
+ }
  if(payment.debits){
   if(request.mode!=='cast'||payment.debits.length!==2||new Set(payment.debits.map(row=>row.resourceId)).size!==2)return reject('双资源支付声明无效，未执行。');
   const spent:NonNullable<SpellActionReceipt['spent']>=[];

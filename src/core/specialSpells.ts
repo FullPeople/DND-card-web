@@ -1,3 +1,4 @@
+import {ownedLimitedSourceResource} from './automation/limitedSourceUses';
 import {rememberSourceSpellUses,sourceSpellEnabled} from './automation/sourceSpellState';
 import {spellState} from './characterDetails';
 import type {Character,SpecialSpell} from './model';
@@ -5,6 +6,7 @@ import type {Character,SpecialSpell} from './model';
 import {specialSpellResource} from './spellResourceKeys';
 export {specialSpellResource} from './spellResourceKeys';
 export function setSpecialSpell(c:Character,id:string,config?:SpecialSpell):boolean{
+ if(ownedLimitedSourceResource(c,specialSpellResource(id,c)))throw Error('有限来源配置由专属历史管理。');
  const row=c.selections.find(s=>s.id===id&&s.entry.kind==='spell');if(!row||row.grantKey?.startsWith('source-spell:'))return false;
  const settings=c.spellSettings||=structuredClone(spellState(c));
  const manualSource=settings.special?.[id]?.manualSource;
@@ -16,4 +18,4 @@ export function setSpecialSpell(c:Character,id:string,config?:SpecialSpell):bool
  else delete c.runtime.resources[key];
  return true;
 }
-export function changeSpecialSpellUses(c:Character,id:string,value:number){const config=c.spellSettings?.special?.[id],resource=c.runtime.resources[specialSpellResource(id,c)];if(config?.mode!=='uses'||!resource||!sourceSpellEnabled(c,id))return;resource.current=Math.max(0,Math.min(resource.max,Math.trunc(value)));rememberSourceSpellUses(c,id);}
+export function changeSpecialSpellUses(c:Character,id:string,value:number){if(ownedLimitedSourceResource(c,specialSpellResource(id,c)))throw Error('有限来源不能手工补充次数。');const config=c.spellSettings?.special?.[id],resource=c.runtime.resources[specialSpellResource(id,c)];if(config?.mode!=='uses'||!resource||!sourceSpellEnabled(c,id))return;resource.current=Math.max(0,Math.min(resource.max,Math.trunc(value)));rememberSourceSpellUses(c,id);}

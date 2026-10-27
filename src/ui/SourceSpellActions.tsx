@@ -1,17 +1,20 @@
-import {useState,type KeyboardEvent} from 'react';
+import {useLayoutEffect,useState,type KeyboardEvent} from 'react';
 import type {Character} from '../core/model';
 import type {Edit} from './CharacterPages';
 import {spellPayments,sourceSpellRestoreOffer} from '../core/automation/actions';
 import {sourceSpellEnabled} from '../core/automation/sourceSpellState';
 import {SpellActionFeedback,useSpellActionFeedback} from './SpellActionFeedback';
+import {useRetainedCardActive} from './RetainedCardVisibility';
 
 export function SourceSpellActions({c,id,edit,readOnly=false}:{c:Character;id:string;edit:Edit;readOnly?:boolean}){
  const config=c.spellSettings?.special?.[id];
- const [chosen,setChosen]=useState(''),feedback=useSpellActionFeedback(c,edit,readOnly),offer=spellPayments(c,id,feedback.authority);
+ const [chosen,setChosen]=useState(''),[currentValid,setCurrentValid]=useState(false),active=useRetainedCardActive(),feedback=useSpellActionFeedback(c,edit,readOnly),offer=spellPayments(c,id,feedback.authority);
  const selected=chosen||offer.options[0]?.id||'',payment=offer.options.find(p=>p.id===selected),enabled=sourceSpellEnabled(c,id);
- const available=offer.options.filter(option=>option.available),dual=config?.sourceGrant?.usage==='invocation-pact',restore=dual?sourceSpellRestoreOffer(c,id,feedback.authority):undefined,restricted=readOnly||!feedback.authority.canEdit;
+ const available=offer.options.filter(option=>option.available),dual=config?.sourceGrant?.usage==='invocation-pact',limited=config?.sourceGrant?.usage==='limited',restore=dual?sourceSpellRestoreOffer(c,id,feedback.authority):undefined,restricted=readOnly||!feedback.authority.canEdit;
+ const limitedBasis=JSON.stringify([c.id,id,c.profile,c.automation,config?.sourceGrant,offer.options,c.runtime.limitedSourceUses]);
+ useLayoutEffect(()=>setCurrentValid(false),[limitedBasis,active,restricted]);
  function recover(){
-  if(restricted||feedback.busy||!enabled||dual&&!restore?.available)return;
+  if(limited||restricted||feedback.busy||!enabled||dual&&!restore?.available)return;
   if(dual&&!window.confirm('确认角色已经完成长休？这里只恢复本祈唤的 1 次使用次数，不恢复契约位、生命值或其他资源。'))return;
   feedback.run(id,restore?.paymentId||'source',dual?'确认已长休，恢复本祈唤次数':'恢复来源次数','restore');
  }
@@ -22,7 +25,8 @@ export function SourceSpellActions({c,id,edit,readOnly=false}:{c:Character;id:st
  return <div className="source-spell-actions">
   {offer.options.length>1?<div className="spell-payment-choices" role="radiogroup" aria-label={`${c.selections.find(s=>s.id===id)?.entry.name}施法消耗`}>{offer.options.map(option=><button key={option.id} type="button" role="radio" aria-checked={selected===option.id} tabIndex={option.id===(available.find(row=>row.id===selected)?.id||available[0]?.id)?0:-1} disabled={restricted||!enabled||!option.available||feedback.busy} onKeyDown={event=>navigate(event,option.id)} onClick={()=>setChosen(option.id)}><b>{option.label}</b>{option.reason&&<small>{option.reason}</small>}</button>)}</div>:<small>{payment?.label||offer.reason}</small>}
   {dual&&<><p>每次同时消耗本祈唤 1 次和所属魔契师契约位 1 枚{payment?`，以 ${payment.level} 环施法`:''}。</p><ul aria-label="双资源余额">{payment?.debits?.map(debit=>{const resource=c.runtime.resources[debit.resourceId],pact=/^pact-slot:([1-9])$/.exec(debit.resourceId);return <li key={debit.resourceId} data-payment-resource={debit.resourceId}>{pact?`${pact[1]}环契约位`:'本祈唤次数'}：{resource?.current??0} / {resource?.max??0}（消耗 {debit.cost}）</li>;})}</ul><small>不能用普通法术位替代；目标、豁免、专注、持续及法术效果仍需手动处理，不豁免材料成分。</small></>}
-  <div className="spell-action-buttons"><button className="primary" disabled={restricted||!payment?.available||!enabled||feedback.busy} onClick={()=>{if(!restricted)feedback.run(id,selected,payment?.label||'施法');}}>{feedback.busy?'等待确认…':'使用'}</button>{config?.mode==='uses'&&<button disabled={restricted||!enabled||feedback.busy||dual&&!restore?.available} onClick={recover}>{dual?'确认已长休，恢复本祈唤次数':config.sourceGrant?.resourceKey?'恢复共用次数':'恢复次数'}</button>}</div>
+  {limited&&<><label><input type="checkbox" aria-label="确认有限来源本次施法当前仍有效" checked={currentValid} disabled={restricted||!enabled||feedback.busy||!payment?.available} onChange={event=>setCurrentValid(event.target.checked)}/>我已核对本次来源仍有效，本次施法满足当前条件。</label><small>每次须重新核对。只扣一次有限使用，不恢复；动作与施法时间、施法属性、攻击与 DC、材料、目标、伤害与效果、持续时间和专注均需人工处理，也不自动判定过期。</small></>}
+  <div className="spell-action-buttons"><button className="primary" disabled={restricted||!payment?.available||!enabled||feedback.busy||limited&&!currentValid} onClick={()=>{if(!restricted&&(!limited||currentValid)){feedback.run(id,selected,payment?.label||'施法','cast',limited?{confirmedLimitedSourceValid:true}:{});setCurrentValid(false);}}}>{feedback.busy?'等待确认…':'使用'}</button>{config?.mode==='uses'&&!limited&&<button disabled={restricted||!enabled||feedback.busy||dual&&!restore?.available} onClick={recover}>{dual?'确认已长休，恢复本祈唤次数':config.sourceGrant?.resourceKey?'恢复共用次数':'恢复次数'}</button>}</div>
   {dual&&<small>此恢复只处理本祈唤次数；契约位仍需在原有资源设置中手动调整，不会执行完整休息。{restricted?' 当前为只读，不能施法或恢复。':''}</small>}
   {!payment?.available&&payment?.reason&&<small>{payment.reason}</small>}
   {dual&&restore?.reason&&<small>{restore.reason}</small>}

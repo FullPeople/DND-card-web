@@ -16,7 +16,7 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
  // Ordinary version retirement does not create this receipt.
  plan.grants=plan.grants.filter(grant=>!c.dismissedFeatures?.includes(grant.owner.id+'|'+grant.key));
  const transfers=new Map<string,{max:number;old:Set<string>}>();
- for(const grant of plan.grants){if(grant.config.sourceGrant?.usage==='invocation-pact')continue;const old=c.spellSettings?.special?.[grant.id];if(old?.mode!=='uses'||grant.config.mode!=='uses')continue;
+ for(const grant of plan.grants){if(grant.config.sourceGrant?.usage==='invocation-pact'||grant.config.sourceGrant?.usage==='limited')continue;const old=c.spellSettings?.special?.[grant.id];if(old?.mode!=='uses'||grant.config.mode!=='uses')continue;
   const previousKey=specialSpellResource(grant.id,c),nextKey=grant.config.sourceGrant?.resourceKey||`innate-spell:${grant.id}`;
   if(previousKey===nextKey)continue;const transfer=transfers.get(nextKey)||{max:grant.config.max!,old:new Set<string>()};transfer.old.add(previousKey);transfers.set(nextKey,transfer);
  }
@@ -29,6 +29,7 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
   if(!row){if(c.selections.length>=3000)continue;row={id:grant.id,entry:structuredClone(grant.entry),quantity:1,level:1,equipped:false,parentId:grant.owner.id,grantKey:grant.key};c.selections.push(row);}
   const settings=c.spellSettings||=structuredClone(spellState(c));(settings.special||={})[row.id]=grant.config;
   settings.prepared=settings.prepared.map(id=>id===row!.id?'':id);matched.add(row.id);
+  if(grant.config.sourceGrant?.usage==='limited')continue;
   if(grant.config.mode==='uses'){
    const key=specialSpellResource(row.id,c),resource=c.runtime.resources[key],max=grant.config.max!;
    // A missing counter on an already saved grant is not permission to replenish it.

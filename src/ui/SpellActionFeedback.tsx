@@ -28,10 +28,10 @@ export function useSpellActionFeedback(c:Character,edit:Edit,readOnly=false){
  useLayoutEffect(()=>{const confirmed=confirmSpellPresentation(visible,c.id,c.runtime.automationActions?.last);if(confirmed!==visible){flight.current=undefined;setAction(confirmed);}},[c.runtime.automationActions?.last,c.id,visible]);
  useEffect(()=>{flight.current=undefined;setAction(undefined);},[c.id]);
  useEffect(()=>{if(visible?.phase!=='pending')return;const id=visible.id,timer=setTimeout(()=>setAction(old=>old?.id===id&&old.phase==='pending'?{...old,phase:'unconfirmed',message:'尚未收到卡面确认，请查看保存与同步状态。'}:old),4500);return()=>clearTimeout(timer);},[visible?.id,visible?.phase]);
- function run(selectionId:string,payment:string,label:string,mode:'cast'|'restore'='cast',context:{casterId?:string}={}){
+ function run(selectionId:string,payment:string,label:string,mode:'cast'|'restore'='cast',context:{casterId?:string;confirmedLimitedSourceValid?:true}={}){
   if(flight.current||!authority().canEdit)return;
   const live=latest.current,scope=live.c.id,token=epoch.current;
-  const request=spellActionRequest(live.c,selectionId,payment,crypto.randomUUID(),mode,context.casterId);
+  const request=spellActionRequest(live.c,selectionId,payment,crypto.randomUUID(),mode,context.casterId,context.confirmedLimitedSourceValid===true?{confirmedLimitedSourceValid:true}:undefined);
   const next:Action={id:request.id,scope,title:live.c.selections.find(row=>row.id===selectionId)?.entry.name||'施法',payment:label,mode,phase:'pending'};
   flight.current=request.id;setAction(next);
   let used=false;
@@ -45,7 +45,7 @@ export function useSpellActionFeedback(c:Character,edit:Edit,readOnly=false){
    });
   }catch(error){flight.current=undefined;setAction({...next,phase:'rejected',message:error instanceof Error?error.message:String(error)});}
  }
- return {run,action:visible,busy:visible?.phase==='pending'||visible?.phase==='unconfirmed',authority:authority()};
+ return {run,action:visible,busy:visible?.phase==='pending'||visible?.phase==='unconfirmed',authority:authority(),liveAuthority:authority};
 }
 export function SpellActionFeedback({action}:{action?:Action}){
  const status=useInteractionStatus();if(!action)return null;
