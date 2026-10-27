@@ -1,6 +1,6 @@
 import {it,expect,vi} from 'vitest';
 // Rendering is read-only; isolate the live room transport from this Node test.
-vi.mock('../src/platform/workbench',()=>({inWorkbench:false,workbenchRequest:vi.fn()}));
+vi.mock('../src/platform/workbench',()=>{const state={};return {inWorkbench:false,workbenchRequest:vi.fn(),useWorkbench:()=>state,getWorkbench:()=>state};});
 vi.mock('../src/ui/pointerDrag',()=>({pointerDrag:vi.fn(),landingWithin:vi.fn()}));
 vi.mock('../src/ui/sheetDisplay',()=>({useSheetRenderMode:()=> 'a4',useSheetCaptureActive:()=>false}));
 import {createElement} from 'react';

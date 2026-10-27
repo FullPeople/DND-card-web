@@ -4,13 +4,12 @@ import type {Edit} from './CharacterPages';
 import {spellPayments,sourceSpellRestoreOffer} from '../core/automation/actions';
 import {sourceSpellEnabled} from '../core/automation/sourceSpellState';
 import {SpellActionFeedback,useSpellActionFeedback} from './SpellActionFeedback';
-import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 
 export function SourceSpellActions({c,id,edit,readOnly=false}:{c:Character;id:string;edit:Edit;readOnly?:boolean}){
- const offer=spellPayments(c,id),config=c.spellSettings?.special?.[id],workspace=useChoiceWorkspace();
- const [chosen,setChosen]=useState(''),feedback=useSpellActionFeedback(c,edit);
+ const config=c.spellSettings?.special?.[id];
+ const [chosen,setChosen]=useState(''),feedback=useSpellActionFeedback(c,edit,readOnly),offer=spellPayments(c,id,feedback.authority);
  const selected=chosen||offer.options[0]?.id||'',payment=offer.options.find(p=>p.id===selected),enabled=sourceSpellEnabled(c,id);
- const available=offer.options.filter(option=>option.available),dual=config?.sourceGrant?.usage==='invocation-pact',restore=dual?sourceSpellRestoreOffer(c,id):undefined,restricted=readOnly||dual&&workspace.canEdit===false;
+ const available=offer.options.filter(option=>option.available),dual=config?.sourceGrant?.usage==='invocation-pact',restore=dual?sourceSpellRestoreOffer(c,id,feedback.authority):undefined,restricted=readOnly||!feedback.authority.canEdit;
  function recover(){
   if(restricted||feedback.busy||!enabled||dual&&!restore?.available)return;
   if(dual&&!window.confirm('确认角色已经完成长休？这里只恢复本祈唤的 1 次使用次数，不恢复契约位、生命值或其他资源。'))return;
