@@ -14,6 +14,7 @@ import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoi
 import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
 import type {ClassChoiceSupport} from './classChoiceSupport';
 import {invocationRecord} from './invocations';
+import {validateInfusions} from './infusions';
 
 export type ChoiceOption={value:string;label:string;entry:Entry;grant?:Entry;abilities?:Partial<Record<import('../model').Ability,number>>;unavailable?:string};
 export type SheetChoice={id:string;ownerId:string;grantOwnerId?:string;grantLevel?:number;label:string;count:number;options:ChoiceOption[];selected:string[];slots?:string[];complete:boolean;restricted:boolean;channel:'skills'|'tools'|'languages'|'content'|'equipment'|'abilities'|'spells';equipmentIndex?:number;spellKind?:ClassSpellChoiceKind;catalogKind?:Entry['kind'];sourceProgression?:'optional'|'feat';ownerEdition?:Entry['edition'];support?:ClassChoiceSupport;evidenceEntries?:Entry[];duplicateChoiceIds?:string[];hint?:string};
@@ -124,7 +125,7 @@ export function chooseSheetOption(c:Character,id:string,value:string,catalog:Ent
   // Concept buttons must edit the recorded slots too, not their deduplicated
   // display. Removing one value cannot erase unrelated legacy records.
   const saved=c.answers[id]||[];
-  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];withdrawMissingReviewedFeats(c,id,slots);resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
+  if(saved.includes(value)){const slots=saved.map(v=>v===value?'':v);c.answers[id]=slots.some(Boolean)?slots:[];withdrawMissingReviewedFeats(c,id,slots);withdrawRemovedOptionalBindings(c,choice,saved,slots);resumeSheetChoice(c,id);finishBuiltinChoices(c,before,catalog);return;}
   const index=choice.count===1?0:choice.slots!.findIndex((v,i)=>i<choice.count&&!v);
   if(index<0)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
   setSheetChoiceSlot(c,id,index,value,catalog);return;
@@ -198,6 +199,15 @@ function withdrawMissingReviewedFeats(c:Character,id:string,slots:string[]){
  if(id.includes(':class-legacy-feat:')&&c.reviewedSkilled?.version===1)c.reviewedSkilled={...c.reviewedSkilled,bindings:c.reviewedSkilled.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
  for(const field of ['reviewedFeats','reviewedWeaponMaster'] as const){const store=c[field];if(id.includes(':class-legacy-feat:')&&store?.version===1)c[field]={...store,bindings:store.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};}
 }
+/** Explicit unlearning withdraws only this choice's removed activation intent.
+ * Suspension, unchanged picks, moves and unrelated retained records are not edits. */
+function withdrawRemovedOptionalBindings(c:Character,choice:SheetChoice,previous:string[],slots:string[]){
+ if(choice.sourceProgression!=='optional'||c.infusions?.version!==1)return;
+ const removed=new Set(previous.filter(value=>value&&!slots.includes(value)));
+ if(!removed.size)return;
+ try{validateInfusions(c.infusions);}catch{return;}
+ c.infusions={...c.infusions,bindings:c.infusions.bindings.filter(binding=>binding.choiceId!==choice.id||!removed.has(binding.entryId))};
+}
 /** Slot edits validate and replace atomically, including already full choices. */
 export function setSheetChoiceSlot(c:Character,id:string,index:number,value:string|undefined,catalog:Entry[]=[]){
  const before=sheetChoices(c,catalog),choice=before.find(r=>r.id===id);
@@ -216,7 +226,7 @@ export function setSheetChoiceSlot(c:Character,id:string,index:number,value:stri
   // Explicitly forgetting/replacing a reviewed feat withdraws its consent.
   // Source disable and level suspension never edit the answer or intent.
   withdrawMissingReviewedFeats(draft,id,slots);
-  if(choice.sourceProgression==='optional'&&c.infusions?.version===1)draft.infusions={...c.infusions,bindings:c.infusions.bindings.filter(binding=>binding.choiceId!==id||slots.includes(binding.entryId))};
+  withdrawRemovedOptionalBindings(draft,choice,c.answers[id]||[],slots);
   if(choice.sourceProgression&&option)draft.classChoiceSnapshots={...c.classChoiceSnapshots,...Object.fromEntries([option.entry,...(choice.evidenceEntries||[])].map(entry=>[entry.id,structuredClone(entry)]))};
  }
  resumeSheetChoice(draft,id);finishBuiltinChoices(draft,before,catalog);Object.assign(c,draft);
