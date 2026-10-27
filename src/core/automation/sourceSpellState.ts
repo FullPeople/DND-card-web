@@ -1,3 +1,4 @@
+import {itemAtWillGrantKey,itemAtWillSpell} from './itemAtWill';
 import {ownedItemChargeResource} from './itemChargeDebits';
 import {limitedSourceSpellOffer,limitedSourceUseOffers,ownedLimitedSourceResource} from './limitedSourceUses';
 import {specialSpellResource} from '../spellResourceKeys';
@@ -8,6 +9,7 @@ export function sourceSpellEnabled(c:Character,id:string):boolean{
  let row=c.selections.find(s=>s.id===id);if(!row)return false;
  const config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;if(!grant&&!config?.manualSource)return true;
  if(grant&&(!automationEnabled(c)||!grant.active))return false;
+ if(itemAtWillGrantKey(grant?.key)||itemAtWillGrantKey(row.grantKey))return !!itemAtWillSpell(c,id);
  if(grant?.usage==='limited')return limitedSourceSpellOffer(c,id)?.offer.eligible===true;
  const seen=new Set<string>();
  while(row){if(seen.has(row.id)||!selectionAllowed(c,row.entry))return false;seen.add(row.id);if(!row.parentId)return true;row=c.selections.find(s=>s.id===row!.parentId);}

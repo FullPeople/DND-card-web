@@ -1,3 +1,4 @@
+import {revokeItemAtWillOwners} from './automation/itemAtWill';
 import {ownedItemChargeResource,revokeItemChargeOwners} from './automation/itemChargeDebits';
 import {ownedLimitedSourceResource,revokeLimitedSourceOwners} from './automation/limitedSourceUses';
 import {retainedAsiSourceFeature,preserveLegacyAsiGrants} from './automation/asi';
@@ -42,6 +43,7 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
     for(const parent of discardedParents)if(!c.selections.some(row=>row.id===parent)&&!Object.values(c.classChoiceArchive).some(archive=>archive.parent?.id===parent))removed.add(parent);
     if(!Object.keys(c.classChoiceArchive).length)delete c.classChoiceArchive;
   }
+  revokeItemAtWillOwners(c,removed);
   revokeLimitedSourceOwners(c,removed);
   revokeItemChargeOwners(c,removed);
   rememberSourceSpellUses(c);

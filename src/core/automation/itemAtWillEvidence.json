@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "owned-item-at-will-source-cast",
+  "scope": "Explicit source-owned direct spell casting only; item effects, action timing, targets, duration, concentration, ability, DC and components remain manual.",
+  "sourceProseIncluded": false,
+  "investigatedStructuralEntries": 58,
+  "approvedEntries": 2,
+  "fullSnapshotHashMethod": "SHA256(JSON.stringify(recursivelySorted(entire normalized Entry))); nonmutating unreserved exact-source alias id and transport-only string revision canonicalization to pinned source values; every other field remains hashed.",
+  "rules": [
+    {
+      "id": "kiwee:item:dmg:helm%20of%20comprehending%20languages::::::",
+      "kind": "item",
+      "name": "通晓语言头盔",
+      "english": "Helm of Comprehending Languages",
+      "source": "DMG",
+      "packId": "kiwee",
+      "edition": "2014",
+      "page": 173,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "152ee0a9b986063a2042c1a6fe9f410f9038ebb3b068ae909944e05f4090f649",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 976
+      },
+      "clauseSha256": "d0fcff350d5768a77fde5079ddc1b3fe707517563c3732c6b12d243042a253a5",
+      "requiresEquipped": true,
+      "requiresAttunement": false,
+      "spellInput": {
+        "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+        "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+      },
+      "manualBoundaries": [
+        "actual-wearing-and-attunement-legality",
+        "source-action-timing",
+        "targets-and-spell-effects",
+        "spell-ability-DC-components-when-not-declared",
+        "duration-concentration-and-effect-end",
+        "no-slots-or-resource-debit-for-this-source-branch"
+      ],
+      "grants": [
+        {
+          "key": "direct-cast",
+          "targetEntryId": "kiwee:spell:phb:comprehend%20languages::::::",
+          "reference": "通晓语言|PHB",
+          "targetScope": "spell"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:boots%20of%20levitation::::::",
+      "kind": "item",
+      "name": "浮空之靴",
+      "english": "Boots of Levitation",
+      "source": "DMG",
+      "packId": "kiwee",
+      "edition": "2014",
+      "page": 155,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "488b2f5ca86b92a64abeed917c7267a62aea47b840c5e78aef8690cfd278dca6",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 281
+      },
+      "clauseSha256": "ec1ccfe8bf2b880c46562cd6ec30dce44ae5a9a8b55f1607a47e2f74b2ec9e7b",
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "spellInput": {
+        "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+        "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+      },
+      "manualBoundaries": [
+        "actual-wearing-and-attunement-legality",
+        "source-action-timing",
+        "targets-and-spell-effects",
+        "spell-ability-DC-components-when-not-declared",
+        "duration-concentration-and-effect-end",
+        "no-slots-or-resource-debit-for-this-source-branch"
+      ],
+      "grants": [
+        {
+          "key": "direct-cast",
+          "targetEntryId": "kiwee:spell:phb:levitate::::::",
+          "reference": "浮空术|PHB",
+          "targetScope": "self"
+        }
+      ]
+    }
+  ]
+}
