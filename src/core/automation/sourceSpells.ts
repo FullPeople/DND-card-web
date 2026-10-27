@@ -1,3 +1,4 @@
+import {ownedItemChargeResource} from './itemChargeDebits';
 import type {Character,Entry} from '../model';
 import {rememberSourceSpellUses} from './sourceSpellState';
 import {spellState} from '../characterDetails';
@@ -18,9 +19,9 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
  const transfers=new Map<string,{max:number;old:Set<string>}>();
  for(const grant of plan.grants){if(grant.config.sourceGrant?.usage==='invocation-pact'||grant.config.sourceGrant?.usage==='limited')continue;const old=c.spellSettings?.special?.[grant.id];if(old?.mode!=='uses'||grant.config.mode!=='uses')continue;
   const previousKey=specialSpellResource(grant.id,c),nextKey=grant.config.sourceGrant?.resourceKey||`innate-spell:${grant.id}`;
-  if(previousKey===nextKey)continue;const transfer=transfers.get(nextKey)||{max:grant.config.max!,old:new Set<string>()};transfer.old.add(previousKey);transfers.set(nextKey,transfer);
+  if(previousKey===nextKey||ownedItemChargeResource(c,previousKey)||ownedItemChargeResource(c,nextKey))continue;const transfer=transfers.get(nextKey)||{max:grant.config.max!,old:new Set<string>()};transfer.old.add(previousKey);transfers.set(nextKey,transfer);
  }
- for(const [key,transfer] of transfers){const current=c.runtime.resources[key],spent=[...transfer.old].reduce((sum,k)=>{const r=c.runtime.resources[k];return sum+(r?Math.max(0,r.max-r.current):transfer.max);},0),preserved=Math.max(spent,current?Math.max(0,current.max-current.current):0);c.runtime.resources[key]={...current,max:transfer.max,current:Math.max(0,transfer.max-preserved),type:'count'};}
+ for(const [key,transfer] of transfers){if(ownedItemChargeResource(c,key))continue;const current=c.runtime.resources[key],spent=[...transfer.old].reduce((sum,k)=>{const r=c.runtime.resources[k];return sum+(r?Math.max(0,r.max-r.current):transfer.max);},0),preserved=Math.max(spent,current?Math.max(0,current.max-current.current):0);c.runtime.resources[key]={...current,max:transfer.max,current:Math.max(0,transfer.max-preserved),type:'count'};}
 
  for(const grant of plan.grants){
   let row=c.selections.find(s=>s.id===grant.id);
@@ -31,7 +32,7 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
   settings.prepared=settings.prepared.map(id=>id===row!.id?'':id);matched.add(row.id);
   if(grant.config.sourceGrant?.usage==='limited')continue;
   if(grant.config.mode==='uses'){
-   const key=specialSpellResource(row.id,c),resource=c.runtime.resources[key],max=grant.config.max!;
+   const key=specialSpellResource(row.id,c),resource=c.runtime.resources[key],max=grant.config.max!;if(ownedItemChargeResource(c,key))continue;
    // A missing counter on an already saved grant is not permission to replenish it.
    if(!resource)c.runtime.resources[key]={name:grant.config.sourceGrant?.usage==='invocation-pact'?`${grant.owner.entry.name}祈唤次数`:grant.config.sourceGrant?.resourceKey?`${grant.owner.entry.name}共享施法次数`:`${row.entry.name} · ${grant.owner.entry.name}`,max,current:!fresh?0:c.runtime.sourceSpellSpent?.[grant.config.sourceGrant!.usageKey!]!==undefined?Math.max(0,max-c.runtime.sourceSpellSpent[grant.config.sourceGrant!.usageKey!]):max,type:'count',...(grant.config.sourceGrant?.usage==='invocation-pact'?{sourceSpellGrant:{usageKey:grant.config.sourceGrant.usageKey!}}:{})};
    else if(grant.config.sourceGrant?.usage==='invocation-pact')continue; // Never repair/adopt a manual collision or an edited invocation balance.

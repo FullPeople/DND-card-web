@@ -1,3 +1,4 @@
+import {validateItemChargeDebitState} from './automation/itemChargeDebits';
 import {validateLimitedSourceUseState} from './automation/limitedSourceUses';
 import {validateReviewedAlert} from './automation/reviewedAlert';
 import {validateReviewedObservant} from './automation/reviewedObservant';
@@ -177,6 +178,8 @@ export function validateCharacter(value: unknown): Character {
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   validateActionState(c.runtime.automationActions);
   validateLimitedSourceUseState(c.runtime.limitedSourceUses);
+  validateItemChargeDebitState(c.runtime.itemChargeDebits);
+  for(const r of Object.values(c.runtime.resources) as any[])if(r.itemChargeDebitGrant!==undefined)assert(plain(r.itemChargeDebitGrant)&&typeof r.itemChargeDebitGrant.key==='string'&&r.itemChargeDebitGrant.key.length>0&&r.itemChargeDebitGrant.key.length<=20000,'物品充能计数标记无效。');
   for(const r of Object.values(c.runtime.resources) as any[])if(r.limitedSourceUseGrant!==undefined)assert(plain(r.limitedSourceUseGrant)&&typeof r.limitedSourceUseGrant.key==='string'&&r.limitedSourceUseGrant.key.length>0&&r.limitedSourceUseGrant.key.length<=20000,'有限来源计数标记无效。');
   validateInfusionChargeState(c.runtime.infusionCharges);
   validateRefuelingRingState(c.runtime.refuelingRing);

@@ -1,3 +1,4 @@
+import {ownedItemChargeResource,assertItemChargeResourcesPreserved} from './automation/itemChargeDebits';
 import {assertLimitedSourceResourcesPreserved,ownedLimitedSourceResource} from './automation/limitedSourceUses';
 import type {Character} from './model';
 import {applyPatch,sameValue} from './merge';
@@ -23,7 +24,7 @@ export function commitDashboardDraft(live:Character,base:Character,draft:Charact
   const before=base.runtime.resources[id],after=draft.runtime.resources[id],current=live.runtime.resources[id];
   if(sameValue(before,after))continue;
   if(!after&&(before?.automatic||current?.automatic))throw Error('自动资源不能在仪表盘中删除');
-  if(ownedLimitedSourceResource(live,id)&&(current?.locked||after&&!!before?.locked!==!!after.locked)&&(!Object.hasOwn(options,'gm')||options.gm!==true))throw Error('有限来源锁定设置需要当前明确主持人权限');
+  if((ownedLimitedSourceResource(live,id)||ownedItemChargeResource(live,id))&&(current?.locked||after&&!!before?.locked!==!!after.locked)&&(!Object.hasOwn(options,'gm')||options.gm!==true))throw Error('有限来源锁定设置需要当前明确主持人权限');
   if(!options.gm&&(current?.locked||after&&!!before?.locked!==!!after.locked))throw Error('资源已锁定，请由房主调整');
  }
  // Compare equally hydrated snapshots: merely opening a legacy card must not
@@ -31,6 +32,7 @@ export function commitDashboardDraft(live:Character,base:Character,draft:Charact
  const previous=createDashboardDraft(base),remote=createDashboardDraft(live);
  const merged:Character=applyPatch(remote,previous,draft);
  assertLimitedSourceResourcesPreserved(live,merged);
+ assertItemChargeResourcesPreserved(live,merged);
  merged.revision=live.revision;merged.updatedAt=live.updatedAt;
  const result=validateCharacter(merged),layout=result.quickbarLayout!;
  const visible=freeDashboardLayout(resourceModules(resourceCanvasRows(result),layout.widgets,result.selections),layout.widgets,layout.attacks);

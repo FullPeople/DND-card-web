@@ -1,3 +1,4 @@
+import {ownedItemChargeResource} from './itemChargeDebits';
 import {limitedSourceSpellOffer,limitedSourceUseOffers,ownedLimitedSourceResource} from './limitedSourceUses';
 import {specialSpellResource} from '../spellResourceKeys';
 import {selectionAllowed,type Character,type Selection} from '../model';
@@ -27,10 +28,10 @@ export function sourceOwnerIdentity(c:Character,row:Selection):string{
 export function rememberSourceSpellUses(c:Character,id?:string,preserveOverflow=true){
  // Canonical invocation pools survive aliases and inactive learning trees. Their
  // owned key, not mutable cached spell metadata, is the expenditure identity.
- for(const [key,r] of Object.entries(c.runtime.resources)){const usageKey=r.sourceSpellGrant?.usageKey;if(!usageKey||key!==`source-spell-pool:${encodeURIComponent(usageKey)}`||r.max!==1||!Number.isSafeInteger(r.current)||r.current<0||r.current>1||r.unlimited||id&&specialSpellResource(id,c)!==key)continue;(c.runtime.sourceSpellSpent||={})[usageKey]=1-r.current;}
+ for(const [key,r] of Object.entries(c.runtime.resources)){if(ownedItemChargeResource(c,key))continue;const usageKey=r.sourceSpellGrant?.usageKey;if(!usageKey||key!==`source-spell-pool:${encodeURIComponent(usageKey)}`||r.max!==1||!Number.isSafeInteger(r.current)||r.current<0||r.current>1||r.unlimited||id&&specialSpellResource(id,c)!==key)continue;(c.runtime.sourceSpellSpent||={})[usageKey]=1-r.current;}
  for(const [selectionId,config] of Object.entries(c.spellSettings?.special||{})){
   if(id&&selectionId!==id||!config.sourceGrant?.usageKey||config.mode!=='uses'||(config.sourceGrant.usage==='invocation-pact'||config.sourceGrant.usage==='limited'))continue;
-  const r=c.runtime.resources[specialSpellResource(selectionId,c)];if(!r||r.sourceSpellGrant||ownedLimitedSourceResource(c,specialSpellResource(selectionId,c)))continue;
+  const r=c.runtime.resources[specialSpellResource(selectionId,c)];if(!r||r.sourceSpellGrant||ownedLimitedSourceResource(c,specialSpellResource(selectionId,c))||ownedItemChargeResource(c,specialSpellResource(selectionId,c)))continue;
   const ledger=c.runtime.sourceSpellSpent||={};ledger[config.sourceGrant.usageKey]=Math.max(0,r.max-r.current,preserveOverflow&&r.current===0?ledger[config.sourceGrant.usageKey]||0:0);
  }
 }

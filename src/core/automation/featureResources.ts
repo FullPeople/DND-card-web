@@ -1,3 +1,4 @@
+import {ownedItemChargeResource} from './itemChargeDebits';
 import {ownedLimitedSourceResource} from './limitedSourceUses';
 import {reviewedAlertIdentity} from './reviewedFeatIdentity';
 import {planRacialAbilities} from '../racialAbilities';
@@ -121,21 +122,21 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
  }
  grants.push(...planClassResourcePools(c,grants));return {grants,issues};
 }
-export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id)){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
+export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id)&&!ownedItemChargeResource(c,id)){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
 /** Own lifecycle and recovery only; preserve player-owned presentation and overrides. */
 export function syncFeatureResources(c:Character){
  const before=JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);rememberFeatureResources(c);
  const needed=new Set<string>();
- for(const grant of planFeatureResources(c).grants){needed.add(grant.key);const old=c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key];
+ for(const grant of planFeatureResources(c).grants){if(ownedItemChargeResource(c,grant.key))continue;needed.add(grant.key);const old=c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key];
   const manual=old?.featureGrant?.manualMax||!!old?.featureGrant&&old.max!==old.featureGrant.ruleMax;
   const max=manual?old!.max:grant.max,spent=old?old.featureGrant?.spent??Math.max(0,old.max-old.current):0;
   c.runtime.resources[grant.key]={...old,name:grant.name,type:old?.type||'count',icon:old?.icon||'gem',max,current:Math.max(0,max-spent),featureGrant:{ownerId:grant.ownerId,ruleMax:grant.max,manualMax:manual,spent,recovery:grant.recovery,formula:grant.formula,origin:grant.origin,classPool:grant.classPool}};
  }
- for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key)&&!ownedLimitedSourceResource(c,key))delete c.runtime.resources[key];
- for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id))(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);
+ for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key)&&!ownedLimitedSourceResource(c,key)&&!ownedItemChargeResource(c,key))delete c.runtime.resources[key];
+ for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id)&&!ownedItemChargeResource(c,id))(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);
 }
 export function resourceRestRecovery(c:Character,key:string,kind:'short'|'long'):number|'all'|undefined{
- if(ownedLimitedSourceResource(c,key))return;
+ if(ownedLimitedSourceResource(c,key)||ownedItemChargeResource(c,key))return;
  const r=c.runtime.resources[key];if(!r)return undefined;
   let recovery:number|'all'|undefined=r.featureGrant?.recovery[kind];
   if(!r.featureGrant){if(key.startsWith('pact-slot:')||kind==='long'&&key.startsWith('spell-slot:'))recovery='all';

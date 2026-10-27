@@ -1,3 +1,5 @@
+import {itemChargeOffers,itemChargeStateIssue} from './itemChargeDebits';
+import {itemChargeIdentity,itemChargeRule} from './itemChargeDebitSource';
 import {limitedSourceUseOffers,limitedSourceUseStateIssue} from './limitedSourceUses';
 import {limitedSourceIdentity,limitedSourceRule,limitedSourcePoolId} from './limitedSourceUseSource';
 import {reviewedAlertIdentity} from './reviewedFeatIdentity';
@@ -15,15 +17,16 @@ import {sourceResourcePool,validResourceCost,type ResourceColumn} from './source
 
 export const sourceSpellKey=(key?:string)=>!!key?.startsWith('source-spell:');
 export interface SourceSpellPlan {id:string;owner:Selection;key:string;entry:Entry;eligible:boolean;config:SpecialSpell}
-export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string}}
+export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string};itemChargeUse?:{ownerId:string}}
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 /** Interpret declared data, never rule prose. Unresolved choices and shapes are visible. */
 export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceSpellPlan[];issues:Issue[];choices:SourceSpellChoice[]}{
  const grants:SourceSpellPlan[]=[],issues:Issue[]=[],choices:SourceSpellChoice[]=[];
  let resourceGrants:ReturnType<typeof planFeatureResources>['grants']|undefined;
+ const itemIssue=itemChargeStateIssue(c);if(itemIssue)issues.push({id:'item-charge-history',severity:'warning',message:itemIssue});
  const limitedIssue=limitedSourceUseStateIssue(c);if(limitedIssue)issues.push({id:'limited-source-history',severity:'warning',message:limitedIssue});
  if(!supportedAutomation(c))return {grants,issues,choices};
- const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'&&!reviewedAlertIdentity(s.entry)&&!limitedSourceIdentity(s.entry)),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
+ const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'&&!reviewedAlertIdentity(s.entry)&&!limitedSourceIdentity(s.entry)&&!itemChargeIdentity(s.entry)),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
  // Saved snapshots win over a newly downloaded edition/revision of the same entry.
  const known=[...new Map([...c.selections.map(s=>s.entry),...catalog].map(e=>[e.id,e] as const).reverse()).values()].filter(e=>e.kind==='spell');
  for(const owner of c.selections.filter(s=>s.entry.kind!=='spell'&&s.entry.raw.additionalSpells!=null)){
@@ -34,7 +37,8 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   const limitedRule=limitedSourceRule(owner.entry);
   const issue=(path:string,message:string)=>{const id=`source-spell:${owner.id}:${path}:${message}`;if(!issues.some(i=>i.id===id))issues.push({id,selectionId:owner.id,severity:'warning',message:`${owner.entry.name}：${message}`});};
   if(limitedSourceIdentity(owner.entry)&&!limitedRule){issue('limited-proof','有限来源身份或完整快照未通过核验，保留手工记录。');continue;}
-  if(owner.entry.kind==='item'){issue('item','物品赠送施法与充能尚未接入，请按原文记录。');continue;}
+  if(itemChargeIdentity(owner.entry)&&!itemChargeRule(owner.entry)){issue('item-charge-proof','物品完整来源快照未通过核验，保留手工记录。');continue;}
+  if(owner.entry.kind==='item'){issue('item',itemChargeRule(owner.entry)?.supported?'仅提供一个来源证明的固定费用记账；物品施法、效果与恢复仍需人工处理。':'物品赠送施法与充能尚未接入，请按原文记录。');continue;}
   const reviewedInvocation=learnedInvocationRule(c,owner);
   const unreviewedInvocation=invocationCandidate(owner.entry)&&!reviewedInvocation;
   if(unreviewedInvocation)issue('invocation-owner','祈唤尚未通过当前职业学习授权或声明已变化；保留记录，不自动授予施法。');
@@ -47,7 +51,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   while(!cls&&parent.parentId&&!seen.has(parent.id)){seen.add(parent.id);const next=c.selections.find(s=>s.id===parent.parentId);if(!next)break;parent=next;cls=parent.entry.kind==='class'?parent:parentClass(c,parent);}
   // Implicit raw class metadata is not permission to borrow a forged Alert's
   // level. Other real-class metadata resolution retains its existing route.
-  if(cls&&(reviewedAlertIdentity(cls.entry)||limitedSourceIdentity(cls.entry)))continue;
+  if(cls&&(reviewedAlertIdentity(cls.entry)||limitedSourceIdentity(cls.entry)||itemChargeIdentity(cls.entry)))continue;
   let ability:Ability|undefined=ABILITIES.includes(block.ability)?block.ability:undefined;
   if(object(block.ability)&&Array.isArray(block.ability.choose)){
    const options=block.ability.choose.filter((a:any)=>ABILITIES.includes(a)) as Ability[];choices.push({ownerId:owner.id,key:blockKey,label:owner.entry.name+'的施法属性',abilities:options});
@@ -148,6 +152,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   }
  }
  for(const offer of limitedSourceUseOffers(c))if(!choices.some(q=>q.limitedUse?.ownerId===offer.ownerId&&q.limitedUse.poolId===offer.poolId))choices.push({ownerId:offer.ownerId,key:JSON.stringify(['limited-source',offer.ownerId,offer.poolId]),label:offer.ownerName+'的有限次数记录',limitedUse:{ownerId:offer.ownerId,poolId:offer.poolId}});
+ for(const offer of itemChargeOffers(c))choices.push({ownerId:offer.ownerId,key:JSON.stringify(['item-charge',offer.ownerId]),label:offer.ownerName+'的充能记账',itemChargeUse:{ownerId:offer.ownerId}});
  return {grants,issues,choices};
 }
 

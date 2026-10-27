@@ -1,3 +1,4 @@
+import {ownedItemChargeResource} from './itemChargeDebits';
 import {limitedSourceSpellOffer,limitedSourceSpellBasis,spendLimitedSourceSpell,ownedLimitedSourceResource} from './limitedSourceUses';
 import {ordinarySpellOffer,ordinarySpellActionBasis,ordinaryCastingClassContextMalformed} from './ordinarySpellCasting';
 import {spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
@@ -78,7 +79,7 @@ function sourceSpellPayments(c:Character,id:string,authority?:SpellActionAuthori
  * invocations. It is not a complete long-rest operation or a slot refill. */
 export function spellPayments(c:Character,id:string,authority?:SpellActionAuthority,casterId?:string){
  const ordinary=ordinarySpellOffer(c,id,casterId,authority),source=!c.spellSettings?.special?.[id]?.sourceGrant&&ordinaryCastingClassContextMalformed(c)?{options:[],reason:'已识别的职业快照已修改，未调用旧施法解码或仪式回退。'}:sourceSpellPayments(c,id,authority);
- const options=[...ordinary.options,...source.options].map(option=>{const reason=spellActionAuthorityReason(c,authority,[...(option.resourceId?[option.resourceId]:[]),...(option.debits?.map(d=>d.resourceId)||[])]);return reason?{...option,available:false,reason}:option;});
+ const options=[...ordinary.options,...source.options].map(option=>{const ids=[...(option.resourceId?[option.resourceId]:[]),...(option.debits?.map(d=>d.resourceId)||[])],reason=ids.some(key=>ownedItemChargeResource(c,key))?'物品充能不能用于通用施法支付。':spellActionAuthorityReason(c,authority,ids);return reason?{...option,available:false,reason}:option;});
  return {...ordinary,options,ordinaryReason:ordinary.reason,reason:ordinary.casters.length?ordinary.reason:source.reason||ordinary.reason};
 }
 export function sourceSpellRestoreOffer(c:Character,id:string,authority?:SpellActionAuthority):{paymentId:'source';label:string;available:boolean;reason?:string}|undefined{
@@ -106,7 +107,7 @@ export function sourceSpellRestPlan(c:Character,kind:'short'|'long',authority?:S
   const verified=currentSourceSpell(c,id);if(!verified)return {resources:[],reason:'来源声明或授予归属已变化，整批未恢复。'};
   if(verified.grant.usage==='invocation-pact'&&(!invocationUseCounter(c,id,verified.grant)||verified.config.recovery!=='long'))return {resources:[],reason:'祈唤次数记录无效，整批未恢复。'};
   if(!(verified.config.recovery==='short'||kind==='long'&&verified.config.recovery==='long'))continue;
-  const resourceId=specialSpellResource(id,c);if(ownedLimitedSourceResource(c,resourceId))continue;if(seen.has(resourceId))continue;seen.add(resourceId);
+  const resourceId=specialSpellResource(id,c);if(ownedLimitedSourceResource(c,resourceId)||ownedItemChargeResource(c,resourceId))continue;if(seen.has(resourceId))continue;seen.add(resourceId);
   const r=c.runtime.resources[resourceId],locked=spellActionAuthorityReason(c,authority,[resourceId]);if(locked)return {resources:[],reason:locked};
   if(!r||r.unlimited||!Number.isSafeInteger(r.max)||r.max<1||!Number.isSafeInteger(r.current)||r.current<0||r.current>r.max)return {resources:[],reason:'来源次数记录无效，整批未恢复。'};
   if(r.current<r.max)resources.push({resourceId,before:r.current,after:r.max});
@@ -169,6 +170,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest,author
   if(!payment)return reject(offer.reason||'此来源不允许所选的施法方式。');
   if(!payment.available)return reject(payment.reason||'所需资源不足。');
  }
+ if([...(payment.resourceId?[payment.resourceId]:[]),...(payment.debits?.map(d=>d.resourceId)||[])].some(key=>ownedItemChargeResource(c,key)))return reject('物品充能只能由已核实的专属记账动作处理。');
  const locked=spellActionAuthorityReason(c,authority,[...(payment.resourceId?[payment.resourceId]:[]),...(payment.debits?.map(d=>d.resourceId)||[])]);if(locked)return reject(locked);
  if(payment.id==='limited'){
   if(request.mode!=='cast'||!request.limitedIntent||Array.isArray(request.limitedIntent)||Object.keys(request.limitedIntent).length!==1||!Object.hasOwn(request.limitedIntent,'confirmedLimitedSourceValid')||request.limitedIntent.confirmedLimitedSourceValid!==true||typeof request.basis!=='string')return reject('请重新确认本次有限来源仍有效。');
