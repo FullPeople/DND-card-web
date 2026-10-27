@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "repository": "FullPeople/dnd5e-automation-data",
-  "revision": "06889ec69d5c423d9a3e6e6dc8be0a5818cf8268",
+  "revision": "954cf46fcf236f2f5553e294e5f358c52d3fafd4",
   "path": "reports/progress/runtime-coverage.json",
-  "sha256": "f254c3b8451d24b86d0d53e72f02f6874d22a725771744e34ee59c692599f35f"
+  "sha256": "cc6694329697a250bbf95b71a491705d8588069ef44854bc6b5f016cfe4685c8"
 }
