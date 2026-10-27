@@ -16,7 +16,7 @@ import {performSpellAction,spellActionRequest} from '../src/core/automation/acti
 import {confirmSpellPresentation,type SpellPresentation} from '../src/ui/spellActionPresentation';
 import {invocationDualPaymentCases as cases,invocationDualPaymentData} from './fixtures/invocationDualPaymentData';
 import {sync,learn,invocationFixture} from './fixtures/invocationFixture';
-vi.mock('../src/platform/workbench',()=>({inWorkbench:false,workbenchRequest:vi.fn()}));
+vi.mock('../src/platform/workbench',()=>{const state={};return {inWorkbench:false,workbenchRequest:vi.fn(),useWorkbench:()=>state,getWorkbench:()=>state};});
 vi.mock('../src/ui/pointerDrag',()=>({pointerDrag:vi.fn(),landingWithin:vi.fn()}));
 vi.mock('../src/ui/sheetDisplay',()=>({useSheetRenderMode:()=> 'a4',useSheetCaptureActive:()=>false}));
 function setup(){

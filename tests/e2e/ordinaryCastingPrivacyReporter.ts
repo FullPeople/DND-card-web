@@ -1,0 +1,6 @@
+import {basename,join} from 'node:path';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import type {Reporter,TestCase,TestResult} from '@playwright/test/reporter';
+import {ordinaryBrowserInputSetSha256} from './ordinaryCastingBrowserFixture';
+import {ORDINARY_INPUT_ANNOTATION,ORDINARY_PRODUCT_ANNOTATION,ORDINARY_PRODUCT_SHA256,ordinarySafeDirectory,ordinarySafeReceipt} from './ordinaryCastingArtifactPrivacy';
+export default class OrdinaryCastingPrivacyReporter implements Reporter{onTestEnd(test:TestCase,result:TestResult){if(basename(test.location.file)!=='ordinaryCasting.spec.ts')return;const project=test.parent.project();if(!project)throw Error('Missing ordinary evidence project');const receipt=ordinarySafeReceipt({id:test.id,title:test.title,project:project.name,status:result.status,expectedStatus:test.expectedStatus,retry:result.retry,durationMs:result.duration,inputsVerified:test.annotations.some(row=>row.type===ORDINARY_INPUT_ANNOTATION&&row.description===ordinaryBrowserInputSetSha256),productVerified:test.annotations.some(row=>row.type===ORDINARY_PRODUCT_ANNOTATION&&row.description===ORDINARY_PRODUCT_SHA256)}),directory=ordinarySafeDirectory({id:test.id,project:project.name,outputDir:project.outputDir});mkdirSync(directory,{recursive:true});writeFileSync(join(directory,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');}}
