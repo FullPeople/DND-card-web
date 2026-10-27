@@ -20,8 +20,20 @@ on:
       - 'tests/reviewed-linguist*.test.ts'
       - 'tests/reviewed-alert*.test.ts'
       - 'tests/ordinary-*.test.ts'
+      - 'tests/attuned-item-charge*.test.ts'
+      - 'tests/vitest-runner*.test.ts'
+      - 'tests/helpers/offlineCatalog*.mjs'
+      - 'tests/helpers/attunedItemChargeDebitFixture.ts'
+      - 'tests/helpers/itemChargeMergedFixture.ts'
+      - 'tools/runVitest.mjs'
       - 'tests/helpers/ordinarySpellCastingFixture.ts'
       - 'tests/e2e/ordinaryCasting*.ts'
+      - 'tests/e2e/resourceLedger*.ts'
+      - 'tests/resource-ledger*.test.ts'
+      - 'tests/limited-source*.test.ts'
+      - 'tests/item-charge-*.test.ts'
+      - 'tests/protected-resource-history*.test.ts'
+      - 'tests/resource-evidence-native-imports.test.ts'
       - 'tools/fetchReviewedAlertCorpus.*'
       - 'tools/reviewedAlertCorpusSources.json'
       - 'tests/e2e/reviewedAlert*.ts'
@@ -72,7 +84,7 @@ jobs:
   verify:
     name: verify (${{ matrix.project }})
     runs-on: ubuntu-latest
-    # Preserve 67 accepted App cases and add four ordinary-casting cases/project.
+    # Keep all 71 existing App case identities and add three resource-bookkeeping cases/project.
     # Existing per-assertion and per-case budgets/retries are unchanged.
     timeout-minutes: 35
     strategy:
@@ -233,6 +245,8 @@ jobs:
           printf '%s\n' 'REVIEWED_FEATS_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'PASSIVE_FEAT_TEST_INPUTS=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'ORDINARY_CASTING_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'LIMITED_SOURCE_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'ITEM_CHARGE_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
       - name: Fetch exact old consumer for charge-preservation verification
         run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
       - name: Fetch ninth-stage consumer for localized-v2 and ring preservation
@@ -250,11 +264,13 @@ jobs:
       - name: Fetch exact accepted pre-Alert consumer
         run: git fetch --no-tags --depth=1 origin 8e48bbbe801b21a57fbb9072b4d4c324379448ea
       - name: Source replay, persistence, restrictions and UI guards
-        run: npx vitest run tests/radiant-*.test.ts tests/refueling-*.test.ts tests/infusion-charge*.test.ts tests/attuned-infusion*.test.ts tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-spell-expansion.test.ts tests/invocation-level9.test.ts tests/invocation-atwill-final.test.ts tests/invocation-skill-guard.test.ts tests/invocation-dual-payment.test.ts tests/invocation-dual-controls.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
+        run: node tools/runVitest.mjs run tests/radiant-*.test.ts tests/refueling-*.test.ts tests/infusion-charge*.test.ts tests/attuned-infusion*.test.ts tests/arcane-focus.test.ts tests/arcane-focus-controls.test.ts tests/returning-weapon.test.ts tests/returning-weapon-controls.test.ts tests/enhanced-weapon.test.ts tests/enhanced-weapon-controls.test.ts tests/infusion-activation.test.ts tests/infusion-controls.test.ts tests/infusion-source-identity.test.ts tests/automation209-weapons.test.ts tests/characterDetails.test.ts tests/automation209-spells.test.ts tests/numberInput234.test.ts tests/invocations.test.ts tests/invocation-spell-expansion.test.ts tests/invocation-level9.test.ts tests/invocation-atwill-final.test.ts tests/invocation-skill-guard.test.ts tests/invocation-dual-payment.test.ts tests/invocation-dual-controls.test.ts tests/invocation-regression.test.ts tests/invocation-ui.test.ts tests/sourceSpellChoiceLifecycle.test.ts tests/sourceSpellMechanics217.test.ts tests/class-choice-support.test.ts tests/featureArmor.test.ts tests/sourceChoices232.test.ts tests/optional-feature-drag.test.ts tests/import-choice-ignore.test.ts tests/automation-choices-resources.test.ts --maxWorkers=2
       - name: Reviewed passive-feat source, lifecycle and player controls
-        run: npx vitest run tests/reviewed-feats*.test.ts tests/reviewed-armor-*.test.ts tests/reviewed-modern-*.test.ts tests/reviewed-weapon-master*.test.ts tests/reviewed-skilled*.test.ts tests/reviewed-linguist*.test.ts tests/reviewed-observant*.test.ts tests/reviewed-alert*.test.ts tests/training-chips-editing.test.ts --maxWorkers=1
+        run: node tools/runVitest.mjs run tests/reviewed-feats*.test.ts tests/reviewed-armor-*.test.ts tests/reviewed-modern-*.test.ts tests/reviewed-weapon-master*.test.ts tests/reviewed-skilled*.test.ts tests/reviewed-linguist*.test.ts tests/reviewed-observant*.test.ts tests/reviewed-alert*.test.ts tests/training-chips-editing.test.ts --maxWorkers=1
       - name: Actual-source ordinary casting and eight rendered control workflows
-        run: node node_modules/vitest/vitest.mjs run tests/ordinary-spell-*.test.ts tests/ordinary-catalog-hydration.test.ts tests/ordinary-casting-browser-contract.test.ts --maxWorkers=1
+        run: node tools/runVitest.mjs run tests/ordinary-spell-*.test.ts tests/ordinary-catalog-hydration.test.ts tests/ordinary-casting-browser-contract.test.ts --maxWorkers=1
+      - name: Grouped real-source finite and fixed-item accounting with rendered control guards
+        run: node tools/runVitest.mjs run tests/limited-source*.test.ts tests/item-charge-*.test.ts tests/attuned-item-charge*.test.ts tests/vitest-runner*.test.ts tests/protected-resource-history*.test.ts tests/resource-evidence-native-imports.test.ts tests/resource-ledger-browser-contract.test.ts --maxWorkers=1
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone
@@ -277,6 +293,8 @@ jobs:
             .local-evidence/alert-browser-safe/
             !.local-evidence/infusion-browser/ordinaryCasting-*/**
             .local-evidence/ordinary-casting-browser-safe/
+            !.local-evidence/infusion-browser/resourceLedgerControls-*/**
+            .local-evidence/resource-ledger-browser-safe/
             .local-evidence/infusion-source-verification.json
             .local-evidence/passive-feat-source-verification.json
             .local-evidence/observant-passive-baseline-verification.json

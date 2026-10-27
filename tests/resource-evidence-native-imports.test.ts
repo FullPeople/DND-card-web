@@ -14,8 +14,8 @@ const imports=sources.flatMap(file=>{
  return [...text.matchAll(/^import\s+(\w+)\s+from\s+(['"])(\.\/[^'"]+\.json)\2(?:\s+with\s+\{[^\n]*\})?;$/gm)].map(match=>({file,binding:match[1],statement:match[0],relative:match[3],source}));
 });
 
-it('retains all five source-evidence import sites in the native compatibility gate',()=>{
- expect(imports).toHaveLength(5);
+it('retains all seven source-evidence import sites including the closed catalog forms in the native compatibility gate',()=>{
+ expect(imports).toHaveLength(7);
  expect(new Set(imports.map(row=>row.file))).toEqual(new Set(sources));
 });
 
