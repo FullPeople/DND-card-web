@@ -7,6 +7,8 @@ import {useInteractionStatus} from './InteractionFeedback';
 import {useRetainedCardActive} from './RetainedCardVisibility';
 import './sourceSpellControls.css';
 
+const sourceTimingLabel=(timing:unknown)=>timing==='bonus-action'?'附赠动作':timing==='action'?'动作':timing==='spell-default'?'按法术原有施法时间':undefined;
+
 /** Explicit owned-source intent, not learning, effects or a resource grant. */
 export function ItemAtWillSpellControl({c,ownerId,entries,edit,writable=true}:{c:Character;ownerId:string;entries:Entry[];edit:Edit;writable?:boolean}){
  const feedback=useSpellActionFeedback(c,edit,!writable),active=useRetainedCardActive(),status=useInteractionStatus(),offer=itemAtWillOffer(c,ownerId,entries,feedback.authority);
@@ -34,8 +36,8 @@ export function ItemAtWillSpellControl({c,ownerId,entries,edit,writable=true}:{c
   <legend>物品随意施法来源 · {offer.label}</legend>
   <p>{offer.active?'当前来源已确认且可核对；法术仍附属于此实物。':record?.enabled?'原确认已保留，但当前穿戴、来源或归属不可用；不能施法。':record?'此物品来源确认已撤回；再次使用须明确重新核对。':'尚未确认当前真实拥有的物品来源；打开或穿戴不会自动获得法术。'}</p>
   {offer.reason&&<p role="note">{offer.reason}</p>}
-  <p>{offer.requiresAttunement?'需要背包中当前已穿戴且已同调的实物标记。':'需要背包中当前穿戴实物的标记。'}实际穿戴、同调程序、资格与限制仍需人工核对；不会自动穿戴或同调。</p>
-  <ul>{offer.grants.map(grant=><li key={grant.key}>{entries.filter(entry=>entry.id===grant.targetEntryId).length===1?entries.find(entry=>entry.id===grant.targetEntryId)!.name:'来源法术引用'} · {grant.targetScope==='self'?'仅限自身，不允许其他目标。':'目标按来源法术条目人工核对。'}</li>)}</ul>
+  <p>{offer.requiresAttunement?'需要背包中当前已装备且已同调的实物标记，实际按来源穿戴／持用。':'需要背包中当前已装备的实物标记，实际按来源穿戴／持用。'}实际穿戴、同调程序、资格与限制仍需人工核对；不会自动穿戴或同调。</p>
+  <ul>{offer.grants.map(grant=><li key={grant.key}>{entries.filter(entry=>entry.id===grant.targetEntryId).length===1?entries.find(entry=>entry.id===grant.targetEntryId)!.name:'来源法术引用'} · {grant.targetScope==='self'?'仅限自身，不允许其他目标。':'目标按来源法术条目人工核对。'}{sourceTimingLabel(grant.sourceActionTiming)&&<small data-item-source-timing={grant.sourceActionTiming}>来源施法时间：{sourceTimingLabel(grant.sourceActionTiming)}。只读提示；动作经济仍需人工处理。</small>}</li>)}</ul>
   <p>这里只确认物品附属的免费来源施法，不是学习法术，不占普通学习或预备名额，也不新增、恢复或重置资源。动作与施法时间、施法属性、攻击与 DC、材料、目标条件、伤害与效果、持续时间和专注仍需人工处理；来源未支持的限制不能通过确认解除。</p>
   <label><input type="checkbox" aria-label="确认当前真实拥有此物品来源" checked={genuine} disabled={!offer.canConfirm||busy} onChange={event=>{setGenuine(event.target.checked);epoch.current++;}}/>我已核对当前真实拥有此实物，并满足其当前来源条件。</label>
   <div className="spell-action-buttons"><button disabled={restricted||busy||!offer.canConfirm||!genuine} onClick={()=>submit(true)}>确认物品随意施法来源</button><button disabled={!busy&&!genuine&&!offer.canConfirm&&!offer.canWithdraw} onClick={cancel}>取消物品来源核对</button>{record?.enabled&&<button disabled={busy||!offer.canWithdraw} onClick={()=>submit(false)}>撤回物品随意施法来源</button>}</div>

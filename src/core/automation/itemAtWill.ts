@@ -7,9 +7,10 @@ import {sourceTextSha256} from './sourceTextSha256';
 import {itemAtWillFamilyId,itemAtWillRule,itemAtWillStoredRule,itemAtWillTargetHeader,type ItemAtWillRule} from './itemAtWillSource';
 export {itemAtWillRule,itemAtWillIdentity} from './itemAtWillSource';
 export type ItemAtWillTargetScope='self'|'spell';
+export type ItemAtWillSourceTiming='action'|'bonus-action'|'spell-default';
 export interface ItemAtWillRecord {ownerId:string;entryId:string;canonicalEntryId:string;snapshotSha256:string;enabled:boolean;nonce:number}
 export interface ItemAtWillState {version:number;sequence:number;records:ItemAtWillRecord[]}
-export interface ItemAtWillGrant {key:string;targetEntryId:string;targetScope:ItemAtWillTargetScope}
+export interface ItemAtWillGrant {key:string;targetEntryId:string;targetScope:ItemAtWillTargetScope;sourceActionTiming:ItemAtWillSourceTiming}
 export interface ItemAtWillOffer {ownerId:string;key:string;label:string;eligible:boolean;active:boolean;canConfirm:boolean;canWithdraw:boolean;reason?:string;basis:string;nonce:number;requiresAttunement:boolean;grants:ItemAtWillGrant[];record?:ItemAtWillRecord}
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const text=(v:unknown)=>typeof v==='string'&&!!v.trim()&&v.length<=2000;
@@ -40,10 +41,10 @@ export const itemAtWillChildId=(ownerId:string,grant:ItemAtWillGrant)=>`auto-spe
 export function itemAtWillChildCollision(c:Character,ownerId:string,grant:ItemAtWillGrant):boolean{
  const id=itemAtWillChildId(ownerId,grant),rows=c.selections.filter(s=>s.id===id);if(!rows.length)return false;if(rows.length!==1)return true;
  const row=rows[0],config=c.spellSettings?.special?.[id],g=config?.sourceGrant,key=itemAtWillChildKey(grant);
- return row.parentId!==ownerId||row.grantKey!==key||ordinaryCastingRule(row.entry)?.id!==grant.targetEntryId||!config||config.mode!=='locked'||config.manualSource!==undefined||config.max!==undefined||config.recovery!==undefined||!g||g.ownerId!==ownerId||g.key!==key||g.usage!=='free'||g.canUseSlots!==false||g.targetScope!==grant.targetScope||g.targetEntryId!==grant.targetEntryId||g.resourceKey!==undefined||g.resourceName!==undefined||g.resourceCost!==undefined||g.ability!==undefined||g.castLevel!==undefined;
+ return row.parentId!==ownerId||row.grantKey!==key||ordinaryCastingRule(row.entry)?.id!==grant.targetEntryId||!config||config.mode!=='locked'||config.manualSource!==undefined||config.max!==undefined||config.recovery!==undefined||!g||g.ownerId!==ownerId||g.key!==key||g.usage!=='free'||g.canUseSlots!==false||g.targetScope!==grant.targetScope||g.targetEntryId!==grant.targetEntryId||g.sourceActionTiming!==undefined&&g.sourceActionTiming!==grant.sourceActionTiming||g.resourceKey!==undefined||g.resourceName!==undefined||g.resourceCost!==undefined||g.ability!==undefined||g.castLevel!==undefined;
 }
 export function itemAtWillOffer(c:Character,ownerId:string,catalog:Entry[]=[],authority?:SpellActionAuthority):ItemAtWillOffer{
- const owner=currentOwner(c,ownerId),rule=owner&&itemAtWillRule(owner.entry),s=state(c),record=s?.records.find(r=>r.ownerId===ownerId),grants=(rule?.grants||[]).map(g=>({key:g.key,targetEntryId:g.targetEntryId,targetScope:g.targetScope as ItemAtWillTargetScope}));
+ const owner=currentOwner(c,ownerId),rule=owner&&itemAtWillRule(owner.entry),s=state(c),record=s?.records.find(r=>r.ownerId===ownerId),grants=(rule?.grants||[]).map(g=>({key:g.key,targetEntryId:g.targetEntryId,targetScope:g.targetScope as ItemAtWillTargetScope,sourceActionTiming:g.sourceActionTiming as ItemAtWillSourceTiming}));
  const denied=spellActionAuthorityReason(c,authority),physical=ownerReason(c,owner,rule),binding=!!record&&!!rule&&record.entryId===owner?.entry.id&&record.canonicalEntryId===rule.id&&record.snapshotSha256===rule.fullNormalizedSnapshotSha256;
  const collision=grants.some(g=>itemAtWillChildCollision(c,ownerId,g));
  const missing=!!rule&&grants.some(g=>!itemAtWillTarget(c,rule,g,catalog));const reason=!s?itemAtWillStateIssue(c):physical||(collision?'生成的法术身份与手工或其他来源记录冲突，保留原记录且未接管。':!binding&&record?.enabled?'旧确认与当前实物不符，请先撤回旧确认。':missing?'法术完整来源或唯一引用当前不可用。':undefined);
@@ -73,7 +74,7 @@ export const itemAtWillGrantKey=(grantKey?:string)=>!!grantKey?.startsWith('sour
 export function itemAtWillSpell(c:Character,id:string,authority?:SpellActionAuthority){
  const rows=c.selections.filter(s=>s.id===id),row=rows.length===1?rows[0]:undefined,cached=c.spellSettings?.special?.[id]?.sourceGrant;if(!row||row.entry.kind!=='spell'||!cached||!itemAtWillGrantKey(row.grantKey)||row.parentId!==cached.ownerId||row.grantKey!==cached.key)return;
  const offer=itemAtWillOffer(c,cached.ownerId,[],authority),owner=currentOwner(c,cached.ownerId),rule=owner&&itemAtWillRule(owner.entry);if(!offer.active||!rule)return;
- const grant=offer.grants.find(g=>cached.key===`source-spell:item-atwill/${encodeURIComponent(g.key)}`);if(!grant||ordinaryCastingRule(row.entry)?.id!==grant.targetEntryId||!sourceAllowed(c,row.entry,grant.targetEntryId)||cached.targetScope!==grant.targetScope||cached.targetEntryId!==grant.targetEntryId||cached.usage!=='free'||cached.canUseSlots!==false)return;
+ const grant=offer.grants.find(g=>cached.key===`source-spell:item-atwill/${encodeURIComponent(g.key)}`);if(!grant||ordinaryCastingRule(row.entry)?.id!==grant.targetEntryId||!sourceAllowed(c,row.entry,grant.targetEntryId)||cached.targetScope!==grant.targetScope||cached.targetEntryId!==grant.targetEntryId||cached.sourceActionTiming!==undefined&&cached.sourceActionTiming!==grant.sourceActionTiming||cached.usage!=='free'||cached.canUseSlots!==false)return;
  return {offer,owner:owner!,rule,grant,row};
 }
 export function itemAtWillSpellBasis(c:Character,id:string):string{const current=itemAtWillSpell(c,id);return sourceTextSha256(JSON.stringify([current?.offer.basis,current?.offer.nonce,current?.grant,current?.row,c.spellSettings?.special?.[id]]));}

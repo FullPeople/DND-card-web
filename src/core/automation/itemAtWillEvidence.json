@@ -1,55 +1,39 @@
 {
   "schemaVersion": 1,
   "mechanism": "owned-item-at-will-source-cast",
-  "scope": "Explicit source-owned direct spell casting only; item effects, action timing, targets, duration, concentration, ability, DC and components remain manual.",
+  "scope": "Source-proved plain direct/self item spell branches only. No spell effects, action-economy enforcement, inferred ability/DC, charge recovery, fixed-DC/attack, upcast, controller, or altered concentration automation.",
   "sourceProseIncluded": false,
   "investigatedStructuralEntries": 58,
-  "approvedEntries": 2,
+  "approvedEntries": 13,
+  "approvedGrantCount": 20,
   "fullSnapshotHashMethod": "SHA256(JSON.stringify(recursivelySorted(entire normalized Entry))); nonmutating unreserved exact-source alias id and transport-only string revision canonicalization to pinned source values; every other field remains hashed.",
-  "rules": [
+  "inputs": [
     {
-      "id": "kiwee:item:dmg:helm%20of%20comprehending%20languages::::::",
-      "kind": "item",
-      "name": "通晓语言头盔",
-      "english": "Helm of Comprehending Languages",
-      "source": "DMG",
-      "packId": "kiwee",
-      "edition": "2014",
-      "page": 173,
-      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
-      "fullNormalizedSnapshotSha256": "152ee0a9b986063a2042c1a6fe9f410f9038ebb3b068ae909944e05f4090f649",
-      "input": {
-        "url": "https://5e.kiwee.top/data/items.json",
-        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
-      },
-      "sourceLocator": {
-        "category": "item",
-        "index": 976
-      },
-      "clauseSha256": "d0fcff350d5768a77fde5079ddc1b3fe707517563c3732c6b12d243042a253a5",
-      "requiresEquipped": true,
-      "requiresAttunement": false,
-      "spellInput": {
-        "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
-        "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
-      },
-      "manualBoundaries": [
-        "actual-wearing-and-attunement-legality",
-        "source-action-timing",
-        "targets-and-spell-effects",
-        "spell-ability-DC-components-when-not-declared",
-        "duration-concentration-and-effect-end",
-        "no-slots-or-resource-debit-for-this-source-branch"
-      ],
-      "grants": [
-        {
-          "key": "direct-cast",
-          "targetEntryId": "kiwee:spell:phb:comprehend%20languages::::::",
-          "reference": "通晓语言|PHB",
-          "targetScope": "spell"
-        }
-      ]
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
     },
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+      "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+      "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+      "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+    }
+  ],
+  "rules": [
     {
       "id": "kiwee:item:dmg:boots%20of%20levitation::::::",
       "kind": "item",
@@ -61,6 +45,12 @@
       "page": 155,
       "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
       "fullNormalizedSnapshotSha256": "488b2f5ca86b92a64abeed917c7267a62aea47b840c5e78aef8690cfd278dca6",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "488b2f5ca86b92a64abeed917c7267a62aea47b840c5e78aef8690cfd278dca6"
+        }
+      ],
       "input": {
         "url": "https://5e.kiwee.top/data/items.json",
         "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
@@ -69,29 +59,1942 @@
         "category": "item",
         "index": 281
       },
+      "originalRawSha256": "d1d5f6246348dca68b388b60cb3a3a8054899a102bd80f5248e5d8b86a3d35db",
       "clauseSha256": "ec1ccfe8bf2b880c46562cd6ec30dce44ae5a9a8b55f1607a47e2f74b2ec9e7b",
+      "clauses": [
+        {
+          "path": "item[281].entries[0]",
+          "sha256": "ec1ccfe8bf2b880c46562cd6ec30dce44ae5a9a8b55f1607a47e2f74b2ec9e7b",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
       "requiresEquipped": true,
       "requiresAttunement": true,
-      "spellInput": {
-        "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
-        "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
-      },
+      "applicableCardEditions": [
+        "2014"
+      ],
       "manualBoundaries": [
-        "actual-wearing-and-attunement-legality",
-        "source-action-timing",
-        "targets-and-spell-effects",
-        "spell-ability-DC-components-when-not-declared",
-        "duration-concentration-and-effect-end",
-        "no-slots-or-resource-debit-for-this-source-branch"
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
       ],
       "grants": [
         {
-          "key": "direct-cast",
+          "declaredReference": "浮空术",
           "targetEntryId": "kiwee:spell:phb:levitate::::::",
           "reference": "浮空术|PHB",
-          "targetScope": "self"
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "浮空术",
+          "targetEnglish": "Levitate",
+          "spellLevel": 2,
+          "targetSnapshotSha256": "79c809bc0e3e933f847aeef2c2e6ed11a95a469b69463e09e1288b34e481abe7",
+          "targetCanonicalFullSnapshotSha256": "f77a09f7b5d58e91991761246e198fd2f6890577006d2b17b503f15d05d05689",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "浮空术",
+            "english": "Levitate",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 255,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "self",
+          "sourceActionTiming": "action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[281].entries[0]",
+              "sha256": "ec1ccfe8bf2b880c46562cd6ec30dce44ae5a9a8b55f1607a47e2f74b2ec9e7b",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:boots%20of%20levitation::::::",
+      "kind": "item",
+      "name": "浮空之靴",
+      "english": "Boots of Levitation",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 239,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "481a253a3f2e26de59f6779947eca694bd7d12453c79a65d89bb0f3b18c783a7",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "481a253a3f2e26de59f6779947eca694bd7d12453c79a65d89bb0f3b18c783a7"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 282
+      },
+      "originalRawSha256": "3a62aac8646564bbd8a8d3f15f40ab908cde0d7d0c4f85becd97b84d5242b403",
+      "clauseSha256": "b65ab26faf5902d7c023b5663f8fff429a7b7eeff61587b2fce4b7fad39e1ad1",
+      "clauses": [
+        {
+          "path": "item[282].entries[0]",
+          "sha256": "b65ab26faf5902d7c023b5663f8fff429a7b7eeff61587b2fce4b7fad39e1ad1",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "浮空术|xphb",
+          "targetEntryId": "kiwee:spell:xphb:levitate::::::",
+          "reference": "浮空术|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "浮空术",
+          "targetEnglish": "Levitate",
+          "spellLevel": 2,
+          "targetSnapshotSha256": "ae886cb3a4dde256facbf15199be1c6d8bd1b3763ca0be8b65e088fc43360073",
+          "targetCanonicalFullSnapshotSha256": "f3880c68608e1c46aa8d3fe8b6608afff8c20316588f0f86e5dadc284e69dc07",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "浮空术",
+            "english": "Levitate",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 291,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "self",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[282].entries[0]",
+              "sha256": "b65ab26faf5902d7c023b5663f8fff429a7b7eeff61587b2fce4b7fad39e1ad1",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:hat%20of%20disguise::::::",
+      "kind": "item",
+      "name": "易容帽",
+      "english": "Hat of Disguise",
+      "source": "DMG",
+      "packId": "kiwee",
+      "edition": "2014",
+      "page": 173,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "212fb430db8d0e03115c98d41b7c32cf85ae39c4234d0d600f4061502ef75d6d",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "212fb430db8d0e03115c98d41b7c32cf85ae39c4234d0d600f4061502ef75d6d"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 956
+      },
+      "originalRawSha256": "06b7ba965b269ef7127ac12ba4e71425d1d8ab915b7e60bece0a62877db6e818",
+      "clauseSha256": "2aa09a74a7e1bc2c1add6be310318ffc4255b7f6c97a2888cb1b2d16b1f48aa3",
+      "clauses": [
+        {
+          "path": "item[956].entries[0]",
+          "sha256": "2aa09a74a7e1bc2c1add6be310318ffc4255b7f6c97a2888cb1b2d16b1f48aa3",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2014"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "易容术",
+          "targetEntryId": "kiwee:spell:phb:disguise%20self::::::",
+          "reference": "易容术|PHB",
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "易容术",
+          "targetEnglish": "Disguise Self",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "3aaaf36630ec77c1e1cd5105c46dee0fa7885e4ffc882a07ff5fc820f535277a",
+          "targetCanonicalFullSnapshotSha256": "cfb1f15477e0cf80f82b3f5c768ba5d488887f752b11a72eea43c8bc8c23189a",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "易容术",
+            "english": "Disguise Self",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 233,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "spell",
+          "sourceActionTiming": "action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[956].entries[0]",
+              "sha256": "2aa09a74a7e1bc2c1add6be310318ffc4255b7f6c97a2888cb1b2d16b1f48aa3",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:hat%20of%20disguise::::::",
+      "kind": "item",
+      "name": "易容帽",
+      "english": "Hat of Disguise",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 266,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "259f322e3440f5dedc6bd2381ce6aef79a6daaabdf487f8ff9d3e63badad1bc5",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "259f322e3440f5dedc6bd2381ce6aef79a6daaabdf487f8ff9d3e63badad1bc5"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 957
+      },
+      "originalRawSha256": "c8e97e331aa8361f5e83cde4edbe0ae901671d90cdc763dbd0ce13074e5813c3",
+      "clauseSha256": "49ac6a8a78eb62bc77d443a5bffa269ebf59715d10186811e7e6abd7e0735189",
+      "clauses": [
+        {
+          "path": "item[957].entries[0]",
+          "sha256": "49ac6a8a78eb62bc77d443a5bffa269ebf59715d10186811e7e6abd7e0735189",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "易容术|xphb",
+          "targetEntryId": "kiwee:spell:xphb:disguise%20self::::::",
+          "reference": "易容术|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "易容术",
+          "targetEnglish": "Disguise Self",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "792b2aefcaa927fc925c45341ea9977fac77f96d1a5d46f5433d88973003fa22",
+          "targetCanonicalFullSnapshotSha256": "5c72d471a70d7ee7cfb666a4278e82b13643436298d494abfdf16f41fe429c0b",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "易容术",
+            "english": "Disguise Self",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 262,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[957].entries[0]",
+              "sha256": "49ac6a8a78eb62bc77d443a5bffa269ebf59715d10186811e7e6abd7e0735189",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:helm%20of%20comprehending%20languages::::::",
+      "kind": "item",
+      "name": "通晓语言头盔",
+      "english": "Helm of Comprehending Languages",
+      "source": "DMG",
+      "packId": "kiwee",
+      "edition": "2014",
+      "page": 173,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "152ee0a9b986063a2042c1a6fe9f410f9038ebb3b068ae909944e05f4090f649",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "152ee0a9b986063a2042c1a6fe9f410f9038ebb3b068ae909944e05f4090f649"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 976
+      },
+      "originalRawSha256": "88be76734120a9535add7c7f4bd43e5ed12786c86125c826b1c3a30339a04c66",
+      "clauseSha256": "d0fcff350d5768a77fde5079ddc1b3fe707517563c3732c6b12d243042a253a5",
+      "clauses": [
+        {
+          "path": "item[976].entries[0]",
+          "sha256": "d0fcff350d5768a77fde5079ddc1b3fe707517563c3732c6b12d243042a253a5",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": false,
+      "applicableCardEditions": [
+        "2014"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "通晓语言",
+          "targetEntryId": "kiwee:spell:phb:comprehend%20languages::::::",
+          "reference": "通晓语言|PHB",
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "通晓语言",
+          "targetEnglish": "Comprehend Languages",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "665fc1c8647a9a1ff60c430ad0c375ce04b401e42e4482aa26b4921574650d05",
+          "targetCanonicalFullSnapshotSha256": "3168daf88f1e1929eb9686cf0138a9b35f019821cc51cecd05efbe832270f59c",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "通晓语言",
+            "english": "Comprehend Languages",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 224,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "spell",
+          "sourceActionTiming": "action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": false,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[976].entries[0]",
+              "sha256": "d0fcff350d5768a77fde5079ddc1b3fe707517563c3732c6b12d243042a253a5",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:helm%20of%20comprehending%20languages::::::",
+      "kind": "item",
+      "name": "通晓语言头盔",
+      "english": "Helm of Comprehending Languages",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 268,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "3320356abff10e92c75b142539dd59990c3fdb16deaf75668f77c2407a4f3a87",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "3320356abff10e92c75b142539dd59990c3fdb16deaf75668f77c2407a4f3a87"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 977
+      },
+      "originalRawSha256": "680e214d05d11e9dafea5984d8a521f63c19d591a5a204f9927291bbf4f02694",
+      "clauseSha256": "ff471a7e1ff347abfcf5ac4b474784854683960a1dd9dfdf23900a3ec8d7c7b6",
+      "clauses": [
+        {
+          "path": "item[977].entries[0]",
+          "sha256": "ff471a7e1ff347abfcf5ac4b474784854683960a1dd9dfdf23900a3ec8d7c7b6",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": false,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "通晓语言|xphb",
+          "targetEntryId": "kiwee:spell:xphb:comprehend%20languages::::::",
+          "reference": "通晓语言|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "通晓语言",
+          "targetEnglish": "Comprehend Languages",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "55108430c21131554eec9fab2437678dcca55bad0ded778e07efc2826a8d3e96",
+          "targetCanonicalFullSnapshotSha256": "93af266c9c1faee2065de5a8f49ae4cfd37dca3e690f07bd02940363d3869686",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "通晓语言",
+            "english": "Comprehend Languages",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 252,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": false,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[977].entries[0]",
+              "sha256": "ff471a7e1ff347abfcf5ac4b474784854683960a1dd9dfdf23900a3ec8d7c7b6",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20jumping::::::",
+      "kind": "item",
+      "name": "跳跃戒指",
+      "english": "Ring of Jumping",
+      "source": "DMG",
+      "packId": "kiwee",
+      "edition": "2014",
+      "page": 191,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "111d3d92d37e5c74f712412aff1e720eb877b9c94791be131cafe123b3d33ebc",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "111d3d92d37e5c74f712412aff1e720eb877b9c94791be131cafe123b3d33ebc"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1783
+      },
+      "originalRawSha256": "76546f6e18562c891d496d48bb6445bbfaaaf56e79279e9b037b74b417dd4269",
+      "clauseSha256": "c81726b752debba074d5f226cb28ee6ada40008fd149b3dba3a3826eb1836056",
+      "clauses": [
+        {
+          "path": "item[1783].entries[0]",
+          "sha256": "c81726b752debba074d5f226cb28ee6ada40008fd149b3dba3a3826eb1836056",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2014"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "跳跃术",
+          "targetEntryId": "kiwee:spell:phb:jump::::::",
+          "reference": "跳跃术|PHB",
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "跳跃术",
+          "targetEnglish": "Jump",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "b8866c95a057d93791fcd4818a0e10493d936ff233f75c34757206da16b78b4c",
+          "targetCanonicalFullSnapshotSha256": "045ab14c7b3617ebb6fb0b005740e4f3911bf757d4bb7a90e59708c173740567",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "跳跃术",
+            "english": "Jump",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 254,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "self",
+          "sourceActionTiming": "bonus-action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:bonus-action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1783].entries[0]",
+              "sha256": "c81726b752debba074d5f226cb28ee6ada40008fd149b3dba3a3826eb1836056",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20jumping::::::",
+      "kind": "item",
+      "name": "跳跃戒指",
+      "english": "Ring of Jumping",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 293,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "83746924c28c9e2a4d681c03819aa3a908c6e3d135764b8b51a8f7fbfa4bb83a",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "83746924c28c9e2a4d681c03819aa3a908c6e3d135764b8b51a8f7fbfa4bb83a"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1784
+      },
+      "originalRawSha256": "bbc9786a7d44d61c8904ae3e76310fadecfde651702d50e5cf32708b5827f98f",
+      "clauseSha256": "983564ff08ec5085ecff86be12b281b1ff0f7e4dfbe790f6cef8243250ce8d1e",
+      "clauses": [
+        {
+          "path": "item[1784].entries[0]",
+          "sha256": "983564ff08ec5085ecff86be12b281b1ff0f7e4dfbe790f6cef8243250ce8d1e",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "跳跃术|xphb",
+          "targetEntryId": "kiwee:spell:xphb:jump::::::",
+          "reference": "跳跃术|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "跳跃术",
+          "targetEnglish": "Jump",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "1e6e5bb89aa0c9a5f0e28057174e5121dc5856b719e1e1c496d10e6d03c23195",
+          "targetCanonicalFullSnapshotSha256": "1094835979a6b3e1e28ba3bbb611755cb0d217267458e72d35be9cd3c8c3730a",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "跳跃术",
+            "english": "Jump",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 290,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "self",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1784].entries[0]",
+              "sha256": "983564ff08ec5085ecff86be12b281b1ff0f7e4dfbe790f6cef8243250ce8d1e",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20shooting%20stars::::::",
+      "kind": "item",
+      "name": "流星戒指",
+      "english": "Ring of Shooting Stars",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 294,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "f0f4df3a06de64bb6f38f474b64f1a37c916cf14e51add09fdb57d6baf820532",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "f0f4df3a06de64bb6f38f474b64f1a37c916cf14e51add09fdb57d6baf820532"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1805
+      },
+      "originalRawSha256": "353d5c3988651f939e2f047a085202924a55a355f26716713f7cd3cc12882c39",
+      "clauseSha256": "4d44a7eed6a66b3677849c6cfaa62ad12551a730d1108ce0aef3bf7f69c8adee",
+      "clauses": [
+        {
+          "path": "item[1805].entries[0]",
+          "sha256": "4d44a7eed6a66b3677849c6cfaa62ad12551a730d1108ce0aef3bf7f69c8adee",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "舞光术|xphb",
+          "targetEntryId": "kiwee:spell:xphb:dancing%20lights::::::",
+          "reference": "舞光术|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "舞光术",
+          "targetEnglish": "Dancing Lights",
+          "spellLevel": 0,
+          "targetSnapshotSha256": "52525b6dd1c53a445db5b588369598653bc7ad7c39488cdb1a572f9ad032c5db",
+          "targetCanonicalFullSnapshotSha256": "ec4dde6220d8f10762ddfe6d2eaac1a4970263bd2cb2d0f50a0e86d04bc90e68",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "舞光术",
+            "english": "Dancing Lights",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 259,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1805].entries[0]",
+              "sha256": "4d44a7eed6a66b3677849c6cfaa62ad12551a730d1108ce0aef3bf7f69c8adee",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:xphb:dancing%20lights::::::",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        },
+        {
+          "declaredReference": "光亮术|xphb",
+          "targetEntryId": "kiwee:spell:xphb:light::::::",
+          "reference": "光亮术|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "光亮术",
+          "targetEnglish": "Light",
+          "spellLevel": 0,
+          "targetSnapshotSha256": "bd71475d9dfbd24190f45b879ccfe5df905b7a85f9c3c26ed8a18e91842e2b46",
+          "targetCanonicalFullSnapshotSha256": "31bb3d74637d25afcb866f878c08c22e1a2adeab03747d8390d9fc3b16e4c544",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "光亮术",
+            "english": "Light",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 292,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1805].entries[0]",
+              "sha256": "4d44a7eed6a66b3677849c6cfaa62ad12551a730d1108ce0aef3bf7f69c8adee",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:xphb:light::::::",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20telekinesis::::::",
+      "kind": "item",
+      "name": "心灵遥控戒指",
+      "english": "Ring of Telekinesis",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 295,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "f2152f5567c45b9efc90e414947b973bca1ec532e8ea019e14d92c85e768c351",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "f2152f5567c45b9efc90e414947b973bca1ec532e8ea019e14d92c85e768c351"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1813
+      },
+      "originalRawSha256": "bc4f099755f30f0fc32fc22045643d163525672a5a394340d567abfae33df363",
+      "clauseSha256": "255abaa7f0d60944efb28ac95e96809d39ae009acdbe6f0cc642770e95411013",
+      "clauses": [
+        {
+          "path": "item[1813].entries[0]",
+          "sha256": "255abaa7f0d60944efb28ac95e96809d39ae009acdbe6f0cc642770e95411013",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "心灵遥控|xphb",
+          "targetEntryId": "kiwee:spell:xphb:telekinesis::::::",
+          "reference": "心灵遥控|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "心灵遥控",
+          "targetEnglish": "Telekinesis",
+          "spellLevel": 5,
+          "targetSnapshotSha256": "013b5c170f88a635bf6914821371ffef0ac8dd22b9dea94742dad27a5d8d80a9",
+          "targetCanonicalFullSnapshotSha256": "d46b2638fe52a0833b65df8e1e6725ddd4a40f678dc73563e3ea7166ece76c47",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "心灵遥控",
+            "english": "Telekinesis",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 331,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1813].entries[0]",
+              "sha256": "255abaa7f0d60944efb28ac95e96809d39ae009acdbe6f0cc642770e95411013",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20water%20walking::::::",
+      "kind": "item",
+      "name": "水上行走戒指",
+      "english": "Ring of Water Walking",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 296,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "f95a65ae6bd63d69172a51996340e9fe6dd85c945b6bad7e2b45247dddd7cb06",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "f95a65ae6bd63d69172a51996340e9fe6dd85c945b6bad7e2b45247dddd7cb06"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1829
+      },
+      "originalRawSha256": "0785b69ac716501fe26df3d1642f78274ee3f64b4170ff380a19ea972fcc7bfd",
+      "clauseSha256": "086e0100fd1d3941937873943508bc6e6e270c59e29ca18ed92c266b9f04a80e",
+      "clauses": [
+        {
+          "path": "item[1829].entries[0]",
+          "sha256": "086e0100fd1d3941937873943508bc6e6e270c59e29ca18ed92c266b9f04a80e",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": false,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "水上行走|xphb",
+          "targetEntryId": "kiwee:spell:xphb:water%20walk::::::",
+          "reference": "水上行走|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "水上行走",
+          "targetEnglish": "Water Walk",
+          "spellLevel": 3,
+          "targetSnapshotSha256": "3e1f28a6722d3a0d132f37a420b55b7193ae0e961223d88f7026ebb9b00f1b2e",
+          "targetCanonicalFullSnapshotSha256": "d6e83f14f327875f3857b4c7c9c885768b0996b7d295e5e5611e8d2d2d18b578",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "水上行走",
+            "english": "Water Walk",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 340,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "self",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": false,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1829].entries[0]",
+              "sha256": "086e0100fd1d3941937873943508bc6e6e270c59e29ca18ed92c266b9f04a80e",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:rod%20of%20alertness::::::",
+      "kind": "item",
+      "name": "警示权杖",
+      "english": "Rod of Alertness",
+      "source": "DMG",
+      "packId": "kiwee",
+      "edition": "2014",
+      "page": 196,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "3407f87de672298dbea63b8940dbe82d57805e108e9040651c376c9559c3896b",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "3407f87de672298dbea63b8940dbe82d57805e108e9040651c376c9559c3896b"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1852
+      },
+      "originalRawSha256": "b485ca85b3223947baa0fa2a09f9d49fee6eb02519d85d0e3be8d6a6e2bcd1d7",
+      "clauseSha256": "4981ace59112d650291d40f8bd0a07381df51eb96f994946e1240650ca216a1b",
+      "clauses": [
+        {
+          "path": "item[1852].entries[2].entries[0]",
+          "sha256": "4981ace59112d650291d40f8bd0a07381df51eb96f994946e1240650ca216a1b",
+          "hashMethod": "SHA256-UTF8-string",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2014"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "侦测善恶",
+          "targetEntryId": "kiwee:spell:phb:detect%20evil%20and%20good::::::",
+          "reference": "侦测善恶|PHB",
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "侦测善恶",
+          "targetEnglish": "Detect Evil and Good",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "cf8c65ecfac0908a49937a4c46201c4e71d919c9ccfbd13ffd061f0fb0c4c04e",
+          "targetCanonicalFullSnapshotSha256": "53e1f0a93cb62f8f41962f33a66de9eb9d682e374a2e000f5269d85320a02eb1",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "侦测善恶",
+            "english": "Detect Evil and Good",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 231,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "spell",
+          "sourceActionTiming": "action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1852].entries[2].entries[0]",
+              "sha256": "4981ace59112d650291d40f8bd0a07381df51eb96f994946e1240650ca216a1b",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:phb:detect%20evil%20and%20good::::::",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        },
+        {
+          "declaredReference": "侦测魔法",
+          "targetEntryId": "kiwee:spell:phb:detect%20magic::::::",
+          "reference": "侦测魔法|PHB",
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "侦测魔法",
+          "targetEnglish": "Detect Magic",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "7b88a870e8bfaee30d569e18bb7b1e8438f3b47c6b678cc47ca9e0e3744790d2",
+          "targetCanonicalFullSnapshotSha256": "25c8960e130a9416a336a5e06306bb02d95afbea913ea9b78b974675bc613a90",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "侦测魔法",
+            "english": "Detect Magic",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 231,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "spell",
+          "sourceActionTiming": "action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1852].entries[2].entries[0]",
+              "sha256": "4981ace59112d650291d40f8bd0a07381df51eb96f994946e1240650ca216a1b",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:phb:detect%20magic::::::",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        },
+        {
+          "declaredReference": "侦测毒性和疾病",
+          "targetEntryId": "kiwee:spell:phb:detect%20poison%20and%20disease::::::",
+          "reference": "侦测毒性和疾病|PHB",
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "侦测毒性和疾病",
+          "targetEnglish": "Detect Poison and Disease",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "ff624465e9ff033d37676c14c7e01d3234d80284c7ea88ff293abb7707b9fbec",
+          "targetCanonicalFullSnapshotSha256": "1a2f92e30c77b500ecf774ee54408938bbe42b1030c49b99dce30b3cd420a39f",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "侦测毒性和疾病",
+            "english": "Detect Poison and Disease",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 231,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "spell",
+          "sourceActionTiming": "action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1852].entries[2].entries[0]",
+              "sha256": "4981ace59112d650291d40f8bd0a07381df51eb96f994946e1240650ca216a1b",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:phb:detect%20poison%20and%20disease::::::",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        },
+        {
+          "declaredReference": "识破隐形",
+          "targetEntryId": "kiwee:spell:phb:see%20invisibility::::::",
+          "reference": "识破隐形|PHB",
+          "targetSource": "PHB",
+          "targetEdition": "2014",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "识破隐形",
+          "targetEnglish": "See Invisibility",
+          "spellLevel": 2,
+          "targetSnapshotSha256": "15141b6306d085bfdf72bed128215d12804f53db0d453528fd879e536e2ac838",
+          "targetCanonicalFullSnapshotSha256": "ba97e2696755a05c1822f89caec451a6df338bcc44197cebb30fd102d6098d43",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "识破隐形",
+            "english": "See Invisibility",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 274,
+            "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+            "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "DMG2014-original-unqualified-reference-unique-PHB2014-approved-target-no-card-edition-switch",
+          "targetScope": "spell",
+          "sourceActionTiming": "action",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:action"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1852].entries[2].entries[0]",
+              "sha256": "4981ace59112d650291d40f8bd0a07381df51eb96f994946e1240650ca216a1b",
+              "hashMethod": "SHA256-UTF8-string",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:phb:see%20invisibility::::::",
+          "applicableCardEditions": [
+            "2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:rod%20of%20alertness::::::",
+      "kind": "item",
+      "name": "警示权杖",
+      "english": "Rod of Alertness",
+      "source": "XDMG",
+      "packId": "kiwee",
+      "edition": "2024",
+      "page": 299,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "fullNormalizedSnapshotSha256": "714cc7b462a0035a58ab7472deea6fbf97ba1bf20013f55dd7322fb84bad8994",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "714cc7b462a0035a58ab7472deea6fbf97ba1bf20013f55dd7322fb84bad8994"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1853
+      },
+      "originalRawSha256": "43c4789d7368e6f65d61e81f078012f8b8d9310b7a0bb81b5370b0e9909a827b",
+      "clauseSha256": "47414acdd3f316af8ae93dbeb85cb6dbde4e6eaeee05401d550a8d8dbeca58f2",
+      "clauses": [
+        {
+          "path": "item[1853].entries[2]",
+          "sha256": "47414acdd3f316af8ae93dbeb85cb6dbde4e6eaeee05401d550a8d8dbeca58f2",
+          "hashMethod": "SHA256-exact-JS-recursively-sorted-JSON",
+          "purpose": "source-semantic-approval-or-blocker"
+        }
+      ],
+      "requiresEquipped": true,
+      "requiresAttunement": true,
+      "applicableCardEditions": [
+        "2024"
+      ],
+      "manualBoundaries": [
+        "actual-genuine-ownership-equipment-attunement-legality-and-slot-limit",
+        "source-components-when-not-declared",
+        "effects-damage-duration-concentration-recovery-not-automated",
+        "no-whole-item-or-whole-spell-completion-claim"
+      ],
+      "grants": [
+        {
+          "declaredReference": "侦测善恶|xphb",
+          "targetEntryId": "kiwee:spell:xphb:detect%20evil%20and%20good::::::",
+          "reference": "侦测善恶|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "侦测善恶",
+          "targetEnglish": "Detect Evil and Good",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "ca2c9662f89c2f860e6dd05dc503b568d8ecdfef41c80b4b3124248032f765b7",
+          "targetCanonicalFullSnapshotSha256": "ce890826454d5e08121c126fb1feab147ef9501d2b9f12063d8fa552d532cb80",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "侦测善恶",
+            "english": "Detect Evil and Good",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 261,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1853].entries[2]",
+              "sha256": "47414acdd3f316af8ae93dbeb85cb6dbde4e6eaeee05401d550a8d8dbeca58f2",
+              "hashMethod": "SHA256-exact-JS-recursively-sorted-JSON",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:xphb:detect%20evil%20and%20good::::::",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        },
+        {
+          "declaredReference": "侦测魔法|xphb",
+          "targetEntryId": "kiwee:spell:xphb:detect%20magic::::::",
+          "reference": "侦测魔法|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "侦测魔法",
+          "targetEnglish": "Detect Magic",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "5dd11e522d41562b9c405dce7273439037fcebecda41c169f0d68f60f2c7b0a0",
+          "targetCanonicalFullSnapshotSha256": "720a8d47dbf5f73898f2621f3998d19964873f21b884f152d387ec8501c1201c",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "侦测魔法",
+            "english": "Detect Magic",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 262,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1853].entries[2]",
+              "sha256": "47414acdd3f316af8ae93dbeb85cb6dbde4e6eaeee05401d550a8d8dbeca58f2",
+              "hashMethod": "SHA256-exact-JS-recursively-sorted-JSON",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:xphb:detect%20magic::::::",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        },
+        {
+          "declaredReference": "侦测毒性和疾病|xphb",
+          "targetEntryId": "kiwee:spell:xphb:detect%20poison%20and%20disease::::::",
+          "reference": "侦测毒性和疾病|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "侦测毒性和疾病",
+          "targetEnglish": "Detect Poison and Disease",
+          "spellLevel": 1,
+          "targetSnapshotSha256": "e89b0dd499055a39116fdfc8ade40c11418c5edcaa6013799978769b599670c1",
+          "targetCanonicalFullSnapshotSha256": "72a01561484565dde90aad026d48e07c31302d4515ae3ed074795ead2ed1ea87",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "侦测毒性和疾病",
+            "english": "Detect Poison and Disease",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 262,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1853].entries[2]",
+              "sha256": "47414acdd3f316af8ae93dbeb85cb6dbde4e6eaeee05401d550a8d8dbeca58f2",
+              "hashMethod": "SHA256-exact-JS-recursively-sorted-JSON",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:xphb:detect%20poison%20and%20disease::::::",
+          "applicableCardEditions": [
+            "2024"
+          ]
+        },
+        {
+          "declaredReference": "识破隐形|xphb",
+          "targetEntryId": "kiwee:spell:xphb:see%20invisibility::::::",
+          "reference": "识破隐形|XPHB",
+          "targetSource": "XPHB",
+          "targetEdition": "2024",
+          "targetKind": "spell",
+          "targetPackId": "kiwee",
+          "targetName": "识破隐形",
+          "targetEnglish": "See Invisibility",
+          "spellLevel": 2,
+          "targetSnapshotSha256": "065b37d648b18653709fccd8a0b92c7259aff696acefa2feb76e194e59714fee",
+          "targetCanonicalFullSnapshotSha256": "434abd20828e24ee71c303b3aaf691042540876a64abb046a95b75b07a8ba732",
+          "targetHeader": {
+            "kind": "spell",
+            "name": "识破隐形",
+            "english": "See Invisibility",
+            "source": "XPHB",
+            "edition": "2024",
+            "packId": "kiwee",
+            "page": 314,
+            "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "targetInput": {
+            "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+            "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d"
+          },
+          "targetLookupInput": {
+            "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+            "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9"
+          },
+          "identityResolution": "explicit-original-reference-source-qualifier",
+          "targetScope": "spell",
+          "sourceActionTiming": "spell-default",
+          "sourceSaveDC": null,
+          "sourceSpellAttackBonus": null,
+          "sourceCastingAbility": null,
+          "frequency": "unrestricted",
+          "permissionCodes": [
+            "explicit-unrestricted-player-cast-no-frequency-or-charge-qualifier"
+          ],
+          "requiresEquipped": true,
+          "requiresAttunement": true,
+          "manualBoundaries": [
+            "source-effects-damage-duration-concentration-and-end-remain-manual",
+            "no-character-ability-or-DC-inference",
+            "only-exact-source-spell-and-declared-self-scope",
+            "source-action-timing:spell-default"
+          ],
+          "runtimeRequirements": [
+            "self-only-scope-bound-at-request-and-child-if-self",
+            "source-action-timing-not-silently-replaced"
+          ],
+          "clauses": [
+            {
+              "path": "item[1853].entries[2]",
+              "sha256": "47414acdd3f316af8ae93dbeb85cb6dbde4e6eaeee05401d550a8d8dbeca58f2",
+              "hashMethod": "SHA256-exact-JS-recursively-sorted-JSON",
+              "purpose": "explicit-source-cast-authority-and-restrictions"
+            }
+          ],
+          "key": "direct-cast:kiwee:spell:xphb:see%20invisibility::::::",
+          "applicableCardEditions": [
+            "2024"
+          ]
         }
       ]
     }
-  ]
+  ],
+  "heldStructuralEntries": 45,
+  "inputSha256Method": "SHA256 of UTF8 JSON.stringify(parsed original input), original object order retained; not a raw transport-byte hash.",
+  "originalRawSha256Method": "SHA256 of UTF8 JSON.stringify(recursivelySorted(original source row)), arrays ordered; no normalized category or loader fields.",
+  "targetSnapshotSha256Method": "SHA256 of UTF8 JSON.stringify(recursivelySorted({raw,entries,effects,choices,dependencies})); undefined object fields omitted; exact ordinaryCastingRule mechanics proof.",
+  "targetCanonicalFullSnapshotSha256Method": "SHA256 of UTF8 JSON.stringify(recursivelySorted(entire normalized target Entry)), with canonical target id and pinned input revision plus exact per-row lookup revision."
 }

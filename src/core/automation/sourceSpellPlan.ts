@@ -157,7 +157,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   choices.push({ownerId:offer.ownerId,key:offer.key,label:offer.label+'的物品随意施法',itemAtWill:{ownerId:offer.ownerId}});
   const owner=c.selections.find(s=>s.id===offer.ownerId),rule=owner&&itemAtWillRule(owner.entry);if(!owner||!rule||!offer.record)continue;
   for(const branch of offer.grants){if(itemAtWillChildCollision(c,owner.id,branch))continue;const entry=itemAtWillTarget(c,rule,branch,catalog);if(!entry)continue;const key=itemAtWillChildKey(branch),id=itemAtWillChildId(owner.id,branch);
-   grants.push({id,owner,key,entry,eligible:offer.active,config:{mode:'locked',label:branch.targetScope==='self'?'物品随意施法（仅自身）':'物品随意施法',sourceGrant:{ownerId:owner.id,key,active:offer.active,usage:'free',canUseSlots:false,targetScope:branch.targetScope,targetEntryId:branch.targetEntryId,reason:offer.active?undefined:offer.reason}}});
+   grants.push({id,owner,key,entry,eligible:offer.active,config:{mode:'locked',label:branch.targetScope==='self'?'物品随意施法（仅自身）':'物品随意施法',sourceGrant:{ownerId:owner.id,key,active:offer.active,usage:'free',canUseSlots:false,targetScope:branch.targetScope,targetEntryId:branch.targetEntryId,sourceActionTiming:branch.sourceActionTiming,reason:offer.active?undefined:offer.reason}}});
   }
  }
  for(const offer of limitedSourceUseOffers(c))if(!choices.some(q=>q.limitedUse?.ownerId===offer.ownerId&&q.limitedUse.poolId===offer.poolId))choices.push({ownerId:offer.ownerId,key:JSON.stringify(['limited-source',offer.ownerId,offer.poolId]),label:offer.ownerName+'的有限次数记录',limitedUse:{ownerId:offer.ownerId,poolId:offer.poolId}});

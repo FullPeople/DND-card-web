@@ -1,4 +1,4 @@
-import {itemAtWillGrantKey,itemAtWillSpell,itemAtWillSpellBasis,type ItemAtWillTargetScope} from './itemAtWill';
+import {itemAtWillGrantKey,itemAtWillSpell,itemAtWillSpellBasis,type ItemAtWillTargetScope,type ItemAtWillSourceTiming} from './itemAtWill';
 import {ownedItemChargeResource} from './itemChargeDebits';
 import {limitedSourceSpellOffer,limitedSourceSpellBasis,spendLimitedSourceSpell,ownedLimitedSourceResource} from './limitedSourceUses';
 import {ordinarySpellOffer,ordinarySpellActionBasis,ordinaryCastingClassContextMalformed} from './ordinarySpellCasting';
@@ -13,8 +13,8 @@ import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../bookRitu
 import {planSourceSpells} from './sourceSpellPlan';
 import {learnedInvocationRule,invocationSpellMatches,invocationPactSlot} from './invocations';
 
-export interface SpellPayment {targetScope?:ItemAtWillTargetScope;targetEntryId?:string;id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;debits?:{resourceId:string;cost:number}[]}
-export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long';basis?:string;casterId?:string;limitedIntent?:{confirmedLimitedSourceValid:true};targetScope?:ItemAtWillTargetScope}
+export interface SpellPayment {targetScope?:ItemAtWillTargetScope;targetEntryId?:string;sourceActionTiming?:ItemAtWillSourceTiming;id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;debits?:{resourceId:string;cost:number}[]}
+export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long';basis?:string;casterId?:string;limitedIntent?:{confirmedLimitedSourceValid:true};targetScope?:ItemAtWillTargetScope;sourceActionTiming?:ItemAtWillSourceTiming}
 export interface SpellActionReceipt {id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number;recovered?:{resourceId:string;before:number;after:number}[];spent?:{resourceId:string;before:number;after:number}[]}
 export interface ActionState {version:number;sequence:number;last?:SpellActionReceipt}
 export type SpellActionResult={status:'applied'|'duplicate';receipt:SpellActionReceipt;message:string}|{status:'rejected';message:string};
@@ -66,7 +66,7 @@ function sourceSpellPayments(c:Character,id:string,authority?:SpellActionAuthori
  }else if(config.mode==='uses'){
   const resourceId=specialSpellResource(id,c),r=c.runtime.resources[resourceId],available=!!r&&Number.isSafeInteger(r.current)&&r.current>=1;
   options.push({id:'source',label:`${grant.resourceKey?'共享':'来源'}次数（${r?.current??0} / ${r?.max??config.max}）`,level,resourceId,cost:1,available,...(!available?{reason:'来源次数不足或计数器不可用。'}:{})});
- }else if(grant.usage==='free'||grant.usage==='ritual')options.push({id:grant.usage,label:grant.usage==='ritual'?'仪式施法（不消耗法术位）':invocation?.selfOnly||itemAtWill?.grant.targetScope==='self'?'免费施法（仅自身）':'免费施法',level,cost:0,available:true,...(itemAtWill?{targetScope:itemAtWill.grant.targetScope,targetEntryId:itemAtWill.grant.targetEntryId}:{})});
+ }else if(grant.usage==='free'||grant.usage==='ritual')options.push({id:grant.usage,label:grant.usage==='ritual'?'仪式施法（不消耗法术位）':invocation?.selfOnly||itemAtWill?.grant.targetScope==='self'?'免费施法（仅自身）':'免费施法',level,cost:0,available:true,...(itemAtWill?{targetScope:itemAtWill.grant.targetScope,targetEntryId:itemAtWill.grant.targetEntryId,sourceActionTiming:itemAtWill.grant.sourceActionTiming}:{})});
  if(base>0&&(grant.usage==='slot'||grant.canUseSlots)){
   for(const [resourceId,r] of Object.entries(c.runtime.resources)){
    const match=/^(spell-slot|pact-slot):([1-9])$/.exec(resourceId);if(!match||Number(match[2])<level||!Number.isSafeInteger(r.max)||r.max<1)continue;
@@ -124,7 +124,7 @@ export function sourceSpellRestRequest(c:Character,kind:'short'|'long',id:string
 export function spellActionRequest(c:Character,selectionId:string,paymentId:string,id:string,mode:'cast'|'restore'='cast',casterId?:string,limitedIntent?:{confirmedLimitedSourceValid:true}):SpellActionRequest{
  const request:SpellActionRequest={id,selectionId,paymentId,mode,revision:c.revision,sequence:c.runtime.automationActions?.sequence??0};
  if(paymentId.startsWith('ordinary:')){request.casterId=casterId||ordinarySpellOffer(c,selectionId).casterId;request.basis=ordinarySpellActionBasis(c,selectionId,request.casterId);}
- if(itemAtWillGrantKey(c.spellSettings?.special?.[selectionId]?.sourceGrant?.key)){request.basis=itemAtWillSpellBasis(c,selectionId);request.targetScope=itemAtWillSpell(c,selectionId)?.grant.targetScope;}
+ if(itemAtWillGrantKey(c.spellSettings?.special?.[selectionId]?.sourceGrant?.key)){request.basis=itemAtWillSpellBasis(c,selectionId);request.targetScope=itemAtWillSpell(c,selectionId)?.grant.targetScope;request.sourceActionTiming=itemAtWillSpell(c,selectionId)?.grant.sourceActionTiming;}
  if(c.spellSettings?.special?.[selectionId]?.sourceGrant?.usage==='limited'){request.basis=limitedSourceSpellBasis(c,selectionId);request.limitedIntent=limitedIntent;}
  if(c.spellSettings?.special?.[selectionId]?.sourceGrant?.usage==='invocation-pact')request.basis=invocationActionBasis(c,selectionId);
  return request;
@@ -137,10 +137,10 @@ export function performSpellAction(c:Character,request:SpellActionRequest,author
  const reject=(message:string):SpellActionResult=>({status:'rejected',message});
  const denied=spellActionAuthorityReason(c,authority);if(denied)return reject(denied);
  if(!automationEnabled(c))return reject('请先开启此角色卡的自动计算。');
- if(!request||typeof request.selectionId!=='string'||request.selectionId.length>2000||typeof request.paymentId!=='string'||!request.paymentId||request.paymentId.length>4000||typeof request.id!=='string'||!request.id.trim()||request.id.length>128||!Number.isSafeInteger(request.sequence)||request.sequence<0||!Number.isSafeInteger(request.revision)||!['cast','restore'].includes(request.mode)||request.basis!==undefined&&(typeof request.basis!=='string'||request.basis.length>30000)||request.casterId!==undefined&&(typeof request.casterId!=='string'||!request.casterId||request.casterId.length>2000)||request.targetScope!==undefined&&!['self','spell'].includes(request.targetScope))return reject('施法操作格式无效。');
+ if(!request||typeof request.selectionId!=='string'||request.selectionId.length>2000||typeof request.paymentId!=='string'||!request.paymentId||request.paymentId.length>4000||typeof request.id!=='string'||!request.id.trim()||request.id.length>128||!Number.isSafeInteger(request.sequence)||request.sequence<0||!Number.isSafeInteger(request.revision)||!['cast','restore'].includes(request.mode)||request.basis!==undefined&&(typeof request.basis!=='string'||request.basis.length>30000)||request.casterId!==undefined&&(typeof request.casterId!=='string'||!request.casterId||request.casterId.length>2000)||request.targetScope!==undefined&&!['self','spell'].includes(request.targetScope)||request.sourceActionTiming!==undefined&&!['action','bonus-action','spell-default'].includes(request.sourceActionTiming))return reject('施法操作格式无效。');
  const state=c.runtime.automationActions;
  if(state&&state.version!==1)return reject('此卡的动作记录版本尚未支持。');
- const fingerprint=JSON.stringify([request.revision,request.selectionId,request.mode,request.paymentId,...(request.rest!==undefined?[request.rest]:[]),...(request.basis!==undefined?[request.basis]:[]),...(request.casterId!==undefined?[request.casterId]:[]),...(request.limitedIntent!==undefined?[request.limitedIntent]:[]),...(request.targetScope!==undefined?[request.targetScope]:[])]);
+ const fingerprint=JSON.stringify([request.revision,request.selectionId,request.mode,request.paymentId,...(request.rest!==undefined?[request.rest]:[]),...(request.basis!==undefined?[request.basis]:[]),...(request.casterId!==undefined?[request.casterId]:[]),...(request.limitedIntent!==undefined?[request.limitedIntent]:[]),...(request.targetScope!==undefined?[request.targetScope]:[]),...(request.sourceActionTiming!==undefined?[request.sourceActionTiming]:[])]);
  if(fingerprint.length>40000)return reject('施法操作记录超出支持范围。');
  if(state?.last?.id===request.id){
   if(state.last.sequence===request.sequence&&state.last.fingerprint===fingerprint)return {status:'duplicate',receipt:state.last,message:'该操作已经记录，未重复扣费。'};
@@ -159,7 +159,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest,author
  }
  let config=c.spellSettings?.special?.[request.selectionId];
  if(config?.sourceGrant&&!sourceSpellEnabled(c,request.selectionId))return reject('此来源法术当前不可用。');
- if(config?.sourceGrant){const verified=currentSourceSpell(c,request.selectionId);if(!verified)return reject('来源声明、身份或授予归属已变化，未执行。');config=verified.config;if(verified.itemAtWill&&(request.mode!=='cast'||request.paymentId!=='free'||request.targetScope!==verified.itemAtWill.grant.targetScope||request.basis!==itemAtWillSpellBasis(c,request.selectionId)))return reject('物品确认、穿戴同调、法术来源或限定目标已变化，请重新操作。');if(verified.grant.usage==='invocation-pact'&&(typeof request.basis!=='string'||request.basis!==invocationActionBasis(c,request.selectionId)))return reject('祈唤来源或资源已变化，请重新操作。');}
+ if(config?.sourceGrant){const verified=currentSourceSpell(c,request.selectionId);if(!verified)return reject('来源声明、身份或授予归属已变化，未执行。');config=verified.config;if(verified.itemAtWill&&(request.mode!=='cast'||request.paymentId!=='free'||request.targetScope!==verified.itemAtWill.grant.targetScope||request.sourceActionTiming!==verified.itemAtWill.grant.sourceActionTiming||request.basis!==itemAtWillSpellBasis(c,request.selectionId)))return reject('物品确认、穿戴同调、法术来源或限定目标已变化，请重新操作。');if(verified.grant.usage==='invocation-pact'&&(typeof request.basis!=='string'||request.basis!==invocationActionBasis(c,request.selectionId)))return reject('祈唤来源或资源已变化，请重新操作。');}
  let payment:SpellPayment|undefined;
  if(request.mode==='restore'){
   if(!config?.sourceGrant||config.sourceGrant.usage==='limited'||config.mode!=='uses'||request.paymentId!=='source')return reject('这个法术没有可恢复的来源次数。');
