@@ -1,3 +1,4 @@
+import {projectRacialDarkvision} from './automation/racialDarkvision';
 import {evaluateReviewedAlert} from './automation/reviewedAlert';
 import {reviewedObservantHasRetainedBinding} from './automation/reviewedObservant';
 import {evaluateReviewedSkilled} from './automation/reviewedSkilled';
@@ -20,6 +21,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const issues: Derived['issues'] = [...inheritedIssues]; const requirements: Requirement[] = [];
   const compatibility=automationCompatibilityIssue(c);if(compatibility)issues.push(compatibility);
   const active=activeEffectSelections(c,excluded);
+  const racialSenses=projectRacialDarkvision(c,active);issues.push(...racialSenses.issues);
   for(const s of c.selections)if(!excluded.has(s.id)&&!selectionEffectsAllowed(c,s.entry))issues.push({id:`disabled:${s.id}`,message:`${s.entry.name} 的来源、依赖或规则选项未启用，保留内容但不计效果。`,selectionId:s.id,severity:'error'});
   const baseAbilities=baseAbilityScores(c,active),abilities=baseAbilities.abilities,trace:Record<string,string[]>=baseAbilities.trace;issues.push(...baseAbilities.issues);
   const classes = active.filter(s => s.entry.kind === 'class');
@@ -145,7 +147,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
   for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
-  return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),
+  if(racialSenses.trace.length)trace.darkvision=racialSenses.trace;
+  return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),...(racialSenses.darkvision===undefined?{}:{senses:{darkvision:racialSenses.darkvision}}),
     skills, saves, requirements, issues, trace, resistances:[...new Set(infusion.resistances)],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }

@@ -98,6 +98,8 @@ export interface RulePack { schemaVersion: 1; id: string; name: string; version:
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }
 export interface Issue { id: string; message: string; selectionId?: string; severity: 'warning' | 'error' }
 export interface Derived {
+  /** Source-proved racial range only; never saved or applied to map vision. */
+  senses?:{darkvision?:number};
   abilities: Record<Ability, number>; modifiers: Record<Ability, number>; level: number; proficiency: number;
   ac: number; initiative: number; speed: number; maxHp: number; passive: number; passiveInvestigation?:number;
   skills: Record<string, { value: number; proficient: boolean; expertise: boolean; sources: string[] }>;

@@ -247,6 +247,7 @@ jobs:
           printf '%s\n' 'ORDINARY_CASTING_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'LIMITED_SOURCE_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'ITEM_CHARGE_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'RACIAL_DARKVISION_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
       - name: Fetch exact old consumer for charge-preservation verification
         run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
       - name: Fetch ninth-stage consumer for localized-v2 and ring preservation
@@ -271,6 +272,8 @@ jobs:
         run: node tools/runVitest.mjs run tests/ordinary-spell-*.test.ts tests/ordinary-catalog-hydration.test.ts tests/ordinary-casting-browser-contract.test.ts --maxWorkers=1
       - name: Grouped real-source finite and fixed-item accounting with rendered control guards
         run: node tools/runVitest.mjs run tests/limited-source*.test.ts tests/item-charge-*.test.ts tests/attuned-item-charge*.test.ts tests/vitest-runner*.test.ts tests/protected-resource-history*.test.ts tests/resource-evidence-native-imports.test.ts tests/resource-ledger-browser-contract.test.ts --maxWorkers=1
+      - name: Owned item at-will and source-qualified racial darkvision guards
+        run: node tools/runVitest.mjs run tests/item-atwill*.test.ts tests/racial-darkvision*.test.ts --maxWorkers=1
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone
