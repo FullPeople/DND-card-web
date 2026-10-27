@@ -5,7 +5,7 @@ import type {Locator,TestInfo} from '@playwright/test';
 import {ordinaryBrowserInputSetSha256} from './ordinaryCastingBrowserFixture';
 export {canonicalJsonSha256} from './reviewedObservantArtifactPrivacy';
 export const ORDINARY_INPUT_ANNOTATION='ordinary-verified-input-set-sha256',ORDINARY_PRODUCT_ANNOTATION='ordinary-verified-product-sha256';
-export const ORDINARY_MODULE_SHA256='95944ae6596dfce61db8d73dcf6df0442147cb1e6d6e9b0b748b48c8f241bf51',ORDINARY_ACTIONS_SHA256='4858ec502a735ee3aabaa3a599a47ddbe4b7838ef5850cf7d33288341c45459e';
+export const ORDINARY_MODULE_SHA256='7f1fe68331976718c9372631f0fac43ce6569e8156951e153e36fbe2e9e8bb53',ORDINARY_ACTIONS_SHA256='c7907fc990721ff33723aa3a8f321f70deca312d8f38891013c03c896183bda0';
 export const ORDINARY_PRODUCT_SHA256=createHash('sha256').update(JSON.stringify([ORDINARY_MODULE_SHA256,ORDINARY_ACTIONS_SHA256])).digest('hex');
 export const ordinaryPixelStages=['wizard-ready','wizard-spent','wizard-exhausted','wizard-reopen','sorcerer-spent','cantrip-recorded','pact-spent','readonly-held','source-held','caster-required','caster-selected','save-failure'] as const;
 export function ordinarySafeDirectory(identity:{id:string;project:string;outputDir:string}){const run=process.env.ORDINARY_CASTING_ARTIFACT_RUN;if(!run||!/^[a-zA-Z0-9-]+$/.test(run)||!/^[a-zA-Z0-9-]+$/.test(identity.project))throw Error('Invalid ordinary evidence identity');return resolve(identity.outputDir,'..','ordinary-casting-browser-safe',run,identity.project,createHash('sha256').update(identity.id).digest('hex').slice(0,24));}

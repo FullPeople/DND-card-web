@@ -1,3 +1,5 @@
+import {ownedItemChargeResource,revokeItemChargeOwners} from './automation/itemChargeDebits';
+import {ownedLimitedSourceResource,revokeLimitedSourceOwners} from './automation/limitedSourceUses';
 import {retainedAsiSourceFeature,preserveLegacyAsiGrants} from './automation/asi';
 import {rememberSourceEquipment,syncSourceEquipment} from './automation/sourceEquipment';
 import {entryNameIndex} from './entryNameIndex';
@@ -40,11 +42,13 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
     for(const parent of discardedParents)if(!c.selections.some(row=>row.id===parent)&&!Object.values(c.classChoiceArchive).some(archive=>archive.parent?.id===parent))removed.add(parent);
     if(!Object.keys(c.classChoiceArchive).length)delete c.classChoiceArchive;
   }
+  revokeLimitedSourceOwners(c,removed);
+  revokeItemChargeOwners(c,removed);
   rememberSourceSpellUses(c);
   const spellCounters=[...removed].flatMap(id=>{const key=specialSpellResource(id,c),grant=c.spellSettings?.special?.[id]?.sourceGrant;
    // Refusing a pre-existing manual counter must also preserve it on deletion.
    if(grant?.usage==='invocation-pact'&&c.runtime.resources[key]?.sourceSpellGrant?.usageKey!==grant.usageKey)return [];
-   return [key];
+   return ownedLimitedSourceResource(c,key)||ownedItemChargeResource(c,key)?[]:[key];
   });
   // Automatic level removal parks a class-choice tree first. Keep saved UI
   // references to its source snapshot so restoring the old ID restores pins.

@@ -7,7 +7,7 @@ import {automationEnabled} from './state';
 import {syncAutoResources} from '../resources';
 import {sourceTextSha256} from './sourceTextSha256';
 import {spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
-import evidence from './ordinarySpellCastingEvidence.json';
+import evidence from './ordinarySpellCastingEvidence.json' with {type:'json'};
 const sorted=(v:any):any=>Array.isArray(v)?v.map(sorted):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==undefined).map(k=>[k,sorted(v[k])])):v;
 export const ordinaryCastingSnapshot=(entry:Entry)=>sourceTextSha256(JSON.stringify(sorted({raw:entry.raw,entries:entry.entries,effects:entry.effects,choices:entry.choices,dependencies:entry.dependencies})));
 const rules=new Map(evidence.rules.map(rule=>[rule.id,rule])),canonical=new Set(evidence.canonicalIds);
