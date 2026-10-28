@@ -2,6 +2,7 @@ import {ABILITY_LABELS,type Ability,type Character,type Entry,type Issue,type Se
 import {activeEffectSelections} from './active';
 import {automationEnabled} from './state';
 import {armorType} from './equipment';
+import {itemCastingBonusRule} from './itemCastingBonuses';
 import {sourceTextSha256} from './sourceTextSha256';
 import evidence from './itemPassiveBonusEvidence.json' with {type:'json'};
 import ordinary from './ordinarySpellCastingEvidence.json' with {type:'json'};
@@ -34,7 +35,7 @@ export function projectItemPassiveBonuses(c:Character,providedActive?:readonly S
  for(const row of c.selections){
   const family=itemPassiveBonusFamilyId(row.entry);
   if(!family){
-   const raw=row.entry?.raw;if(row.entry?.kind==='item'&&raw&&(raw.bonusSavingThrow!==undefined||raw.bonusAbilityCheck!==undefined||raw.bonusSpellAttack!==undefined||raw.bonusAc!==undefined&&!armorType(row.entry)))warn(row,'unproved','此物品的被动加值分支尚未通过完整来源核对；保留物品和手工值，不根据数值字段或名称猜测自动效果。');
+   const raw=row.entry?.raw;if(row.entry?.kind==='item'&&raw&&(raw.bonusSavingThrow!==undefined||raw.bonusAbilityCheck!==undefined||raw.bonusSpellAttack!==undefined&&!itemCastingBonusRule(row.entry)||raw.bonusAc!==undefined&&!armorType(row.entry)))warn(row,'unproved','此物品的被动加值分支尚未通过完整来源核对；保留物品和手工值，不根据数值字段或名称猜测自动效果。');
    continue;
   }
   if(!automationEnabled(c)){warn(row,'paused','装备被动加值暂停：自动化关闭或协议未知；原记录与手工值保留。');continue;}

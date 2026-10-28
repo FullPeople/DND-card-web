@@ -1,0 +1,63 @@
+// @vitest-environment jsdom
+// Authored real component coverage; NOT RUN locally without installed jsdom.
+// Incoming equipment/source props are not Inventory gestures or mounted App proof.
+import {act,createElement} from 'react';
+import {createRoot,type Root} from 'react-dom/client';
+import {afterEach,beforeEach,expect,it,vi} from 'vitest';
+vi.mock('../src/platform/workbench',()=>{const state={cards:[],monsters:[],inventory:{containers:{}}};return{inWorkbench:false,useWorkbench:()=>state,getWorkbench:()=>state,workbenchRequest:vi.fn(),requestInventory:vi.fn(),composeRoll:vi.fn()};});
+vi.mock('../src/cloud/localRights',()=>({localGm:()=>false}));
+vi.mock('../src/ui/sheetDisplay',()=>({useSheetRenderMode:()=> 'a4',useSheetCaptureActive:()=>false}));
+vi.mock('../src/ui/Portrait',()=>({Portrait:()=>null}));
+vi.mock('../src/ui/FeaturePanel',()=>({FeaturePanel:()=>null}));
+import {DetailHeader} from '../src/ui/CharacterPages';
+import {QuickbarAttacks} from '../src/ui/Quickbar';
+import {SpellAbilityEditor} from '../src/ui/SpellAbilityEditor';
+import {SpellsPage} from '../src/ui/SpellsPage';
+import {ValueTraceProvider} from '../src/ui/ValueTrace';
+import {SheetEditContext} from '../src/ui/SheetEdit';
+import {ChoiceWorkspaceContext} from '../src/ui/ChoiceWorkspaceContext';
+import {evaluate} from '../src/core/engine';
+import {spellState,spellValues,spellValueDetails} from '../src/core/characterDetails';
+import type {Character,Entry,Selection} from '../src/core/model';
+import {itemChargeRequest,performItemChargeAction} from '../src/core/automation/itemChargeDebits';
+import {setChargedItemSpellIntent,chargedItemSpellGrantKey} from '../src/core/automation/chargedItemSpells';
+import {setItemAtWillIntent} from '../src/core/automation/itemAtWill';
+import {syncSourceSpells} from '../src/core/automation/sourceSpells';
+import {itemCastingBonusFixture} from './helpers/itemCastingBonusFlowFixture';
+import {itemCastingBonusClass,itemCastingBonusSnapshot as snapshot} from './helpers/itemCastingBonusSourceFixture';
+import {chargedItemSpellFixture} from './helpers/chargedItemSpellFlowFixture';
+import {chargedItemSpellSpecs} from './helpers/chargedItemSpellSourceFixture';
+import {itemAtWillFixture} from './helpers/itemAtWillFixture';
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;
+const noop=()=>{},authority={canEdit:true,gm:false};let dispose:(()=>Promise<void>)|undefined;
+beforeEach(()=>{vi.stubGlobal('ResizeObserver',class{observe(){}disconnect(){}});vi.stubGlobal('matchMedia',()=>({matches:true,addEventListener(){},removeEventListener(){}}));vi.stubGlobal('requestAnimationFrame',(fn:FrameRequestCallback)=>setTimeout(()=>fn(performance.now()),0));vi.stubGlobal('cancelAnimationFrame',(id:number)=>clearTimeout(id));});
+afterEach(async()=>{await dispose?.();dispose=undefined;vi.restoreAllMocks();vi.unstubAllGlobals();});
+function addClass(c:Character,role:Parameters<typeof itemCastingBonusClass>[0],id:string){const entry=structuredClone(itemCastingBonusClass(role,c.edition)),row:Selection={id,entry,level:5,quantity:1,equipped:false};c.selections.push(row);c.profile.enabledSources=[...new Set([...c.profile.enabledSources,entry.source,...(entry.dependencies||[])])];return row;}
+function attachCastingItem(c:Character){const f=itemCastingBonusFixture(c.edition==='2024'?1845:1),caster=addClass(c,c.edition==='2024'?'Wizard':'Cleric','stat-attunement-owner'),owner={...structuredClone(f.owner),id:'stat-item-owner'};c.selections.push(owner);c.profile.enabledSources=[...new Set([...c.profile.enabledSources,owner.entry.source,...(owner.entry.dependencies||[])])];c.spellSettings!.abilityClassId=caster.id;c.spellSettings!.ability=caster.entry.raw.spellcastingAbility;return{caster,owner,spec:f.spec};}
+const base=(c:Character)=>{const s=spellState(c),d=evaluate(c);return{attack:d.modifiers[s.ability]+d.proficiency+s.attackBonus,dc:8+d.modifiers[s.ability]+d.proficiency+s.dcBonus};};
+async function setup(initial:Character,entries:Entry[]){
+ await dispose?.();let c=initial;const host=document.createElement('div');document.body.append(host);let root:Root|undefined=createRoot(host);const inspect=vi.fn(),edit=vi.fn((fn:(draft:Character)=>void)=>{const draft=structuredClone(c);fn(draft);c=draft;draw();});
+ function draw(){const d=evaluate(c);root?.render(createElement(ChoiceWorkspaceContext.Provider,{value:{canEdit:true,open:noop,close:noop}},createElement(ValueTraceProvider,{c,d,children:createElement(SheetEditContext.Provider,{value:true},createElement('main',null,createElement(DetailHeader,{c,d,page:'法术',edit,browse:noop,inspect,onLink:noop,add:noop}),createElement(SpellAbilityEditor,{c,edit}),createElement(QuickbarAttacks,{c,d,inspect,manageQuickbar:noop}),createElement(SpellsPage,{c,d,entries,edit,browse:noop,inspect,onLink:noop,add:noop})))})));}
+ const render=async()=>{c={...c};await act(draw);},click=async(node:HTMLElement)=>act(()=>node.click());
+ const field=(label:string,scope:ParentNode=host)=>{const node=scope.querySelector<HTMLInputElement>(`input[aria-label=${JSON.stringify(label)}]`);expect(node).not.toBeNull();return node!;};
+ const dialog=(label:string)=>{const rows=[...document.querySelectorAll<HTMLElement>('[role=dialog]')].filter(node=>node.getAttribute('aria-label')===label);expect(rows).toHaveLength(1);return rows[0];};
+ const type=async(node:HTMLInputElement,value:string)=>act(()=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(node,value);node.dispatchEvent(new Event('input',{bubbles:true}));node.dispatchEvent(new Event('change',{bubbles:true}));});
+ const header=()=>{const rows=host.querySelectorAll('.detail-page-header .page-value');expect(rows.length).toBeGreaterThanOrEqual(3);return{attack:Number(rows[0].textContent),dc:Number(rows[1].textContent)};};
+ const selectClass=async(name:string)=>{const rows=[...host.querySelectorAll<HTMLButtonElement>('.spell-ability-editor button')].filter(node=>node.textContent?.startsWith(name+' · '));expect(rows).toHaveLength(1);await click(rows[0]);};
+ const openSource=async(id:string)=>{const tile=host.querySelector<HTMLElement>(`[data-spell-id="${id}"]`);expect(tile).not.toBeNull();await click(tile!);const parent=tile!.closest('.source-spell-row');expect(parent).not.toBeNull();const badge=parent!.querySelector<HTMLButtonElement>('.spell-use-badge');expect(badge).not.toBeNull();await click(badge!);const row=c.selections.find(row=>row.id===id)!;expect(inspect.mock.calls.at(-1)?.[0]?.id===row.entry.id).toBe(true);return dialog(row.entry.name+'施放详情');};
+ dispose=async()=>{if(root)await act(()=>root!.unmount());root=undefined;host.remove();};await render();return{host,edit,inspect,field,dialog,type,click,header,selectClass,openSource,render,get c(){return c;},async commit(next:Character){c=next;await render();}};
+}
+
+it('real class/ability controls and NumberInput traces separate same-CHA owners, preview only the stored manual offset, and refresh source reasons after explicit prop transitions',async()=>{
+ const f=itemCastingBonusFixture(3),warlock=addClass(f.c,'Warlock','other-warlock-owner'),s=await setup(f.c,f.entries),protectedBefore=snapshot([s.c.selections,s.c.abilities,s.c.runtime,s.c.notes]);let b=base(s.c);expect(s.header()).toEqual({attack:b.attack+1,dc:b.dc+1});await s.selectClass(warlock.entry.name);expect(s.header()).toEqual(base(s.c));await s.selectClass(f.caster.entry.name);b=base(s.c);expect(s.header()).toEqual({attack:b.attack+1,dc:b.dc+1});
+ const priorCalls=s.edit.mock.calls.length;await s.click(s.field('法术攻击调整值'));let panel=s.dialog('法术攻击数据追溯'),input=s.field('法术攻击追溯输入',panel);expect(input.value).toBe('7');expect(panel.querySelector('.trace-result strong')?.textContent).toBe(String(b.attack+1));for(const row of spellValueDetails(s.c,evaluate(s.c)).attackSourceTrace)expect(panel.textContent).toContain(row);await s.type(input,'8');expect(panel.querySelector('.trace-result strong')?.textContent).toBe(String(b.attack+2));expect(s.edit.mock.calls.length).toBe(priorCalls);await act(()=>{input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));});expect(s.edit.mock.calls.length).toBe(priorCalls+1);expect(s.c.spellSettings!.attackBonus).toBe(8);expect(snapshot([s.c.selections,s.c.abilities,s.c.runtime,s.c.notes])).toBe(protectedBefore);
+ await s.click(s.field('法术DC调整值'));panel=s.dialog('法术DC数据追溯');expect(s.field('法术DC追溯输入',panel).value).toBe('11');const original=structuredClone(s.c),edits=s.edit.mock.calls.length;
+ // No inventory controls are invented: these are incoming source/equipment states.
+ for(const mode of ['source','equipment','attunement']as const){const c=structuredClone(original),owner=c.selections.find(row=>row.id===f.owner.id)!;if(mode==='source')c.profile.enabledSources=c.profile.enabledSources.filter(source=>source!==f.entry.source);if(mode==='equipment')owner.equipped=false;if(mode==='attunement')owner.attuned=false;const before=snapshot(c);await s.commit(c);const details=spellValueDetails(s.c,evaluate(s.c));expect(s.header()).toEqual(details.values);expect(s.dialog('法术DC数据追溯').querySelector('.trace-result strong')?.textContent).toBe(String(details.values.dc));expect([...s.dialog('法术DC数据追溯').querySelectorAll('li')].map(row=>row.textContent)).toEqual([`施法属性：魅力 ${evaluate(s.c).modifiers.cha}`,`熟练加值 ${evaluate(s.c).proficiency}`,'基础 DC 8',...details.dcSourceTrace,'手动调整 11']);expect(snapshot(s.c)).toBe(before);expect(s.edit.mock.calls.length).toBe(edits);}
+ await s.click(s.dialog('法术DC数据追溯').querySelector<HTMLElement>('[aria-label="关闭数据追溯"]')!);await s.commit(original);const manual=s.host.querySelector<HTMLElement>('[aria-label="手动施法属性"]')!,wis=[...manual.querySelectorAll<HTMLButtonElement>('button')].find(row=>row.textContent==='感知')!;expect(wis).toBeDefined();await s.click(wis);expect(s.c.spellSettings!.abilityOverride).toBe(true);expect(s.c.spellSettings!.ability).toBe('wis');expect(s.header()).toEqual(base(s.c));expect(s.c.spellSettings!.attackBonus).toBe(8);expect(s.c.spellSettings!.dcBonus).toBe(11);
+});
+
+it('actual source Reference/badge/detail portals retain fixed/no-stat and at-will policies while an authenticated worn item raises only ordinary global totals',async()=>{
+ for(const kind of ['none','fixed-dc']as const){const spec=chargedItemSpellSpecs.find(row=>row.statistics.kind===kind)!,f=chargedItemSpellFixture(spec.ownerId);expect(performItemChargeAction(f.c,itemChargeRequest(f.c,f.owner.id,'mounted-stat-known',{kind:'acquire',knownRemaining:1+f.rule.branch.minAfter,confirmedGenuineItem:true,confirmedKnownBalance:true}),authority).status).toBe('applied');setChargedItemSpellIntent(f.c,f.owner.id,{confirmedGenuineOwnedItem:true},f.entries,authority);syncSourceSpells(f.c,f.entries);const child=f.c.selections.find(row=>row.parentId===f.owner.id&&chargedItemSpellGrantKey(row.grantKey))!;const attached=attachCastingItem(f.c),s=await setup(f.c,[...f.entries,attached.owner.entry]),before=snapshot(s.c),b=base(s.c),panel=await s.openSource(child.id);expect(s.header()).toEqual({attack:b.attack+attached.spec.attackBonus,dc:b.dc+attached.spec.dcBonus});expect(panel.querySelector(`[data-item-cast-statistics="${kind}"]`)).not.toBeNull();if(spec.statistics.kind==='fixed-dc')expect(panel.textContent).toContain(`来源固定豁免 DC：${spec.statistics.saveDC}`);else expect(panel.textContent).not.toContain('来源固定豁免 DC：');expect(panel.textContent).not.toContain(`DC ${spellValues(s.c,evaluate(s.c)).dc}`);expect(panel.querySelector('input[type=number]')).toBeNull();expect(s.edit).not.toHaveBeenCalled();expect(snapshot(s.c)).toBe(before);const c=structuredClone(s.c);c.selections.find(row=>row.id===attached.owner.id)!.equipped=false;const changed=snapshot(c);await s.commit(c);expect(s.header()).toEqual(base(s.c));expect(s.dialog(f.target.name+'施放详情').querySelector(`[data-item-cast-statistics="${kind}"]`)).not.toBeNull();expect(snapshot(s.c)).toBe(changed);expect(s.edit).not.toHaveBeenCalled();}
+ const f=itemAtWillFixture();setItemAtWillIntent(f.c,f.owner.id,{confirmedGenuineOwnedItem:true},f.entries,authority);syncSourceSpells(f.c,f.entries);const child=f.c.selections.find(row=>row.parentId===f.owner.id&&row.entry.kind==='spell')!,attached=attachCastingItem(f.c),s=await setup(f.c,[...f.entries,attached.owner.entry]),before=snapshot(s.c),panel=await s.openSource(child.id),b=base(s.c);expect(s.header()).toEqual({attack:b.attack+attached.spec.attackBonus,dc:b.dc+attached.spec.dcBonus});expect(panel.querySelector('[data-item-cast-statistics]')).toBeNull();expect(panel.textContent).not.toContain(`DC ${spellValues(s.c,evaluate(s.c)).dc}`);expect(panel.querySelector('input[type=number]')).toBeNull();expect(s.edit).not.toHaveBeenCalled();expect(snapshot(s.c)).toBe(before);
+});

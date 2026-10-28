@@ -1,0 +1,26 @@
+# Source-qualified item spell attack and save DC bonuses
+
+This first-pass checkpoint implements nine source-qualified worn-item owners / 18 attack-and-DC property rows. It does not mark nine complete entries, alter the runtime progress report, or claim a release.
+
+## Actual player behavior
+
+- The three Amulet of the Devout ranks require a source-proven Cleric or Paladin attunement qualifier. Their reviewed bonus applies to the wearer's spells, not only Cleric or Paladin spells. A valid first-level Paladin qualifier does not grant spell slots or spellcasting access.
+- The three Bloodwell Vial ranks affect only the current source-proven Sorcerer recipient. Another Charisma caster does not borrow that bonus. The worn route is implemented; holding is not inferred from equipment.
+- Jester's Mask affects verified Charisma-based recipient spells. Robe of Thayan Arcana and the 2024 Robe of the Archmagi affect the qualified wearer's recipient spells. Item-specific source and class attunement conditions remain distinct from the recipient scope.
+- Current wearing, attunement, single physical root ownership, exact original or actual catalog-composition fingerprints, canonical/alias disabling, edition and source eligibility gate every projection. Only source-proven native base-class recipients receive the new modifiers; unsupported subclass-only or overridden-ability contexts remain held rather than guessed.
+- Actual per-class spell displays carry the caster selection identity, even when two classes use the same ability. Global values use an explicit valid default recipient or an unambiguous proven sole caster. Present-but-invalid recipient markers never fall back. Source-owned item and at-will casts retain their independent fixed/no-stat policies; no global class statistic is borrowed.
+- Value traces use the same recipient-aware calculation as displayed numbers. Existing manual base values, offsets and unrelated AC/save behavior are preserved. The projection creates no class entitlement, spell, slot, resource, persisted protocol or bookkeeping event and never changes spent balances.
+
+Two reviewed same-family rank-overlap groups remain held when multiple otherwise-eligible ranks are active because their simultaneous stacking policy is unreviewed. This is not an identity merge or a game-wide prohibition. The 2014 Archmagi alignment/color branch, harmful talismans, held/focus routes, unknown casting contexts and other clauses remain outside this checkpoint. Old clients do not calculate this new numeric projection; saved-card/browser behavior beyond the stated checks is not claimed.
+
+## Proof and limits
+
+Ten original runtime inputs are exact byte/hash-locked members of the existing 229-input corpus. Source proof covers nine canonical and nine actual catalog-composition forms and fourteen source-class headers. Three additional existing spell inputs and two separately pinned item-casting policy books support adjacent protected-cast tests; the corpus denominator is unchanged and source prose is not included here.
+
+Before implementation, all nine existing numeric workflows failed at the missing bonuses while four source groups passed. The same nine numeric assertions were retained. The final runtime window passed 42/42 groups across seven files: 32 new-family source, numeric, ownership/lifecycle and SSR groups, six retained passive-item workflows and four real ordinary-payment/persistence workflows. All passed without skips or retries under the inherited startup network-deny, one-worker and 512 MB constraints. The installed compiler reported zero diagnostics. Two earlier checks retained the same inferred string-array union type error; the final erased type annotation corrects only the affected recipient-ID expression. Removing that annotation reproduces the tested runtime expressions byte-for-byte; no source evidence, assertions or policy was changed.
+
+An earlier window passed 34 groups with four SSR groups not run because their existing side-policy environment was missing. The isolated four passed after binding only the existing exact policy inputs. Later review produced a real RED for explicitly provided undefined recipient markers; the narrow context-only correction passed the final 38-case union. A separate selection-ID collision hypothesis was disproven by the existing active-selection uniqueness guard; no new class-ownership restriction was added. The ordinary casting payment/readiness/slot implementation tail remains byte-identical after extraction of its pure source-identity helper.
+
+Two authored new mounted interactions and the previous passive family's two mounted interactions are NOT RUN. SSR rerenders are not inventory gestures or full-App proof. The earlier 861-case / 16-mounted result belongs to the earlier source, not this checkpoint. Fresh grouped source-bound replay, consumer/report pairing, broader CI and 148 full-App checks remain open. No report witness, completion-percentage increase, whole-entry completion, merge or deployment is claimed.
+
+This independent checkpoint is stacked on `cfb6f1ae21b8acaebf51c9f9e271aafcbbc6c58c` (Draft PR125). Its dependency chain is not merge-ready; the older pending report operation is not replaced by this work.
