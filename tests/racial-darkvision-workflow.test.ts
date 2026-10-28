@@ -14,8 +14,17 @@ for(const name of ['web','automation-progress','infusion-controls']){
   const block=text.slice(materialize,racial[0].index);
   expect(block).toContain(`--output ${racial[0][1]}`);
   expect(block).toContain('--report docs/data/automation-runtime-coverage.json');
-  const check=name==='infusion-controls'?'node tools/runVitest.mjs run tests/item-atwill*.test.ts tests/racial-darkvision*.test.ts --maxWorkers=1':'npm run check';
-  expect(text.indexOf(check,racial[0].index)).toBeGreaterThan(racial[0].index!);
+  if(name==='infusion-controls'){
+   // Required executable arguments remain mandatory when another independently
+   // tested family is appended; an obsolete whole-line prefix is not the ABI.
+   const commands=[...text.matchAll(/^\s*run: (node tools\/runVitest\.mjs run [^\n]+)$/gm)];
+   const matches=commands.filter(row=>row.index!>racial[0].index!&&row[1].split(/\s+/).includes('tests/racial-darkvision*.test.ts'));
+   expect(matches).toHaveLength(1);const args=matches[0][1].split(/\s+/);
+   for(const required of ['tests/item-atwill*.test.ts','tests/racial-darkvision*.test.ts','tests/item-ability-floors*.test.ts','tests/racial-movement*.test.ts','--maxWorkers=1'])expect(args.filter(arg=>arg===required)).toHaveLength(1);
+   expect(args.slice(0,3)).toEqual(['node','tools/runVitest.mjs','run']);
+   expect(args.filter(arg=>arg.startsWith('--'))).toEqual(['--maxWorkers=1']);
+   expect(args.slice(3).every(arg=>arg==='--maxWorkers=1'||/^tests\/[A-Za-z0-9_*\/.\-]+\.test\.ts$/.test(arg))).toBe(true);
+  }else expect(text.indexOf('npm run check',racial[0].index)).toBeGreaterThan(racial[0].index!);
  });
 }
 it('keeps the original229 materializer, explicit fixture variable and hard source failures',()=>{

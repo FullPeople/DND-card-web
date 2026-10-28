@@ -97,8 +97,8 @@ export function classSpellGroups(c:Character):{profile:CasterProfile;ids:string[
   ids.forEach(id=>assigned.add(id));return {profile,ids};
  });
 }
-export function assignClassSpell(c:Character,id:string,ownerId:string){
- const groups=classSpellGroups(c),group=groups.find(g=>g.profile.owner.id===ownerId);if(!group)return;
+export function assignClassSpell(c:Character,id:string,ownerId:string,groups=classSpellGroups(c)){
+ const group=groups.find(g=>g.profile.owner.id===ownerId);if(!group)return;
  const settings=c.spellSettings||=structuredClone(spellState(c));settings.classSpells||={};
  for(const g of groups)settings.classSpells[g.profile.owner.id]??=[...g.ids];
  const ids=settings.classSpells[ownerId];if(!ids.includes(id)){const empty=ids.indexOf('');if(empty>=0)ids[empty]=id;else ids.push(id);}
@@ -114,7 +114,9 @@ export function learnActiveSpell(c:Character,entry:Entry,ownerId?:string):{id?:s
   const level=entry.raw.level;if(!Number.isSafeInteger(level)||level<0||level>selected.maxLevel)return {error:'该可选法表法术尚未在当前职业施法模型解锁；高环秘法或其他独立机制仍需手工处理。'};
   if(selected.mode==='known'&&level>0){const capacity=selected.casting.entry.raw.spellsKnownProgression?.[selected.owner.level-1]??selected.casting.entry.raw.preparedSpellsProgression?.[selected.owner.level-1],ids=classSpellGroups(c).find(group=>group.profile.owner.id===selected.owner.id)?.ids||[];if(!Number.isSafeInteger(capacity)||capacity<0||!old||!ids.includes(old.id)){if(!Number.isSafeInteger(capacity)||capacity<0||ids.filter(Boolean).length>=capacity)return {error:'该职业的原有法术名额已满或无法核对；可选法表不会增加名额。'};}}
  }
+ // Freeze only this explicit new optional allocation before a base-list owner can infer the inserted row.
+ const access=ownerId&&selected?optionalClassSpellListDecision(c,entry,selected.owner.id):undefined,groups=!old&&access?.scoped&&access.allowed&&!access.baseOverlap?classSpellGroups(c):undefined;
  const row=old||{id:uid(),entry:structuredClone(entry),quantity:1,level:1,equipped:false};if(!old)c.selections.push(row);
- const owner=ownerId||(matching.length===1?matching[0].owner.id:undefined);if(owner&&Number(entry.raw.level)>0)assignClassSpell(c,row.id,owner);
+ const owner=ownerId||(matching.length===1?matching[0].owner.id:undefined);if(owner&&Number(entry.raw.level)>0)assignClassSpell(c,row.id,owner,groups);
  return {id:row.id};
 }

@@ -1,0 +1,11 @@
+# Optional class allocation: preserve pre-existing ownership
+
+The bounded mounted diagnosis proved that a newly learned optional Bard spell was correctly assigned to Bard but also silently assigned to a second class whose base list already included that spell. Real-source domain tests reproduced the same insertion-before-inference defect for explicit learning and preparation. Previously inferred, saved and manual shared references were not the defect and must remain intact.
+
+The correction captures the pre-insert class-reference projection only when all of these hold: an explicit class owner, a currently admitted source-qualified optional-only association (not a base overlap), and a new spell row. The intended owner is then assigned using that preserved projection. Existing rows, base-list and unscoped calls retain their previous behavior; preparation persists the captured references only after successful preparation. The fix does not remove another owner's existing reference, alter list policy, increase quotas, grant slots or change manual spells.
+
+The four new regressions passed after first reproducing two real failures. Directed validation of the existing seven workflows, fourteen SSR/callsite checks and those four regressions passed **25/25**, zero skipped. The installed compiler passed with zero diagnostics. The first RED's two authored setup defects were retained separately and corrected from actual source associations rather than treating them as product failures.
+
+All 674 existing test cases and assertions remain unchanged; the exact-source milestone now also requires these four regressions, for 678 total. The mounted ownership flow and complete milestone still require the corrected source's CI; no old-source results are spliced into acceptance. This source-only checkpoint is not paired full-runtime, full App, whole-entry, release or deployment acceptance and claims no automation-page percentage increase.
+
+Reusable invariant: when an explicit owned transaction inserts a new record, preserve legacy-derived ownership before that insertion. Inferring legacy ownership afterward can silently claim the new record for an unrelated owner. Preserve valid prior references; do not solve this by clearing or globally rewriting them.

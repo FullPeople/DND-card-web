@@ -2,7 +2,7 @@ import {selectionAllowed,uid,type Character,type Entry,type Selection} from './m
 import {spellState} from './characterDetails';
 import {availableClassSpells,spellUsesPreparation} from './spellcastingRules';
 import {preparationBase} from './preparation';
-import {assignClassSpell} from './spellWorkspace';
+import {assignClassSpell,classSpellGroups} from './spellWorkspace';
 import {casterProfiles,spellOnCurrentClassList} from './spellcastingRules';
 import {optionalClassSpellListAccess,optionalClassSpellListDecision} from './automation/optionalClassSpellLists';
 
@@ -19,8 +19,10 @@ export function prepareSpellEntry(c:Character,entry:Entry,preferredSlot?:number,
  if(!c.spellSettings?.modeOverride&&!matching.length&&casterProfiles(c).some(profile=>{const access=optionalClassSpellListDecision(c,entry,profile.owner.id);return access.scoped&&!access.baseOverlap;}))return undefined;
  const selected=ownerId?matching.find(profile=>profile.owner.id===ownerId):matching.length===1?matching[0]:undefined;
  if(selected&&optionalClassSpellListAccess(c,entry,selected.owner.id)&&(!Number.isSafeInteger(entry.raw.level)||entry.raw.level<1||entry.raw.level>selected.maxLevel))return undefined;
- const assign=(id:string)=>{const owner=ownerId||(matching.length===1?matching[0].owner.id:undefined);if(owner)assignClassSpell(c,id,owner);return id;};
  const existing=c.selections.find(s=>s.entry.kind==='spell'&&s.entry.id===entry.id&&!c.spellSettings?.special?.[s.id]);
+ // Do not persist the pre-insert projection unless this new explicit optional preparation succeeds.
+ const access=ownerId&&selected?optionalClassSpellListDecision(c,entry,selected.owner.id):undefined,groups=!existing&&access?.scoped&&access.allowed&&!access.baseOverlap?classSpellGroups(c):undefined;
+ const assign=(id:string)=>{const owner=ownerId||(matching.length===1?matching[0].owner.id:undefined);if(owner)assignClassSpell(c,id,owner,groups);return id;};
  if(existing){const effective=spellState(c);return setPreparedSpell(c,existing.id,true,preferredSlot)||effective.prepared.slice(0,effective.capacity).includes(existing.id)?assign(existing.id):undefined;}
  if(!selectionAllowed(c,entry)||!spellUsesPreparation(c,entry))return undefined;
  const row:Selection={id:uid(),entry:structuredClone(entry),quantity:1,level:1,equipped:false};
