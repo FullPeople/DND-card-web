@@ -24,6 +24,9 @@ on:
       - 'tests/vitest-runner*.test.ts'
       - 'tests/helpers/offlineCatalog*.mjs'
       - 'tests/racial-movement*.test.ts'
+      - 'tests/optional-class-list-*.test.ts'
+      - 'tests/helpers/optionalClassList*.ts'
+      - 'tools/fetchOptionalClassSpellListSource.*'
       - 'tests/helpers/racialMovement*.ts'
       - 'tests/helpers/attunedItemChargeDebitFixture.ts'
       - 'tests/helpers/itemChargeMergedFixture.ts'
@@ -252,6 +255,15 @@ jobs:
           printf '%s\n' 'RACIAL_DARKVISION_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'ITEM_ABILITY_FLOOR_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'RACIAL_MOVEMENT_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'OPTIONAL_CLASS_LIST_FROZEN_DIR=.local-evidence/reviewed-alert-full-upstream' >> "$GITHUB_ENV"
+      - name: Verify the independent immutable optional-list policy source privately
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/fetchOptionalClassSpellListSource.mjs \
+            --output .local-evidence/optional-class-list-side-source/book-tce.json \
+            --receipt .local-evidence/optional-class-list-side-source/verification.json
+          printf '%s\n' 'OPTIONAL_CLASS_LIST_SIDE_SOURCE_FILE=.local-evidence/optional-class-list-side-source/book-tce.json' >> "$GITHUB_ENV"
       - name: Fetch exact old consumer for charge-preservation verification
         run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
       - name: Fetch ninth-stage consumer for localized-v2 and ring preservation
@@ -278,6 +290,8 @@ jobs:
         run: node tools/runVitest.mjs run tests/limited-source*.test.ts tests/item-charge-*.test.ts tests/attuned-item-charge*.test.ts tests/vitest-runner*.test.ts tests/protected-resource-history*.test.ts tests/resource-evidence-native-imports.test.ts tests/resource-ledger-browser-contract.test.ts --maxWorkers=1
       - name: Owned item at-will and source-qualified racial darkvision guards
         run: node tools/runVitest.mjs run tests/item-atwill*.test.ts tests/racial-darkvision*.test.ts tests/item-ability-floors*.test.ts tests/racial-movement*.test.ts --maxWorkers=1
+      - name: Explicit owned-class optional lists, paid workflows and rendered controls
+        run: node tools/runVitest.mjs run tests/optional-class-list-*.test.ts --maxWorkers=1
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone

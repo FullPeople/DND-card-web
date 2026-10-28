@@ -7,6 +7,8 @@ import {automationEnabled} from './state';
 import {syncAutoResources} from '../resources';
 import {sourceTextSha256} from './sourceTextSha256';
 import {spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
+import {directBaseClassList} from '../classSpellLists';
+import {optionalClassSpellListAccess} from './optionalClassSpellLists';
 import evidence from './ordinarySpellCastingEvidence.json' with {type:'json'};
 const sorted=(v:any):any=>Array.isArray(v)?v.map(sorted):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==undefined).map(k=>[k,sorted(v[k])])):v;
 export const ordinaryCastingSnapshot=(entry:Entry)=>sourceTextSha256(JSON.stringify(sorted({raw:entry.raw,entries:entry.entries,effects:entry.effects,choices:entry.choices,dependencies:entry.dependencies})));
@@ -27,14 +29,9 @@ export function ordinaryCastingClassContextMalformed(c:Character):boolean{
   return known&&!ordinaryCastingRule(entry);
  });
 }
-const key=(v:unknown)=>String(v??'').trim().toLowerCase();
 /** Direct base-class access only: variant/optional and expanded lists remain held. */
 export function ordinaryDirectBaseClassList(entry:Entry,profile:CasterProfile):boolean{
- const names=[profile.owner.entry.name,profile.owner.entry.english,profile.owner.entry.raw.name,profile.owner.entry.raw.ENG_name].map(key),source=key(profile.owner.entry.source),raw=entry.raw;
- const matches=(row:any)=>row&&key(row.source||'PHB')===source&&[row.name,row.ENG_name].some(n=>names.includes(key(n)));
- if(Array.isArray(raw.classes?.fromClassList)&&raw.classes.fromClassList.some(matches))return true;
- const lookup=raw._spellClasses;if(lookup&&typeof lookup==='object'&&!Array.isArray(lookup))for(const [book,classes] of Object.entries(lookup))if(key(book)===source&&classes&&typeof classes==='object'&&!Array.isArray(classes))for(const [name,definition] of Object.entries(classes)){if(!names.includes(key(name)))continue;const d=definition as any;if(d===true||d&&typeof d==='object'&&!Array.isArray(d)&&!d.definedInSource&&!d.isVariant)return true;}
- return false;
+ return directBaseClassList(entry,profile.owner.entry);
 }
 function allowed(c:Character,entry:Entry){const proof=ordinaryCastingRule(entry);return !!proof&&selectionAllowed(c,entry)&&c.profile.enabledSources.includes(proof.source)&&(entry.dependencies||[]).every(id=>c.profile.enabledSources.includes(id))&&!c.profile.disabledEntries?.some(id=>id===entry.id||id===proof.id)&&(proof.edition==='both'||proof.edition===c.edition);}
 function profiles(c:Character):CasterProfile[]{
@@ -44,7 +41,7 @@ function profiles(c:Character):CasterProfile[]{
 }
 function exactlyAllocated(ids:unknown,id:string,capacity:number){return Array.isArray(ids)&&ids.every(v=>typeof v==='string')&&ids.filter(v=>v===id).length===1&&ids.indexOf(id)<capacity&&new Set(ids.filter(Boolean)).size===ids.filter(Boolean).length;}
 function ready(c:Character,row:Selection,p:CasterProfile):boolean{
- if(c.spellSettings?.modeOverride)return false;const base=row.entry.raw.level;if(!Number.isSafeInteger(base)||base<0||base>9||base>p.maxLevel||!ordinaryDirectBaseClassList(row.entry,p))return false;
+ if(c.spellSettings?.modeOverride)return false;const base=row.entry.raw.level;if(!Number.isSafeInteger(base)||base<0||base>9||base>p.maxLevel||!ordinaryDirectBaseClassList(row.entry,p)&&!optionalClassSpellListAccess(c,row.entry,p.owner.id))return false;
  if(base===0)return exactlyAllocated(c.spellSettings?.cantrips?.[p.owner.id],row.id,cantripCapacity(p));
  const ids=c.spellSettings?.classSpells?.[p.owner.id];if(!Array.isArray(ids))return false;
  if(p.mode==='known'){const n=p.casting.entry.raw.spellsKnownProgression?.[p.owner.level-1]??p.casting.entry.raw.preparedSpellsProgression?.[p.owner.level-1];return Number.isSafeInteger(n)&&n>=0&&exactlyAllocated(ids,row.id,n);}

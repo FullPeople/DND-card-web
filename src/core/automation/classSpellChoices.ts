@@ -1,5 +1,5 @@
 import {editionAllows,selectionAllowed,type Character,type Entry} from '../model';
-import {cantripCapacity,casterProfiles,spellOnClassList} from '../spellcastingRules';
+import {cantripCapacity,casterProfiles,spellOnCurrentClassList} from '../spellcastingRules';
 import {assignClassSpell,cantripGroups,chooseCantrip,clearCantrip,classSpellGroups,learnActiveSpell} from '../spellWorkspace';
 import {prepareSpellEntry,setPreparedSpell} from '../spells';
 import type {SheetChoice} from './choices';
@@ -20,7 +20,7 @@ export function classSpellChoices(c:Character,catalog:Entry[]):SheetChoice[]{
    if(!capacity)return;
    const slots=selectedIds.map(id=>c.selections.find(s=>s.id===id)?.entry.id||'');
    const selected=[...new Set(slots.filter(Boolean))];
-   const options=entries.filter(e=>(kind==='cantrips'?Number(e.raw.level)===0:Number(e.raw.level)>0&&Number(e.raw.level)<=p.maxLevel)&&editionAllows(e,c.edition)&&spellOnClassList(e,p)).filter(e=>kind!=='prepared'||p.pool!=='book'||ids.some(id=>c.selections.find(s=>s.id===id)?.entry.id===e.id)).sort((a,b)=>Number(a.raw.level)-Number(b.raw.level)||a.name.localeCompare(b.name,'zh-CN')).map(entry=>({value:entry.id,label:entry.name,entry,unavailable:selectionAllowed(c,entry)?undefined:'此法术来源尚未启用。'}));
+   const options=entries.filter(e=>(kind==='cantrips'?Number(e.raw.level)===0:Number(e.raw.level)>0&&Number(e.raw.level)<=p.maxLevel)&&editionAllows(e,c.edition)&&spellOnCurrentClassList(c,e,p)).filter(e=>kind!=='prepared'||p.pool!=='book'||ids.some(id=>c.selections.find(s=>s.id===id)?.entry.id===e.id)).sort((a,b)=>Number(a.raw.level)-Number(b.raw.level)||a.name.localeCompare(b.name,'zh-CN')).map(entry=>({value:entry.id,label:entry.name,entry,unavailable:selectionAllowed(c,entry)?undefined:'此法术来源尚未启用。'}));
    out.push({id:`${p.owner.id}:spells:${kind}`,ownerId:p.owner.id,label,count:capacity,options,selected,slots,complete:selected.length>=capacity,restricted:!!c.spellSettings?.modeOverride,channel:'spells',spellKind:kind,hint:c.spellSettings?.modeOverride?'施法模式已手动覆盖，请在法术页恢复“跟随职业”后选择。':hint});
   };
   add('cantrips','戏法',cantripCapacity(p,c),cantrips.find(g=>g.id===p.owner.id)?.slots||[],'戏法单独计数；选择会直接填入法术页的该职业戏法格。');
@@ -40,6 +40,7 @@ export function classSpellChoices(c:Character,catalog:Entry[]):SheetChoice[]{
 /** Explicit edits use the same selection IDs and references as the spell page. */
 export function chooseClassSpell(c:Character,choice:SheetChoice,entry:Entry){
  const row=c.selections.find(s=>s.entry.id===entry.id&&s.entry.kind==='spell'&&!c.spellSettings?.special?.[s.id]),selected=choice.selected.includes(entry.id);
+ const profile=casterProfiles(c).find(value=>value.owner.id===choice.ownerId);if(!selected&&(!profile||!spellOnCurrentClassList(c,entry,profile)))throw Error('当前职业法表、来源或确认已变化，请重新选择。');
  if(!selected&&choice.selected.length>=choice.count)throw Error(`最多选择 ${choice.count} 项，请先取消一项。`);
  if(choice.spellKind==='cantrips'){
   if(selected){const group=cantripGroups(c).find(g=>g.id===choice.ownerId)!;clearCantrip(c,choice.ownerId,group.slots.indexOf(row!.id));}
@@ -59,6 +60,7 @@ export function chooseClassSpell(c:Character,choice:SheetChoice,entry:Entry){
 export function setClassSpellSlot(c:Character,choice:SheetChoice,index:number,entry?:Entry){
  const oldId=choice.slots?.[index],old=c.selections.find(s=>s.entry.id===oldId&&s.entry.kind==='spell'&&!c.spellSettings?.special?.[s.id]);
  if(entry?.id===oldId)return;
+ if(entry){const profile=casterProfiles(c).find(value=>value.owner.id===choice.ownerId);if(!profile||!spellOnCurrentClassList(c,entry,profile))throw Error('当前职业法表、来源或确认已变化，原分配保留。');}
  if(choice.spellKind==='cantrips'){
   if(entry){const result=chooseCantrip(c,entry,choice.ownerId,index);if(result.error)throw Error(result.error);}
   else clearCantrip(c,choice.ownerId,index);

@@ -1,6 +1,7 @@
 import {selectionAllowed,type Character,type Entry,type Selection} from './model';
 import {parentClass,featureOwner} from './featureOwnership';
 import {automationEnabled} from './automation/state';
+import {optionalClassSpellListDecision} from './automation/optionalClassSpellLists';
 
 export type CasterProfile={owner:Selection;casting:Selection;mode:'known'|'prepared';pool:'learned'|'book'|'list';maxLevel:number};
 const key=(value:unknown)=>String(value??'').trim().toLowerCase();
@@ -67,10 +68,16 @@ export function spellOnClassList(entry:Entry,profile:CasterProfile):boolean{
  return [...(raw.classes?.fromClassList||[]),...(raw.classes?.fromClassListVariant||[])].some(row=>sameClassSource(row.source||'PHB')&&[row.name,row.ENG_name].some(name=>names.includes(key(name))));
 }
 
+/** Only the reviewed TCE optional domain is consent-sensitive. Preserve the
+ * existing base/other-source decoder rather than classifying all variants. */
+export function spellOnCurrentClassList(c:Character,entry:Entry,profile:CasterProfile):boolean{
+ const decision=optionalClassSpellListDecision(c,entry,profile.owner.id);return decision.scoped?decision.baseOverlap||decision.allowed:spellOnClassList(entry,profile);
+}
+
 /** Full-list access is a read-only projection. Only an actually prepared spell is stored on the card. */
 export function availableClassSpells(c:Character,entries:Entry[]):Entry[]{
  const profiles=casterProfiles(c);
- return entries.filter(e=>e.kind==='spell'&&selectionAllowed(c,e)&&profiles.some(p=>spellOnClassList(e,p)&&(Number(e.raw.level)===0?fullCantripList(p):Number(e.raw.level)>0&&p.mode==='prepared'&&p.pool==='list'&&Number(e.raw.level)<=p.maxLevel)));
+ return entries.filter(e=>e.kind==='spell'&&selectionAllowed(c,e)&&profiles.some(p=>spellOnCurrentClassList(c,e,p)&&(Number(e.raw.level)===0?fullCantripList(p):Number(e.raw.level)>0&&p.mode==='prepared'&&p.pool==='list'&&Number(e.raw.level)<=p.maxLevel)));
 }
 
 /** Capabilities come from the source's casting model, never its translated name. */
@@ -101,10 +108,11 @@ export function cantripCapacity(p:CasterProfile,c?:Character):number{
 export const fullCantripList=(p:CasterProfile):boolean=>cantripCapacity(p)>0&&(p.pool==='book'||p.casting.entry.raw.casterProgression==='artificer'||p.casting.entry.raw.cantripChange==='restLong');
 export const hasKnownLibrary=(p:CasterProfile):boolean=>p.pool==='book'||p.mode==='prepared'&&cantripCapacity(p)>0;
 
-export function spellUsesPreparation(c:Character,entry:Entry,selectionId?:string):boolean{
+export function spellUsesPreparation(c:Character,entry:Entry,selectionId?:string,ownerId?:string):boolean{
  if(selectionId&&c.spellSettings?.special?.[selectionId])return false;
  if(Number(entry.raw.level)===0&&(casterProfiles(c).length>0||c.spellSettings?.cantrips?.manual?.some(Boolean)))return false;
  if(c.spellSettings?.modeOverride)return c.spellSettings.mode==='prepared';
- const profiles=casterProfiles(c),matching=profiles.filter(p=>spellOnClassList(entry,p));
+ const profiles=casterProfiles(c),matching=profiles.filter(p=>spellOnCurrentClassList(c,entry,p));
+ if(ownerId){const profile=matching.find(row=>row.owner.id===ownerId);return profile?.mode==='prepared';}
  return matching.length?matching.some(p=>p.mode==='prepared'):(inferredSpellMode(c)??c.spellSettings?.mode??'prepared')==='prepared';
 }

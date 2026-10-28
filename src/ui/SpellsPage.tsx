@@ -1,4 +1,11 @@
 import {itemAtWillGrantKey} from '../core/automation/itemAtWill';
+import {optionalClassListOffer,optionalClassListOffers,optionalClassSpellListAccess} from '../core/automation/optionalClassSpellLists';
+import {spellActionAuthorityReason} from '../core/automation/spellActionAuthority';
+import {sheetChoices} from '../core/automation/choices';
+import {OptionalClassSpellListControl} from './OptionalClassSpellListControl';
+import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
+import {ChoiceWorkspace} from './ChoiceWorkspace';
+import {useSpellActionFeedback} from './SpellActionFeedback';
 import {limitedSourceUseOffers} from '../core/automation/limitedSourceUses';
 import {useSheetContext} from './scopedSheetContext';
 import {BookRituals} from './BookRituals';
@@ -17,8 +24,8 @@ import {uid,signed,selectionAllowed,ABILITIES,ABILITY_LABELS,type Ability,type E
 import {spellState,spellValues} from '../core/characterDetails';
 import {prepareSpellEntry,setPreparedSpell,spellLibrary} from '../core/spells';
 import {knownSpellCapacity,capacitySlots,sourceCapacity} from '../core/spellCapacity';
-import {casterProfiles,spellUsesPreparation,spellOnClassList,hasKnownLibrary} from '../core/spellcastingRules';
-import {cantripGroups,chooseCantrip,clearCantrip,spellIsReady,ordinaryPrepared,learnActiveSpell,knownActiveSpells,chooseKnownSpell} from '../core/spellWorkspace';
+import {casterProfiles,spellUsesPreparation,spellOnCurrentClassList,hasKnownLibrary} from '../core/spellcastingRules';
+import {cantripGroups,chooseCantrip,clearCantrip,spellIsReady,ordinaryPrepared,learnActiveSpell,knownActiveSpells,chooseKnownSpell,hasClassLookup} from '../core/spellWorkspace';
 import {cantripSources,chooseSourceSpell} from '../core/sourceCantrips';
 import {removeSelection} from '../core/sheet';
 import {SheetCell} from './SheetCell';
@@ -29,7 +36,7 @@ import {Reference,ReferenceContext} from './Reference';
 import {pointerDrag} from './pointerDrag';
 import {type PageProps} from './CharacterPages';
 import './spellsPage.css';
-import {RetainedCardHideEffect} from './RetainedCardVisibility';
+import {RetainedCardHideEffect,useRetainedCardActive} from './RetainedCardVisibility';
 
 export function SpellFrame(){return <svg className="spell-tile-frame" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path d="M3 .75H97L99.25 3V25L97 27.25H3L.75 25V3Z"/></svg>;}
 function ConcentrationMark(){return <svg className="spell-concentration-mark" viewBox="0 0 24 24" role="img" aria-label="专注"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="7"/><path d="m12 4 7 12H5Zm0 16L5 8h14Z"/><path d="M12 0v3m0 18v3M0 12h3m18 0h3"/></svg>;}
@@ -37,9 +44,38 @@ type Target={kind:'cantrip'|'ordinary'|'source';owner?:string;index?:number};
 const error=(detail:string)=>window.dispatchEvent(new CustomEvent('workbench-error',{detail}));
 function limitedDisplayBalance(c:Character,id:string){const grant=c.spellSettings?.special?.[id]?.sourceGrant;if(grant?.usage!=='limited')return;const rows=limitedSourceUseOffers(c).filter(row=>row.ownerId===grant.ownerId&&row.key===grant.resourceKey&&row.initialized);return rows.length===1?rows[0]:undefined;}
 
+/** Only newly opted-in routes require disambiguation here; legacy/manual paths keep their policy. */
+export function spellPageClassRoute(c:Character,entry:Entry,chosenOwner?:string):{ownerId?:string;error?:string}{
+ const matching=casterProfiles(c).filter(profile=>spellOnCurrentClassList(c,entry,profile)),optional=matching.some(profile=>optionalClassSpellListAccess(c,entry,profile.owner.id));
+ if(optional&&matching.length>1&&!chosenOwner)return {error:'此扩展法术可属于多个职业，请先选择对应职业，再学习或预备。'};
+ const explicit=chosenOwner&&(hasClassLookup(entry)||matching.some(profile=>profile.owner.id===chosenOwner))?chosenOwner:undefined;
+ return {ownerId:explicit||(optional&&matching.length===1?matching[0].owner.id:undefined)};
+}
+
+/** Reuse the real choice workflow, scoped to this card/page and owned source. */
+function OptionalClassChoiceWorkspace({c,ownerId,id,host,entries,edit,close,writable}:{c:Character;ownerId:string;id:string;host:string;entries:Entry[];edit:PageProps['edit'];close:()=>void;writable:boolean}){
+ const active=useRetainedCardActive(),feedback=useSpellActionFeedback(c,edit,!writable),offer=optionalClassListOffer(c,ownerId,entries,feedback.authority),epoch=useRef(0),mounted=useRef(true),live=useRef({c,ownerId,id,entries,writable,active});live.current={c,ownerId,id,entries,writable,active};
+ useLayoutEffect(()=>{epoch.current++;},[c.id,ownerId,id,offer.basis,writable,active,feedback.authority.canEdit,feedback.authority.gm]);
+ useLayoutEffect(()=>{mounted.current=true;return()=>{mounted.current=false;epoch.current++;};},[]);
+ function guardedEdit(action:Parameters<PageProps['edit']>[0]){
+  if(!writable||!active||!offer.active||spellActionAuthorityReason(c,feedback.authority))return;
+  const scope=c.id,token=epoch.current,basis=offer.basis;let used=false;
+  edit(draft=>{if(used)return;used=true;const access=feedback.liveAuthority(),current=live.current,next=optionalClassListOffer(draft,ownerId,current.entries,access);
+   if(!mounted.current||token!==epoch.current||current.c.id!==scope||draft.id!==scope||current.ownerId!==ownerId||current.id!==id||!current.writable||!current.active||spellActionAuthorityReason(draft,access)||!next.active||next.basis!==basis)return;
+   action(draft);
+  });
+ }
+ if(!writable||!active||!offer.active||spellActionAuthorityReason(c,feedback.authority))return null;
+ return <ChoiceWorkspace embedded c={c} id={id} catalog={entries} edit={guardedEdit} close={close} navigationScope={{host,ownerId,channel:'spells'}}/>;
+}
+
 export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:PageProps&{readOnly?:boolean}){
- const editing=useContext(SheetEditContext),preview=useSheetContext('reference',ReferenceContext),settings=spellState(c),capturing=useSheetCaptureActive();
+ const editing=useContext(SheetEditContext),preview=useSheetContext('reference',ReferenceContext),workspace=useChoiceWorkspace(),settings=spellState(c),capturing=useSheetCaptureActive(),active=useRetainedCardActive();
  const spells=useMemo(()=>spellLibrary(c,entries),[c,entries]),groups=cantripGroups(c),profiles=casterProfiles(c);
+ const optionalLists=optionalClassListOffers(c,entries,{canEdit:editing&&!readOnly});
+ const optionalChoices=useMemo(()=>optionalLists.length?sheetChoices(c,entries).filter(choice=>choice.channel==='spells'&&optionalLists.some(offer=>offer.eligible&&offer.ownerId===choice.ownerId)):[],[c,entries,optionalLists.length]);
+ const optionalHost=`optional-class-list:${c.id}:spells`,optionalChoice=optionalChoices.find(choice=>choice.id===workspace.id),optionalProfile=profiles.find(profile=>profile.owner.id===optionalChoice?.ownerId);
+ const optionalChoiceId=editing&&!readOnly&&active&&workspace.canEdit!==false&&workspace.host===optionalHost&&optionalProfile?optionalChoice?.id:undefined;
  const sourceIssues=useMemo(()=>planSourceSpells(c,entries).issues,[c,entries]);
  const [focused,setFocused]=useState<Target>(),[menu,setMenu]=useState<{row:Selection;target?:Target;x:number;y:number}>(),[detail,setDetail]=useState<string>(),[classFilter,setClassFilter]=useState('');
  const [giftOwner,setGiftOwner]=useState('');const [collapsed,setCollapsed]=useState<Record<number,boolean>>({});const [preparedHeight,setPreparedHeight]=useState(0);const giftSources=cantripSources(c);
@@ -49,7 +85,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
  const special=spells.filter(s=>settings.special?.[s.id]);
  const selectedClass=profiles.find(p=>p.owner.id===classFilter);
  const showLibrary=profiles.some(hasKnownLibrary)||!profiles.length||settings.modeOverride&&settings.mode==='prepared'||profiles.some(p=>p.mode==='prepared'&&p.pool==='learned');
- const library=spells.filter(s=>!settings.special?.[s.id]&&(capturing||!selectedClass||spellOnClassList(s.entry,selectedClass)||!s.entry.raw._spellClasses&&!s.entry.raw.classes)&&(!capturing||c.selections.some(record=>record.id===s.id)));
+ const library=spells.filter(s=>!settings.special?.[s.id]&&(capturing||!selectedClass||spellOnCurrentClassList(c,s.entry,selectedClass)||!s.entry.raw._spellClasses&&!s.entry.raw.classes)&&(!capturing||c.selections.some(record=>record.id===s.id)));
  const knownActive=knownActiveSpells(c);
  const sourceOwner=(s:Selection)=>settings.special?.[s.id]?.sourceGrant?.ownerId||settings.special?.[s.id]?.manualSource?.ownerId||'manual';
  const sourceGroups=[...new Set([...special.map(sourceOwner),...Object.keys({...settings.sourceCantripCapacities,...settings.sourceCapacityAdjustments}).filter(id=>id==='manual'||giftSources.some(s=>s.id===id))])].map(owner=>({owner,name:c.selections.find(s=>s.id===owner)?.entry.name||(owner==='manual'?'手动添加':'已移除的来源'),rows:special.filter(s=>sourceOwner(s)===owner)}));
@@ -65,18 +101,27 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
  function findTile(root:HTMLDivElement|null,id?:string){return id?root?.querySelector<HTMLElement>(`[data-spell-id="${CSS.escape(id)}"]`)||null:null;}
  function receive(entry:Entry,target?:Target){
   if(!editing){error('请先开启编辑模式，再调整预备或戏法。');return;}
+  if(readOnly){error('当前角色卡只读，不能调整预备或戏法。');return;}
   let failure='',id:string|undefined;
   edit(draft=>{
+   const route=spellPageClassRoute(draft,entry,target?.kind==='ordinary'?target.owner||classFilter||undefined:classFilter||undefined),ownerId=route.ownerId;
+   if(target?.kind!=='source'&&target?.kind!=='cantrip'&&route.error){failure=route.error;return;}
    if(target?.kind==='source'){const result=chooseSourceSpell(draft,entry,target.owner!);failure=result.error||'';id=result.id;}
    else if(Number(entry.raw.level)===0&&cantripGroups(draft).length){const result=chooseCantrip(draft,entry,target?.kind==='cantrip'?target.owner:undefined,target?.kind==='cantrip'?target.index:undefined);failure=result.error||'';id=result.id;}
    else if(target?.kind==='cantrip')failure='这个位置只能放戏法。';
-   else if(spellUsesPreparation(draft,entry)){
-    const result=prepareSpellEntry(draft,entry,target?.kind==='ordinary'?target.index:undefined);
+   else if(spellUsesPreparation(draft,entry,undefined,ownerId)){
+    const result=prepareSpellEntry(draft,entry,target?.kind==='ordinary'?target.index:undefined,ownerId);
     id=result||undefined;
     if(!result)failure='无法预备：请检查来源或版本；格子已满时可拖到已有法术上替换。';
-   }else {const result=chooseKnownSpell(draft,entry);failure=result.error||'';id=result.id;}
+   }else {const result=chooseKnownSpell(draft,entry,ownerId);failure=result.error||'';id=result.id;}
   });
   if(failure)error(failure);else setFocused(undefined);return id;
+ }
+ function learn(entry:Entry){if(!editing||readOnly)return;edit(draft=>{const route=spellPageClassRoute(draft,entry,classFilter||undefined);if(route.error){error(route.error);return;}const result=learnActiveSpell(draft,entry,route.ownerId);if(result.error)error(result.error);});}
+ function chooseOptionalOwner(ownerId:string){
+  if(!editing||readOnly||!active||workspace.canEdit===false)return;const profile=profiles.find(row=>row.owner.id===ownerId);if(!profile)return;
+  const choice=optionalChoices.find(row=>row.ownerId===ownerId&&row.channel==='spells'&&row.spellKind===(profile.pool==='book'?'book':'learned'));
+  setClassFilter(ownerId);if((profile.pool==='book'||profile.mode==='known')&&choice)workspace.open(choice.id,optionalHost);else browse('spell');
  }
  function unprepare(row:Selection,target?:Target){if(!editing)return;edit(draft=>{if(target?.kind==='cantrip'){const group=cantripGroups(draft).find(g=>g.id===target.owner);clearCantrip(draft,target.owner!,target.index??group?.slots.indexOf(row.id)??-1);}else if(Number(row.entry.raw.level)===0&&!spellUsesPreparation(draft,row.entry,row.id)){for(const group of cantripGroups(draft))group.slots.forEach((id,index)=>{if(id===row.id)clearCantrip(draft,group.id,index);});}else if(spellUsesPreparation(draft,row.entry,row.id))setPreparedSpell(draft,row.id,false);else removeSelection(draft,row.id);});}
  function configure(row:Selection,config?:SpecialSpell){edit(draft=>{let stored=draft.selections.find(s=>s.id===row.id)||draft.selections.find(s=>s.entry.id===row.entry.id&&!draft.spellSettings?.special?.[s.id]);if(!stored){stored={...row,id:uid(),entry:structuredClone(row.entry)};draft.selections.push(stored);}setSpecialSpell(draft,stored.id,config);});setMenu(undefined);}
@@ -101,7 +146,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
     }});
    }}><SpellFrame/><span className="stock-name">{row.entry.name}</span><span className="spell-stock-meta">{row.entry.raw.duration?.some((v:any)=>v.concentration)&&<ConcentrationMark/>}<span className="spell-stock-level" aria-label={level===0?'戏法':`${level}环`}>{level}</span></span>{!target&&!config&&ready&&<span className="spell-ready-mark" aria-hidden="true">✓</span>}</Reference>;
  }
- function slot(id:string|undefined,target:Target){const row=spells.find(s=>s.id===id);return <DropZone key={target.index} kinds={['spell']} allowExisting accepts={e=>target.kind==='cantrip'?Number(e.raw.level)===0:spellUsesPreparation(c,e)} rejectReason={target.kind==='cantrip'?'这个位置只能放戏法。':'这个法术属于其他分类，请放入对应的法术栏。'} onReceive={entry=>receive(entry,target)} className="spell-grid-slot" data-spell-target={target.kind} data-spell-owner={target.owner} data-spell-index={target.index} data-prepared-slot={target.kind==='ordinary'?target.index:undefined}>
+ function slot(id:string|undefined,target:Target){const row=spells.find(s=>s.id===id);return <DropZone key={target.index} kinds={['spell']} allowExisting accepts={e=>target.kind==='cantrip'?Number(e.raw.level)===0:spellUsesPreparation(c,e,undefined,target.owner||classFilter||undefined)} rejectReason={target.kind==='cantrip'?'这个位置只能放戏法。':'这个法术属于其他分类，请放入对应的法术栏。'} onReceive={entry=>receive(entry,target)} className="spell-grid-slot" data-spell-target={target.kind} data-spell-owner={target.owner} data-spell-index={target.index} data-prepared-slot={target.kind==='ordinary'?target.index:undefined}>
   {row?tile(row,target):<button data-physical-frame="" className={`stock-empty prepared-slot spell-stock-empty ${focused?.kind===target.kind&&focused.owner===target.owner&&focused.index===target.index?'slot-focused':''}`} aria-label={`${target.kind==='cantrip'?`${groups.find(g=>g.id===target.owner)?.name||''}戏法`:'预备'}空位${(target.index||0)+1}`} disabled={!editing} onClick={()=>{setFocused(target);if(!showLibrary)browse('spell');}}><SpellFrame/>＋</button>}</DropZone>;}
  function grantTile(row:Selection){
   const config=settings.special![row.id],resource=c.runtime.resources[specialSpellResource(row.id,c)],grant=config.sourceGrant,enabled=sourceSpellEnabled(c,row.id);
@@ -115,6 +160,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
  {editing&&giftSources.length>0&&<div className="spell-settings source-cantrip-settings"><label>赠送法术来源<select aria-label="赠送法术来源" value={giftOwner} onChange={e=>setGiftOwner(e.target.value)}><option value="">选择已加入的来源</option>{giftSources.map(s=><option key={s.id} value={s.id}>{s.entry.name}</option>)}</select></label>{giftOwner&&adjustment('来源法术上限调整',settings.sourceCapacityAdjustments?.[giftOwner]||0,value=>change(s=>{(s.sourceCapacityAdjustments||={})[giftOwner]=value;}))}</div>}
  {profiles.length>1&&<section className="multiclass-spells" aria-label="各职业施法"><div className="segmented"><button aria-pressed={!classFilter} onClick={()=>setClassFilter('')}>全部法术</button>{profiles.map(p=><button key={p.owner.id} aria-pressed={classFilter===p.owner.id} onClick={()=>setClassFilter(p.owner.id)}>{p.owner.entry.name}</button>)}</div><table><thead><tr><th>职业</th><th>属性</th><th>攻击</th><th>DC</th><th>更换</th></tr></thead><tbody>{profiles.map(p=>{const ability=ABILITIES.includes(p.casting.entry.raw.spellcastingAbility)?p.casting.entry.raw.spellcastingAbility as Ability:settings.ability;const values=spellValues(c,d,ability);return <tr key={p.owner.id}><th>{p.owner.entry.name}</th><td>{ABILITY_LABELS[ability]}</td><td>{signed(values.attack)}</td><td>{values.dc}</td><td>{p.mode==='known'?'升级':'预备'}</td></tr>;})}</tbody></table></section>}
  {sourceIssues.length>0&&<details className="spell-source-notices"><summary>{sourceIssues.length} 项来源法术需要核对</summary><ul>{sourceIssues.map((issue,i)=><li key={i}>{issue.message}</li>)}</ul></details>}
+ {optionalLists.length>0&&!capturing&&<details className="spell-source-notices" data-optional-class-lists=""><summary>可选职业扩展法表 · 逐职业核对</summary>{optionalLists.map(offer=><OptionalClassSpellListControl key={offer.ownerId} c={c} ownerId={offer.ownerId} entries={entries} edit={edit} writable={editing&&!readOnly&&active} onChooseOwner={()=>chooseOptionalOwner(offer.ownerId)}/>)}{optionalChoiceId&&optionalProfile&&<OptionalClassChoiceWorkspace key={`${c.id}:${optionalChoiceId}`} c={c} ownerId={optionalProfile.owner.id} id={optionalChoiceId} host={optionalHost} entries={entries} edit={edit} close={workspace.close} writable={editing&&!readOnly&&active&&workspace.canEdit!==false}/>}</details>}
  {showPrepared&&<SheetCell label="预备法术" style={{height:preparedHeight+38}} className={`prepared-cell unified-prepared spell-stock-cell ${showLibrary?'':'only-prepared'}`} dropKinds={['spell']} allowExisting onReceive={entry=>receive(entry,focused)}>
   <div ref={preparedRoot} className="prepared-spell-groups">
    {ordinaryVisible&&<section className="prepared-spell-group ordinary-prepared-group"><h4><span>普通预备 <small>{count} / {normalCapacity}</small></span>{adjustment('预备上限调整',settings.capacityAdjustment||0,value=>change(s=>{s.capacityAdjustment=value;}))}</h4><div className="prepared-slots spell-stock-grid" data-spell-target="ordinary">{capacitySlots(prepared,normalCapacity).slots.map((id,i)=>slot(id,{kind:'ordinary',index:i}))}</div>{overflow(capacitySlots(prepared,normalCapacity).overflow)}</section>}
@@ -125,7 +171,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
    {!showLibrary&&<button className="feature-browse" onClick={()=>browse('spell')}>＋ 从 Wiki 选择法术</button>}
   </div>
  </SheetCell>}
- {showLibrary&&<SheetCell label="已知法术" className="spell-library spell-stock-cell" dropKinds={['spell']} allowExisting onReceive={entry=>{if(!editing)return;edit(draft=>{const result=learnActiveSpell(draft,entry);if(result.error)error(result.error);});}}><div ref={libraryRoot} className="spell-library-groups">{[...new Set(library.map(s=>Number(s.entry.raw.level)||0))].sort((a,b)=>a-b).map(level=><details key={level} data-spell-level={level} className="spell-library-level" open={capturing||!collapsed[level]} onToggle={e=>{if(capturing)return;const closed=!e.currentTarget.open;setCollapsed(old=>old[level]===closed?old:{...old,[level]:closed});}}><summary>{level===0?'戏法':`${level}环`} <small>{library.filter(s=>(Number(s.entry.raw.level)||0)===level).length}</small></summary><div className="spell-stock-grid">{library.filter(s=>(Number(s.entry.raw.level)||0)===level).map(s=>tile(s))}</div></details>)}</div><button className="feature-browse" onClick={()=>browse('spell')}>＋ 查阅法术</button></SheetCell>}
+ {showLibrary&&<SheetCell label="已知法术" className="spell-library spell-stock-cell" dropKinds={['spell']} allowExisting onReceive={learn}><div ref={libraryRoot} className="spell-library-groups">{[...new Set(library.map(s=>Number(s.entry.raw.level)||0))].sort((a,b)=>a-b).map(level=><details key={level} data-spell-level={level} className="spell-library-level" open={capturing||!collapsed[level]} onToggle={e=>{if(capturing)return;const closed=!e.currentTarget.open;setCollapsed(old=>old[level]===closed?old:{...old,[level]:closed});}}><summary>{level===0?'戏法':`${level}环`} <small>{library.filter(s=>(Number(s.entry.raw.level)||0)===level).length}</small></summary><div className="spell-stock-grid">{library.filter(s=>(Number(s.entry.raw.level)||0)===level).map(s=>tile(s))}</div></details>)}</div><button className="feature-browse" onClick={()=>browse('spell')}>＋ 查阅法术</button></SheetCell>}
  {menu&&createPortal(<div className="stock-menu-shade spell-menu-shade" onPointerDown={e=>{if(e.target===e.currentTarget){e.preventDefault();setMenu(undefined);}}} onContextMenu={e=>{e.preventDefault();setMenu(undefined);}}><div role="menu" aria-label="法术操作" className="stock-menu spell-context-menu" style={{left:menu.x,top:menu.y}}><strong>{menu.row.entry.name}</strong><ShareEntryButton entry={menu.row.entry} done={()=>setMenu(undefined)}/>{editing&&!settings.special?.[menu.row.id]&&<button role="menuitem" onClick={()=>{if(menu.target||spellIsReady(c,menu.row))unprepare(menu.row,menu.target);else receive(menu.row.entry,focused);setMenu(undefined);}}>{menu.target?'移出此格':spellIsReady(c,menu.row)?'取消选中':'放入预备栏'}</button>}<button role="menuitem" onClick={()=>{inspect(menu.row.entry);setMenu(undefined);}}>在 Wiki 中查看</button>{!settings.special?.[menu.row.id]&&<button role="menuitem" onClick={()=>{setDetail(menu.row.id);setMenu(undefined);}}>普通施法</button>}{settings.special?.[menu.row.id]&&<button role="menuitem" onClick={()=>{setDetail(menu.row.id);setMenu(undefined);}}>施放方式与次数</button>}{editing&&!settings.special?.[menu.row.id]?.sourceGrant&&<><button role="menuitem" onClick={()=>configure(menu.row,{mode:'locked'})}>设为来源赠送</button><button role="menuitem" onClick={()=>configure(menu.row,{mode:'uses',max:settings.special?.[menu.row.id]?.max||1,recovery:'long'})}>设置免费施放次数</button>{settings.special?.[menu.row.id]&&<button role="menuitem" onClick={()=>configure(menu.row)}>改为普通法术</button>}{c.selections.some(s=>s.id===menu.row.id)&&<button role="menuitem" onClick={()=>{edit(draft=>removeSelection(draft,menu.row.id));setMenu(undefined);}}>从角色卡移除</button>}</>}</div></div>,document.body)}
  {detailRow&&!detailConfig&&createPortal(<div className="spell-detail-shade" onPointerDown={e=>{if(e.target===e.currentTarget)setDetail(undefined);}}><section className="spell-detail-dialog" role="dialog" aria-label={`${detailRow.entry.name}普通施法详情`}><header><strong>{detailRow.entry.name}</strong><button aria-label="关闭施放详情" onClick={()=>setDetail(undefined)}><CloseIcon/></button></header><OrdinarySpellActions c={c} id={detailRow.id} edit={edit} readOnly={readOnly}/></section></div>,document.body)}
  {detailRow&&detailConfig&&createPortal(<div className="spell-detail-shade" onPointerDown={e=>{if(e.target===e.currentTarget)setDetail(undefined);}}><section className="spell-detail-dialog" role="dialog" aria-label={`${detailRow.entry.name}施放详情`}><header><strong>{detailRow.entry.name}</strong><button aria-label="关闭施放详情" onClick={()=>setDetail(undefined)}><CloseIcon/></button></header><p>来源：{c.selections.find(s=>s.id===(detailConfig.sourceGrant?.ownerId||detailConfig.manualSource?.ownerId))?.entry.name||'手动添加'} · 不占普通预备格</p>{detailConfig.sourceGrant?.ability&&<p>{ABILITY_LABELS[detailConfig.sourceGrant.ability]} · 攻击 {signed(spellValues(c,d,detailConfig.sourceGrant.ability).attack)} · DC {spellValues(c,d,detailConfig.sourceGrant.ability).dc}</p>}{detailConfig.sourceGrant?.usage==='limited'?<p>已记录有限剩余 <output aria-label={`${detailRow.entry.name}剩余次数`}>{detailLimited?.remaining??'待核对'}</output> / {detailLimited?.capacity??'待核对'} · 不恢复、不重置；只通过已确认的来源施法扣费。</p>:detailConfig.mode==='uses'&&<label className="special-spell-uses">剩余次数 <NumberInput aria-label={`${detailRow.entry.name}剩余次数`} min="0" max={detailConfig.max} value={c.runtime.resources[specialSpellResource(detailRow.id,c)]?.current??0} readOnly={detailConfig.sourceGrant?.usage==='invocation-pact'} disabled={!sourceSpellEnabled(c,detailRow.id)||readOnly&&detailConfig.sourceGrant?.usage==='invocation-pact'} onChange={e=>edit(draft=>changeSpecialSpellUses(draft,detailRow.id,Number(e.target.value)))}/> / {detailConfig.max} · {detailConfig.recovery==='short'?'短休或长休恢复':detailConfig.recovery==='long'?'长休恢复':'手动恢复'}</label>}{detailConfig.sourceGrant?<SourceSpellActions c={c} id={detailRow.id} edit={edit} readOnly={readOnly&&(detailConfig.sourceGrant.usage==='invocation-pact'||detailConfig.sourceGrant.usage==='limited'||itemAtWillGrantKey(detailConfig.sourceGrant.key))}/>:detailConfig.mode==='uses'?<div className="manual-spell-actions"><button disabled={!c.runtime.resources[specialSpellResource(detailRow.id,c)]?.current} onClick={()=>edit(draft=>changeSpecialSpellUses(draft,detailRow.id,(draft.runtime.resources[specialSpellResource(detailRow.id,draft)]?.current||0)-1))}>使用免费次数</button><button onClick={()=>edit(draft=>changeSpecialSpellUses(draft,detailRow.id,detailConfig.max||1))}>恢复次数</button></div>:<p>施放条件请按来源原文核对。</p>}{editing&&!detailConfig.sourceGrant&&detailConfig.mode==='uses'&&<div><label>次数上限 <NumberInput value={detailConfig.max||1} onChange={e=>configure(detailRow,{...detailConfig,max:Number(e.target.value)})}/></label><select aria-label="次数恢复方式" value={detailConfig.recovery||'manual'} onChange={e=>configure(detailRow,{...detailConfig,recovery:e.target.value as SpecialSpell['recovery']})}><option value="manual">手动</option><option value="short">短休或长休</option><option value="long">长休</option></select></div>}</section></div>,document.body)}

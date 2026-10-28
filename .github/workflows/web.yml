@@ -57,6 +57,15 @@ jobs:
           printf '%s\n' 'RACIAL_DARKVISION_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'ITEM_ABILITY_FLOOR_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'RACIAL_MOVEMENT_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'OPTIONAL_CLASS_LIST_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+      - name: Verify the independent immutable optional-list policy source privately
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/fetchOptionalClassSpellListSource.mjs \
+            --output .local-evidence/optional-class-list-side-source/book-tce.json \
+            --receipt .local-evidence/optional-class-list-side-source/verification.json
+          printf '%s\n' 'OPTIONAL_CLASS_LIST_SIDE_SOURCE_FILE=.local-evidence/optional-class-list-side-source/book-tce.json' >> "$GITHUB_ENV"
 
       - run: npm run verify:automation-progress
       - run: npm run check

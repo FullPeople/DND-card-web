@@ -1,4 +1,5 @@
 import {validateItemAtWillState} from './itemAtWill';
+import {optionalClassListAuthorityReason,validateOptionalClassListState} from './optionalClassSpellLists';
 import type {Character,RuntimeResource} from '../model';
 import {validateLimitedSourceUseState,ownedLimitedSourceResource} from './limitedSourceUses';
 import {validateItemChargeDebitState,ownedItemChargeResource} from './itemChargeDebits';
@@ -8,6 +9,10 @@ const mechanics=(r:RuntimeResource|undefined)=>r&&[r.current,r.max,r.unlimited,r
 /** Explicit authorized Undo/redo may reverse bookkeeping. This guard neither
  * projects irreversible history nor repairs a damaged/unknown ledger. */
 export function assertProtectedResourceHistoryTravel(live:Character,candidate:Character,authority?:SpellActionAuthority):void{
+ if(!same(live.automation?.optionalClassSpellLists,candidate.automation?.optionalClassSpellLists)){
+  const denied=optionalClassListAuthorityReason(live,authority!);if(denied)throw Error(denied);
+  for(const card of [live,candidate]){const value=card.automation?.optionalClassSpellLists;validateOptionalClassListState(value);if(value&&value.version!==1)throw Error('未知版本的可选职业法表确认不能通过撤销或重做修改。');}
+ }
  if(!same(live.automation?.itemAtWill,candidate.automation?.itemAtWill)){
   const denied=spellActionAuthorityReason(live,authority);if(denied)throw Error(denied);
   for(const card of [live,candidate]){const value=card.automation?.itemAtWill;validateItemAtWillState(value);if(value&&value.version!==1)throw Error('未知版本的物品随意施法确认不能通过撤销或重做修改。');}
