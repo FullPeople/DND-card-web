@@ -56,6 +56,7 @@ jobs:
           printf '%s\n' 'ORDINARY_CASTING_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'RACIAL_DARKVISION_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
           printf '%s\n' 'ITEM_ABILITY_FLOOR_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'RACIAL_MOVEMENT_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
 
       - run: npm run verify:automation-progress
       - run: npm run check

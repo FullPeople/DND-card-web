@@ -98,6 +98,8 @@ export interface RulePack { schemaVersion: 1; id: string; name: string; version:
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }
 export interface Issue { id: string; message: string; selectionId?: string; severity: 'warning' | 'error' }
 export interface Derived {
+  /** Reviewed racial BASE modes only; not saved or modified by scalar walking controls. */
+  sourceMovement?:Partial<Record<'swim'|'climb',number>>;
   /** Source-proved racial range only; never saved or applied to map vision. */
   senses?:{darkvision?:number};
   /** Before reviewed item floors, after advancement; derived only, not saved. */
