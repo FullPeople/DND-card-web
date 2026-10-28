@@ -2,7 +2,7 @@ import {validateItemAtWillState} from './itemAtWill';
 import {optionalClassListAuthorityReason,validateOptionalClassListState} from './optionalClassSpellLists';
 import type {Character,RuntimeResource} from '../model';
 import {validateLimitedSourceUseState,ownedLimitedSourceResource} from './limitedSourceUses';
-import {validateItemChargeDebitState,ownedItemChargeResource} from './itemChargeDebits';
+import {validateItemChargeDebitState,ownedItemChargeResource,itemChargeHasVariableHistory,itemChargeVariableAuthorityReason} from './itemChargeDebits';
 import {liveSpellActionAuthority,spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 const mechanics=(r:RuntimeResource|undefined)=>r&&[r.current,r.max,r.unlimited,r.automatic,r.featureGrant,r.sourceSpellGrant,r.limitedSourceUseGrant,r.itemChargeDebitGrant,(r as any).recovery,r.locked];
@@ -23,8 +23,9 @@ export function assertProtectedResourceHistoryTravel(live:Character,candidate:Ch
   const keys=[...allKeys].filter(id=>group.owns(live,id)||group.owns(candidate,id));
   if(same(live.runtime[group.name],candidate.runtime[group.name])&&!keys.some(id=>!same(mechanics(live.runtime.resources[id]),mechanics(candidate.runtime.resources[id]))))continue;
   changed=true;for(const id of keys)locked.add(id);
+  if(group.name==='itemChargeDebits'&&(live.runtime.itemChargeDebits?.version===2||candidate.runtime.itemChargeDebits?.version===2||itemChargeHasVariableHistory(live)||itemChargeHasVariableHistory(candidate))){const issue=itemChargeVariableAuthorityReason(live,authority,keys);if(issue)throw Error(issue);}
   for(const card of [live,candidate]){
-   const store=card.runtime[group.name];group.validate(store);if(store===undefined)continue;if(store.version!==1)throw Error('未知版本的受保护充能历史不能通过撤销或重做修改。');
+   const store=card.runtime[group.name];group.validate(store);if(store===undefined)continue;if(store.version!==1&&!(group.name==='itemChargeDebits'&&store.version===2))throw Error('未知版本的受保护充能历史不能通过撤销或重做修改。');
    for(const record of store.records){const r=card.runtime.resources[record.key];if(!r||r.current!==record.initial-record.spent||r.max!==record.capacity||(r.unlimited!==undefined&&r.unlimited!==false)||(r.automatic!==undefined&&r.automatic!==false)||r.featureGrant!==undefined||r.sourceSpellGrant!==undefined||r[group.marker]?.key!==record.key||group.marker==='itemChargeDebitGrant'&&(r.limitedSourceUseGrant!==undefined||(r as any).recovery!==undefined)||group.marker==='limitedSourceUseGrant'&&r.itemChargeDebitGrant||r.locked!==undefined&&typeof r.locked!=='boolean')throw Error('受保护充能镜像与历史不一致，未通过撤销或重做修复。');}
   }
  }

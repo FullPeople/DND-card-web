@@ -4,6 +4,7 @@ import evidence from './itemChargeDebitEvidence.json' with {type:'json'};
 import ordinary from './ordinarySpellCastingEvidence.json' with {type:'json'};
 import attuned from './attunedItemChargeDebitEvidence.json' with {type:'json'};
 import forms from './itemChargeCatalogFormsEvidence.json' with {type:'json'};
+import nonunit from './nonunitItemChargeEvidence.json' with {type:'json'};
 export interface ItemChargeRule {id:string;kind:string;name:string;english:string;source:string;edition:string;packId:string;revision:string;page:number|null;fullNormalizedSnapshotSha256:string;capacity:number;supported:boolean;requiresAttunement?:boolean;action?:{key:string;cost:number;equipmentRequired:boolean;minAfter:number;manualBoundaries:string[];fixedUnits:Partial<Record<string,number|string>>|null;requiredSources:string[];requiredCardEdition:string|null}|null}
 const allRules:ItemChargeRule[]=[...evidence.rules,...attuned.rules.map(r=>({...r,action:r.action?{...r.action,manualBoundaries:[...r.manualBoundaries,...r.mechanismGaps]}:null}))];
 const compatibleForms=new Map(forms.rules.map(r=>[r.id,r]));
@@ -21,3 +22,17 @@ export function itemChargeRule(entry:Entry):ItemChargeRule|undefined{
  try{const hash=itemChargeSourceSnapshot({...entry,id:r.id,revision:r.revision}),closed=compatibleForms.get(r.id);if(hash===r.fullNormalizedSnapshotSha256||closed?.canonicalProofAnchorSha256===r.fullNormalizedSnapshotSha256&&closed.compatibleFullSnapshotForms.some(form=>form.sha256===hash))return r;}catch{/* Damaged or extra-field snapshots remain held. */}
 }
 export const itemChargeRules=()=>allRules;
+export interface ItemChargeVariableBranch {key:string;allowedCosts:readonly number[];minAfter:0|1;requiredContext:readonly string[];clauses:readonly {path:string;sha256:string}[]}
+export interface ItemChargeVariablePolicy {id:string;fullNormalizedSnapshotSha256:string;capacity:number;requiresAttunement:boolean;manualBoundaries:readonly string[];branches:readonly ItemChargeVariableBranch[];policySha256:string}
+const immutable=(value:any):any=>{if(value&&typeof value==='object'){Object.values(value).forEach(immutable);Object.freeze(value);}return value;};
+const variablePolicies=new Map<string,ItemChargeVariablePolicy>(nonunit.owners.flatMap(owner=>{
+ const {policySha256,...policy}=owner;
+ return sourceTextSha256(JSON.stringify(sorted(policy)))===policySha256?[[owner.id,immutable(owner)as ItemChargeVariablePolicy]as const]:[];
+}));
+/** Metadata identity is not enough: the unchanged full source/form guard is
+ * required before any new bookkeeping route can be offered. */
+export const itemChargeVariablePolicy=(id:string)=>variablePolicies.get(id);
+export function itemChargeVariableRule(entry:Entry):ItemChargeVariablePolicy|undefined{
+ const source=itemChargeRule(entry),policy=source&&variablePolicies.get(source.id);
+ return source&&policy&&source.fullNormalizedSnapshotSha256===policy.fullNormalizedSnapshotSha256&&source.capacity===policy.capacity&&source.requiresAttunement===policy.requiresAttunement?policy:undefined;
+}
