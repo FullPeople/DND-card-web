@@ -6,6 +6,8 @@ import {RelativeRacialMovementSummary} from './RelativeRacialMovementSummary';
 import {ClassMovementSummary} from './ClassMovementSummary';
 import {SourceLevelHpControl} from './SourceLevelHpControl';
 import {sourceLevelHpOffers} from '../core/automation/sourceLevelHp';
+import {ItemAffineHpControl} from './ItemAffineHpControl';
+import {itemAffineHpOffers} from '../core/automation/itemAffineHp';
 import {SourceSpellChoiceControl,SourceResourceColumnControl} from './SourceSpellControls';
 import {LimitedSourceUseControl} from './LimitedSourceUseControl';
 import {ItemChargeUseControl} from './ItemChargeUseControl';
@@ -38,6 +40,9 @@ export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:E
   <h3>来源生命值上限</h3><p>当前上限：<strong data-testid="automation-max-hp">{d.maxHp}</strong>。只计算已完整核对且明确确认未计入手工上限的来源，不恢复当前或临时生命值。</p>
   {sourceLevelHpOffers(c).map(offer=><SourceLevelHpControl key={offer.selectionId} c={c} selectionId={offer.selectionId} edit={edit} writable={writable}/>)}
   {d.issues.filter(issue=>issue.id.startsWith('source-level-hp:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
+  <h3>物品生命值上限</h3><p>仅采用已核对的具体物理物品、当前同调／穿戴条件和独立手工生命值确认；不治疗、不补发资源，也不推断诅咒或攻击效果。</p>
+  {itemAffineHpOffers(c).map(offer=><ItemAffineHpControl key={offer.selectionId} c={c} selectionId={offer.selectionId} edit={edit} writable={writable}/>)}
+  {d.issues.filter(issue=>issue.id.startsWith('item-affine-hp:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <h3>当前自动抗性</h3><p data-testid="automation-resistances">{INFUSION_DAMAGE_TYPES.filter(type=>d.resistances?.includes(type)).join('、')||'无'}</p><p>仅列出当前可核对并生效的抗性；实际伤害结算与减免仍需手动处理，不会自动改写生命值。</p>
   <ul>{d.trace.resistances?.map((line,i)=><li key={i}>{line}</li>)}</ul>
   {d.issues.filter(issue=>issue.id.startsWith('item-resistance-bonus:')||issue.id.startsWith('variant-item-resistance-bonus:')||issue.id.startsWith('racial-resistance:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}

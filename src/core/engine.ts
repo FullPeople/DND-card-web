@@ -2,6 +2,7 @@ import {projectVariantItemResistanceBonuses} from './automation/variantItemResis
 import {projectRacialResistances} from './automation/racialResistances';
 import {projectRacialNaturalArmor,racialNaturalArmorFamilyId} from './automation/racialNaturalArmor';
 import {projectSourceLevelHp,sourceLevelHpLegacyHpSelection} from './automation/sourceLevelHp';
+import {projectItemAffineHp,itemAffineHpLegacyHpSelection} from './automation/itemAffineHp';
 import {projectClassMovement,projectClassMovementModes} from './automation/classMovement';
 import {projectRelativeRacialMovement} from './automation/relativeRacialMovement';
 import {projectItemResistanceBonuses} from './automation/itemResistanceBonuses';
@@ -94,6 +95,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
         const id=`source-level-hp:legacy:${selection.id}`;if(!issues.some(issue=>issue.id===id))issues.push({id,selectionId:selection.id,severity:'warning',message:`${e.name}：此来源的旧平面生命值效果不能代替完整归属和明确核对；原记录保留，未借旧执行器追加生命值。`});
         continue;
       }
+      if(effect.op!=='proficiency'&&effect.target==='hp'&&itemAffineHpLegacyHpSelection(c,selection)){
+        const id=`item-affine-hp:legacy:${selection.id}`;if(!issues.some(issue=>issue.id===id))issues.push({id,selectionId:selection.id,severity:'warning',message:`${e.name}：此物品来源的旧平面生命值效果不能代替完整物理归属、当前同调／穿戴条件和明确核对；原记录保留，未借旧执行器追加生命值。`});
+        continue;
+      }
       if (effect.op === 'proficiency') grantSkill(effect.skill, origin);
       else if (ABILITIES.includes(effect.target as Ability)) {
         // Applied once by the shared pre-advancement score layer.
@@ -141,9 +146,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   ac += acBonus+naturalArmor.bonus+(featureArmor?.bonus||0)+infusion.bonus+itemPassives.acBonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   const sourceHp=projectSourceLevelHp(c,active);issues.push(...sourceHp.issues);
-  let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus+sourceHp.bonus);
+  const itemHp=projectItemAffineHp(c,active);issues.push(...itemHp.issues);
+  let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus+sourceHp.bonus+itemHp.bonus);
   trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]),...naturalArmor.trace, ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace,...itemPassives.acTrace];
-  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp,...sourceHp.trace];
+  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp,...sourceHp.trace,...itemHp.trace];
   trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...classMovement.trace,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0) + (itemPassives.saveBonuses[a] || 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
   const alert=evaluateReviewedAlert(c,active);issues.push(...alert.issues);
