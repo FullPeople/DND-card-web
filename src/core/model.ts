@@ -100,6 +100,8 @@ export interface Issue { id: string; message: string; selectionId?: string; seve
 export interface Derived {
   /** Source-proved racial range only; never saved or applied to map vision. */
   senses?:{darkvision?:number};
+  /** Before reviewed item floors, after advancement; derived only, not saved. */
+  naturalAbilities?:Record<Ability,number>;
   abilities: Record<Ability, number>; modifiers: Record<Ability, number>; level: number; proficiency: number;
   ac: number; initiative: number; speed: number; maxHp: number; passive: number; passiveInvestigation?:number;
   skills: Record<string, { value: number; proficient: boolean; expertise: boolean; sources: string[] }>;

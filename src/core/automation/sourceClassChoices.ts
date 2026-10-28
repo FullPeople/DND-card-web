@@ -84,7 +84,7 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
   return level(owner)<invocation.requiredClassLevel?`尚未达到所需职业等级 ${invocation.requiredClassLevel}。`:undefined;
  }
  if(!Array.isArray(alternatives)||!alternatives.length)return '此前置条件结构尚未核对。';
- let scores:ReturnType<typeof evaluate>['abilities']|undefined;
+ let evaluated:ReturnType<typeof evaluate>|undefined;
  const check=(rule:Record<string,unknown>):string|undefined=>{
   for(const [field,value] of Object.entries(rule)){
    if(field==='level'){
@@ -98,10 +98,11 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
     if(!Number.isSafeInteger(required)||Number(required)<1)return '此等级前置结构尚未核对。';
     if(actual<Number(required))return `尚未达到所需${optional?'职业':''}等级 ${required}。`;
    }else if(field==='ability'){
-    scores??=evaluate(c).abilities;
+    evaluated??=evaluate(c);
     const groups=list(value) as Record<string,unknown>[];
-    const current=scores;
-    if(!groups.length||!groups.some(group=>Object.entries(group).every(([ability,minimum])=>Object.hasOwn(current,ability)&&typeof minimum==='number'&&current[ability as keyof typeof current]>=minimum)))return '尚未满足属性前置条件。';
+    const meets=(current:ReturnType<typeof evaluate>['abilities'])=>groups.length>0&&groups.some(group=>group&&typeof group==='object'&&!Array.isArray(group)&&Object.keys(group).length>0&&Object.entries(group).every(([ability,minimum])=>Object.hasOwn(current,ability)&&typeof minimum==='number'&&Number.isFinite(minimum)&&current[ability as keyof typeof current]>=minimum));
+    if(!meets(evaluated.abilities))return '尚未满足属性前置条件。';
+    if(evaluated.naturalAbilities&&!meets(evaluated.naturalAbilities))return '装备临时属性满足数值门槛，但此选项是否接受装备属性的来源政策尚未受审；暂不自动确认资格，原选择保留。这不表示规则禁止装备属性。';
    }else if(field==='proficiency'&&!optional){
     const reviewed=reviewedFeatRule(entry);
     if(!reviewed?.requiredArmor)return '此前置条件结构尚未核对。';

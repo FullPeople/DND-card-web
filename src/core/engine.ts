@@ -1,3 +1,4 @@
+import {projectItemAbilityFloors} from './automation/itemAbilityFloors';
 import {projectRacialDarkvision} from './automation/racialDarkvision';
 import {evaluateReviewedAlert} from './automation/reviewedAlert';
 import {reviewedObservantHasRetainedBinding} from './automation/reviewedObservant';
@@ -84,6 +85,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for(const a of ABILITIES){abilities[a]+=observant.bonuses[a];trace[a].push(...observant.trace[a]);}
   for(const a of ABILITIES){abilities[a]+=linguist.bonuses[a];trace[a].push(...linguist.trace[a]);}
   for(const a of ABILITIES){abilities[a]+=reviewedFeats.bonuses[a];trace[a].push(...reviewedFeats.trace[a]);if(reviewedFeats.saves.has(a))proficientSaves.add(a);}
+  // Equipment floors follow all natural advancement caps, never feed them.
+  const naturalAbilities={...abilities},itemFloors=projectItemAbilityFloors(c,active);issues.push(...itemFloors.issues);
+  for(const a of ABILITIES)if(itemFloors.floors[a]!==undefined){abilities[a]=Math.max(abilities[a],itemFloors.floors[a]!);trace[a].push(...(itemFloors.trace[a]||[]));}
+  const equipmentChangedAbilities=ABILITIES.some(a=>abilities[a]!==naturalAbilities[a]);
+  if(equipmentChangedAbilities)issues.push({id:'item-ability-floor:resource-policy',severity:'warning',message:'装备属性下限不自动授予属性公式资源容量、补充或恢复；这些政策尚未受审，仍需手工核对。原资源与已消耗次数保留。'});
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
     if (key.startsWith('save:')) { if (value) proficientSaves.add(key.slice(5)); else proficientSaves.delete(key.slice(5)); }
     // Manual skill choices supplement source grants; clearing one cannot revoke a rule.
@@ -148,7 +154,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
   if(racialSenses.trace.length)trace.darkvision=racialSenses.trace;
-  return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),...(racialSenses.darkvision===undefined?{}:{senses:{darkvision:racialSenses.darkvision}}),
+  return { abilities, ...(equipmentChangedAbilities?{naturalAbilities}:{}), modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),...(racialSenses.darkvision===undefined?{}:{senses:{darkvision:racialSenses.darkvision}}),
     skills, saves, requirements, issues, trace, resistances:[...new Set(infusion.resistances)],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }
