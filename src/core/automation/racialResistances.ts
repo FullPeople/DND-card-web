@@ -3,13 +3,15 @@ import {activeEffectSelections} from './active';
 import {automationEnabled} from './state';
 import {sourceTextSha256} from './sourceTextSha256';
 import evidence from './racialResistanceEvidence.json' with {type:'json'};
+import inheritedEvidence from './inheritedRacialResistanceEvidence.json' with {type:'json'};
 import ordinary from './ordinarySpellCastingEvidence.json' with {type:'json'};
 
 export type RacialResistance='acid'|'cold'|'fire'|'force'|'lightning'|'necrotic'|'poison'|'psychic'|'radiant'|'thunder';
-export type RacialResistanceRule=typeof evidence.rules[number];
+export type RacialResistanceRule=typeof evidence.rules[number]|typeof inheritedEvidence.rules[number];
 export interface RacialResistanceGrant {selectionId:string;entryId:string;source:string;resistances:RacialResistance[];snapshotSha256:string}
 export interface RacialResistanceProjection {resistances:RacialResistance[];trace:string[];issues:Issue[];grants:RacialResistanceGrant[]}
-const rules=new Map(evidence.rules.map(rule=>[rule.id,rule])),canonical=new Set(ordinary.canonicalIds);
+const allRules:readonly RacialResistanceRule[]=[...evidence.rules,...inheritedEvidence.rules];
+const rules=new Map(allRules.map(rule=>[rule.id,rule])),canonical=new Set(ordinary.canonicalIds);
 const validIdentity=(value:unknown):value is string=>typeof value==='string'&&value.trim().length>0&&value.length<=2000&&!value.includes('\0');
 const validType=(value:unknown):value is RacialResistance=>typeof value==='string'&&['acid','cold','fire','force','lightning','necrotic','poison','psychic','radiant','thunder'].includes(value);
 const sorted=(value:any):any=>Array.isArray(value)?value.map(sorted):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().filter(key=>value[key]!==undefined).map(key=>[key,sorted(value[key])])):value;
@@ -19,7 +21,7 @@ export const racialResistanceSnapshot=(value:unknown)=>sourceTextSha256(JSON.str
 export function racialResistanceFamilyId(entry:Entry):string|undefined{
  if(!entry||typeof entry!=='object')return;
  const exact=typeof entry.id==='string'&&rules.get(entry.id);if(exact)return exact.id;
- const matches=evidence.rules.filter(rule=>rule.packId===entry.packId&&rule.source===entry.source&&rule.name===entry.name&&rule.english===entry.english);return matches.length===1?matches[0].id:undefined;
+ const matches=allRules.filter(rule=>rule.category===entry.raw?._category&&rule.packId===entry.packId&&rule.source===entry.source&&rule.name===entry.name&&rule.english===entry.english);return matches.length===1?matches[0].id:undefined;
 }
 /** Complete source and actual App snapshots authenticate their own explicit
  * fixed clauses. Only coherent unreserved transport ID/revision may rebound;
