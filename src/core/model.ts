@@ -100,6 +100,8 @@ export interface Issue { id: string; message: string; selectionId?: string; seve
 export interface Derived {
   /** Reviewed racial BASE modes only; not saved or modified by scalar walking controls. */
   sourceMovement?:Partial<Record<'swim'|'climb',number>>;
+  /** Explicit source relations to current final walking; derived only, never saved. */
+  relativeMovement?:Partial<Record<'swim'|'climb',number>>;
   /** Source-proved racial range only; never saved or applied to map vision. */
   senses?:{darkvision?:number};
   /** Before reviewed item floors, after advancement; derived only, not saved. */

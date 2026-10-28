@@ -1,3 +1,4 @@
+import {projectRelativeRacialMovement} from './automation/relativeRacialMovement';
 import {projectItemResistanceBonuses} from './automation/itemResistanceBonuses';
 import {projectItemPassiveBonuses} from './automation/itemPassiveBonuses';
 import {projectItemAbilityFloors} from './automation/itemAbilityFloors';
@@ -155,14 +156,17 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   maxHp += c.sheetBonuses?.hp || 0;
   maxHp += reviewedFeats.hpBonus;trace.hp.push(...reviewedFeats.hpTrace);
   for (const [target, value] of Object.entries(c.sheetBonuses || {})) if (value) (trace[target] ??= []).push(`卡面调整 ${value >= 0 ? '+' : ''}${value}`);
+  const relativeMovement=projectRelativeRacialMovement(c,speed,active);issues.push(...relativeMovement.issues);
   issues.push(...planFeatureResources(c).issues);
   for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
   for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(itemPassives.saveTrace[a]||[]),...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
   if(racialSenses.trace.length)trace.darkvision=racialSenses.trace;
   if(racialMovement.trace.length)trace.sourceMovement=racialMovement.trace;
+  if(relativeMovement.trace.length)trace.relativeMovement=relativeMovement.trace;
   return { abilities, ...(equipmentChangedAbilities?{naturalAbilities}:{}), modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),...(racialSenses.darkvision===undefined?{}:{senses:{darkvision:racialSenses.darkvision}}),
     ...(Object.keys(racialMovement.modes).length?{sourceMovement:racialMovement.modes}:{}),
+    ...(Object.keys(relativeMovement.modes).length?{relativeMovement:relativeMovement.modes}:{}),
     skills, saves, requirements, issues, trace, resistances:[...new Set([...infusion.resistances,...itemResistance.resistances])],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }

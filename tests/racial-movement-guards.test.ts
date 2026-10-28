@@ -7,6 +7,8 @@ import {readCharacter} from '../src/core/validation';
 import {removeSelection} from '../src/core/sheet';
 import evidence from '../src/core/automation/racialMovementEvidence.json';
 import {racialMovementDigest,racialMovementEntries,racialMovementFixture,racialMovementHeldSpecs,racialMovementSpecs} from './helpers/racialMovementFixture';
+import {relativeRacialMovementRule} from '../src/core/automation/relativeRacialMovement';
+import {relativeRacialMovementSpecs} from './helpers/relativeRacialMovementSourceFixture';
 
 beforeAll(()=>{racialMovementEntries();});
 it('binds fresh complete source forms and declares per-row mechanism credit without whole-entry completion',()=>{
@@ -44,8 +46,14 @@ it('does not reinterpret walking totals, scalar offsets, generic speed effects o
  f.c.profile.enabledSources.push('CUSTOM');f.c.selections.push({id:'authored-effect-owner',entry:effect,quantity:1,level:1,equipped:false});let saved=racialMovementDigest(f.c);expect(evaluate(f.c).speed).toBe(50);expect(evaluate(f.c).sourceMovement).toEqual({swim:30});expect(racialMovementDigest(f.c)).toBe(saved);
  f.c.adjustments=[];saved=racialMovementDigest(f.c);expect(evaluate(f.c).speed).toBe(40);expect(evaluate(f.c).sourceMovement).toEqual({swim:30});expect(racialMovementDigest(f.c)).toBe(saved);expect(evaluate(f.c).trace.sourceMovement.join('；')).toMatch(/基础|手工/);
 });
-it('all32 reviewed primary holds remain visible and manual, never promoted from numeric or equal-walk metadata',()=>{
- for(const held of racialMovementHeldSpecs){const f=racialMovementFixture(),matches=f.entries.filter(entry=>entry.id===held.id);expect(matches,held.id).toHaveLength(1);f.owner.entry=structuredClone(matches[0]);f.c.profile.enabledSources=[...new Set([f.owner.entry.source,...(f.owner.entry.dependencies||[])])];const saved=racialMovementDigest(f.c),d=evaluate(f.c);expect(d.sourceMovement,held.id).toBeUndefined();expect(d.issues.some(issue=>issue.id.startsWith('racial-movement:held:')),held.id).toBe(true);expect(racialMovementDigest(f.c)).toBe(saved);}
+it('keeps twenty-six unresolved primary holds strict while six independently source-proven relations use only the current-walking route',()=>{
+ const qualified=new Map(relativeRacialMovementSpecs.map(spec=>[spec.id,spec])),seen=new Set<string>();let unresolved=0;expect(qualified.size).toBe(6);expect(racialMovementHeldSpecs).toHaveLength(32);
+ for(const held of racialMovementHeldSpecs){const f=racialMovementFixture(),matches=f.entries.filter(entry=>entry.id===held.id);expect(matches,held.id).toHaveLength(1);f.owner.entry=structuredClone(matches[0]);f.c.profile.enabledSources=[...new Set([f.owner.entry.source,...(f.owner.entry.dependencies||[])])];const saved=racialMovementDigest(f.c),d=evaluate(f.c);expect(d.sourceMovement,held.id).toBeUndefined();const spec=qualified.get(held.id);
+  if(spec){seen.add(held.id);expect(relativeRacialMovementRule(f.owner.entry)?.id).toBe(spec.id);expect(d.relativeMovement?.[spec.mode]).toBe(d.speed);expect(d.issues.some(issue=>issue.id.startsWith('racial-movement:held:')),held.id).toBe(false);}
+  else{unresolved++;expect(relativeRacialMovementRule(f.owner.entry)).toBeUndefined();expect(d.relativeMovement).toBeUndefined();expect(d.issues.some(issue=>issue.id.startsWith('racial-movement:held:')),held.id).toBe(true);}
+  expect(racialMovementDigest(f.c)).toBe(saved);
+ }
+ expect(seen.size).toBe(6);expect(unresolved).toBe(26);
 });
 it('selected-race removal/replacement and native/linked reopen preserve spent resources and do not save derived movement',()=>{
  const f=racialMovementFixture(),saved=racialMovementDigest(f.c),derived=evaluate(f.c);for(const file of [exportCharacter(f.c),exportLinkedOwlbear(f.c,derived).dnd_card_web]){const reopened=readCharacter(JSON.parse(JSON.stringify(file))).character;expect(racialMovementDigest(reopened)).toBe(saved);expect(evaluate(reopened).sourceMovement).toEqual({swim:30});expect(Object.hasOwn(reopened,'sourceMovement')).toBe(false);}

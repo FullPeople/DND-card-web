@@ -1,3 +1,4 @@
+import {relativeRacialMovementRule} from './relativeRacialMovement';
 import type {Character,Entry,Issue,Selection} from '../model';
 import {activeEffectSelections} from './active';
 import {automationEnabled} from './state';
@@ -35,6 +36,9 @@ export function projectRacialMovement(c:Character,providedActive?:readonly Selec
  if(!automationEnabled(c))return warn(candidate,'paused','来源基础移动速度暂停：自动化关闭或协议未知；原种族、步行速度与手工记录保留。');
  if(rows.length!==1||candidate.parentId||candidate.quantity!==1)return warn(candidate,'owner','种族归属不唯一或不是单件完整根种族；不叠加来源基础移动速度，原记录保留。');
  const rule=racialMovementRule(candidate.entry);
+ // A separately authenticated current-walking relation is not an unreviewed
+ // fixed-base rule. Its own late projection retains source/ownership guards.
+ if(!rule&&relativeRacialMovementRule(candidate.entry))return result;
  if(!rule){const hold=held.get(candidate.entry.id);return warn(candidate,hold?'held':'unproved',hold?`此种族非步行速度仍需手工核对（${hold}）；本批不根据数值标签、选择、护甲条件或动态关系授予速度。`:'此种族完整来源快照、身份或基础移动条款尚未通过核对；不根据名称、笔记或数值标签猜测速度。');}
  if(!['swim','climb'].includes(rule.mode)||!Number.isSafeInteger(rule.baseFeet)||rule.baseFeet<=0)return warn(candidate,'unproved','来源基础移动速度的模式或数值尚未通过核对；原记录保留。');
  const disabled=c.profile.disabledEntries||[];
