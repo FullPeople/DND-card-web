@@ -1,3 +1,4 @@
+import {variantItemResistanceBonusRule} from './variantItemResistanceBonuses';
 import type {Character,Entry,Issue,Selection} from '../model';
 import {activeEffectSelections} from './active';
 import {automationEnabled} from './state';
@@ -39,6 +40,9 @@ export function projectItemResistanceBonuses(c:Character,providedActive?:readonl
  for(const row of c.selections){
   const family=itemResistanceBonusFamilyId(row.entry);
   if(!family){
+   // Only the separately authenticated concrete variant route removes this
+   // obsolete plain-item warning; the plain variant denial stays unchanged.
+   if(variantItemResistanceBonusRule(row.entry))continue;
    const entry=row.entry,held=evidence.holds.some(hold=>entry&&entry.kind===hold.kind&&entry.packId===hold.packId&&entry.source===hold.source&&entry.edition===hold.edition&&entry.name===hold.name&&entry.english===hold.english);
    if(held)warn(row,'condition-unresolved','此版本抗性戒指的同调条件尚未由来源核实；元数据缺项不代表不需同调，手动勾选同调也不解除暂停。');
    else if(entry?.kind==='item'&&entry.raw?.resist!==undefined)warn(row,'unproved','此物品的抗性分支尚未通过完整来源及条件核对；不根据名称或伤害标签猜测自动效果。');

@@ -1,3 +1,4 @@
+import {projectVariantItemResistanceBonuses} from './automation/variantItemResistanceBonuses';
 import {projectRelativeRacialMovement} from './automation/relativeRacialMovement';
 import {projectItemResistanceBonuses} from './automation/itemResistanceBonuses';
 import {projectItemPassiveBonuses} from './automation/itemPassiveBonuses';
@@ -28,6 +29,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const active=activeEffectSelections(c,excluded);
   const itemPassives=projectItemPassiveBonuses(c,active);issues.push(...itemPassives.issues);
   const itemResistance=projectItemResistanceBonuses(c,active);issues.push(...itemResistance.issues);
+  const variantResistance=projectVariantItemResistanceBonuses(c,active);issues.push(...variantResistance.issues);
   const racialSenses=projectRacialDarkvision(c,active);issues.push(...racialSenses.issues);
   const racialMovement=projectRacialMovement(c,active);issues.push(...racialMovement.issues);
   for(const s of c.selections)if(!excluded.has(s.id)&&!selectionEffectsAllowed(c,s.entry))issues.push({id:`disabled:${s.id}`,message:`${s.entry.name} 的来源、依赖或规则选项未启用，保留内容但不计效果。`,selectionId:s.id,severity:'error'});
@@ -116,7 +118,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry)&&!reviewedAlertIdentity(row.entry))):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=[...infusion.resistanceTrace,...itemResistance.trace];
+  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=[...infusion.resistanceTrace,...itemResistance.trace,...variantResistance.trace];
   ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus+itemPassives.acBonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
@@ -167,7 +169,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   return { abilities, ...(equipmentChangedAbilities?{naturalAbilities}:{}), modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),...(racialSenses.darkvision===undefined?{}:{senses:{darkvision:racialSenses.darkvision}}),
     ...(Object.keys(racialMovement.modes).length?{sourceMovement:racialMovement.modes}:{}),
     ...(Object.keys(relativeMovement.modes).length?{relativeMovement:relativeMovement.modes}:{}),
-    skills, saves, requirements, issues, trace, resistances:[...new Set([...infusion.resistances,...itemResistance.resistances])],
+    skills, saves, requirements, issues, trace, resistances:[...new Set([...infusion.resistances,...itemResistance.resistances,...variantResistance.resistances])],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }
 
