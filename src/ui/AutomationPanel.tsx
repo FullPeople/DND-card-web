@@ -6,6 +6,8 @@ import {SourceSpellChoiceControl,SourceResourceColumnControl} from './SourceSpel
 import {LimitedSourceUseControl} from './LimitedSourceUseControl';
 import {ItemChargeUseControl} from './ItemChargeUseControl';
 import {ItemAtWillSpellControl} from './ItemAtWillSpellControl';
+import {ChargedItemSpellControl} from './ChargedItemSpellControl';
+import {chargedItemSpellOffers} from '../core/automation/chargedItemSpells';
 import {itemAtWillOffers,itemAtWillStateIssue} from '../core/automation/itemAtWill';
 import {itemChargeOffers,itemChargeStateIssue} from '../core/automation/itemChargeDebits';
 import {limitedSourceUseOffers} from '../core/automation/limitedSourceUses';
@@ -20,7 +22,7 @@ import {armorType,equipSelection} from '../core/automation/equipment';
 import type {Edit} from './CharacterPages';
 
 export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:Entry[];c:Character;d:Derived;edit:Edit;copy?:()=>void;writable?:boolean}){
- const supported=!c.automation||supportedAutomation(c),enabled=automationEnabled(c),weapons=automaticWeaponAttacks(c,d),spells=planSourceSpells(c,entries),limited=limitedSourceUseOffers(c),itemCharges=itemChargeOffers(c),itemAtWill=itemAtWillOffers(c,entries);
+ const supported=!c.automation||supportedAutomation(c),enabled=automationEnabled(c),weapons=automaticWeaponAttacks(c,d),spells=planSourceSpells(c,entries),limited=limitedSourceUseOffers(c),itemCharges=itemChargeOffers(c),itemAtWill=itemAtWillOffers(c,entries),chargedSpells=chargedItemSpellOffers(c,entries);
  return <section className="automation-panel"><fieldset disabled={!writable} style={{border:0,padding:0,margin:0,minWidth:0}}>
   <p>自动化支持装备、职业与特性选择、可适配的次数资源和休息恢复；未支持的规则会列出。</p>
   {supported?<><p>新建、导入和旧角色默认开启自动化。手写内容、修正和已消耗资源保留；可在此手动关闭。</p><label><input type="checkbox" aria-label="启用自动计算" checked={enabled} onChange={e=>edit(draft=>setAutomationEnabled(draft,e.target.checked))}/>启用自动计算</label></>:<p role="alert">这张卡使用尚未支持的自动化协议或规则版本。原始记录已保留，暂不执行或转换。</p>}
@@ -39,12 +41,13 @@ export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:E
   {weapons.issues.map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <h3>来源固定法术</h3><p>法术附属于赠送它的来源，不占普通预备名额。切换次数归属会保守保留消耗，可手动核对修正。切换方案、关闭来源与刷新不会恢复已用次数；未解析的条目仍需人工处理。</p>
   {itemAtWill.map(offer=><ItemAtWillSpellControl key={offer.key} c={c} ownerId={offer.ownerId} entries={entries} edit={edit} writable={writable}/>)}
+  {chargedSpells.map(offer=><ChargedItemSpellControl key={offer.key} c={c} ownerId={offer.ownerId} entries={entries} edit={edit} writable={writable}/>)}
   {itemAtWillStateIssue(c)&&<p role="status">{itemAtWillStateIssue(c)}</p>}
   {limited.map(offer=><LimitedSourceUseControl key={offer.key} c={c} ownerId={offer.ownerId} poolId={offer.poolId} edit={edit} writable={writable}/>)}
   {c.runtime.limitedSourceUses&&(c.runtime.limitedSourceUses.version!==1||!limited.length)&&<p role="status">有限来源记录当前无法解析或版本尚未支持；原记录保留，不能重新初始化。</p>}
   {itemCharges.map(offer=><ItemChargeUseControl key={offer.key} c={c} ownerId={offer.ownerId} edit={edit} writable={writable}/>)}
   {itemChargeStateIssue(c)&&<p role="status">{itemChargeStateIssue(c)}</p>}
-  {enabled&&spells.choices.filter(choice=>!choice.limitedUse&&!choice.itemChargeUse&&!choice.itemAtWill).map(choice=>choice.resourceColumns?<SourceResourceColumnControl key={choice.key} c={c} choice={choice} entries={entries} edit={edit} writable={writable}/>:choice.spells?<SourceSpellChoiceControl key={choice.key} c={c} choice={choice} entries={entries} edit={edit} writable={writable}/>:<label key={choice.key} style={{display:'block'}}>{choice.label}<select aria-label={choice.label} value={choice.usageModes?c.automation?.spellUsageModes?.[choice.key]??'':choice.sets?c.automation?.spellSets?.[choice.key]??'':c.automation?.spellAbilities?.[choice.key]??''} onChange={e=>edit(draft=>{if(!draft.automation)return;if(choice.usageModes){const values=draft.automation.spellUsageModes||={};if(!e.target.value)delete values[choice.key];else values[choice.key]=e.target.value as 'shared'|'each';}else if(choice.sets){const values=draft.automation.spellSets||={};if(e.target.value==='')delete values[choice.key];else values[choice.key]=Number(e.target.value);}else{const values=draft.automation.spellAbilities||={};if(!e.target.value)delete values[choice.key];else values[choice.key]=e.target.value as Ability;}})}><option value="">请选择</option>{choice.usageModes?<><option value="each">各法术各自拥有次数</option><option value="shared">这些法术共用次数</option></>:choice.sets?choice.sets.map((label,index)=><option key={index} value={index}>{label}</option>):choice.abilities?.map(a=><option key={a} value={a}>{ABILITY_LABELS[a]}</option>)}</select></label>)}
+  {enabled&&spells.choices.filter(choice=>!choice.limitedUse&&!choice.itemChargeUse&&!choice.itemAtWill&&!choice.chargedItemSpell).map(choice=>choice.resourceColumns?<SourceResourceColumnControl key={choice.key} c={c} choice={choice} entries={entries} edit={edit} writable={writable}/>:choice.spells?<SourceSpellChoiceControl key={choice.key} c={c} choice={choice} entries={entries} edit={edit} writable={writable}/>:<label key={choice.key} style={{display:'block'}}>{choice.label}<select aria-label={choice.label} value={choice.usageModes?c.automation?.spellUsageModes?.[choice.key]??'':choice.sets?c.automation?.spellSets?.[choice.key]??'':c.automation?.spellAbilities?.[choice.key]??''} onChange={e=>edit(draft=>{if(!draft.automation)return;if(choice.usageModes){const values=draft.automation.spellUsageModes||={};if(!e.target.value)delete values[choice.key];else values[choice.key]=e.target.value as 'shared'|'each';}else if(choice.sets){const values=draft.automation.spellSets||={};if(e.target.value==='')delete values[choice.key];else values[choice.key]=Number(e.target.value);}else{const values=draft.automation.spellAbilities||={};if(!e.target.value)delete values[choice.key];else values[choice.key]=e.target.value as Ability;}})}><option value="">请选择</option>{choice.usageModes?<><option value="each">各法术各自拥有次数</option><option value="shared">这些法术共用次数</option></>:choice.sets?choice.sets.map((label,index)=><option key={index} value={index}>{label}</option>):choice.abilities?.map(a=><option key={a} value={a}>{ABILITY_LABELS[a]}</option>)}</select></label>)}
   {spells.issues.map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
  </fieldset></section>;
 }

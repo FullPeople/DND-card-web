@@ -1,6 +1,6 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import type {Character} from '../core/model';
-import {performSpellAction,spellActionRequest,type SpellActionResult} from '../core/automation/actions';
+import {performSpellAction,spellActionRequest,type SpellActionResult,type SpellActionReceipt} from '../core/automation/actions';
 import type {Edit} from './CharacterPages';
 import {useInteractionStatus} from './InteractionFeedback';
 import {confirmSpellPresentation,type SpellPresentation as Action} from './spellActionPresentation';
@@ -12,7 +12,7 @@ import {qqRoom,roomState} from '../cloud/room';
 import './actionPresentation.css';
 
 /** The card's observed receipt confirms the action, not the optimistic draft. */
-export function useSpellActionFeedback(c:Character,edit:Edit,readOnly=false){
+export function useSpellActionFeedback(c:Character,edit:Edit,readOnly=false,receiptObserver?:(c:Character,requestId:string)=>SpellActionReceipt|undefined){
  useWorkbench(); // Live role/target changes must refresh payment offers, too.
  const workspace=useChoiceWorkspace(),active=useRetainedCardActive();
  const [action,setAction]=useState<Action>(),flight=useRef<string|undefined>(undefined),epoch=useRef(0),mounted=useRef(true);
@@ -25,13 +25,14 @@ export function useSpellActionFeedback(c:Character,edit:Edit,readOnly=false){
   return {canEdit,gm:inWorkbench?wb.role==='GM':localGm()};
  }
  const visible=action?.scope===c.id?action:undefined;
- useLayoutEffect(()=>{const confirmed=confirmSpellPresentation(visible,c.id,c.runtime.automationActions?.last);if(confirmed!==visible){flight.current=undefined;setAction(confirmed);}},[c.runtime.automationActions?.last,c.id,visible]);
+ const observed=receiptObserver&&visible?receiptObserver(c,visible.id):receiptObserver?undefined:c.runtime.automationActions?.last;
+ useLayoutEffect(()=>{const confirmed=confirmSpellPresentation(visible,c.id,observed);if(confirmed!==visible){flight.current=undefined;setAction(confirmed);}},[observed,c.id,visible]);
  useEffect(()=>{flight.current=undefined;setAction(undefined);},[c.id]);
  useEffect(()=>{if(visible?.phase!=='pending')return;const id=visible.id,timer=setTimeout(()=>setAction(old=>old?.id===id&&old.phase==='pending'?{...old,phase:'unconfirmed',message:'尚未收到卡面确认，请查看保存与同步状态。'}:old),4500);return()=>clearTimeout(timer);},[visible?.id,visible?.phase]);
- function run(selectionId:string,payment:string,label:string,mode:'cast'|'restore'='cast',context:{casterId?:string;confirmedLimitedSourceValid?:true}={}){
+ function run(selectionId:string,payment:string,label:string,mode:'cast'|'restore'='cast',context:{casterId?:string;confirmedLimitedSourceValid?:true;confirmedCurrentItemCastValid?:true}={}){
   if(flight.current||!authority().canEdit)return;
   const live=latest.current,scope=live.c.id,token=epoch.current;
-  const request=spellActionRequest(live.c,selectionId,payment,crypto.randomUUID(),mode,context.casterId,context.confirmedLimitedSourceValid===true?{confirmedLimitedSourceValid:true}:undefined);
+  const request=spellActionRequest(live.c,selectionId,payment,crypto.randomUUID(),mode,context.casterId,context.confirmedLimitedSourceValid===true?{confirmedLimitedSourceValid:true}:undefined,context.confirmedCurrentItemCastValid===true?{confirmedCurrentItemCastValid:true}:undefined);
   const next:Action={id:request.id,scope,title:live.c.selections.find(row=>row.id===selectionId)?.entry.name||'施法',payment:label,mode,phase:'pending'};
   flight.current=request.id;setAction(next);
   let used=false;
@@ -45,7 +46,9 @@ export function useSpellActionFeedback(c:Character,edit:Edit,readOnly=false){
    });
   }catch(error){flight.current=undefined;setAction({...next,phase:'rejected',message:error instanceof Error?error.message:String(error)});}
  }
- return {run,action:visible,busy:visible?.phase==='pending'||visible?.phase==='unconfirmed',authority:authority(),liveAuthority:authority};
+ function invalidate(){epoch.current++;}
+ function cancel(){invalidate();flight.current=undefined;setAction(undefined);}
+ return {run,cancel,invalidate,action:visible,busy:visible?.phase==='pending'||visible?.phase==='unconfirmed',authority:authority(),liveAuthority:authority};
 }
 export function SpellActionFeedback({action}:{action?:Action}){
  const status=useInteractionStatus();if(!action)return null;

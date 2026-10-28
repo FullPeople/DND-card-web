@@ -1,7 +1,9 @@
 import {itemAtWillGrantKey,itemAtWillSpell,itemAtWillSpellBasis,type ItemAtWillTargetScope,type ItemAtWillSourceTiming} from './itemAtWill';
+import {chargedItemSpellReserved,chargedItemSpellPayment,chargedItemSpellBinding,chargedItemSpellBasis,performChargedItemSpellAction,validateChargedItemSpellCastMarker,type ChargedItemSpellCastMarker} from './chargedItemSpells';
+import type {ChargedItemSpellStatistics} from './chargedItemSpellSource';
 import {ownedItemChargeResource} from './itemChargeDebits';
 import {limitedSourceSpellOffer,limitedSourceSpellBasis,spendLimitedSourceSpell,ownedLimitedSourceResource} from './limitedSourceUses';
-import {ordinarySpellOffer,ordinarySpellActionBasis,ordinaryCastingClassContextMalformed} from './ordinarySpellCasting';
+import {ordinarySpellOffer,ordinarySpellActionBasis,ordinaryCastingClassContextMalformed,type OrdinarySpellOffer} from './ordinarySpellCasting';
 import {spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
 export type {SpellActionAuthority} from './spellActionAuthority';
 import type {Character} from '../model';
@@ -13,9 +15,9 @@ import {bookRitualGroups,bookRitualPaymentId,BOOK_RITUAL_TIME} from '../bookRitu
 import {planSourceSpells} from './sourceSpellPlan';
 import {learnedInvocationRule,invocationSpellMatches,invocationPactSlot} from './invocations';
 
-export interface SpellPayment {targetScope?:ItemAtWillTargetScope;targetEntryId?:string;sourceActionTiming?:ItemAtWillSourceTiming;id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;debits?:{resourceId:string;cost:number}[]}
-export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long';basis?:string;casterId?:string;limitedIntent?:{confirmedLimitedSourceValid:true};targetScope?:ItemAtWillTargetScope;sourceActionTiming?:ItemAtWillSourceTiming}
-export interface SpellActionReceipt {id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number;recovered?:{resourceId:string;before:number;after:number}[];spent?:{resourceId:string;before:number;after:number}[]}
+export interface SpellPayment {statistics?:ChargedItemSpellStatistics;targetScope?:ItemAtWillTargetScope;targetEntryId?:string;sourceActionTiming?:ItemAtWillSourceTiming;id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;debits?:{resourceId:string;cost:number}[]}
+export interface SpellActionRequest {id:string;sequence:number;revision:number;selectionId:string;mode:'cast'|'restore';paymentId:string;rest?:'short'|'long';basis?:string;casterId?:string;limitedIntent?:{confirmedLimitedSourceValid:true};chargedItemIntent?:{confirmedCurrentItemCastValid:true};targetScope?:ItemAtWillTargetScope;sourceActionTiming?:ItemAtWillSourceTiming}
+export interface SpellActionReceipt {itemChargedSpell?:ChargedItemSpellCastMarker;id:string;sequence:number;fingerprint:string;selectionId:string;mode:'cast'|'restore';level:number;resourceId?:string;before?:number;after?:number;recovered?:{resourceId:string;before:number;after:number}[];spent?:{resourceId:string;before:number;after:number}[]}
 export interface ActionState {version:number;sequence:number;last?:SpellActionReceipt}
 export type SpellActionResult={status:'applied'|'duplicate';receipt:SpellActionReceipt;message:string}|{status:'rejected';message:string};
 
@@ -79,7 +81,8 @@ function sourceSpellPayments(c:Character,id:string,authority?:SpellActionAuthori
 
 /** The UI exposes this single-counter confirmation only for the seven reviewed
  * invocations. It is not a complete long-rest operation or a slot refill. */
-export function spellPayments(c:Character,id:string,authority?:SpellActionAuthority,casterId?:string){
+export function spellPayments(c:Character,id:string,authority?:SpellActionAuthority,casterId?:string):Omit<OrdinarySpellOffer,'options'>&{options:SpellPayment[];ordinaryReason?:string}{
+ if(chargedItemSpellReserved(c,id)){const payment=chargedItemSpellPayment(c,id,authority);return {options:payment?[payment]:[],casters:[],reason:payment?.reason||(!payment?'物品付费施法来源或历史当前未通过核验；不改走其他支付。':undefined)};}
  const ordinary=ordinarySpellOffer(c,id,casterId,authority),source=!c.spellSettings?.special?.[id]?.sourceGrant&&ordinaryCastingClassContextMalformed(c)?{options:[],reason:'已识别的职业快照已修改，未调用旧施法解码或仪式回退。'}:sourceSpellPayments(c,id,authority);
  const options:SpellPayment[]=[...ordinary.options,...source.options].map(option=>{const ids=[...(option.resourceId?[option.resourceId]:[]),...(option.debits?.map(d=>d.resourceId)||[])],reason=ids.some(key=>ownedItemChargeResource(c,key))?'物品充能不能用于通用施法支付。':spellActionAuthorityReason(c,authority,ids);return reason?{...option,available:false,reason}:option;});
  return {...ordinary,options,ordinaryReason:ordinary.reason,reason:ordinary.casters.length?ordinary.reason:source.reason||ordinary.reason};
@@ -121,12 +124,13 @@ export function sourceSpellRestRequest(c:Character,kind:'short'|'long',id:string
 }
 
 /** Request identity is supplied by the application, keeping the core independent of randomness. */
-export function spellActionRequest(c:Character,selectionId:string,paymentId:string,id:string,mode:'cast'|'restore'='cast',casterId?:string,limitedIntent?:{confirmedLimitedSourceValid:true}):SpellActionRequest{
+export function spellActionRequest(c:Character,selectionId:string,paymentId:string,id:string,mode:'cast'|'restore'='cast',casterId?:string,limitedIntent?:{confirmedLimitedSourceValid:true},chargedItemIntent?:{confirmedCurrentItemCastValid:true}):SpellActionRequest{
  const request:SpellActionRequest={id,selectionId,paymentId,mode,revision:c.revision,sequence:c.runtime.automationActions?.sequence??0};
  if(paymentId.startsWith('ordinary:')){request.casterId=casterId||ordinarySpellOffer(c,selectionId).casterId;request.basis=ordinarySpellActionBasis(c,selectionId,request.casterId);}
  if(itemAtWillGrantKey(c.spellSettings?.special?.[selectionId]?.sourceGrant?.key)){request.basis=itemAtWillSpellBasis(c,selectionId);request.targetScope=itemAtWillSpell(c,selectionId)?.grant.targetScope;request.sourceActionTiming=itemAtWillSpell(c,selectionId)?.grant.sourceActionTiming;}
  if(c.spellSettings?.special?.[selectionId]?.sourceGrant?.usage==='limited'){request.basis=limitedSourceSpellBasis(c,selectionId);request.limitedIntent=limitedIntent;}
  if(c.spellSettings?.special?.[selectionId]?.sourceGrant?.usage==='invocation-pact')request.basis=invocationActionBasis(c,selectionId);
+ if(chargedItemSpellReserved(c,selectionId,paymentId)){const current=chargedItemSpellBinding(c,selectionId);request.basis=chargedItemSpellBasis(c,selectionId);request.targetScope=current?.rule.branch.targetScope;request.sourceActionTiming=current?.rule.branch.sourceActionTiming;request.chargedItemIntent=chargedItemIntent;}
  return request;
 }
 
@@ -138,6 +142,7 @@ export function performSpellAction(c:Character,request:SpellActionRequest,author
  const denied=spellActionAuthorityReason(c,authority);if(denied)return reject(denied);
  if(!automationEnabled(c))return reject('请先开启此角色卡的自动计算。');
  if(!request||typeof request.selectionId!=='string'||request.selectionId.length>2000||typeof request.paymentId!=='string'||!request.paymentId||request.paymentId.length>4000||typeof request.id!=='string'||!request.id.trim()||request.id.length>128||!Number.isSafeInteger(request.sequence)||request.sequence<0||!Number.isSafeInteger(request.revision)||!['cast','restore'].includes(request.mode)||request.basis!==undefined&&(typeof request.basis!=='string'||request.basis.length>30000)||request.casterId!==undefined&&(typeof request.casterId!=='string'||!request.casterId||request.casterId.length>2000)||request.targetScope!==undefined&&!['self','spell'].includes(request.targetScope)||request.sourceActionTiming!==undefined&&!['action','bonus-action','spell-default'].includes(request.sourceActionTiming))return reject('施法操作格式无效。');
+ if(chargedItemSpellReserved(c,request.selectionId,request.paymentId)||request.chargedItemIntent!==undefined)return performChargedItemSpellAction(c,request,authority);
  const state=c.runtime.automationActions;
  if(state&&state.version!==1)return reject('此卡的动作记录版本尚未支持。');
  const fingerprint=JSON.stringify([request.revision,request.selectionId,request.mode,request.paymentId,...(request.rest!==undefined?[request.rest]:[]),...(request.basis!==undefined?[request.basis]:[]),...(request.casterId!==undefined?[request.casterId]:[]),...(request.limitedIntent!==undefined?[request.limitedIntent]:[]),...(request.targetScope!==undefined?[request.targetScope]:[]),...(request.sourceActionTiming!==undefined?[request.sourceActionTiming]:[])]);
@@ -204,5 +209,5 @@ export function validateActionState(value:unknown):void{
  if(!object(value)||!Number.isSafeInteger(value.version)||value.version<1)throw Error('自动化动作记录无效。');
  if(value.version!==1)return; // Preserve unfamiliar ledgers, never execute them.
  if(!Number.isSafeInteger(value.sequence)||value.sequence<0)throw Error('自动化动作序号无效。');
- if(value.last!==undefined){const r=value.last;if(!object(r)||typeof r.id!=='string'||!r.id.trim()||r.id.length>128||!Number.isSafeInteger(r.sequence)||r.sequence!==value.sequence-1||typeof r.fingerprint!=='string'||r.fingerprint.length>40000||typeof r.selectionId!=='string'||!['cast','restore'].includes(r.mode)||!Number.isInteger(r.level)||r.level<0||r.level>9||r.resourceId!==undefined&&(typeof r.resourceId!=='string'||!Number.isSafeInteger(r.before)||r.before<0||!Number.isSafeInteger(r.after)||r.after<0))throw Error('自动化动作回执无效。');if(r.spent!==undefined&&(r.mode!=='cast'||r.resourceId!==undefined||r.before!==undefined||r.after!==undefined||r.recovered!==undefined||!Array.isArray(r.spent)||r.spent.length!==2||new Set(r.spent.map((x:any)=>x?.resourceId)).size!==2||r.spent.some((x:any)=>!object(x)||typeof x.resourceId!=='string'||!x.resourceId||x.resourceId.length>40000||!Number.isSafeInteger(x.before)||x.before<1||!Number.isSafeInteger(x.after)||x.after!==x.before-1)))throw Error('双资源支出回执无效。');if(r.recovered!==undefined&&(!Array.isArray(r.recovered)||r.recovered.length>3000||r.recovered.some((x:any)=>!object(x)||typeof x.resourceId!=='string'||!Number.isSafeInteger(x.before)||x.before<0||!Number.isSafeInteger(x.after)||x.after<x.before)))throw Error('批量恢复回执无效。');}
+ if(value.last!==undefined){const r=value.last;if(!object(r)||typeof r.id!=='string'||!r.id.trim()||r.id.length>128||!Number.isSafeInteger(r.sequence)||r.sequence!==value.sequence-1||typeof r.fingerprint!=='string'||r.fingerprint.length>40000||typeof r.selectionId!=='string'||!['cast','restore'].includes(r.mode)||!Number.isInteger(r.level)||r.level<0||r.level>9||r.resourceId!==undefined&&(typeof r.resourceId!=='string'||!Number.isSafeInteger(r.before)||r.before<0||!Number.isSafeInteger(r.after)||r.after<0))throw Error('自动化动作回执无效。');if(r.itemChargedSpell!==undefined)validateChargedItemSpellCastMarker(r.itemChargedSpell);if(r.spent!==undefined&&(r.mode!=='cast'||r.resourceId!==undefined||r.before!==undefined||r.after!==undefined||r.recovered!==undefined||!Array.isArray(r.spent)||r.spent.length!==2||new Set(r.spent.map((x:any)=>x?.resourceId)).size!==2||r.spent.some((x:any)=>!object(x)||typeof x.resourceId!=='string'||!x.resourceId||x.resourceId.length>40000||!Number.isSafeInteger(x.before)||x.before<1||!Number.isSafeInteger(x.after)||x.after!==x.before-1)))throw Error('双资源支出回执无效。');if(r.recovered!==undefined&&(!Array.isArray(r.recovered)||r.recovered.length>3000||r.recovered.some((x:any)=>!object(x)||typeof x.resourceId!=='string'||!Number.isSafeInteger(x.before)||x.before<0||!Number.isSafeInteger(x.after)||x.after<x.before)))throw Error('批量恢复回执无效。');}
 }

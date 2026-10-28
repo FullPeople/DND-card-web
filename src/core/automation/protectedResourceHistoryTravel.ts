@@ -1,4 +1,5 @@
 import {validateItemAtWillState} from './itemAtWill';
+import {validateChargedItemSpellState,chargedItemSpellAuthorityReason,chargedItemSpellBoundCastReceipt} from './chargedItemSpells';
 import {optionalClassListAuthorityReason,validateOptionalClassListState} from './optionalClassSpellLists';
 import type {Character,RuntimeResource} from '../model';
 import {validateLimitedSourceUseState,ownedLimitedSourceResource} from './limitedSourceUses';
@@ -9,6 +10,14 @@ const mechanics=(r:RuntimeResource|undefined)=>r&&[r.current,r.max,r.unlimited,r
 /** Explicit authorized Undo/redo may reverse bookkeeping. This guard neither
  * projects irreversible history nor repairs a damaged/unknown ledger. */
 export function assertProtectedResourceHistoryTravel(live:Character,candidate:Character,authority?:SpellActionAuthority):void{
+ if(!same(live.automation?.chargedItemSpells,candidate.automation?.chargedItemSpells)){
+  const pools=[live,candidate].flatMap(card=>{const rows=card.automation?.chargedItemSpells?.records;return Array.isArray(rows)?rows.map(row=>row.poolKey).filter((key):key is string=>typeof key==='string'):[];}),issue=chargedItemSpellAuthorityReason(live,authority,[...new Set(pools)]);if(issue)throw Error(issue);
+  for(const card of [live,candidate]){const value=card.automation?.chargedItemSpells;validateChargedItemSpellState(value);if(value&&value.version!==1)throw Error('未知版本的物品施法确认不能通过撤销或重做修改。');}
+ }
+ if(!same(live.runtime.automationActions,candidate.runtime.automationActions)&&(live.runtime.automationActions?.last?.itemChargedSpell!==undefined||candidate.runtime.automationActions?.last?.itemChargedSpell!==undefined)){
+  const keys=[live,candidate].map(card=>card.runtime.automationActions?.last?.resourceId).filter((key):key is string=>typeof key==='string'),issue=chargedItemSpellAuthorityReason(live,authority,keys);if(issue)throw Error(issue);
+  for(const card of [live,candidate]){const last=card.runtime.automationActions?.last;if(last?.itemChargedSpell!==undefined&&!chargedItemSpellBoundCastReceipt(card,last.selectionId,last.id))throw Error('物品施法与原充能支出无法共同核实；未通过历史修复。');}
+ }
  if(!same(live.automation?.optionalClassSpellLists,candidate.automation?.optionalClassSpellLists)){
   const denied=optionalClassListAuthorityReason(live,authority!);if(denied)throw Error(denied);
   for(const card of [live,candidate]){const value=card.automation?.optionalClassSpellLists;validateOptionalClassListState(value);if(value&&value.version!==1)throw Error('未知版本的可选职业法表确认不能通过撤销或重做修改。');}

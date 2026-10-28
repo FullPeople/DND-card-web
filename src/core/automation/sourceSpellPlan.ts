@@ -1,5 +1,7 @@
 import {itemAtWillOffers,itemAtWillRule,itemAtWillIdentity,itemAtWillTarget,itemAtWillStateIssue,itemAtWillChildCollision,itemAtWillChildKey,itemAtWillChildId} from './itemAtWill';
 import {itemChargeOffers,itemChargeStateIssue} from './itemChargeDebits';
+import {chargedItemSpellOffers,chargedItemSpellStateIssue,chargedItemSpellTarget,chargedItemSpellChildCollision,chargedItemSpellChildKey,chargedItemSpellChildId,chargedItemSpellConfig} from './chargedItemSpells';
+import {chargedItemSpellFamilyId,chargedItemSpellRule} from './chargedItemSpellSource';
 import {itemChargeIdentity,itemChargeRule} from './itemChargeDebitSource';
 import {limitedSourceUseOffers,limitedSourceUseStateIssue} from './limitedSourceUses';
 import {limitedSourceIdentity,limitedSourceRule,limitedSourcePoolId} from './limitedSourceUseSource';
@@ -18,7 +20,7 @@ import {sourceResourcePool,validResourceCost,type ResourceColumn} from './source
 
 export const sourceSpellKey=(key?:string)=>!!key?.startsWith('source-spell:');
 export interface SourceSpellPlan {id:string;owner:Selection;key:string;entry:Entry;eligible:boolean;config:SpecialSpell}
-export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string};itemChargeUse?:{ownerId:string};itemAtWill?:{ownerId:string}}
+export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string};itemChargeUse?:{ownerId:string};itemAtWill?:{ownerId:string};chargedItemSpell?:{ownerId:string}}
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 /** Interpret declared data, never rule prose. Unresolved choices and shapes are visible. */
 export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceSpellPlan[];issues:Issue[];choices:SourceSpellChoice[]}{
@@ -34,7 +36,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   // Alert's authenticated PHB adapter grants only initiative; edited family
   // copies cannot bypass it through generic additionalSpells or use pools.
   // The genuine XPHB compatibility exception retains its original route.
-  if(reviewedAlertIdentity(owner.entry)||itemAtWillIdentity(owner.entry))continue;
+  if(reviewedAlertIdentity(owner.entry)||itemAtWillIdentity(owner.entry)||chargedItemSpellFamilyId(owner.entry))continue;
   const limitedRule=limitedSourceRule(owner.entry);
   const issue=(path:string,message:string)=>{const id=`source-spell:${owner.id}:${path}:${message}`;if(!issues.some(i=>i.id===id))issues.push({id,selectionId:owner.id,severity:'warning',message:`${owner.entry.name}：${message}`});};
   if(limitedSourceIdentity(owner.entry)&&!limitedRule){issue('limited-proof','有限来源身份或完整快照未通过核验，保留手工记录。');continue;}
@@ -159,6 +161,12 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   for(const branch of offer.grants){if(itemAtWillChildCollision(c,owner.id,branch))continue;const entry=itemAtWillTarget(c,rule,branch,catalog);if(!entry)continue;const key=itemAtWillChildKey(branch),id=itemAtWillChildId(owner.id,branch);
    grants.push({id,owner,key,entry,eligible:offer.active,config:{mode:'locked',label:branch.targetScope==='self'?'物品随意施法（仅自身）':'物品随意施法',sourceGrant:{ownerId:owner.id,key,active:offer.active,usage:'free',canUseSlots:false,targetScope:branch.targetScope,targetEntryId:branch.targetEntryId,sourceActionTiming:branch.sourceActionTiming,reason:offer.active?undefined:offer.reason}}});
   }
+ }
+ const chargedIssue=chargedItemSpellStateIssue(c);if(chargedIssue)issues.push({id:'charged-item-spell-history',severity:'warning',message:chargedIssue});
+ for(const offer of chargedItemSpellOffers(c,catalog)){
+  choices.push({ownerId:offer.ownerId,key:offer.key,label:offer.label+'的付费物品施法',chargedItemSpell:{ownerId:offer.ownerId}});
+  const owner=c.selections.find(row=>row.id===offer.ownerId),rule=owner&&chargedItemSpellRule(owner.entry);if(!owner||!rule||!offer.record||chargedItemSpellChildCollision(c,owner.id,rule))continue;const entry=chargedItemSpellTarget(c,rule,catalog);if(!entry)continue;
+  grants.push({id:chargedItemSpellChildId(owner.id,rule),owner,key:chargedItemSpellChildKey(rule),entry,eligible:offer.active,config:chargedItemSpellConfig(rule,offer.record,offer.active,offer.active?undefined:offer.reason)});
  }
  for(const offer of limitedSourceUseOffers(c))if(!choices.some(q=>q.limitedUse?.ownerId===offer.ownerId&&q.limitedUse.poolId===offer.poolId))choices.push({ownerId:offer.ownerId,key:JSON.stringify(['limited-source',offer.ownerId,offer.poolId]),label:offer.ownerName+'的有限次数记录',limitedUse:{ownerId:offer.ownerId,poolId:offer.poolId}});
  for(const offer of itemChargeOffers(c))choices.push({ownerId:offer.ownerId,key:JSON.stringify(['item-charge',offer.ownerId]),label:offer.ownerName+'的充能记账',itemChargeUse:{ownerId:offer.ownerId}});

@@ -1,0 +1,1723 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact11-source-qualified-one-charge-item-owned-spell-delivery-and-payment",
+  "sourceProseIncluded": false,
+  "counts": {
+    "owners": 11,
+    "targets": 11,
+    "ownerCompleteForms": 22,
+    "noStatistics": 6,
+    "fixedSourceSaveDC": 5,
+    "conditionalHeld": 7,
+    "UIDOrStatisticsHeld": 21
+  },
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+      "bytes": 149813
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "bytes": 2458443
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+      "bytes": 190573
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+      "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d",
+      "bytes": 514953
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+      "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+      "bytes": 500124
+    },
+    {
+      "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+      "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+      "bytes": 673279
+    }
+  ],
+  "policies": [
+    {
+      "code": "DMG",
+      "edition": "2014",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/book/book-dmg.json",
+      "rawBytes": 1312030,
+      "gitBlobSha1": "961454f0039f5c9d9a9f5272ff3003f0cbd91133",
+      "rawSha256": "2cd30ce20ef2786b1153a85bec25beee8747793491a8f38123a1a9fb6aee06ba",
+      "canonicalSha256": "1c9a98e4a2b108d8c47397de9c03165619f54d8ed6e0a736331e9a57f807c450",
+      "policySection": {
+        "path": "$.data[7].entries[6].entries[8].entries[4]",
+        "id": "264",
+        "page": 141,
+        "englishHeader": "Spells",
+        "sortedCanonicalSha256": "4aa12680e89e4fcd1bdb8d9d7016d7d9ff8f3fc55d26846f186f6c79ee825b74",
+        "clauses": [
+          {
+            "path": "entries[0]",
+            "sha256": "f17eb9d6fb44395562d6c9ac248e0c21af0551fecc7392e6a52006b160176af0"
+          },
+          {
+            "path": "entries[1]",
+            "sha256": "6b2eee05619a619ef7dcc696391dc7c1d358f6425e52853ba1ad4c3e3412935d"
+          },
+          {
+            "path": "entries[2]",
+            "sha256": "8ecb66491dbc5119b48a1f123b05964085aa6a94b9df41e8ba2a661c8b7e502d"
+          }
+        ]
+      },
+      "facts": {
+        "appliesTo": "actual spells cast from magic item, not direct spell-effect-only properties",
+        "minimumPossibleSpellAndCasterLevelUnlessItemOverride": true,
+        "noUserSpellSlotExpended": true,
+        "noSpellComponentsUnlessItemOverride": true,
+        "underlyingNormalCastingTimeUnlessItemOverride": true,
+        "underlyingNormalRangeUnlessItemOverride": true,
+        "underlyingNormalDurationUnlessItemOverride": true,
+        "userConcentrationRequiredIfUnderlyingSpellRequiresUnlessItemOverride": true,
+        "itemSpecificChangesMustRemainExplicit": true,
+        "ownCastingAbilityPolicyOnlyWhenItemRequiresIt": true,
+        "multipleOwnSpellcastingAbilitiesRequireExplicitChoice": true,
+        "noOwnSpellcastingAbilityUsesModifierZeroWithProficiencyOnlyWithinThatPolicy": true,
+        "noUniversalUnknownSaveDCDefaultProved": true,
+        "noUniversalUnknownAttackBonusDefaultProved": true,
+        "fixedSaveDCDoesNotDefineAttackBonusOrCastingModifier": true,
+        "unsuffixedReferenceDefaultSourceNotAddressed": true,
+        "noEffectAutomationOrAutomaticEligibility": true
+      }
+    },
+    {
+      "code": "XDMG",
+      "edition": "2024",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/book/book-xdmg.json",
+      "rawBytes": 1452650,
+      "gitBlobSha1": "78d798f3b8540a627dc37e1761c1b293175ca4fd",
+      "rawSha256": "0be2e1fc83321379fb949d699dcf7c2aec9011a3278c1fce93ae4424737fc5aa",
+      "canonicalSha256": "2dadc226f1b38ed500c2dc9b24e250771ba8cc0bedd27f7873cebc7e10b6f9de",
+      "policySection": {
+        "path": "$.data[6].entries[8].entries[5].entries[3]",
+        "id": "432",
+        "page": 220,
+        "englishHeader": "Spells Cast from Items",
+        "sortedCanonicalSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "clauses": [
+          {
+            "path": "entries[0]",
+            "sha256": "d999cb1dbbf5bfd9a8528b0c81cce9e9ae351c314518c6d2f272ae37872603bb"
+          },
+          {
+            "path": "entries[1]",
+            "sha256": "144d637cb2d2745346f6520f8cb7ab0525c45e31d437ad9567935809156a79c9"
+          }
+        ]
+      },
+      "facts": {
+        "appliesTo": "actual spells cast from magic item, not direct spell-effect-only properties",
+        "minimumPossibleSpellAndCasterLevelUnlessItemOverride": true,
+        "noUserSpellSlotExpended": true,
+        "noSpellComponentsUnlessItemOverride": true,
+        "underlyingNormalCastingTimeUnlessItemOverride": true,
+        "underlyingNormalRangeUnlessItemOverride": true,
+        "underlyingNormalDurationUnlessItemOverride": true,
+        "userConcentrationRequiredIfUnderlyingSpellRequiresUnlessItemOverride": true,
+        "itemSpecificChangesMustRemainExplicit": true,
+        "ownCastingAbilityPolicyOnlyWhenItemRequiresIt": true,
+        "multipleOwnSpellcastingAbilitiesRequireExplicitChoice": true,
+        "noOwnSpellcastingAbilityUsesModifierZeroWithProficiencyOnlyWithinThatPolicy": true,
+        "noUniversalUnknownSaveDCDefaultProved": true,
+        "noUniversalUnknownAttackBonusDefaultProved": true,
+        "fixedSaveDCDoesNotDefineAttackBonusOrCastingModifier": true,
+        "unsuffixedReferenceDefaultSourceNotAddressed": true,
+        "noEffectAutomationOrAutomaticEligibility": true
+      }
+    }
+  ],
+  "fullSnapshotHashMethod": "SHA256(JSON.stringify(recursivelySorted(entire Entry))); existing owner proof rebinds only canonical id and revision; targets are actual complete hydrated forms",
+  "rules": [
+    {
+      "id": "kiwee:item:au:wand%20of%20slumber::::::",
+      "kind": "item",
+      "name": "沉睡魔杖",
+      "english": "Wand of Slumber",
+      "source": "AU",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 125,
+      "fullNormalizedSnapshotSha256": "fc04635b9d7fb1adcef29cc21db5910e70276c48bbf877e827a33024e0054f2a",
+      "canonicalPoolProofAnchorSha256": "fc04635b9d7fb1adcef29cc21db5910e70276c48bbf877e827a33024e0054f2a",
+      "capacity": 7,
+      "requiresAttunement": true,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:au:wand%20of%20slumber::::::",
+          "kind": "item",
+          "name": "沉睡魔杖",
+          "english": "Wand of Slumber",
+          "source": "AU",
+          "edition": "both",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 125,
+          "completeSnapshotSha256": "fc04635b9d7fb1adcef29cc21db5910e70276c48bbf877e827a33024e0054f2a",
+          "canonicalReboundFullSnapshotSha256": "fc04635b9d7fb1adcef29cc21db5910e70276c48bbf877e827a33024e0054f2a",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:au:wand%20of%20slumber::::::",
+          "kind": "item",
+          "name": "沉睡魔杖",
+          "english": "Wand of Slumber",
+          "source": "AU",
+          "edition": "both",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 125,
+          "completeSnapshotSha256": "290426db79474200227e552128c39259317f23524106c3767ff7f3c3a534f8bb",
+          "canonicalReboundFullSnapshotSha256": "fc04635b9d7fb1adcef29cc21db5910e70276c48bbf877e827a33024e0054f2a",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:sleep::::::",
+        "kind": "spell",
+        "name": "睡眠术",
+        "english": "Sleep",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 317,
+        "fullNormalizedSnapshotSha256": "e646d3137ba59a5d6091b08b01dcc9e22ffe11e0e245ab1a0e09c07bab585e6b",
+        "ordinarySnapshotSha256": "97549865c18d24f1a192ec6634860ae0bf9af2454fcd5de935f5b9271d3ea5fe",
+        "baseSpellLevel": 1,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "4a08244070bd5a776b8312f2a176e3869b3907e1ef30d3bd3928a9b77aab8d7a",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-sleep",
+        "targetEntryId": "kiwee:spell:xphb:sleep::::::",
+        "sourceUid": "Sleep|XPHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "fixed-dc",
+          "saveDC": 15
+        },
+        "sourceDeclaredSaveDC": 15,
+        "sourcePhysicalConstraint": "held",
+        "equipmentRequired": true,
+        "requiresAttunement": true,
+        "requiredSources": [
+          "AU",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[2421].entries[0]",
+            "sha256": "532a79a11fb2d389939c1e56d7e479ff013ff0aec553b68171741cd94b3d48eb"
+          },
+          {
+            "path": "item[2421].entries[2].rows[1]",
+            "sha256": "d63969cbd75960445f24925e844bfcab1acd7c93fd6448f129b57ece31b21e4a"
+          },
+          {
+            "path": "item[2421].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[2421].charges",
+            "sha256": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[2421]",
+        "originalObjectSortedSha256": "ea8629a5f6b1708015303dba21bf29a35ab5e8fd3c828109740d271e4a91ea8d",
+        "clauses": [
+          {
+            "path": "item[2421].entries[0]",
+            "sha256": "532a79a11fb2d389939c1e56d7e479ff013ff0aec553b68171741cd94b3d48eb"
+          },
+          {
+            "path": "item[2421].entries[2].rows[1]",
+            "sha256": "d63969cbd75960445f24925e844bfcab1acd7c93fd6448f129b57ece31b21e4a"
+          },
+          {
+            "path": "item[2421].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[2421].charges",
+            "sha256": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "5286c70cca088fe5a2083d02c0c905c7850beb22fc0490a6f14fbc616e495025"
+    },
+    {
+      "id": "kiwee:item:aud:spirit-binding%20censer::::::",
+      "kind": "item",
+      "name": "缚灵香炉",
+      "english": "Spirit-Binding Censer",
+      "source": "AUD",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": null,
+      "fullNormalizedSnapshotSha256": "e14a2b44d2111264482ce7f77793d87dd77eb84d45d34ddba754bf0164d72f87",
+      "canonicalPoolProofAnchorSha256": "e14a2b44d2111264482ce7f77793d87dd77eb84d45d34ddba754bf0164d72f87",
+      "capacity": 10,
+      "requiresAttunement": true,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:aud:spirit-binding%20censer::::::",
+          "kind": "item",
+          "name": "缚灵香炉",
+          "english": "Spirit-Binding Censer",
+          "source": "AUD",
+          "edition": "both",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": null,
+          "completeSnapshotSha256": "e14a2b44d2111264482ce7f77793d87dd77eb84d45d34ddba754bf0164d72f87",
+          "canonicalReboundFullSnapshotSha256": "e14a2b44d2111264482ce7f77793d87dd77eb84d45d34ddba754bf0164d72f87",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:aud:spirit-binding%20censer::::::",
+          "kind": "item",
+          "name": "缚灵香炉",
+          "english": "Spirit-Binding Censer",
+          "source": "AUD",
+          "edition": "both",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": null,
+          "completeSnapshotSha256": "fd3a84046b571966a289e36eaa62838a424e96a9608f4a8112fdf74a18c1589b",
+          "canonicalReboundFullSnapshotSha256": "e14a2b44d2111264482ce7f77793d87dd77eb84d45d34ddba754bf0164d72f87",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:bless::::::",
+        "kind": "spell",
+        "name": "祝福术",
+        "english": "Bless",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 247,
+        "fullNormalizedSnapshotSha256": "77a12897cde2f0a03372215e7a599e778397dd7b141729721e8a0d6cc949620c",
+        "ordinarySnapshotSha256": "77fa4a6b3e8e92f61ec2010c29fe6cb24c2b238814cb390d717987cfe0133837",
+        "baseSpellLevel": 1,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "5ecaa1ea6ef7db62618dea4ef79573de42aca0c762e11c9a8cfa493980d4aa3d",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-bless",
+        "targetEntryId": "kiwee:spell:xphb:bless::::::",
+        "sourceUid": "Bless|XPHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "none"
+        },
+        "sourceDeclaredSaveDC": 18,
+        "sourcePhysicalConstraint": "held",
+        "equipmentRequired": true,
+        "requiresAttunement": true,
+        "requiredSources": [
+          "AUD",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[2150].entries[1].entries[0]",
+            "sha256": "8c617120644d7174df77ee41d8bbfb9387addfc4053785aafd581108c62a7996"
+          },
+          {
+            "path": "item[2150].entries[2].rows[1]",
+            "sha256": "1f4217f97b3462ccd480404200684fba1fea2d2a820d70c93c8f5132c19144f2"
+          },
+          {
+            "path": "item[2150].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[2150].charges",
+            "sha256": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[2150]",
+        "originalObjectSortedSha256": "c4e0a469d50c2bbdf55656a89e4c46917304755751d3aa9958f7534b69b385bf",
+        "clauses": [
+          {
+            "path": "item[2150].entries[1].entries[0]",
+            "sha256": "8c617120644d7174df77ee41d8bbfb9387addfc4053785aafd581108c62a7996"
+          },
+          {
+            "path": "item[2150].entries[2].rows[1]",
+            "sha256": "1f4217f97b3462ccd480404200684fba1fea2d2a820d70c93c8f5132c19144f2"
+          },
+          {
+            "path": "item[2150].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[2150].charges",
+            "sha256": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "c6122fc8fc8c9bd747e346ee9a23b20a7783e0d924c4ed1fead85c547728de58"
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20animal%20influence::::::",
+      "kind": "item",
+      "name": "影响动物戒指",
+      "english": "Ring of Animal Influence",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 189,
+      "fullNormalizedSnapshotSha256": "fe7f20fa8c5bf78002840953b17be749ae7218b0716d4dc484772651d23ee6a9",
+      "canonicalPoolProofAnchorSha256": "fe7f20fa8c5bf78002840953b17be749ae7218b0716d4dc484772651d23ee6a9",
+      "capacity": 3,
+      "requiresAttunement": false,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:dmg:ring%20of%20animal%20influence::::::",
+          "kind": "item",
+          "name": "影响动物戒指",
+          "english": "Ring of Animal Influence",
+          "source": "DMG",
+          "edition": "2014",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 189,
+          "completeSnapshotSha256": "fe7f20fa8c5bf78002840953b17be749ae7218b0716d4dc484772651d23ee6a9",
+          "canonicalReboundFullSnapshotSha256": "fe7f20fa8c5bf78002840953b17be749ae7218b0716d4dc484772651d23ee6a9",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:dmg:ring%20of%20animal%20influence::::::",
+          "kind": "item",
+          "name": "影响动物戒指",
+          "english": "Ring of Animal Influence",
+          "source": "DMG",
+          "edition": "2014",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 189,
+          "completeSnapshotSha256": "0cf77f0b40a3ec1be2c7b52c395ba73fda975d88a4bdd7ff02f49a63cde9c6dd",
+          "canonicalReboundFullSnapshotSha256": "fe7f20fa8c5bf78002840953b17be749ae7218b0716d4dc484772651d23ee6a9",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:phb:animal%20friendship::::::",
+        "kind": "spell",
+        "name": "化兽为友",
+        "english": "Animal Friendship",
+        "source": "PHB",
+        "edition": "2014",
+        "packId": "kiwee",
+        "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 212,
+        "fullNormalizedSnapshotSha256": "b600bf6e912df2df4648ad1f455e1d82514e0134c41cc66daf3710b498f676c6",
+        "ordinarySnapshotSha256": "834d0db29a0bf6222f76b0304cd5aa4df2981014a2b93b875037793a3494ab22",
+        "baseSpellLevel": 1,
+        "inputSha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "3ec7bdd6a1e399d6f85229e4666529a8457fd86764c6383c0ad219849075d2d8",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-animal-friendship",
+        "targetEntryId": "kiwee:spell:phb:animal%20friendship::::::",
+        "sourceUid": "Animal Friendship|PHB",
+        "cost": 1,
+        "minAfter": 0,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "item-override",
+        "statistics": {
+          "kind": "fixed-dc",
+          "saveDC": 13
+        },
+        "sourceDeclaredSaveDC": 13,
+        "sourcePhysicalConstraint": "worn",
+        "equipmentRequired": true,
+        "requiresAttunement": false,
+        "requiredSources": [
+          "DMG",
+          "PHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "DMG",
+        "policySectionSha256": "4aa12680e89e4fcd1bdb8d9d7016d7d9ff8f3fc55d26846f186f6c79ee825b74",
+        "sourceBinding": "reviewed-DMG2014-original-to-unique-PHB2014-no-card-edition-switch",
+        "clauses": [
+          {
+            "path": "item[1756].entries[0]",
+            "sha256": "e18f0f893518ce5f3b744ca3de19675f36ead58e76f3bc3526a1ce5372689e9d"
+          },
+          {
+            "path": "item[1756].entries[1].items[0]",
+            "sha256": "78d7ac7c15a09f0712945cef0dc33fbd7c9e90ee2eb6dba0a95149ac0cebfc32"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[1756]",
+        "originalObjectSortedSha256": "a43f91c1ba42ff7dd59ab994a7251f5e56ef0b86599952fa41a8cdb35e2a1713",
+        "clauses": [
+          {
+            "path": "item[1756].entries[0]",
+            "sha256": "e18f0f893518ce5f3b744ca3de19675f36ead58e76f3bc3526a1ce5372689e9d"
+          },
+          {
+            "path": "item[1756].entries[1].items[0]",
+            "sha256": "78d7ac7c15a09f0712945cef0dc33fbd7c9e90ee2eb6dba0a95149ac0cebfc32"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "75042e6a3cff47d2395a553588ee2c2feafba2b16fd4b427c3a617c9c5f1ee02"
+    },
+    {
+      "id": "kiwee:item:dmg:wand%20of%20magic%20missiles::::::",
+      "kind": "item",
+      "name": "魔法飞弹魔杖",
+      "english": "Wand of Magic Missiles",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 211,
+      "fullNormalizedSnapshotSha256": "5459cc2d9b7ddb7492500cfd8350cc832d47998b25e2912ca5bc519548488baf",
+      "canonicalPoolProofAnchorSha256": "5459cc2d9b7ddb7492500cfd8350cc832d47998b25e2912ca5bc519548488baf",
+      "capacity": 7,
+      "requiresAttunement": false,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:dmg:wand%20of%20magic%20missiles::::::",
+          "kind": "item",
+          "name": "魔法飞弹魔杖",
+          "english": "Wand of Magic Missiles",
+          "source": "DMG",
+          "edition": "2014",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 211,
+          "completeSnapshotSha256": "5459cc2d9b7ddb7492500cfd8350cc832d47998b25e2912ca5bc519548488baf",
+          "canonicalReboundFullSnapshotSha256": "5459cc2d9b7ddb7492500cfd8350cc832d47998b25e2912ca5bc519548488baf",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:dmg:wand%20of%20magic%20missiles::::::",
+          "kind": "item",
+          "name": "魔法飞弹魔杖",
+          "english": "Wand of Magic Missiles",
+          "source": "DMG",
+          "edition": "2014",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 211,
+          "completeSnapshotSha256": "7f10645a0fcda58c4b090637caa83a2c7c9076dc2a7825ad877b74d2c8e9afa4",
+          "canonicalReboundFullSnapshotSha256": "5459cc2d9b7ddb7492500cfd8350cc832d47998b25e2912ca5bc519548488baf",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:phb:magic%20missile::::::",
+        "kind": "spell",
+        "name": "魔法飞弹",
+        "english": "Magic Missile",
+        "source": "PHB",
+        "edition": "2014",
+        "packId": "kiwee",
+        "revision": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 257,
+        "fullNormalizedSnapshotSha256": "74889339b703aa113878fa2c4f1e7a1435feea42d1bd9ec03ca33bb5e29258f1",
+        "ordinarySnapshotSha256": "50599ffea1351a55a304b6bcca88a097acbe36fc94f28220ea83495a803cbd84",
+        "baseSpellLevel": 1,
+        "inputSha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "fb73e484ad7053fa374cc4f8cd4fc8617761974ed8a98bccaae6ce772ccea58e",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-magic-missile-rank-1",
+        "targetEntryId": "kiwee:spell:phb:magic%20missile::::::",
+        "sourceUid": "Magic Missile|PHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "item-override",
+        "statistics": {
+          "kind": "none"
+        },
+        "sourceDeclaredSaveDC": null,
+        "sourcePhysicalConstraint": "held",
+        "equipmentRequired": true,
+        "requiresAttunement": false,
+        "requiredSources": [
+          "DMG",
+          "PHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "DMG",
+        "policySectionSha256": "4aa12680e89e4fcd1bdb8d9d7016d7d9ff8f3fc55d26846f186f6c79ee825b74",
+        "sourceBinding": "reviewed-DMG2014-original-to-unique-PHB2014-no-card-edition-switch",
+        "clauses": [
+          {
+            "path": "item[2408].entries[0]",
+            "sha256": "7aeea791611c1723ca756369f8f9e47a864493c88bdbaa1deb43a43b0a7373ef"
+          },
+          {
+            "path": "item[2408].entries[1]",
+            "sha256": "5b5e19a61db98eeb2e79c5c499d295091b3b02c240a241789237dac92887a1ef"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[2408]",
+        "originalObjectSortedSha256": "58d2067b5d5033a3e8068d804cee57109a40942c1cc38ff5f1de7e14b4de735b",
+        "clauses": [
+          {
+            "path": "item[2408].entries[0]",
+            "sha256": "7aeea791611c1723ca756369f8f9e47a864493c88bdbaa1deb43a43b0a7373ef"
+          },
+          {
+            "path": "item[2408].entries[1]",
+            "sha256": "5b5e19a61db98eeb2e79c5c499d295091b3b02c240a241789237dac92887a1ef"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "ff49ee4e3f900126d8809848369f9fe96bf7d74d11724bcf2c9294f148436b68"
+    },
+    {
+      "id": "kiwee:item:xdmg:hag%20eye::::::",
+      "kind": "item",
+      "name": "鬼婆之眼",
+      "english": "Hag Eye",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 265,
+      "fullNormalizedSnapshotSha256": "addfd4e88bf56360ea7a2cfa65c8d7a45f39b3b580b05bd457c6f2cd48adca35",
+      "canonicalPoolProofAnchorSha256": "addfd4e88bf56360ea7a2cfa65c8d7a45f39b3b580b05bd457c6f2cd48adca35",
+      "capacity": 3,
+      "requiresAttunement": false,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:xdmg:hag%20eye::::::",
+          "kind": "item",
+          "name": "鬼婆之眼",
+          "english": "Hag Eye",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 265,
+          "completeSnapshotSha256": "addfd4e88bf56360ea7a2cfa65c8d7a45f39b3b580b05bd457c6f2cd48adca35",
+          "canonicalReboundFullSnapshotSha256": "addfd4e88bf56360ea7a2cfa65c8d7a45f39b3b580b05bd457c6f2cd48adca35",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:xdmg:hag%20eye::::::",
+          "kind": "item",
+          "name": "鬼婆之眼",
+          "english": "Hag Eye",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 265,
+          "completeSnapshotSha256": "6f40a72a08e36c18760872a67564ac85419fa81e4d43f8571fdcdfa1a62c7a83",
+          "canonicalReboundFullSnapshotSha256": "addfd4e88bf56360ea7a2cfa65c8d7a45f39b3b580b05bd457c6f2cd48adca35",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:darkvision::::::",
+        "kind": "spell",
+        "name": "黑暗视觉",
+        "english": "Darkvision",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 260,
+        "fullNormalizedSnapshotSha256": "319eb754375afc344ad32772bc783f154079b6aa3413e7f4bbb0338a1a7d6124",
+        "ordinarySnapshotSha256": "3594c5f109f5b81ec5c91a6bdf5ce75af61fd7fa261575d3ea4c599ba068be51",
+        "baseSpellLevel": 2,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "470f319e56d22a2b94720c0c10bd0bef0a58b5dc274f4daa851fa4b9f2ce3b7f",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-darkvision-self",
+        "targetEntryId": "kiwee:spell:xphb:darkvision::::::",
+        "sourceUid": "Darkvision|XPHB",
+        "cost": 1,
+        "minAfter": 0,
+        "castLevel": 2,
+        "targetScope": "self",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "none"
+        },
+        "sourceDeclaredSaveDC": null,
+        "sourcePhysicalConstraint": "worn-or-held",
+        "equipmentRequired": true,
+        "requiresAttunement": false,
+        "requiredSources": [
+          "XDMG",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[941].entries[0]",
+            "sha256": "99fe8d15b75e073f03d5282bc3df1f03fa9eefa6b6423a9fd2c673e0be81c502"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[941]",
+        "originalObjectSortedSha256": "3aeae41c78c67cc0df9f911002d6743babed28b3193ec1d756f033854d9b94e4",
+        "clauses": [
+          {
+            "path": "item[941].entries[0]",
+            "sha256": "99fe8d15b75e073f03d5282bc3df1f03fa9eefa6b6423a9fd2c673e0be81c502"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "34c36738a669091590392eb2d3588e1dd2ef2314e22b0a443243e0badd3f253e"
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20animal%20influence::::::",
+      "kind": "item",
+      "name": "影响动物戒指",
+      "english": "Ring of Animal Influence",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 292,
+      "fullNormalizedSnapshotSha256": "3cba25c1191f56d17bb145c2d9479c487085688289b267865ee125bf10574478",
+      "canonicalPoolProofAnchorSha256": "3cba25c1191f56d17bb145c2d9479c487085688289b267865ee125bf10574478",
+      "capacity": 3,
+      "requiresAttunement": false,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:xdmg:ring%20of%20animal%20influence::::::",
+          "kind": "item",
+          "name": "影响动物戒指",
+          "english": "Ring of Animal Influence",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 292,
+          "completeSnapshotSha256": "3cba25c1191f56d17bb145c2d9479c487085688289b267865ee125bf10574478",
+          "canonicalReboundFullSnapshotSha256": "3cba25c1191f56d17bb145c2d9479c487085688289b267865ee125bf10574478",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:xdmg:ring%20of%20animal%20influence::::::",
+          "kind": "item",
+          "name": "影响动物戒指",
+          "english": "Ring of Animal Influence",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 292,
+          "completeSnapshotSha256": "58b59d9948d702741efc3d2f7395aee2e989021790bbb07da7a15c360685c6cc",
+          "canonicalReboundFullSnapshotSha256": "3cba25c1191f56d17bb145c2d9479c487085688289b267865ee125bf10574478",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:animal%20friendship::::::",
+        "kind": "spell",
+        "name": "化兽为友",
+        "english": "Animal Friendship",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 239,
+        "fullNormalizedSnapshotSha256": "a74cc92061b8b668815e45b3a57f0e52bc909cdc2f8d350f394323b553ed1ed8",
+        "ordinarySnapshotSha256": "b06219c4623f047bb060856e7fe69d149fc04252793f724a3c9fcbe914d1e7f1",
+        "baseSpellLevel": 1,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "ba51efaa1a78361024e33bb1aeeb007940eb35c2dbac34a8f06c0a3a58979d94",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-animal-friendship",
+        "targetEntryId": "kiwee:spell:xphb:animal%20friendship::::::",
+        "sourceUid": "Animal Friendship|XPHB",
+        "cost": 1,
+        "minAfter": 0,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "fixed-dc",
+          "saveDC": 13
+        },
+        "sourceDeclaredSaveDC": 13,
+        "sourcePhysicalConstraint": "worn",
+        "equipmentRequired": true,
+        "requiresAttunement": false,
+        "requiredSources": [
+          "XDMG",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[1757].entries[0]",
+            "sha256": "096b9b457fed7f95e830a11c0845de3ed143291e009c690061254f5d5d68ba0a"
+          },
+          {
+            "path": "item[1757].entries[1].items[0]",
+            "sha256": "3453d6584be6e9fbabb7edca90e2a9d26bef3ab48830bfb476913720e33a4f17"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[1757]",
+        "originalObjectSortedSha256": "431e17849cab0d46775178d76f2617db9b68bb3ac9b3dd19dba2f3b65ba53595",
+        "clauses": [
+          {
+            "path": "item[1757].entries[0]",
+            "sha256": "096b9b457fed7f95e830a11c0845de3ed143291e009c690061254f5d5d68ba0a"
+          },
+          {
+            "path": "item[1757].entries[1].items[0]",
+            "sha256": "3453d6584be6e9fbabb7edca90e2a9d26bef3ab48830bfb476913720e33a4f17"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "35a08ab592bc01b819dc98d1c40cd9a9fcdabf1ac1528b60fdd0d242d78837d7"
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(air)::::::",
+      "kind": "item",
+      "name": "命令元素戒指（气）",
+      "english": "Ring of Elemental Command (Air)",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 292,
+      "fullNormalizedSnapshotSha256": "74000f5fb1684f26bad201bcfeff40939891ebbfd003f5d81152f72c0c5bcf8b",
+      "canonicalPoolProofAnchorSha256": "74000f5fb1684f26bad201bcfeff40939891ebbfd003f5d81152f72c0c5bcf8b",
+      "capacity": 5,
+      "requiresAttunement": true,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(air)::::::",
+          "kind": "item",
+          "name": "命令元素戒指（气）",
+          "english": "Ring of Elemental Command (Air)",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 292,
+          "completeSnapshotSha256": "74000f5fb1684f26bad201bcfeff40939891ebbfd003f5d81152f72c0c5bcf8b",
+          "canonicalReboundFullSnapshotSha256": "74000f5fb1684f26bad201bcfeff40939891ebbfd003f5d81152f72c0c5bcf8b",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(air)::::::",
+          "kind": "item",
+          "name": "命令元素戒指（气）",
+          "english": "Ring of Elemental Command (Air)",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 292,
+          "completeSnapshotSha256": "1f5bc81f09b4da6b19e9377b3367726321a80228ff46243f29b07fd8bf171305",
+          "canonicalReboundFullSnapshotSha256": "74000f5fb1684f26bad201bcfeff40939891ebbfd003f5d81152f72c0c5bcf8b",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:wind%20wall::::::",
+        "kind": "spell",
+        "name": "风墙术",
+        "english": "Wind Wall",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 341,
+        "fullNormalizedSnapshotSha256": "38f09fc0326f25ec1317c41de7b3518e126759ad6095c50fae7b0083e17d2e61",
+        "ordinarySnapshotSha256": "c4302e9c49467c4b262c469897fd91b357d89c54766c9bd38f9e1669604b0f28",
+        "baseSpellLevel": 3,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "ef028f7e4210e4f22665b349c7db17fcfe572dca2b0cd5a084e3c53be7c72ff9",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-wind-wall",
+        "targetEntryId": "kiwee:spell:xphb:wind%20wall::::::",
+        "sourceUid": "Wind Wall|XPHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 3,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "fixed-dc",
+          "saveDC": 18
+        },
+        "sourceDeclaredSaveDC": 18,
+        "sourcePhysicalConstraint": "worn",
+        "equipmentRequired": true,
+        "requiresAttunement": true,
+        "requiredSources": [
+          "XDMG",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[1766].entries[3].entries[0]",
+            "sha256": "d0356fce892e1a2b98b20d5f88068f911a32dd81ea434e090e02a7e2601e69c0"
+          },
+          {
+            "path": "item[1766].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1766].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[1766]",
+        "originalObjectSortedSha256": "54d493271128336be84330b5b6925521b804f12e506285b96af60964bfc7d96d",
+        "clauses": [
+          {
+            "path": "item[1766].entries[3].entries[0]",
+            "sha256": "d0356fce892e1a2b98b20d5f88068f911a32dd81ea434e090e02a7e2601e69c0"
+          },
+          {
+            "path": "item[1766].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1766].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "120f645ca07c5e39987ccce80cf61c53aee05bce91ca61b0d5295f132fd16712"
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(fire)::::::",
+      "kind": "item",
+      "name": "命令元素戒指（火）",
+      "english": "Ring of Elemental Command (Fire)",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 292,
+      "fullNormalizedSnapshotSha256": "9b82e2c0726e4b07fe9a443aaf1db95c7afeb20e9731e4746a9e17777f408009",
+      "canonicalPoolProofAnchorSha256": "9b82e2c0726e4b07fe9a443aaf1db95c7afeb20e9731e4746a9e17777f408009",
+      "capacity": 5,
+      "requiresAttunement": true,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(fire)::::::",
+          "kind": "item",
+          "name": "命令元素戒指（火）",
+          "english": "Ring of Elemental Command (Fire)",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 292,
+          "completeSnapshotSha256": "9b82e2c0726e4b07fe9a443aaf1db95c7afeb20e9731e4746a9e17777f408009",
+          "canonicalReboundFullSnapshotSha256": "9b82e2c0726e4b07fe9a443aaf1db95c7afeb20e9731e4746a9e17777f408009",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(fire)::::::",
+          "kind": "item",
+          "name": "命令元素戒指（火）",
+          "english": "Ring of Elemental Command (Fire)",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 292,
+          "completeSnapshotSha256": "13d86a55b2d8af5f9f255387d3703b169ec2e37fc787ef87e9fc3a7cb755f8cd",
+          "canonicalReboundFullSnapshotSha256": "9b82e2c0726e4b07fe9a443aaf1db95c7afeb20e9731e4746a9e17777f408009",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:burning%20hands::::::",
+        "kind": "spell",
+        "name": "燃烧之手",
+        "english": "Burning Hands",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 248,
+        "fullNormalizedSnapshotSha256": "05838dc5c36b02e6e4a077ace930f5c7c57d389430ece05cbedfb1653cc5d060",
+        "ordinarySnapshotSha256": "aa96b535fb1b1e59258df83a44dc6e81cf8b0ddd5f048be1a96cabcaa6a8be84",
+        "baseSpellLevel": 1,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "ea158c41e374e6ed0c25400e5b1961b3b669629180db2a598e17c3a75a8dcd08",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-burning-hands",
+        "targetEntryId": "kiwee:spell:xphb:burning%20hands::::::",
+        "sourceUid": "Burning Hands|XPHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "fixed-dc",
+          "saveDC": 18
+        },
+        "sourceDeclaredSaveDC": 18,
+        "sourcePhysicalConstraint": "worn",
+        "equipmentRequired": true,
+        "requiresAttunement": true,
+        "requiredSources": [
+          "XDMG",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[1768].entries[0]",
+            "sha256": "1cca802986eebbb26f9f6cb057a8e3c8ecbd7e9601bb11cc11bff07e00d53358"
+          },
+          {
+            "path": "item[1768].entries[3].entries[0]",
+            "sha256": "1e3708499ab96174a301f56fc512595bdebd0b4580935f501901110792e4bf69"
+          },
+          {
+            "path": "item[1768].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1768].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter",
+          "unrelated-plane-description-conflict-retained-no-elemental-property-claim"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[1768]",
+        "originalObjectSortedSha256": "5dc1610765d4c497ba2b1be0959e11e5c4fe42c8dd8520c5fcdf690a5abea613",
+        "clauses": [
+          {
+            "path": "item[1768].entries[0]",
+            "sha256": "1cca802986eebbb26f9f6cb057a8e3c8ecbd7e9601bb11cc11bff07e00d53358"
+          },
+          {
+            "path": "item[1768].entries[3].entries[0]",
+            "sha256": "1e3708499ab96174a301f56fc512595bdebd0b4580935f501901110792e4bf69"
+          },
+          {
+            "path": "item[1768].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1768].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "742030ec42fd9415c2fa7ee9a42eb480c868d0d514cfd21f5561e5e0ecaa697c"
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(water)::::::",
+      "kind": "item",
+      "name": "命令元素戒指（水）",
+      "english": "Ring of Elemental Command (Water)",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 292,
+      "fullNormalizedSnapshotSha256": "d58ee966d0d25e129b84d3b0d29d361e2b4ecd2740c1ec6f054e77e4488505ea",
+      "canonicalPoolProofAnchorSha256": "d58ee966d0d25e129b84d3b0d29d361e2b4ecd2740c1ec6f054e77e4488505ea",
+      "capacity": 5,
+      "requiresAttunement": true,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(water)::::::",
+          "kind": "item",
+          "name": "命令元素戒指（水）",
+          "english": "Ring of Elemental Command (Water)",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 292,
+          "completeSnapshotSha256": "d58ee966d0d25e129b84d3b0d29d361e2b4ecd2740c1ec6f054e77e4488505ea",
+          "canonicalReboundFullSnapshotSha256": "d58ee966d0d25e129b84d3b0d29d361e2b4ecd2740c1ec6f054e77e4488505ea",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:xdmg:ring%20of%20elemental%20command%20(water)::::::",
+          "kind": "item",
+          "name": "命令元素戒指（水）",
+          "english": "Ring of Elemental Command (Water)",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 292,
+          "completeSnapshotSha256": "dc3e2519e15d837131a465d2e377c09b75fed09e9f7b0c1f16f5d027b79384cb",
+          "canonicalReboundFullSnapshotSha256": "d58ee966d0d25e129b84d3b0d29d361e2b4ecd2740c1ec6f054e77e4488505ea",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:create%20or%20destroy%20water::::::",
+        "kind": "spell",
+        "name": "造水术/枯水术",
+        "english": "Create or Destroy Water",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 258,
+        "fullNormalizedSnapshotSha256": "3738d587bfd9b937fa4e4a815f8de43080790e375cdacbaa6c9411057e1cf748",
+        "ordinarySnapshotSha256": "64c29e616e811a7cc375b34097243247d7183b3570faf08efa72d022ac2b4f63",
+        "baseSpellLevel": 1,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "a41060d2a34b103fbc5d9844eb2f3117bc6a8b1534e6ac86e3b52ba39adbc4d0",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-create-or-destroy-water",
+        "targetEntryId": "kiwee:spell:xphb:create%20or%20destroy%20water::::::",
+        "sourceUid": "Create or Destroy Water|XPHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "none"
+        },
+        "sourceDeclaredSaveDC": 18,
+        "sourcePhysicalConstraint": "worn",
+        "equipmentRequired": true,
+        "requiresAttunement": true,
+        "requiredSources": [
+          "XDMG",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[1769].entries[3].entries[0]",
+            "sha256": "db9ff47c32677960506307483ff978c13cafff4e8482d39fbfc77df405ebd9e1"
+          },
+          {
+            "path": "item[1769].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1769].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[1769]",
+        "originalObjectSortedSha256": "5fb266c4584a94aef8da165d2eb8db4cd3e955bf48dbdc603ffecff400be92e7",
+        "clauses": [
+          {
+            "path": "item[1769].entries[3].entries[0]",
+            "sha256": "db9ff47c32677960506307483ff978c13cafff4e8482d39fbfc77df405ebd9e1"
+          },
+          {
+            "path": "item[1769].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1769].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "3b8e34075d46887c1195f8b19f1ebe1ed31b28c9b99c883fe9a9a557034deb8b"
+    },
+    {
+      "id": "kiwee:item:xdmg:rod%20of%20resurrection::::::",
+      "kind": "item",
+      "name": "复生权杖",
+      "english": "Rod of Resurrection",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 301,
+      "fullNormalizedSnapshotSha256": "0096decc13407dc0dd298ed400be8eacfbf0f039200b7f706df43e4d113bdcc3",
+      "canonicalPoolProofAnchorSha256": "0096decc13407dc0dd298ed400be8eacfbf0f039200b7f706df43e4d113bdcc3",
+      "capacity": 5,
+      "requiresAttunement": true,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:xdmg:rod%20of%20resurrection::::::",
+          "kind": "item",
+          "name": "复生权杖",
+          "english": "Rod of Resurrection",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 301,
+          "completeSnapshotSha256": "0096decc13407dc0dd298ed400be8eacfbf0f039200b7f706df43e4d113bdcc3",
+          "canonicalReboundFullSnapshotSha256": "0096decc13407dc0dd298ed400be8eacfbf0f039200b7f706df43e4d113bdcc3",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:xdmg:rod%20of%20resurrection::::::",
+          "kind": "item",
+          "name": "复生权杖",
+          "english": "Rod of Resurrection",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 301,
+          "completeSnapshotSha256": "de5dbfe6aefaada2d765807d0882457c4b72dcba6f733e6a66910a487c7252ac",
+          "canonicalReboundFullSnapshotSha256": "0096decc13407dc0dd298ed400be8eacfbf0f039200b7f706df43e4d113bdcc3",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:heal::::::",
+        "kind": "spell",
+        "name": "医疗术",
+        "english": "Heal",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 284,
+        "fullNormalizedSnapshotSha256": "de506d9348684af6a5b2232462b57a43f8efa0bc59a6d5593e62acd9b0adbc3d",
+        "ordinarySnapshotSha256": "785572bf2f6a1956b46fa26ab0224a8fd8940a2b74c2b4b8db658995a4a49d42",
+        "baseSpellLevel": 6,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "f8c697e49a62468a8cb208a206c92418c4cb9d82f02bef17ff7a63ba31a110a6",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-heal",
+        "targetEntryId": "kiwee:spell:xphb:heal::::::",
+        "sourceUid": "Heal|XPHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 6,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "none"
+        },
+        "sourceDeclaredSaveDC": null,
+        "sourcePhysicalConstraint": "held",
+        "equipmentRequired": true,
+        "requiresAttunement": true,
+        "requiredSources": [
+          "XDMG",
+          "XPHB"
+        ],
+        "requiredCardEdition": null,
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[1858].entries[0]",
+            "sha256": "4e57f8b0c0402f158da8659ccc61824442821c17e1bf7236971a174c42e0c36f"
+          },
+          {
+            "path": "item[1858].entries[1]",
+            "sha256": "2477ad0bed7051186a3af5eedaba235806241fbb9bb4949ae38080c401f6a163"
+          },
+          {
+            "path": "item[1858].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1858].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[1858]",
+        "originalObjectSortedSha256": "2f49d4d5564ec7229ff90bba9d1aa74522d9207f31210288d53c56b860d2ec6d",
+        "clauses": [
+          {
+            "path": "item[1858].entries[0]",
+            "sha256": "4e57f8b0c0402f158da8659ccc61824442821c17e1bf7236971a174c42e0c36f"
+          },
+          {
+            "path": "item[1858].entries[1]",
+            "sha256": "2477ad0bed7051186a3af5eedaba235806241fbb9bb4949ae38080c401f6a163"
+          },
+          {
+            "path": "item[1858].reqAttune",
+            "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+          },
+          {
+            "path": "item[1858].charges",
+            "sha256": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "00d3462caebbb007ec0a65ab8e1c08f835d3459e09a201ddeb76a75a1964e2df"
+    },
+    {
+      "id": "kiwee:item:xdmg:wand%20of%20magic%20missiles::::::",
+      "kind": "item",
+      "name": "魔法飞弹魔杖",
+      "english": "Wand of Magic Missiles",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 320,
+      "fullNormalizedSnapshotSha256": "3bdbc453be7c765441f21049306b9f5ac203d7fa87f39d3b65ad1b40391c9110",
+      "canonicalPoolProofAnchorSha256": "3bdbc453be7c765441f21049306b9f5ac203d7fa87f39d3b65ad1b40391c9110",
+      "capacity": 7,
+      "requiresAttunement": false,
+      "ownerForms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:item:xdmg:wand%20of%20magic%20missiles::::::",
+          "kind": "item",
+          "name": "魔法飞弹魔杖",
+          "english": "Wand of Magic Missiles",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "page": 320,
+          "completeSnapshotSha256": "3bdbc453be7c765441f21049306b9f5ac203d7fa87f39d3b65ad1b40391c9110",
+          "canonicalReboundFullSnapshotSha256": "3bdbc453be7c765441f21049306b9f5ac203d7fa87f39d3b65ad1b40391c9110",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        },
+        {
+          "form": "final",
+          "id": "kiwee:item:xdmg:wand%20of%20magic%20missiles::::::",
+          "kind": "item",
+          "name": "魔法飞弹魔杖",
+          "english": "Wand of Magic Missiles",
+          "source": "XDMG",
+          "edition": "2024",
+          "packId": "kiwee",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "page": 320,
+          "completeSnapshotSha256": "8b6b909c910f0ab4326442c991faba1bf7ba4663ec938aaf2302192d6b4e9b73",
+          "canonicalReboundFullSnapshotSha256": "3bdbc453be7c765441f21049306b9f5ac203d7fa87f39d3b65ad1b40391c9110",
+          "existingPoolFormAuthority": "canonical-pool-anchor"
+        }
+      ],
+      "target": {
+        "id": "kiwee:spell:xphb:magic%20missile::::::",
+        "kind": "spell",
+        "name": "魔法飞弹",
+        "english": "Magic Missile",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "revision": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d|lists:8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "page": 295,
+        "fullNormalizedSnapshotSha256": "c2d2da1dc904712c508f13c8a8eb245915d9334e93b916faaffbbddbe2215fd6",
+        "ordinarySnapshotSha256": "cc92b859b1c1e371b25221a30b18904e76871705453bc3d8dfdf9afa93a5a196",
+        "baseSpellLevel": 1,
+        "inputSha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+        "lookupSha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+        "originalObjectSortedSha256": "7d81b0bbc7c984fe718418070571e863264e92c28eb2b2aafc6fe660aa82ece9",
+        "normalizedForm": "actual-hydrated-original"
+      },
+      "branch": {
+        "key": "cast-magic-missile-rank-1",
+        "targetEntryId": "kiwee:spell:xphb:magic%20missile::::::",
+        "sourceUid": "Magic Missile|XPHB",
+        "cost": 1,
+        "minAfter": 1,
+        "castLevel": 1,
+        "targetScope": "spell",
+        "sourceActionTiming": "action",
+        "timingBasis": "spell-default-policy",
+        "statistics": {
+          "kind": "none"
+        },
+        "sourceDeclaredSaveDC": null,
+        "sourcePhysicalConstraint": "held",
+        "equipmentRequired": true,
+        "requiresAttunement": false,
+        "requiredSources": [
+          "XDMG",
+          "XPHB"
+        ],
+        "requiredCardEdition": "2024",
+        "policyCode": "XDMG",
+        "policySectionSha256": "d132bff2fb8240961427a8e3160ede24a4e4802e7435f3c11bf8aff717736fbd",
+        "sourceBinding": "explicit-XPHB-source-reference",
+        "clauses": [
+          {
+            "path": "item[2409].entries[0]",
+            "sha256": "e826e73bb55999cdedf549a1c36872dc397da44b9890dad4e0d46edab8ede269"
+          },
+          {
+            "path": "item[2409].entries[1].entries[0]",
+            "sha256": "6a4b7962de019900d46d787d8db3c80dbf2cbf2dcdccf91d0910bc731c59cf92"
+          }
+        ],
+        "manualBoundaries": [
+          "source-effects-target-legality-duration-concentration-and-ending-manual",
+          "physical-holding-or-wearing-and-attunement-legality-manual",
+          "one-selected-cost-one-branch-only",
+          "recovery-and-terminal-outcomes-not-automated",
+          "no-ordinary-slot-fallback-or-new-spell-counter"
+        ]
+      },
+      "sourceProof": {
+        "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+        "originalPath": "item[2409]",
+        "originalObjectSortedSha256": "204b4be23906287bf1d34a0044814a7789d9de62eca191737deadc2b34acb17a",
+        "clauses": [
+          {
+            "path": "item[2409].entries[0]",
+            "sha256": "e826e73bb55999cdedf549a1c36872dc397da44b9890dad4e0d46edab8ede269"
+          },
+          {
+            "path": "item[2409].entries[1].entries[0]",
+            "sha256": "6a4b7962de019900d46d787d8db3c80dbf2cbf2dcdccf91d0910bc731c59cf92"
+          }
+        ]
+      },
+      "wholeEntryCompletionCredit": 0,
+      "policySha256": "0465325431427805ca771305d295d9339839cdf92563b7d3d64482ab273cd138"
+    }
+  ],
+  "held": [
+    {
+      "id": "kiwee:item:au:staff%20of%20the%20lost::::::",
+      "reasonCode": "conditional-current-context-held"
+    },
+    {
+      "id": "kiwee:item:bmt:tidecaller%20trident::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:coa:sage's%20mirror::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:coa:wrought-iron%20tower::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:dmg:cubic%20gate::::::",
+      "reasonCode": "conditional-current-context-held"
+    },
+    {
+      "id": "kiwee:item:dmg:trident%20of%20fish%20command::::::",
+      "reasonCode": "conditional-current-context-held"
+    },
+    {
+      "id": "kiwee:item:egw:ring%20of%20obscuring::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:azorius%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:boros%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:dimir%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:golgari%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:gruul%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:izzet%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:orzhov%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:rakdos%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:selesnya%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:ggr:simic%20guild%20signet::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:kftgv:shard%20solitaire%20(black%20sapphire)::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:kftgv:shard%20solitaire%20(diamond)::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:kftgv:shard%20solitaire%20(jacinth)::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:kftgv:shard%20solitaire%20(rainbow%20pearl)::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:kftgv:shard%20solitaire%20(ruby)::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:skt:rod%20of%20the%20vonindod::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:xdmg:cubic%20gate::::::",
+      "reasonCode": "conditional-current-context-held"
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20shooting%20stars::::::",
+      "reasonCode": "UID-or-statistics-held"
+    },
+    {
+      "id": "kiwee:item:xdmg:spirit%20board::::::",
+      "reasonCode": "conditional-current-context-held"
+    },
+    {
+      "id": "kiwee:item:xdmg:trident%20of%20fish%20command::::::",
+      "reasonCode": "conditional-current-context-held"
+    },
+    {
+      "id": "kiwee:item:xdmg:wand%20of%20fear::::::",
+      "reasonCode": "conditional-current-context-held"
+    }
+  ],
+  "manualLimits": [
+    "source-owned cast and one-charge payment only; spell effects remain manual",
+    "no recovery, terminal outcome, other cost, conditional28 or unknown saved-form admission",
+    "sourcebook policy anchors are semantic proof, not new catalog grants"
+  ],
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0
+}

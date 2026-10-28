@@ -1,4 +1,6 @@
 import {ownedItemChargeResource} from './itemChargeDebits';
+import {chargedItemSpellGrantKey,chargedItemSpellOwnedChild,chargedItemSpellProtectedCollision} from './chargedItemSpells';
+export {setChargedItemSpellIntent} from './chargedItemSpells';
 import type {Character,Entry} from '../model';
 import {rememberSourceSpellUses} from './sourceSpellState';
 import {spellState} from '../characterDetails';
@@ -25,6 +27,7 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
 
  for(const grant of plan.grants){
   let row=c.selections.find(s=>s.id===grant.id);
+  if(row&&chargedItemSpellProtectedCollision(c,row))continue;
   if(!row&&(!grant.eligible||!grant.config.sourceGrant?.active))continue;
   const fresh=!row;
   if(!row){if(c.selections.length>=3000)continue;row={id:grant.id,entry:structuredClone(grant.entry),quantity:1,level:1,equipped:false,parentId:grant.owner.id,grantKey:grant.key};c.selections.push(row);}
@@ -40,6 +43,7 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
   }
  }
  for(const row of c.selections.filter(s=>sourceSpellKey(s.grantKey)&&!matched.has(s.id))){
+  if(chargedItemSpellProtectedCollision(c,row)||chargedItemSpellGrantKey(row.grantKey)&&!chargedItemSpellOwnedChild(c,row))continue;
   const config=c.spellSettings?.special?.[row.id];if(config?.sourceGrant)config.sourceGrant={...config.sourceGrant,active:false,reason:'来源方案未启用或声明已变化，保留记录与消耗'};
  }
  rememberSourceSpellUses(c,undefined,true);return before!==fingerprint();

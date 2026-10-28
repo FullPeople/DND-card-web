@@ -1,4 +1,5 @@
 import {revokeItemAtWillOwners} from './automation/itemAtWill';
+import {revokeChargedItemSpellOwners} from './automation/chargedItemSpells';
 import {revokeOptionalClassListOwners} from './automation/optionalClassSpellLists';
 import {ownedItemChargeResource,revokeItemChargeOwners} from './automation/itemChargeDebits';
 import {ownedLimitedSourceResource,revokeLimitedSourceOwners} from './automation/limitedSourceUses';
@@ -45,6 +46,7 @@ export function removeSelection(c: Character, id: string, dismiss = true) {
     if(!Object.keys(c.classChoiceArchive).length)delete c.classChoiceArchive;
   }
   revokeItemAtWillOwners(c,removed);
+  revokeChargedItemSpellOwners(c,removed);
   revokeOptionalClassListOwners(c,removed);
   revokeLimitedSourceOwners(c,removed);
   revokeItemChargeOwners(c,removed);
