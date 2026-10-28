@@ -102,6 +102,8 @@ export interface Derived {
   sourceMovement?:Partial<Record<'swim'|'climb',number>>;
   /** Explicit source relations to current final walking; derived only, never saved. */
   relativeMovement?:Partial<Record<'swim'|'climb',number>>;
+  /** Source-qualified class swim/climb relations, after final walking overrides. */
+  classMovement?:Partial<Record<'swim'|'climb',number>>;
   /** Source-proved racial range only; never saved or applied to map vision. */
   senses?:{darkvision?:number};
   /** Before reviewed item floors, after advancement; derived only, not saved. */

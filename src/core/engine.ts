@@ -1,4 +1,6 @@
 import {projectVariantItemResistanceBonuses} from './automation/variantItemResistanceBonuses';
+import {projectRacialResistances} from './automation/racialResistances';
+import {projectClassMovement,projectClassMovementModes} from './automation/classMovement';
 import {projectRelativeRacialMovement} from './automation/relativeRacialMovement';
 import {projectItemResistanceBonuses} from './automation/itemResistanceBonuses';
 import {projectItemPassiveBonuses} from './automation/itemPassiveBonuses';
@@ -30,8 +32,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const itemPassives=projectItemPassiveBonuses(c,active);issues.push(...itemPassives.issues);
   const itemResistance=projectItemResistanceBonuses(c,active);issues.push(...itemResistance.issues);
   const variantResistance=projectVariantItemResistanceBonuses(c,active);issues.push(...variantResistance.issues);
+  const racialResistance=projectRacialResistances(c,active);issues.push(...racialResistance.issues);
   const racialSenses=projectRacialDarkvision(c,active);issues.push(...racialSenses.issues);
   const racialMovement=projectRacialMovement(c,active);issues.push(...racialMovement.issues);
+  const classMovement=projectClassMovement(c,active);issues.push(...classMovement.issues);
   for(const s of c.selections)if(!excluded.has(s.id)&&!selectionEffectsAllowed(c,s.entry))issues.push({id:`disabled:${s.id}`,message:`${s.entry.name} 的来源、依赖或规则选项未启用，保留内容但不计效果。`,selectionId:s.id,severity:'error'});
   const baseAbilities=baseAbilityScores(c,active),abilities=baseAbilities.abilities,trace:Record<string,string[]>=baseAbilities.trace;issues.push(...baseAbilities.issues);
   const classes = active.filter(s => s.entry.kind === 'class');
@@ -42,6 +46,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const raceSpeed = active.find(s => s.entry.kind === 'race')?.entry.raw.speed;
   const walking=typeof raceSpeed==='number'?raceSpeed:raceSpeed?.walk;
   let speed = typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
+  speed+=classMovement.walkingBonus;
   const sizes = new Set<string>();
   const effectTrace:Record<string,string[]>={ac:[],hp:[],speed:[]};
   const invocationSkillsApplied=new Set<string>();
@@ -118,13 +123,13 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry)&&!reviewedAlertIdentity(row.entry))):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
   let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=[...infusion.resistanceTrace,...itemResistance.trace,...variantResistance.trace];
+  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=[...infusion.resistanceTrace,...itemResistance.trace,...variantResistance.trace,...racialResistance.trace];
   ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus+itemPassives.acBonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
   trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace,...itemPassives.acTrace];
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
-  trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
+  trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...classMovement.trace,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0) + (itemPassives.saveBonuses[a] || 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
   const alert=evaluateReviewedAlert(c,active);issues.push(...alert.issues);
   let initiative = alert.initiativeBonus + modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value + observant.passivePerceptionBonus;
@@ -159,6 +164,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   maxHp += reviewedFeats.hpBonus;trace.hp.push(...reviewedFeats.hpTrace);
   for (const [target, value] of Object.entries(c.sheetBonuses || {})) if (value) (trace[target] ??= []).push(`卡面调整 ${value >= 0 ? '+' : ''}${value}`);
   const relativeMovement=projectRelativeRacialMovement(c,speed,active);issues.push(...relativeMovement.issues);
+  const classModes=projectClassMovementModes(c,speed,active);
+  for(const issue of classModes.issues)if(!issues.some(existing=>existing.id===issue.id))issues.push(issue);
   issues.push(...planFeatureResources(c).issues);
   for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
   for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(itemPassives.saveTrace[a]||[]),...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
@@ -166,10 +173,12 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   if(racialSenses.trace.length)trace.darkvision=racialSenses.trace;
   if(racialMovement.trace.length)trace.sourceMovement=racialMovement.trace;
   if(relativeMovement.trace.length)trace.relativeMovement=relativeMovement.trace;
+  if(classMovement.trace.length||classModes.trace.length)trace.classMovement=[...classMovement.trace,...classModes.trace];
   return { abilities, ...(equipmentChangedAbilities?{naturalAbilities}:{}), modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),...(racialSenses.darkvision===undefined?{}:{senses:{darkvision:racialSenses.darkvision}}),
     ...(Object.keys(racialMovement.modes).length?{sourceMovement:racialMovement.modes}:{}),
     ...(Object.keys(relativeMovement.modes).length?{relativeMovement:relativeMovement.modes}:{}),
-    skills, saves, requirements, issues, trace, resistances:[...new Set([...infusion.resistances,...itemResistance.resistances,...variantResistance.resistances])],
+    ...(Object.keys(classModes.modes).length?{classMovement:classModes.modes}:{}),
+    skills, saves, requirements, issues, trace, resistances:[...new Set([...infusion.resistances,...itemResistance.resistances,...variantResistance.resistances,...racialResistance.resistances])],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }
 

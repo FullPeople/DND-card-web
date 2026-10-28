@@ -3,6 +3,7 @@ import {ArmorAdjustmentReview} from './ArmorAdjustmentReview';
 import {RacialDarkvisionSummary} from './RacialDarkvisionSummary';
 import {RacialMovementSummary} from './RacialMovementSummary';
 import {RelativeRacialMovementSummary} from './RelativeRacialMovementSummary';
+import {ClassMovementSummary} from './ClassMovementSummary';
 import {SourceSpellChoiceControl,SourceResourceColumnControl} from './SourceSpellControls';
 import {LimitedSourceUseControl} from './LimitedSourceUseControl';
 import {ItemChargeUseControl} from './ItemChargeUseControl';
@@ -34,10 +35,11 @@ export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:E
   {d.issues.filter(issue=>issue.id.startsWith('armor-')||issue.id.startsWith('feature-ac-rule:')||issue.id.startsWith('equipment-')||issue.id==='automation-protocol').map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <h3>当前自动抗性</h3><p data-testid="automation-resistances">{INFUSION_DAMAGE_TYPES.filter(type=>d.resistances?.includes(type)).join('、')||'无'}</p><p>仅列出当前可核对并生效的抗性；实际伤害结算与减免仍需手动处理，不会自动改写生命值。</p>
   <ul>{d.trace.resistances?.map((line,i)=><li key={i}>{line}</li>)}</ul>
-  {d.issues.filter(issue=>issue.id.startsWith('item-resistance-bonus:')||issue.id.startsWith('variant-item-resistance-bonus:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
+  {d.issues.filter(issue=>issue.id.startsWith('item-resistance-bonus:')||issue.id.startsWith('variant-item-resistance-bonus:')||issue.id.startsWith('racial-resistance:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <RacialDarkvisionSummary d={d}/>
   <RacialMovementSummary d={d}/>
   <RelativeRacialMovementSummary d={d}/>
+  <ClassMovementSummary d={d}/>
   <h3>装备武器与快捷攻击</h3><p>装备后按属性、熟练和武器加值生成攻击。每件武器可选择命中与伤害所用属性，默认自动；武器额外加值保留。投掷、双手使用分别显示；不自动消耗弹药或判定战场条件，手工动作保留。</p>
   {enabled&&c.selections.filter(row=>weaponType(row.entry)).map(row=><div key={row.id} data-weapon-selection={row.id} style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}><label><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>{row.entry.raw.attackBonus===undefined?<label>命中与伤害属性<select aria-label={`${row.entry.name}计算属性`} value={row.weaponAbility||''} onChange={e=>edit(draft=>{const stored=draft.selections.find(s=>s.id===row.id);if(!stored)return;if(e.target.value)stored.weaponAbility=e.target.value as Ability;else delete stored.weaponAbility;})}><option value="">自动（{ABILITY_LABELS[automaticWeaponAbility(row.entry,d)]}）</option>{ABILITIES.map(a=><option key={a} value={a}>{ABILITY_LABELS[a]}</option>)}</select></label>:<small>使用手写命中与伤害公式，计算属性不追加。</small>}</div>)}
   {weapons.attacks.map(attack=><details key={attack.key}><summary>{attack.name}：命中 {attack.attack_bonus}，伤害 {attack.damage}</summary><ul>{attack.trace.map((line,i)=><li key={i}>{line}</li>)}</ul></details>)}
