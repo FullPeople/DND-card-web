@@ -1,5 +1,6 @@
 import {projectVariantItemResistanceBonuses} from './automation/variantItemResistanceBonuses';
 import {projectRacialResistances} from './automation/racialResistances';
+import {projectRacialNaturalArmor,racialNaturalArmorFamilyId} from './automation/racialNaturalArmor';
 import {projectClassMovement,projectClassMovementModes} from './automation/classMovement';
 import {projectRelativeRacialMovement} from './automation/relativeRacialMovement';
 import {projectItemResistanceBonuses} from './automation/itemResistanceBonuses';
@@ -84,6 +85,10 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Retain already recorded skill choices from older backups, without quota limits.
     if(!invocationScope)for (const [key, values] of Object.entries(c.answers)) if (key.startsWith(`${selection.id}:skills:`) || key.startsWith(`${selection.id}:custom:`)) values.forEach(value => grantSkill(value, origin));
     for (const effect of invocationScope ? [] : e.effects || []) {
+      // Recognized innate-AC sources use their complete proof, not a changed
+      // snapshot's legacy AC field. Other mechanisms and CUSTOM entries retain
+      // their established executors.
+      if(effect.op!=='proficiency'&&effect.target==='ac'&&racialNaturalArmorFamilyId(e))continue;
       if (effect.op === 'proficiency') grantSkill(effect.skill, origin);
       else if (ABILITIES.includes(effect.target as Ability)) {
         // Applied once by the shared pre-advancement score layer.
@@ -120,14 +125,18 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   // A recognized, unreviewed Observant payload is manual in every generic
   // executor, including the separate prose-based armor pass. Genuine XPHB
   // entries retain their existing generic route through the identity exception.
-  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry)&&!reviewedAlertIdentity(row.entry))):undefined;
+  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry)&&!reviewedAlertIdentity(row.entry)&&!racialNaturalArmorFamilyId(row.entry))):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
-  let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
+  // Keep unsupported-clause notices without letting an edited recognized
+  // source regain AC through the separate legacy prose executor.
+  if(automationEnabled(c))issues.push(...evaluateFeatureArmor(active.filter(row=>!!racialNaturalArmorFamilyId(row.entry))).issues);
+  const naturalArmor=projectRacialNaturalArmor(c,{modifiers,armor,explicitBaseOverride:acOverride},active);issues.push(...naturalArmor.issues);
+  let ac = (acOverride ?? naturalArmor.base ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
   const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=[...infusion.resistanceTrace,...itemResistance.trace,...variantResistance.trace,...racialResistance.trace];
-  ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus+itemPassives.acBonus;
+  ac += acBonus+naturalArmor.bonus+(featureArmor?.bonus||0)+infusion.bonus+itemPassives.acBonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
   let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace,...itemPassives.acTrace];
+  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]),...naturalArmor.trace, ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace,...itemPassives.acTrace];
   trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
   trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...classMovement.trace,...effectTrace.speed];
   const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0) + (itemPassives.saveBonuses[a] || 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];

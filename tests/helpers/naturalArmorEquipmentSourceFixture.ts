@@ -1,0 +1,27 @@
+import {readFileSync,realpathSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {normalizeCatalogData} from '../../src/data/catalog';
+import {hydrateSpellLookup} from '../../src/data/spellLookup';
+import type {Entry,Selection} from '../../src/core/model';
+
+// Validation context only. This pin is NOT a prerequisite for an unworn race,
+// and does not alter the immutable ten-owner racial source evidence.
+export const naturalArmorEquipmentPin={url:'https://5e.kiwee.top/data/items-base.json',bytes:149813,sha256:'8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff'}as const;
+export const naturalArmorEquipmentSpecs=[
+ {key:'leather',path:'baseitem/105',name:'皮甲',english:'Leather Armor',page:144,type:'LA',ac:11,rawSha256:'a011e0176d47bef919558863717d24dc5887280869257d4cbc0e1fc6b1dba2f4'},
+ {key:'plate',path:'baseitem/150',name:'板甲',english:'Plate Armor',page:145,type:'HA',ac:18,rawSha256:'08617d1905d33c5039ca7b3d3c8ee2a776779afb2234353ae6b697cabb019fb2'},
+ {key:'shield',path:'baseitem/174',name:'盾牌',english:'Shield',page:144,type:'S',ac:2,rawSha256:'e878f40e61f6bad68c840cddc646506575f66c1ee7542e4798baa0f4347e1ef0'},
+]as const;
+type Key=typeof naturalArmorEquipmentSpecs[number]['key'];type Form='canonical'|'app';
+const sorted=(value:any):any=>Array.isArray(value)?value.map(sorted):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().filter(key=>value[key]!==undefined).map(key=>[key,sorted(value[key])])):value;
+const digest=(value:string|Uint8Array)=>createHash('sha256').update(value).digest('hex');
+export const naturalArmorEquipmentSnapshot=(value:unknown)=>digest(JSON.stringify(sorted(value)));
+const fail:(code:string)=>never=code=>{throw Error('NATURAL_ARMOR_EQUIPMENT_SOURCE_'+code);};
+function boundary(){const key=Symbol.for('dnd.offlineCatalogFetch.v1'),descriptor=Object.getOwnPropertyDescriptor(globalThis,key),guard=(globalThis as any)[key];if(!descriptor||descriptor.writable!==false||descriptor.configurable!==false||!Object.isFrozen(guard)||guard.version!==1||globalThis.fetch!==guard.deny||!Array.isArray(guard.unexpected)||guard.unexpected.length)fail('STARTUP_BOUNDARY');}
+let original:Record<string,any>|undefined;
+function body(){boundary();if(original)return original;const directory=process.env.RACIAL_NATURAL_ARMOR_FROZEN_DIR;if(!directory)fail('FROZEN_DIRECTORY');const root=realpathSync(directory),index=JSON.parse(readFileSync(root+'/index.json','utf8')),rows=index.rows.filter((row:any)=>row?.url===naturalArmorEquipmentPin.url);if(rows.length!==1||rows[0].sha256!==naturalArmorEquipmentPin.sha256||rows[0].path!=='files/'+naturalArmorEquipmentPin.sha256+'.json')fail('INPUT_PIN');const file=realpathSync(root+'/'+rows[0].path);if(!file.startsWith(root+'/'))fail('INPUT_PATH');const bytes=readFileSync(file);if(bytes.length!==naturalArmorEquipmentPin.bytes||digest(bytes)!==naturalArmorEquipmentPin.sha256)fail('INPUT_BYTES');const source=JSON.parse(bytes.toString('utf8'));if(digest(JSON.stringify(source))!==naturalArmorEquipmentPin.sha256)fail('INPUT_CANONICAL');for(const spec of naturalArmorEquipmentSpecs){const raw=spec.path.split('/').reduce((row:any,key)=>row?.[key],source);if(!raw||naturalArmorEquipmentSnapshot(raw)!==spec.rawSha256||raw.name!==spec.name||raw.ENG_name!==spec.english||raw.source!=='PHB'||raw.page!==spec.page||raw.type!==spec.type||raw.ac!==spec.ac||raw.bonusAc!==undefined||raw.reqAttune!==undefined||raw._copy)fail('EXACT_PLAIN_ORIGINAL');}return original=source;}
+const cache:Partial<Record<Form,Map<Key,Entry>>>={};
+function route(form:Form){boundary();if(form!=='canonical'&&form!=='app')fail('FORM');if(cache[form])return cache[form]!;const normalized=normalizeCatalogData(structuredClone(body()),naturalArmorEquipmentPin.sha256,'kiwee'),routed=form==='app'?normalized.map(entry=>hydrateSpellLookup(entry,{},'')):normalized,out=new Map<Key,Entry>();for(const spec of naturalArmorEquipmentSpecs){const matches=routed.filter(entry=>entry.kind==='item'&&entry.packId==='kiwee'&&entry.source==='PHB'&&entry.edition==='2014'&&entry.name===spec.name&&entry.english===spec.english&&entry.page===spec.page&&entry.raw._category==='baseitem');if(matches.length!==1)fail('COMPLETE_HEADER_NOT_UNIQUE');const entry=matches[0];if(!entry.id||entry.revision!==naturalArmorEquipmentPin.sha256||routed.filter(row=>row.id===entry.id).length!==1||entry.raw.type!==spec.type||entry.raw.ac!==spec.ac||entry.raw._copy||entry.raw._unresolvedParent||entry.raw._versionBaseName)fail('COMPLETE_ENTRY_INVALID');out.set(spec.key,entry);}return cache[form]=out;}
+export function naturalArmorEquipmentFind(key:Key,form:Form='canonical'):Entry{const entry=route(form).get(key);if(!entry)fail('UNREVIEWED_KEY');return entry;}
+export function naturalArmorEquipmentSelection(key:Key,form:Form='canonical'):Selection{return{id:'authored-natural-armor-gear-'+key,entry:structuredClone(naturalArmorEquipmentFind(key,form)),quantity:1,level:1,equipped:true};}
+export function naturalArmorEquipmentSourceProof(){return{scope:'validation-context-only-not-racial-authority-prerequisite',inputs:[naturalArmorEquipmentPin],sourceProseIncluded:false,rows:naturalArmorEquipmentSpecs.map(spec=>{const canonical=naturalArmorEquipmentFind(spec.key),app=naturalArmorEquipmentFind(spec.key,'app');return{...spec,source:'PHB',id:canonical.id,revision:canonical.revision,category:canonical.raw._category,forms:[{form:'canonical',id:canonical.id,sha256:naturalArmorEquipmentSnapshot(canonical)},{form:'app',id:app.id,sha256:naturalArmorEquipmentSnapshot(app)}]};})};}
