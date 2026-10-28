@@ -33,6 +33,7 @@ export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:E
   {d.issues.filter(issue=>issue.id.startsWith('armor-')||issue.id.startsWith('feature-ac-rule:')||issue.id.startsWith('equipment-')||issue.id==='automation-protocol').map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <h3>当前自动抗性</h3><p data-testid="automation-resistances">{INFUSION_DAMAGE_TYPES.filter(type=>d.resistances?.includes(type)).join('、')||'无'}</p><p>仅列出当前可核对并生效的抗性；实际伤害结算与减免仍需手动处理，不会自动改写生命值。</p>
   <ul>{d.trace.resistances?.map((line,i)=><li key={i}>{line}</li>)}</ul>
+  {d.issues.filter(issue=>issue.id.startsWith('item-resistance-bonus:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <RacialDarkvisionSummary d={d}/>
   <RacialMovementSummary d={d}/>
   <h3>装备武器与快捷攻击</h3><p>装备后按属性、熟练和武器加值生成攻击。每件武器可选择命中与伤害所用属性，默认自动；武器额外加值保留。投掷、双手使用分别显示；不自动消耗弹药或判定战场条件，手工动作保留。</p>
