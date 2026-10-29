@@ -7,7 +7,7 @@ function expectOldBackup(rows:Character[],original:Character){const backup=rows.
 
 test('multi-candidate migration recommends the current handbook, respects custom and saves only the reviewed copy',async({page})=>{
  await mockSource(page);await suppressAnnouncement(page);
- await page.route('**/data/races.json',r=>r.fulfill({json:{race:['PHB','XPHB','XDMG','EXP-A','EXP-B'].map(source=>({name:'原创旅人',ENG_name:'Original Traveller',source,entries:['原创迁移候选 '+source]}))}}));
+ await page.context().route('**/data/races.json',r=>r.fulfill({json:{race:['PHB','XPHB','XDMG','EXP-A','EXP-B'].map(source=>({name:'原创旅人',ENG_name:'Original Traveller',source,entries:['原创迁移候选 '+source]}))}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  const c=newCharacter();c.name='三宝书推荐验收';c.profile.enabledSources=['PHB','XPHB','XDMG','EXP-A','EXP-B'];
  const old=(name:string,kind:Entry['kind']):Entry=>({id:'old:'+name,name,english:name,kind,source:'IMPORTED',packId:'imported',edition:'both',revision:'1',entries:['原创旧卡'],raw:{}});

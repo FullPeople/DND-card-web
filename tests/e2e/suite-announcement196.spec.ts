@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {mockSource} from './fixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 test('authored character and Wiki preview for the legacy announcement',async({page})=>{
- await mockSource(page);await page.route('https://5e.kiwee.top/data/bestiary/index.json',route=>route.fulfill({json:{CUSTOM:'bestiary-showcase.json'}}));await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
+ await mockSource(page);await page.context().route('https://5e.kiwee.top/data/bestiary/index.json',route=>route.fulfill({json:{CUSTOM:'bestiary-showcase.json'}}));await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
  const c=newCharacter();c.name='星湾记录员';c.player='示例角色';c.abilities={str:10,dex:14,con:14,int:16,wis:12,cha:10};c.baseHp=18;c.runtime.hp=18;
  const entry=(id:string,kind:Entry['kind'],name:string,raw:Record<string,unknown>={}):Entry=>({id,kind,name,english:name,source:'CUSTOM',edition:'both',packId:'custom',revision:'1',raw:{_custom:true,...raw},entries:['此内容为界面演示原创，不包含出版规则或真实玩家资料。']});
  c.selections=[entry('showcase-class','class','星图学者',{hd:{faces:6}}),entry('showcase-race','race','远行者',{speed:30}),entry('showcase-bg','background','抄书员'),entry('showcase-feature','feature','旅行札记'),entry('showcase-spell','spell','微光术',{level:0,school:'I'})].map(e=>({id:e.id,entry:e,level:e.kind==='class'?3:1,quantity:1,equipped:false}));

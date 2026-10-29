@@ -13,7 +13,7 @@ async function readingSource(page:Page){
   'adventures.json':{adventure:[{id:'TRIP',name:'纸页旅行',contents:[{name:'启程'}]}]},'adventure/adventure-trip.json':{adventureData:[{id:'TRIP',data:[{type:'section',name:'启程',entries:['原创冒险章节。']}]}]}
  };
  await page.context().route('https://5e.kiwee.top/data/**',async route=>{const path=new URL(route.request().url()).pathname.replace('/data/','');if(Object.hasOwn(files,path))await route.fulfill({json:files[path],headers:{'access-control-allow-origin':'*'}});else await route.fallback();});
- await page.route('https://5e.kiwee.top/img/authored-paper.svg',route=>route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="#ccc"/></svg>'}));
+ await page.context().route('https://5e.kiwee.top/img/authored-paper.svg',route=>route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="#ccc"/></svg>'}));
 }
 test.beforeEach(async({page})=>readingSource(page));
 

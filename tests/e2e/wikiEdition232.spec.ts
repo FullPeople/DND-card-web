@@ -3,7 +3,7 @@ import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 
 async function ready(page:Page){
   await mockSource(page);await suppressAnnouncement(page);
-  await page.route('**/data/class/class-test.json',route=>route.fulfill({json:{
+  await page.context().route('**/data/class/class-test.json',route=>route.fulfill({json:{
     class:['PHB','XPHB'].map(source=>({name:'版本测试职业',source,entries:['原创主体正文。']})),
     subclass:['PHB','XPHB'].flatMap(classSource=>['PHB','XPHB','XGE'].map(source=>({name:`${source}测试子职`,source,className:'版本测试职业',classSource,entries:[`${source}原创子职正文。`]}))),
   }}));

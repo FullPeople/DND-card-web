@@ -11,7 +11,7 @@ function dwarfEntry(name:string):Entry{return {id:`fixture:race:PHB:${name}`,kin
 const possessions=(c:Character)=>c.selections.filter(row=>row.entry.kind==='item').map(({id,quantity,equipped,attuned})=>({id,quantity,equipped,attuned}));
 function character(){const c=newCharacter();c.name='背景气泡卡';c.automation=newAutomationState();c.selections=[{id:'bubble-background',entry:background,quantity:1,level:1,equipped:false}];return c;}
 async function ready(page:Page,c=character()){
- await mockSource(page);await suppressAnnouncement(page);await page.route('**/data/backgrounds.json',route=>route.fulfill({json:{background:data.background}}));await page.route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));
+ await mockSource(page);await suppressAnnouncement(page);await page.context().route('**/data/backgrounds.json',route=>route.fulfill({json:{background:data.background}}));await page.context().route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
  await page.getByTestId('character-file').setInputFiles({name:'source-choice.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  if(c.edition==='2014'){

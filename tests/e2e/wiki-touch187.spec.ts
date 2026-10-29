@@ -3,7 +3,7 @@ import {mockSource} from './fixtures';
 
 async function setup(page:Page,phone:boolean){
   await mockSource(page);
-  await page.route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:Array.from({length:80},(_,i)=>({name:i===0?'微光术':`练习法术${String(i).padStart(2,'0')}`,source:'XPHB',level:0,entries:['原创触摸测试正文。']}))}}));
+  await page.context().route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:Array.from({length:80},(_,i)=>({name:i===0?'微光术':`练习法术${String(i).padStart(2,'0')}`,source:'XPHB',level:0,entries:['原创触摸测试正文。']}))}}));
   await page.goto('./');
   if(phone)await page.getByRole('switch',{name:'编辑模式'}).tap();
   if(phone)await page.getByRole('navigation',{name:'工作区'}).getByRole('button',{name:'Wiki',exact:true}).tap();

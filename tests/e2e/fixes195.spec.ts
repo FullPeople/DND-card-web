@@ -3,7 +3,7 @@ import {mockSource,fillFromDetail} from './fixtures';
 import {source195} from '../fixtures/source195';
 import {newCharacter,type Entry} from '../../src/core/model';
 const raw=source195.class[0],cls:Entry={id:'test-caster',kind:'class',name:raw.name,english:raw.name,source:raw.source,edition:'2024',packId:'test',revision:'1',entries:[],raw};
-async function start(page:Page){await mockSource(page);await page.route('https://5e.kiwee.top/data/class/class-test.json',r=>r.fulfill({json:source195}));await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
+async function start(page:Page){await mockSource(page);await page.context().route('https://5e.kiwee.top/data/class/class-test.json',r=>r.fulfill({json:source195}));await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();}
 async function loadCard(page:Page){const c=newCharacter();c.name='界面核对';c.abilities.con=14;c.abilities.wis=16;c.selections=[{id:'caster',entry:cls,level:8,quantity:1,equipped:false}];c.runtime.resources={'spell-slot:1':{name:'1环法术位',current:3,max:4},'spell-slot:2':{name:'2环法术位',current:2,max:3}};await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'test195.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();}
 test('Wiki preserves nested feature prose and separate edition-qualified subclass sections',async({page})=>{
  await start(page);await page.locator('.catalog-row').first().click();await page.getByRole('button',{name:'子职',exact:true}).click();

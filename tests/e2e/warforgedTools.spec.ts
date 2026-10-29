@@ -11,9 +11,9 @@ async function saved(page:Page){return page.evaluate(async()=>{
 });}
 async function ready(page:Page,book:'ERLW'|'EFA',mobile=false){
  await mockSource(page,{displayMode:mobile?'screen':'a4'});await suppressAnnouncement(page);
- await page.route('**/data/races.json',route=>route.fulfill({json:{race:source.projection.race}}));
- await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:source.projection.baseitem}}));
- await page.route('**/data/skills.json',route=>route.fulfill({json:{skill:['PHB','XPHB'].map(source=>({name:'运动',ENG_name:'Athletics',source,entries:['原创拖拽技能验收夹具。']}))}}));
+ await page.context().route('**/data/races.json',route=>route.fulfill({json:{race:source.projection.race}}));
+ await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:source.projection.baseitem}}));
+ await page.context().route('**/data/skills.json',route=>route.fulfill({json:{skill:['PHB','XPHB'].map(source=>({name:'运动',ENG_name:'Athletics',source,entries:['原创拖拽技能验收夹具。']}))}}));
  const c=newCharacter(book==='ERLW'?'2014':'2024');c.name='战俑工具入口 '+book;c.automation=newAutomationState();c.profile.enabledSources.push(book);c.training={tools:'手工工具记录',languages:'手工语言'};c.runtime.hp=7;c.runtime.resources={spent:{current:1,max:4}};c.selections=[{id:'race',entry:warforgedToolEntries().find(e=>e.kind==='race'&&e.source===book)!,quantity:1,level:1,equipped:false}];
  await page.goto('/');if(mobile)await page.getByRole('button',{name:'Wiki',exact:true}).click();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();if(mobile)await page.getByRole('button',{name:'功能页',exact:true}).click();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'synthetic-warforged-tools.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});

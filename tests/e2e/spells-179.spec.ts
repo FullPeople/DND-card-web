@@ -28,8 +28,8 @@ test('daily full-list caster shows eligible known spells with preparation marks 
  const c=newCharacter();add(c,entry('class','测试牧师',{casterProgression:'full',cantripProgression:[3,3,3],preparedSpellsProgression:[4,5,6],preparedSpellsChange:'restLong'}));
  await load(page,c,async()=>{
   const values=[{name:'一环祈祷',source:'XPHB',level:1,entries:['测试祈祷']},{name:'二环祈祷',source:'XPHB',level:2,entries:['测试祈祷']},{name:'高环祈祷',source:'XPHB',level:3,entries:['测试祈祷']}];
-  await page.route('https://5e.kiwee.top/data/spells/spells-test.json',r=>r.fulfill({json:{spell:values}}));
-  await page.route('https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json',r=>r.fulfill({json:{xphb:Object.fromEntries(values.map(v=>[v.name,{class:{XPHB:{测试牧师:true}}}]))}}));
+  await page.context().route('https://5e.kiwee.top/data/spells/spells-test.json',r=>r.fulfill({json:{spell:values}}));
+  await page.context().route('https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json',r=>r.fulfill({json:{xphb:Object.fromEntries(values.map(v=>[v.name,{class:{XPHB:{测试牧师:true}}}]))}}));
  });
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();await page.getByRole('switch',{name:'编辑模式'}).click();await expect(page.locator('.spell-library')).toContainText('已知法术');await expect(page.locator('.spell-library .spell-stock-tile')).toHaveCount(2);
  const known=page.locator('.spell-library .spell-stock-tile').filter({hasText:'一环祈祷'});await known.click();await expect(page.locator('.ordinary-prepared-group .spell-stock-tile')).toHaveCount(1);await expect(page.locator('.spell-library .spell-stock-tile')).toHaveCount(2);await expectPrepared(known,true);await page.locator('.ordinary-prepared-group .spell-stock-tile').click();await expectPrepared(known,false);

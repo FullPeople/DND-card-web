@@ -8,8 +8,8 @@ test('array equipment loads through the worker and the no-worker fallback',async
     const context=await browser.newContext(),page=await context.newPage();
     if(!workerAvailable)await page.addInitScript(()=>{Object.defineProperty(window,'Worker',{value:undefined,configurable:true});});
     await mockSource(page);
-    await page.route('**/data/bestiary/index.json',route=>route.fulfill({json:{fixture:'bestiary-test.json'}}));
-    await page.route('**/data/backgrounds.json',route=>route.fulfill({json:{background:[{name:'装备格式验收背景',source:'XPHB',startingEquipment:[{_:[{item:'测试皮甲|XPHB',quantity:2}]}],entries:['自制格式验收。']}]}}));
+    await page.context().route('**/data/bestiary/index.json',route=>route.fulfill({json:{fixture:'bestiary-test.json'}}));
+    await page.context().route('**/data/backgrounds.json',route=>route.fulfill({json:{background:[{name:'装备格式验收背景',source:'XPHB',startingEquipment:[{_:[{item:'测试皮甲|XPHB',quantity:2}]}],entries:['自制格式验收。']}]}}));
     await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
     await expect(page.locator('.load-errors')).toHaveCount(0);
     await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'背景',exact:true}).click();
@@ -29,13 +29,13 @@ test('reported real sources recover with retry and reuse valid cached JSON on re
   const calls:Record<string,number>={},errors:string[]=[];let workers=0,failBackground=true;
   page.on('pageerror',error=>errors.push(String(error)));page.on('worker',()=>workers++);
   await mockSource(page);
-  await page.route('**/data/bestiary/index.json',route=>route.fulfill({json:{fixture:'bestiary-test.json'}}));
-  await page.route('**/data/backgrounds.json',route=>{
+  await page.context().route('**/data/bestiary/index.json',route=>route.fulfill({json:{fixture:'bestiary-test.json'}}));
+  await page.context().route('**/data/backgrounds.json',route=>{
     calls['data/backgrounds.json']=(calls['data/backgrounds.json']||0)+1;
     if(failBackground){failBackground=false;return route.fulfill({status:503,body:'temporary verification failure'});}
     return route.fulfill({json:sources.get('/data/backgrounds.json')!.body});
   });
-  await page.route('https://homebrew.kiwee.top/**',route=>{
+  await page.context().route('https://homebrew.kiwee.top/**',route=>{
     const path=decodeURIComponent(new URL(route.request().url()).pathname);
     if(path==='/_generated/index-sources.json')return route.fulfill({json:Object.fromEntries(manifest.slice(1).map((source,i)=>[String(i),source.path]))});
     const source=sources.get(path);if(!source)return route.fulfill({json:{}});

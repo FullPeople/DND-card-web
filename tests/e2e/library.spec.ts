@@ -3,13 +3,13 @@ import { mockSource, fillFromDetail } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
   await mockSource(page);
-  await page.route('**/data/spells/spells-test.json', route => route.fulfill({ json: { spell: [
+  await page.context().route('**/data/spells/spells-test.json', route => route.fulfill({ json: { spell: [
     { name: '低环甲', ENG_name: 'Low Ember', source: 'XPHB', level: 1, school: 'V', time: [{ number: 1, unit: 'action' }], entries: ['用于验收的一点火光。'] },
     { name: '高环乙', ENG_name: 'High Ember', source: 'XPHB', level: 3, school: 'V', time: [{ number: 1, unit: 'action' }], entries: ['用于验收的另一点火光。'] },
     { name: '幻影丙', ENG_name: 'Test Mirage', source: 'XPHB', level: 2, school: 'I', entries: ['用于验收的幻象。'] },
   ] } }));
-  await page.route('**/data/languages.json', route => route.fulfill({ json: { language: [{ name: '测试语', ENG_name: 'Test Speech', source: 'XPHB', type: 'standard', script: '测试文字', entries: ['自制语言正文。'] }] } }));
-  await page.route('**/data/conditionsdiseases.json', route => route.fulfill({ json: { condition: [{ name: '测试状态', source: 'XPHB', entries: ['用于验收的状态正文。'] }] } }));
+  await page.context().route('**/data/languages.json', route => route.fulfill({ json: { language: [{ name: '测试语', ENG_name: 'Test Speech', source: 'XPHB', type: 'standard', script: '测试文字', entries: ['自制语言正文。'] }] } }));
+  await page.context().route('**/data/conditionsdiseases.json', route => route.fulfill({ json: { condition: [{ name: '测试状态', source: 'XPHB', entries: ['用于验收的状态正文。'] }] } }));
   await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); await page.getByRole('switch', { name: '编辑模式' }).click();
 });
 

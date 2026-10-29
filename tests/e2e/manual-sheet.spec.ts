@@ -11,7 +11,7 @@ async function dragOut(page: Page, source: Locator) {
   const b = (await source.boundingBox())!; await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.down();
   await page.mouse.move(710, 420, { steps: 12 }); await expect(page.locator('.removal-preview')).toBeVisible(); await page.mouse.up();
 }
-test.beforeEach(async ({ page }) => { await mockSource(page); await page.route('https://5e.kiwee.top/data/races.json', route => route.fulfill({ json: { race: [{ name: '测试精灵', source: 'XPHB', size: ['M'], entries: [{ type: 'entries', name: '测试感官', entries: ['自制感官内容。'] }] }] } })); await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); await page.getByRole('switch', { name: '编辑模式' }).click(); });
+test.beforeEach(async ({ page }) => { await mockSource(page); await page.context().route('https://5e.kiwee.top/data/races.json', route => route.fulfill({ json: { race: [{ name: '测试精灵', source: 'XPHB', size: ['M'], entries: [{ type: 'entries', name: '测试感官', entries: ['自制感官内容。'] }] }] } })); await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); await page.getByRole('switch', { name: '编辑模式' }).click(); });
 
 test('declared features arrive automatically, manual proficiency supplements rule grants and numeric adjustments remain editable and HP follows the new layout', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));

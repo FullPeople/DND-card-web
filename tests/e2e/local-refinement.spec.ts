@@ -4,7 +4,7 @@ import { mockSource,fillFromDetail } from './fixtures';
 
 test.beforeEach(async({page})=>{await mockSource(page);});
 test('large catalog has bounded DOM, sorted sources and instant access to the tail',async({page})=>{
- await page.route('**/data/items.json',r=>r.fulfill({json:{item:Array.from({length:4000},(_,i)=>({name:`装备${String(i).padStart(4,'0')}`,source:i<2000?'XGE':'XPHB',entries:['测试正文。']}))}}));
+ await page.context().route('**/data/items.json',r=>r.fulfill({json:{item:Array.from({length:4000},(_,i)=>({name:`装备${String(i).padStart(4,'0')}`,source:i<2000?'XGE':'XPHB',entries:['测试正文。']}))}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备',exact:true}).click();
  const list=page.locator('.catalog-list');await expect(list).toHaveAttribute('data-total-rows','4001');await expect(page.getByRole('columnheader',{name:/来源/})).toHaveAttribute('aria-sort','ascending');
  await expect(page.locator('.catalog-row').first()).toContainText('玩家手册');expect(await page.locator('.catalog-row').count()).toBeLessThan(60);
@@ -18,17 +18,17 @@ test('fill prompts have no size dash, pulse the catalog, and skills use an ordin
  await expect(page.locator('.ability-skill').first()).toHaveCSS('cursor','default');
 });
 test('source defaults show all conditions at the end and spells start at low levels',async({page})=>{
- await page.route('**/data/conditionsdiseases.json',r=>r.fulfill({json:{condition:[{name:'主状态',source:'XPHB'},{name:'扩展状态',source:'XGE'}],status:[{name:'额外状态',source:'XPHB'}]}}));
- await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'一术',source:'XPHB',level:3},{name:'二术',source:'XPHB',level:0}]}}));
+ await page.context().route('**/data/conditionsdiseases.json',r=>r.fulfill({json:{condition:[{name:'主状态',source:'XPHB'},{name:'扩展状态',source:'XGE'}],status:[{name:'额外状态',source:'XPHB'}]}}));
+ await page.context().route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'一术',source:'XPHB',level:3},{name:'二术',source:'XPHB',level:0}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();const tabs=page.getByRole('navigation',{name:'资料分类'});await tabs.getByRole('button',{name:'状态',exact:true}).click();await expect(page.locator('.catalog-row .entry-name')).toHaveText(['主状态','扩展状态','额外状态']);
  await tabs.getByRole('button',{name:'法术',exact:true}).click();await expect(page.locator('.catalog-row .entry-name')).toHaveText(['二术','一术']);await expect(page.getByRole('columnheader',{name:/环阶/})).toHaveAttribute('aria-sort','ascending');
 });
 test('race families expand without merging distinct identities',async({page})=>{
- await page.route('**/data/races.json',r=>r.fulfill({json:{race:[{name:'精灵',ENG_name:'Elf',source:'XPHB'},{name:'精灵',ENG_name:'Elf',source:'XGE'},{name:'矮人',ENG_name:'Dwarf',source:'XPHB',_versions:[{name:'矮人；山地',ENG_name:'Dwarf; Mountain',source:'XPHB'}]}],subrace:[{name:'高等',ENG_name:'High',raceName:'精灵',raceSource:'XPHB',source:'XPHB'}]}}));
+ await page.context().route('**/data/races.json',r=>r.fulfill({json:{race:[{name:'精灵',ENG_name:'Elf',source:'XPHB'},{name:'精灵',ENG_name:'Elf',source:'XGE'},{name:'矮人',ENG_name:'Dwarf',source:'XPHB',_versions:[{name:'矮人；山地',ENG_name:'Dwarf; Mountain',source:'XPHB'}]}],subrace:[{name:'高等',ENG_name:'High',raceName:'精灵',raceSource:'XPHB',source:'XPHB'}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'种族',exact:true}).click();const group=page.getByRole('button',{name:/精灵.*个条目/});await expect(group).toHaveAttribute('aria-expanded','false');await group.click();await expect(page.locator('.catalog-row.race-child')).toHaveCount(3);await page.getByRole('button',{name:/矮人.*个条目/}).click();await expect(page.locator('.catalog-row.race-child')).toHaveCount(5);await group.click();await expect(page.locator('.catalog-row')).toHaveCount(2);
 });
 test('class dice, sticky subclass navigation and hover highlight work together',async({page})=>{
- await page.route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'测试法师',source:'XPHB',classFeatures:['施法|测试法师|XPHB|1'],classTableGroups:[{colLabels:['骰子'],rows:[[{type:'dice',toRoll:[{number:1,faces:4}]}],[{type:'dice',toRoll:[{number:1,faces:6}]}]]}]}],classFeature:[{name:'施法',source:'XPHB',className:'测试法师',classSource:'XPHB',level:1,entries:['测试正文。']}],subclass:[{name:'测试学派',source:'XPHB',className:'测试法师',classSource:'XPHB',entries:['子职正文。']}]}}));
+ await page.context().route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'测试法师',source:'XPHB',classFeatures:['施法|测试法师|XPHB|1'],classTableGroups:[{colLabels:['骰子'],rows:[[{type:'dice',toRoll:[{number:1,faces:4}]}],[{type:'dice',toRoll:[{number:1,faces:6}]}]]}]}],classFeature:[{name:'施法',source:'XPHB',className:'测试法师',classSource:'XPHB',level:1,entries:['测试正文。']}],subclass:[{name:'测试学派',source:'XPHB',className:'测试法师',classSource:'XPHB',entries:['子职正文。']}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.locator('.catalog-row').click();await expect(page.locator('.document-prose table')).toContainText('1d4');await expect(page.locator('.document-prose table')).toContainText('1d6');await fillFromDetail(page);
  await page.locator('.class-subclasses button').click();await expect(page.locator('.detail-heading')).toContainText('测试学派');await expect(page.locator('.detail-frozen').getByRole('button',{name:'主体',exact:true})).toBeVisible();await expect(page.locator('.detail-frozen .class-subclasses button')).toBeVisible();
  await page.locator('.class-features .feature-caption').hover();await expect(page.locator('.document-section.reading-highlight')).toContainText('测试正文');await page.locator('.class-features .feature-caption').click();await page.mouse.move(40,40);await expect(page.locator('.document-section.reading-highlight-fade')).toContainText('测试正文');

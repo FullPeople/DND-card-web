@@ -40,7 +40,7 @@ test('subclass fill link opens subclasses instead of the main class body',async(
 });
 
 test('legacy import with no prepared spells recovers its source-declared spellbook and preparation capacity',async({page})=>{
- await mockSource(page);await page.route('https://5e.kiwee.top/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'测试书法师',source:'XPHB',hd:{faces:6},casterProgression:'full',spellcastingAbility:'int',preparedSpellsProgression:[4,5,6],preparedSpellsChange:'restLong',spellsKnownProgressionFixed:[6,2,2]}]}}));
+ await mockSource(page);await page.context().route('https://5e.kiwee.top/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'测试书法师',source:'XPHB',hd:{faces:6},casterProgression:'full',spellcastingAbility:'int',preparedSpellsProgression:[4,5,6],preparedSpellsChange:'restLong',spellsKnownProgressionFixed:[6,2,2]}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
  const original=newCharacter();add(original,entry('class','测试书法师',{hd:{faces:6}}),3);add(original,entry('spell','书中法术',{level:1}));
  await page.getByLabel('枭熊 JSON 文本').fill(JSON.stringify(exportOwlbear(original,evaluate(original))));await page.getByRole('button',{name:'从文本导入枭熊'}).click();await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('tab',{name:'法术',exact:true}).click();

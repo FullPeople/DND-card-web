@@ -23,7 +23,7 @@ test('manually added subclass level feature is grouped under the source-qualifie
 
 test('dragging a nested section from a subclass level feature preserves subclass ownership',async({page})=>{
  const c=newCharacter(),cls=add(c,entry('class','星术师'),6),sub=add(c,entry('subclass','星术学派',{shortName:'星术',className:'星术师',classSource:'XPHB'}));Object.assign(sub,{parentId:cls.id});
- await load(page,c,()=>page.route('**/data/class/class-test.json',r=>r.fulfill({json:{
+ await load(page,c,()=>page.context().route('**/data/class/class-test.json',r=>r.fulfill({json:{
   class:[{name:'星术师',source:'XPHB',hd:{faces:6}}],
   subclass:[{name:'星术学派',source:'XPHB',shortName:'星术',className:'星术师',classSource:'XPHB',subclassFeatures:['星轨|星术师|XPHB|星术|XPHB|6']}],
   subclassFeature:[{name:'星轨',source:'XPHB',className:'星术师',classSource:'XPHB',subclassShortName:'星术',subclassSource:'XPHB',level:6,entries:[{type:'entries',name:'星光屏障',entries:['一层手动记录的屏障。']}]}]
