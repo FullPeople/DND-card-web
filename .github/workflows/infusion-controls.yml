@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'src/**'
+      - 'docs/data/automation-runtime-coverage*'
+      - 'tools/prepareRuleIntegrationSources.mjs'
       - 'tests/infusion-*.test.ts'
       - 'tests/radiant-*.test.ts'
       - 'tests/refueling-*.test.ts'

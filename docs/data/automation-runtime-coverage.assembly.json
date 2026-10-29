@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "producerRevision": "d25630a143cfb5a438d88f510d5c525cc2ddf1b8",
+  "observationProducerRevision": "8b6caf72f4c255219052d9c42d053ab190f34610",
+  "consumerRevision": "fe6a5fde96c5ea97cb82087b11898e283a670e91",
+  "consumerSourceTree": "71ad399d3e793d86aea2ed6fe9ef4768323de922",
+  "observationBinding": "a7f1bfa872056e8e8edbc00a1e02ec620db43bed1c4d70ff8282e2bd54628138",
+  "observations": 18789,
+  "observationsSha256": "d91402a17c383a3627a9fc7e74c5731afec42bf6bcecf62491011b7066ed45b8",
+  "reassembledCompleteUnchangedSource": true,
+  "runtimeModules": 304,
+  "styles": [
+    {
+      "path": "src/ui/observantPassive.css",
+      "sha256": "018a27bbb99d5521a7dcdb6a6f59017c9d445db79f67112bbcd9f3cedea27e4a"
+    }
+  ],
+  "reportSha256": "177d40f613280039bbd8cc5165b594385c4485ebaa3b57848e0634a4edebd743",
+  "sourceBodiesPublished": false
+}
