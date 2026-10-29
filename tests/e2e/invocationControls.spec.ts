@@ -1,5 +1,6 @@
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
+import {pointerChoiceDrop} from './pointerChoiceDrop';
 import {restoreAuthoredChoices} from './authoredChoicesFixture';
 import {invocationData} from '../fixtures/invocationData';
 import {newCharacter,type Entry} from '../../src/core/model';
@@ -53,8 +54,7 @@ async function learning(page:Page){
 }
 async function drag(page:Page,workspace:Locator,name:string,index:number){
  if((page.viewportSize()?.width||0)<=760)await workspace.getByRole('button',{name:'打开候选资料',exact:true}).click();
- const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();await page.mouse.move(from!.x+25,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+40,from!.y+from!.height/2,{steps:3});
- const slot=workspace.locator('.choice-slot').nth(index);await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(page.locator('.pointer-ghost')).toHaveCount(0);
+ const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await pointerChoiceDrop(page,row,workspace.locator('.choice-slot').nth(index));
  // Narrow Wiki drops can leave the old workspace. Reopen the actual player
  // entrance before asserting instead of waiting on a detached former slot.
  if((page.viewportSize()?.width||0)<=760)workspace=await learning(page);

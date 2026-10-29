@@ -77,6 +77,8 @@ on:
       - 'tests/e2e/enhancedWeapon*.ts'
       - 'tests/e2e/returningWeapon*.ts'
       - 'tests/e2e/fixtures.ts'
+      - 'tests/e2e/catalogWorkerFixture.spec.ts'
+      - 'tests/e2e/pointerChoiceDrop.ts'
       - 'tests/e2e/authoredChoicesFixture.ts'
       - 'docs/data/automation*'
       - 'playwright.infusions.config.ts'
@@ -93,7 +95,7 @@ jobs:
   verify:
     name: verify (${{ matrix.project }})
     runs-on: ubuntu-latest
-    # Keep all 71 existing App case identities and add three resource-bookkeeping cases/project.
+    # Retain all 74 existing App cases and add one real Worker fixture case per project.
     # Existing per-assertion and per-case budgets/retries are unchanged.
     timeout-minutes: 35
     strategy:

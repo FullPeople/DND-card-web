@@ -1,20 +1,24 @@
 {
   "schemaVersion": 1,
-  "producerRevision": "d25630a143cfb5a438d88f510d5c525cc2ddf1b8",
-  "observationProducerRevision": "8b6caf72f4c255219052d9c42d053ab190f34610",
-  "consumerRevision": "fe6a5fde96c5ea97cb82087b11898e283a670e91",
-  "consumerSourceTree": "71ad399d3e793d86aea2ed6fe9ef4768323de922",
-  "observationBinding": "a7f1bfa872056e8e8edbc00a1e02ec620db43bed1c4d70ff8282e2bd54628138",
+  "producerRevision": "f769ac89995eaa5fea980c42d95134bebeb52844",
+  "observationProducerRevision": "f769ac89995eaa5fea980c42d95134bebeb52844",
+  "consumerRevision": "bc419f961f0106062a62c2885c2e96fb7a04e935",
+  "consumerSourceTree": "d37d46c6ed0cd21e81e8de3a48cb4417c12cebd0",
+  "observationBinding": "55272f47de25fff927253f6429aa30768b1e687cd6a3c0e0465d1d929a2ffb88",
   "observations": 18789,
-  "observationsSha256": "d91402a17c383a3627a9fc7e74c5731afec42bf6bcecf62491011b7066ed45b8",
-  "reassembledCompleteUnchangedSource": true,
+  "observationsSha256": "eae289456d4c7efea84dfa7941411a20605c618a4008df82d78b4bd39d558018",
+  "reassembledCompleteUnchangedSource": false,
   "runtimeModules": 304,
   "styles": [
+    {
+      "path": "src/ui/overview.css",
+      "sha256": "e2559564fa57c99ef3ab1c3ac7c1776b73ce713c0cd140735ead3bbb9515ba26"
+    },
     {
       "path": "src/ui/observantPassive.css",
       "sha256": "018a27bbb99d5521a7dcdb6a6f59017c9d445db79f67112bbcd9f3cedea27e4a"
     }
   ],
-  "reportSha256": "177d40f613280039bbd8cc5165b594385c4485ebaa3b57848e0634a4edebd743",
+  "reportSha256": "da3c1a3eb781c7c39f41b6a8032a95381e28c1af8b36162cd6ad1aeda39e4962",
   "sourceBodiesPublished": false
 }
