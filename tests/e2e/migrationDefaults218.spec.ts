@@ -13,6 +13,13 @@ test('multi-candidate migration recommends the current handbook, respects custom
  const old=(name:string,kind:Entry['kind']):Entry=>({id:'old:'+name,name,english:name,kind,source:'IMPORTED',packId:'imported',edition:'both',revision:'1',entries:['原创旧卡'],raw:{}});
  c.selections=[old('测试法师','class'),old('原创旅人','race')].map((entry,i)=>({id:'old-'+i,entry,level:1,quantity:1,equipped:false}));
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'migration218.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await expect(page.getByRole('tab',{name:c.name+'（导入）'})).toHaveAttribute('aria-selected','true');await expect(page.locator('.save-status')).toContainText('已保存到本机');const imported=page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/});await imported.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(imported).toHaveCount(0);
+ // Import persistence precedes the existing source/default reconciliation.
+ // Verify those exact additions and the supplied values before taking the
+ // full-card baseline used to prove that reviewing migration never saves it.
+ const active=async()=>{const saved=await workspace(page);return saved.characters.find((row:Character)=>row.id===saved.activeId) as Character;};
+ await expect.poll(async()=>(await active()).profile.autoSourceDefaults).toEqual(c.profile.enabledSources);
+ await expect.poll(async()=>(await active()).spellSettings).toEqual({ability:'int',attackBonus:0,capacity:0,capacityAdjustment:0,dcBonus:0,mode:'prepared',prepared:[],slots:{'1':{max:2,used:0}}});
+ const settled=await active();expect(settled.rulePacks).toEqual([]);expect(settled.selections).toEqual(c.selections);expect(settled.profile.enabledSources).toEqual(c.profile.enabledSources);expect(settled.runtime).toEqual({...c.runtime,resources:{...c.runtime.resources,'spell-slot:1':{automatic:true,current:2,icon:'gem',max:2,name:'1环法术位',type:'count'}}});
  const before=await workspace(page),original=before.characters.find((row:Character)=>row.id===before.activeId);
  await page.getByRole('button',{name:'核对并同步旧卡',exact:true}).click();const dialog=page.getByRole('dialog',{name:/^旧卡资料同步(?:\s|$)/}),group=dialog.getByRole('radiogroup',{name:'原创旅人同步目标',exact:true});
  const core=group.getByRole('radio',{name:'原创旅人同步目标：原创旅人（XPHB）',exact:true}),custom=group.getByRole('radio',{name:'原创旅人同步目标：自定义',exact:true});
