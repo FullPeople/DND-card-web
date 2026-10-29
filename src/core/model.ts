@@ -1,3 +1,6 @@
+import {itemChargeIdentity,itemChargeRule} from './automation/itemChargeDebitSource';
+import {limitedSourceIdentity,limitedSourceRule} from './automation/limitedSourceUseSource';
+import {reviewedAlertIdentity} from './automation/reviewedAlertSource';
 import type {CardComponent,CardPalette} from './palette';
 export type Edition = '2014' | '2024';
 export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule' | 'monster';
@@ -25,15 +28,17 @@ export interface Entry {
 }
 export interface SourceEquipmentReceipt { received:string[]; choices:Record<string,string>; itemIds:string[]; ownerIds:string[]; completed:boolean }
 export interface Selection { catalogReview?:{edition:Edition;entryId:string;source:string;kind:Kind}; id: string; entry: Entry; quantity: number; level: number; equipped: boolean; attuned?: boolean; weaponAbility?:Ability; requirementId?: string; parentId?: string; grantKey?: string; section?: 'features' | 'heritage' }
-export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;usageKey?:string;resourceKey?:string;resourceName?:string;resourceCost?:number;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check'|'resource'|'invocation-pact';castLevel?:number}}
+export interface SpecialSpell {mode:'locked'|'uses';max?:number;recovery?:'long'|'short'|'manual';label?:string;manualSource?:{ownerId:string};sourceGrant?:{ownerId:string;key:string;itemChargedSpell?:import('./automation/chargedItemSpells').ChargedItemSpellMarker;targetScope?:'self'|'spell';targetEntryId?:string;sourceActionTiming?:'action'|'bonus-action'|'spell-default';usageKey?:string;resourceKey?:string;resourceName?:string;resourceCost?:number;canUseSlots?:boolean;ability?:Ability;active:boolean;reason?:string;usage:'slot'|'free'|'ritual'|'check'|'resource'|'invocation-pact'|'limited';castLevel?:number}}
 export interface SpellSettings { mode:'known'|'prepared'; modeOverride?:boolean; ability:Ability; abilityOverride?:boolean; abilityClassId?:string; capacity:number; capacityAdjustment?:number; attackBonus:number; dcBonus:number; prepared:string[]; cantrips?:Record<string,string[]>; classSpells?:Record<string,string[]>; cantripCapacityAdjustments?:Record<string,number>; sourceCantripCapacities?:Record<string,number>; sourceCapacityAdjustments?:Record<string,number>; knownCapacityAdjustment?:number; special?:Record<string,SpecialSpell>; slots:Record<string,{max:number;used:number}> }
 export interface RuleProfile { sourceConflicts?:import('./sourceCatalog').ConflictSettings; autoSourceDefaults?: string[]; disabledEntries?: string[]; enabledSources: string[]; optional: { feats: boolean; multiclass: boolean; legacy: boolean }; exceptions: Record<string, string> }
 export interface ClassPoolMetadata {entryId:string;label:string}
-export interface RuntimeResource {sourceSpellGrant?:{usageKey:string};current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string;classPool?:ClassPoolMetadata}}
+export interface RuntimeResource {itemChargeDebitGrant?:{key:string};limitedSourceUseGrant?:{key:string};sourceSpellGrant?:{usageKey:string};current:number;max:number;name?:string;type?:string;icon?:string;order?:number;automatic?:boolean;unlimited?:boolean;locked?:boolean;featureGrant?:{ownerId:string;ruleMax:number;manualMax?:boolean;spent?:number;recovery:{short?:number|'all';long?:number|'all'};formula?:string;origin:string;classPool?:ClassPoolMetadata}}
 export interface PortraitFraming {x:number;y:number;zoom:number;frameWidth?:number;frameHeight?:number}
 export type PortraitPage='overview'|'features'|'background'|'spells'|'inventory';
 export interface Character {
   asiAllocations?:import('./automation/asi').AsiAllocationState;
+  reviewedAlert?:import('./automation/reviewedAlert').ReviewedAlertState;
+  reviewedObservant?:import('./automation/reviewedObservant').ReviewedObservantState;
   reviewedLinguist?:import('./automation/reviewedLinguist').ReviewedLinguistState;
   reviewedSkilled?:import('./automation/reviewedSkilled').ReviewedSkilledState;
   reviewedWeaponMaster?:import('./automation/reviewedFeats').ReviewedWeaponMasterState;
@@ -87,14 +92,24 @@ export interface Character {
   /** Evidence retained when the user explicitly resolves a legacy AC override. */
   armorAdjustmentHistory?: {version:1;action:'restore'|'convert';records:{id:string;target:'ac'|string;value:number;reason:string}[];previousBonus:number;previousTotal:number;ruleTotal:number;resultingBonus:number}[];
   externalSnapshot?: Raw;
-  runtime: { refuelingRing?:import('./automation/refuelingRing').RefuelingRingState; infusionCharges?:import('./automation/infusionCharges').InfusionChargeState; rests?:import('./automation/rest').RestState; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
+  runtime: { itemChargeDebits?:import('./automation/itemChargeDebits').ItemChargeDebitState; limitedSourceUses?:import('./automation/limitedSourceUses').LimitedSourceUseState; refuelingRing?:import('./automation/refuelingRing').RefuelingRingState; infusionCharges?:import('./automation/infusionCharges').InfusionChargeState; rests?:import('./automation/rest').RestState; featureResourceArchive?:Record<string,RuntimeResource>; automationActions?:import('./automation/actions').ActionState; sourceSpellSpent?:Record<string,number>; deathSaves?: { success: number; failure: number }; hp: number; tempHp: number; inspiration: number; resources: Record<string,RuntimeResource> };
 }
 export interface RulePack { schemaVersion: 1; id: string; name: string; version: string; author?: string; editions: Edition[]; requires: { id: string; version: string }[]; conflicts: string[]; entries: Entry[] }
 export interface Requirement extends ChoiceDefinition { id: string; origin: string; section: Kind | 'abilities' | 'proficiency'; selected: string[]; complete: boolean; review?: boolean }
 export interface Issue { id: string; message: string; selectionId?: string; severity: 'warning' | 'error' }
 export interface Derived {
+  /** Reviewed racial BASE modes only; not saved or modified by scalar walking controls. */
+  sourceMovement?:Partial<Record<'swim'|'climb',number>>;
+  /** Explicit source relations to current final walking; derived only, never saved. */
+  relativeMovement?:Partial<Record<'swim'|'climb',number>>;
+  /** Source-qualified class swim/climb relations, after final walking overrides. */
+  classMovement?:Partial<Record<'swim'|'climb',number>>;
+  /** Source-proved racial range only; never saved or applied to map vision. */
+  senses?:{darkvision?:number};
+  /** Before reviewed item floors, after advancement; derived only, not saved. */
+  naturalAbilities?:Record<Ability,number>;
   abilities: Record<Ability, number>; modifiers: Record<Ability, number>; level: number; proficiency: number;
-  ac: number; initiative: number; speed: number; maxHp: number; passive: number;
+  ac: number; initiative: number; speed: number; maxHp: number; passive: number; passiveInvestigation?:number;
   skills: Record<string, { value: number; proficient: boolean; expertise: boolean; sources: string[] }>;
   saves: Record<Ability, { value: number; proficient: boolean }>; requirements: Requirement[]; issues: Issue[];
   /** Reviewed derived resistances only; damage application remains manual. */
@@ -122,6 +137,11 @@ export function editionAllows(e:Entry,edition:Edition,legacy=false){const requir
 /** Saved sources keep their declared mechanics when the card edition changes.
  * Availability, dependencies and explicit opt-outs still govern their effects. */
 export function selectionEffectsAllowed(c: Character, e: Entry): boolean {
+  if(limitedSourceIdentity(e)&&!limitedSourceRule(e))return false;
+  if(itemChargeIdentity(e)&&!itemChargeRule(e))return false;
+  // A known Alert identity cannot impersonate a class/race/other executor,
+  // even through a retained exception. Genuine feat availability is unchanged.
+  if(e.kind!=='feat'&&reviewedAlertIdentity(e))return false;
   if (c.profile.disabledEntries?.includes(e.id)) return false;
   if (c.profile.exceptions[e.id]?.trim()) return true;
   // Unmapped external card records have no publisher source to enable. Keep

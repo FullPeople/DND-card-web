@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact12-source-base-fixed-racial-movement",
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/races.json",
+      "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "bytes": 451902
+    }
+  ],
+  "primaryInventoryCount": 44,
+  "unreviewedHomebrewCount": 18,
+  "wholeEntryCompletionCredit": 0,
+  "newWitnessCredit": 0,
+  "rules": [
+    {
+      "id": "kiwee:race:vgm:lizardfolk::::::",
+      "kind": "race",
+      "name": "蜥蜴人",
+      "english": "Lizardfolk",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 111,
+      "category": "race",
+      "sourcePath": "race/106",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/106/entries/2/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "VGM"
+      ],
+      "fullNormalizedSnapshotSha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:psz:merfolk::::::",
+      "kind": "race",
+      "name": "人鱼",
+      "english": "Merfolk",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 13,
+      "category": "race",
+      "sourcePath": "race/112",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/112/entries/4/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "PSZ"
+      ],
+      "fullNormalizedSnapshotSha256": "64aacfa22683c041283c5b13e21030114d1183b47d6551d6ee1585b6ae5223c0",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:vgm:triton::::::",
+      "kind": "race",
+      "name": "梭螺鱼人",
+      "english": "Triton",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 115,
+      "category": "race",
+      "sourcePath": "race/149",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/149/entries/2/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "VGM"
+      ],
+      "fullNormalizedSnapshotSha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:mot:triton::::::",
+      "kind": "race",
+      "name": "梭螺鱼人",
+      "english": "Triton",
+      "source": "MOT",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 26,
+      "category": "race",
+      "sourcePath": "race/147",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/149/entries/2/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "MOT",
+        "VGM"
+      ],
+      "fullNormalizedSnapshotSha256": "32f3e11ff7e62de6fc45624b0eb1838ba65c9b6756951270cfc421c8648d7297",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:mtf:elf%20(sea)::::::%E7%B2%BE%E7%81%B5",
+      "kind": "race",
+      "name": "精灵（海）",
+      "english": "Elf (Sea)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 62,
+      "category": "subrace",
+      "sourcePath": "subrace/19",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "subrace/19/entries/1/entries/0",
+        "utf8Sha256": "cb44613a28ac55056a878772b1edf30a351f45d54b5e8d628df1f60f149d4fd2"
+      },
+      "requiredSources": [
+        "MTF",
+        "PHB"
+      ],
+      "fullNormalizedSnapshotSha256": "8fd932ed23111f006e98516594fbd26a1906fca7054661d70bf23249f180211a",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:eepc:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "kind": "race",
+      "name": "元素裔（水）",
+      "english": "Genasi (Water)",
+      "source": "EEPC",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 10,
+      "category": "subrace",
+      "sourcePath": "subrace/30",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "subrace/30/entries/2/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "EEPC"
+      ],
+      "fullNormalizedSnapshotSha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:psx:merfolk%20(ixalan%3B%20blue)::::::%E4%BA%BA%E9%B1%BC",
+      "kind": "race",
+      "name": "人鱼（依夏兰; 蓝色）",
+      "english": "Merfolk (Ixalan; Blue)",
+      "source": "PSX",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 12,
+      "category": "subrace",
+      "sourcePath": "subrace/73",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/112/entries/4/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "PSX",
+        "PSZ"
+      ],
+      "fullNormalizedSnapshotSha256": "972dc80ea0153acc42faf18bdbf73878cca996ccd6ee1f0bf1d57d026624e157",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:psx:merfolk%20(ixalan%3B%20green)::::::%E4%BA%BA%E9%B1%BC",
+      "kind": "race",
+      "name": "人鱼（依夏兰; 绿色）",
+      "english": "Merfolk (Ixalan; Green)",
+      "source": "PSX",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 12,
+      "category": "subrace",
+      "sourcePath": "subrace/74",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/112/entries/4/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "PSX",
+        "PSZ"
+      ],
+      "fullNormalizedSnapshotSha256": "f2ee2e65cd584ec91d65561df498efd6fa00e935c5cef7329bea28019263ef0b",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:psz:merfolk%20(zendikar%3B%20cosi%20creed)::::::%E4%BA%BA%E9%B1%BC",
+      "kind": "race",
+      "name": "人鱼（赞迪卡; 诡术信仰寇希）",
+      "english": "Merfolk (Zendikar; Cosi Creed)",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 13,
+      "category": "subrace",
+      "sourcePath": "subrace/75",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/112/entries/4/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "PSZ"
+      ],
+      "fullNormalizedSnapshotSha256": "def1a1f15639cceeab31dbde3c6928669989211919149523477cdcb79ebfd424",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:psz:merfolk%20(zendikar%3B%20emeria%20creed)::::::%E4%BA%BA%E9%B1%BC",
+      "kind": "race",
+      "name": "人鱼（赞迪卡; 风之信仰伊美黎）",
+      "english": "Merfolk (Zendikar; Emeria Creed)",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 13,
+      "category": "subrace",
+      "sourcePath": "subrace/76",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/112/entries/4/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "PSZ"
+      ],
+      "fullNormalizedSnapshotSha256": "0942e6f6ae58d3e6c2b0032b6494bb42f6c4c9ca69f54a123efb948fa3126e28",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:psz:merfolk%20(zendikar%3B%20ula%20creed)::::::%E4%BA%BA%E9%B1%BC",
+      "kind": "race",
+      "name": "人鱼（赞迪卡; 水之信仰钨拉）",
+      "english": "Merfolk (Zendikar; Ula Creed)",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 13,
+      "category": "subrace",
+      "sourcePath": "subrace/77",
+      "mode": "swim",
+      "baseFeet": 30,
+      "sourceClause": {
+        "path": "race/112/entries/4/entries/0",
+        "utf8Sha256": "979cf80221c17fdebedfe9d82a3ff88643e4a759fdbef8c67cdb8b19dcc522a7"
+      },
+      "requiredSources": [
+        "PSZ"
+      ],
+      "fullNormalizedSnapshotSha256": "6817294a8219abf3dab55b355346847e34225ff9da0af826ed0317a34f6680e2",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    },
+    {
+      "id": "kiwee:race:vgm:tabaxi::::::",
+      "kind": "race",
+      "name": "斑猫人",
+      "english": "Tabaxi",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "page": 113,
+      "category": "race",
+      "sourcePath": "race/141",
+      "mode": "climb",
+      "baseFeet": 20,
+      "sourceClause": {
+        "path": "race/141/entries/4/entries/0",
+        "utf8Sha256": "35e8adc6175a3b8614cb36195fd9eee2a22769d9fc914398b8704b1657ca65f8"
+      },
+      "requiredSources": [
+        "VGM"
+      ],
+      "fullNormalizedSnapshotSha256": "6a572083483b2779b7917bad7152003efd6c696a8585ea4e1a8e6a5ac51452b3",
+      "firstPassMechanism": "source-base-fixed-movement-only",
+      "wholeEntryCompletion": false,
+      "remainingWholeEntryGaps": [
+        "other-source-clauses-not-certified-by-this-mechanism",
+        "conditional-and-global-movement-policy-not-implemented",
+        "world-movement-execution-not-implemented"
+      ]
+    }
+  ],
+  "held": [
+    {
+      "id": "kiwee:race:dmg:aarakocra::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:dmg:bullywug::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:dmg:kuo-toa::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:dmg:lizardfolk::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:dmg:merfolk::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:aag:giff::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:aag:hadozee::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:oga:grung::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:lr:locathah::::::",
+      "holdCode": "source-movement-clause-absent"
+    },
+    {
+      "id": "kiwee:race:eepc:aarakocra::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:mpmm:aarakocra::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:psa:aven::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:psd:aven::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:psa:aven%20(hawk-headed)::::::%E8%89%BE%E6%96%87",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:psa:aven%20(ibis-headed)::::::%E8%89%BE%E6%96%87",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:lfl:faerie::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:lfl:faerie%3B%20lorwyn::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:lfl:faerie%3B%20shadowmoor::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:mpmm:fairy::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:wbtw:fairy::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:scc:owlin::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:psx:siren::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:psz:kor::::::",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:scag:tiefling%20(variant%3B%20winged)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "holdCode": "armor-or-encumbrance-condition"
+    },
+    {
+      "id": "kiwee:race:scag:variant%3B%20aquatic%20elf%20descent%3B%20swim%20speed::::::%E5%8D%8A%E7%B2%BE%E7%81%B5",
+      "holdCode": "trait-replacement-choice"
+    },
+    {
+      "id": "kiwee:race:rhw:dhampir::::::",
+      "holdCode": "nonfixed-speed-relation"
+    },
+    {
+      "id": "kiwee:race:vrgr:dhampir::::::",
+      "holdCode": "nonfixed-speed-relation"
+    },
+    {
+      "id": "kiwee:race:mpmm:lizardfolk::::::",
+      "holdCode": "nonfixed-speed-relation"
+    },
+    {
+      "id": "kiwee:race:mpmm:sea%20elf::::::",
+      "holdCode": "nonfixed-speed-relation"
+    },
+    {
+      "id": "kiwee:race:mpmm:tabaxi::::::",
+      "holdCode": "nonfixed-speed-relation"
+    },
+    {
+      "id": "kiwee:race:mpmm:triton::::::",
+      "holdCode": "nonfixed-speed-relation"
+    },
+    {
+      "id": "kiwee:race:mpmm:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "holdCode": "nonfixed-speed-relation"
+    }
+  ]
+}

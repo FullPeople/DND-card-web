@@ -1,0 +1,6 @@
+import {basename,join} from 'node:path';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import type {Reporter,TestCase,TestResult} from '@playwright/test/reporter';
+import {resourceInputSetSha256,resourceProductSetSha256} from './resourceLedgerBrowserFixture';
+import {RESOURCE_INPUT_ANNOTATION,RESOURCE_PRODUCT_ANNOTATION,resourceSafeDirectory,resourceSafeReceipt} from './resourceLedgerArtifactPrivacy';
+export default class ResourceLedgerPrivacyReporter implements Reporter{onTestEnd(test:TestCase,result:TestResult){if(basename(test.location.file)!=='resourceLedgerControls.spec.ts')return;const project=test.parent.project();if(!project)throw Error('Missing resource evidence project');const receipt=resourceSafeReceipt({id:test.id,title:test.title,project:project.name,status:result.status,expectedStatus:test.expectedStatus,retry:result.retry,durationMs:result.duration,inputsVerified:test.annotations.some(row=>row.type===RESOURCE_INPUT_ANNOTATION&&row.description===resourceInputSetSha256),productVerified:test.annotations.some(row=>row.type===RESOURCE_PRODUCT_ANNOTATION&&row.description===resourceProductSetSha256)}),directory=resourceSafeDirectory({id:test.id,project:project.name,outputDir:project.outputDir});mkdirSync(directory,{recursive:true});writeFileSync(join(directory,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');}}

@@ -3,7 +3,7 @@ import {isActiveSheetTarget} from '../platform/activeSheet';
 import {CloseIcon} from './icons';
 import {createPortal} from 'react-dom';
 import {ABILITY_LABELS,SKILLS,type Character,type Derived,type Ability,type SheetBonus} from '../core/model';
-import {spellState,spellValues} from '../core/characterDetails';
+import {spellState,spellValueDetails} from '../core/characterDetails';
 import {evaluate} from '../core/engine';
 import './valueTrace.css';
 import {useRetainedCardActive} from './RetainedCardVisibility';
@@ -16,7 +16,7 @@ export function traceForInput(context:Context,label:string,value:number,change:(
  const {c,d}=context;
  for(const [a,name] of Object.entries(ABILITY_LABELS))if(label===`${name}基础值`)return {title:name,value,result:d.abilities[a as Ability],rows:d.trace[a]?.slice()||[],change,min:1,max:30};
  for(const [target,name] of Object.entries(labels))if(label===`${name}调整值`)return {title:name,value,result:target==='hp'?d.maxHp:d[target as Exclude<SheetBonus,'hp'>],rows:d.trace[target]||[],change,min:-9999,max:9999};
- if(label==='法术攻击调整值'||label==='法术DC调整值'){const settings=spellState(c),values=spellValues(c,d);return {title:label.replace('调整值',''),value,result:label==='法术攻击调整值'?values.attack:values.dc,rows:[`施法属性：${ABILITY_LABELS[settings.ability]} ${d.modifiers[settings.ability]}`,`熟练加值 ${d.proficiency}`,...(label==='法术DC调整值'?['基础 DC 8']:d.trace.spellAttack||[]),`手动调整 ${value}`],change,min:-100,max:100};}
+ if(label==='法术攻击调整值'||label==='法术DC调整值'){const details=spellValueDetails(c,d),dc=label==='法术DC调整值';return {title:label.replace('调整值',''),value,result:dc?details.values.dc:details.values.attack,rows:[`施法属性：${ABILITY_LABELS[details.ability]} ${d.modifiers[details.ability]}`,`熟练加值 ${d.proficiency}`,...(dc?['基础 DC 8',...details.dcSourceTrace]:details.attackSourceTrace),`手动调整 ${value}`],change,min:-100,max:100};}
  return undefined;
 }
 export function ValueTraceProvider({c,d,enabled=true,children}:{c:Character;d:Derived;enabled?:boolean;children:ReactNode}){
@@ -54,9 +54,9 @@ function TracePanel({element,model,focusRequest,c,d:current,close}:{element:HTML
   if(ability)preview.abilities[ability]=value;else if(key)(preview.sheetBonuses||={})[key]=value;else if(model.title==='法术攻击'||model.title==='法术DC'){preview.spellSettings||=structuredClone(spellState(preview));preview.spellSettings[model.title==='法术攻击'?'attackBonus':'dcBonus']=value;}
   return {preview,d:evaluate(preview)};
  },[c,current,draft,model,ability,key]);
- const fresh=traceForInput({c:preview,d,open:()=>{}},`${model.title}基础值`,Number(draft),model.change||(()=>{}));
+ const spell=model.title==='法术攻击'||model.title==='法术DC',fresh=traceForInput({c:preview,d,open:()=>{}},`${model.title}${spell?'调整值':'基础值'}`,Number(draft),model.change||(()=>{}));
  const skill=Object.entries(SKILLS).find(([,s])=>s.name===model.title)?.[0],save=Object.entries(ABILITY_LABELS).find(([,s])=>`${s}豁免`===model.title)?.[0] as Ability|undefined;
- const result=key?(key==='hp'?d.maxHp:d[key]):skill?d.skills[skill].value:save?d.saves[save].value:model.title==='法术攻击'?spellValues(preview,d).attack:model.title==='法术DC'?spellValues(preview,d).dc:fresh?.result??model.result;
+ const result=key?(key==='hp'?d.maxHp:d[key]):skill?d.skills[skill].value:save?d.saves[save].value:fresh?.result??model.result;
  const left=Math.max(8,Math.min(anchor.left-12,innerWidth-286)),top=Math.max(4,anchor.top-40),fieldTop=anchor.top-top;
  const style=useMemo(()=>{const value=getComputedStyle(element);return {fontSize:value.fontSize,fontWeight:value.fontWeight,textAlign:value.textAlign as CSSProperties['textAlign'],padding:value.padding};},[element,anchor.width,anchor.height]);
  const commit=()=>{const n=Number(draft);if(!cancel.current&&draft.trim()&&Number.isFinite(n)&&Number.isInteger(n)){const value=Math.max(model.min??-9999,Math.min(model.max??9999,n));if(value!==committed.current){committed.current=value;model.change?.(value);}}};

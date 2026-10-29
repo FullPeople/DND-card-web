@@ -39,3 +39,7 @@ export function reviewedSkilledIdentity(entry:Entry):boolean{
 /** Deny-family only: names and canonical IDs cannot authorize generic effects.
  * Existing manual answers remain stored and are disclosed as legacy records. */
 export function reviewedLinguistIdentity(entry:Entry):boolean{return entry.id==='kiwee:feat:phb:linguist::::::'||entry.english==='Linguist'||entry.raw.ENG_name==='Linguist';}
+
+export {reviewedObservantIdentity,reviewedModernObservantRule} from './reviewedObservantSource';
+
+export {reviewedAlertIdentity,reviewedModernAlertRule} from './reviewedAlertSource';

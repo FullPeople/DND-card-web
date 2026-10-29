@@ -1,0 +1,1562 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "reviewed-finite-source-lifetime-uses",
+  "scope": "Explicit known remaining balance and source-owned lifetime debit only. No automatic acquisition, full balance, reset, recovery or spell effect.",
+  "input": {
+    "url": "https://5e.kiwee.top/data/rewards.json",
+    "parsedJsonStringifySha256": "03062ce964d2cd88be4b538bf8cbb10eb5b96dc33ab6f94720b4a1790ca30871"
+  },
+  "investigated": 46,
+  "supported": 32,
+  "held": 14,
+  "sourceProseIncluded": false,
+  "rules": [
+    {
+      "id": "kiwee:feature:xdmg:arcane%20study%20charm::::::",
+      "dataId": "kiwee:reward:xdmg:arcane%20study%20charm::::::::",
+      "kind": "feature",
+      "name": "秘学护咒",
+      "english": "Arcane Study Charm",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 336,
+      "snapshotSha256": "afa40c12c42636d16d4cf6a8ff59e27d027ba141d6c80503171ef3e5ad3c5af3",
+      "originalRawPointer": "/reward/1",
+      "originalRawOrderedJsonSha256": "d829612ea95087959a7a688901309e19e9ab541314580411c921f7b280740425",
+      "supported": false,
+      "holdCodes": [
+        "within-seven-days-of-genuine-grant"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:rhw:blasphemous%20charm::::::",
+      "dataId": "kiwee:reward:rhw:blasphemous%20charm::::::::",
+      "kind": "feature",
+      "name": "亵渎魅惑",
+      "english": "Blasphemous Charm",
+      "source": "RHW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 208,
+      "snapshotSha256": "d76070e3abc09b7a74afd6a0951f67e35052250e07f1d22fb9829394c5b9a679",
+      "originalRawPointer": "/reward/6",
+      "originalRawOrderedJsonSha256": "bc31c29399b4eb0a77c556e04350c760e7dbcfc3b1f29fc8a646275b5ea7c794",
+      "supported": false,
+      "holdCodes": [
+        "unproven-literal-finite-count"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:bam:charm%20of%20air%20bubbles::::::",
+      "dataId": "kiwee:reward:bam:charm%20of%20air%20bubbles::::::::",
+      "kind": "feature",
+      "name": "空气泡泡护咒",
+      "english": "Charm of Air Bubbles",
+      "source": "BAM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "snapshotSha256": "b4dbf29fdddea8e614c3318246afdd9d3ac30d9813ba692bec09e79f42204fde",
+      "originalRawPointer": "/reward/73",
+      "originalRawOrderedJsonSha256": "366a09ffa90bca6c7afd07ea2d024b55dd0538e6626da4b9783b7ad0adad204c",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "空气泡泡|AAG",
+          "spellEntryId": "kiwee:spell:aag:air%20bubble::::::",
+          "spellSource": "AAG",
+          "spellEdition": "both",
+          "spellSnapshotSha256": "1a141b149a2be717bc636aab66035735acf4952fd6f948111be4e4b826777bcd",
+          "castLevel": 2,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:dmg:charm%20of%20animal%20conjuring::::::",
+      "dataId": "kiwee:reward:dmg:charm%20of%20animal%20conjuring::::::::",
+      "kind": "feature",
+      "name": "兽群咒唤护咒",
+      "english": "Charm of Animal Conjuring",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "70a137fdb681c00c3f2e7938dee8567a3b230dd4ba3e860616edc80b42a0512f",
+      "originalRawPointer": "/reward/74",
+      "originalRawOrderedJsonSha256": "853b73d188daa66fc38ed293c716c846a1f71fe9629ba785c0034fb69ce04801",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "咒唤兽群#3",
+          "spellEntryId": "kiwee:spell:phb:conjure%20animals::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "ad36594a6f7aa0a68c349f45b37b8809538503fc6e4e4c1c0b4673047c96251d",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:xdmg:charm%20of%20animal%20conjuring::::::",
+      "dataId": "kiwee:reward:xdmg:charm%20of%20animal%20conjuring::::::::",
+      "kind": "feature",
+      "name": "兽群咒唤护咒",
+      "english": "Charm of Animal Conjuring",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 99,
+      "snapshotSha256": "9cc2c747427e7fbe9a9ada6dfdc85f0052d78e6b2dc545d80e6e3290c0410fdd",
+      "originalRawPointer": "/reward/75",
+      "originalRawOrderedJsonSha256": "8ba06e1603c427189cb11b016ae0930dbd6edc48d8400a981b6e28da53d0bb32",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "咒唤兽群|xphb",
+          "spellEntryId": "kiwee:spell:xphb:conjure%20animals::::::",
+          "spellSource": "XPHB",
+          "spellEdition": "2024",
+          "spellSnapshotSha256": "26f61558ca021f1f043a0f7e7f935b2f8bb0999a6665cd25306131dc493ba671",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:efa:charm%20of%20argonnessen::::::",
+      "dataId": "kiwee:reward:efa:charm%20of%20argonnessen::::::::",
+      "kind": "feature",
+      "name": "阿贡尼森护咒",
+      "english": "Charm of Argonnessen",
+      "source": "EFA",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 51,
+      "snapshotSha256": "d94a610906fc26d2218f5a0be9febd7689e955625d0c5272cbb1c787974ffc09",
+      "originalRawPointer": "/reward/76",
+      "originalRawOrderedJsonSha256": "dfe7ad1188772fa7a1d631b9c338f64325706641a35d5bf1ee6a250e6a466e79",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "龙息术|xphb#4",
+          "spellEntryId": "kiwee:spell:xphb:dragon's%20breath::::::",
+          "spellSource": "XPHB",
+          "spellEdition": "2024",
+          "spellSnapshotSha256": "7a1b8914e73dc758012b5810cee8a1f65120591ebb4b3909f62e18b1c92b194b",
+          "castLevel": 4,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:efa:charm%20of%20ashtakala::::::",
+      "dataId": "kiwee:reward:efa:charm%20of%20ashtakala::::::::",
+      "kind": "feature",
+      "name": "阿什塔卡拉护咒",
+      "english": "Charm of Ashtakala",
+      "source": "EFA",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 51,
+      "snapshotSha256": "a3a0064b3a83496e625aee6688a4a97756e29e474df493f1550777180a467c8d",
+      "originalRawPointer": "/reward/77",
+      "originalRawOrderedJsonSha256": "b48d2f35eb086f59ef9cbb85bb205b50d9b9a44f33f9e8a7c277e25363ecfbce",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "致病射线|xphb#4",
+          "spellEntryId": "kiwee:spell:xphb:ray%20of%20sickness::::::",
+          "spellSource": "XPHB",
+          "spellEdition": "2024",
+          "spellSnapshotSha256": "01c149a742e9682f577fcd878110ea1ae77010fa2d8a8204758fbeeeae251743",
+          "castLevel": 4,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:drde:charm%20of%20cozmioko's%20glory::::::",
+      "dataId": "kiwee:reward:drde:charm%20of%20cozmioko's%20glory::::::::",
+      "kind": "feature",
+      "name": "科兹米奥科荣耀护咒",
+      "english": "Charm of Cozmioko's Glory",
+      "source": "DRDE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 192,
+      "snapshotSha256": "043ebdd59b45636b32ccfa6880a93d252db93d2703d45c340ba40b830b413d95",
+      "originalRawPointer": "/reward/82",
+      "originalRawOrderedJsonSha256": "d7a4f93b595ab5cfd965d5a301b31e208442d8e77fc704e139e97b93bbbf4c48",
+      "supported": false,
+      "holdCodes": [
+        "shared-alternative-nonspell-consumption"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20cure%20wounds::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20cure%20wounds::::::::",
+      "kind": "feature",
+      "name": "疗伤护咒",
+      "english": "Charm of Cure Wounds",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "66941b535faf0b29f147e8716dd2f1f47d32655ddff4a01a4bca35df3d6e313a",
+      "originalRawPointer": "/reward/83",
+      "originalRawOrderedJsonSha256": "f8522ca076a4b761dfac268fbd8fef8bce541693454ac18a2fc9988f91461499",
+      "supported": true,
+      "holdCodes": [],
+      "ability": "wis",
+      "abilityBoundary": {
+        "kind": "source-fixed",
+        "ability": "wis"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "疗伤术#3",
+          "spellEntryId": "kiwee:spell:phb:cure%20wounds::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "44a56821911fe1e0b487c3f35827e449b79fc7760bcbde82fd44ee5abf8bd6c4",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:dmg:charm%20of%20darkvision::::::",
+      "dataId": "kiwee:reward:dmg:charm%20of%20darkvision::::::::",
+      "kind": "feature",
+      "name": "黑暗视觉护咒",
+      "english": "Charm of Darkvision",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "631c576f84df475b86459b0bc1e81e24fdd34bd06a9efcc41adbda26c11116dc",
+      "originalRawPointer": "/reward/84",
+      "originalRawOrderedJsonSha256": "2d8d53bcefcd0cd6ab4d34961c38721dabfb226df7091c6c8cbd6332af93414d",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "黑暗视觉",
+          "spellEntryId": "kiwee:spell:phb:darkvision::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "5a131118822969e60e652f0190eb54e5ef2eb37e204a5817c62672430b4fa731",
+          "castLevel": 2,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:xdmg:charm%20of%20darkvision::::::",
+      "dataId": "kiwee:reward:xdmg:charm%20of%20darkvision::::::::",
+      "kind": "feature",
+      "name": "黑暗视觉护咒",
+      "english": "Charm of Darkvision",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 99,
+      "snapshotSha256": "4a5944ea6ad1712243cb43f181a434e5e4fb0c7ed756a5854d951540e5c25f80",
+      "originalRawPointer": "/reward/85",
+      "originalRawOrderedJsonSha256": "0a8dd78ac17aebe8c9678d021ecf843942b0b20f557d7f741bfe274be7c02a55",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "黑暗视觉|xphb",
+          "spellEntryId": "kiwee:spell:xphb:darkvision::::::",
+          "spellSource": "XPHB",
+          "spellEdition": "2024",
+          "spellSnapshotSha256": "3594c5f109f5b81ec5c91a6bdf5ce75af61fd7fa261575d3ea4c599ba068be51",
+          "castLevel": 2,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:efa:charm%20of%20dhakaan::::::",
+      "dataId": "kiwee:reward:efa:charm%20of%20dhakaan::::::::",
+      "kind": "feature",
+      "name": "达卡恩魅惑",
+      "english": "Charm of Dhakaan",
+      "source": "EFA",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 51,
+      "snapshotSha256": "ee5234f40525c91b607cc33a0e38b522fc2a023ec14b8c2d81f9496c165b9fb5",
+      "originalRawPointer": "/reward/86",
+      "originalRawOrderedJsonSha256": "6134ee714c07a0c4c5ae4393c36b94cf2c048c4a310383782d51b1db422cd850",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "惊惧斩|xphb",
+          "spellEntryId": "kiwee:spell:xphb:staggering%20smite::::::",
+          "spellSource": "XPHB",
+          "spellEdition": "2024",
+          "spellSnapshotSha256": "645ec70d0083453b2cbdffbd3bca00908e27e4288fcef103dac29b70102b7724",
+          "castLevel": 4,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20druidcraft::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20druidcraft::::::::",
+      "kind": "feature",
+      "name": "德鲁伊伎俩护咒",
+      "english": "Charm of Druidcraft",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "af28b71fca21a03badb575151e16ae3b2ba925c72df6135a6b3fc1fea1ab81ad",
+      "originalRawPointer": "/reward/88",
+      "originalRawOrderedJsonSha256": "5b3e59a9784df53d14c5f3ff3754e084559c7efa2ce10abd571d2f4e9d0df57c",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "德鲁伊伎俩",
+          "spellEntryId": "kiwee:spell:phb:druidcraft::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "e5a5703eae03fd13d4876b8b23c050057842257ac2c15cd20d7018637a1d2d4d",
+          "castLevel": 0,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:rhw:charm%20of%20electromancy::::::",
+      "dataId": "kiwee:reward:rhw:charm%20of%20electromancy::::::::",
+      "kind": "feature",
+      "name": "电魔法魅惑",
+      "english": "Charm of Electromancy",
+      "source": "RHW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 210,
+      "snapshotSha256": "999854f8a68d93db5f456d6b171f5a3f0585bc099d9ec8bba6d0ffc8a67bb238",
+      "originalRawPointer": "/reward/89",
+      "originalRawOrderedJsonSha256": "aac8d06336276063e9a43781ab091a12528f4e9a3e66ab66f0f0128976a9ea28",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "心灵遥控|xphb",
+          "spellEntryId": "kiwee:spell:xphb:telekinesis::::::",
+          "spellSource": "XPHB",
+          "spellEdition": "2024",
+          "spellSnapshotSha256": "013b5c170f88a635bf6914821371ffef0ac8dd22b9dea94742dad27a5d8d80a9",
+          "castLevel": 5,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bgdia:charm%20of%20hellish%20rebuke::::::",
+      "dataId": "kiwee:reward:bgdia:charm%20of%20hellish%20rebuke::::::::",
+      "kind": "feature",
+      "name": "炼狱叱喝护咒",
+      "english": "Charm of Hellish Rebuke",
+      "source": "BGDIA",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 215,
+      "snapshotSha256": "83759c0c5758d50f6fd8900047cbd2b68c90add15452348cf12df2c6afae3ea4",
+      "originalRawPointer": "/reward/95",
+      "originalRawOrderedJsonSha256": "6ed17f08def261e44285321c2e452044442436c213121c61ad6f9bacb6ca2234",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/9",
+          "path": "limited/9",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 9,
+          "cost": 1,
+          "reference": "炼狱叱喝#9",
+          "spellEntryId": "kiwee:spell:phb:hellish%20rebuke::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "caadcd2b3b27ae75109e420eb7838a8b70d5e05a0d31bbe9425e241957099ef9",
+          "castLevel": 9,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20invisibility::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20invisibility::::::::",
+      "kind": "feature",
+      "name": "隐形护咒",
+      "english": "Charm of Invisibility",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "82b75387c3eac7286f119e377845e2b64b102854480b6d8210b7b714ed7421d8",
+      "originalRawPointer": "/reward/99",
+      "originalRawOrderedJsonSha256": "2f8b8edd46147011a8b158e3a4b9628844fbf02cd67dc0ff53935e9b9c84b74a",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "隐形术",
+          "spellEntryId": "kiwee:spell:phb:invisibility::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "f88b22a4473dc8d9112ea4951425164e89db7acdc26d3eabdcb5025bd6834b86",
+          "castLevel": 2,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20lightning%20bolt::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20lightning%20bolt::::::::",
+      "kind": "feature",
+      "name": "闪电束护咒",
+      "english": "Charm of Lightning Bolt",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "109ea68f1fc66bc66da21d245c3a99c52502a15c1d709002adb5fc7955bb63f3",
+      "originalRawPointer": "/reward/102",
+      "originalRawOrderedJsonSha256": "f3fff271a7cc415c091a3042ed1a64c970e728721be695a2533f72f98af8d8c4",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "闪电束",
+          "spellEntryId": "kiwee:spell:phb:lightning%20bolt::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "26df5f639df2a8aa32aac0dc8c85bbb1aed18af36b58cf62c2f73794441213be",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20purplemancy::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20purplemancy::::::::",
+      "kind": "feature",
+      "name": "紫法护咒",
+      "english": "Charm of Purplemancy",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "ce509aa889a9d92252954909eeda51d5ecba34fae5d9fdfead966faa4dc37f8b",
+      "originalRawPointer": "/reward/107",
+      "originalRawOrderedJsonSha256": "c8beabc112dabf3f2c497845d9cefec259841a3f6d35af9ae8efd5364224aec3",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "妖火",
+          "spellEntryId": "kiwee:spell:phb:faerie%20fire::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "158d9a180d1d319d79eb7ba649ab607482230de66f800e615905b0fa46e63ea8",
+          "castLevel": 1,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:dmg:charm%20of%20restoration::::::",
+      "dataId": "kiwee:reward:dmg:charm%20of%20restoration::::::::",
+      "kind": "feature",
+      "name": "复原护咒",
+      "english": "Charm of Restoration",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "3231b1311706490c5b7d2c930ba50bfd8041fa0cb1f0f34c1b7c4e77516680c6",
+      "originalRawPointer": "/reward/108",
+      "originalRawOrderedJsonSha256": "c6276bcbd2b521ff07cf6af81ac83dacfcaae79af48a0a10c53a5d56a36929b2",
+      "supported": false,
+      "holdCodes": [
+        "weighted-shared-pool-not-independent-each-counts"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:xdmg:charm%20of%20restoration::::::",
+      "dataId": "kiwee:reward:xdmg:charm%20of%20restoration::::::::",
+      "kind": "feature",
+      "name": "复原护咒",
+      "english": "Charm of Restoration",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 99,
+      "snapshotSha256": "79f78e864145de34f49f79245716b8a51088372f2c3d04e09ad90d6bc0ddd1d6",
+      "originalRawPointer": "/reward/109",
+      "originalRawOrderedJsonSha256": "94a3697b204c52250009489308aaed054bc8e336c49d6e18a9235b8373845762",
+      "supported": false,
+      "holdCodes": [
+        "weighted-shared-pool-not-independent-each-counts"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20sending::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20sending::::::::",
+      "kind": "feature",
+      "name": "短讯护咒",
+      "english": "Charm of Sending",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "67e2ae882866c3db227adbf556d0c11c132f4384d46d9d7f67d5f793fe3378fd",
+      "originalRawPointer": "/reward/111",
+      "originalRawOrderedJsonSha256": "33b71cb7c3d6e8a58c5b4bf740c268c41205b0828fef10ccf34ef124683f8055",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "短讯术",
+          "spellEntryId": "kiwee:spell:phb:sending::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "a11f71f4ca0208c5a10f58def21d6979204053b69abb88595e429bf2b6449a14",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:rhw:charm%20of%20the%20black%20rose::::::",
+      "dataId": "kiwee:reward:rhw:charm%20of%20the%20black%20rose::::::::",
+      "kind": "feature",
+      "name": "漆黑玫瑰魅惑",
+      "english": "Charm of the Black Rose",
+      "source": "RHW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 161,
+      "snapshotSha256": "e2787b1bbebd8b26797a10d382c85cf1eb0fdbd6cee6afd3599a49637804c14e",
+      "originalRawPointer": "/reward/114",
+      "originalRawOrderedJsonSha256": "b8e7ad4f4289b8f6eb0349c47e36b6d4ae8e8090d244f65b2c48fea660581378",
+      "supported": false,
+      "holdCodes": [
+        "shared-alternative-nonspell-consumption"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20donjon::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20donjon::::::::",
+      "kind": "feature",
+      "name": "城堡护咒",
+      "english": "Charm of the Donjon",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "b4933cfbeedef7e8db9461163b92e6841064629067c333e1ed14e9c5ab746c35",
+      "originalRawPointer": "/reward/118",
+      "originalRawOrderedJsonSha256": "1e662c500eaa9548173c9f890e1146c35aae4ba5bf1efd9b7166ec744f1cb3a7",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "欧提路克弹力法球",
+          "spellEntryId": "kiwee:spell:phb:otiluke's%20resilient%20sphere::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "2bfa743509bf492cf02a73919baeaca394b929857887d8b9069538ecf7be7d98",
+          "castLevel": 4,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:vnotee:charm%20of%20the%20eldritch%20eye::::::",
+      "dataId": "kiwee:reward:vnotee:charm%20of%20the%20eldritch%20eye::::::::",
+      "kind": "feature",
+      "name": "妖眼护咒",
+      "english": "Charm of the Eldritch Eye",
+      "source": "VNOTEE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": null,
+      "snapshotSha256": "03e56b23971cb281b4429fbfbab6e07c9d9f0b8710adeed8e6837551e308ed69",
+      "originalRawPointer": "/reward/119",
+      "originalRawOrderedJsonSha256": "4b77ac83df8d2d074db934a7d69e12c1fe101db36c19ff7b9abf77e9dd3a546b",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "鹰眼术",
+          "spellEntryId": "kiwee:spell:phb:clairvoyance::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "042dc4b4c8905bdbff0858c71b2871e5fc55ceb9e60c87ca6b79c8abc3d162d8",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20fool::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20fool::::::::",
+      "kind": "feature",
+      "name": "愚者护咒",
+      "english": "Charm of the Fool",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "c8806d2ea20fa79f4bd6390889c332bcb280778d19dfdcfc111734a1eed31a5d",
+      "originalRawPointer": "/reward/122",
+      "originalRawOrderedJsonSha256": "879f5205573e4a78d8991ae18f6ad646a51bc5994cfda107e1a10d1b3fb028ba",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "高等幻影",
+          "spellEntryId": "kiwee:spell:phb:major%20image::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "efc5e285f8ab02d918403a15488ad8356b162a03059eceffa420c99512c8e5e0",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:cm:charm%20of%20the%20heroes'%20feast::::::",
+      "dataId": "kiwee:reward:cm:charm%20of%20the%20heroes'%20feast::::::::",
+      "kind": "feature",
+      "name": "英雄宴护咒",
+      "english": "Charm of the Heroes' Feast",
+      "source": "CM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 128,
+      "snapshotSha256": "731664f2fa3e3093fe39790e4c3cfbc28bba7a7197a61580656e07360c928e57",
+      "originalRawPointer": "/reward/125",
+      "originalRawOrderedJsonSha256": "fc8ad7da10b14849d56dc0fd430c49dc36ffb400de872b56f9e6db8b3d5dcae4",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "英雄宴",
+          "spellEntryId": "kiwee:spell:phb:heroes'%20feast::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "627a367bb2ab690831190d3b41f57c6abe6da620db29593be6928de4eea16456",
+          "castLevel": 6,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20jester::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20jester::::::::",
+      "kind": "feature",
+      "name": "小丑护咒",
+      "english": "Charm of the Jester",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "a83fb917fb3a6cfdfcfdfd3b44384af2af527a2523c9c4f7bbfdac2736bd592c",
+      "originalRawPointer": "/reward/127",
+      "originalRawOrderedJsonSha256": "5f7a05c1be180ed7b10595717b683038b098878886115f22ddaa66648ab12fee",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "塔莎狂笑术",
+          "spellEntryId": "kiwee:spell:phb:tasha's%20hideous%20laughter::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "d6d55b4ab34f5da17379ffee5ee2bd3ffa4d2c062383ec23fe7d00fbb2878b39",
+          "castLevel": 1,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:cm:charm%20of%20the%20mirage::::::",
+      "dataId": "kiwee:reward:cm:charm%20of%20the%20mirage::::::::",
+      "kind": "feature",
+      "name": "幻景护咒",
+      "english": "Charm of the Mirage",
+      "source": "CM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 212,
+      "snapshotSha256": "1a9a772aeaf8554fd6d4bfad7b1da3ca2909756db9d656095c788b659529a253",
+      "originalRawPointer": "/reward/131",
+      "originalRawOrderedJsonSha256": "de70b8aea3743fdb143e71947348bfa31ad51848af0aefea3992522dc3f0d035",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "幻景",
+          "spellEntryId": "kiwee:spell:phb:hallucinatory%20terrain::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "cbe651fc381a70f7e63668ed13e092edd83ee3d0ea916adea8040179e8228f28",
+          "castLevel": 4,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20puzzle::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20puzzle::::::::",
+      "kind": "feature",
+      "name": "谜题护咒",
+      "english": "Charm of the Puzzle",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "b309774268c82aee17e10a214286801453b74064dc9e50b07c31c4eef9d15f9d",
+      "originalRawPointer": "/reward/133",
+      "originalRawOrderedJsonSha256": "509d1be718734725faf624ad4013da9726b19465a6a53a1eab472f635179f22b",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "催眠图纹",
+          "spellEntryId": "kiwee:spell:phb:hypnotic%20pattern::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "a617048093fa06f57afa94ba0f811d73859c0fc0319c4b89adbe89e0ee31348c",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20rogue::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20rogue::::::::",
+      "kind": "feature",
+      "name": "浪客护咒",
+      "english": "Charm of the Rogue",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "b9cde431b72cd0481a2cf45e02e8b8d0975a928a3775d52ec57a671ae0138483",
+      "originalRawPointer": "/reward/134",
+      "originalRawOrderedJsonSha256": "a0271166531cfddf63800c7d964889b0cd6806c13c129c98aa703f2ef5241e94",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "假象术",
+          "spellEntryId": "kiwee:spell:phb:mislead::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "da941765d9c2f99c739dcfc534444e995a7679c535665d7705f8534151a0cfdd",
+          "castLevel": 5,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20sage::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20sage::::::::",
+      "kind": "feature",
+      "name": "贤者护咒",
+      "english": "Charm of the Sage",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "b9786dbd34d2c3536c6df4e2d687aab14d52916ad7a98831ff184f5cc43ae754",
+      "originalRawPointer": "/reward/135",
+      "originalRawOrderedJsonSha256": "6f65ba48cfd1e8d632275f6c8648b07b9ee3f10dbb15dcf16775fcf2884d7907",
+      "supported": true,
+      "holdCodes": [],
+      "ability": "int",
+      "abilityBoundary": {
+        "kind": "source-fixed",
+        "ability": "int"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "预言术",
+          "spellEntryId": "kiwee:spell:phb:divination::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "8d298bc08d714b6d7042d532eae41ee5fbf5b3d188280e3b06d105eba15c37fc",
+          "castLevel": 4,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20star::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20star::::::::",
+      "kind": "feature",
+      "name": "星辰护咒",
+      "english": "Charm of the Star",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "1c426eb43c8d561c6c051bcfc30c141fae644fa37a77a4f8de92bdc72c56f706",
+      "originalRawPointer": "/reward/140",
+      "originalRawOrderedJsonSha256": "83436989bd6fb69358fa863b1b62f496da4296495d603e10dc8773c511a1996b",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "强化属性",
+          "spellEntryId": "kiwee:spell:phb:enhance%20ability::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "2ae703e35f39a628bdadda1fd99e4d7b5d249375d37b1e2d19702626b7ef7e93",
+          "castLevel": 2,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:dip:charm%20of%20the%20storm::::::",
+      "dataId": "kiwee:reward:dip:charm%20of%20the%20storm::::::::",
+      "kind": "feature",
+      "name": "风暴护咒",
+      "english": "Charm of the Storm",
+      "source": "DIP",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 41,
+      "snapshotSha256": "9a59fe0f2ea6a569e42fb408c7d1d0b420665aab527d42e1882e8aa0fd729c53",
+      "originalRawPointer": "/reward/141",
+      "originalRawOrderedJsonSha256": "c9e26acbf968ad699625e740e4597c74503b140c72eeb30e271ea59be51a5272",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "闪电束",
+          "spellEntryId": "kiwee:spell:phb:lightning%20bolt::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "26df5f639df2a8aa32aac0dc8c85bbb1aed18af36b58cf62c2f73794441213be",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20sun::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20sun::::::::",
+      "kind": "feature",
+      "name": "太阳护咒",
+      "english": "Charm of the Sun",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "853e18bdb6922a89d334838e212a2f0ea6e2ac34b976fbcef07ee7196a69b06c",
+      "originalRawPointer": "/reward/143",
+      "originalRawOrderedJsonSha256": "a1e1b9df0eecbda027529891ea5b87f1a26d2a58562937ce623e72158b6c21db",
+      "supported": false,
+      "holdCodes": [
+        "consumption-revokes-separate-known-cantrip-grant"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20talons::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20talons::::::::",
+      "kind": "feature",
+      "name": "利爪护咒",
+      "english": "Charm of the Talons",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "685d5d16402b064efc05dd1b6cb74063c97066ca6ca066550077eb8da6bd255f",
+      "originalRawPointer": "/reward/145",
+      "originalRawOrderedJsonSha256": "366791897dfea59d354203fa13fad9ebd059c0ba4126b7b0f6174d298c3777d0",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "解除魔法",
+          "spellEntryId": "kiwee:spell:phb:dispel%20magic::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "17e0ecafc20369f649c3abf7ab1d96f301fa8560f3a6f5b3f5393065ff0fd899",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20throne::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20throne::::::::",
+      "kind": "feature",
+      "name": "王座护咒",
+      "english": "Charm of the Throne",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "1b5602bd567dc36bbd4ac6f4c1bc3493879622680b2bc6a09ce9acd7db9def82",
+      "originalRawPointer": "/reward/146",
+      "originalRawOrderedJsonSha256": "abeab5f37ea541487ca43f382888b6a6381dddf67b69c448401b479064c440ed",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "魔邓肯豪宅术",
+          "spellEntryId": "kiwee:spell:phb:mordenkainen's%20magnificent%20mansion::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "69987483a9af1493ea2df0279ecb0e0a9ebfe20c5fd86c09c62eff8f7e6fde40",
+          "castLevel": 7,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20the%20traveler's%20haven::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20the%20traveler's%20haven::::::::",
+      "kind": "feature",
+      "name": "旅者港湾护咒",
+      "english": "Charm of the Traveler's Haven",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 283,
+      "snapshotSha256": "a85f7622b86ed32c24a8223013cd01e6c526da17c3ae781d85b2a3e931af2de1",
+      "originalRawPointer": "/reward/147",
+      "originalRawOrderedJsonSha256": "a9390531cad13a7b948c0ccce9f3cb7b9233be5769bad9ac9e32ffe78af58bb9",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3e",
+          "path": "limited/3e",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "李欧蒙小屋",
+          "spellEntryId": "kiwee:spell:phb:leomund's%20tiny%20hut::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "e860a3521325cc1e1fc72e37563c4698ff5be59c385cd7496ed4d5f781d40b29",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:bmt:charm%20of%20the%20void::::::",
+      "dataId": "kiwee:reward:bmt:charm%20of%20the%20void::::::::",
+      "kind": "feature",
+      "name": "虚空护咒",
+      "english": "Charm of the Void",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "snapshotSha256": "c826455caa3e06a1b5a9578b429027ca131f1d8f7fb26961e410f4914ed56f6d",
+      "originalRawPointer": "/reward/148",
+      "originalRawOrderedJsonSha256": "e9605e38f3701b0e2c1dc0c4fbda3b22b1c69d192101e3166010a12de46ac5c4",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-source-choice",
+        "from": [
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/3",
+          "path": "limited/3",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 3,
+          "cost": 1,
+          "reference": "放逐术",
+          "spellEntryId": "kiwee:spell:phb:banishment::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "04ed5749691739cd94e39d33c01fd7fc122d6a4e996255ae7199927737c3c80b",
+          "castLevel": 4,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:idrotf:charm%20of%20vicious%20mockery::::::",
+      "dataId": "kiwee:reward:idrotf:charm%20of%20vicious%20mockery::::::::",
+      "kind": "feature",
+      "name": "恶言相加护咒",
+      "english": "Charm of Vicious Mockery",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 228,
+      "snapshotSha256": "3e825f38a90997b17afe92bce1da9ae14c650f31403b9b2dae58b52584218471",
+      "originalRawPointer": "/reward/151",
+      "originalRawOrderedJsonSha256": "07ee5763e42fa87a31e3b978def54317b068ce3493e51bab712effbcb30ff7ee",
+      "supported": false,
+      "holdCodes": [
+        "cantrip-casting-rank-source-ambiguity"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:tor:charm%20of%20water%20breathing::::::",
+      "dataId": "kiwee:reward:tor:charm%20of%20water%20breathing::::::::",
+      "kind": "feature",
+      "name": "水下呼吸护咒",
+      "english": "Charm of Water Breathing",
+      "source": "TOR",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 213,
+      "snapshotSha256": "4c7359573d4a563c30cdedb43130886ad982f48fb075340bce117b395c0a76da",
+      "originalRawPointer": "/reward/154",
+      "originalRawOrderedJsonSha256": "9a53b6b047acd5abe73252a710002ebf50c9b89d5165dadb0a70dccacef5f0c3",
+      "supported": true,
+      "holdCodes": [],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": [
+        {
+          "id": "0/innate/_/limited/1",
+          "path": "limited/1",
+          "block": 0,
+          "mode": "innate",
+          "gate": "_",
+          "capacity": 1,
+          "cost": 1,
+          "reference": "水下呼吸",
+          "spellEntryId": "kiwee:spell:phb:water%20breathing::::::",
+          "spellSource": "PHB",
+          "spellEdition": "2014",
+          "spellSnapshotSha256": "af48f2da6c4f35eeab4cb3fa4d9cab5f23dcd14a8717c8e8133032891a6c0ea6",
+          "castLevel": 3,
+          "lifetime": "finite-no-recovery"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:feature:xdmg:observatory%20charm::::::",
+      "dataId": "kiwee:reward:xdmg:observatory%20charm::::::::",
+      "kind": "feature",
+      "name": "天文护咒",
+      "english": "Observatory Charm",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 343,
+      "snapshotSha256": "97125c677a73529da3bc46989f140d368ee9dc0c59c6f23cb1451510bc3ba701",
+      "originalRawPointer": "/reward/245",
+      "originalRawOrderedJsonSha256": "b8592e6aae39902fc2e9543a49d28a3109a8f9664b2697ed0cf6cca018fdab33",
+      "supported": false,
+      "holdCodes": [
+        "within-seven-days-of-genuine-grant"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:xdmg:reliquary%20charm::::::",
+      "dataId": "kiwee:reward:xdmg:reliquary%20charm::::::::",
+      "kind": "feature",
+      "name": "圣物护咒",
+      "english": "Reliquary Charm",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 344,
+      "snapshotSha256": "9cbbc9d6b55d9789585875662ec91dbae0cd610607cf624d937be4269bbd9842",
+      "originalRawPointer": "/reward/259",
+      "originalRawOrderedJsonSha256": "8e719f36aad64b4b9827118f9c454c5f7114281ac1d6b409b3629adbc3e350a0",
+      "supported": false,
+      "holdCodes": [
+        "within-seven-days-of-genuine-grant"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:xdmg:sanctuary%20charm::::::",
+      "dataId": "kiwee:reward:xdmg:sanctuary%20charm::::::::",
+      "kind": "feature",
+      "name": "圣坛护咒",
+      "english": "Sanctuary Charm",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 345,
+      "snapshotSha256": "de7643d8ea9451f32204661b90390c98c32383a0210fe549417355b4b4cb8c95",
+      "originalRawPointer": "/reward/260",
+      "originalRawOrderedJsonSha256": "c6c318ef75368be518a82df651845a9abdaef29bcbb2bf1740db9975442fef5a",
+      "supported": false,
+      "holdCodes": [
+        "within-seven-days-of-genuine-grant"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:xdmg:sanctum%20charm::::::",
+      "dataId": "kiwee:reward:xdmg:sanctum%20charm::::::::",
+      "kind": "feature",
+      "name": "圣所护咒",
+      "english": "Sanctum Charm",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 346,
+      "snapshotSha256": "b1c74b7dbdea16a1fa745149bc19b037332326952660bc53fdf91307316e5586",
+      "originalRawPointer": "/reward/261",
+      "originalRawOrderedJsonSha256": "f47c08788a4cbf657c23ac9aed1ffbe4fc0ecdcdaad9ea43a1873a477a84446b",
+      "supported": false,
+      "holdCodes": [
+        "within-seven-days-of-genuine-grant"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:toa:strawbundle's%20charm::::::",
+      "dataId": "kiwee:reward:toa:strawbundle's%20charm::::::::",
+      "kind": "feature",
+      "name": "草包的护咒",
+      "english": "Strawbundle's Charm",
+      "source": "TOA",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 179,
+      "snapshotSha256": "8a71a472b664164a130eaa8fbfe9537ccfc2dc0fd3a8be839ee516af062a1fd7",
+      "originalRawPointer": "/reward/266",
+      "originalRawOrderedJsonSha256": "d78d0c1146e93de576bb5ad246b6b896090b7a3545b59713858e52a7d8b2f480",
+      "supported": false,
+      "holdCodes": [
+        "currently-carrying-required-source-toy"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    },
+    {
+      "id": "kiwee:feature:au:traveling%20snacks::::::",
+      "dataId": "kiwee:reward:au:traveling%20snacks::::::::",
+      "kind": "feature",
+      "name": "旅行零食",
+      "english": "Traveling Snacks",
+      "source": "AU",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": null,
+      "snapshotSha256": "5431bd0bfc12aa8df89c3d04a48997a16f57e6b5b9e292b35e6a0f9cf1896d51",
+      "originalRawPointer": "/reward/273",
+      "originalRawOrderedJsonSha256": "9f665dc6055175d0b52abbe70978eb7ef2b93b25cb652c036e15d430b844ac04",
+      "supported": false,
+      "holdCodes": [
+        "within-seven-days-of-genuine-grant"
+      ],
+      "abilityBoundary": {
+        "kind": "manual-unresolved-no-class-inheritance"
+      },
+      "pools": []
+    }
+  ],
+  "snapshotHashMethod": "SHA256(JSON.stringify(recursivelySortedKeys({raw,entries,effects,choices,dependencies}))); undefined object properties omitted"
+}

@@ -1,0 +1,1301 @@
+{
+  "schemaVersion": 1,
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "bytes": 2458443
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202014.json",
+      "sha256": "0593dd1ff41efae5fe35732dac306d6af94f3393f8224493e1368bb7924b3b5a",
+      "bytes": 122372
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Darrington%20Press%3B%20%E5%A1%94%E5%B0%94%E5%A4%9A%E9%9B%B7%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86%E9%87%8D%E5%88%B6%E7%89%88.json",
+      "sha256": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44",
+      "bytes": 1609163
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+      "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "bytes": 2170330
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%95%85%E4%BA%8B%E9%9B%86.json",
+      "sha256": "58226d6315b3e17c0c9746dba4b248b1d620b11fa21b12cf9e6d3b151873de4d",
+      "bytes": 1163416
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+      "bytes": 149813
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+      "bytes": 190573
+    }
+  ],
+  "owners": [
+    {
+      "id": "kiwee:item:tce:baba%20yaga's%20pestle::::::",
+      "kind": "item",
+      "name": "芭芭·雅嘎的杵",
+      "english": "Baba Yaga's Pestle",
+      "source": "TCE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 121,
+      "sourceDataId": "kiwee:item:tce:baba%20yaga's%20pestle::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "3039bea2185172cd78b5fad406256f4bf219e6f1811dba186e7d60d036bc1481",
+      "normalizedRawSha256": "2380088a415fcb3ca17acc483defe6d964b5edb2c65dfd0831941fe3030b34c6",
+      "normalizedEntriesSha256": "2108ea76992f4b247268e214a8b5d4d527bc2ca66f23bc3a0e41026b1328e865",
+      "capacity": 12,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "item-melee-hit",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-held",
+            "this-item-melee-hit"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "87c4dd317b7a70d41c13325fd503214f359ede8ec3db563606c2452f1408fc21"
+            }
+          ]
+        }
+      ],
+      "policySha256": "d33e07c1288e3372ab6e775790aa8ffc996e6ecdf8624b2defa9e0e87349e1f2"
+    },
+    {
+      "id": "kiwee:item:toa:devlin's%20staff%20of%20striking::::::",
+      "kind": "item",
+      "name": "德夫林的强袭法杖",
+      "english": "Devlin's Staff of Striking",
+      "source": "TOA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 141,
+      "sourceDataId": "kiwee:item:toa:devlin's%20staff%20of%20striking::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "c6c4ff517c09ec6ade73679cda1a722ae072faeef6fd86b743d9614eed702e9f",
+      "normalizedRawSha256": "e51b4aafc1055ac02439fe7bb0b8a253c40aa0f455dbdd8cc84b82a944654dae",
+      "normalizedEntriesSha256": "39b7cacce9d86f5fa2fe6e0f525a1f6b8dd24961a9f1c26f51217e6c21dcfc7f",
+      "capacity": 10,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "item-melee-hit",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 1,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-held",
+            "this-item-melee-hit"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "049cd047a59802c4b996430216f00860b31c31946ba412d98dde17d5952e3a1b"
+            }
+          ]
+        }
+      ],
+      "policySha256": "72800688c2dc14e4b485ff868f9b8a0a8533723e635d3c5c9072334fc08b7363"
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20the%20ram::::::",
+      "kind": "item",
+      "name": "公羊戒指",
+      "english": "Ring of the Ram",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 193,
+      "sourceDataId": "kiwee:item:dmg:ring%20of%20the%20ram::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "e603edc9f1ade677aa70133486b2f48ab8cb0766cf41e646960df2129d14c136",
+      "normalizedRawSha256": "ccca94da695667b13ed69ac076900cbddbe236b5e1aab066fb6154d720968d57",
+      "normalizedEntriesSha256": "9601d2fa3759cbab0aa37be3312246fe420a2f9963bc5a16f9c7fe3f4a5192d5",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "ram-creature-attack",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "action-used",
+            "visible-creature-within-60-feet"
+          ],
+          "clauses": [
+            {
+              "path": "entries[0]",
+              "sha256": "96469937b68d140c2a1bfee70ed2ef88f36e628a21c7ea32e5f809d15a2b421d"
+            }
+          ]
+        },
+        {
+          "key": "ram-object-breaking",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "action-used",
+            "visible-unworn-uncarried-object-within-60-feet"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "9b1a852a31fc5d2d8b8838281ad98600f06d4d36e8b77b3455aa539256a81761"
+            }
+          ]
+        }
+      ],
+      "policySha256": "618cebf40c41a203a72c47127788e8cd7a5ad1a2b406ee12a98228b97f6a586d"
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20the%20ram::::::",
+      "kind": "item",
+      "name": "公羊戒指",
+      "english": "Ring of the Ram",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 296,
+      "sourceDataId": "kiwee:item:xdmg:ring%20of%20the%20ram::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "a3fe3cfc1c637941160516d30a1db8eebb52f6c5588abbc92c28fd15015769ec",
+      "normalizedRawSha256": "6f9277fe4134a3282ac68c95503853e51479e832ad6e3ef3cca0429ee8314797",
+      "normalizedEntriesSha256": "662d0dda997b5196caa82aae21a24cf662cf1c9fba8e585d339708ba87ecb559",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "ram-creature-attack",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "magic-action-used",
+            "visible-creature-within-60-feet"
+          ],
+          "clauses": [
+            {
+              "path": "entries[0]",
+              "sha256": "888e2b60405f22f1d16966765562c60136b1da52d0feb9258d34db2043c9596a"
+            }
+          ]
+        },
+        {
+          "key": "ram-object-breaking",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "magic-action-used",
+            "visible-unworn-uncarried-object-within-60-feet",
+            "nonmagical-object"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "0c520a2045493aca36eed32fa259b27c4c777cee4ecf3aab92486f74adf57246"
+            }
+          ]
+        }
+      ],
+      "policySha256": "290a3da1c626fe7b3e1092849dd8ce8ac6a742be60bf75e98972e280f734273f"
+    },
+    {
+      "id": "kiwee:item:dmg:staff%20of%20striking::::::",
+      "kind": "item",
+      "name": "强袭法杖",
+      "english": "Staff of Striking",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 203,
+      "sourceDataId": "kiwee:item:dmg:staff%20of%20striking::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "c671a5d28e999ea0e893660c89e0904c86ddf1e89e4696cd79ec7ff221cd1b0c",
+      "normalizedRawSha256": "191677d4e42e6ab0c768da988a3203ed50c4095953594259b38686e4b8da2ea4",
+      "normalizedEntriesSha256": "87afbcc4c965f69ba9a7795982d267b5ca9b8fc675b5a725bb11ea2152a41f7c",
+      "capacity": 10,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "item-melee-hit",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 1,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-held",
+            "this-item-melee-hit"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "049cd047a59802c4b996430216f00860b31c31946ba412d98dde17d5952e3a1b"
+            }
+          ]
+        }
+      ],
+      "policySha256": "e010c5da923ffa38f94ce22b47d599694330e1bdf4908e3bc4d717037ddbc1b5"
+    },
+    {
+      "id": "kiwee:item:xdmg:staff%20of%20striking::::::",
+      "kind": "item",
+      "name": "强袭法杖",
+      "english": "Staff of Striking",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 309,
+      "sourceDataId": "kiwee:item:xdmg:staff%20of%20striking::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "8d25634a6f934082dde436ba01a5a38f9a10d127a6e3d2c3884bf2200fb03f9b",
+      "normalizedRawSha256": "586facdd734c6ec054884cc35021efa15d847b4b5a9ca2ac8975ab99670821ac",
+      "normalizedEntriesSha256": "2fbbd6136cd0e8b81195fdae9f354a69a64b7a81c894857a861c862a6f30b674",
+      "capacity": 10,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "item-melee-hit",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 1,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-held",
+            "this-item-melee-hit"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "cfba9186de7efae798ed28a61c892e733c41cc73b7fb2cb2127be27701615f0d"
+            }
+          ]
+        }
+      ],
+      "policySha256": "6543214a6f103a2cae5f4cde6821924239b8eab896400e650dfd0207ffbbd6d9"
+    },
+    {
+      "id": "kiwee-homebrew:item:sterlingvermin:club%20of%20unconsciousness::::::",
+      "kind": "item",
+      "name": "闷棍",
+      "english": "Club of Unconsciousness",
+      "source": "STERLINGVERMIN",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "0593dd1ff41efae5fe35732dac306d6af94f3393f8224493e1368bb7924b3b5a",
+      "page": null,
+      "sourceDataId": "kiwee-homebrew:item:sterlingvermin:club%20of%20unconsciousness::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202014.json",
+        "sha256": "0593dd1ff41efae5fe35732dac306d6af94f3393f8224493e1368bb7924b3b5a"
+      },
+      "fullNormalizedSnapshotSha256": "f4df102692d8802b2c152010261527efd6d1484a9868e5c7494f7b0e39cdcf4d",
+      "normalizedRawSha256": "61e97b12c17cb8f4fccafea0238be7b271bd13388396400c3cfe01cecca98dac",
+      "normalizedEntriesSha256": "94c501a6fb8fa89408caeb97d7649c9e15dc66c90ab905c0ed5454213f15e678",
+      "capacity": 5,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "weapon-damage-response",
+          "allowedCosts": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-held",
+            "this-weapon-dealt-damage"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "cd7c638be67ad745fab2ff9a82a609f667ad51bedf5db98b728d5cba2021695b"
+            }
+          ]
+        }
+      ],
+      "policySha256": "2c7a2f573dae06f8b962b3c91d858e710759f54bd0908a2d9e7f0bc7475a0d46"
+    },
+    {
+      "id": "kiwee-homebrew:item:taldoreicampaignsettingreborn:cabal's%20ruin%20(awakened)::::::",
+      "kind": "item",
+      "name": "鬼蜮末日（觉醒）",
+      "english": "Cabal's Ruin (Awakened)",
+      "source": "TALDOREICAMPAIGNSETTINGREBORN",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44",
+      "page": 203,
+      "sourceDataId": "kiwee-homebrew:item:taldoreicampaignsettingreborn:cabal's%20ruin%20(awakened)::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Darrington%20Press%3B%20%E5%A1%94%E5%B0%94%E5%A4%9A%E9%9B%B7%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "sha256": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44"
+      },
+      "fullNormalizedSnapshotSha256": "2ef8abc89ff43bc13aca9f919100f783f033b636ba338a068ba6ec890fc75afc",
+      "normalizedRawSha256": "d70979f4c75979c8d2b427bdedca811dc095508a76a582010fe4f6f2dd7145b2",
+      "normalizedEntriesSha256": "9b614f8993c8821ac0d0ef37b8f33b80fe09fbb2afa05a13ca57b90996a3b06d",
+      "capacity": 6,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "attack-hit-lightning",
+          "allowedCosts": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "current-source-stage",
+            "attack-hit"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1].entries[0]",
+              "sha256": "a9d6a2d5271a55c43b8f42dbd45a8c900941bc3f26e36a33059b263bbbefbf39"
+            }
+          ]
+        }
+      ],
+      "policySha256": "b1b03213edf6444b5f7b1b6caa87309fe94b0d5c8d15cb5ebc888ddbbb365df1"
+    },
+    {
+      "id": "kiwee-homebrew:item:taldoreicampaignsettingreborn:cabal's%20ruin%20(dormant)::::::",
+      "kind": "item",
+      "name": "鬼蜮末日（休眠）",
+      "english": "Cabal's Ruin (Dormant)",
+      "source": "TALDOREICAMPAIGNSETTINGREBORN",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44",
+      "page": 203,
+      "sourceDataId": "kiwee-homebrew:item:taldoreicampaignsettingreborn:cabal's%20ruin%20(dormant)::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Darrington%20Press%3B%20%E5%A1%94%E5%B0%94%E5%A4%9A%E9%9B%B7%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "sha256": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44"
+      },
+      "fullNormalizedSnapshotSha256": "c3b96614af28b961c83e5165cb762d7493c6ef46de89376a6ecda8d7c65bc3b2",
+      "normalizedRawSha256": "4e4974c371a5e6850ebf10b927bfca84a1f0aea05a401cc8a65116befe6ffcdc",
+      "normalizedEntriesSha256": "a5e40db2682d4782a5152aa78119e683c0c01b86fd07c38d8f0c10ccbb7d5ccf",
+      "capacity": 4,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "attack-hit-lightning",
+          "allowedCosts": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "current-source-stage",
+            "attack-hit"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1].entries[0]",
+              "sha256": "a9d6a2d5271a55c43b8f42dbd45a8c900941bc3f26e36a33059b263bbbefbf39"
+            }
+          ]
+        }
+      ],
+      "policySha256": "1351a60de29af89ae3872a57f42b4a0344b3049bb1cd5b34efaa5ee25c1b4dff"
+    },
+    {
+      "id": "kiwee-homebrew:item:taldoreicampaignsettingreborn:cabal's%20ruin%20(exalted)::::::",
+      "kind": "item",
+      "name": "鬼蜮末日（升华）",
+      "english": "Cabal's Ruin (Exalted)",
+      "source": "TALDOREICAMPAIGNSETTINGREBORN",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44",
+      "page": 203,
+      "sourceDataId": "kiwee-homebrew:item:taldoreicampaignsettingreborn:cabal's%20ruin%20(exalted)::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Darrington%20Press%3B%20%E5%A1%94%E5%B0%94%E5%A4%9A%E9%9B%B7%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "sha256": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44"
+      },
+      "fullNormalizedSnapshotSha256": "0a3d80620b9a4460498f3a6c49d1244132573da73e1e531b180c669a5556a046",
+      "normalizedRawSha256": "463110641e6e7529a1a480dfba805b254280815454b42c771201a022036a4f0e",
+      "normalizedEntriesSha256": "1a627b6526ff546614ab0d0813bb6e8f202502166f431868ffc6b28790ac87f6",
+      "capacity": 10,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "attack-hit-lightning",
+          "allowedCosts": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "current-source-stage",
+            "attack-hit"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1].entries[0]",
+              "sha256": "a9d6a2d5271a55c43b8f42dbd45a8c900941bc3f26e36a33059b263bbbefbf39"
+            }
+          ]
+        }
+      ],
+      "policySha256": "4e2a53a62a1506cb5b4a306c4b252bec13d8b0fcaa86ef0533739fb59914ce68"
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:helm%20of%20the%20justicars::::::",
+      "kind": "item",
+      "name": "裁决官之冠",
+      "english": "Helm of the Justicars",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 102,
+      "sourceDataId": "kiwee-homebrew:item:griffonssaddlebag2:helm%20of%20the%20justicars::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "fullNormalizedSnapshotSha256": "f7e21b1efec17ad9d88ac38e21388dc321a71a0480b1147d3b3cf2c2727c4d12",
+      "normalizedRawSha256": "c7dd759bc0026af275ddd38d2969b5d62d43657e5a7aab9a5519963705828f3b",
+      "normalizedEntriesSha256": "080415f7c4a84ffee882c383ae9ec4debcfe4c2fc1e66db77b2b30584d0f5100",
+      "capacity": 12,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "spell-response",
+          "allowedCosts": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "affected-by-spell",
+            "reaction-used"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "05b0cb582a47b704350dbe2d366b8c9ab0a20462e0b7e59628096e9ba039c624"
+            }
+          ]
+        }
+      ],
+      "policySha256": "c5b9b3e28724389554fd624a6b750ddb7b49cd5e5f25b7aed1d50e1f71e63373"
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:mageplate%20ring::::::",
+      "kind": "item",
+      "name": "法师板甲戒指",
+      "english": "Mageplate Ring",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 118,
+      "sourceDataId": "kiwee-homebrew:item:griffonssaddlebag2:mageplate%20ring::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "fullNormalizedSnapshotSha256": "b000d0a8c398a9fe105823444c8e16e9b9bcf016552a06b557bf6d2dede381d1",
+      "normalizedRawSha256": "ffbb63c58c5c067930ba21afa982649b3ec8780f9c3731df069b1497c0e96fc4",
+      "normalizedEntriesSha256": "64a383dda716794c267ce89cd26176c0a5497d147751d7d36f6af238b5513438",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "armour-activation",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "bonus-action-used"
+          ],
+          "clauses": [
+            {
+              "path": "entries[0]",
+              "sha256": "ee3f1951ccd29ee19c4c37b1f674e40fa4269019304186e790917b45c0506aae"
+            }
+          ]
+        }
+      ],
+      "policySha256": "bf7dcb43e5d7ff65a559bfff3b3fd42d7961295391ca6e673478fe1b847f45d5"
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:phoenix%20rocket%20sword::::::",
+      "kind": "item",
+      "name": "凤凰推进器之剑",
+      "english": "Phoenix Rocket Sword",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 136,
+      "sourceDataId": "kiwee-homebrew:item:griffonssaddlebag2:phoenix%20rocket%20sword::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "fullNormalizedSnapshotSha256": "0aacb8cc098c95363c048d185f26bcb507b3eec9fcc3d6b26ae2e39ccadcb0cf",
+      "normalizedRawSha256": "8f63af244d276550918bb2a24c3ab9d19905acb4b31aec04759fc63532b47a33",
+      "normalizedEntriesSha256": "8ca8f845f38f393cadc2115e63a389731b03bf75d681713c2c2afd4625e154af",
+      "capacity": 10,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "flame-discharge",
+          "allowedCosts": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-held",
+            "action-used",
+            "source-command-spoken",
+            "source-gesture-performed"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1]",
+              "sha256": "983fa48f3f9b055f48e0b8e121c1d91fd92ef08643901c8ef8f03d1e9de22aec"
+            }
+          ]
+        }
+      ],
+      "policySha256": "ac911dfc4408a8d9051735b8eb49c5f5b5e04c2cd9f4d6a3fa5d8e6ce5c7ad02"
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:wraps%20of%20the%20restless::::::",
+      "kind": "item",
+      "name": "不休绑带",
+      "english": "Wraps of the Restless",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 192,
+      "sourceDataId": "kiwee-homebrew:item:griffonssaddlebag2:wraps%20of%20the%20restless::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "fullNormalizedSnapshotSha256": "428c38d23e8a245c981410677b81bf863f6a532db9f7c10fe3da884d2daa277c",
+      "normalizedRawSha256": "fab06905142b9d7942cfd840fc2330e81f0284d785d4ae41f86f2e945820f23b",
+      "normalizedEntriesSha256": "32aff0964fda3ec6bd4b61bdc8946b98308a26dfc93fd28b4013dbd8ffb3a5ed",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "sand-blast",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "action-used",
+            "source-gesture-performed"
+          ],
+          "clauses": [
+            {
+              "path": "entries[2]",
+              "sha256": "389c30e7bf6965daec4cc616e01da55c27cd89cf3f8b51d5406ec477d5cd4a7a"
+            }
+          ]
+        }
+      ],
+      "policySha256": "a2f9a9b926f8dacdf48e356f057333262d6c4a25d46a60782de5e53cd88ea607"
+    },
+    {
+      "id": "kiwee-homebrew:item:humblewoodtales:fangs%20of%20guile::::::",
+      "kind": "item",
+      "name": "狡诈之牙",
+      "english": "Fangs of Guile",
+      "source": "HUMBLEWOODTALES",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "58226d6315b3e17c0c9746dba4b248b1d620b11fa21b12cf9e6d3b151873de4d",
+      "page": 239,
+      "sourceDataId": "kiwee-homebrew:item:humblewoodtales:fangs%20of%20guile::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%95%85%E4%BA%8B%E9%9B%86.json",
+        "sha256": "58226d6315b3e17c0c9746dba4b248b1d620b11fa21b12cf9e6d3b151873de4d"
+      },
+      "fullNormalizedSnapshotSha256": "139612f010e4f307b7795f9db3e4242de19e7eda0b9711ef57f853d33abf2d0b",
+      "normalizedRawSha256": "a576f8cce46bafbb433c1b6835503188c8826a0a217adfd399bff3e81874c661",
+      "normalizedEntriesSha256": "f1733a27a913f8e213b04caafecc1e2d8cc5a4c195031fcfc85160b3b1252620",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only",
+        "source-fee-3-held-by-minimum-after-one-terminal-fate-unimplemented"
+      ],
+      "branches": [
+        {
+          "key": "spirit-jaw-attack",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 1,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "action-used",
+            "visible-creature-within-5-feet"
+          ],
+          "clauses": [
+            {
+              "path": "entries[2]",
+              "sha256": "43f1cedb6967d49913dc64eeb3e8ea21410ed9a0b2c15f16c87e3390376158b0"
+            }
+          ]
+        }
+      ],
+      "policySha256": "df2c7289e9050286b6d15914101695972f8d4afc2964f3f5b0a2bac8c1387176"
+    },
+    {
+      "id": "kiwee-homebrew:item:humblewoodtales:ring%20of%20the%20sky%20hunter::::::",
+      "kind": "item",
+      "name": "天空猎人之戒",
+      "english": "Ring of the Sky Hunter",
+      "source": "HUMBLEWOODTALES",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "58226d6315b3e17c0c9746dba4b248b1d620b11fa21b12cf9e6d3b151873de4d",
+      "page": 246,
+      "sourceDataId": "kiwee-homebrew:item:humblewoodtales:ring%20of%20the%20sky%20hunter::::::::",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%95%85%E4%BA%8B%E9%9B%86.json",
+        "sha256": "58226d6315b3e17c0c9746dba4b248b1d620b11fa21b12cf9e6d3b151873de4d"
+      },
+      "fullNormalizedSnapshotSha256": "fbd9c863a396da1ef1d538cf30269aca0500475a26dd887e53829e6a78c08442",
+      "normalizedRawSha256": "b527a0feeb230d9525f9f4c5eead58efa387a78021e2a1a48712dcefe352048e",
+      "normalizedEntriesSha256": "92c121fe47df3ad8b77567fea478b1b1b2aa5861e1fa621071714ae26bf4b3c3",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "manualBoundaries": [
+        "genuine-physical-owner",
+        "actual-attunement-and-equipment-still-required",
+        "attunement-legality-and-slot-limit-manual",
+        "effects-commands-targets-timing-not-automated",
+        "actual-attunement-still-required",
+        "no-activation-permission",
+        "no-spell-casting",
+        "no-item-effects",
+        "no-recovery",
+        "no-destruction",
+        "no-stage-transition",
+        "no-arbitrary-freeform-fee",
+        "no-whole-entry-or-report-credit",
+        "existing-manual-history-authority-guards-preserved",
+        "source-enumerated-positive-fee-accounting-only"
+      ],
+      "branches": [
+        {
+          "key": "stooping-talons",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "action-used",
+            "visible-creature-within-60-feet"
+          ],
+          "clauses": [
+            {
+              "path": "entries[1].entries[0]",
+              "sha256": "1efaf96f50452235d4a8bc90ad0baf20ed5d1a1850d3cfdd6e2efd21e9814a54"
+            }
+          ]
+        },
+        {
+          "key": "raising-talons",
+          "allowedCosts": [
+            1,
+            2,
+            3
+          ],
+          "minAfter": 0,
+          "requiredContext": [
+            "accounting-only",
+            "current-item-worn",
+            "action-used",
+            "visible-large-or-smaller-creature-within-60-feet"
+          ],
+          "clauses": [
+            {
+              "path": "entries[2].entries[0]",
+              "sha256": "0bdb1271ebbe26cba6e8bc3325e533daeeb5ae58c6005696869240a255b0c47d"
+            }
+          ]
+        }
+      ],
+      "policySha256": "ae742bce815392883e6ffa1c72070692f4a47c5c151f3080ed5c9fb5d8c621d9"
+    }
+  ],
+  "holds": [
+    {
+      "id": "kiwee:item:dmg:pipes%20of%20the%20sewers::::::",
+      "kind": "item",
+      "name": "唤鼠乐笙",
+      "english": "Pipes of the Sewers",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 185,
+      "sourceDataId": "kiwee:item:dmg:pipes%20of%20the%20sewers::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "3e05ea3d611f7cdd747e92be1cd83dbebfd4e95e059134ef63212739ae28a52f",
+      "normalizedRawSha256": "5f6bfd22141b9f0f096883a33ce649f00f59ba62f1239489476f79ca0e147701",
+      "normalizedEntriesSha256": "dc55d3c59a3ecc922b35589c6bd20ddceeffb083dd6bef5d8b2e488c6b30be1a",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "holdReason": "wind-proficiency-playing-and-dm-availability-not-admitted",
+      "clauses": [
+        {
+          "path": "entries[0]",
+          "sha256": "2e27f7356dff57c5f6f9025e0f5ff02b9c8efe296aad1726fa477a766eae5f8f"
+        },
+        {
+          "path": "raw.entries[0]",
+          "sha256": "2e27f7356dff57c5f6f9025e0f5ff02b9c8efe296aad1726fa477a766eae5f8f"
+        },
+        {
+          "path": "entries[1]",
+          "sha256": "d517d8290527a6ee3688c0eca25359f1bf093c7ed518f3e08e8415364f137894"
+        },
+        {
+          "path": "raw.entries[1]",
+          "sha256": "d517d8290527a6ee3688c0eca25359f1bf093c7ed518f3e08e8415364f137894"
+        },
+        {
+          "path": "entries[2]",
+          "sha256": "bc28b9f56616aeb40fe64cc3c107f3adbdbf413dfeaa19f4b778fcd9f9145985"
+        },
+        {
+          "path": "raw.entries[2]",
+          "sha256": "bc28b9f56616aeb40fe64cc3c107f3adbdbf413dfeaa19f4b778fcd9f9145985"
+        },
+        {
+          "path": "raw.charges",
+          "sha256": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": "raw.reqAttune",
+          "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+        },
+        {
+          "path": "raw.additionalEntries",
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:pipes%20of%20the%20sewers::::::",
+      "kind": "item",
+      "name": "唤鼠乐笙",
+      "english": "Pipes of the Sewers",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 285,
+      "sourceDataId": "kiwee:item:xdmg:pipes%20of%20the%20sewers::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "ae0fca5695cc4ac280dcf3ed6bea370b22a389111dadf6427da10b7ec7bab03c",
+      "normalizedRawSha256": "9c605a58da69a75eba7361a7454dee67e880a365cef184b59ccbc25663a4ffa1",
+      "normalizedEntriesSha256": "3b726a489a327bd8c50828b273f8c65aff1f465b2da4c662815f8ac83b234150",
+      "capacity": 3,
+      "requiresAttunement": true,
+      "holdReason": "playing-and-dm-availability-not-admitted",
+      "clauses": [
+        {
+          "path": "entries[0]",
+          "sha256": "7632e457c6ea001b10d6e6847ed163f9b5ce2bf81affb691f4cd6c00cc8cd756"
+        },
+        {
+          "path": "raw.entries[0]",
+          "sha256": "7632e457c6ea001b10d6e6847ed163f9b5ce2bf81affb691f4cd6c00cc8cd756"
+        },
+        {
+          "path": "entries[1]",
+          "sha256": "e187c9d5cd1b2f88c229b6ee76c268488ef5cc4af5bb636f44d54eddcbfe133c"
+        },
+        {
+          "path": "raw.entries[1]",
+          "sha256": "e187c9d5cd1b2f88c229b6ee76c268488ef5cc4af5bb636f44d54eddcbfe133c"
+        },
+        {
+          "path": "entries[2]",
+          "sha256": "ac135a54a40a3e1d2e998c101ba4127fc232e9ac7f466cbafe194c60694f4a2f"
+        },
+        {
+          "path": "raw.entries[2]",
+          "sha256": "ac135a54a40a3e1d2e998c101ba4127fc232e9ac7f466cbafe194c60694f4a2f"
+        },
+        {
+          "path": "raw.charges",
+          "sha256": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": "raw.reqAttune",
+          "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+        },
+        {
+          "path": "raw.additionalEntries",
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:oota:stonespeaker%20crystal::::::",
+      "kind": "item",
+      "name": "石语者水晶",
+      "english": "Stonespeaker Crystal",
+      "source": "OOTA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 223,
+      "sourceDataId": "kiwee:item:oota:stonespeaker%20crystal::::::::",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "fullNormalizedSnapshotSha256": "784c6d749562df3910848e431d308ceb85f2622bb0aa4e5bbabe0393bc95f954",
+      "normalizedRawSha256": "49acd0e37068f4cc9ed60ad51b747c944b7e074bfff0fff979b621c857d28af0",
+      "normalizedEntriesSha256": "73e54bffe00bd68b9f410884e19f6325be09679f2a2962d1d17b50cf5e26d4d1",
+      "capacity": 10,
+      "requiresAttunement": true,
+      "holdReason": "spellcasting-and-material-substitution-not-admitted",
+      "clauses": [
+        {
+          "path": "entries[0]",
+          "sha256": "edc7de141a3592f5dce2dce8b4e8ecc9d3425bc3e5bd9a37e2d22df0260f2b3e"
+        },
+        {
+          "path": "raw.entries[0]",
+          "sha256": "edc7de141a3592f5dce2dce8b4e8ecc9d3425bc3e5bd9a37e2d22df0260f2b3e"
+        },
+        {
+          "path": "entries[1]",
+          "sha256": "dd11b62162ac6108b10778411adb3246c62a7cd304dfb21fd18dd65379654a86"
+        },
+        {
+          "path": "raw.entries[1]",
+          "sha256": "dd11b62162ac6108b10778411adb3246c62a7cd304dfb21fd18dd65379654a86"
+        },
+        {
+          "path": "entries[2]",
+          "sha256": "713847e36ba6be2bf13e46ff43cca4f8e0cfda330c8c6dbd07ae181c62966ca8"
+        },
+        {
+          "path": "raw.entries[2]",
+          "sha256": "713847e36ba6be2bf13e46ff43cca4f8e0cfda330c8c6dbd07ae181c62966ca8"
+        },
+        {
+          "path": "entries[3]",
+          "sha256": "db7e9bc48e6274172ce5d0db566702c0a0a3ea9d216ed354828928887f2a3925"
+        },
+        {
+          "path": "raw.entries[3]",
+          "sha256": "db7e9bc48e6274172ce5d0db566702c0a0a3ea9d216ed354828928887f2a3925"
+        },
+        {
+          "path": "raw.charges",
+          "sha256": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5"
+        },
+        {
+          "path": "raw.reqAttune",
+          "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+        },
+        {
+          "path": "raw.additionalEntries",
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    }
+  ]
+}

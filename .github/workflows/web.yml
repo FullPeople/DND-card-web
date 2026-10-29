@@ -45,6 +45,28 @@ jobs:
       - name: Verify runtime ledger and current consumer module hashes
         run: npm run verify:automation-runtime -- --data-repository .local-evidence/runtime-authority
       - run: npm ci
+      - name: Materialize exact original sources privately for ordinary casting checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/fetchReviewedAlertCorpus.mjs \
+            --report docs/data/automation-runtime-coverage.json \
+            --output .local-evidence/ordinary-check-upstream \
+            --receipt .local-evidence/ordinary-full-source-verification.json
+          printf '%s\n' 'ORDINARY_CASTING_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'RACIAL_DARKVISION_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'ITEM_ABILITY_FLOOR_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'RACIAL_MOVEMENT_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+          printf '%s\n' 'OPTIONAL_CLASS_LIST_FROZEN_DIR=.local-evidence/ordinary-check-upstream' >> "$GITHUB_ENV"
+      - name: Verify the independent immutable optional-list policy source privately
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/fetchOptionalClassSpellListSource.mjs \
+            --output .local-evidence/optional-class-list-side-source/book-tce.json \
+            --receipt .local-evidence/optional-class-list-side-source/verification.json
+          printf '%s\n' 'OPTIONAL_CLASS_LIST_SIDE_SOURCE_FILE=.local-evidence/optional-class-list-side-source/book-tce.json' >> "$GITHUB_ENV"
+
       - run: npm run verify:automation-progress
       - run: npm run check
       - run: npm run build:standalone
@@ -60,6 +82,7 @@ jobs:
             .local-evidence/automation-progress/unit-report.json
             .local-evidence/automation-progress/source-provenance.json
             .local-evidence/automation-progress/runtime-provenance.json
+            .local-evidence/ordinary-full-source-verification.json
           if-no-files-found: error
           retention-days: 1
   browsers:

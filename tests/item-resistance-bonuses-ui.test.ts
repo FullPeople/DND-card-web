@@ -1,0 +1,18 @@
+import {beforeAll,expect,it,vi} from 'vitest';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+vi.mock('../src/platform/workbench',()=>{const state={};return{inWorkbench:false,useWorkbench:()=>state,getWorkbench:()=>state,workbenchRequest:vi.fn(),requestInventory:vi.fn(),composeRoll:vi.fn()};});
+vi.mock('../src/cloud/localRights',()=>({localGm:()=>false}));
+vi.mock('../src/ui/pointerDrag',()=>({pointerDrag:vi.fn(),landingWithin:vi.fn()}));
+import {AutomationPanel} from '../src/ui/AutomationPanel';
+import {evaluate} from '../src/core/engine';
+import {itemResistanceBonusFixture} from './helpers/itemResistanceBonusFlowFixture';
+import {itemResistanceBonusSpecs,itemResistanceBonusHeldEntries,itemResistanceBonusSourceEvidence,itemResistanceBonusSnapshot as snapshot} from './helpers/itemResistanceBonusSourceFixture';
+beforeAll(()=>{itemResistanceBonusSourceEvidence();});
+const text=(value:string)=>value.replace(/[&<>"']/g,key=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;'}as Record<string,string>)[key]);
+
+it('the existing readonly resistance summary renders authenticated types/provenance and manual-damage boundaries, while inactive and ten held XDMG rings explain their non-grant without card writes',()=>{
+ for(const form of ['canonical','app']as const)for(const spec of itemResistanceBonusSpecs){const f=itemResistanceBonusFixture(spec.sourceIndex,form),before=snapshot(f.c),d=evaluate(f.c),edit=vi.fn();d.resistances!.push('unreviewed-type');const html=renderToStaticMarkup(createElement(AutomationPanel,{c:f.c,d,entries:f.entries,edit,writable:false}));expect(html.includes(`data-testid="automation-resistances">${spec.resistance}</p>`)).toBe(true);expect(html.includes('unreviewed-type')).toBe(false);expect(html.includes('实际伤害结算与减免仍需手动处理，不会自动改写生命值')).toBe(true);expect(html.includes('<fieldset disabled=""')).toBe(true);expect(d.trace.resistances.length).toBeGreaterThan(0);for(const row of d.trace.resistances)expect(html.includes(text(row))).toBe(true);expect(edit).not.toHaveBeenCalled();expect(snapshot(f.c)).toBe(before);}
+ for(const index of [213,1752])for(const mode of ['source','equipment','attunement']as const){const f=itemResistanceBonusFixture(index);if(mode==='source')f.c.profile.enabledSources=[];if(mode==='equipment')f.owner.equipped=false;if(mode==='attunement')f.owner.attuned=false;const before=snapshot(f.c),d=evaluate(f.c),issues=d.issues.filter(issue=>issue.id.startsWith('item-resistance-bonus:')),edit=vi.fn(),html=renderToStaticMarkup(createElement(AutomationPanel,{c:f.c,d,entries:f.entries,edit}));expect(d.resistances).toEqual([]);expect(issues.length).toBeGreaterThan(0);expect(html.includes('data-testid="automation-resistances">无</p>')).toBe(true);for(const issue of issues)expect(html.includes(text(issue.message))).toBe(true);expect(edit).not.toHaveBeenCalled();expect(snapshot(f.c)).toBe(before);}
+ const held=itemResistanceBonusHeldEntries();expect(held).toHaveLength(10);for(const entry of held){const f=itemResistanceBonusFixture(214);f.owner.entry=structuredClone(entry);f.owner.equipped=true;f.owner.attuned=true;f.c.profile.enabledSources=[entry.source,...(entry.dependencies||[])];const before=snapshot(f.c),d=evaluate(f.c),issues=d.issues.filter(issue=>issue.id.startsWith('item-resistance-bonus:')),edit=vi.fn(),html=renderToStaticMarkup(createElement(AutomationPanel,{c:f.c,d,entries:[...f.entries,entry],edit}));expect(d.resistances).toEqual([]);expect(issues.length).toBeGreaterThan(0);for(const issue of issues)expect(html.includes(text(issue.message))).toBe(true);expect(html.includes('data-testid="automation-resistances">无</p>')).toBe(true);expect(edit).not.toHaveBeenCalled();expect(snapshot(f.c)).toBe(before);}
+});

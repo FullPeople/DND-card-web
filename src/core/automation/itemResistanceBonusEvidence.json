@@ -1,0 +1,1810 @@
+{
+  "schemaVersion": 1,
+  "scope": "source-qualified worn attuned Dragon Scale Mail and typed DMG Ring damage-resistance branches only",
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+      "bytes": 149813
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "bytes": 2458443
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+      "bytes": 190573
+    }
+  ],
+  "counts": {
+    "owners": 30,
+    "completeOwnerForms": 60,
+    "dragonScaleMail": 20,
+    "typedDmgRings": 10,
+    "heldXdmgRings": 10
+  },
+  "normalization": {
+    "canonical": "complete original items.json through installed normalizeCatalogData",
+    "app": "exact catalog.ts equipment accumulation plus normalize then magicItems, sorted path-prefixed source revisions",
+    "noPayloadRepair": true
+  },
+  "rules": [
+    {
+      "id": "kiwee:item:dmg:black%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "黑龙鳞甲",
+      "english": "Black Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 213,
+      "fullNormalizedSnapshotSha256": "49edeec22458c5f750077bf932d4aef01283156bd2d3012f6013e186efc89631",
+      "resistance": "acid",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "49edeec22458c5f750077bf932d4aef01283156bd2d3012f6013e186efc89631",
+          "canonicalReboundSnapshotSha256": "49edeec22458c5f750077bf932d4aef01283156bd2d3012f6013e186efc89631"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "6cd51ecd92fca8d0444b84453a74d8e77f7ef50459b8344d237f8275669bd153",
+          "canonicalReboundSnapshotSha256": "49edeec22458c5f750077bf932d4aef01283156bd2d3012f6013e186efc89631"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/213/entries/0",
+          "utf8Sha256": "124587f4b0d5f08f891b46641aae98ba4507dfdd265b4ee04b299af230174793"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:blue%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "蓝龙鳞甲",
+      "english": "Blue Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 253,
+      "fullNormalizedSnapshotSha256": "d5a83ccbb384103aa5e3164626f59235010e89bf4dcc76ccd7f6b1d24b120260",
+      "resistance": "lightning",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "d5a83ccbb384103aa5e3164626f59235010e89bf4dcc76ccd7f6b1d24b120260",
+          "canonicalReboundSnapshotSha256": "d5a83ccbb384103aa5e3164626f59235010e89bf4dcc76ccd7f6b1d24b120260"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "bd45eb7759c1fa54a7ea0be886c21c36fe572861ccc71362874a69d7f519f848",
+          "canonicalReboundSnapshotSha256": "d5a83ccbb384103aa5e3164626f59235010e89bf4dcc76ccd7f6b1d24b120260"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/253/entries/0",
+          "utf8Sha256": "6a9d2557d7f8a3ae9e33382997fdd23e5e4dbfe7e056eb110570e3e6c57c8ed3"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:brass%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "黄铜龙鳞甲",
+      "english": "Brass Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 309,
+      "fullNormalizedSnapshotSha256": "7b073cc711cea7c63b25ceb7c56f1e863bbb4d465eab4c4e18473db98658d0fa",
+      "resistance": "fire",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "7b073cc711cea7c63b25ceb7c56f1e863bbb4d465eab4c4e18473db98658d0fa",
+          "canonicalReboundSnapshotSha256": "7b073cc711cea7c63b25ceb7c56f1e863bbb4d465eab4c4e18473db98658d0fa"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "4e08f030d5d335be8f85f0bb8b1058d64dcfd808cd0f4f8e5586daaa0fa7c7d4",
+          "canonicalReboundSnapshotSha256": "7b073cc711cea7c63b25ceb7c56f1e863bbb4d465eab4c4e18473db98658d0fa"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/309/entries/0",
+          "utf8Sha256": "0c242b12e1bd6504d3db9eeb186d6bc3f1e867a05a9cfc8dbe57a11ff9eb02bc"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:bronze%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "青铜龙鳞甲",
+      "english": "Bronze Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 323,
+      "fullNormalizedSnapshotSha256": "cb904f1ad2faee9a50deec1ee36527e5472f4ed3a5b1fcb29f2acdb96eb36e22",
+      "resistance": "lightning",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "cb904f1ad2faee9a50deec1ee36527e5472f4ed3a5b1fcb29f2acdb96eb36e22",
+          "canonicalReboundSnapshotSha256": "cb904f1ad2faee9a50deec1ee36527e5472f4ed3a5b1fcb29f2acdb96eb36e22"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "c3eab12ec4f05d1dfced96f73dede9a408b9dde673e3180e6dd95af492033d9f",
+          "canonicalReboundSnapshotSha256": "cb904f1ad2faee9a50deec1ee36527e5472f4ed3a5b1fcb29f2acdb96eb36e22"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/323/entries/0",
+          "utf8Sha256": "6a9d2557d7f8a3ae9e33382997fdd23e5e4dbfe7e056eb110570e3e6c57c8ed3"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:copper%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "赤铜龙鳞甲",
+      "english": "Copper Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 495,
+      "fullNormalizedSnapshotSha256": "195cb22b3abad1cd0baecf77de6a13b3fe7db3405532999f0692c6008fe6ada2",
+      "resistance": "acid",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "195cb22b3abad1cd0baecf77de6a13b3fe7db3405532999f0692c6008fe6ada2",
+          "canonicalReboundSnapshotSha256": "195cb22b3abad1cd0baecf77de6a13b3fe7db3405532999f0692c6008fe6ada2"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "0a398680c6a8a3a9c2579493cd9d8eef62cceeac6aca0c2b31ef4ec1e4e09cb1",
+          "canonicalReboundSnapshotSha256": "195cb22b3abad1cd0baecf77de6a13b3fe7db3405532999f0692c6008fe6ada2"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/495/entries/0",
+          "utf8Sha256": "124587f4b0d5f08f891b46641aae98ba4507dfdd265b4ee04b299af230174793"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:gold%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "金龙鳞甲",
+      "english": "Gold Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 888,
+      "fullNormalizedSnapshotSha256": "88866c19c46b8a840e79d08c89ff98936159f284300032779646d0405dd9193b",
+      "resistance": "fire",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "88866c19c46b8a840e79d08c89ff98936159f284300032779646d0405dd9193b",
+          "canonicalReboundSnapshotSha256": "88866c19c46b8a840e79d08c89ff98936159f284300032779646d0405dd9193b"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "8b07fe8ead9bd7edcc078bb1da8faff909a2e693208f5f92414b6889f1ab35e3",
+          "canonicalReboundSnapshotSha256": "88866c19c46b8a840e79d08c89ff98936159f284300032779646d0405dd9193b"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/888/entries/0",
+          "utf8Sha256": "0c242b12e1bd6504d3db9eeb186d6bc3f1e867a05a9cfc8dbe57a11ff9eb02bc"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:green%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "绿龙鳞甲",
+      "english": "Green Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 921,
+      "fullNormalizedSnapshotSha256": "d62554aeb1694f7e1a943684477591343481baad96adf2ed52972135486a0d88",
+      "resistance": "poison",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "d62554aeb1694f7e1a943684477591343481baad96adf2ed52972135486a0d88",
+          "canonicalReboundSnapshotSha256": "d62554aeb1694f7e1a943684477591343481baad96adf2ed52972135486a0d88"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "59d70982c78956879f0e43b29cf5c18fe38289c83f6c01d2ea7031d4961a2313",
+          "canonicalReboundSnapshotSha256": "d62554aeb1694f7e1a943684477591343481baad96adf2ed52972135486a0d88"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/921/entries/0",
+          "utf8Sha256": "71c1cf3266f1a71a87d59bcd900663d481c39d91463af345be4a26a036031a6d"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:red%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "红龙鳞甲",
+      "english": "Red Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1734,
+      "fullNormalizedSnapshotSha256": "8857c330add1f4dd5e0302e0e1aba4e8e4909f4ca21a87c0069cefc3ae287e31",
+      "resistance": "fire",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "8857c330add1f4dd5e0302e0e1aba4e8e4909f4ca21a87c0069cefc3ae287e31",
+          "canonicalReboundSnapshotSha256": "8857c330add1f4dd5e0302e0e1aba4e8e4909f4ca21a87c0069cefc3ae287e31"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "965f3fb026d4f9c96e3bdf889b0b6aa7134372986af44e047a396c8b2e533e2d",
+          "canonicalReboundSnapshotSha256": "8857c330add1f4dd5e0302e0e1aba4e8e4909f4ca21a87c0069cefc3ae287e31"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1734/entries/0",
+          "utf8Sha256": "0c242b12e1bd6504d3db9eeb186d6bc3f1e867a05a9cfc8dbe57a11ff9eb02bc"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:silver%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "银龙鳞甲",
+      "english": "Silver Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 2036,
+      "fullNormalizedSnapshotSha256": "663442a1055e07e72f8fffd2c675cba777c94b967dff95cf2c52ce4ac3974d06",
+      "resistance": "cold",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "663442a1055e07e72f8fffd2c675cba777c94b967dff95cf2c52ce4ac3974d06",
+          "canonicalReboundSnapshotSha256": "663442a1055e07e72f8fffd2c675cba777c94b967dff95cf2c52ce4ac3974d06"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "cdd3ae1ae193c27cbcf7fac09d587faecc8aef92e74ee0b18bb2107da0cab9b9",
+          "canonicalReboundSnapshotSha256": "663442a1055e07e72f8fffd2c675cba777c94b967dff95cf2c52ce4ac3974d06"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/2036/entries/0",
+          "utf8Sha256": "cdb13a69c1b6c3fd45adf47a453149ce6ae5343a6c712ee68dc60990f8aedd8e"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:white%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "白龙鳞甲",
+      "english": "White Dragon Scale Mail",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 165,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 2463,
+      "fullNormalizedSnapshotSha256": "5bacb325a206290b039d46430e498a9b5f57328eff7fa6b167094fcdea1765d8",
+      "resistance": "cold",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "5bacb325a206290b039d46430e498a9b5f57328eff7fa6b167094fcdea1765d8",
+          "canonicalReboundSnapshotSha256": "5bacb325a206290b039d46430e498a9b5f57328eff7fa6b167094fcdea1765d8"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "74adbebd6e8a111cc8660a4f4fbd4d952fd0f22b83e1646f9fc1ea34628e65e0",
+          "canonicalReboundSnapshotSha256": "5bacb325a206290b039d46430e498a9b5f57328eff7fa6b167094fcdea1765d8"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/2463/entries/0",
+          "utf8Sha256": "cdb13a69c1b6c3fd45adf47a453149ce6ae5343a6c712ee68dc60990f8aedd8e"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:black%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "黑龙鳞甲",
+      "english": "Black Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 214,
+      "fullNormalizedSnapshotSha256": "9c3b5a89bad8ec5052987a8e0d12c48041f788d1c58c7a20658df0768b2e9184",
+      "resistance": "acid",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "9c3b5a89bad8ec5052987a8e0d12c48041f788d1c58c7a20658df0768b2e9184",
+          "canonicalReboundSnapshotSha256": "9c3b5a89bad8ec5052987a8e0d12c48041f788d1c58c7a20658df0768b2e9184"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "d7a89a40251234d7e38767e2691ef6869d5f490b6692ef725ee884c98ecad631",
+          "canonicalReboundSnapshotSha256": "5ec40626efe771f34ab32ccffd4ad27816043441a3b29dd6fdb94f70712bb6db"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/214/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:blue%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "蓝龙鳞甲",
+      "english": "Blue Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 254,
+      "fullNormalizedSnapshotSha256": "ffaf01f35ec25dd89700f7076f81b8b4f0211784e881ae6442421a196db3eb48",
+      "resistance": "lightning",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "ffaf01f35ec25dd89700f7076f81b8b4f0211784e881ae6442421a196db3eb48",
+          "canonicalReboundSnapshotSha256": "ffaf01f35ec25dd89700f7076f81b8b4f0211784e881ae6442421a196db3eb48"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "c107d2dd2103b8db144a6734d086b38203a82dd99b23a5a0a957b705cef86755",
+          "canonicalReboundSnapshotSha256": "735d829634797c26c37922b151a5bebd6ee3391462c4764fc8b2f8bef43f31c9"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/254/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:brass%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "黄铜龙鳞甲",
+      "english": "Brass Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 310,
+      "fullNormalizedSnapshotSha256": "b5498ec05348b3948a271e89bb7298ceffecb6ba9c48b1e30c220b3ea86bf816",
+      "resistance": "fire",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "b5498ec05348b3948a271e89bb7298ceffecb6ba9c48b1e30c220b3ea86bf816",
+          "canonicalReboundSnapshotSha256": "b5498ec05348b3948a271e89bb7298ceffecb6ba9c48b1e30c220b3ea86bf816"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "1dbe92dc57e229506a4ae1f321bb97cf72866224ebc7c13f7152b792c937fc43",
+          "canonicalReboundSnapshotSha256": "f6164bf02e95fabd630ba211bd3177d8dbf4875e649443aa7abc6587cf242a45"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/310/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:bronze%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "青铜龙鳞甲",
+      "english": "Bronze Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 324,
+      "fullNormalizedSnapshotSha256": "e5b170b36d44eb03e8832053fa231174ef979a7ed17a6160157c638acc64b03d",
+      "resistance": "lightning",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "e5b170b36d44eb03e8832053fa231174ef979a7ed17a6160157c638acc64b03d",
+          "canonicalReboundSnapshotSha256": "e5b170b36d44eb03e8832053fa231174ef979a7ed17a6160157c638acc64b03d"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "61df029959b2ef93a69cf09424098cbf51b7a1b937e87d09fdbc9f5c4997ce96",
+          "canonicalReboundSnapshotSha256": "017199d286ec197a4b41b7bb63c9252e9a27bf090ac0c4a903ecba82e66e88a3"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/324/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:copper%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "赤铜龙鳞甲",
+      "english": "Copper Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 496,
+      "fullNormalizedSnapshotSha256": "eb8a92e0bfcd6c4b31e4a1c4cccb0fece8f4bba8fc7838861491d9fccd9acc21",
+      "resistance": "acid",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "eb8a92e0bfcd6c4b31e4a1c4cccb0fece8f4bba8fc7838861491d9fccd9acc21",
+          "canonicalReboundSnapshotSha256": "eb8a92e0bfcd6c4b31e4a1c4cccb0fece8f4bba8fc7838861491d9fccd9acc21"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "3d5cbfd229fb93f5bbde9c5134251ec2e1ad2fbd52e5f8a7bff092fe68ca2f9b",
+          "canonicalReboundSnapshotSha256": "6226cabad1b0b7cd089549f0441009de79d0e63948eaa50da6655ce85380589e"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/496/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:gold%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "金龙鳞甲",
+      "english": "Gold Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 889,
+      "fullNormalizedSnapshotSha256": "60368837cbd4d789178c731c245f015c5932ce4992f016e42282b3e3cc6fa1e1",
+      "resistance": "fire",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "60368837cbd4d789178c731c245f015c5932ce4992f016e42282b3e3cc6fa1e1",
+          "canonicalReboundSnapshotSha256": "60368837cbd4d789178c731c245f015c5932ce4992f016e42282b3e3cc6fa1e1"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "5baaa62c8c3952fc0d05a27f5990a95a96a87a50fb1116c0e2112003c4a2224a",
+          "canonicalReboundSnapshotSha256": "0c0e7a57aebdfc420b5896e9f88c42f1f33944e6491228c9d3ee164058c343d1"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/889/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:green%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "绿龙鳞甲",
+      "english": "Green Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 922,
+      "fullNormalizedSnapshotSha256": "b3843b52ff10abddbe1db2b103f145fc9c57dd1b66a5bdbe209bfd073e4444d4",
+      "resistance": "poison",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "b3843b52ff10abddbe1db2b103f145fc9c57dd1b66a5bdbe209bfd073e4444d4",
+          "canonicalReboundSnapshotSha256": "b3843b52ff10abddbe1db2b103f145fc9c57dd1b66a5bdbe209bfd073e4444d4"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "647019ebd1010dcdcf582cd8fac399c2e9dd59027d9b39a355bbff5c56d171d4",
+          "canonicalReboundSnapshotSha256": "9d0b38161d07a05cdf7ac7b0c4852d2d4b7f1cfa5a2aa2002e354b7ea4258da5"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/922/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:red%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "红龙鳞甲",
+      "english": "Red Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1735,
+      "fullNormalizedSnapshotSha256": "5ca019060bba3f1db83cc512a4ef582a2ea6187694fb0639d4c07c5846ec5205",
+      "resistance": "fire",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "5ca019060bba3f1db83cc512a4ef582a2ea6187694fb0639d4c07c5846ec5205",
+          "canonicalReboundSnapshotSha256": "5ca019060bba3f1db83cc512a4ef582a2ea6187694fb0639d4c07c5846ec5205"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "04a1c2c4b67fb9ee9388ec23c2c2de05a870447604459ce8abdff8a2fa767de0",
+          "canonicalReboundSnapshotSha256": "320ad010948e4eb80ae05b0263b08ea7fe865146cde10ec456bfd725543002ba"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1735/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:silver%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "银龙鳞甲",
+      "english": "Silver Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 2037,
+      "fullNormalizedSnapshotSha256": "f075e1cf3a5260cec3186f14ae0841551edfbf1577f71d564a9678c2dc488999",
+      "resistance": "cold",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "f075e1cf3a5260cec3186f14ae0841551edfbf1577f71d564a9678c2dc488999",
+          "canonicalReboundSnapshotSha256": "f075e1cf3a5260cec3186f14ae0841551edfbf1577f71d564a9678c2dc488999"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "15601a99d94bfca98911e33f42fbc73b380e962bad9cb843f2f8831d5dd5e38f",
+          "canonicalReboundSnapshotSha256": "a77b189c4fc1a33ac29e0528288129f10533a10b62732d7dc28090994a7c8755"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/2037/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:white%20dragon%20scale%20mail::::::",
+      "kind": "item",
+      "name": "白龙鳞甲",
+      "english": "White Dragon Scale Mail",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 254,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 2464,
+      "fullNormalizedSnapshotSha256": "250f5dde8bd43cb42ec100543870fc89f5d7fbef3fa6ea224b215d7b7aba00a0",
+      "resistance": "cold",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "250f5dde8bd43cb42ec100543870fc89f5d7fbef3fa6ea224b215d7b7aba00a0",
+          "canonicalReboundSnapshotSha256": "250f5dde8bd43cb42ec100543870fc89f5d7fbef3fa6ea224b215d7b7aba00a0"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "18570b7fa865419467aeab2e70cbe75f831dc4cc8cf8348e730525f92b48812b",
+          "canonicalReboundSnapshotSha256": "3d32eda5e1182b51fd2b8d10bc7a91b2eb67f403e29e93ff760f0c6b81e422c1"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/2464/entries/0",
+          "utf8Sha256": "2c7bede1731a743c2baa406326a30dee53cfc38439efba7a1d0a2dd7011efd69"
+        },
+        {
+          "path": "items-base.json/itemEntry/4/entriesTemplate/1",
+          "utf8Sha256": "76cd5dada2c0a79a666230213f156a170677e73f6fdf42f1a82084f29b3b9426"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20acid%20resistance::::::",
+      "kind": "item",
+      "name": "强酸抗性戒指",
+      "english": "Ring of Acid Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1752,
+      "fullNormalizedSnapshotSha256": "cea72614996631af9b7fae2b938ea61fa073d404b5c9f13c197f2d30207b1d59",
+      "resistance": "acid",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "cea72614996631af9b7fae2b938ea61fa073d404b5c9f13c197f2d30207b1d59",
+          "canonicalReboundSnapshotSha256": "cea72614996631af9b7fae2b938ea61fa073d404b5c9f13c197f2d30207b1d59"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "d01c8e0a985bc3a340a6ece5ea0fe1b92c0b3146bf62e329701dabe3f2a38aba",
+          "canonicalReboundSnapshotSha256": "6d802ec1e02f9a1896a9ce4fa2b2d8238fdf71acfcac767b5daf16fb20a9a8f4"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1752/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20cold%20resistance::::::",
+      "kind": "item",
+      "name": "寒冷抗性戒指",
+      "english": "Ring of Cold Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1759,
+      "fullNormalizedSnapshotSha256": "dd01daa2b230c9fafa1954ad6aee2bcde0e865239c3572680ad4ba3d6c311f77",
+      "resistance": "cold",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "dd01daa2b230c9fafa1954ad6aee2bcde0e865239c3572680ad4ba3d6c311f77",
+          "canonicalReboundSnapshotSha256": "dd01daa2b230c9fafa1954ad6aee2bcde0e865239c3572680ad4ba3d6c311f77"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "ef7e9ea88b012d8662363aa85a695cccbcc6fb30bc718147fc5230a5645ccbb5",
+          "canonicalReboundSnapshotSha256": "0bc3bdd69e3179f3fb6d85febece660fd2202a90be856f5ed35b3b2105b80d7d"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1759/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20fire%20resistance::::::",
+      "kind": "item",
+      "name": "火焰抗性戒指",
+      "english": "Ring of Fire Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1775,
+      "fullNormalizedSnapshotSha256": "7f53b00af2fab98da0b656dd1bf2c319d665f9f4988b4a128247004d8fa1c824",
+      "resistance": "fire",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "7f53b00af2fab98da0b656dd1bf2c319d665f9f4988b4a128247004d8fa1c824",
+          "canonicalReboundSnapshotSha256": "7f53b00af2fab98da0b656dd1bf2c319d665f9f4988b4a128247004d8fa1c824"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "66fcb0a50b96987291492c8beba00cd1145283c98b31dc218e84e3649cc25938",
+          "canonicalReboundSnapshotSha256": "666a3294d8c7f820d68d9a50a1a43c2cecb01fa5cefea1db0f1a6f0f189423b0"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1775/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20force%20resistance::::::",
+      "kind": "item",
+      "name": "力场抗性戒指",
+      "english": "Ring of Force Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1777,
+      "fullNormalizedSnapshotSha256": "22fd9258ac72615d38841023bcb1be8fd07d0d2e38cee3fdff93a192c847b10c",
+      "resistance": "force",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "22fd9258ac72615d38841023bcb1be8fd07d0d2e38cee3fdff93a192c847b10c",
+          "canonicalReboundSnapshotSha256": "22fd9258ac72615d38841023bcb1be8fd07d0d2e38cee3fdff93a192c847b10c"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "939640bd558ef2afc9f3b81577c97c33093c20243139336ee8f92acade20e5e6",
+          "canonicalReboundSnapshotSha256": "f0f1ee70637bcb2204abc8c05779606fa28934532f4b6278afa4eef1578a7a03"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1777/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20lightning%20resistance::::::",
+      "kind": "item",
+      "name": "闪电抗性戒指",
+      "english": "Ring of Lightning Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1785,
+      "fullNormalizedSnapshotSha256": "13811d4c01c18c0dd5fbb357ba807e0749c2e6e4083764bf7a801f3eedff10a5",
+      "resistance": "lightning",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "13811d4c01c18c0dd5fbb357ba807e0749c2e6e4083764bf7a801f3eedff10a5",
+          "canonicalReboundSnapshotSha256": "13811d4c01c18c0dd5fbb357ba807e0749c2e6e4083764bf7a801f3eedff10a5"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "856a50ef05a7b2d738e883c5e6071e033334a4f8e7422df087d51781ba2c02bf",
+          "canonicalReboundSnapshotSha256": "1320d59368c11b77a420495a25fb234f469d2c73391fb0b5485854c21d57084a"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1785/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20necrotic%20resistance::::::",
+      "kind": "item",
+      "name": "暗蚀抗性戒指",
+      "english": "Ring of Necrotic Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1789,
+      "fullNormalizedSnapshotSha256": "96a8c1a238b48a9c06fc36915f0ab2a5d32567adba5a5975887597e8b3884d12",
+      "resistance": "necrotic",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "96a8c1a238b48a9c06fc36915f0ab2a5d32567adba5a5975887597e8b3884d12",
+          "canonicalReboundSnapshotSha256": "96a8c1a238b48a9c06fc36915f0ab2a5d32567adba5a5975887597e8b3884d12"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "64befd2449a744427176d6bf0ef65a1a78c06afc1667efc26baf852e75ffd6e9",
+          "canonicalReboundSnapshotSha256": "6c211508fe91b6240c22b15edd193a9d28164209c28b56058a2c6fbc612ea0e6"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1789/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20poison%20resistance::::::",
+      "kind": "item",
+      "name": "毒素抗性戒指",
+      "english": "Ring of Poison Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1792,
+      "fullNormalizedSnapshotSha256": "d947d2dbf53ee19596ccbac7e65c0b01f4ff88c20bb1714bf06ec11f58ba698a",
+      "resistance": "poison",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "d947d2dbf53ee19596ccbac7e65c0b01f4ff88c20bb1714bf06ec11f58ba698a",
+          "canonicalReboundSnapshotSha256": "d947d2dbf53ee19596ccbac7e65c0b01f4ff88c20bb1714bf06ec11f58ba698a"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "b275fb1a41774cf640c37cd7f57a1797cbb257bd19e34b7a664b8982abb79437",
+          "canonicalReboundSnapshotSha256": "d2d4745be5dee78ea6db1c26cd79485dd583d6d5a98e289691d9a3a2c7ba134b"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1792/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20psychic%20resistance::::::",
+      "kind": "item",
+      "name": "心灵抗性戒指",
+      "english": "Ring of Psychic Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1796,
+      "fullNormalizedSnapshotSha256": "47308e8e9d1cd232bf94bf9d3cfa3031f679058f10b1eae9b2c3dffbe768c17a",
+      "resistance": "psychic",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "47308e8e9d1cd232bf94bf9d3cfa3031f679058f10b1eae9b2c3dffbe768c17a",
+          "canonicalReboundSnapshotSha256": "47308e8e9d1cd232bf94bf9d3cfa3031f679058f10b1eae9b2c3dffbe768c17a"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "55a35e779257895ca666926ac128dc8c34263bf7dfc8b8d4436c48cbfa64f047",
+          "canonicalReboundSnapshotSha256": "cd8e8d0049c241a4c08e584d91b1fb7306a3a4d626142145e46e89dcb95b4c37"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1796/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20radiant%20resistance::::::",
+      "kind": "item",
+      "name": "光耀抗性戒指",
+      "english": "Ring of Radiant Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1799,
+      "fullNormalizedSnapshotSha256": "8eff6f75ee0616f9b817915b0ec05de950157e068fac194d2f003fb165dc9b17",
+      "resistance": "radiant",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "8eff6f75ee0616f9b817915b0ec05de950157e068fac194d2f003fb165dc9b17",
+          "canonicalReboundSnapshotSha256": "8eff6f75ee0616f9b817915b0ec05de950157e068fac194d2f003fb165dc9b17"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "9095272da7bbcefe3375fe21ed9e7e255044dde405437a9aa7d06e487ed64fe6",
+          "canonicalReboundSnapshotSha256": "e18b2a7a8299aaec0d8b1c96391d24111cc99f1114e9d0141c1f4005bff83953"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1799/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20thunder%20resistance::::::",
+      "kind": "item",
+      "name": "雷鸣抗性戒指",
+      "english": "Ring of Thunder Resistance",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1821,
+      "fullNormalizedSnapshotSha256": "f21ca0469eceb13b04692031f049cbc7d869a41b7e2f4745b578206cc4b05bdc",
+      "resistance": "thunder",
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "f21ca0469eceb13b04692031f049cbc7d869a41b7e2f4745b578206cc4b05bdc",
+          "canonicalReboundSnapshotSha256": "f21ca0469eceb13b04692031f049cbc7d869a41b7e2f4745b578206cc4b05bdc"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "888a5006aab4c10eba38a12bf9a7953bcecd88d9dc9541ba94f5dc4e1866bc19",
+          "canonicalReboundSnapshotSha256": "a9ea4b13e8dacd1e5440f2c3eec936ff16d8ee11cfc41020df3c574c3d60fcd7"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1821/entries/0",
+          "utf8Sha256": "1841c33949dfeac199457336f0541bdc6fac60e929fd51b4dbdfa796f051a6f6"
+        },
+        {
+          "path": "items-base.json/itemEntry/10/entriesTemplate/0",
+          "utf8Sha256": "f4123906ddc9ae5e0d710e98bdef60f9be8e84f64e83b5e34226ef12d9ea7510"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "holds": [
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20acid%20resistance::::::",
+      "kind": "item",
+      "name": "强酸抗性戒指",
+      "english": "Ring of Acid Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1753,
+      "resistance": "acid",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1753"
+      ],
+      "fullNormalizedSnapshotSha256": "bf890157fc8b5a9b23b20537df4f2b20e4ea64327fd4e63eb33e4fafee8dcde6",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "bf890157fc8b5a9b23b20537df4f2b20e4ea64327fd4e63eb33e4fafee8dcde6",
+          "canonicalReboundSnapshotSha256": "bf890157fc8b5a9b23b20537df4f2b20e4ea64327fd4e63eb33e4fafee8dcde6"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "84e49f0dff7a544e8bb11d9a933d429e528f07e13fc1b7414eed8b9aad2bef0f",
+          "canonicalReboundSnapshotSha256": "ac1faf6ff4ca6306d9d71e5f712ffa8c29469667460298292b76f220b6d2fb40"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1753/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20cold%20resistance::::::",
+      "kind": "item",
+      "name": "寒冷抗性戒指",
+      "english": "Ring of Cold Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1760,
+      "resistance": "cold",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1760"
+      ],
+      "fullNormalizedSnapshotSha256": "d06746d91d829985da7cd495326503c54bc0596e2c3007e983c00b649b319cd5",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "d06746d91d829985da7cd495326503c54bc0596e2c3007e983c00b649b319cd5",
+          "canonicalReboundSnapshotSha256": "d06746d91d829985da7cd495326503c54bc0596e2c3007e983c00b649b319cd5"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "3630b0e9b823c2e23014577060623344d2327b1da707ab1929ff8686036ab8fe",
+          "canonicalReboundSnapshotSha256": "8df6e31af28ad5541444bd095edbc6613dfc77a5e7e9cadfca512f3ce36f4a9e"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1760/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20fire%20resistance::::::",
+      "kind": "item",
+      "name": "火焰抗性戒指",
+      "english": "Ring of Fire Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1776,
+      "resistance": "fire",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1776"
+      ],
+      "fullNormalizedSnapshotSha256": "5c8c649248ca89fc2c50403bded30ae85667fffcb1e8054a410cdab4a704e2e7",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "5c8c649248ca89fc2c50403bded30ae85667fffcb1e8054a410cdab4a704e2e7",
+          "canonicalReboundSnapshotSha256": "5c8c649248ca89fc2c50403bded30ae85667fffcb1e8054a410cdab4a704e2e7"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "f40da15e68ffb346a87a0d641ddf308d9456fce9b0dabb300070cdc0330fd131",
+          "canonicalReboundSnapshotSha256": "007a5353265d5f1a47053a471cdcc605afe2254cd9fb0c2880a1345fc974fcbf"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1776/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20force%20resistance::::::",
+      "kind": "item",
+      "name": "力场抗性戒指",
+      "english": "Ring of Force Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1778,
+      "resistance": "force",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1778"
+      ],
+      "fullNormalizedSnapshotSha256": "ecdf212684e59f63f145b2c1a2da318e7cb74395b2d08f245e7d8f9e8bc100c5",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "ecdf212684e59f63f145b2c1a2da318e7cb74395b2d08f245e7d8f9e8bc100c5",
+          "canonicalReboundSnapshotSha256": "ecdf212684e59f63f145b2c1a2da318e7cb74395b2d08f245e7d8f9e8bc100c5"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "8e769e2028f720b095f78432d2682fb7bf9c468603b96271f2b4d6f6f6d8ac2f",
+          "canonicalReboundSnapshotSha256": "764984df4f58d1a0763ad2f139568a8119de3016dd0e4d19c2adae6da379970e"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1778/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20lightning%20resistance::::::",
+      "kind": "item",
+      "name": "闪电抗性戒指",
+      "english": "Ring of Lightning Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1786,
+      "resistance": "lightning",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1786"
+      ],
+      "fullNormalizedSnapshotSha256": "fcf04daa9285e309fd7bbc9aa9e02b9d948e14b98a4e128d88cea73f25648e04",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "fcf04daa9285e309fd7bbc9aa9e02b9d948e14b98a4e128d88cea73f25648e04",
+          "canonicalReboundSnapshotSha256": "fcf04daa9285e309fd7bbc9aa9e02b9d948e14b98a4e128d88cea73f25648e04"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "7fc5986894d09d42b572b9ee9964f7feb3d49e689a8f0e093fd454468a64a527",
+          "canonicalReboundSnapshotSha256": "087feb7791de247e368896107e384d15b4570fba4e145fd2926cd40670cef34c"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1786/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20necrotic%20resistance::::::",
+      "kind": "item",
+      "name": "暗蚀抗性戒指",
+      "english": "Ring of Necrotic Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1790,
+      "resistance": "necrotic",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1790"
+      ],
+      "fullNormalizedSnapshotSha256": "04d0424b3fdd51e90aae09c6c489dde4a6b322885f7a51b6dc43c0ab2b71ebba",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "04d0424b3fdd51e90aae09c6c489dde4a6b322885f7a51b6dc43c0ab2b71ebba",
+          "canonicalReboundSnapshotSha256": "04d0424b3fdd51e90aae09c6c489dde4a6b322885f7a51b6dc43c0ab2b71ebba"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "9cc660606d7e7e1f617caa4e96928a1d4f0f9b5a3e80fa41b64d7904491de146",
+          "canonicalReboundSnapshotSha256": "8ab8143324865db56ac4dcd4e754bce589d62ae9b87f0f074c5a02ed89d64df9"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1790/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20poison%20resistance::::::",
+      "kind": "item",
+      "name": "毒素抗性戒指",
+      "english": "Ring of Poison Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1793,
+      "resistance": "poison",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1793"
+      ],
+      "fullNormalizedSnapshotSha256": "cfec0ec6edae5bb837a0c24fb50bd64b1d2165b34e7c8f9c2460cc4b2ba86a00",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "cfec0ec6edae5bb837a0c24fb50bd64b1d2165b34e7c8f9c2460cc4b2ba86a00",
+          "canonicalReboundSnapshotSha256": "cfec0ec6edae5bb837a0c24fb50bd64b1d2165b34e7c8f9c2460cc4b2ba86a00"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "abb49e70b358e7f20ce88f6fdac65575ebe5760f8aa930658f541b8eafc1d681",
+          "canonicalReboundSnapshotSha256": "8c162ed4ec1b519f374331fa78cd49fdbeaa6740b72ba11de555025da90a5d82"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1793/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20psychic%20resistance::::::",
+      "kind": "item",
+      "name": "心灵抗性戒指",
+      "english": "Ring of Psychic Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1797,
+      "resistance": "psychic",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1797"
+      ],
+      "fullNormalizedSnapshotSha256": "c95b03306d3f86b8eb25c235e2779fe7e896ef5e4874e68ced3a71ec44a4982d",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "c95b03306d3f86b8eb25c235e2779fe7e896ef5e4874e68ced3a71ec44a4982d",
+          "canonicalReboundSnapshotSha256": "c95b03306d3f86b8eb25c235e2779fe7e896ef5e4874e68ced3a71ec44a4982d"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "4ee2bb59272dfa5b0ea8372b3f2c0558592890b8a3d38bcae2fc83fd9f85d0af",
+          "canonicalReboundSnapshotSha256": "b98d18629fd0679011c9f8ce5f5799399b1b3bbbd05091a6f15335c2f7618826"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1797/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20radiant%20resistance::::::",
+      "kind": "item",
+      "name": "光耀抗性戒指",
+      "english": "Ring of Radiant Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1800,
+      "resistance": "radiant",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1800"
+      ],
+      "fullNormalizedSnapshotSha256": "e1a1213c959794d249be97b30f3a9a783532f78ba7e6070c74527b41c0d8ca8a",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "e1a1213c959794d249be97b30f3a9a783532f78ba7e6070c74527b41c0d8ca8a",
+          "canonicalReboundSnapshotSha256": "e1a1213c959794d249be97b30f3a9a783532f78ba7e6070c74527b41c0d8ca8a"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "e7c2461cb8b942e6830436d469c16cff86759ac1ca7fe7057998d3ecfc82c617",
+          "canonicalReboundSnapshotSha256": "0187fb9f14b8d99db9aef97cb2263a1b616fc5be8d88c94dd29d4f0dd8127bc7"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1800/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20thunder%20resistance::::::",
+      "kind": "item",
+      "name": "雷鸣抗性戒指",
+      "english": "Ring of Thunder Resistance",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 294,
+      "category": "item",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 1822,
+      "resistance": "thunder",
+      "reasonCode": "missing-explicit-reqAttune-metadata-not-source-proof",
+      "rawPaths": [
+        "items.json/item/1822"
+      ],
+      "fullNormalizedSnapshotSha256": "700355d18778315db711a8a686588c7eae561b7c39be1bebc292de8e77ddb386",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "700355d18778315db711a8a686588c7eae561b7c39be1bebc292de8e77ddb386",
+          "canonicalReboundSnapshotSha256": "700355d18778315db711a8a686588c7eae561b7c39be1bebc292de8e77ddb386"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "7cd7d3ba773e123557be947d49560d4e93da1bc58f8ee00a18a48cae7bafaeb1",
+          "canonicalReboundSnapshotSha256": "524537201bd388f4e884499abd6c20d0f8661c7897398f3e90ede213a582fa23"
+        }
+      ],
+      "clauses": [
+        {
+          "path": "items.json/item/1822/entries/0",
+          "utf8Sha256": "df6eeb6ee942d82c68ed2072fab58a89ab7234c35e9b8cfdc2d6a91125be3248"
+        },
+        {
+          "path": "items-base.json/itemEntry/11/entriesTemplate/0",
+          "utf8Sha256": "c789ee0ce14f51aa99d0016f8aa272acc190101e760261ca6c3e865dea19691b"
+        }
+      ]
+    }
+  ]
+}

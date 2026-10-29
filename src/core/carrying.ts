@@ -1,3 +1,4 @@
+import {projectRacialCarrying} from './automation/racialCarrying';
 import type {Character,Derived} from './model';
 /** Arithmetic only: no JavaScript, property access or executable expressions. */
 export function capacityFormula(text:string,base:number,strength:number):number{
@@ -10,4 +11,4 @@ export function capacityFormula(text:string,base:number,strength:number):number{
  function sum(){let n=product();while(['+','-'].includes(tokens[cursor])){const op=tokens[cursor++],v=product();n=op==='+'?n+v:n-v;}return n;}
  const value=sum();if(cursor!==tokens.length||!Number.isFinite(value)||value<0||value>1e9)throw Error('负重上限必须在 0 到 10 亿磅之间');return value;
 }
-export function carrying(c:Character,d:Derived){const size=c.size||'M',strength=d.abilities.str,base=strength*({T:7.5,S:15,M:15,L:30,H:60,G:120}[size]||15);return {base,strength,max:capacityFormula(c.inventory?.capacityAdjustment||'',base,strength)};}
+export function carrying(c:Character,d:Derived){const source=projectRacialCarrying(c),size=source.effectiveSize||c.size||'M',strength=d.abilities.str,base=strength*({T:7.5,S:15,M:15,L:30,H:60,G:120}[size]||15);return {base,strength,max:capacityFormula(c.inventory?.capacityAdjustment||'',base,strength),sourceNotes:source.sourceNotes};}

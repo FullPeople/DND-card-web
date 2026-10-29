@@ -8,7 +8,7 @@ import {useSources} from './SourceName';
 import './characterReview.css';
 
 const sections=['概况与风险','属性与熟练','法术与资源','装备与负重','条目与来源','裁定与依据'] as const;
-const labels:Record<string,string>={ac:'护甲',hp:'生命上限',speed:'速度',initiative:'先攻',passive:'被动察觉',proficiency:'熟练加值',armor:'护甲',weapons:'武器',tools:'工具',languages:'语言'};
+const labels:Record<string,string>={ac:'护甲',hp:'生命上限',speed:'速度',initiative:'先攻',passive:'被动察觉',passiveInvestigation:'被动调查',proficiency:'熟练加值',armor:'护甲',weapons:'武器',tools:'工具',languages:'语言'};
 export function CharacterReview({c,inspect,exportHtml,ruleContext}:{c:Character;inspect?:(entry:Entry)=>void;exportHtml?:()=>void;ruleContext?:Pick<Character,'edition'|'profile'|'rulePacks'>}){
  const review=useMemo(()=>characterReview(ruleContext?{...c,...ruleContext}:c),[c,ruleContext]),{d,restricted,recordedLevel,manual,spells,stats,weight}=review,{format}=useSources();
  const [section,setSection]=useState<(typeof sections)[number]>('概况与风险'),[query,setQuery]=useState(''),[filter,setFilter]=useState('all');
@@ -21,7 +21,7 @@ export function CharacterReview({c,inspect,exportHtml,ruleContext}:{c:Character;
   {ruleContext&&<p className="review-note">按房间 {ruleContext.edition} 规则与来源核对；原卡 {c.edition} 身份和独立配置保留。{ruleContext.edition!==c.edition?'版本不同，请重点核对受限条目与等级。':''}</p>}
   <nav aria-label="审卡分类">{sections.map(label=><button key={label} type="button" aria-pressed={section===label} onClick={()=>setSection(label)}>{label}</button>)}</nav>
   {section==='概况与风险'&&<>
-   <dl className="review-facts">{fact('记录等级',recordedLevel)}{fact('生效等级',d.level)}{fact('生命',`${c.runtime.hp} / ${d.maxHp}`)}{fact('临时生命',c.runtime.tempHp)}{fact('护甲',d.ac)}{fact('先攻',signed(d.initiative))}{fact('速度',`${d.speed} 尺`)}{fact('被动察觉',d.passive)}{fact('熟练加值',signed(d.proficiency))}{fact('生命骰',d.hitDice||'—')}</dl>
+   <dl className="review-facts">{fact('记录等级',recordedLevel)}{fact('生效等级',d.level)}{fact('生命',`${c.runtime.hp} / ${d.maxHp}`)}{fact('临时生命',c.runtime.tempHp)}{fact('护甲',d.ac)}{fact('先攻',signed(d.initiative))}{fact('速度',`${d.speed} 尺`)}{fact('被动察觉',d.passive)}{d.passiveInvestigation!==undefined&&fact('被动调查',d.passiveInvestigation)}{fact('熟练加值',signed(d.proficiency))}{fact('生命骰',d.hitDice||'—')}</dl>
    <h4>角色身份</h4><p>{review.classes.map(s=>`${s.entry.name} ${s.level} 级`).join(' / ')||'未填写职业'}</p><p>{c.selections.filter(s=>['race','background','subclass'].includes(s.entry.kind)).map(s=>`${KIND_LABELS[s.entry.kind]}：${s.entry.name}`).join(' · ')||'未填写种族、背景或子职'}</p>
    <h4>需要核对</h4><ul className="review-findings">{recordedLevel!==d.level&&<li>记录等级 {recordedLevel} 与当前规则下生效等级 {d.level} 不一致，请核对职业来源与版本。</li>}{restricted.length>0&&<li><button onClick={()=>{setSection('条目与来源');setFilter('restricted');}}>查看 {restricted.length} 项受限条目</button>：记录保留，当前效果暂停。</li>}{review.unlinked.length>0&&<li>{review.unlinked.length} 项来自旧格式导入，尚未关联 Wiki 来源。</li>}{d.issues.map(issue=><li key={issue.id}>{issue.message}</li>)}{manual.length>0&&<li><button onClick={()=>setSection('裁定与依据')}>核对 {manual.length} 项人工数值修正</button></li>}{!restricted.length&&!review.unlinked.length&&!d.issues.length&&!manual.length&&<li>未发现来源受限或数值修正。</li>}</ul><p className="review-note">此卡为手动记录。技能、选择数量与复杂特性的合法性由 DM 结合规则核对。</p>
   </>}

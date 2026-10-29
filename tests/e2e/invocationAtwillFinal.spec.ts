@@ -83,7 +83,7 @@ async function drag(page:Page,workspace:Locator,name:string,index:number,accepte
  const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();expect(from).not.toBeNull();
  await page.mouse.move(from!.x+25,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+40,from!.y+from!.height/2,{steps:3});
  const slot=workspace.locator('.choice-slot').nth(index);await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();expect(to).not.toBeNull();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(page.locator('.pointer-ghost')).toHaveCount(0);
- if(!accepted)await expect(page.locator('.suite-toast')).toContainText('此条目不属于当前可选内容');
+ if(!accepted)await expect(page.locator('.suite-toast')).toContainText((page.viewportSize()?.width||0)<=760?'尚未达到所需职业等级 15。':'此条目不属于当前可选内容');
  // Explicitly return to the live narrow-screen sheet after a Wiki drag. The
  // stale pre-drop workspace must never stand in for visible player navigation.
  if((page.viewportSize()?.width||0)<=760)workspace=await learning(page);
@@ -234,7 +234,7 @@ test('source suspension preserves learned records and read-only viewing or casti
  const other=await context.newPage();other.on('pageerror',error=>errors.push(error.message));await mock(other);await other.goto('/card/?intro=0');const readonly=await tab(other,'特性');await expect(other.locator('.card-permission-banner')).toContainText('另一标签页正在编辑');await expect(other.getByRole('switch',{name:'编辑模式',exact:true})).toBeDisabled();
  const records=readonly.locator(`[data-class-choice="${choiceId}"]`);for(const row of cases)await expect(records.getByRole('button',{name:row.name,exact:true})).toBeVisible();await expect(records.locator(`[data-choice-id="${choiceId}"]:not([disabled])`)).toHaveCount(0);await expect(readonly.getByRole('spinbutton',{name:'魔契师等级',exact:true})).toHaveAttribute('readonly','');const readonlyBefore=await saved(other);
  for(const [index,row] of cases.entries()){
-  const dialog=await detail(other,row,ids[index]);await dialog.getByRole('button',{name:'使用',exact:true}).click();await expect(other.locator('.suite-toast')).toContainText('此标签页为只读');await expect(dialog.locator('.spell-action-feedback')).not.toHaveAttribute('data-phase','applied');expect(await saved(other)).toEqual(readonlyBefore);await closeDetail(other);
+  const dialog=await detail(other,row,ids[index]);await expect(dialog.getByRole('button',{name:'使用',exact:true})).toBeDisabled();await expect(dialog.locator('.spell-action-feedback')).not.toHaveAttribute('data-phase','applied');expect(await saved(other)).toEqual(readonlyBefore);await closeDetail(other);
  }
  await other.close();expect(await saved(page)).toEqual(active);
  await source(page,false);await expect.poll(async()=>(await saved(page)).selections.filter(row=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);let panel=await tab(page,'特性');await expect(panel.locator(`[data-class-choice="${choiceId}"]`)).toContainText('来源未启用，原记录保留');

@@ -1,0 +1,16 @@
+import {describe,expect,it} from 'vitest';
+import {normalizeData} from '../src/data/catalog';
+import {syncFeatures} from '../src/core/sheet';
+import {sheetChoices,setSheetChoiceSlot} from '../src/core/automation/choices';
+import {evaluate} from '../src/core/engine';
+import {reviewedObservantFixture} from './e2e/reviewedObservantFixture';
+import {reviewedObservantSourceData,observantSourceAvailable} from './helpers/observantSourceFixture';
+import {canonicalJsonSha256} from './e2e/reviewedObservantArtifactPrivacy';
+import {setReviewedObservantIntent} from '../src/core/automation/reviewedObservant';
+function setup(int=19,wis=10){const c=reviewedObservantFixture(int,wis),catalog=normalizeData(reviewedObservantSourceData(),'observant-browser');syncFeatures(c,catalog);const choice=sheetChoices(c,catalog).find(row=>row.grantLevel===4)!,entry=catalog.find(row=>row.english==='Observant')!;setSheetChoiceSlot(c,choice.id,0,entry.id,catalog);return{c,catalog,choice,entry};}
+describe.skipIf(!observantSourceAvailable)('private exact-source browser predictions',()=>{
+it('authored browser fixture uses real legacy ownership and separate passive results without changing manual state or active checks',()=>{const s=setup(),before=structuredClone(s.c);expect(s.c.selections.filter(row=>row.entry.kind==='feat')).toEqual([]);expect(evaluate(s.c).passive).toBe(10);setReviewedObservantIntent(s.c,s.choice.id,s.entry.id,{kind:'observant',ability:'int',confirmedManualAbilityExcluded:true,confirmedManualPassivesExcluded:true},s.catalog);const d=evaluate(s.c);expect(d).toMatchObject({abilities:{int:20},passive:15,passiveInvestigation:20,skills:{investigation:{value:5},perception:{value:0}}});for(const key of ['abilities','training','runtime','proficiencies','expertise','skillBonuses','sheetBonuses','adjustments','selections'] as const)expect(canonicalJsonSha256(s.c[key]??null)).toBe(canonicalJsonSha256(before[key]??null));});
+it.each([20,22])('cap %d retains both five-point passive bonuses',score=>{const s=setup(score,score);for(const ability of ['int','wis'] as const){setReviewedObservantIntent(s.c,s.choice.id,s.entry.id,{kind:'observant',ability,confirmedManualAbilityExcluded:true,confirmedManualPassivesExcluded:true},s.catalog);expect(evaluate(s.c)).toMatchObject({abilities:{int:score,wis:score},passive:10+Math.floor((score-10)/2)+5,passiveInvestigation:10+Math.floor((score-10)/2)+5});}});
+it('manual Perception absolute plus sheet offset remains independent from Investigation skill total/offset and the owned five',()=>{const s=setup();s.c.adjustments=[{id:'perception-final',target:'passive',value:17,reason:'手工最终值'},{id:'investigation-final',target:'skill:investigation',value:8,reason:'手工主动调查'}];s.c.sheetBonuses!.passive=2;s.c.skillBonuses!.investigation=-1;setReviewedObservantIntent(s.c,s.choice.id,s.entry.id,{kind:'observant',ability:'int',confirmedManualAbilityExcluded:true,confirmedManualPassivesExcluded:true},s.catalog);expect(evaluate(s.c)).toMatchObject({passive:19,passiveInvestigation:22,skills:{investigation:{value:7},perception:{value:0}}});s.c.skillBonuses!.investigation=-146;expect(evaluate(s.c)).toMatchObject({passive:19,passiveInvestigation:-123,skills:{investigation:{value:-138},perception:{value:0}}});s.c.skillBonuses!.investigation=-1;expect(evaluate(s.c).passiveInvestigation).toBe(22);});
+
+});

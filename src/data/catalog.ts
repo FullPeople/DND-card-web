@@ -1,3 +1,5 @@
+import {hydrateSpellLookup} from './spellLookup';
+export {hydrateSpellLookup} from './spellLookup';
 import {loadCatalogSnapshot,CATALOG_SNAPSHOT_SCHEMA} from './catalogSnapshot';
 import type {SourceMeta} from '../core/sourceCatalog';
 import {catalogNormalizer,type CatalogOperation} from './catalogNormalizer';
@@ -144,14 +146,7 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
         if(result.body.monsterTemplate)monsterTemplates=result.body.monsterTemplate;
         if(result.body.legendaryGroup)legendaryGroups=result.body.legendaryGroup;
         const normalized = await normalizer.normalize(result.body, result.revision);
-        for (const entry of normalized) if (entry.kind === 'spell') {
-          const lookup = spellLookup[entry.source.toLowerCase()]?.[entry.name.toLowerCase()] || spellLookup[entry.source.toLowerCase()]?.[entry.english.toLowerCase()];
-          entry.raw._spellClasses = lookup?.class;
-          entry.raw._spellSources = lookup;
-          entry.raw._spellClassLookupLoaded = !!lookup;
-          entry.revision += `|lists:${lookupRevision || 'unavailable'}`;
-        }
-        onBatch(normalized);
+        onBatch(normalized.map(entry=>hydrateSpellLookup(entry,spellLookup,lookupRevision)));
       } catch (error) { if (signal.aborted || error instanceof CatalogPausedError) return; failed(path,path,error); }
       progress.done++; progress.label = path.replace('data/', ''); publish();
     }
@@ -182,7 +177,7 @@ async function loadCatalogSources(onBatch: (entries: Entry[]) => void, onProgres
         if(result.recoveredFrom)(progress.recovered??=[]).push(path);
         onSources?.(homebrewMetadata(result.body));
         const body=homebrewBody(result.body);
-        onBatch(await normalizer.normalize(body,result.revision,'kiwee-homebrew'));
+        onBatch((await normalizer.normalize(body,result.revision,'kiwee-homebrew')).map(entry=>hydrateSpellLookup(entry,spellLookup,lookupRevision)));
         if(body.magicvariant?.length&&body.baseitem?.length)onBatch(await normalizer.normalize(body,result.revision,'kiwee-homebrew','magicItems'));
       }catch(error){if(signal.aborted || error instanceof CatalogPausedError)return;failed(path.split('/').map(encodeURIComponent).join('/'),path,error,DEFAULT_HOMEBREW);}
       progress.done++;progress.label=path;publish();

@@ -1,0 +1,2934 @@
+{
+  "schemaVersion": 1,
+  "scope": "explicit-unconditional-fixed-racial-resistance-type-union",
+  "input": {
+    "url": "https://5e.kiwee.top/data/races.json",
+    "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+    "bytes": 451902
+  },
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "sourceCandidateCounts": {
+    "owners": 38,
+    "races": 30,
+    "subraces": 8,
+    "typedAssociations": 44
+  },
+  "counts": {
+    "actualOwners": 38,
+    "typedAssociations": 44,
+    "verifiedRouteProofs": 76,
+    "distinctNormalizedSnapshotForms": 38,
+    "heldOwners": 11
+  },
+  "heldRouteProofs": 22,
+  "normalization": {
+    "canonical": "complete-original-races-body-through-installed-normalizeCatalogData",
+    "app": "independent-complete-original-races-body-normalize-then-real-hydrateSpellLookup",
+    "transportRevision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+    "noPayloadRepair": true
+  },
+  "policy": {
+    "operation": "derived-fixed-damage-type-union-only",
+    "manualMechanisms": [
+      "numeric-damage",
+      "hp",
+      "saving-throw-advantage",
+      "immunity",
+      "temporary-all-damage-resistance",
+      "ancestry-choice",
+      "conditional-resistance"
+    ]
+  },
+  "rules": [
+    {
+      "key": "race/3",
+      "id": "kiwee:race:dmg:aasimar::::::",
+      "kind": "race",
+      "name": "阿斯莫",
+      "english": "Aasimar",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 286,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "9393d2341bfc9acf97cdb1e2005459bb5f3e30303bdbd35f536eb10c89984127",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:dmg:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9393d2341bfc9acf97cdb1e2005459bb5f3e30303bdbd35f536eb10c89984127",
+          "completeSnapshotSha256": "9393d2341bfc9acf97cdb1e2005459bb5f3e30303bdbd35f536eb10c89984127",
+          "canonicalReboundSnapshotSha256": "9393d2341bfc9acf97cdb1e2005459bb5f3e30303bdbd35f536eb10c89984127"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:dmg:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9393d2341bfc9acf97cdb1e2005459bb5f3e30303bdbd35f536eb10c89984127",
+          "completeSnapshotSha256": "9393d2341bfc9acf97cdb1e2005459bb5f3e30303bdbd35f536eb10c89984127",
+          "canonicalReboundSnapshotSha256": "9393d2341bfc9acf97cdb1e2005459bb5f3e30303bdbd35f536eb10c89984127"
+        }
+      ],
+      "resistances": [
+        "necrotic",
+        "radiant"
+      ],
+      "requiredSources": [
+        "DMG"
+      ],
+      "sourceProof": {
+        "path": "race/3",
+        "rawSha256": "ed5d85850e611714e78547c8c01f39962321fe13b68fcdea516f732944f2a7f4",
+        "rawHeader": {
+          "name": "阿斯莫",
+          "ENG_name": "Aasimar",
+          "source": "DMG",
+          "page": 286
+        },
+        "clause": {
+          "path": "race/3/entries/3/entries/0",
+          "utf8Bytes": 42,
+          "sha256": "47c4598056500e44746cc76746b05e25ea7df10f00d5449fe7cd5aedb1caab8e"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/4",
+      "id": "kiwee:race:mpmm:aasimar::::::",
+      "kind": "race",
+      "name": "阿斯莫",
+      "english": "Aasimar",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 7,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "840ab8e7c4dddc746606d3435248c58431c0be666d7dcd3027dccd64a3d73b53",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "840ab8e7c4dddc746606d3435248c58431c0be666d7dcd3027dccd64a3d73b53",
+          "completeSnapshotSha256": "840ab8e7c4dddc746606d3435248c58431c0be666d7dcd3027dccd64a3d73b53",
+          "canonicalReboundSnapshotSha256": "840ab8e7c4dddc746606d3435248c58431c0be666d7dcd3027dccd64a3d73b53"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "840ab8e7c4dddc746606d3435248c58431c0be666d7dcd3027dccd64a3d73b53",
+          "completeSnapshotSha256": "840ab8e7c4dddc746606d3435248c58431c0be666d7dcd3027dccd64a3d73b53",
+          "canonicalReboundSnapshotSha256": "840ab8e7c4dddc746606d3435248c58431c0be666d7dcd3027dccd64a3d73b53"
+        }
+      ],
+      "resistances": [
+        "necrotic",
+        "radiant"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/4",
+        "rawSha256": "a18a8ae981a4deeb44648498073c4576daf491435e39934e8c92834aa3d2c845",
+        "rawHeader": {
+          "name": "阿斯莫",
+          "ENG_name": "Aasimar",
+          "source": "MPMM",
+          "page": 7
+        },
+        "clause": {
+          "path": "race/4/entries/1/entries/0",
+          "utf8Bytes": 42,
+          "sha256": "47c4598056500e44746cc76746b05e25ea7df10f00d5449fe7cd5aedb1caab8e"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/5",
+      "id": "kiwee:race:vgm:aasimar::::::",
+      "kind": "race",
+      "name": "阿斯莫",
+      "english": "Aasimar",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 104,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+          "completeSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+          "canonicalReboundSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+          "completeSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+          "canonicalReboundSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+        }
+      ],
+      "resistances": [
+        "necrotic",
+        "radiant"
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sourceProof": {
+        "path": "race/5",
+        "rawSha256": "e3a57bc345e934cca5555719944e027f920852b6110136a92bc545a6b7be344d",
+        "rawHeader": {
+          "name": "阿斯莫",
+          "ENG_name": "Aasimar",
+          "source": "VGM",
+          "page": 104
+        },
+        "clause": {
+          "path": "race/5/entries/3/entries/0",
+          "utf8Bytes": 42,
+          "sha256": "47c4598056500e44746cc76746b05e25ea7df10f00d5449fe7cd5aedb1caab8e"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/6",
+      "id": "kiwee:race:xphb:aasimar::::::",
+      "kind": "race",
+      "name": "阿斯莫",
+      "english": "Aasimar",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 186,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "ad472c6c0e00fd3bc110f55bc48fd003bbcc63f0a18fce5a122abfd6d1ce2c25",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ad472c6c0e00fd3bc110f55bc48fd003bbcc63f0a18fce5a122abfd6d1ce2c25",
+          "completeSnapshotSha256": "ad472c6c0e00fd3bc110f55bc48fd003bbcc63f0a18fce5a122abfd6d1ce2c25",
+          "canonicalReboundSnapshotSha256": "ad472c6c0e00fd3bc110f55bc48fd003bbcc63f0a18fce5a122abfd6d1ce2c25"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:aasimar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ad472c6c0e00fd3bc110f55bc48fd003bbcc63f0a18fce5a122abfd6d1ce2c25",
+          "completeSnapshotSha256": "ad472c6c0e00fd3bc110f55bc48fd003bbcc63f0a18fce5a122abfd6d1ce2c25",
+          "canonicalReboundSnapshotSha256": "ad472c6c0e00fd3bc110f55bc48fd003bbcc63f0a18fce5a122abfd6d1ce2c25"
+        }
+      ],
+      "resistances": [
+        "necrotic",
+        "radiant"
+      ],
+      "requiredSources": [
+        "XPHB"
+      ],
+      "sourceProof": {
+        "path": "race/6",
+        "rawSha256": "28f8e9a745e128a55e68e2441fb19977f7ff556546bb6bb34fe1570d03d14c2f",
+        "rawHeader": {
+          "name": "阿斯莫",
+          "ENG_name": "Aasimar",
+          "source": "XPHB",
+          "page": 186,
+          "edition": "one"
+        },
+        "clause": {
+          "path": "race/6/entries/0/entries/0",
+          "utf8Bytes": 62,
+          "sha256": "796184d983e89de194e7f1cc1593c6286639f1967dc7a3872ff4d8e34e384426"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/7",
+      "id": "kiwee:race:psk:aetherborn::::::",
+      "kind": "race",
+      "name": "乙太种",
+      "english": "Aetherborn",
+      "source": "PSK",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "649337ba859ad4d65dd057abf6d85775e26750d5352617ca98ffee3c194529ae",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psk:aetherborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "649337ba859ad4d65dd057abf6d85775e26750d5352617ca98ffee3c194529ae",
+          "completeSnapshotSha256": "649337ba859ad4d65dd057abf6d85775e26750d5352617ca98ffee3c194529ae",
+          "canonicalReboundSnapshotSha256": "649337ba859ad4d65dd057abf6d85775e26750d5352617ca98ffee3c194529ae"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psk:aetherborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "649337ba859ad4d65dd057abf6d85775e26750d5352617ca98ffee3c194529ae",
+          "completeSnapshotSha256": "649337ba859ad4d65dd057abf6d85775e26750d5352617ca98ffee3c194529ae",
+          "canonicalReboundSnapshotSha256": "649337ba859ad4d65dd057abf6d85775e26750d5352617ca98ffee3c194529ae"
+        }
+      ],
+      "resistances": [
+        "necrotic"
+      ],
+      "requiredSources": [
+        "PSK"
+      ],
+      "sourceProof": {
+        "path": "race/7",
+        "rawSha256": "8f62d5b65f8ee52d5ec23a927befdfc4ae68320ef193e3f7deef41bfc119d33c",
+        "rawHeader": {
+          "name": "乙太种",
+          "ENG_name": "Aetherborn",
+          "source": "PSK",
+          "page": 17
+        },
+        "clause": {
+          "path": "race/7/entries/4/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d73bbf01d8ebc67523c50bbcada7d93d59d71fcd6a377e4a40a3d61edd9b15c8"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/9",
+      "id": "kiwee:race:aag:autognome::::::",
+      "kind": "race",
+      "name": "自动侏儒",
+      "english": "Autognome",
+      "source": "AAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 11,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:aag:autognome::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "completeSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "canonicalReboundSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:aag:autognome::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "completeSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "canonicalReboundSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "AAG"
+      ],
+      "sourceProof": {
+        "path": "race/9",
+        "rawSha256": "a3c2a1a6d1fbbc8048e1c437ed9ccc085e005757edae7188dd46237e190fb6aa",
+        "rawHeader": {
+          "name": "自动侏儒",
+          "ENG_name": "Autognome",
+          "source": "AAG",
+          "page": 11
+        },
+        "clause": {
+          "path": "race/9/entries/4/entries/0",
+          "utf8Bytes": 173,
+          "sha256": "2106c412f6eac6960ff128aa65158d05a24e9d1a6d345fe57e6e28c79be7e05a"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/25",
+      "id": "kiwee:race:rhw:dhampir::::::",
+      "kind": "race",
+      "name": "半血裔",
+      "english": "Dhampir",
+      "source": "RHW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 28,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:rhw:dhampir::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+          "completeSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+          "canonicalReboundSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:rhw:dhampir::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+          "completeSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+          "canonicalReboundSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f"
+        }
+      ],
+      "resistances": [
+        "necrotic"
+      ],
+      "requiredSources": [
+        "RHW"
+      ],
+      "sourceProof": {
+        "path": "race/25",
+        "rawSha256": "ea3df054941fca7c05a7a9dea553ea3949df6e38d9501ff8aef52a24b94c3137",
+        "rawHeader": {
+          "name": "半血裔",
+          "ENG_name": "Dhampir",
+          "source": "RHW",
+          "page": 28
+        },
+        "clause": {
+          "path": "race/25/entries/2/entries/0",
+          "utf8Bytes": 56,
+          "sha256": "b6fbb866fd57fc08cfd8470541b595b7dfaf9b917417cd6c2a129a943446ba62"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/32",
+      "id": "kiwee:race:mpmm:duergar::::::",
+      "kind": "race",
+      "name": "灰矮人",
+      "english": "Duergar",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 12,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "ef44cde2a8c5a9824b475ec919b18197489d902c0fe05f8075df08de95459ff0",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:duergar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ef44cde2a8c5a9824b475ec919b18197489d902c0fe05f8075df08de95459ff0",
+          "completeSnapshotSha256": "ef44cde2a8c5a9824b475ec919b18197489d902c0fe05f8075df08de95459ff0",
+          "canonicalReboundSnapshotSha256": "ef44cde2a8c5a9824b475ec919b18197489d902c0fe05f8075df08de95459ff0"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:duergar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ef44cde2a8c5a9824b475ec919b18197489d902c0fe05f8075df08de95459ff0",
+          "completeSnapshotSha256": "ef44cde2a8c5a9824b475ec919b18197489d902c0fe05f8075df08de95459ff0",
+          "canonicalReboundSnapshotSha256": "ef44cde2a8c5a9824b475ec919b18197489d902c0fe05f8075df08de95459ff0"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/32",
+        "rawSha256": "1f0ad6893399804bda473cce9c1e4e3ecb2fb6756605fc002d9f39842d6edf9e",
+        "rawHeader": {
+          "name": "灰矮人",
+          "ENG_name": "Duergar",
+          "source": "MPMM",
+          "page": 12
+        },
+        "clause": {
+          "path": "race/32/entries/3/entries/0",
+          "utf8Bytes": 127,
+          "sha256": "b0fd6ca87e2771232e07fd85b056ee9bfdce547c83cf72265ef0f323b04db36c"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/33",
+      "id": "kiwee:race:phb:dwarf::::::",
+      "kind": "race",
+      "name": "矮人",
+      "english": "Dwarf",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 18,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "completeSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "canonicalReboundSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "completeSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "canonicalReboundSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "PHB"
+      ],
+      "sourceProof": {
+        "path": "race/33",
+        "rawSha256": "6e51d570accc43fb4d42da125c6268a80c1676b7af17f80b52ec0c16d2f5d5c0",
+        "rawHeader": {
+          "name": "矮人",
+          "ENG_name": "Dwarf",
+          "source": "PHB",
+          "page": 18
+        },
+        "clause": {
+          "path": "race/33/entries/4/entries/0",
+          "utf8Bytes": 87,
+          "sha256": "aee47d00c384413d7e2e7eb43b6ecf96f4fff71f3f3417763f1fc31b771210a9"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/34",
+      "id": "kiwee:race:xphb:dwarf::::::",
+      "kind": "race",
+      "name": "矮人",
+      "english": "Dwarf",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 188,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "completeSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "canonicalReboundSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "completeSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "canonicalReboundSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "XPHB"
+      ],
+      "sourceProof": {
+        "path": "race/34",
+        "rawSha256": "a334dc252c549c6a78c4e4878e77f722fb20ee93ec1a13ea0399151853270e96",
+        "rawHeader": {
+          "name": "矮人",
+          "ENG_name": "Dwarf",
+          "source": "XPHB",
+          "page": 188,
+          "edition": "one"
+        },
+        "clause": {
+          "path": "race/34/entries/1/entries/0",
+          "utf8Bytes": 167,
+          "sha256": "9b4ddfadab7624b8aa3c6cc88da6190ce57702daa1490491af346195dfe01709"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/35",
+      "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+      "kind": "race",
+      "name": "矮人 (卡拉德许)",
+      "english": "Dwarf (Kaladesh)",
+      "source": "PSK",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 19,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "completeSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "canonicalReboundSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "completeSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "canonicalReboundSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "PSK"
+      ],
+      "sourceProof": {
+        "path": "race/35",
+        "rawSha256": "29897be4c84c2fd3e2118aa04403e838c6a7ede0509fe0833c0e0362282fbed1",
+        "rawHeader": {
+          "name": "矮人 (卡拉德许)",
+          "ENG_name": "Dwarf (Kaladesh)",
+          "source": "PSK",
+          "page": 19
+        },
+        "clause": {
+          "path": "race/35/entries/5/entries/0",
+          "utf8Bytes": 87,
+          "sha256": "aee47d00c384413d7e2e7eb43b6ecf96f4fff71f3f3417763f1fc31b771210a9"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/52",
+      "id": "kiwee:race:mpmm:githyanki::::::",
+      "kind": "race",
+      "name": "吉斯洋基人",
+      "english": "Githyanki",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 18,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "dc6b9967b6ef551a04e961b80c8b686c8bf31202bbfffe57db1b6c5e6d8a1c36",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:githyanki::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "dc6b9967b6ef551a04e961b80c8b686c8bf31202bbfffe57db1b6c5e6d8a1c36",
+          "completeSnapshotSha256": "dc6b9967b6ef551a04e961b80c8b686c8bf31202bbfffe57db1b6c5e6d8a1c36",
+          "canonicalReboundSnapshotSha256": "dc6b9967b6ef551a04e961b80c8b686c8bf31202bbfffe57db1b6c5e6d8a1c36"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:githyanki::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "dc6b9967b6ef551a04e961b80c8b686c8bf31202bbfffe57db1b6c5e6d8a1c36",
+          "completeSnapshotSha256": "dc6b9967b6ef551a04e961b80c8b686c8bf31202bbfffe57db1b6c5e6d8a1c36",
+          "canonicalReboundSnapshotSha256": "dc6b9967b6ef551a04e961b80c8b686c8bf31202bbfffe57db1b6c5e6d8a1c36"
+        }
+      ],
+      "resistances": [
+        "psychic"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/52",
+        "rawSha256": "775b9d7c7d7b23505c04d3a94a41b43b984f7a87e42017515be4b5c5dc35b1ce",
+        "rawHeader": {
+          "name": "吉斯洋基人",
+          "ENG_name": "Githyanki",
+          "source": "MPMM",
+          "page": 18
+        },
+        "clause": {
+          "path": "race/52/entries/2/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "3ab2a68045387edc02a7a9d37f46787cca673c9bce596649ddf9c03a7073b063"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/53",
+      "id": "kiwee:race:mpmm:githzerai::::::",
+      "kind": "race",
+      "name": "吉斯泽莱人",
+      "english": "Githzerai",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 19,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1110a1016630073b35fb11002bb8891ea9162f54c665b4d0790b327f56beb229",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:githzerai::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1110a1016630073b35fb11002bb8891ea9162f54c665b4d0790b327f56beb229",
+          "completeSnapshotSha256": "1110a1016630073b35fb11002bb8891ea9162f54c665b4d0790b327f56beb229",
+          "canonicalReboundSnapshotSha256": "1110a1016630073b35fb11002bb8891ea9162f54c665b4d0790b327f56beb229"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:githzerai::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1110a1016630073b35fb11002bb8891ea9162f54c665b4d0790b327f56beb229",
+          "completeSnapshotSha256": "1110a1016630073b35fb11002bb8891ea9162f54c665b4d0790b327f56beb229",
+          "canonicalReboundSnapshotSha256": "1110a1016630073b35fb11002bb8891ea9162f54c665b4d0790b327f56beb229"
+        }
+      ],
+      "resistances": [
+        "psychic"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/53",
+        "rawSha256": "7c6d02f8a5c75afdafc19561d22522826bafbff807fb8a6753279363b25b0ccf",
+        "rawHeader": {
+          "name": "吉斯泽莱人",
+          "ENG_name": "Githzerai",
+          "source": "MPMM",
+          "page": 19
+        },
+        "clause": {
+          "path": "race/53/entries/2/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "3ab2a68045387edc02a7a9d37f46787cca673c9bce596649ddf9c03a7073b063"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/62",
+      "id": "kiwee:race:psz:goblin::::::",
+      "kind": "race",
+      "name": "地精",
+      "english": "Goblin",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 16,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psz:goblin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+          "completeSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+          "canonicalReboundSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psz:goblin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+          "completeSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+          "canonicalReboundSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+        }
+      ],
+      "resistances": [
+        "fire",
+        "psychic"
+      ],
+      "requiredSources": [
+        "PSZ"
+      ],
+      "sourceProof": {
+        "path": "race/62",
+        "rawSha256": "fb7e22cbce55a844f0be02948a76fdd16db02e507aca36152ccb45463fe23c5e",
+        "rawHeader": {
+          "name": "地精",
+          "ENG_name": "Goblin",
+          "source": "PSZ",
+          "page": 16
+        },
+        "clause": {
+          "path": "race/62/entries/5/entries/0",
+          "utf8Bytes": 137,
+          "sha256": "1ee23b5d69950ae2e39bb268b8324a399090fda750f18b843e78fdd6124955ef"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/65",
+      "id": "kiwee:race:mpmm:goliath::::::",
+      "kind": "race",
+      "name": "歌利亚",
+      "english": "Goliath",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 21,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "completeSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "canonicalReboundSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "completeSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "canonicalReboundSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0"
+        }
+      ],
+      "resistances": [
+        "cold"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/65",
+        "rawSha256": "d141f667825f4e353c844e38c3976988688403905891ee00277f9f4c0af0ac49",
+        "rawHeader": {
+          "name": "歌利亚",
+          "ENG_name": "Goliath",
+          "source": "MPMM",
+          "page": 21
+        },
+        "clause": {
+          "path": "race/65/entries/1/entries/0",
+          "utf8Bytes": 141,
+          "sha256": "fc886dbc5f265dc92dd75da174e489c902e14ecc82ae15d700ad042ed1eadd89"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/66",
+      "id": "kiwee:race:vgm:goliath::::::",
+      "kind": "race",
+      "name": "歌利亚",
+      "english": "Goliath",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 108,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "completeSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "canonicalReboundSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "completeSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "canonicalReboundSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95"
+        }
+      ],
+      "resistances": [
+        "cold"
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sourceProof": {
+        "path": "race/66",
+        "rawSha256": "c6af3ee9e70bebb9836449ef00ae18dfd2627a6cfff4d8ef8020b34174b4afea",
+        "rawHeader": {
+          "name": "歌利亚",
+          "ENG_name": "Goliath",
+          "source": "VGM",
+          "page": 108
+        },
+        "clause": {
+          "path": "race/66/entries/5/entries/0",
+          "utf8Bytes": 114,
+          "sha256": "beec626d5965db1f57fbda6a4089a7bad1e7ec9cf611ced44a9eb85931c48731"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/89",
+      "id": "kiwee:race:efa:kalashtar::::::",
+      "kind": "race",
+      "name": "离梦人",
+      "english": "Kalashtar",
+      "source": "EFA",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 35,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "970a481c3b3aa2ccc3841056ee7a11fd71284df8ed1a70776e6bd040da3fbe22",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:efa:kalashtar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "970a481c3b3aa2ccc3841056ee7a11fd71284df8ed1a70776e6bd040da3fbe22",
+          "completeSnapshotSha256": "970a481c3b3aa2ccc3841056ee7a11fd71284df8ed1a70776e6bd040da3fbe22",
+          "canonicalReboundSnapshotSha256": "970a481c3b3aa2ccc3841056ee7a11fd71284df8ed1a70776e6bd040da3fbe22"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:efa:kalashtar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "970a481c3b3aa2ccc3841056ee7a11fd71284df8ed1a70776e6bd040da3fbe22",
+          "completeSnapshotSha256": "970a481c3b3aa2ccc3841056ee7a11fd71284df8ed1a70776e6bd040da3fbe22",
+          "canonicalReboundSnapshotSha256": "970a481c3b3aa2ccc3841056ee7a11fd71284df8ed1a70776e6bd040da3fbe22"
+        }
+      ],
+      "resistances": [
+        "psychic"
+      ],
+      "requiredSources": [
+        "EFA"
+      ],
+      "sourceProof": {
+        "path": "race/89",
+        "rawSha256": "c099eb346a0dea0f4200b635efd8968fa22061746c79212fc268569311a627b9",
+        "rawHeader": {
+          "name": "离梦人",
+          "ENG_name": "Kalashtar",
+          "source": "EFA",
+          "page": 35,
+          "edition": "one"
+        },
+        "clause": {
+          "path": "race/89/entries/1/entries/0",
+          "utf8Bytes": 56,
+          "sha256": "a5f88b78c6fd9005482da5fbb48d84ba1a54b06160428c29f760f5303c7145c8"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/90",
+      "id": "kiwee:race:erlw:kalashtar::::::",
+      "kind": "race",
+      "name": "离梦人",
+      "english": "Kalashtar",
+      "source": "ERLW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 29,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "d3926f9102b58a3a5b0bcf35ae71129470c8957ca8639770bd10ca5a003397f3",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:erlw:kalashtar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d3926f9102b58a3a5b0bcf35ae71129470c8957ca8639770bd10ca5a003397f3",
+          "completeSnapshotSha256": "d3926f9102b58a3a5b0bcf35ae71129470c8957ca8639770bd10ca5a003397f3",
+          "canonicalReboundSnapshotSha256": "d3926f9102b58a3a5b0bcf35ae71129470c8957ca8639770bd10ca5a003397f3"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:erlw:kalashtar::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d3926f9102b58a3a5b0bcf35ae71129470c8957ca8639770bd10ca5a003397f3",
+          "completeSnapshotSha256": "d3926f9102b58a3a5b0bcf35ae71129470c8957ca8639770bd10ca5a003397f3",
+          "canonicalReboundSnapshotSha256": "d3926f9102b58a3a5b0bcf35ae71129470c8957ca8639770bd10ca5a003397f3"
+        }
+      ],
+      "resistances": [
+        "psychic"
+      ],
+      "requiredSources": [
+        "ERLW"
+      ],
+      "sourceProof": {
+        "path": "race/90",
+        "rawSha256": "d8155d1cf7c2caf422f00e6b969ea6952d66d7f8e1be3afebcb680ce36dfe72a",
+        "rawHeader": {
+          "name": "离梦人",
+          "ENG_name": "Kalashtar",
+          "source": "ERLW",
+          "page": 29
+        },
+        "clause": {
+          "path": "race/90/entries/4/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "3ab2a68045387edc02a7a9d37f46787cca673c9bce596649ddf9c03a7073b063"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/126",
+      "id": "kiwee:race:aag:plasmoid::::::",
+      "kind": "race",
+      "name": "流浆体",
+      "english": "Plasmoid",
+      "source": "AAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 14,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "404c464c7e037459beb3a4dfd1345f06aedda70b861753bf1b9d8d793357390d",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:aag:plasmoid::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "404c464c7e037459beb3a4dfd1345f06aedda70b861753bf1b9d8d793357390d",
+          "completeSnapshotSha256": "404c464c7e037459beb3a4dfd1345f06aedda70b861753bf1b9d8d793357390d",
+          "canonicalReboundSnapshotSha256": "404c464c7e037459beb3a4dfd1345f06aedda70b861753bf1b9d8d793357390d"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:aag:plasmoid::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "404c464c7e037459beb3a4dfd1345f06aedda70b861753bf1b9d8d793357390d",
+          "completeSnapshotSha256": "404c464c7e037459beb3a4dfd1345f06aedda70b861753bf1b9d8d793357390d",
+          "canonicalReboundSnapshotSha256": "404c464c7e037459beb3a4dfd1345f06aedda70b861753bf1b9d8d793357390d"
+        }
+      ],
+      "resistances": [
+        "acid",
+        "poison"
+      ],
+      "requiredSources": [
+        "AAG"
+      ],
+      "sourceProof": {
+        "path": "race/126",
+        "rawSha256": "efb1c34743ac390ef1fa4139520281fdfa473dfece5c9bc53f6932a8c5d857e3",
+        "rawHeader": {
+          "name": "流浆体",
+          "ENG_name": "Plasmoid",
+          "source": "AAG",
+          "page": 14
+        },
+        "clause": {
+          "path": "race/126/entries/5/entries/0",
+          "utf8Bytes": 115,
+          "sha256": "c45c6c87f9fad3d56dfd535d24af66813c5df37fc705c7aac699099be098cd44"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/128",
+      "id": "kiwee:race:vrgr:reborn::::::",
+      "kind": "race",
+      "name": "重生者",
+      "english": "Reborn",
+      "source": "VRGR",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 20,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "9eac7db8d612f6230c0d52d35cbdd2528d0d7257e5215b0ac53e8bac52a6ac01",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vrgr:reborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9eac7db8d612f6230c0d52d35cbdd2528d0d7257e5215b0ac53e8bac52a6ac01",
+          "completeSnapshotSha256": "9eac7db8d612f6230c0d52d35cbdd2528d0d7257e5215b0ac53e8bac52a6ac01",
+          "canonicalReboundSnapshotSha256": "9eac7db8d612f6230c0d52d35cbdd2528d0d7257e5215b0ac53e8bac52a6ac01"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vrgr:reborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9eac7db8d612f6230c0d52d35cbdd2528d0d7257e5215b0ac53e8bac52a6ac01",
+          "completeSnapshotSha256": "9eac7db8d612f6230c0d52d35cbdd2528d0d7257e5215b0ac53e8bac52a6ac01",
+          "canonicalReboundSnapshotSha256": "9eac7db8d612f6230c0d52d35cbdd2528d0d7257e5215b0ac53e8bac52a6ac01"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "VRGR"
+      ],
+      "sourceProof": {
+        "path": "race/128",
+        "rawSha256": "a60aa205d435b1dd08dfaf57b0b091c6f2bc4fcac48ce6c8e4cd85365729dfd2",
+        "rawHeader": {
+          "name": "重生者",
+          "ENG_name": "Reborn",
+          "source": "VRGR",
+          "page": 20
+        },
+        "clause": {
+          "path": "race/128/entries/2/entries/1/items/0",
+          "utf8Bytes": 106,
+          "sha256": "9335232468f973d719b90bc5517bc8f28a77298634a5a8cf1fd9d5296f4bc2b5"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/129",
+      "id": "kiwee:race:lfl:rimekin::::::",
+      "kind": "race",
+      "name": "霜身",
+      "english": "Rimekin",
+      "source": "LFL",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": null,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "c6423626619a47398539c7f44024505d5d58ea34891d63fee24af6d2ab0a74cf",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:lfl:rimekin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "c6423626619a47398539c7f44024505d5d58ea34891d63fee24af6d2ab0a74cf",
+          "completeSnapshotSha256": "c6423626619a47398539c7f44024505d5d58ea34891d63fee24af6d2ab0a74cf",
+          "canonicalReboundSnapshotSha256": "c6423626619a47398539c7f44024505d5d58ea34891d63fee24af6d2ab0a74cf"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:lfl:rimekin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "c6423626619a47398539c7f44024505d5d58ea34891d63fee24af6d2ab0a74cf",
+          "completeSnapshotSha256": "c6423626619a47398539c7f44024505d5d58ea34891d63fee24af6d2ab0a74cf",
+          "canonicalReboundSnapshotSha256": "c6423626619a47398539c7f44024505d5d58ea34891d63fee24af6d2ab0a74cf"
+        }
+      ],
+      "resistances": [
+        "cold"
+      ],
+      "requiredSources": [
+        "LFL"
+      ],
+      "sourceProof": {
+        "path": "race/129",
+        "rawSha256": "d17cc04b3ee8a3b0ed8e4a9377db615c756ed523bfdca5034ff16fe1205fa5ed",
+        "rawHeader": {
+          "name": "霜身",
+          "ENG_name": "Rimekin",
+          "source": "LFL"
+        },
+        "clause": {
+          "path": "race/129/entries/1/entries/0",
+          "utf8Bytes": 53,
+          "sha256": "13d5aaa37d3c73f4ab5e2a5009ba9e30777805c81a9c154bc74bb0c4a17cfc4a"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/132",
+      "id": "kiwee:race:mpmm:sea%20elf::::::",
+      "kind": "race",
+      "name": "海精灵",
+      "english": "Sea Elf",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 30,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:sea%20elf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+          "completeSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+          "canonicalReboundSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:sea%20elf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+          "completeSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+          "canonicalReboundSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c"
+        }
+      ],
+      "resistances": [
+        "cold"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/132",
+        "rawSha256": "f17035e004edfecacc266f06aa337f2eb1e1a0481ed0f82178d835846c3a9252",
+        "rawHeader": {
+          "name": "海精灵",
+          "ENG_name": "Sea Elf",
+          "source": "MPMM",
+          "page": 30
+        },
+        "clause": {
+          "path": "race/132/entries/2/entries/0",
+          "utf8Bytes": 72,
+          "sha256": "367aeab5a6a9bcd27a2bdfc0f46a3addebfda8ab7787d17319faea98f5b201c9"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/133",
+      "id": "kiwee:race:mpmm:shadar-kai::::::",
+      "kind": "race",
+      "name": "影灵",
+      "english": "Shadar-Kai",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 31,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "d13bc4bdebc0ac76676bf76adf5da4c6198525e250a63c50f784d150843ff42d",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:shadar-kai::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d13bc4bdebc0ac76676bf76adf5da4c6198525e250a63c50f784d150843ff42d",
+          "completeSnapshotSha256": "d13bc4bdebc0ac76676bf76adf5da4c6198525e250a63c50f784d150843ff42d",
+          "canonicalReboundSnapshotSha256": "d13bc4bdebc0ac76676bf76adf5da4c6198525e250a63c50f784d150843ff42d"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:shadar-kai::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d13bc4bdebc0ac76676bf76adf5da4c6198525e250a63c50f784d150843ff42d",
+          "completeSnapshotSha256": "d13bc4bdebc0ac76676bf76adf5da4c6198525e250a63c50f784d150843ff42d",
+          "canonicalReboundSnapshotSha256": "d13bc4bdebc0ac76676bf76adf5da4c6198525e250a63c50f784d150843ff42d"
+        }
+      ],
+      "resistances": [
+        "necrotic"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/133",
+        "rawSha256": "21d34ddf3061972627871007cf0092669f9dbe69b6d10e71c01d4cff494cd9e4",
+        "rawHeader": {
+          "name": "影灵",
+          "ENG_name": "Shadar-Kai",
+          "source": "MPMM",
+          "page": 31
+        },
+        "clause": {
+          "path": "race/133/entries/5/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d73bbf01d8ebc67523c50bbcada7d93d59d71fcd6a377e4a40a3d61edd9b15c8"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/143",
+      "id": "kiwee:race:phb:tiefling::::::",
+      "kind": "race",
+      "name": "提夫林",
+      "english": "Tiefling",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 42,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:tiefling::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "completeSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "canonicalReboundSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:tiefling::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "completeSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "canonicalReboundSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "PHB"
+      ],
+      "sourceProof": {
+        "path": "race/143",
+        "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+        "rawHeader": {
+          "name": "提夫林",
+          "ENG_name": "Tiefling",
+          "source": "PHB",
+          "page": 42
+        },
+        "clause": {
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/148",
+      "id": "kiwee:race:mpmm:triton::::::",
+      "kind": "race",
+      "name": "梭螺鱼人",
+      "english": "Triton",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 35,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:triton::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+          "completeSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+          "canonicalReboundSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:triton::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+          "completeSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+          "canonicalReboundSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa"
+        }
+      ],
+      "resistances": [
+        "cold"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/148",
+        "rawSha256": "d56260c31e80889280743aea0b2f5daab504fdff41a7d81c7d4fc46c9e297fc6",
+        "rawHeader": {
+          "name": "梭螺鱼人",
+          "ENG_name": "Triton",
+          "source": "MPMM",
+          "page": 35
+        },
+        "clause": {
+          "path": "race/148/entries/5/entries/0",
+          "utf8Bytes": 72,
+          "sha256": "87445164ec3c9863d6b26035cd80f0fc38cff79531760077e7790b8817448a15"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/149",
+      "id": "kiwee:race:vgm:triton::::::",
+      "kind": "race",
+      "name": "梭螺鱼人",
+      "english": "Triton",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 115,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:triton::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62",
+          "completeSnapshotSha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62",
+          "canonicalReboundSnapshotSha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:triton::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62",
+          "completeSnapshotSha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62",
+          "canonicalReboundSnapshotSha256": "1ca4db4de96570eb1ce729dfb825f88e05f49b78341772f0814cd48d8a49dd62"
+        }
+      ],
+      "resistances": [
+        "cold"
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sourceProof": {
+        "path": "race/149",
+        "rawSha256": "9f0ee0c8d0739f6aff471f109e854e2f0a56c924100162b5bdf6388e154c02ef",
+        "rawHeader": {
+          "name": "梭螺鱼人",
+          "ENG_name": "Triton",
+          "source": "VGM",
+          "page": 115
+        },
+        "clause": {
+          "path": "race/149/entries/7/entries/0",
+          "utf8Bytes": 69,
+          "sha256": "059f9bab9da4da1e5e6bbd7aa749f5599cbdb4ee7214fd9224dd237485d1a032"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/151",
+      "id": "kiwee:race:psz:vampire::::::",
+      "kind": "race",
+      "name": "吸血鬼",
+      "english": "Vampire",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 14,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psz:vampire::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5",
+          "completeSnapshotSha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5",
+          "canonicalReboundSnapshotSha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psz:vampire::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5",
+          "completeSnapshotSha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5",
+          "canonicalReboundSnapshotSha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5"
+        }
+      ],
+      "resistances": [
+        "necrotic"
+      ],
+      "requiredSources": [
+        "PSZ"
+      ],
+      "sourceProof": {
+        "path": "race/151",
+        "rawSha256": "64ede6a49962763969d026585747ed180bd9016b328c0fd3668b7f5fd110b636",
+        "rawHeader": {
+          "name": "吸血鬼",
+          "ENG_name": "Vampire",
+          "source": "PSZ",
+          "page": 14
+        },
+        "clause": {
+          "path": "race/151/entries/6/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d73bbf01d8ebc67523c50bbcada7d93d59d71fcd6a377e4a40a3d61edd9b15c8"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/155",
+      "id": "kiwee:race:efa:warforged::::::",
+      "kind": "race",
+      "name": "战俑",
+      "english": "Warforged",
+      "source": "EFA",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 38,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b5966b5ad185cf4a9fd0f322200a572b0ed10dd063ee50886ca643efde1dd72a",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:efa:warforged::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b5966b5ad185cf4a9fd0f322200a572b0ed10dd063ee50886ca643efde1dd72a",
+          "completeSnapshotSha256": "b5966b5ad185cf4a9fd0f322200a572b0ed10dd063ee50886ca643efde1dd72a",
+          "canonicalReboundSnapshotSha256": "b5966b5ad185cf4a9fd0f322200a572b0ed10dd063ee50886ca643efde1dd72a"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:efa:warforged::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b5966b5ad185cf4a9fd0f322200a572b0ed10dd063ee50886ca643efde1dd72a",
+          "completeSnapshotSha256": "b5966b5ad185cf4a9fd0f322200a572b0ed10dd063ee50886ca643efde1dd72a",
+          "canonicalReboundSnapshotSha256": "b5966b5ad185cf4a9fd0f322200a572b0ed10dd063ee50886ca643efde1dd72a"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "EFA"
+      ],
+      "sourceProof": {
+        "path": "race/155",
+        "rawSha256": "a36f98d3a9d2437eec208f01bf8c82deaaf3dc6d02c9335b7fdbadacb080c443",
+        "rawHeader": {
+          "name": "战俑",
+          "ENG_name": "Warforged",
+          "source": "EFA",
+          "page": 38,
+          "edition": "one"
+        },
+        "clause": {
+          "path": "race/155/entries/0/entries/0",
+          "utf8Bytes": 160,
+          "sha256": "b1abb5a6a9aef02cf67a7b779332410cc9fb1a44c965e013075c714801b15965"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/156",
+      "id": "kiwee:race:erlw:warforged::::::",
+      "kind": "race",
+      "name": "战俑",
+      "english": "Warforged",
+      "source": "ERLW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 35,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "0cd3d0645617045fa6c45646cb02e3a028af2d840207acf0286d2dbb9ef3bf8b",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:erlw:warforged::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "0cd3d0645617045fa6c45646cb02e3a028af2d840207acf0286d2dbb9ef3bf8b",
+          "completeSnapshotSha256": "0cd3d0645617045fa6c45646cb02e3a028af2d840207acf0286d2dbb9ef3bf8b",
+          "canonicalReboundSnapshotSha256": "0cd3d0645617045fa6c45646cb02e3a028af2d840207acf0286d2dbb9ef3bf8b"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:erlw:warforged::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "0cd3d0645617045fa6c45646cb02e3a028af2d840207acf0286d2dbb9ef3bf8b",
+          "completeSnapshotSha256": "0cd3d0645617045fa6c45646cb02e3a028af2d840207acf0286d2dbb9ef3bf8b",
+          "canonicalReboundSnapshotSha256": "0cd3d0645617045fa6c45646cb02e3a028af2d840207acf0286d2dbb9ef3bf8b"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "ERLW"
+      ],
+      "sourceProof": {
+        "path": "race/156",
+        "rawSha256": "51e15bf12aabea5352c186c918ddbcb5c433fe8cc64940654416cd9d173e0aff",
+        "rawHeader": {
+          "name": "战俑",
+          "ENG_name": "Warforged",
+          "source": "ERLW",
+          "page": 35
+        },
+        "clause": {
+          "path": "race/156/entries/3/entries/1/items/0",
+          "utf8Bytes": 97,
+          "sha256": "d05eab739247a3d64c37510bce04c2add10106120141efa143c0cfd61d3ebe17"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/157",
+      "id": "kiwee:race:mpmm:yuan-ti::::::",
+      "kind": "race",
+      "name": "蛇人",
+      "english": "Yuan-Ti",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 36,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "afde2d39141b0ba0a4596ca0f1cf00323fc5265ff420d6083a621c1a85f7bf01",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:yuan-ti::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "afde2d39141b0ba0a4596ca0f1cf00323fc5265ff420d6083a621c1a85f7bf01",
+          "completeSnapshotSha256": "afde2d39141b0ba0a4596ca0f1cf00323fc5265ff420d6083a621c1a85f7bf01",
+          "canonicalReboundSnapshotSha256": "afde2d39141b0ba0a4596ca0f1cf00323fc5265ff420d6083a621c1a85f7bf01"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:yuan-ti::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "afde2d39141b0ba0a4596ca0f1cf00323fc5265ff420d6083a621c1a85f7bf01",
+          "completeSnapshotSha256": "afde2d39141b0ba0a4596ca0f1cf00323fc5265ff420d6083a621c1a85f7bf01",
+          "canonicalReboundSnapshotSha256": "afde2d39141b0ba0a4596ca0f1cf00323fc5265ff420d6083a621c1a85f7bf01"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "race/157",
+        "rawSha256": "49a49bde4fece787bd9cc2118cd57311a1112b94abe34bdba7743901a1699fd9",
+        "rawHeader": {
+          "name": "蛇人",
+          "ENG_name": "Yuan-Ti",
+          "source": "MPMM",
+          "page": 36
+        },
+        "clause": {
+          "path": "race/157/entries/3/entries/0",
+          "utf8Bytes": 127,
+          "sha256": "b0fd6ca87e2771232e07fd85b056ee9bfdce547c83cf72265ef0f323b04db36c"
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/20",
+      "id": "kiwee:race:mtf:elf%20(shadar-kai)::::::%E7%B2%BE%E7%81%B5",
+      "kind": "race",
+      "name": "精灵（影灵）",
+      "english": "Elf (Shadar-kai)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 62,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "f00b8fd4453d2e9576a3f95c1556d53f51273221ffb5ec2430a60f80f4828988",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:elf%20(shadar-kai)::::::%E7%B2%BE%E7%81%B5",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "f00b8fd4453d2e9576a3f95c1556d53f51273221ffb5ec2430a60f80f4828988",
+          "completeSnapshotSha256": "f00b8fd4453d2e9576a3f95c1556d53f51273221ffb5ec2430a60f80f4828988",
+          "canonicalReboundSnapshotSha256": "f00b8fd4453d2e9576a3f95c1556d53f51273221ffb5ec2430a60f80f4828988"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:elf%20(shadar-kai)::::::%E7%B2%BE%E7%81%B5",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "f00b8fd4453d2e9576a3f95c1556d53f51273221ffb5ec2430a60f80f4828988",
+          "completeSnapshotSha256": "f00b8fd4453d2e9576a3f95c1556d53f51273221ffb5ec2430a60f80f4828988",
+          "canonicalReboundSnapshotSha256": "f00b8fd4453d2e9576a3f95c1556d53f51273221ffb5ec2430a60f80f4828988"
+        }
+      ],
+      "resistances": [
+        "necrotic"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/20",
+        "rawSha256": "05cd4fee20227e09651000b082e75ce87a01178bcd6ccaf48d08f8322fb5f096",
+        "rawHeader": {
+          "name": "影灵",
+          "ENG_name": "Shadar-kai",
+          "source": "MTF",
+          "page": 62,
+          "raceName": "精灵",
+          "raceSource": "PHB"
+        },
+        "clause": {
+          "path": "subrace/20/entries/0/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d73bbf01d8ebc67523c50bbcada7d93d59d71fcd6a377e4a40a3d61edd9b15c8"
+        },
+        "parent": {
+          "path": "race/38",
+          "rawSha256": "5754e3320cc451ca113b28023ef3f14e225101274f407fe692482eb942b44672",
+          "header": {
+            "name": "精灵",
+            "ENG_name": "Elf",
+            "source": "PHB",
+            "page": 21
+          },
+          "normalizedId": "kiwee:race:phb:elf::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:elf::::::",
+            "kind": "race",
+            "name": "精灵",
+            "english": "Elf",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 21,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b3a57fc3fcf30d31b2ffaddd5f44ee30bb1811605ba7dd901bba5e0a5df11478",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:elf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b3a57fc3fcf30d31b2ffaddd5f44ee30bb1811605ba7dd901bba5e0a5df11478"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:elf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b3a57fc3fcf30d31b2ffaddd5f44ee30bb1811605ba7dd901bba5e0a5df11478"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/29",
+      "id": "kiwee:race:eepc:genasi%20(fire)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "kind": "race",
+      "name": "元素裔（火）",
+      "english": "Genasi (Fire)",
+      "source": "EEPC",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 9,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "87a3763561888a8f5a55c35b5fa5c6afbc4a25e74c4148362b7e005b12cf819e",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:eepc:genasi%20(fire)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "87a3763561888a8f5a55c35b5fa5c6afbc4a25e74c4148362b7e005b12cf819e",
+          "completeSnapshotSha256": "87a3763561888a8f5a55c35b5fa5c6afbc4a25e74c4148362b7e005b12cf819e",
+          "canonicalReboundSnapshotSha256": "87a3763561888a8f5a55c35b5fa5c6afbc4a25e74c4148362b7e005b12cf819e"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:eepc:genasi%20(fire)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "87a3763561888a8f5a55c35b5fa5c6afbc4a25e74c4148362b7e005b12cf819e",
+          "completeSnapshotSha256": "87a3763561888a8f5a55c35b5fa5c6afbc4a25e74c4148362b7e005b12cf819e",
+          "canonicalReboundSnapshotSha256": "87a3763561888a8f5a55c35b5fa5c6afbc4a25e74c4148362b7e005b12cf819e"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "EEPC"
+      ],
+      "sourceProof": {
+        "path": "subrace/29",
+        "rawSha256": "84d5466b5f0c99e770e1428e3269de0d9f6b0820af9515b20df52f70a2ba061e",
+        "rawHeader": {
+          "name": "火",
+          "ENG_name": "Fire",
+          "source": "EEPC",
+          "page": 9,
+          "raceName": "元素裔",
+          "raceSource": "EEPC"
+        },
+        "clause": {
+          "path": "subrace/29/entries/1/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc"
+        },
+        "parent": {
+          "path": "race/48",
+          "rawSha256": "0c69ea064f7a3d2bc72d9a462c3c7b3a9b2cda26e01a85d3728d88e46eec7d54",
+          "header": {
+            "name": "元素裔",
+            "ENG_name": "Genasi",
+            "source": "EEPC",
+            "page": 9
+          },
+          "normalizedId": "kiwee:race:eepc:genasi::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:eepc:genasi::::::",
+            "kind": "race",
+            "name": "元素裔",
+            "english": "Genasi",
+            "source": "EEPC",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 9,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "21b9a5bc200a23db30c9f685b92ff6f2ccfc4be51c980ba091f99c908864e70d",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:eepc:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "21b9a5bc200a23db30c9f685b92ff6f2ccfc4be51c980ba091f99c908864e70d"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:eepc:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "21b9a5bc200a23db30c9f685b92ff6f2ccfc4be51c980ba091f99c908864e70d"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/30",
+      "id": "kiwee:race:eepc:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "kind": "race",
+      "name": "元素裔（水）",
+      "english": "Genasi (Water)",
+      "source": "EEPC",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 10,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:eepc:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69",
+          "completeSnapshotSha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69",
+          "canonicalReboundSnapshotSha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:eepc:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69",
+          "completeSnapshotSha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69",
+          "canonicalReboundSnapshotSha256": "30b9ed1f12cb2f64bf09636971b4fdb164da28a0c073617753c11673f943df69"
+        }
+      ],
+      "resistances": [
+        "acid"
+      ],
+      "requiredSources": [
+        "EEPC"
+      ],
+      "sourceProof": {
+        "path": "subrace/30",
+        "rawSha256": "8e10806e1707368eb70668ae41dca22404064fbcb58daad8d28a5f5cfd735e31",
+        "rawHeader": {
+          "name": "水",
+          "ENG_name": "Water",
+          "source": "EEPC",
+          "page": 10,
+          "raceName": "元素裔",
+          "raceSource": "EEPC"
+        },
+        "clause": {
+          "path": "subrace/30/entries/0/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "9ef5ea3d39626e630ee1acf5818e3a379f9defa40b26fce344eb61dc2f27519c"
+        },
+        "parent": {
+          "path": "race/48",
+          "rawSha256": "0c69ea064f7a3d2bc72d9a462c3c7b3a9b2cda26e01a85d3728d88e46eec7d54",
+          "header": {
+            "name": "元素裔",
+            "ENG_name": "Genasi",
+            "source": "EEPC",
+            "page": 9
+          },
+          "normalizedId": "kiwee:race:eepc:genasi::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:eepc:genasi::::::",
+            "kind": "race",
+            "name": "元素裔",
+            "english": "Genasi",
+            "source": "EEPC",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 9,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "21b9a5bc200a23db30c9f685b92ff6f2ccfc4be51c980ba091f99c908864e70d",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:eepc:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "21b9a5bc200a23db30c9f685b92ff6f2ccfc4be51c980ba091f99c908864e70d"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:eepc:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "21b9a5bc200a23db30c9f685b92ff6f2ccfc4be51c980ba091f99c908864e70d"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/31",
+      "id": "kiwee:race:mpmm:genasi%20(air)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "kind": "race",
+      "name": "元素裔（气）",
+      "english": "Genasi (Air)",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 16,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "17731349545ecda8d70e977c3401b54e90a908bcb4ac66e8d5048bed31816631",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:genasi%20(air)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "17731349545ecda8d70e977c3401b54e90a908bcb4ac66e8d5048bed31816631",
+          "completeSnapshotSha256": "17731349545ecda8d70e977c3401b54e90a908bcb4ac66e8d5048bed31816631",
+          "canonicalReboundSnapshotSha256": "17731349545ecda8d70e977c3401b54e90a908bcb4ac66e8d5048bed31816631"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:genasi%20(air)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "17731349545ecda8d70e977c3401b54e90a908bcb4ac66e8d5048bed31816631",
+          "completeSnapshotSha256": "17731349545ecda8d70e977c3401b54e90a908bcb4ac66e8d5048bed31816631",
+          "canonicalReboundSnapshotSha256": "17731349545ecda8d70e977c3401b54e90a908bcb4ac66e8d5048bed31816631"
+        }
+      ],
+      "resistances": [
+        "lightning"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "subrace/31",
+        "rawSha256": "190144af3a1c898a0bd7d7cb395f35db1e10913fddc1729e9ce9bdb3d93b8e75",
+        "rawHeader": {
+          "name": "气",
+          "ENG_name": "Air",
+          "source": "MPMM",
+          "page": 16,
+          "raceName": "元素裔",
+          "raceSource": "MPMM"
+        },
+        "clause": {
+          "path": "subrace/31/entries/1/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d182ef60d93a99a5689751cc6620e1eb5c67bfff54b3f476d2e673975b7d9069"
+        },
+        "parent": {
+          "path": "race/49",
+          "rawSha256": "142edceccac9117be031ba56e0e134793c3a24906ef63028474e766711c24523",
+          "header": {
+            "name": "元素裔",
+            "ENG_name": "Genasi",
+            "source": "MPMM",
+            "page": 16
+          },
+          "normalizedId": "kiwee:race:mpmm:genasi::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:mpmm:genasi::::::",
+            "kind": "race",
+            "name": "元素裔",
+            "english": "Genasi",
+            "source": "MPMM",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 16,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:mpmm:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:mpmm:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/33",
+      "id": "kiwee:race:mpmm:genasi%20(fire)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "kind": "race",
+      "name": "元素裔（火）",
+      "english": "Genasi (Fire)",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b07df5f6510375a431d5a29c829ad04c761a4e0b1e3b5b19453ed064046c8114",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:genasi%20(fire)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b07df5f6510375a431d5a29c829ad04c761a4e0b1e3b5b19453ed064046c8114",
+          "completeSnapshotSha256": "b07df5f6510375a431d5a29c829ad04c761a4e0b1e3b5b19453ed064046c8114",
+          "canonicalReboundSnapshotSha256": "b07df5f6510375a431d5a29c829ad04c761a4e0b1e3b5b19453ed064046c8114"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:genasi%20(fire)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b07df5f6510375a431d5a29c829ad04c761a4e0b1e3b5b19453ed064046c8114",
+          "completeSnapshotSha256": "b07df5f6510375a431d5a29c829ad04c761a4e0b1e3b5b19453ed064046c8114",
+          "canonicalReboundSnapshotSha256": "b07df5f6510375a431d5a29c829ad04c761a4e0b1e3b5b19453ed064046c8114"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "subrace/33",
+        "rawSha256": "b6a6bc3e3866ab7fd8e958adfbf141a2f890db8529a97ab9a43798f1e1812769",
+        "rawHeader": {
+          "name": "火",
+          "ENG_name": "Fire",
+          "source": "MPMM",
+          "page": 17,
+          "raceName": "元素裔",
+          "raceSource": "MPMM"
+        },
+        "clause": {
+          "path": "subrace/33/entries/0/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc"
+        },
+        "parent": {
+          "path": "race/49",
+          "rawSha256": "142edceccac9117be031ba56e0e134793c3a24906ef63028474e766711c24523",
+          "header": {
+            "name": "元素裔",
+            "ENG_name": "Genasi",
+            "source": "MPMM",
+            "page": 16
+          },
+          "normalizedId": "kiwee:race:mpmm:genasi::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:mpmm:genasi::::::",
+            "kind": "race",
+            "name": "元素裔",
+            "english": "Genasi",
+            "source": "MPMM",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 16,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:mpmm:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:mpmm:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/34",
+      "id": "kiwee:race:mpmm:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "kind": "race",
+      "name": "元素裔（水）",
+      "english": "Genasi (Water)",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+          "completeSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+          "canonicalReboundSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+          "completeSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+          "canonicalReboundSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176"
+        }
+      ],
+      "resistances": [
+        "acid"
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sourceProof": {
+        "path": "subrace/34",
+        "rawSha256": "6cd5343d6a21c2646a09b82fa91a7e469302b0fa4216baa42bef8b28a7af4cc3",
+        "rawHeader": {
+          "name": "水",
+          "ENG_name": "Water",
+          "source": "MPMM",
+          "page": 17,
+          "raceName": "元素裔",
+          "raceSource": "MPMM"
+        },
+        "clause": {
+          "path": "subrace/34/entries/1/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "9ef5ea3d39626e630ee1acf5818e3a379f9defa40b26fce344eb61dc2f27519c"
+        },
+        "parent": {
+          "path": "race/49",
+          "rawSha256": "142edceccac9117be031ba56e0e134793c3a24906ef63028474e766711c24523",
+          "header": {
+            "name": "元素裔",
+            "ENG_name": "Genasi",
+            "source": "MPMM",
+            "page": 16
+          },
+          "normalizedId": "kiwee:race:mpmm:genasi::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:mpmm:genasi::::::",
+            "kind": "race",
+            "name": "元素裔",
+            "english": "Genasi",
+            "source": "MPMM",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 16,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:mpmm:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:mpmm:genasi::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "2b57252cb53f6bdea21a95ac16bc1026052d839bcab7b08e6382edbb14051bb6"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/50",
+      "id": "kiwee:race:erlw:half-elf%20(variant%3B%20mark%20of%20storm)::::::%E5%8D%8A%E7%B2%BE%E7%81%B5",
+      "kind": "race",
+      "name": "半精灵（变体; 暴风龙纹）",
+      "english": "Half-Elf (Variant; Mark of Storm)",
+      "source": "ERLW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 50,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "34a2be1479bd20407b4240b3da6bbb40ee54b5a0207c8d955fa43157f478dcb7",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:erlw:half-elf%20(variant%3B%20mark%20of%20storm)::::::%E5%8D%8A%E7%B2%BE%E7%81%B5",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "34a2be1479bd20407b4240b3da6bbb40ee54b5a0207c8d955fa43157f478dcb7",
+          "completeSnapshotSha256": "34a2be1479bd20407b4240b3da6bbb40ee54b5a0207c8d955fa43157f478dcb7",
+          "canonicalReboundSnapshotSha256": "34a2be1479bd20407b4240b3da6bbb40ee54b5a0207c8d955fa43157f478dcb7"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:erlw:half-elf%20(variant%3B%20mark%20of%20storm)::::::%E5%8D%8A%E7%B2%BE%E7%81%B5",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "34a2be1479bd20407b4240b3da6bbb40ee54b5a0207c8d955fa43157f478dcb7",
+          "completeSnapshotSha256": "34a2be1479bd20407b4240b3da6bbb40ee54b5a0207c8d955fa43157f478dcb7",
+          "canonicalReboundSnapshotSha256": "34a2be1479bd20407b4240b3da6bbb40ee54b5a0207c8d955fa43157f478dcb7"
+        }
+      ],
+      "resistances": [
+        "lightning"
+      ],
+      "requiredSources": [
+        "ERLW"
+      ],
+      "sourceProof": {
+        "path": "subrace/50",
+        "rawSha256": "b071038be951a9bce0f7a70595a80a7abec373f85ba880a38d5ee4381a9491fc",
+        "rawHeader": {
+          "name": "变体; 暴风龙纹",
+          "ENG_name": "Variant; Mark of Storm",
+          "source": "ERLW",
+          "page": 50,
+          "raceName": "半精灵",
+          "raceSource": "PHB"
+        },
+        "clause": {
+          "path": "subrace/50/entries/1/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d182ef60d93a99a5689751cc6620e1eb5c67bfff54b3f476d2e673975b7d9069"
+        },
+        "parent": {
+          "path": "race/71",
+          "rawSha256": "fccec19eafe587b6b3759d1dd1bbc6838fde8c3dd63e8c90e1dc89a717734fc8",
+          "header": {
+            "name": "半精灵",
+            "ENG_name": "Half-Elf",
+            "source": "PHB",
+            "page": 38
+          },
+          "normalizedId": "kiwee:race:phb:half-elf::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:half-elf::::::",
+            "kind": "race",
+            "name": "半精灵",
+            "english": "Half-Elf",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 38,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "d83b1c48f85f8b4a5891b9f99930dc9ad54e6a40a3541e03df7188aa9c66e5a1",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:half-elf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "d83b1c48f85f8b4a5891b9f99930dc9ad54e6a40a3541e03df7188aa9c66e5a1"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:half-elf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "d83b1c48f85f8b4a5891b9f99930dc9ad54e6a40a3541e03df7188aa9c66e5a1"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/60",
+      "id": "kiwee:race:phb:halfling%20(stout)::::::%E5%8D%8A%E8%BA%AB%E4%BA%BA",
+      "kind": "race",
+      "name": "半身人（敦实）",
+      "english": "Halfling (Stout)",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 28,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "9bea1b1435b0af8aa1380a6568cf620caf0a820edbb592f0ce885a837a75a7a5",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:halfling%20(stout)::::::%E5%8D%8A%E8%BA%AB%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9bea1b1435b0af8aa1380a6568cf620caf0a820edbb592f0ce885a837a75a7a5",
+          "completeSnapshotSha256": "9bea1b1435b0af8aa1380a6568cf620caf0a820edbb592f0ce885a837a75a7a5",
+          "canonicalReboundSnapshotSha256": "9bea1b1435b0af8aa1380a6568cf620caf0a820edbb592f0ce885a837a75a7a5"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:halfling%20(stout)::::::%E5%8D%8A%E8%BA%AB%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9bea1b1435b0af8aa1380a6568cf620caf0a820edbb592f0ce885a837a75a7a5",
+          "completeSnapshotSha256": "9bea1b1435b0af8aa1380a6568cf620caf0a820edbb592f0ce885a837a75a7a5",
+          "canonicalReboundSnapshotSha256": "9bea1b1435b0af8aa1380a6568cf620caf0a820edbb592f0ce885a837a75a7a5"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "PHB"
+      ],
+      "sourceProof": {
+        "path": "subrace/60",
+        "rawSha256": "39f6d68472f690acfa20534cab26ed7bd705999bbf5f684a63042bd5de2033ca",
+        "rawHeader": {
+          "name": "敦实",
+          "ENG_name": "Stout",
+          "source": "PHB",
+          "page": 28,
+          "raceName": "半身人",
+          "raceSource": "PHB"
+        },
+        "clause": {
+          "path": "subrace/60/entries/0/entries/0",
+          "utf8Bytes": 87,
+          "sha256": "aee47d00c384413d7e2e7eb43b6ecf96f4fff71f3f3417763f1fc31b771210a9"
+        },
+        "parent": {
+          "path": "race/73",
+          "rawSha256": "a85a098e369e1e35be88fb62d6736f140a7c6ac43c5e759ace5586f0d2d2199e",
+          "header": {
+            "name": "半身人",
+            "ENG_name": "Halfling",
+            "source": "PHB",
+            "page": 26
+          },
+          "normalizedId": "kiwee:race:phb:halfling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:halfling::::::",
+            "kind": "race",
+            "name": "半身人",
+            "english": "Halfling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 26,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "fd346f192b546caf9e69f00996c12b04f1fb1e71db534d4967e4894152868a94",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:halfling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "fd346f192b546caf9e69f00996c12b04f1fb1e71db534d4967e4894152868a94"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:halfling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "fd346f192b546caf9e69f00996c12b04f1fb1e71db534d4967e4894152868a94"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "held": [
+    {
+      "key": "race/27",
+      "sourcePath": "race/27",
+      "rawHeader": {
+        "name": "龙裔",
+        "ENG_name": "Dragonborn",
+        "source": "PHB",
+        "page": 32
+      },
+      "rawSha256": "4495fc7c6fea0dbef2a3822a8011cdfcc6fbdeb9189bd29ff10d65bd7658b6cd",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "id": "kiwee:race:phb:dragonborn::::::",
+      "kind": "race",
+      "name": "龙裔",
+      "english": "Dragonborn",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 32,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "completeSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "canonicalReboundSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "completeSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "canonicalReboundSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b"
+        }
+      ]
+    },
+    {
+      "key": "race/28",
+      "sourcePath": "race/28",
+      "rawHeader": {
+        "name": "龙裔",
+        "ENG_name": "Dragonborn",
+        "source": "XPHB",
+        "edition": "one",
+        "page": 187
+      },
+      "rawSha256": "dcd92857702bc606c87be2d95e610e8dd25a13a5f05d4128d6afe1640defa2a5",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "id": "kiwee:race:xphb:dragonborn::::::",
+      "kind": "race",
+      "name": "龙裔",
+      "english": "Dragonborn",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 187,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "completeSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "canonicalReboundSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "completeSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "canonicalReboundSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4"
+        }
+      ]
+    },
+    {
+      "key": "race/29",
+      "sourcePath": "race/29",
+      "rawHeader": {
+        "name": "龙裔 (色彩)",
+        "ENG_name": "Dragonborn (Chromatic)",
+        "source": "FTD",
+        "page": 10
+      },
+      "rawSha256": "eef403fa14578bca2c37a6e8bd5f70705bb188c6846c06b66aaeec810f82a744",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "id": "kiwee:race:ftd:dragonborn%20(chromatic)::::::",
+      "kind": "race",
+      "name": "龙裔 (色彩)",
+      "english": "Dragonborn (Chromatic)",
+      "source": "FTD",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 10,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ftd:dragonborn%20(chromatic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "completeSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "canonicalReboundSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ftd:dragonborn%20(chromatic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "completeSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "canonicalReboundSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212"
+        }
+      ]
+    },
+    {
+      "key": "race/30",
+      "sourcePath": "race/30",
+      "rawHeader": {
+        "name": "龙裔 (宝石)",
+        "ENG_name": "Dragonborn (Gem)",
+        "source": "FTD",
+        "page": 11
+      },
+      "rawSha256": "0881086f31350ef2cbb1f5b198d86fde72cce9d4ef15a7963f5337676ec43a3a",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "id": "kiwee:race:ftd:dragonborn%20(gem)::::::",
+      "kind": "race",
+      "name": "龙裔 (宝石)",
+      "english": "Dragonborn (Gem)",
+      "source": "FTD",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 11,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ftd:dragonborn%20(gem)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "completeSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "canonicalReboundSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ftd:dragonborn%20(gem)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "completeSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "canonicalReboundSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59"
+        }
+      ]
+    },
+    {
+      "key": "race/31",
+      "sourcePath": "race/31",
+      "rawHeader": {
+        "name": "龙裔 (金属)",
+        "ENG_name": "Dragonborn (Metallic)",
+        "source": "FTD",
+        "page": 12
+      },
+      "rawSha256": "856a2b6390824d8bb4921252a058ae66ee20faf3248cbc3da4416afd23d0d707",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "id": "kiwee:race:ftd:dragonborn%20(metallic)::::::",
+      "kind": "race",
+      "name": "龙裔 (金属)",
+      "english": "Dragonborn (Metallic)",
+      "source": "FTD",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 12,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ftd:dragonborn%20(metallic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "completeSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "canonicalReboundSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ftd:dragonborn%20(metallic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "completeSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "canonicalReboundSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6"
+        }
+      ]
+    },
+    {
+      "key": "race/127",
+      "sourcePath": "race/127",
+      "rawHeader": {
+        "name": "重生者",
+        "ENG_name": "Reborn",
+        "source": "RHW",
+        "edition": "one",
+        "page": 31
+      },
+      "rawSha256": "038cf0d771a726c029213dda2b56663d4ef03c193c19d20819b7a6c8f8004cae",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "id": "kiwee:race:rhw:reborn::::::",
+      "kind": "race",
+      "name": "重生者",
+      "english": "Reborn",
+      "source": "RHW",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 31,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:rhw:reborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "completeSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "canonicalReboundSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:rhw:reborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "completeSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "canonicalReboundSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334"
+        }
+      ]
+    },
+    {
+      "key": "race/144",
+      "sourcePath": "race/144",
+      "rawHeader": {
+        "name": "提夫林",
+        "ENG_name": "Tiefling",
+        "source": "XPHB",
+        "edition": "one",
+        "page": 197
+      },
+      "rawSha256": "847157775f0365c3a1deec98491c0c7da5526305fb4e7d5fd8737e1dc5dc028f",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "id": "kiwee:race:xphb:tiefling::::::",
+      "kind": "race",
+      "name": "提夫林",
+      "english": "Tiefling",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 197,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:tiefling::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "completeSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "canonicalReboundSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:tiefling::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "completeSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "canonicalReboundSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6"
+        }
+      ]
+    },
+    {
+      "key": "subrace/7",
+      "sourcePath": "subrace/7",
+      "rawHeader": {
+        "name": "龙血裔",
+        "ENG_name": "Draconblood",
+        "source": "EGW",
+        "page": 168,
+        "raceName": "龙裔",
+        "raceSource": "PHB"
+      },
+      "rawSha256": "4aae3822d6463af64efb49ebd76bc37d2b3d8e4ebb8e1ef8407c85105cf071b8",
+      "reasonCode": "explicit-null-resist-override-no-parent-fallback",
+      "id": "kiwee:race:egw:dragonborn%20(draconblood)::::::%E9%BE%99%E8%A3%94",
+      "kind": "race",
+      "name": "龙裔（龙血裔）",
+      "english": "Dragonborn (Draconblood)",
+      "source": "EGW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 168,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:egw:dragonborn%20(draconblood)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "completeSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "canonicalReboundSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:egw:dragonborn%20(draconblood)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "completeSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "canonicalReboundSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508"
+        }
+      ]
+    },
+    {
+      "key": "subrace/8",
+      "sourcePath": "subrace/8",
+      "rawHeader": {
+        "name": "峡谷裔",
+        "ENG_name": "Ravenite",
+        "source": "EGW",
+        "page": 168,
+        "raceName": "龙裔",
+        "raceSource": "PHB"
+      },
+      "rawSha256": "946f8129c12fcaebff909e08c71a563678884b87b2c2ebf66107f27a175dd8e1",
+      "reasonCode": "explicit-null-resist-override-no-parent-fallback",
+      "id": "kiwee:race:egw:dragonborn%20(ravenite)::::::%E9%BE%99%E8%A3%94",
+      "kind": "race",
+      "name": "龙裔（峡谷裔）",
+      "english": "Dragonborn (Ravenite)",
+      "source": "EGW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 168,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:egw:dragonborn%20(ravenite)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "completeSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "canonicalReboundSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:egw:dragonborn%20(ravenite)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "completeSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "canonicalReboundSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1"
+        }
+      ]
+    },
+    {
+      "key": "subrace/42",
+      "sourcePath": "subrace/42",
+      "rawHeader": {
+        "name": "依夏兰",
+        "ENG_name": "Ixalan",
+        "source": "PSX",
+        "page": 16,
+        "raceName": "地精",
+        "raceSource": "PSZ"
+      },
+      "rawSha256": "9a3366a5b0ff75d4d2d9f5b081a7bbc4509389fa3eae328eaea5a4fbc6642720",
+      "reasonCode": "explicit-null-resist-override-no-parent-fallback",
+      "id": "kiwee:race:psx:goblin%20(ixalan)::::::%E5%9C%B0%E7%B2%BE",
+      "kind": "race",
+      "name": "地精（依夏兰）",
+      "english": "Goblin (Ixalan)",
+      "source": "PSX",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 16,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psx:goblin%20(ixalan)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "completeSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "canonicalReboundSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psx:goblin%20(ixalan)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "completeSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "canonicalReboundSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139"
+        }
+      ]
+    },
+    {
+      "key": "race/47",
+      "sourcePath": "race/47",
+      "rawHeader": {
+        "name": "炎身",
+        "ENG_name": "Flamekin",
+        "source": "LFL"
+      },
+      "rawSha256": "7cac3f99f6d1e744bdb7f4e6df014158754a72e89ecf0ab33b88eaa26c464072",
+      "reasonCode": "copied-source-outside-explicit-native-family",
+      "id": "kiwee:race:lfl:flamekin::::::",
+      "kind": "race",
+      "name": "炎身",
+      "english": "Flamekin",
+      "source": "LFL",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": null,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:lfl:flamekin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "completeSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "canonicalReboundSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:lfl:flamekin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "completeSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "canonicalReboundSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e"
+        }
+      ]
+    }
+  ],
+  "normalizationHolds": [],
+  "unlocatedHeldOwners": [],
+  "excluded": {
+    "inherited": {
+      "keys": [
+        "subrace/1",
+        "subrace/2",
+        "subrace/3",
+        "subrace/9",
+        "subrace/10",
+        "subrace/11",
+        "subrace/12",
+        "subrace/43",
+        "subrace/44",
+        "subrace/45",
+        "subrace/82",
+        "subrace/83",
+        "subrace/84",
+        "subrace/85",
+        "subrace/86",
+        "subrace/87",
+        "subrace/88",
+        "subrace/89",
+        "subrace/90",
+        "subrace/91",
+        "subrace/92",
+        "subrace/93",
+        "subrace/94",
+        "subrace/95",
+        "subrace/96",
+        "subrace/97"
+      ],
+      "reasonCode": "inherited-owner-outside-explicit-native-family",
+      "count": 26
+    },
+    "versions": {
+      "keys": [
+        "race/4/_versions/0",
+        "race/4/_versions/1",
+        "race/4/_versions/2",
+        "race/7/_versions/0"
+      ],
+      "reasonCode": "expanded-version-outside-explicit-native-family",
+      "count": 4
+    }
+  }
+}

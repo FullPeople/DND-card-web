@@ -68,7 +68,7 @@ it('makes resistance readable in review and warnings without changing unverified
  expect(review).toContain('fire');expect(review).toContain('伤害结算仍需手动');
  expect(legacy.defenses).toEqual({resistances:[],immunities:[],advantages:[],disadvantages:[]});
  expect(legacy.export_warnings.some(line=>line.includes('fire')&&line.includes('伤害结算仍需手动'))).toBe(true);
- c.profile.enabledSources=['PHB'];const suspended=evaluate(c);expect(exportReview(c,suspended)).not.toContain('<h2>已核对的注法抗性</h2>');expect(exportOwlbear(c,suspended).export_warnings.some(line=>line.startsWith('已核对的注法抗性：'))).toBe(false);
+ c.profile.enabledSources=['PHB'];const suspended=evaluate(c);expect(exportReview(c,suspended)).not.toContain('<h2>已核对的自动抗性</h2>');expect(exportOwlbear(c,suspended).export_warnings.some(line=>line.startsWith('已核对的自动抗性：'))).toBe(false);
 });
 it.each(['Repeating Shot','Repulsion Shield','Resistant Armor'])('round trips %s bindings exactly through native and linked backups without changing manual fields',kind=>{
  const {c,choiceId,entry}=fixture(kind);const before=JSON.stringify(c);

@@ -1,5 +1,19 @@
+import {projectVariantItemResistanceBonuses} from './automation/variantItemResistanceBonuses';
+import {projectRacialResistances} from './automation/racialResistances';
+import {projectRacialNaturalArmor,racialNaturalArmorFamilyId} from './automation/racialNaturalArmor';
+import {projectSourceLevelHp,sourceLevelHpLegacyHpSelection} from './automation/sourceLevelHp';
+import {projectItemAffineHp,itemAffineHpLegacyHpSelection} from './automation/itemAffineHp';
+import {projectClassMovement,projectClassMovementModes} from './automation/classMovement';
+import {projectRelativeRacialMovement} from './automation/relativeRacialMovement';
+import {projectItemResistanceBonuses} from './automation/itemResistanceBonuses';
+import {projectItemPassiveBonuses} from './automation/itemPassiveBonuses';
+import {projectItemAbilityFloors} from './automation/itemAbilityFloors';
+import {projectRacialMovement} from './automation/racialMovement';
+import {projectRacialDarkvision} from './automation/racialDarkvision';
+import {evaluateReviewedAlert} from './automation/reviewedAlert';
+import {reviewedObservantHasRetainedBinding} from './automation/reviewedObservant';
 import {evaluateReviewedSkilled} from './automation/reviewedSkilled';
-import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity} from './automation/reviewedFeatIdentity';
+import {reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity,reviewedObservantIdentity,reviewedAlertIdentity} from './automation/reviewedFeatIdentity';
 import {evaluateAbilityAdvancements} from './automation/abilityAdvancements';
 import {evaluateInfusions} from './automation/infusions';
 import {invocationSkillScope,learnedInvocationRule} from './automation/invocations';
@@ -18,6 +32,13 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const issues: Derived['issues'] = [...inheritedIssues]; const requirements: Requirement[] = [];
   const compatibility=automationCompatibilityIssue(c);if(compatibility)issues.push(compatibility);
   const active=activeEffectSelections(c,excluded);
+  const itemPassives=projectItemPassiveBonuses(c,active);issues.push(...itemPassives.issues);
+  const itemResistance=projectItemResistanceBonuses(c,active);issues.push(...itemResistance.issues);
+  const variantResistance=projectVariantItemResistanceBonuses(c,active);issues.push(...variantResistance.issues);
+  const racialResistance=projectRacialResistances(c,active);issues.push(...racialResistance.issues);
+  const racialSenses=projectRacialDarkvision(c,active);issues.push(...racialSenses.issues);
+  const racialMovement=projectRacialMovement(c,active);issues.push(...racialMovement.issues);
+  const classMovement=projectClassMovement(c,active);issues.push(...classMovement.issues);
   for(const s of c.selections)if(!excluded.has(s.id)&&!selectionEffectsAllowed(c,s.entry))issues.push({id:`disabled:${s.id}`,message:`${s.entry.name} 的来源、依赖或规则选项未启用，保留内容但不计效果。`,selectionId:s.id,severity:'error'});
   const baseAbilities=baseAbilityScores(c,active),abilities=baseAbilities.abilities,trace:Record<string,string[]>=baseAbilities.trace;issues.push(...baseAbilities.issues);
   const classes = active.filter(s => s.entry.kind === 'class');
@@ -28,6 +49,7 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   const raceSpeed = active.find(s => s.entry.kind === 'race')?.entry.raw.speed;
   const walking=typeof raceSpeed==='number'?raceSpeed:raceSpeed?.walk;
   let speed = typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30; let acBonus = 0; let hpBonus = 0; let acOverride: number | undefined; let hpOverride: number | undefined;
+  speed+=classMovement.walkingBonus;
   const sizes = new Set<string>();
   const effectTrace:Record<string,string[]>={ac:[],hp:[],speed:[]};
   const invocationSkillsApplied=new Set<string>();
@@ -46,6 +68,8 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Preserve the existing unsupported-choice notice, including for XPHB,
     // but never let a manual/edited Weapon Master raw or effects field bypass
     // the separate explicitly owned PHB training/ability grant.
+    if(reviewedAlertIdentity(e)){issues.push({id:`reviewed-alert-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工警觉条目与旧答案保留；只有真实职业属性提升位置另行确认先攻 +5 未计入手工数值后才生效。突袭、未见攻击者、状态与掷骰顺序仍手工。'});continue;}
+    if(reviewedObservantIdentity(e)){issues.push({id:`reviewed-observant-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工观察力与旧答案保留；此历史机制不属于本批受审。真实职业属性提升须另行确认属性与两项被动值未计入手工数值；唇读和情境优势／劣势仍手工。'});continue;}
     if(reviewedLinguistIdentity(e)){issues.push({id:`reviewed-linguist-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工语言学家条目与旧手工语言答案保留；旧机制不属于本批受审。固定智力和三语言只支持真实职业属性提升位置另行确认；密码、解码与教学仍手工。'});continue;}
     if(reviewedSkilledIdentity(e)){issues.push({id:`reviewed-skilled-manual:${selection.id}`,selectionId:selection.id,severity:'warning',message:'手工熟习条目保留。本批只支持真实职业属性提升位置中另行确认的三项技能或工具熟练；此条目不自动授予效果。'});continue;}
     if(reviewedWeaponMasterIdentity(e))continue;
@@ -63,6 +87,18 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     // Retain already recorded skill choices from older backups, without quota limits.
     if(!invocationScope)for (const [key, values] of Object.entries(c.answers)) if (key.startsWith(`${selection.id}:skills:`) || key.startsWith(`${selection.id}:custom:`)) values.forEach(value => grantSkill(value, origin));
     for (const effect of invocationScope ? [] : e.effects || []) {
+      // Recognized innate-AC sources use their complete proof, not a changed
+      // snapshot's legacy AC field. Other mechanisms and CUSTOM entries retain
+      // their established executors.
+      if(effect.op!=='proficiency'&&effect.target==='ac'&&racialNaturalArmorFamilyId(e))continue;
+      if(effect.op!=='proficiency'&&effect.target==='hp'&&sourceLevelHpLegacyHpSelection(c,selection)){
+        const id=`source-level-hp:legacy:${selection.id}`;if(!issues.some(issue=>issue.id===id))issues.push({id,selectionId:selection.id,severity:'warning',message:`${e.name}：此来源的旧平面生命值效果不能代替完整归属和明确核对；原记录保留，未借旧执行器追加生命值。`});
+        continue;
+      }
+      if(effect.op!=='proficiency'&&effect.target==='hp'&&itemAffineHpLegacyHpSelection(c,selection)){
+        const id=`item-affine-hp:legacy:${selection.id}`;if(!issues.some(issue=>issue.id===id))issues.push({id,selectionId:selection.id,severity:'warning',message:`${e.name}：此物品来源的旧平面生命值效果不能代替完整物理归属、当前同调／穿戴条件和明确核对；原记录保留，未借旧执行器追加生命值。`});
+        continue;
+      }
       if (effect.op === 'proficiency') grantSkill(effect.skill, origin);
       else if (ABILITIES.includes(effect.target as Ability)) {
         // Applied once by the shared pre-advancement score layer.
@@ -72,11 +108,17 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
     }
   }
   const skilled=evaluateReviewedSkilled(c,active);issues.push(...skilled.issues);for(const skill of skilled.skills)grantSkill(skill.key,skill.source);
-  const {asi,reviewed:reviewedFeats,linguist}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
+  const {asi,reviewed:reviewedFeats,linguist,observant}=evaluateAbilityAdvancements(c,abilities,active);issues.push(...asi.issues);
   for(const a of ABILITIES){abilities[a]+=asi.bonuses[a];trace[a].push(...asi.trace[a]);}
-  issues.push(...reviewedFeats.issues,...linguist.issues);
+  issues.push(...reviewedFeats.issues,...linguist.issues,...observant.issues);
+  for(const a of ABILITIES){abilities[a]+=observant.bonuses[a];trace[a].push(...observant.trace[a]);}
   for(const a of ABILITIES){abilities[a]+=linguist.bonuses[a];trace[a].push(...linguist.trace[a]);}
   for(const a of ABILITIES){abilities[a]+=reviewedFeats.bonuses[a];trace[a].push(...reviewedFeats.trace[a]);if(reviewedFeats.saves.has(a))proficientSaves.add(a);}
+  // Equipment floors follow all natural advancement caps, never feed them.
+  const naturalAbilities={...abilities},itemFloors=projectItemAbilityFloors(c,active);issues.push(...itemFloors.issues);
+  for(const a of ABILITIES)if(itemFloors.floors[a]!==undefined){abilities[a]=Math.max(abilities[a],itemFloors.floors[a]!);trace[a].push(...(itemFloors.trace[a]||[]));}
+  const equipmentChangedAbilities=ABILITIES.some(a=>abilities[a]!==naturalAbilities[a]);
+  if(equipmentChangedAbilities)issues.push({id:'item-ability-floor:resource-policy',severity:'warning',message:'装备属性下限不自动授予属性公式资源容量、补充或恢复；这些政策尚未受审，仍需手工核对。原资源与已消耗次数保留。'});
   for (const [key, value] of Object.entries(c.proficiencies || {})) {
     if (key.startsWith('save:')) { if (value) proficientSaves.add(key.slice(5)); else proficientSaves.delete(key.slice(5)); }
     // Manual skill choices supplement source grants; clearing one cannot revoke a rule.
@@ -90,20 +132,30 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   }));
   const armor=automationEnabled(c)?evaluateArmor(c,active,modifiers.dex):undefined;
   if(armor)issues.push(...armor.issues);
-  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active):undefined;
+  // A recognized, unreviewed Observant payload is manual in every generic
+  // executor, including the separate prose-based armor pass. Genuine XPHB
+  // entries retain their existing generic route through the identity exception.
+  const featureArmor=automationEnabled(c)?evaluateFeatureArmor(active.filter(row=>!reviewedObservantIdentity(row.entry)&&!reviewedAlertIdentity(row.entry)&&!racialNaturalArmorFamilyId(row.entry))):undefined;
   if(featureArmor)issues.push(...featureArmor.issues);
-  let ac = (acOverride ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
-  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=infusion.resistanceTrace;
-  ac += acBonus+(featureArmor?.bonus||0)+infusion.bonus;
+  // Keep unsupported-clause notices without letting an edited recognized
+  // source regain AC through the separate legacy prose executor.
+  if(automationEnabled(c))issues.push(...evaluateFeatureArmor(active.filter(row=>!!racialNaturalArmorFamilyId(row.entry))).issues);
+  const naturalArmor=projectRacialNaturalArmor(c,{modifiers,armor,explicitBaseOverride:acOverride},active);issues.push(...naturalArmor.issues);
+  let ac = (acOverride ?? naturalArmor.base ?? armor?.base ?? (10 + modifiers.dex))+(armor?.bonus||0);
+  const infusion=evaluateInfusions(c,active);issues.push(...infusion.issues);trace.spellAttack=infusion.spellAttack.trace;trace.resistances=[...infusion.resistanceTrace,...itemResistance.trace,...variantResistance.trace,...racialResistance.trace];
+  ac += acBonus+naturalArmor.bonus+(featureArmor?.bonus||0)+infusion.bonus+itemPassives.acBonus;
   const hpFromClasses = hitPointLevels(c,modifiers.con,classes).reduce((sum,r)=>sum+r.hp,0);
-  let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus);
-  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]), ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace];
-  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp];
-  trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...effectTrace.speed];
-  const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
-  let initiative = modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value;
-  trace.initiative=[`敏捷调整值 ${modifiers.dex}`,...(c.jackOfAllTrades&&c.edition==='2014'?[`万事通 +${Math.floor(proficiency/2)}`]:[])];
-  trace.passive=[`基础 10 + 察觉 ${skills.perception.value}`];
+  const sourceHp=projectSourceLevelHp(c,active);issues.push(...sourceHp.issues);
+  const itemHp=projectItemAffineHp(c,active);issues.push(...itemHp.issues);
+  let maxHp = Math.max(1, (hpOverride ?? (c.baseHp > 0 ? c.baseHp : hpFromClasses)) + hpBonus+sourceHp.bonus+itemHp.bonus);
+  trace.ac = [...(armor?.trace||[`基础 10 + 敏捷 ${modifiers.dex}`]),...naturalArmor.trace, ...effectTrace.ac,...(featureArmor?.trace||[]),...infusion.trace,...itemPassives.acTrace];
+  trace.hp = [c.baseHp > 0 ? `手动生命值上限 ${c.baseHp}` : `首级满骰、以后${c.hpProgression?.mode==='rolled'?'逐级骰值':'固定平均值'}，含体质 ${modifiers.con}，每级最少 1 点：${hpFromClasses}`, ...effectTrace.hp,...sourceHp.trace,...itemHp.trace];
+  trace.proficiency = [`总等级 ${level || 1}：基础熟练加值 ${2+Math.floor((Math.max(1,level)-1)/4)}`]; trace.speed = [`${active.find(s => s.entry.kind === 'race')?.entry.name || '默认步行速度'} ${typeof walking==='number'?walking:typeof walking?.number==='number'?walking.number:30}`,...classMovement.trace,...effectTrace.speed];
+  const saves = Object.fromEntries(ABILITIES.map(a => [a, { value: modifiers[a] + (proficientSaves.has(a) ? proficiency : 0) + (itemPassives.saveBonuses[a] || 0), proficient: proficientSaves.has(a) }])) as Derived['saves'];
+  const alert=evaluateReviewedAlert(c,active);issues.push(...alert.issues);
+  let initiative = alert.initiativeBonus + modifiers.dex + (c.jackOfAllTrades && c.edition === '2014' ? Math.floor(proficiency / 2) : 0); let passive = 10 + skills.perception.value + observant.passivePerceptionBonus;
+  trace.initiative=[`敏捷调整值 ${modifiers.dex}`,...(c.jackOfAllTrades&&c.edition==='2014'?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...alert.trace];
+  trace.passive=[`基础 10 + 察觉 ${skills.perception.value}`,...observant.passivePerceptionTrace];
   for (const adjustment of c.adjustments || []) {
     if (!adjustment.reason.trim()) continue;
     const { target, value } = adjustment;
@@ -120,7 +172,11 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   }
   // Like skill offsets, saving-throw offsets supplement any retained legacy total.
   for (const a of ABILITIES) saves[a].value += c.saveBonuses?.[a] || 0;
-  if (!(c.adjustments || []).some(a => a.target === 'passive')) {passive = 10 + skills.perception.value;trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}`;}
+  if (!(c.adjustments || []).some(a => a.target === 'passive')) {passive = 10 + skills.perception.value + observant.passivePerceptionBonus;trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}`;}
+  const passiveInvestigation=Number.isFinite(skills.investigation.value)&&reviewedObservantHasRetainedBinding(c)?10+skills.investigation.value+observant.passiveInvestigationBonus:undefined;
+  if(passiveInvestigation!==undefined)trace.passiveInvestigation=[`基础 10 + 调查最终检定 ${skills.investigation.value}`,...observant.passiveInvestigationTrace,...(observant.passiveInvestigationBonus?[]:['观察力确认保留但当前暂停；此处仅显示自然被动调查，未授予 +5。']),'唇读与情境优势／劣势仍需手工裁定。'];
+  if((c.adjustments||[]).some(a=>a.target==='passive'&&a.reason.trim())&&observant.passivePerceptionBonus){trace.passive[0]=`基础 10 + 察觉 ${skills.perception.value}；自然被动察觉 ${10+skills.perception.value+observant.passivePerceptionBonus}`;trace.passive.push('人工最终被动察觉覆盖自然结果（含观察力 +5）；不会再次叠加该加值，也不取消独立的被动调查与属性分量。');}
+  if(alert.initiativeBonus&&(c.adjustments||[]).some(a=>a.target==='initiative'&&a.reason.trim()))trace.initiative.push('人工最终先攻覆盖自然结果（含警觉 +5）；不会再次叠加该加值，卡面独立调整仍在覆盖之后叠加。');
   ac += c.sheetBonuses?.ac || 0;
   initiative += c.sheetBonuses?.initiative || 0;
   speed += c.sheetBonuses?.speed || 0;
@@ -128,12 +184,22 @@ export function evaluate(c: Character, excluded = new Set<string>(), inheritedIs
   maxHp += c.sheetBonuses?.hp || 0;
   maxHp += reviewedFeats.hpBonus;trace.hp.push(...reviewedFeats.hpTrace);
   for (const [target, value] of Object.entries(c.sheetBonuses || {})) if (value) (trace[target] ??= []).push(`卡面调整 ${value >= 0 ? '+' : ''}${value}`);
+  const relativeMovement=projectRelativeRacialMovement(c,speed,active);issues.push(...relativeMovement.issues);
+  const classModes=projectClassMovementModes(c,speed,active);
+  for(const issue of classModes.issues)if(!issues.some(existing=>existing.id===issue.id))issues.push(issue);
   issues.push(...planFeatureResources(c).issues);
   for(const [key,skill] of Object.entries(SKILLS))trace[`skill:${key}`]=[`${ABILITY_LABELS[skill.ability]}调整值 ${modifiers[skill.ability]}`,...skills[key].sources.map(s=>`来源：${s}`),...(skills[key].proficient?[`${skills[key].expertise?'两倍熟练':'熟练加值'} +${proficiency*(skills[key].expertise?2:1)}`]:c.jackOfAllTrades?[`万事通 +${Math.floor(proficiency/2)}`]:[]),...(c.adjustments||[]).filter(a=>a.target===`skill:${key}`).map(a=>`人工覆盖 ${a.value}：${a.reason}`)];
-  for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
+  for(const a of ABILITIES)trace[`save:${a}`]=[`${ABILITY_LABELS[a]}调整值 ${modifiers[a]}`,...reviewedFeats.saveTrace[a],...(itemPassives.saveTrace[a]||[]),...(saves[a].proficient?[`熟练加值 +${proficiency}`]:[]),...(c.adjustments||[]).filter(v=>v.target===`save:${a}`).map(v=>`人工覆盖 ${v.value}：${v.reason}`),...(c.saveBonuses?.[a]?[`豁免额外调整 ${c.saveBonuses[a]>=0?'+':''}${c.saveBonuses[a]}`]:[])];
   for(const a of ABILITIES)trace[`mod:${a}`]=[...(trace[a]||[]),`最终属性 ${abilities[a]}：向下取整 (属性 − 10) / 2`];
-  return { abilities, modifiers, level, proficiency, ac, initiative, speed, maxHp, passive,
-    skills, saves, requirements, issues, trace, resistances:[...new Set(infusion.resistances)],
+  if(racialSenses.trace.length)trace.darkvision=racialSenses.trace;
+  if(racialMovement.trace.length)trace.sourceMovement=racialMovement.trace;
+  if(relativeMovement.trace.length)trace.relativeMovement=relativeMovement.trace;
+  if(classMovement.trace.length||classModes.trace.length)trace.classMovement=[...classMovement.trace,...classModes.trace];
+  return { abilities, ...(equipmentChangedAbilities?{naturalAbilities}:{}), modifiers, level, proficiency, ac, initiative, speed, maxHp, passive, ...(passiveInvestigation===undefined?{}:{passiveInvestigation}),...(racialSenses.darkvision===undefined?{}:{senses:{darkvision:racialSenses.darkvision}}),
+    ...(Object.keys(racialMovement.modes).length?{sourceMovement:racialMovement.modes}:{}),
+    ...(Object.keys(relativeMovement.modes).length?{relativeMovement:relativeMovement.modes}:{}),
+    ...(Object.keys(classModes.modes).length?{classMovement:classModes.modes}:{}),
+    skills, saves, requirements, issues, trace, resistances:[...new Set([...infusion.resistances,...itemResistance.resistances,...variantResistance.resistances,...racialResistance.resistances])],
     hitDice: classes.map(s => `${s.level}d${s.entry.raw.hd?.faces || '?'}`).join(' + ') || '—' };
 }
 

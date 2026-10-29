@@ -1,0 +1,883 @@
+{
+  "schemaVersion": 1,
+  "scope": "source-qualified flat passive item AC and saving-throw branches only",
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+      "bytes": 149813
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "bytes": 2458443
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+      "bytes": 190573
+    }
+  ],
+  "counts": {
+    "owners": 16,
+    "sourcePropertyRows": 21,
+    "completeOwnerForms": 32,
+    "worn": 8,
+    "attunedOnly": 7,
+    "equippedOnPerson": 1
+  },
+  "normalization": {
+    "canonical": "complete original items.json through installed normalizeCatalogData",
+    "app": "exact catalog.ts final equipment accumulation plus normalize then magicItems, sorted path-prefixed source revisions",
+    "noPayloadRepair": true
+  },
+  "rules": [
+    {
+      "id": "kiwee:item:dmg:cloak%20of%20protection::::::",
+      "kind": "item",
+      "name": "防护斗篷",
+      "english": "Cloak of Protection",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 159,
+      "category": "item",
+      "sourceIndex": 453,
+      "fullNormalizedSnapshotSha256": "42c09d7a93f651a5cbefb636b647590a96674a9af213014944fc7150d032b065",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "42c09d7a93f651a5cbefb636b647590a96674a9af213014944fc7150d032b065",
+          "canonicalReboundSnapshotSha256": "42c09d7a93f651a5cbefb636b647590a96674a9af213014944fc7150d032b065"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "a98239c7e5f823bc8363615f1fd8d497c4ee87504aad38c4214981f6882e4419",
+          "canonicalReboundSnapshotSha256": "42c09d7a93f651a5cbefb636b647590a96674a9af213014944fc7150d032b065"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": "cloak-protection-editions",
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 1,
+      "saveBonuses": {
+        "str": 1,
+        "dex": 1,
+        "con": 1,
+        "int": 1,
+        "wis": 1,
+        "cha": 1
+      },
+      "sourcePropertyRows": 2,
+      "clauses": [
+        {
+          "path": "item/453/entries/0",
+          "utf8Sha256": "2b9d10e87f5d87ede0bac077d6c5d3958f574991d8e44fd9f6c098c0b78e2e3e"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:cloak%20of%20protection::::::",
+      "kind": "item",
+      "name": "防护斗篷",
+      "english": "Cloak of Protection",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 245,
+      "category": "item",
+      "sourceIndex": 454,
+      "fullNormalizedSnapshotSha256": "46e3e5993d55f452895eb4b842064413e99d975b5b5e7d590448e1cd077fe5fa",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "46e3e5993d55f452895eb4b842064413e99d975b5b5e7d590448e1cd077fe5fa",
+          "canonicalReboundSnapshotSha256": "46e3e5993d55f452895eb4b842064413e99d975b5b5e7d590448e1cd077fe5fa"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "005839cc52042765915dceeffdb0711f872aafba005fee3630c429d333d40baf",
+          "canonicalReboundSnapshotSha256": "46e3e5993d55f452895eb4b842064413e99d975b5b5e7d590448e1cd077fe5fa"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": "cloak-protection-editions",
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 1,
+      "saveBonuses": {
+        "str": 1,
+        "dex": 1,
+        "con": 1,
+        "int": 1,
+        "wis": 1,
+        "cha": 1
+      },
+      "sourcePropertyRows": 2,
+      "clauses": [
+        {
+          "path": "item/454/entries/0",
+          "utf8Sha256": "3768b9eba57860a2f9922d84e4d979955fd6a48b8e642d9c96135eaf5ba06b43"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20protection::::::",
+      "kind": "item",
+      "name": "防护戒指",
+      "english": "Ring of Protection",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 191,
+      "category": "item",
+      "sourceIndex": 1794,
+      "fullNormalizedSnapshotSha256": "bd61d4a239b624031e825842938e20b80e2463b6b0575bc82fb4ecaed97d6548",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "bd61d4a239b624031e825842938e20b80e2463b6b0575bc82fb4ecaed97d6548",
+          "canonicalReboundSnapshotSha256": "bd61d4a239b624031e825842938e20b80e2463b6b0575bc82fb4ecaed97d6548"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "9a7fd397a503ca930db4a31fd91542dca7320e1448106d975d33a016e51adda7",
+          "canonicalReboundSnapshotSha256": "bd61d4a239b624031e825842938e20b80e2463b6b0575bc82fb4ecaed97d6548"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": "ring-protection-editions",
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 1,
+      "saveBonuses": {
+        "str": 1,
+        "dex": 1,
+        "con": 1,
+        "int": 1,
+        "wis": 1,
+        "cha": 1
+      },
+      "sourcePropertyRows": 2,
+      "clauses": [
+        {
+          "path": "item/1794/entries/0",
+          "utf8Sha256": "4749a9fe120c4f47157073643e0b0c1a79a7e187537f087cb676060cdfb84806"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20protection::::::",
+      "kind": "item",
+      "name": "防护戒指",
+      "english": "Ring of Protection",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 294,
+      "category": "item",
+      "sourceIndex": 1795,
+      "fullNormalizedSnapshotSha256": "177ef050fa02420ed4cebdbd8a29b0a09ba9718bf0783d93a74fe75c619a3bbc",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "177ef050fa02420ed4cebdbd8a29b0a09ba9718bf0783d93a74fe75c619a3bbc",
+          "canonicalReboundSnapshotSha256": "177ef050fa02420ed4cebdbd8a29b0a09ba9718bf0783d93a74fe75c619a3bbc"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "4c34bd75bd71ca4438d3fc7319b129eede9f330c493c08507358cbc3d193a940",
+          "canonicalReboundSnapshotSha256": "177ef050fa02420ed4cebdbd8a29b0a09ba9718bf0783d93a74fe75c619a3bbc"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": "ring-protection-editions",
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 1,
+      "saveBonuses": {
+        "str": 1,
+        "dex": 1,
+        "con": 1,
+        "int": 1,
+        "wis": 1,
+        "cha": 1
+      },
+      "sourcePropertyRows": 2,
+      "clauses": [
+        {
+          "path": "item/1795/entries/0",
+          "utf8Sha256": "653d46c515469923ba4d738f70af94c3961c09c794b8a27758ab8ee38a14c1ae"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:dmg:robe%20of%20stars::::::",
+      "kind": "item",
+      "name": "星辰法袍",
+      "english": "Robe of Stars",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 194,
+      "category": "item",
+      "sourceIndex": 1840,
+      "fullNormalizedSnapshotSha256": "672a9b0b176ab18bd1346638671b77ab3f5146f101f607244e4617aa71115fc1",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "672a9b0b176ab18bd1346638671b77ab3f5146f101f607244e4617aa71115fc1",
+          "canonicalReboundSnapshotSha256": "672a9b0b176ab18bd1346638671b77ab3f5146f101f607244e4617aa71115fc1"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "aa1b61cc57eba75556539d7205fc9c9cc2672f2ed314ed5eba9301647e5c8f0b",
+          "canonicalReboundSnapshotSha256": "672a9b0b176ab18bd1346638671b77ab3f5146f101f607244e4617aa71115fc1"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": "robe-stars-editions",
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "str": 1,
+        "dex": 1,
+        "con": 1,
+        "int": 1,
+        "wis": 1,
+        "cha": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/1840/entries/0",
+          "utf8Sha256": "8f1fbab9480f85186b668923241482fd3fd2f566832d4811335579ebcd2ed96e"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:robe%20of%20stars::::::",
+      "kind": "item",
+      "name": "星辰法袍",
+      "english": "Robe of Stars",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 297,
+      "category": "item",
+      "sourceIndex": 1841,
+      "fullNormalizedSnapshotSha256": "c49bfd3126698335ffea70d85c74acaa93fc084dcc02d21828eee676454bc9e3",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "c49bfd3126698335ffea70d85c74acaa93fc084dcc02d21828eee676454bc9e3",
+          "canonicalReboundSnapshotSha256": "c49bfd3126698335ffea70d85c74acaa93fc084dcc02d21828eee676454bc9e3"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "29d5ddf9f37879dffa22c227d7bf5da0bdcee5982b02b8c6ab937109e4876917",
+          "canonicalReboundSnapshotSha256": "c49bfd3126698335ffea70d85c74acaa93fc084dcc02d21828eee676454bc9e3"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": "robe-stars-editions",
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "str": 1,
+        "dex": 1,
+        "con": 1,
+        "int": 1,
+        "wis": 1,
+        "cha": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/1841/entries/0",
+          "utf8Sha256": "9fe79e99a9a989edd3a51c116629a8a80f19a1d51767cc30d986aa6570acf07a"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:crcotn:jewel%20of%20three%20prayers%20(dormant)::::::",
+      "kind": "item",
+      "name": "三祷之坠（休眠）",
+      "english": "Jewel of Three Prayers (Dormant)",
+      "source": "CRCOTN",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 213,
+      "category": "item",
+      "sourceIndex": 1157,
+      "fullNormalizedSnapshotSha256": "6e83396cde0b663eac3b8d06b0bb5b0e2bd04ea543a4018a15204d0c2bd08435",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "6e83396cde0b663eac3b8d06b0bb5b0e2bd04ea543a4018a15204d0c2bd08435",
+          "canonicalReboundSnapshotSha256": "6e83396cde0b663eac3b8d06b0bb5b0e2bd04ea543a4018a15204d0c2bd08435"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "a71fe94e23acc8d8ec9ba7795773d288466fb451ecf644a13c4af9e8139de5d2",
+          "canonicalReboundSnapshotSha256": "3232dd6d13eba27e58b64708cf177f9fb20c1a55294d9adf32f68aab91646c8b"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 1,
+      "saveBonuses": {},
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/1157/entries/1/entries/2/items/0",
+          "utf8Sha256": "4dcfbaf319abee1bfe5080f1fc650f356484e094f93bbe38b729805b67eb1e28"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:cm:watchful%20helm::::::",
+      "kind": "item",
+      "name": "守望头盔",
+      "english": "Watchful Helm",
+      "source": "CM",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 183,
+      "category": "item",
+      "sourceIndex": 2439,
+      "fullNormalizedSnapshotSha256": "fea82ab3bb3dca82f357b88d8522857a82684f8b9bdd5598d395252c8490af0b",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "fea82ab3bb3dca82f357b88d8522857a82684f8b9bdd5598d395252c8490af0b",
+          "canonicalReboundSnapshotSha256": "fea82ab3bb3dca82f357b88d8522857a82684f8b9bdd5598d395252c8490af0b"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "553f8537e0827302cefd1606b21935547e897fe8a318e9e2f44e153aedf0ef37",
+          "canonicalReboundSnapshotSha256": "fea82ab3bb3dca82f357b88d8522857a82684f8b9bdd5598d395252c8490af0b"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 1,
+      "saveBonuses": {},
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/2439/entries/0",
+          "utf8Sha256": "e0b0b5d9dd8886c3f0138d5c7b9faee869682f837e0364e0065bd403fd186c8f"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:ai:chronolometer::::::",
+      "kind": "item",
+      "name": "年表仪盘",
+      "english": "Chronolometer",
+      "source": "AI",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 220,
+      "category": "item",
+      "sourceIndex": 422,
+      "fullNormalizedSnapshotSha256": "2112fe220d8372d60567b7f35011d93ef0b5dee8152a7721760152ee897285aa",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "2112fe220d8372d60567b7f35011d93ef0b5dee8152a7721760152ee897285aa",
+          "canonicalReboundSnapshotSha256": "2112fe220d8372d60567b7f35011d93ef0b5dee8152a7721760152ee897285aa"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "4b139b09944ab2c0b6fca962372b0c8598d63b948481022ec9b36ef581cf76f1",
+          "canonicalReboundSnapshotSha256": "2112fe220d8372d60567b7f35011d93ef0b5dee8152a7721760152ee897285aa"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "attuned-only",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "int": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/422/entries/0",
+          "utf8Sha256": "3cb2f3665dbb4d3da21e63a044a30ca6694c840ae862dcf04830c8196458b8b3"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:ai:dimensional%20loop::::::",
+      "kind": "item",
+      "name": "维度环",
+      "english": "Dimensional Loop",
+      "source": "AI",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 220,
+      "category": "item",
+      "sourceIndex": 593,
+      "fullNormalizedSnapshotSha256": "330efeabe77cbf7a5bc70a74c620772cd4fb24a304050ea550234aa5a72249e1",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "330efeabe77cbf7a5bc70a74c620772cd4fb24a304050ea550234aa5a72249e1",
+          "canonicalReboundSnapshotSha256": "330efeabe77cbf7a5bc70a74c620772cd4fb24a304050ea550234aa5a72249e1"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "02035cc43ed16d3240962bd82c67806f6a46251258855fc526fc63261a890fa3",
+          "canonicalReboundSnapshotSha256": "330efeabe77cbf7a5bc70a74c620772cd4fb24a304050ea550234aa5a72249e1"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "attuned-only",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "str": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/593/entries/0",
+          "utf8Sha256": "19b6773ba0c314bd7417abc74315eedf45290e6122a01f89ae44376dde93a0f5"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:ai:far%20gear::::::",
+      "kind": "item",
+      "name": "遥远齿轮",
+      "english": "Far Gear",
+      "source": "AI",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 221,
+      "category": "item",
+      "sourceIndex": 753,
+      "fullNormalizedSnapshotSha256": "91a64a1a42e66c5ea24d179cf52a69e5cac3ad6a5ad9daeb7de6b53b0031832e",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "91a64a1a42e66c5ea24d179cf52a69e5cac3ad6a5ad9daeb7de6b53b0031832e",
+          "canonicalReboundSnapshotSha256": "91a64a1a42e66c5ea24d179cf52a69e5cac3ad6a5ad9daeb7de6b53b0031832e"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "a3f63e50acebf1a79bfdb5b95bcb295434ed5293c8a8035ef04f2b6c9ed9778c",
+          "canonicalReboundSnapshotSha256": "91a64a1a42e66c5ea24d179cf52a69e5cac3ad6a5ad9daeb7de6b53b0031832e"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "attuned-only",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "cha": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/753/entries/0",
+          "utf8Sha256": "75a0c2c97cd8a0c0867084fd7e9cabe3d96974579a07ace7a5fd278035a1964c"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:ai:rotor%20of%20return::::::",
+      "kind": "item",
+      "name": "回溯引擎",
+      "english": "Rotor of Return",
+      "source": "AI",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 221,
+      "category": "item",
+      "sourceIndex": 1875,
+      "fullNormalizedSnapshotSha256": "7d99b70ebc172a05e3130721916e9710cfe48e3ff1058a80b79a771a2002d5a2",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "7d99b70ebc172a05e3130721916e9710cfe48e3ff1058a80b79a771a2002d5a2",
+          "canonicalReboundSnapshotSha256": "7d99b70ebc172a05e3130721916e9710cfe48e3ff1058a80b79a771a2002d5a2"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "7715a6a0280ac21823648867c1bb143bc13b6791accc501a45992877938250a2",
+          "canonicalReboundSnapshotSha256": "7d99b70ebc172a05e3130721916e9710cfe48e3ff1058a80b79a771a2002d5a2"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "attuned-only",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "con": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/1875/entries/0",
+          "utf8Sha256": "5f7d1a2ff2aec9cc62a8ed61897e0b9b1f023f16e8b62852c36398b0956e0c03"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:ai:timepiece%20of%20travel::::::",
+      "kind": "item",
+      "name": "旅行表盘",
+      "english": "Timepiece of Travel",
+      "source": "AI",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 221,
+      "category": "item",
+      "sourceIndex": 2311,
+      "fullNormalizedSnapshotSha256": "41d528e17642041a13968b8fef717bf637a23ed12aebd0548a6708382127c16f",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "41d528e17642041a13968b8fef717bf637a23ed12aebd0548a6708382127c16f",
+          "canonicalReboundSnapshotSha256": "41d528e17642041a13968b8fef717bf637a23ed12aebd0548a6708382127c16f"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "50702360a12142a59754bdbfa05c1cfb1f5644b7a78f9a41ecd2fb106b785b14",
+          "canonicalReboundSnapshotSha256": "41d528e17642041a13968b8fef717bf637a23ed12aebd0548a6708382127c16f"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "attuned-only",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "dex": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/2311/entries/0",
+          "utf8Sha256": "85c2ddc047cbc138f27b53c4cdd0b9caa53c4961442e257d84ce8bae164d4b45"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:ai:wheel%20of%20stars::::::",
+      "kind": "item",
+      "name": "星轮",
+      "english": "Wheel of Stars",
+      "source": "AI",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 222,
+      "category": "item",
+      "sourceIndex": 2453,
+      "fullNormalizedSnapshotSha256": "6d037d832c610c6d1f61cdea90434d525c63e5957805ac2c221e48c3643391fc",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "6d037d832c610c6d1f61cdea90434d525c63e5957805ac2c221e48c3643391fc",
+          "canonicalReboundSnapshotSha256": "6d037d832c610c6d1f61cdea90434d525c63e5957805ac2c221e48c3643391fc"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "26c94ed200f1d83082dbdfe4879ff631b37fd29a86b5a92944e0f730f968a3c4",
+          "canonicalReboundSnapshotSha256": "6d037d832c610c6d1f61cdea90434d525c63e5957805ac2c221e48c3643391fc"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "attuned-only",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 0,
+      "saveBonuses": {
+        "wis": 1
+      },
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/2453/entries/0",
+          "utf8Sha256": "bd274538cd14e96cafcefc12e901775c98dd880c793be5424babb6ec6a312232"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:coa:wrought-iron%20tower::::::",
+      "kind": "item",
+      "name": "铸铁塔",
+      "english": "Wrought-Iron Tower",
+      "source": "COA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 276,
+      "category": "item",
+      "sourceIndex": 2492,
+      "fullNormalizedSnapshotSha256": "3abef17fc96f6b821f924b9120af9ed918c9fbd8a31321bd4d1a5aac887bafa0",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "3abef17fc96f6b821f924b9120af9ed918c9fbd8a31321bd4d1a5aac887bafa0",
+          "canonicalReboundSnapshotSha256": "3abef17fc96f6b821f924b9120af9ed918c9fbd8a31321bd4d1a5aac887bafa0"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "b51795e9d1b4f4b798aeb06a26bda9af59f69192ce7083bfb9c407378879cb9a",
+          "canonicalReboundSnapshotSha256": "7c2418cb1cb0d8a02ad668a3831268252e8940b0e75c80e7a55c6303f32c1807"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "attuned-only",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 2,
+      "saveBonuses": {
+        "str": 2,
+        "dex": 2,
+        "con": 2,
+        "int": 2,
+        "wis": 2,
+        "cha": 2
+      },
+      "sourcePropertyRows": 2,
+      "clauses": [
+        {
+          "path": "item/2492/entries/4/entries/0",
+          "utf8Sha256": "9c70954c0d6b3ad866921552260882568a35ca78df689322662a5f3f5e4a3b0b"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:skt:ingot%20of%20the%20skold%20rune::::::",
+      "kind": "item",
+      "name": "盾牌符文铸块",
+      "english": "Ingot of the Skold Rune",
+      "source": "SKT",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 234,
+      "category": "item",
+      "sourceIndex": 1056,
+      "fullNormalizedSnapshotSha256": "b826864185a2429f4ba9b109816faf05131feb74a98e81e5380c8b38513afda8",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "b826864185a2429f4ba9b109816faf05131feb74a98e81e5380c8b38513afda8",
+          "canonicalReboundSnapshotSha256": "b826864185a2429f4ba9b109816faf05131feb74a98e81e5380c8b38513afda8"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "5fc3310b482bac9dd7a7238f8161ef74c925f400ec6f9a8414e29d5101aae44b",
+          "canonicalReboundSnapshotSha256": "b826864185a2429f4ba9b109816faf05131feb74a98e81e5380c8b38513afda8"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "equipped-on-person",
+      "projectionPolicy": {
+        "overlapGroup": null,
+        "overlapHoldReason": "unreviewed-simultaneous-cross-edition-effect-stacking"
+      },
+      "acBonus": 1,
+      "saveBonuses": {},
+      "sourcePropertyRows": 1,
+      "clauses": [
+        {
+          "path": "item/1056/entries/0",
+          "utf8Sha256": "5ef62f12de73f9e71a43e45bcd116cc70605cbaf26a1e59a6b9f602ccdc20bbe"
+        },
+        {
+          "path": "item/1056/entries/1/entries/0",
+          "utf8Sha256": "a849d695cf8b57710d6af43a751ab3d53ed9a49ce9016eac9eea87a35867fb59"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "held": {
+    "carriedOnlySourceIndices": [
+      2220,
+      2221,
+      1920
+    ],
+    "carriedOnlyOwners": 3,
+    "carriedOnlyPropertyRows": 5,
+    "spellAttackOriginalRecords": 53,
+    "otherConditionalBranches": "not admitted; no armor/shield/activation/aura/orbit/curse/stage/variant policy guessed"
+  }
+}
