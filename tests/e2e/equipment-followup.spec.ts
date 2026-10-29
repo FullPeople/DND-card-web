@@ -29,6 +29,9 @@ test('starting sections precede growth; equipment inline references drag, remove
  const dagger=detail.locator('.inline-reference').filter({hasText:'测试匕首'}).first(),weapons=page.locator('.training-row').filter({hasText:'武器'});
  await dagger.click({button:'right'});await expect(page.getByRole('menuitem',{name:'在 Wiki 中查看'})).toHaveCount(0);await expect(page.getByRole('menuitem',{name:'添加至角色卡'})).toBeVisible();await page.keyboard.press('Escape');
  await dagger.dragTo(weapons);await expect(weapons).toContainText('测试匕首');await page.reload();await expect(weapons).toContainText('测试匕首');
+ // The saved chip renders before its catalog. Catalog recovery revokes the
+ // temporary fallback menu, so start this interaction after the real lookup.
+ await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await expect(detail).toContainText('验收职业');
  await weapons.getByRole('button',{name:'测试匕首',exact:true}).click({button:'right'});await expect(page.getByRole('menuitem',{name:'添加至角色卡'})).toHaveCount(0);await page.getByRole('menuitem',{name:'移除',exact:true}).click();await expect(weapons).not.toContainText('测试匕首');
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备词条',exact:true}).click();await page.getByLabel('装备词条分类搜索').fill('盾牌');await page.locator('.catalog-row').filter({hasText:'盾牌'}).first().dragTo(page.locator('.training-row').filter({hasText:'护甲'}));await expect(page.locator('.training-row').filter({hasText:'护甲'})).toContainText('盾牌');
  await page.screenshot({path:test.info().outputPath('equipment-training.png')});
