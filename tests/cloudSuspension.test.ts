@@ -1,3 +1,4 @@
+import {loopbackFetch as fetch,registerLoopbackServer} from './helpers/loopbackHttp';
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {installCloudSuspension} from '../src/cloud/suspension';
 import {cloudFeaturesEnabled} from '../src/cloud/availability';
@@ -45,7 +46,7 @@ describe('temporary cloud suspension',()=>{
    for(let attempt=0;attempt<20;attempt++){
     const candidate=randomInt(49152,65536);try{await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(candidate,'127.0.0.1',()=>{server.removeListener('error',reject);resolve();});});port=candidate;break;}catch(error){if((error as NodeJS.ErrnoException).code!=='EADDRINUSE')throw error;}
    }
-   expect(port).toBeGreaterThan(0);
+   expect(port).toBeGreaterThan(0);registerLoopbackServer(server);
    for(const [path,method] of [['session','GET'],['cards','GET'],['cards','POST'],['cards/'+card.id,'PUT'],['cards/'+card.id,'DELETE'],['cards/'+card.id+'/rooms','POST'],['auth/qq/start','GET'],['auth/qq/callback','GET'],['plugin/start','POST'],['changes','POST'],['logout','POST']]){
     const response=await fetch(`http://127.0.0.1:${port}/api/${path}`,{method,headers:{cookie:'dnd_cloud='+session.token}});
     expect(response.status).toBe(503);expect(await response.json()).toMatchObject({error:'cloud_disabled'});expect(response.headers.get('set-cookie')).toBeNull();

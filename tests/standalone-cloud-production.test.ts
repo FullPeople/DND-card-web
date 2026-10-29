@@ -1,3 +1,4 @@
+import {loopbackFetch as fetch,registerLoopbackServer} from './helpers/loopbackHttp';
 import {afterEach,describe,expect,it} from 'vitest';
 import {once} from 'node:events';
 import {readFileSync} from 'node:fs';
@@ -13,7 +14,7 @@ async function setup(){
  const ownerSession=store.issueVerifiedSession(owner.id),otherSession=store.issueVerifiedSession(other.id);
  const one=store.create(owner,{...newCharacter(),name:'owner'}),two=store.create(other,{...newCharacter(),name:'other'});
  const server=createCloudServer(store,origin,{featuresEnabled:true,standaloneOnly:true,accountPrivate:true,buildVersion:'1.0.303',changesWaitMs:10,qq:{appId:'123456789',appKey:'test-only-key',callback:origin+'/api/auth/qq/callback'}});
- server.listen(0,'127.0.0.1');await once(server,'listening');
+ server.listen(0,'127.0.0.1');await once(server,'listening');registerLoopbackServer(server);
  cleanup.push(async()=>{server.closeChanges();server.closeAllConnections();await new Promise<void>(done=>server.close(()=>done()));store.close();});
  const base='http://127.0.0.1:'+(server.address() as {port:number}).port+'/api/';
  const headers={Origin:origin,Cookie:'dnd_cloud='+ownerSession.token,'X-CSRF-Token':ownerSession.csrf,'Content-Type':'application/json'};

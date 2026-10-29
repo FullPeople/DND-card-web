@@ -1,3 +1,4 @@
+import {loopbackFetch as fetch,registerLoopbackServer} from './helpers/loopbackHttp';
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {randomInt} from 'node:crypto';
 import {CloudChanges} from '../server/cloud/changes';
@@ -44,6 +45,7 @@ async function fixture(){
   try{await new Promise<void>((resolve,reject)=>{const failed=(error:Error)=>{server.off('listening',ready);reject(error);},ready=()=>{server.off('error',failed);resolve();};server.once('error',failed);server.once('listening',ready);server.listen(randomInt(49152,65536),'127.0.0.1');});break;}
   catch(error){if(!['EADDRINUSE','EACCES'].includes((error as NodeJS.ErrnoException).code||''))throw error;}
  }
+ registerLoopbackServer(server);
  const address=server.address();if(!address||typeof address==='string')throw Error('No fixture listener');
  const base='http://127.0.0.1:'+address.port;
  const request=async(path:string,data:unknown,actor:keyof typeof sessions|'guest'='owner',method='POST')=>{
