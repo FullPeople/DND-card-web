@@ -20,8 +20,8 @@ test('suite notice shows a collapsed red Owner explanation near the front and re
 });
 test('starting sections precede growth; equipment inline references drag, remove and preserve book identity',async({page})=>{
  await mockSource(page);
- await page.route('**/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'验收职业',source:'XPHB',startingProficiencies:{skills:[{choose:{from:['animal handling','athletics'],count:1}}],weapons:['{@item 测试匕首|XPHB}','simple','martial'],armor:['light','shield'],armorProficiencies:[{light:true,shield:true}],tools:['vehicles (land)']},startingEquipment:{entries:['领取 {@item 测试匕首|XPHB}。']},classTableGroups:[{colLabels:['成长'],rows:[['入门']]}],entries:['后续职业正文。']}]}}));
- await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:[{name:'测试匕首',source:'XPHB',type:'M',weaponCategory:'simple',entries:['自制测试武器。']}]}}));
+ await page.context().route('**/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'验收职业',source:'XPHB',startingProficiencies:{skills:[{choose:{from:['animal handling','athletics'],count:1}}],weapons:['{@item 测试匕首|XPHB}','simple','martial'],armor:['light','shield'],armorProficiencies:[{light:true,shield:true}],tools:['vehicles (land)']},startingEquipment:{entries:['领取 {@item 测试匕首|XPHB}。']},classTableGroups:[{colLabels:['成长'],rows:[['入门']]}],entries:['后续职业正文。']}]}}));
+ await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:[{name:'测试匕首',source:'XPHB',type:'M',weaponCategory:'simple',entries:['自制测试武器。']}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('switch',{name:'编辑模式'}).click();
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'职业',exact:true}).click();await page.locator('.catalog-row').filter({hasText:'验收职业'}).click();
  const detail=page.locator('.entry-detail');await expect(detail).toContainText('驯兽、运动');await expect(detail).toContainText('陆上载具');await expect(detail).not.toContainText('armorProficiencies');
@@ -34,7 +34,7 @@ test('starting sections precede growth; equipment inline references drag, remove
  await page.screenshot({path:test.info().outputPath('equipment-training.png')});
 });
 test('spell details end with separately identified classes and other learners',async({page})=>{
- await mockSource(page);await page.route('**/data/generated/gendata-spell-source-lookup.json',route=>route.fulfill({json:{xphb:{微光术:{class:{XPHB:{测试法师:true},PHB:{测试法师:true}},feat:{XPHB:{旅行笔记:true}}}}}}));
+ await mockSource(page);await page.context().route('**/data/generated/gendata-spell-source-lookup.json',route=>route.fulfill({json:{xphb:{微光术:{class:{XPHB:{测试法师:true},PHB:{测试法师:true}},feat:{XPHB:{旅行笔记:true}}}}}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();await page.locator('.catalog-row').filter({hasText:'微光术'}).click();
  const learners=page.locator('.entry-detail .spell-learners');await expect(learners).toContainText('谁能学');await expect(learners).toContainText('旅行笔记');await expect(learners.getByRole('button',{name:'测试法师',exact:true})).toHaveCount(2);expect(await learners.evaluate(el=>el===el.parentElement?.lastElementChild)).toBe(true);await page.screenshot({path:test.info().outputPath('spell-learners.png')});
  await learners.getByRole('button',{name:'旅行笔记',exact:true}).click();await expect(page.locator('.detail-title')).toContainText('旅行笔记');

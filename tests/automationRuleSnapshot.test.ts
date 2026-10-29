@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
-import {readFileSync,mkdtempSync,cpSync,writeFileSync,mkdirSync,rmSync} from 'node:fs';
-import {join} from 'node:path';
+import {readFileSync,mkdtempSync,cpSync,writeFileSync,mkdirSync,rmSync,symlinkSync,realpathSync} from 'node:fs';
+import {join,dirname,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 import {generateProgress,progressInputs,VERIFICATION_PATH,VERIFICATION_SCHEMA} from '../tools/automationProgress';
@@ -45,12 +45,19 @@ describe('source-bound public rule snapshots',()=>{
   const v=structuredClone(snapshot),proof=Object.values(v.validations)[0];proof.scope='current-production';expect(()=>validateRuleSnapshot(v)).toThrow('historical validation');
  });
  it('invalidates mechanism verification when only the external version lock changes',()=>{
+  const originalLock=readFileSync(join(root,RULE_STATUS_LOCK));
   const temp=mkdtempSync(join(tmpdir(),'progress-external-lock-'));try{
-   for(const p of ['src','tests','tools','prototype','.github','docs/data']){mkdirSync(join(temp,p.split('/')[0]),{recursive:true});cpSync(join(root,p),join(temp,p),{recursive:true});}
+   // These trees are only read. Keep the full real fingerprint inputs without
+   // copying thousands of immutable files into every temporary fixture.
+   for(const p of ['src','tests','tools','prototype','.github'])symlinkSync(join(root,p),join(temp,p),'junction');
+   // The mutated authority lock must never share a link with the real source.
+   mkdirSync(join(temp,'docs'));cpSync(join(root,'docs/data'),join(temp,'docs/data'),{recursive:true});
    for(const p of ['package.json','package-lock.json','index.html'])cpSync(join(root,p),join(temp,p));
+   expect(realpathSync(join(temp,RULE_STATUS_LOCK))).not.toBe(realpathSync(join(root,RULE_STATUS_LOCK)));
    const before=progressInputs(temp).fingerprint;
    const revised={...lock,revision:'0'.repeat(40)};writeFileSync(join(temp,RULE_STATUS_LOCK),JSON.stringify(revised));
    expect(progressInputs(temp).fingerprint).not.toBe(before);
-  }finally{rmSync(temp,{recursive:true,force:true});}
+   expect(readFileSync(join(root,RULE_STATUS_LOCK))).toEqual(originalLock);
+  }finally{if(dirname(resolve(temp))!==resolve(tmpdir())||realpathSync(temp)!==resolve(temp))throw Error('Unsafe temporary fixture cleanup');rmSync(temp,{recursive:true,force:true});}
  });
 });

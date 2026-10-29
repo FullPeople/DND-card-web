@@ -1,0 +1,1251 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "closed-item-normalization-full-source-forms",
+  "sourceProseIncluded": false,
+  "scope": "Complete hash-pinned equivalent representations of the same canonical charge-accounting source. No fields are removed, ignored or rewritten. Other source forms remain unsupported.",
+  "canonicalProofAnchor": "The original rule fullNormalizedSnapshotSha256 is the stable canonical proof anchor stored by version1 history; it is not claimed to be the literal merged payload or alias/transport hash. Existing records are never migrated or refilled.",
+  "fullSnapshotHashMethod": "Existing exact JavaScript itemChargeSourceSnapshot recipe over the complete normalized Entry after only canonical-ID and transport-only revision binding.",
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d"
+    }
+  ],
+  "normalization": {
+    "sourceTree": "b11830f6e106b06beaacd7cefda389852d59a52f",
+    "operations": [
+      "normalize",
+      "magicItems"
+    ],
+    "sourceModules": [
+      {
+        "path": "src/core/sourceCorrections.ts",
+        "sha256": "0a12d51444945e04d504d2a67d35c542bd314242349cb3f84b1833090e2d9e75"
+      },
+      {
+        "path": "src/data/expand.ts",
+        "sha256": "be28a83b74ca39d328beee2746b069af838b40a959640f8541e1017228eb13f3"
+      },
+      {
+        "path": "src/data/adapt.ts",
+        "sha256": "380ac9bc94b9ddff7950934211650894f521fb5a31344dbebb805f57adaea9aa"
+      },
+      {
+        "path": "src/data/catalog.ts",
+        "sha256": "f6878c76304aa4c17e3168ffa3f7f4da918f6bc435d1178ae897f2bce9cac4d5"
+      }
+    ]
+  },
+  "semanticLimits": {
+    "appendedDefinitions": [
+      {
+        "sha256": "c782e5e62e29cd5d3a88e91fd1cb5a6508f72e71ce3195e7a7f20f7f4889ee92",
+        "concept": "legacy-thrown-weapon",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28",
+        "concept": "legacy-versatile-weapon",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "e154c082777bb97c0b8d4063723f2440d9588e9e3435c58c83aa4cdc2ceef561",
+        "concept": "legacy-heavy-weapon",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "aee7222f9c03ee56099985c45eea82a35fb256b1e1eb63bdf656e571a263a4bc",
+        "concept": "legacy-two-handed-weapon",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "06d7b1b9276fbc51917584733753cfd7152b741c04723b1558dbce526dd90e76",
+        "concept": "modern-musical-instrument-check-bonus",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "b45be4d36b4b67ce1c9bd65c5f1369a1d452f50286429cfc2dea93483ff009b0",
+        "concept": "legacy-musical-instrument-check-bonus",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444",
+        "concept": "modern-versatile-weapon",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe",
+        "concept": "modern-topple-mastery",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "77d320c459c8a18a3324f6f6104566b2383f73a9f56ad0aa28c510cf8752cd6a",
+        "concept": "vestige-reference-note",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "16b89909c56c25fb7d28d4ce6d91bfa30ba1378e828d68571417c949352c0658",
+        "concept": "legacy-light-weapon",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "9a6320457b6e6a05e646ec82e73bbee733fec93ecf3f17164f4482740c2a5aab",
+        "concept": "legacy-weapon-range",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "eee93b8aae82f349ad97279b5a19d7f8411e61386db24de7458bf57ed53770b7",
+        "concept": "legacy-ammunition",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "d2a07a10d2160558a6e61c0d8a768b1b2f19ad20fb4171f976deeedb79989583",
+        "concept": "modern-sap-mastery",
+        "chargeAccountingSemanticsChanged": false
+      },
+      {
+        "sha256": "e0b607f77e1f0eebc2178ca9c90e722e844b0ab8502485297d254807bced0991",
+        "concept": "modern-thrown-weapon",
+        "chargeAccountingSemanticsChanged": false
+      }
+    ],
+    "capacityChanged": false,
+    "costChanged": false,
+    "poolAuthorityChanged": false,
+    "unitChanged": false,
+    "attunementChanged": false,
+    "otherAttackHandAmmunitionMasteryAndEffectRules": "manual"
+  },
+  "rules": [
+    {
+      "id": "kiwee:item:hotdq:dragongleam::::::",
+      "canonicalProofAnchorSha256": "95cf1301cf502fada772da7bc4f2421ca5fcdc652eb7fbed59e0c797167ebee9",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "95cf1301cf502fada772da7bc4f2421ca5fcdc652eb7fbed59e0c797167ebee9"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "863febdbc2ff124e8f9e7dd28ce0ed9fcdeae11747298fa4f58311867087d5ac",
+          "entriesSha256": "57c76d16a3584c39a909342d6935a7587beaa4417d9a3d2f5faf1934100e6b01",
+          "rawSha256": "ff404f880bd6ebea0ba75f1170d5a58b6d8bb3f841230b8031599ac1c1f3b9df",
+          "mechanicsSha256": "5410eb692bd8725bdf237d070f809eb1b642676c1526c4af135e392b3354e660"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "c782e5e62e29cd5d3a88e91fd1cb5a6508f72e71ce3195e7a7f20f7f4889ee92"
+        },
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:hammer%20of%20thunderbolts::::::",
+      "canonicalProofAnchorSha256": "42c4e6ffbd2318e9043c1d8da5301dbddd8bd769c88f6f48f27ff688407f8cf2",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "42c4e6ffbd2318e9043c1d8da5301dbddd8bd769c88f6f48f27ff688407f8cf2"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "38278b6361db8faef81f88fbd53816b72e64a2c49737e3623cb39c2071e748f3",
+          "entriesSha256": "e5984b8aa9df21882ab2ecee1795944426016a2ca9846303e3d5108b48f4287b",
+          "rawSha256": "3003d718dbc46f8b4daf026a662afebcc50fdc801ad6d75b0f55445d25839960",
+          "mechanicsSha256": "de7f66a2ea31753ae0e4d23062e7e9040c2dbe743b9cb1d74e59b389827cb6be"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "e154c082777bb97c0b8d4063723f2440d9588e9e3435c58c83aa4cdc2ceef561"
+        },
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "aee7222f9c03ee56099985c45eea82a35fb256b1e1eb63bdf656e571a263a4bc"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:hat-lmi:hither-thither%20staff::::::",
+      "canonicalProofAnchorSha256": "71d8e626dba066fe67f612742312faad17b03ab21cd178a2f718af1c1b93a364",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "71d8e626dba066fe67f612742312faad17b03ab21cd178a2f718af1c1b93a364"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "df6c8a8bec203f6ba185df49accf13371908031ea21be7110902a46e25a701f9",
+          "entriesSha256": "23a06107e78885f1a3658f8553b1494c7967f2e126e244d55801f16b79c4e464",
+          "rawSha256": "bfc11586d02e3b6ece22559c04282f58599b55c7de96a973b416a9082fd5625d",
+          "mechanicsSha256": "2d0e1f06cafa541e9c7699aa0fdb6d7fe76b4a704f28b858c3892dbe78b2a5cd"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:horn%20of%20silent%20alarm::::::",
+      "canonicalProofAnchorSha256": "d0d27da551ce6c5c1bf0abd5ee58fcf38d153caeea2fb4c22da7117e47a628fc",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "d0d27da551ce6c5c1bf0abd5ee58fcf38d153caeea2fb4c22da7117e47a628fc"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "d59d5cb674f5987c79de01cd7c82a427df95e477e612aff1eba269ad9f3b680e",
+          "entriesSha256": "9f145ff694f3690e690e39953494c09db8d6fd3a7eca7ea0e435d5c09c240dac",
+          "rawSha256": "978e17614488eabb5259a18b6f2cc80ff955e2984736f23cd20a223247089821",
+          "mechanicsSha256": "636de0546137b30d2c8aa00ff41c7d8d2589d525a17100a680410c902b8f5df2"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "06d7b1b9276fbc51917584733753cfd7152b741c04723b1558dbce526dd90e76"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xge:horn%20of%20silent%20alarm::::::",
+      "canonicalProofAnchorSha256": "3bccd0c399363bc5bab81460e4404d37c242c4a266ec8dfa2a8eab4b5763bd08",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "3bccd0c399363bc5bab81460e4404d37c242c4a266ec8dfa2a8eab4b5763bd08"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "ab7dae52702db186d62d3dfcf673ea3eb6d4901cae184bba73112c0d6481a0a3",
+          "entriesSha256": "5a945f58fbb18414b41e7291726680bf850168866d125474120c4e3d748551ab",
+          "rawSha256": "9435c3eee3942081f90054593ab1c23d0691f98811c5c6c89260cd631f9243c4",
+          "mechanicsSha256": "22071ff4f4a1f560431d951dcb1216ea256188b14977f885cc46ba1e299e6b92"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "b45be4d36b4b67ce1c9bd65c5f1369a1d452f50286429cfc2dea93483ff009b0"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:pipes%20of%20haunting::::::",
+      "canonicalProofAnchorSha256": "803be868459180224f505bfda00ece1212ace6e197cbe6c0745cf36c4ae4d5bd",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "803be868459180224f505bfda00ece1212ace6e197cbe6c0745cf36c4ae4d5bd"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "1a3f7b7fad2d5dabe43ab54b9e75816b9c7427015b46ebeb789e35a2491a7681",
+          "entriesSha256": "210156d6d4b7d3042ae2a828c718ee0a9abb5fba2b43fd9017777f19f89dd3c3",
+          "rawSha256": "f8f5a7c055dd7cee3103a4830883f28051bed59c38145effe64efaa0ec436fa4",
+          "mechanicsSha256": "3b7c6dac4c549bf2b095346b8de493806e09eb7c289f2be936639379c6da5293"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "b45be4d36b4b67ce1c9bd65c5f1369a1d452f50286429cfc2dea93483ff009b0"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:staff%20of%20birdcalls::::::",
+      "canonicalProofAnchorSha256": "b9ec8f7a8176fc6c364d384e77383d27b9178958575afab6cb5c91a348dd3c4a",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "b9ec8f7a8176fc6c364d384e77383d27b9178958575afab6cb5c91a348dd3c4a"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "39ad4b0f3310803bf06e67138bab2e918fb1831b132a40d20ec347b928c40851",
+          "entriesSha256": "5e12bd14e21c91232b52784945dbfa5ace38d5e4c6a68ee2395d40cc6ba561cc",
+          "rawSha256": "ab95dbcafa7effbc79e775280f76eda117d15de89866abad56aaf784a65ac336",
+          "mechanicsSha256": "e520ea4beaff6c58e2fce663c37c2dde4f3aa24fd1dd5c7c33dd0dcb5cf9b2f0"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444"
+        },
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xge:staff%20of%20birdcalls::::::",
+      "canonicalProofAnchorSha256": "41e0ba602627fba29a30531ffaca190bf9d92136b7d16d739a11e49002d9eb62",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "41e0ba602627fba29a30531ffaca190bf9d92136b7d16d739a11e49002d9eb62"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "390a7cd56e08a5911af5f6dde26f0712a36664cefd6d669e141266f3f556e512",
+          "entriesSha256": "72affbf761e81df392d1d935b444e40bfaf188dc45c97b1864c07274d13079ea",
+          "rawSha256": "509bf531456213a17c4f97fad4462de2b7adbfdf030597eeb51bb83df6797e86",
+          "mechanicsSha256": "d390976cb21173b726ffd37f1974dadcbf4d49edc376c45a5b44d8d9481e96d7"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:staff%20of%20flowers::::::",
+      "canonicalProofAnchorSha256": "64adb8c6568d8b82962b1266911457a0be266dbd45d8d2c1bd75f669ae4f2ec9",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "64adb8c6568d8b82962b1266911457a0be266dbd45d8d2c1bd75f669ae4f2ec9"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "446cc1488954fc078fd315072c16bedad0e85512ed5ae23082b6a5f68c32a4cf",
+          "entriesSha256": "b0f7782c20f6dfd122e9a4dc103e23bbe90b004394ab1c3d870bb04731f5c074",
+          "rawSha256": "3b84549ec281359b06ed58fc02ea1801af3df522fce18590602da910d8b69898",
+          "mechanicsSha256": "e16f34665bbb961ec7aa697c83fefc96ccfecf298541e17fc56b42e2d6ab4f87"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444"
+        },
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xge:staff%20of%20flowers::::::",
+      "canonicalProofAnchorSha256": "3dff61e7e4c0d61d339f2ac450f2bff7fce559178c69a6d47034df8fcd81663e",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "3dff61e7e4c0d61d339f2ac450f2bff7fce559178c69a6d47034df8fcd81663e"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "1629505452566103ace5916c2ab215e449402e49783a2e9bd3ea2933777af7a6",
+          "entriesSha256": "d0e923de3e8f82644d2d81b65d687edafe8b9da182d547d37290c7132bd0bb64",
+          "rawSha256": "c3421136eb8eb53967e277e716c44bc2e9fd25b83e2b17f3e4f00b524dec5e75",
+          "mechanicsSha256": "f0b6c86972ad574853879baf7c8fa5fda719f9c3228c2e5abcc48900e1ddf1ac"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:wdh:azuredge::::::",
+      "canonicalProofAnchorSha256": "d2f1be3bbe8bcbe95f1c71a74943de9b001091ddf718b2112007d129ed64bc2c",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "d2f1be3bbe8bcbe95f1c71a74943de9b001091ddf718b2112007d129ed64bc2c"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "bf412a6999dbd278d94e0d7d2ed1104991001f51075c6f9cad72a0d0aa79e274",
+          "entriesSha256": "665c89ff472c6a86acfd20a28b18f2d31405a32ac935d1a85df4ae8d0038f66b",
+          "rawSha256": "541c1042514e37c1c771f720168c0598149daa4218ecbc2cd44921ddfb7e8ee8",
+          "mechanicsSha256": "8ec952e1d6c50b72f2c2da59e41e26a82a106173be1d8d1ceed5f07fe36f15f0"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[8]",
+          "rawPath": "raw.entries[8]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:tce:baba%20yaga's%20pestle::::::",
+      "canonicalProofAnchorSha256": "3039bea2185172cd78b5fad406256f4bf219e6f1811dba186e7d60d036bc1481",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "3039bea2185172cd78b5fad406256f4bf219e6f1811dba186e7d60d036bc1481"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "ed7950fe5894a92f41236ab57b0ae9efdac4408803776c9f0877f62d7aeb2b2b",
+          "entriesSha256": "fff3b66727065ccd2ade16969c7a802a332b7616cac8bd3c66bb154382f62666",
+          "rawSha256": "03085f99479d11097f6729c0dade16ee232642932a205b42c90f8a16e82945d3",
+          "mechanicsSha256": "69a881d64f5484af5e556b94ca363b098c8bb84500a97aff00bd92193be0e1d3"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:toa:devlin's%20staff%20of%20striking::::::",
+      "canonicalProofAnchorSha256": "c6c4ff517c09ec6ade73679cda1a722ae072faeef6fd86b743d9614eed702e9f",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "c6c4ff517c09ec6ade73679cda1a722ae072faeef6fd86b743d9614eed702e9f"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "db2be8a77f5ca186453ea2563f7fdd9942e291a491bbd2b188345601ec6ff73c",
+          "entriesSha256": "c3aa8f7ac705b7f2b01a03e48a480d733c6670e6ad2b9bd0a13670767c77c368",
+          "rawSha256": "887a2d620fd40cc5163411dc10ab5f43d2dacb2ac791a7a19eaa73382ff93f18",
+          "mechanicsSha256": "e141879332d2bed6651e4ae3097fb7fa694704fa22df7047efe7699fb08af6de"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:wdh:dragonstaff%20of%20ahghairon::::::",
+      "canonicalProofAnchorSha256": "7def0e4a3e80a7041f846986fdd3c3c49cea18d3f06caba9bb348be8b2758eac",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "7def0e4a3e80a7041f846986fdd3c3c49cea18d3f06caba9bb348be8b2758eac"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "69680fca6d95d481ec3cd7e82e499b00a571cd0fa215e33dadc9b21753003938",
+          "entriesSha256": "a093f09c87cbb1ee9f4faea0a521d7fb268929aa92276d83b52115e7ce098afb",
+          "rawSha256": "ef326704d253650605e6bd6eca8ed66334b9c49d9820d7e4b3c447a27060822d",
+          "mechanicsSha256": "40a3b748a1bca4e503aae5a7ad31753df22c81f61d13c2eb44adefec01532803"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:wbtw:eldritch%20staff::::::",
+      "canonicalProofAnchorSha256": "57914362052ace8cc0d9abaf661c3a7fe890a56b86e9e9c446aab4d6aaa21936",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "57914362052ace8cc0d9abaf661c3a7fe890a56b86e9e9c446aab4d6aaa21936"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "909eafcf52def052a3540e34b782443faabf755ca2a132c977c3e501e48daead",
+          "entriesSha256": "27ece13ee690dc8561010659458cea4810ee04dfdf59e514d4913f10037135ab",
+          "rawSha256": "97ff1dd0c2a6e2fc78ec6596aaaca454e5aaa6d626fd04b8660b02433c3559d7",
+          "mechanicsSha256": "b45e9371cf7c1aa3a35ca32cfb930993db82be844195cd545e9e121ca6810a77"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:cos:gulthias%20staff::::::",
+      "canonicalProofAnchorSha256": "1fcb86a827c77d471301c4b1f727111e8375035d5981465b53e2f0764c1b6b53",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "1fcb86a827c77d471301c4b1f727111e8375035d5981465b53e2f0764c1b6b53"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "a824fb64af77845ffe745041b96a4ac45c8988c09addd3f4188202b59c0be8d8",
+          "entriesSha256": "edea37dcd61ac78da9bc1699a9abed6403fe8498980b25ac3b88eaf1a29758c2",
+          "rawSha256": "b5a40354a4b47fd9c1c99820e386b6219b18e54b2025242146bdc05666fade5f",
+          "mechanicsSha256": "5cfb17cc2dfab01089e05fd90565862a873e71314568475787a43c0fdb3afa59"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:bmt:hammer%20of%20runic%20focus::::::",
+      "canonicalProofAnchorSha256": "9b16e8884bac25598e064ce54f4c830a785a5508e71f36b5ecc9bde802c8195c",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "9b16e8884bac25598e064ce54f4c830a785a5508e71f36b5ecc9bde802c8195c"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "eff4828e23d06a0dabebe82fc2940003d398bd3ea7b613fc10ab7800539fb356",
+          "entriesSha256": "b7f77129be7244369cde4d4b1a8b9a31a2048dc79527fa7efae0e855ad196372",
+          "rawSha256": "4fb0be6c60f89ebde291d66501280d50902267fb3a5d953b941d467a482ca34c",
+          "mechanicsSha256": "c49b3e1e8a13f95d5ae3304d3ac0c5471836c17845d5b4baf8c75c0d374ea4ef"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:hotdq:hazirawn::::::",
+      "canonicalProofAnchorSha256": "2160cc175cec3ed9dbc1c827600a95fb986f64b22cac14e4e187fe321615f8db",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "2160cc175cec3ed9dbc1c827600a95fb986f64b22cac14e4e187fe321615f8db"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "6cab0187d92332a6fbb33d5107965ad1864392b5c94b1ae6fc56bccf6dc87d3e",
+          "entriesSha256": "569665bdaff8f10925f0842ae6b3629f70fb47b48863fc68cb36358bd9bfc49b",
+          "rawSha256": "23d21d58ae5290003a7c7dce39284a2496642662730f936dc530e1a7d3571ca4",
+          "mechanicsSha256": "6c45d1f208d077d4fa3599f7fcae27eee9362310ea960a4def60132531fe422d"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "e154c082777bb97c0b8d4063723f2440d9588e9e3435c58c83aa4cdc2ceef561"
+        },
+        {
+          "path": "entries[5]",
+          "rawPath": "raw.entries[5]",
+          "sha256": "aee7222f9c03ee56099985c45eea82a35fb256b1e1eb63bdf656e571a263a4bc"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xge:instrument%20of%20scribing::::::",
+      "canonicalProofAnchorSha256": "05226473097ce59908557e503ee94b41701a8a2621579edcdf0fa9707779a0b2",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "05226473097ce59908557e503ee94b41701a8a2621579edcdf0fa9707779a0b2"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "f7610339f756e3da376f3e0f48fd5b1e362772b0d80abfc667b8be1f745bc1f5",
+          "entriesSha256": "173cf0476a4cb8f38751e2624fed356fb5cdef4479ea60c2d75d540cc19ced9b",
+          "rawSha256": "e30579cd69ebb8c7a4cb7b5a32a8f2323437ca16dda71639f1bfbf37815b3d05",
+          "mechanicsSha256": "63c533a762d1acd4c67ae97f8f4ad75c2b284ea40d8df44c9b0db0388bd55f12"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "b45be4d36b4b67ce1c9bd65c5f1369a1d452f50286429cfc2dea93483ff009b0"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:crcotn:jewel%20of%20three%20prayers%20(awakened)::::::",
+      "canonicalProofAnchorSha256": "ff423b291d9c5740dcef13a3b754ee2787a6477a94b4845a5b6dc5af54e0259b",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "ff423b291d9c5740dcef13a3b754ee2787a6477a94b4845a5b6dc5af54e0259b"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "fb3ed80eee607a3dae2f3388b31a88e9c831b0c594b462d5261dd1fe057f5c13",
+          "entriesSha256": "85b36d8bbc227847307c56cbf633c4e2a077bd5061b5754c8e45aecee386404e",
+          "rawSha256": "88d5e2cd223a2d10f4602c4f7de5868f273bdc1a8f9a3601ef59d1dbca96daf6",
+          "mechanicsSha256": "7a1ac1e0bfae8b3951d85cadeba9a92bd432e42e80ba7fe21b0e590b8d8981e8"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "77d320c459c8a18a3324f6f6104566b2383f73a9f56ad0aa28c510cf8752cd6a"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:crcotn:jewel%20of%20three%20prayers%20(dormant)::::::",
+      "canonicalProofAnchorSha256": "6e83396cde0b663eac3b8d06b0bb5b0e2bd04ea543a4018a15204d0c2bd08435",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "6e83396cde0b663eac3b8d06b0bb5b0e2bd04ea543a4018a15204d0c2bd08435"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "3232dd6d13eba27e58b64708cf177f9fb20c1a55294d9adf32f68aab91646c8b",
+          "entriesSha256": "487e072cac47c6bb1a42d3a0e37a787894a3eab391b55fa36c76e6b7af4afcf0",
+          "rawSha256": "d3fd0a2fe0e756b0024de65ed57253bfbcee711e82bd4806af946e0bf8cd06ab",
+          "mechanicsSha256": "e445f96e83eb6a5fb66d8ca25212d836c94f7c52ebe6efce0964581f8a2e5ebb"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "77d320c459c8a18a3324f6f6104566b2383f73a9f56ad0aa28c510cf8752cd6a"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:crcotn:jewel%20of%20three%20prayers%20(exalted)::::::",
+      "canonicalProofAnchorSha256": "210d14585e6f8934be2b0c6486cb99667624bcce849da20cca7f1468dacb0442",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "210d14585e6f8934be2b0c6486cb99667624bcce849da20cca7f1468dacb0442"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "bc8a22ff3dd7bf3b01c4a63c4e86a68989c23d945a4ff92d607793a76e7b1b68",
+          "entriesSha256": "4d864174ad1ce8f92520cf5915649698c7ea9ca37cb44eaeecb403e5a68c3e01",
+          "rawSha256": "d872d51711f99d4009339ef20abe164495b0f8874f96a4b2b522372e94af0c47",
+          "mechanicsSha256": "dc354cb49b606624352a59ccf1495d8725230c205bd66e6eaf45669cf43dd59f"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "77d320c459c8a18a3324f6f6104566b2383f73a9f56ad0aa28c510cf8752cd6a"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:mot:khrusor%2C%20spear%20of%20heliod::::::",
+      "canonicalProofAnchorSha256": "4a6c5347106f73aeaf81945ad39d67850c356f25ed423053de1fb8df771188d1",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "4a6c5347106f73aeaf81945ad39d67850c356f25ed423053de1fb8df771188d1"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "8112930d04d698499347cffe88dd2908302f9de3f06b4ba527f5674ab4050fda",
+          "entriesSha256": "3438cdc192f156e4d8d8792f2556ddcc6dd1897e9366d017793c1620c6914885",
+          "rawSha256": "a5fe36d632c9d18c50ced9ba70b9b81b4304e2ba0e8369e878edb9f467370e19",
+          "mechanicsSha256": "ddd1e27a40c7281c557fecdc8bb4a68d38f9ba80b027b191b292fe427982839a"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[7]",
+          "rawPath": "raw.entries[7]",
+          "sha256": "c782e5e62e29cd5d3a88e91fd1cb5a6508f72e71ce3195e7a7f20f7f4889ee92"
+        },
+        {
+          "path": "entries[8]",
+          "rawPath": "raw.entries[8]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:skt:korolnor%20scepter::::::",
+      "canonicalProofAnchorSha256": "1b19dbef2d8ba192eb754284db919981d4c2ccb91f237a563b0fad1bc3761239",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "1b19dbef2d8ba192eb754284db919981d4c2ccb91f237a563b0fad1bc3761239"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "7d960f185db7b9f95f88968042d630bf93cb4755e3dc7fdfb07c1190505417ee",
+          "entriesSha256": "bf4ed0afcd097087a26a372103d95cfa66e1b68c9198ead41e0b6b5c6f4e2f71",
+          "rawSha256": "b30fdc38b76d693cfe846af39fb3e2291ac5f250c96877f67346223fa7acd6e6",
+          "mechanicsSha256": "3575ada6587006d1a54ebbbac25d0e29b1a19c552ab9db174e29e9f1a6c9712a"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[5]",
+          "rawPath": "raw.entries[5]",
+          "sha256": "16b89909c56c25fb7d28d4ce6d91bfa30ba1378e828d68571417c949352c0658"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:bgg:longbow%20of%20the%20healing%20hearth::::::",
+      "canonicalProofAnchorSha256": "345f05dab756ab0a029241399eec5ba2b176ed0fc20cc3f9ef4e35df1390bad0",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "345f05dab756ab0a029241399eec5ba2b176ed0fc20cc3f9ef4e35df1390bad0"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "50ed1588f1b0a9e8209826aa84be0ee96b69da98e883c64a47dbc9de857362f1",
+          "entriesSha256": "856651f27e164a0646cd659467467e5a2e072fb0a31f1ac28ac70caad76899b9",
+          "rawSha256": "9219ed405d43d1b890739d9b690d173caf940139db2c452488fb3b758fed027d",
+          "mechanicsSha256": "573b70d761e8ef6dae32f8eae3aff5e5e44cd0f05f0acc84943b2a622268fcda"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[5]",
+          "rawPath": "raw.entries[5]",
+          "sha256": "9a6320457b6e6a05e646ec82e73bbee733fec93ecf3f17164f4482740c2a5aab"
+        },
+        {
+          "path": "entries[6]",
+          "rawPath": "raw.entries[6]",
+          "sha256": "eee93b8aae82f349ad97279b5a19d7f8411e61386db24de7458bf57ed53770b7"
+        },
+        {
+          "path": "entries[7]",
+          "rawPath": "raw.entries[7]",
+          "sha256": "e154c082777bb97c0b8d4063723f2440d9588e9e3435c58c83aa4cdc2ceef561"
+        },
+        {
+          "path": "entries[8]",
+          "rawPath": "raw.entries[8]",
+          "sha256": "aee7222f9c03ee56099985c45eea82a35fb256b1e1eb63bdf656e571a263a4bc"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:mace%20of%20terror::::::",
+      "canonicalProofAnchorSha256": "52634215b38806aaffa64f6fc0f820dd53efd99371f41711b705871bb55d89e9",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "52634215b38806aaffa64f6fc0f820dd53efd99371f41711b705871bb55d89e9"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "76672eea40187f4192071f95d96d43f9528444bd59326a46631cabcc5ef32193",
+          "entriesSha256": "46be5ec2189b1b7788a45be9dba8de8f6db9f774ae5b75e5949a53c03dbf58b7",
+          "rawSha256": "12f898a0041bda697c227ab11ebf8003694784109a3e9ab52305e19efb0175f7",
+          "mechanicsSha256": "c58a1dfdd75d9e3ad1528fefaa22cb24949920d4fdc73ff77c73f368e4454b31"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "d2a07a10d2160558a6e61c0d8a768b1b2f19ad20fb4171f976deeedb79989583"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:au:martialist's%20quarterstaff::::::",
+      "canonicalProofAnchorSha256": "b1cd66b271bc889314b7f998721a986de001d9d8f2cd58e917db05a50355ec4e",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "b1cd66b271bc889314b7f998721a986de001d9d8f2cd58e917db05a50355ec4e"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "953d3fc0d4aa649e8a64a89399dea6a630035dc81742688cc2809cdc211d2ac0",
+          "entriesSha256": "31149c965190196c4eb50b8c117a519815653a4a8ac45168993593c6eed5b84d",
+          "rawSha256": "73289ab0bd1ac18f8b412e66eb96c2439beb5d8460726685d77de3e095562ad1",
+          "mechanicsSha256": "0e70812d80755a293fd5483296c7cd377493fb7624694abaa202b502129156ca"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444"
+        },
+        {
+          "path": "entries[5]",
+          "rawPath": "raw.entries[5]",
+          "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:pipes%20of%20the%20sewers::::::",
+      "canonicalProofAnchorSha256": "3e05ea3d611f7cdd747e92be1cd83dbebfd4e95e059134ef63212739ae28a52f",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "3e05ea3d611f7cdd747e92be1cd83dbebfd4e95e059134ef63212739ae28a52f"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "1a87fb178a6a14ccc470caf086e52417eb7c99588918517b70cb42813e6b500a",
+          "entriesSha256": "4323f2345a4d87c5e681431e60a65dd517177fead6a6d0aa74dadada266b660c",
+          "rawSha256": "60921081fb717f8133d3292e4e2a62b3a8bacf54ad0028cb34831092f8ff26c5",
+          "mechanicsSha256": "6238ab7e25e4c747c4cf794c78829920fbdf2d3b8678a77c5197016097806cc6"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "b45be4d36b4b67ce1c9bd65c5f1369a1d452f50286429cfc2dea93483ff009b0"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:veor:rod%20of%20seven%20parts::::::",
+      "canonicalProofAnchorSha256": "ec2930c5eefdfde4c8c2f050a9249911a9d43ffd2dd6b14e985747a7ba822133",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "ec2930c5eefdfde4c8c2f050a9249911a9d43ffd2dd6b14e985747a7ba822133"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "9b6fc265a639751b8c3a27ab51d3c0dc8ad9181b86dc4bd0ecb31d922d3babd9",
+          "entriesSha256": "dd503ef142cb7caeb1000c5ae81e2f5860dcfd57328364b4b43584852f8f6dfd",
+          "rawSha256": "3e617b9a06d5fa042cd21b0a8b24a891d4e4a87f54717c4bf733685745aebd00",
+          "mechanicsSha256": "3937fb21abf2cfd7dbca78cdb722892183aeef45d7738ce1ca6cd3e5d027b989"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[9]",
+          "rawPath": "raw.entries[9]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:lmop:spider%20staff::::::",
+      "canonicalProofAnchorSha256": "a2c22908ad629822b4f98742550c6255155ef66a9e6bd7320c4ae2c6fb0654ef",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "a2c22908ad629822b4f98742550c6255155ef66a9e6bd7320c4ae2c6fb0654ef"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "a8c0a6773ddfef00853ef0018d305bdbf0c517b8960b689fddb4127c0a2854e9",
+          "entriesSha256": "0113cade14ba3ef292c61d9ce4294d8e08b05c772eaf978f585683f8f5529ffb",
+          "rawSha256": "748fe69ef7e8e8fcf7e38a3df0d8438717b498a58465bda2eed9988fe657bccb",
+          "mechanicsSha256": "b62e80a90be3dc87ff4926bac5fe8dc9b56bf2499b318da08544364eca94363e"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:lmop:staff%20of%20defense::::::",
+      "canonicalProofAnchorSha256": "6cc9c92cd9c54cf2f29a58032ebfb0d472d2af6b34d73ec6be732786c96f0dc3",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "6cc9c92cd9c54cf2f29a58032ebfb0d472d2af6b34d73ec6be732786c96f0dc3"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "27c5a368637321e83d64b981b83512fa87b1b6750df172fd302abab871637e7a",
+          "entriesSha256": "a6862fa717ebe0b0f3b6b90a1bb6976feab25840433c09ec037ea85faf5374a8",
+          "rawSha256": "acec30552645237ea5abec04f642b31f378a31916ad65da096a66697396a1ea7",
+          "mechanicsSha256": "e9801771aa9c864c8b55685eeb1ad4639b7a877146bc556a6f94ad2df1a20e15"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:cm:staff%20of%20fate::::::",
+      "canonicalProofAnchorSha256": "e72208eca76528fec91af8b00534533e087ca51e2b0d22c7ae00b32d50c7e360",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "e72208eca76528fec91af8b00534533e087ca51e2b0d22c7ae00b32d50c7e360"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "b56ee2753a849118d1a1cda59edb26b7a1d3e6282afa017e1aaa7ae2dfa9a427",
+          "entriesSha256": "611ec0f1ab202fbf3a6de3eab26ee41cd518e5f3809d078c84106cd8ec3f7b3e",
+          "rawSha256": "421dc186c5de7aaf8fe7bff5f0222c9b82d87c3145c85116a4edf1edf69358db",
+          "mechanicsSha256": "a12665f900a0facfe1fb7f05ea3ef2e34d5f2ad663f91ec21de654e7d9867958"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:staff%20of%20striking::::::",
+      "canonicalProofAnchorSha256": "c671a5d28e999ea0e893660c89e0904c86ddf1e89e4696cd79ec7ff221cd1b0c",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "c671a5d28e999ea0e893660c89e0904c86ddf1e89e4696cd79ec7ff221cd1b0c"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "7ec15db468684c523bc947baec90812a5da3fd449dc48d36e84302cf0c3ec4e8",
+          "entriesSha256": "165bf4620adeb0828ee95a95d17197bb5ae0ec0f63dd2ca8b54970af3b561e87",
+          "rawSha256": "a3b2aa2dd62e02c5cabe4bca4472f578eb56ac0f5795c8c472049fe532c36058",
+          "mechanicsSha256": "b9cd3721baba3dc7567e4f15c714827777bac6cbb6035d51c53d6b51030c9dd6"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:staff%20of%20striking::::::",
+      "canonicalProofAnchorSha256": "8d25634a6f934082dde436ba01a5a38f9a10d127a6e3d2c3884bf2200fb03f9b",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "8d25634a6f934082dde436ba01a5a38f9a10d127a6e3d2c3884bf2200fb03f9b"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "b4147c1c4c38860edfa9c458ae0a68eee61065688934f5ae719318a700f5fd94",
+          "entriesSha256": "225ada578a3b5ebc37793f3327a96fd4823c17ac76ebb225ce82fa35a2c117f6",
+          "rawSha256": "ab84fd59083b6e14eb7a95227d1e7263b7e95a939454acb40f63e5fbb51897c3",
+          "mechanicsSha256": "37409112e5fd73a13e48ffe12dd2f079b72cb65fcadee4d57133fe145b709e91"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444"
+        },
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:au:staff%20of%20the%20lost::::::",
+      "canonicalProofAnchorSha256": "018fe29b83417a6f704d32cfc343637adf25965676c3b1b812a7c864585fd556",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "018fe29b83417a6f704d32cfc343637adf25965676c3b1b812a7c864585fd556"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "22ef60a258b16c15f1702f959dc5fab72c5c0419052397351af8331e0c92949a",
+          "entriesSha256": "b324579f05fcbe5dceaf212c09274783a350c1f173212bd30acc3bb08955339c",
+          "rawSha256": "c9e8ac7a3e28c6d5de04746d8ccb0ae7baa657a85e13ab7b88c9211c8dd6c250",
+          "mechanicsSha256": "b7fb5eedecb53ef5d3c7b972f4fc3d9455a3b4c9015306881f8bb1c64b22ca33"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444"
+        },
+        {
+          "path": "entries[4]",
+          "rawPath": "raw.entries[4]",
+          "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:wdmm:tearulai::::::",
+      "canonicalProofAnchorSha256": "8f21c27bf33fe5b913de901631565ae5b97b47c6fcd1191f124af9968cd2b290",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "8f21c27bf33fe5b913de901631565ae5b97b47c6fcd1191f124af9968cd2b290"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "b7715c459fd7ca6ee48acd3d7863bb6827d1bcef54bb8296009531828ad933e0",
+          "entriesSha256": "ed08ff21dc0b353690eee2f8eff90736a3194b73e69319fd873ed64e8bcb180d",
+          "rawSha256": "a319a3ebb0cd0cd6fb43d0ce7957e7bca3e3eb32b4cc3eb3067985c85633b45c",
+          "mechanicsSha256": "cd0508537a409bebfd47cdc27911e135a0dc217610b1f80b0513aa2473821314"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[9]",
+          "rawPath": "raw.entries[9]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:bmt:tidecaller%20trident::::::",
+      "canonicalProofAnchorSha256": "cacab5d3f4697f315cd53d7751908b168f813acd2a702357af1e63ef7284049c",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "cacab5d3f4697f315cd53d7751908b168f813acd2a702357af1e63ef7284049c"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "bf11766b18493de1b591b827e139781966c1c567eecc04ebcc8ca63d43ac1fd8",
+          "entriesSha256": "697b5bb45921f077ab368b083166420c74bdddb136ba0c3ca723bbddbddda547",
+          "rawSha256": "685b461b5d2e3ea724b60163dc500001589286ca5d29fbec62f68db1918334f1",
+          "mechanicsSha256": "2052221c45054b05e2f4cc6726d45a3e5e58a9734d431643be6ff50853cb12fe"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "c782e5e62e29cd5d3a88e91fd1cb5a6508f72e71ce3195e7a7f20f7f4889ee92"
+        },
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:tftyp:tloques'%20berserker%20battleaxe::::::",
+      "canonicalProofAnchorSha256": "b5f99784eca91c0251ad138ee29b2c2ffa5357cbd5f6e82d7efbaaa78ade84a8",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "b5f99784eca91c0251ad138ee29b2c2ffa5357cbd5f6e82d7efbaaa78ade84a8"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "88f8611d21c0a66d27446e3f6f05ee88aa3aa43c632cacc662f7d22e1c17441b",
+          "entriesSha256": "89269e4956d11d81d734cd980073bf499a70df22d34840b6bac98d354fae5237",
+          "rawSha256": "0b7138a31e7ca370f108b96c51b7581a616c3dfd1b4dd2d24b1b7de1b081cedd",
+          "mechanicsSha256": "8d34193a78248397dee16fa37b700257a44095c108879335a711acd2ef583a92"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[6]",
+          "rawPath": "raw.entries[6]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:trident%20of%20fish%20command::::::",
+      "canonicalProofAnchorSha256": "4c2aff2a21aa6174af569b6c89add18c794cc162381e69cd97f4e3903474c9c0",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "4c2aff2a21aa6174af569b6c89add18c794cc162381e69cd97f4e3903474c9c0"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "72b40cd1965958a8a396ab1becbfa1869330bda8a77d9a25615f257045bd9926",
+          "entriesSha256": "0bc4cae4ed9fede6639995297de6badd6ff3f42dfbb1fecfbf45dab8b441edee",
+          "rawSha256": "c856c833cbe1e25ac3feea7e55576eccc5d440a3be2b7858dbdffb22544708ad",
+          "mechanicsSha256": "d47825456d4bae6dd2791c550fe4b704b21d77005edaf2e3175670ebed09d21a"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "c782e5e62e29cd5d3a88e91fd1cb5a6508f72e71ce3195e7a7f20f7f4889ee92"
+        },
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:trident%20of%20fish%20command::::::",
+      "canonicalProofAnchorSha256": "9edd34b0063db7b9644afee08239bc06bf1f3ef7646f2c5683c3ce713f629aeb",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "9edd34b0063db7b9644afee08239bc06bf1f3ef7646f2c5683c3ce713f629aeb"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "63c0618c8ea8e889672a850eca8c166715852c52606242e16c190c095bb7429a",
+          "entriesSha256": "ebb4678a5df135794fdf2a72806b6d3af2ae9ea64bf8703b1e6a441ade44677d",
+          "rawSha256": "adff2fa56af72068963059d315cd35fc2304a39b4f06e67bb8828a4b2dd947d9",
+          "mechanicsSha256": "c8e84d156a4cb02140bc0bf6f6e462942a708e476b004dcb41bc8653db9848b0"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[1]",
+          "rawPath": "raw.entries[1]",
+          "sha256": "e0b607f77e1f0eebc2178ca9c90e722e844b0ab8502485297d254807bced0991"
+        },
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444"
+        },
+        {
+          "path": "entries[3]",
+          "rawPath": "raw.entries[3]",
+          "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:wave::::::",
+      "canonicalProofAnchorSha256": "655be2cc95fe8a9aa8a494cc87e9e04cc63ac5bfd388e18cf406690555113818",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "655be2cc95fe8a9aa8a494cc87e9e04cc63ac5bfd388e18cf406690555113818"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "82da472174d86041391c680e728957813dc439cb4c5f43e2569b8bc08b04adfe",
+          "entriesSha256": "2539ad5e0cef8dc6f3d544011adc94bfd525cd7e1dac6b5de955db9e9051ad8e",
+          "rawSha256": "56d02f8c34bdcf70354b652d4833b1cafedec660ee0577e41a57d81aded1de70",
+          "mechanicsSha256": "59603b6f4923c1d5c478eca9c7029344c9cf79b78dba049ab0e047b9175612ee"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[9]",
+          "rawPath": "raw.entries[9]",
+          "sha256": "e0b607f77e1f0eebc2178ca9c90e722e844b0ab8502485297d254807bced0991"
+        },
+        {
+          "path": "entries[10]",
+          "rawPath": "raw.entries[10]",
+          "sha256": "5c2376bfcbfd7f59c245b30dadfb86dbe00fc337e36ff15707c0757e9e134444"
+        },
+        {
+          "path": "entries[11]",
+          "rawPath": "raw.entries[11]",
+          "sha256": "b4f538f8f1f113219eb45a0ae49fed0ab173208563e84317f1007a92a63ea8fe"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:coa:wrought-iron%20tower::::::",
+      "canonicalProofAnchorSha256": "3abef17fc96f6b821f924b9120af9ed918c9fbd8a31321bd4d1a5aac887bafa0",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "3abef17fc96f6b821f924b9120af9ed918c9fbd8a31321bd4d1a5aac887bafa0"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "7c2418cb1cb0d8a02ad668a3831268252e8940b0e75c80e7a55c6303f32c1807",
+          "entriesSha256": "ac8263bfcd2e52a05b67b39769723b6f6979e56921e1905e82bc83848141ce27",
+          "rawSha256": "92bf2613679196c5fe46dc1ee29becefaafb1a84ef151f3c65fe15e1b54f0d34",
+          "mechanicsSha256": "5e2a3e1606fdbb147adfbc1c79a3c063dd6fbd4501007a691444ea7d8579db67"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[8]",
+          "rawPath": "raw.entries[8]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:wdmm:wyllow's%20staff%20of%20flowers::::::",
+      "canonicalProofAnchorSha256": "fe4bead1d3fbba629cba7634824c77816689b29f1d7e68e4f781ddf7650cbecf",
+      "compatibleFullSnapshotForms": [
+        {
+          "form": "per-file-normalized-v1",
+          "sha256": "fe4bead1d3fbba629cba7634824c77816689b29f1d7e68e4f781ddf7650cbecf"
+        },
+        {
+          "form": "native-equipment-merged-v1",
+          "sha256": "1757dfb1a79a1d76beabe5c620c1509791155b06a894138933c3119e45b48e63",
+          "entriesSha256": "7a5b2640f5834bd8841aed698acfb6098248e9708e9976f3d1a6e471be5c5f5b",
+          "rawSha256": "747c854028ea81c1f11ca58c371c16bb133f8ef12c71d5806f9a79eab220387c",
+          "mechanicsSha256": "9d08c03d1e0172e3d4bbe0596f6e6d3fb50ef48a358607221a80907c1847c4d1"
+        }
+      ],
+      "appendedClauseHashes": [
+        {
+          "path": "entries[2]",
+          "rawPath": "raw.entries[2]",
+          "sha256": "f8b2dbe8a87036f46cf26e77481c79b80dc5388a133bb02fefd2b067d89bca28"
+        }
+      ]
+    }
+  ]
+}

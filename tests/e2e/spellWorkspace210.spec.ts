@@ -116,7 +116,7 @@ test('explicit class cantrip adjustment persists and lowering the limit retains 
  await input.fill('-1');await input.press('Enter');await expect(group.locator('h4')).toContainText('3 / 1');await expect(group.locator('.spell-overflow summary')).toContainText('2 项已保留原记录');await expect(group.locator('[data-spell-id]')).toHaveCount(1);await expect(page.locator('.ordinary-prepared-group h4')).toContainText('0 / 2');
 });
 test('a declared feat grants its cantrip after a real Wiki drop even when class cantrips are full',async({page})=>{
- await load(page,card(),async()=>{await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:[{name:'明确赠送验收专长',ENG_name:'Declared Gift',source:'XPHB',additionalSpells:[{known:{'_':['Mist|XPHB#c']}}],entries:['原创资料，明确赠送引用仅用于软件验收。']}]},headers:{'access-control-allow-origin':'*',etag:'declared-gift'}}));});
+ await load(page,card(),async()=>{await page.context().route('**/data/feats.json',route=>route.fulfill({json:{feat:[{name:'明确赠送验收专长',ENG_name:'Declared Gift',source:'XPHB',additionalSpells:[{known:{'_':['Mist|XPHB#c']}}],entries:['原创资料，明确赠送引用仅用于软件验收。']}]},headers:{'access-control-allow-origin':'*',etag:'declared-gift'}}));});
  const ordinary=page.locator('[data-cantrip-group="Source Mage"]');await expect(ordinary.locator('[data-spell-id]')).toHaveCount(2);
  await page.getByRole('tab',{name:'主要',exact:true}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'专长',exact:true}).click();
  const feat=page.locator('.catalog-row').filter({hasText:'明确赠送验收专长'});await expect(feat).toBeVisible();await drag(page,feat,page.locator('.heritage-features'));
@@ -156,7 +156,7 @@ test('full class cantrips accept an explicitly recorded feat gift separately acr
 test('an unlearned cantrip from the loaded class list can fill a slot without granting the entire catalog',async({page})=>{
  await mockSource(page);await suppressAnnouncement(page);
  const catalogSpell={name:'目录星火',ENG_name:'Catalog Spark',source:'XPHB',level:0,school:'V',classes:{fromClassList:[{name:'Source Mage',source:'XPHB'}]},entries:['原创目录验收戏法。']};
- await page.route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:[catalogSpell]},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:[catalogSpell]},headers:{'access-control-allow-origin':'*'}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'自动化设置'})).toBeVisible();
  const c=card();c.spellSettings!.cantrips={'Source Mage':['','Frost']};await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'catalog.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});await closeImportedCard(page,c.name);
  const editing=page.getByRole('switch',{name:'编辑模式',exact:true});if(await editing.getAttribute('aria-checked')!=='true')await editing.click();await page.getByRole('tab',{name:'法术',exact:true}).click();

@@ -4,8 +4,8 @@ import {mockSource,suppressAnnouncement} from './fixtures';
 const splitter=(page:Page)=>page.getByRole('separator',{name:'调整角色卡与规则资料宽度'});
 async function ready(page:Page){
  await mockSource(page);await suppressAnnouncement(page);
- await page.route('**/data/items.json',route=>route.fulfill({json:{item:Array.from({length:240},(_,i)=>({name:`原创物品${String(i).padStart(3,'0')}`,ENG_name:`Authored Item ${i}`,source:'XPHB',type:'G',entries:['原创界面测试内容。']}))}}));
- await page.route('**/data/races.json',route=>route.fulfill({json:{race:[{name:'原创旅人（甲）',source:'XPHB',entries:['原创种族甲。']},{name:'原创旅人（乙）',source:'XPHB',entries:['原创种族乙。']}]}}));
+ await page.context().route('**/data/items.json',route=>route.fulfill({json:{item:Array.from({length:240},(_,i)=>({name:`原创物品${String(i).padStart(3,'0')}`,ENG_name:`Authored Item ${i}`,source:'XPHB',type:'G',entries:['原创界面测试内容。']}))}}));
+ await page.context().route('**/data/races.json',route=>route.fulfill({json:{race:[{name:'原创旅人（甲）',source:'XPHB',entries:['原创种族甲。']},{name:'原创旅人（乙）',source:'XPHB',entries:['原创种族乙。']}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete');
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备',exact:true}).click();

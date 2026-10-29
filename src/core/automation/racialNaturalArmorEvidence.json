@@ -1,0 +1,821 @@
+{
+  "schemaVersion": 1,
+  "scope": "source-qualified-direct-innate-racial-ac-calculation-or-fixed-bonus",
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/races.json",
+      "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "bytes": 451902
+    }
+  ],
+  "sourceCandidateCounts": {
+    "owners": 10,
+    "alternativeBases": 8,
+    "additiveBonuses": 2
+  },
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "counts": {
+    "actualOwners": 10,
+    "verifiedRouteProofs": 20,
+    "distinctNormalizedSnapshotForms": 10,
+    "heldOwners": 0
+  },
+  "normalization": {
+    "canonical": "complete-original-races-body-through-installed-normalizeCatalogData",
+    "app": "independent-complete-original-races-body-normalize-then-real-hydrateSpellLookup",
+    "transportRevision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+    "noPayloadRepair": true
+  },
+  "policy": {
+    "operation": "one-alternative-base-or-explicit-fixed-additive-bonus",
+    "physicalWearingIndependentOfEffectPermission": true,
+    "manualFinalAcPriority": true,
+    "independentSheetOffsetRetained": true,
+    "shieldAppliedByExistingArmorReportOnly": true,
+    "bodyArmorComparison": "single-known-plain-unenchanted-only",
+    "enchantedOrUnknownBodyArmorComparison": "hold-new-benefit-preserve-existing-armor-result",
+    "existingArmorBonusesNeverReallocated": true,
+    "unsupportedClassCalculations": "manual-no-invented-fallback",
+    "tortleBodyArmor": "hold-new-benefit-visible-no-unequip-or-legality-rewrite",
+    "manualMechanisms": [
+      "hide-action-and-advantage",
+      "body-armor-legality-enforcement",
+      "other-ac-calculations",
+      "damage",
+      "hp",
+      "resources",
+      "attunement",
+      "inventory-mutation",
+      "other-effects"
+    ]
+  },
+  "rules": [
+    {
+      "key": "race/9",
+      "id": "kiwee:race:aag:autognome::::::",
+      "kind": "race",
+      "name": "自动侏儒",
+      "english": "Autognome",
+      "source": "AAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 11,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:aag:autognome::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "completeSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "canonicalReboundSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:aag:autognome::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "completeSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8",
+          "canonicalReboundSnapshotSha256": "432b05f52cee1d82db3e5d9530c55827ce02ab1a0ee8cb296bcb5cbd96ccb6f8"
+        }
+      ],
+      "requiredSources": [
+        "AAG"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 13,
+        "modifier": "dex",
+        "wearing": "no-body-armor",
+        "shield": "not-body-armor-no-extra-grant",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/9",
+        "sourceIndex": 9,
+        "rawSha256": "a3c2a1a6d1fbbc8048e1c437ed9ccc085e005757edae7188dd46237e190fb6aa",
+        "rawHeader": {
+          "name": "自动侏儒",
+          "ENG_name": "Autognome",
+          "source": "AAG",
+          "page": 11
+        },
+        "rawHeaderSha256": "54c56f5085837fb1f40591ccd75acd3cd2afc7317ae69f923207d8224b497bef",
+        "trait": {
+          "path": "race/9/entries/1",
+          "header": {
+            "name": "装甲外壳",
+            "ENG_name": "Armored Casing",
+            "type": "entries"
+          },
+          "sha256": "59ccd58fe1386936ae659087a45f19161874d2ebc2aaac57ca70602581147fa8"
+        },
+        "clauses": [
+          {
+            "path": "race/9/entries/1/entries/0",
+            "utf8Bytes": 154,
+            "sha256": "1ad5b1ef55089f84a6e85a86ae5ba744fee9b641d4b378ac450fc77059f85f0d",
+            "expectedCompleteEntryPath": "raw/entries/1/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/104",
+      "id": "kiwee:race:dmg:lizardfolk::::::",
+      "kind": "race",
+      "name": "蜥蜴人",
+      "english": "Lizardfolk",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 282,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "88d2898a3f0d1310f5e9b7cfe968458daef3aee8f928d236baa8517986c60734",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:dmg:lizardfolk::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "88d2898a3f0d1310f5e9b7cfe968458daef3aee8f928d236baa8517986c60734",
+          "completeSnapshotSha256": "88d2898a3f0d1310f5e9b7cfe968458daef3aee8f928d236baa8517986c60734",
+          "canonicalReboundSnapshotSha256": "88d2898a3f0d1310f5e9b7cfe968458daef3aee8f928d236baa8517986c60734"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:dmg:lizardfolk::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "88d2898a3f0d1310f5e9b7cfe968458daef3aee8f928d236baa8517986c60734",
+          "completeSnapshotSha256": "88d2898a3f0d1310f5e9b7cfe968458daef3aee8f928d236baa8517986c60734",
+          "canonicalReboundSnapshotSha256": "88d2898a3f0d1310f5e9b7cfe968458daef3aee8f928d236baa8517986c60734"
+        }
+      ],
+      "requiredSources": [
+        "DMG"
+      ],
+      "policy": {
+        "operation": "additive-bonus",
+        "constant": 3,
+        "modifier": "none",
+        "wearing": "unconditional",
+        "shield": "unconditional-bonus",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/104",
+        "sourceIndex": 104,
+        "rawSha256": "189a6a1c001a40dc564d498dd86ccdc151c362bfd9486fc49455f3c497937f0a",
+        "rawHeader": {
+          "name": "蜥蜴人",
+          "ENG_name": "Lizardfolk",
+          "source": "DMG",
+          "page": 282
+        },
+        "rawHeaderSha256": "c443abeabb03efb4f8476f55fefba57937740304cb73658600d48d9bf5f37e08",
+        "trait": {
+          "path": "race/104/entries/1",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "9eb45771309447e453a7f4fd8b51ea9ddf27dad01a0dc1e85785dd15b9de0ce4"
+        },
+        "clauses": [
+          {
+            "path": "race/104/entries/1/entries/0",
+            "utf8Bytes": 74,
+            "sha256": "bbecf506efdb7f9b17810e9c7a403add1ea7a68a1ce1b7b985d7989d39fdadef",
+            "expectedCompleteEntryPath": "raw/entries/1/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/105",
+      "id": "kiwee:race:mpmm:lizardfolk::::::",
+      "kind": "race",
+      "name": "蜥蜴人",
+      "english": "Lizardfolk",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 26,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:lizardfolk::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+          "completeSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+          "canonicalReboundSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:lizardfolk::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+          "completeSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+          "canonicalReboundSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3"
+        }
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 13,
+        "modifier": "dex",
+        "wearing": "natural-if-worn-lower",
+        "shield": "explicitly-permitted",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/105",
+        "sourceIndex": 105,
+        "rawSha256": "e229ef03c52fe796e75167c1aeb90c21f31e322c80bc2c8141d19c12276058fd",
+        "rawHeader": {
+          "name": "蜥蜴人",
+          "ENG_name": "Lizardfolk",
+          "source": "MPMM",
+          "page": 26
+        },
+        "rawHeaderSha256": "b1c4ec8bb56bb91e9b9665199c53dac1ea7165f9be67b241189f4710866c5b96",
+        "trait": {
+          "path": "race/105/entries/4",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "4609dd62bcdd344ec1f9a0bfb2af2a4273820209b39e651875b4dc5fb583862b"
+        },
+        "clauses": [
+          {
+            "path": "race/105/entries/4/entries/0",
+            "utf8Bytes": 273,
+            "sha256": "5f9f84ff0ba9980af46477efe19436b86a852969e2d0fe233e433b8f5daaf00b",
+            "expectedCompleteEntryPath": "raw/entries/4/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/106",
+      "id": "kiwee:race:vgm:lizardfolk::::::",
+      "kind": "race",
+      "name": "蜥蜴人",
+      "english": "Lizardfolk",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 111,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:lizardfolk::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0",
+          "completeSnapshotSha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0",
+          "canonicalReboundSnapshotSha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:lizardfolk::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0",
+          "completeSnapshotSha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0",
+          "canonicalReboundSnapshotSha256": "1fe66bcae245a0a714f5087e981d64484063c39d7386f4be17ec0dd57f286ab0"
+        }
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 13,
+        "modifier": "dex",
+        "wearing": "natural-if-worn-lower",
+        "shield": "explicitly-permitted",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/106",
+        "sourceIndex": 106,
+        "rawSha256": "b8b5638cd05f681617d5d894ef937b733f0d08c5d38a1c71ae09724ef142a918",
+        "rawHeader": {
+          "name": "蜥蜴人",
+          "ENG_name": "Lizardfolk",
+          "source": "VGM",
+          "page": 111
+        },
+        "rawHeaderSha256": "33a7d4e40f2db384e72ac0fee1193b5e17a176de981cf977b7cd7280cb0e8db5",
+        "trait": {
+          "path": "race/106/entries/7",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "3692e75341b29b07b54a865400f4ac846461dde76c9a01f58b2bc4e41eecdec0"
+        },
+        "clauses": [
+          {
+            "path": "race/106/entries/7/entries/0",
+            "utf8Bytes": 264,
+            "sha256": "7e0fb1d6ea19f919e410685caf700046e3efeb0086c362aff01337ca289df5f0",
+            "expectedCompleteEntryPath": "raw/entries/7/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/107",
+      "id": "kiwee:race:lr:locathah::::::",
+      "kind": "race",
+      "name": "洛卡鱼人",
+      "english": "Locathah",
+      "source": "LR",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 24,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "8b98a5c0e2e7d9a925872745efd42e08d315c011bb4e66939b818e033d3fd80a",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:lr:locathah::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "8b98a5c0e2e7d9a925872745efd42e08d315c011bb4e66939b818e033d3fd80a",
+          "completeSnapshotSha256": "8b98a5c0e2e7d9a925872745efd42e08d315c011bb4e66939b818e033d3fd80a",
+          "canonicalReboundSnapshotSha256": "8b98a5c0e2e7d9a925872745efd42e08d315c011bb4e66939b818e033d3fd80a"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:lr:locathah::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "8b98a5c0e2e7d9a925872745efd42e08d315c011bb4e66939b818e033d3fd80a",
+          "completeSnapshotSha256": "8b98a5c0e2e7d9a925872745efd42e08d315c011bb4e66939b818e033d3fd80a",
+          "canonicalReboundSnapshotSha256": "8b98a5c0e2e7d9a925872745efd42e08d315c011bb4e66939b818e033d3fd80a"
+        }
+      ],
+      "requiredSources": [
+        "LR"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 12,
+        "modifier": "dex",
+        "wearing": "natural-if-worn-lower",
+        "shield": "explicitly-permitted",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/107",
+        "sourceIndex": 107,
+        "rawSha256": "f33d08d98a68d1cb58b8d77237a052ef37c2f4e41a18209bc5d39bea328b6aac",
+        "rawHeader": {
+          "name": "洛卡鱼人",
+          "ENG_name": "Locathah",
+          "source": "LR",
+          "page": 24
+        },
+        "rawHeaderSha256": "ac9a1c49ee46b10f7ca90a1c9a83955cb1716f84989df6aad3e9a05935ad97f3",
+        "trait": {
+          "path": "race/107/entries/2",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "a26fb533274f6b7da5aada2a84a18c5a439fff748dbbda298ec794efbd09a3d6"
+        },
+        "clauses": [
+          {
+            "path": "race/107/entries/2/entries/0",
+            "utf8Bytes": 240,
+            "sha256": "27d6063f158caee4f05ab4f9ed5790e5e2f0a5e802dd4fc317241ff38c663c45",
+            "expectedCompleteEntryPath": "raw/entries/2/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/109",
+      "id": "kiwee:race:ggr:loxodon::::::",
+      "kind": "race",
+      "name": "象族",
+      "english": "Loxodon",
+      "source": "GGR",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ggr:loxodon::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "completeSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "canonicalReboundSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ggr:loxodon::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "completeSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "canonicalReboundSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9"
+        }
+      ],
+      "requiredSources": [
+        "GGR"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 12,
+        "modifier": "con",
+        "wearing": "natural-if-worn-lower",
+        "shield": "explicitly-permitted",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/109",
+        "sourceIndex": 109,
+        "rawSha256": "4c955812ee3c504ab66882d1b3140bbcfac958b5d740f534d83227384c73a62d",
+        "rawHeader": {
+          "name": "象族",
+          "ENG_name": "Loxodon",
+          "source": "GGR",
+          "page": 17
+        },
+        "rawHeaderSha256": "0e5ceff2b5a3fd179f289fd628ead15a34d8419e25fbb58c26a0ad8929358a05",
+        "trait": {
+          "path": "race/109/entries/5",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "439a6c2bbb8843e256d3335731960e39901e01421c72fcaa4a5bee6def158dd0"
+        },
+        "clauses": [
+          {
+            "path": "race/109/entries/5/entries/0",
+            "utf8Bytes": 260,
+            "sha256": "d50ccdefa6795755bd46e4291ce4fa9575d1a39f031b8e2b509491d28239043b",
+            "expectedCompleteEntryPath": "raw/entries/5/entries/0",
+            "role": "ac-policy"
+          },
+          {
+            "path": "race/109/entries/5/entries/1/entries/0",
+            "utf8Bytes": 284,
+            "sha256": "4357a3098d840fb4f17912a8f3063621ce06bd99dad28ffc4e6a27b867b31c32",
+            "expectedCompleteEntryPath": "raw/entries/5/entries/1/entries/0",
+            "role": "nonstacking"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/142",
+      "id": "kiwee:race:aag:thri-kreen::::::",
+      "kind": "race",
+      "name": "螳螂人",
+      "english": "Thri-kreen",
+      "source": "AAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 15,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "411ea257150cfd0617e3f5ce68664590345c8b2a8800666650f233a632ac0bc2",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:aag:thri-kreen::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "411ea257150cfd0617e3f5ce68664590345c8b2a8800666650f233a632ac0bc2",
+          "completeSnapshotSha256": "411ea257150cfd0617e3f5ce68664590345c8b2a8800666650f233a632ac0bc2",
+          "canonicalReboundSnapshotSha256": "411ea257150cfd0617e3f5ce68664590345c8b2a8800666650f233a632ac0bc2"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:aag:thri-kreen::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "411ea257150cfd0617e3f5ce68664590345c8b2a8800666650f233a632ac0bc2",
+          "completeSnapshotSha256": "411ea257150cfd0617e3f5ce68664590345c8b2a8800666650f233a632ac0bc2",
+          "canonicalReboundSnapshotSha256": "411ea257150cfd0617e3f5ce68664590345c8b2a8800666650f233a632ac0bc2"
+        }
+      ],
+      "requiredSources": [
+        "AAG"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 13,
+        "modifier": "dex",
+        "wearing": "no-body-armor",
+        "shield": "not-body-armor-no-extra-grant",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/142",
+        "sourceIndex": 142,
+        "rawSha256": "879c98d8305fa4ee4feb594f55304b5df83521073f78e767b33c72c8bd556210",
+        "rawHeader": {
+          "name": "螳螂人",
+          "ENG_name": "Thri-kreen",
+          "source": "AAG",
+          "page": 15
+        },
+        "rawHeaderSha256": "b7ba5f4a6f71241949712f06ad073e87af90b5965337ba8e2ac67752a4929780",
+        "trait": {
+          "path": "race/142/entries/2",
+          "header": {
+            "name": "变色甲壳",
+            "ENG_name": "Chameleon Carapace",
+            "type": "entries"
+          },
+          "sha256": "85a4e3ea81f3b7940dda9076dad34c52a7da1122cfab771839fc1ba17a62ce34"
+        },
+        "clauses": [
+          {
+            "path": "race/142/entries/2/entries/0",
+            "utf8Bytes": 91,
+            "sha256": "717350ea6fc87bd99b224eaedc0b18b5f83ad6e8623403918352cbc78c058843",
+            "expectedCompleteEntryPath": "raw/entries/2/entries/0",
+            "role": "ac-policy"
+          },
+          {
+            "path": "race/142/entries/2/entries/1",
+            "utf8Bytes": 214,
+            "sha256": "8597f117d6992677b5182e3fd04e63b502a211783f33cc2438c8cfb5f7241ac7",
+            "expectedCompleteEntryPath": "raw/entries/2/entries/1",
+            "role": "manual-hide"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/145",
+      "id": "kiwee:race:mpmm:tortle::::::",
+      "kind": "race",
+      "name": "龟人",
+      "english": "Tortle",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 34,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "80541b165963d9dbc11afecfd31a4c04d49d6ee898762614d7a265e0e0942003",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:tortle::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "80541b165963d9dbc11afecfd31a4c04d49d6ee898762614d7a265e0e0942003",
+          "completeSnapshotSha256": "80541b165963d9dbc11afecfd31a4c04d49d6ee898762614d7a265e0e0942003",
+          "canonicalReboundSnapshotSha256": "80541b165963d9dbc11afecfd31a4c04d49d6ee898762614d7a265e0e0942003"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:tortle::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "80541b165963d9dbc11afecfd31a4c04d49d6ee898762614d7a265e0e0942003",
+          "completeSnapshotSha256": "80541b165963d9dbc11afecfd31a4c04d49d6ee898762614d7a265e0e0942003",
+          "canonicalReboundSnapshotSha256": "80541b165963d9dbc11afecfd31a4c04d49d6ee898762614d7a265e0e0942003"
+        }
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 17,
+        "modifier": "none",
+        "wearing": "body-armor-prohibited-held",
+        "shield": "explicitly-permitted",
+        "ignoresDex": true
+      },
+      "sourceProof": {
+        "path": "race/145",
+        "sourceIndex": 145,
+        "rawSha256": "75a6047857e8333967098bcb83a3672a60ea591cbda3e1687931ceba977ee67e",
+        "rawHeader": {
+          "name": "龟人",
+          "ENG_name": "Tortle",
+          "source": "MPMM",
+          "page": 34
+        },
+        "rawHeaderSha256": "5b15d8c1f7ffdbf799b1adf7a05c46bdead0c75129d9cc4a8e6e135a564514bf",
+        "trait": {
+          "path": "race/145/entries/3",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "87ecb8aa19fb549e36e9f6f85085780c1a0b712e38f7a739c2b5fc92b1c16830"
+        },
+        "clauses": [
+          {
+            "path": "race/145/entries/3/entries/0",
+            "utf8Bytes": 187,
+            "sha256": "741a4948c82e67ad4059ed292721e15eb7a79bb547da642a69e95ac319a26667",
+            "expectedCompleteEntryPath": "raw/entries/3/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/146",
+      "id": "kiwee:race:ttp:tortle::::::",
+      "kind": "race",
+      "name": "龟人",
+      "english": "Tortle",
+      "source": "TTP",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 3,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1777a9ed9448cb04ec0c451856a453de7735d81fa6acce3f8d6c3cc9b65c0a70",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ttp:tortle::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1777a9ed9448cb04ec0c451856a453de7735d81fa6acce3f8d6c3cc9b65c0a70",
+          "completeSnapshotSha256": "1777a9ed9448cb04ec0c451856a453de7735d81fa6acce3f8d6c3cc9b65c0a70",
+          "canonicalReboundSnapshotSha256": "1777a9ed9448cb04ec0c451856a453de7735d81fa6acce3f8d6c3cc9b65c0a70"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ttp:tortle::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1777a9ed9448cb04ec0c451856a453de7735d81fa6acce3f8d6c3cc9b65c0a70",
+          "completeSnapshotSha256": "1777a9ed9448cb04ec0c451856a453de7735d81fa6acce3f8d6c3cc9b65c0a70",
+          "canonicalReboundSnapshotSha256": "1777a9ed9448cb04ec0c451856a453de7735d81fa6acce3f8d6c3cc9b65c0a70"
+        }
+      ],
+      "requiredSources": [
+        "TTP"
+      ],
+      "policy": {
+        "operation": "alternative-base",
+        "constant": 17,
+        "modifier": "none",
+        "wearing": "body-armor-no-benefit-held",
+        "shield": "explicitly-permitted",
+        "ignoresDex": true
+      },
+      "sourceProof": {
+        "path": "race/146",
+        "sourceIndex": 146,
+        "rawSha256": "38ba333e9d0669667335ee59bb3568335ea25a66fe628e1c7ac72dd1f835bc95",
+        "rawHeader": {
+          "name": "龟人",
+          "ENG_name": "Tortle",
+          "source": "TTP",
+          "page": 3
+        },
+        "rawHeaderSha256": "c1c5a341c6ea83d8357f1a8b43a0924000c833a4617cd2e4af60c15a9e7931b5",
+        "trait": {
+          "path": "race/146/entries/6",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "95e971162cdd35b1509d1c1b4ff6bdbc764e4e4bcf88c1da421b5e5c09d8669e"
+        },
+        "clauses": [
+          {
+            "path": "race/146/entries/6/entries/0",
+            "utf8Bytes": 301,
+            "sha256": "126331a185ee05b60813b73c0d8d51346fa43de9b183277d7b0fa93ede9a8f17",
+            "expectedCompleteEntryPath": "raw/entries/6/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/150",
+      "id": "kiwee:race:dmg:troglodyte::::::",
+      "kind": "race",
+      "name": "穴蜥人",
+      "english": "Troglodyte",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 282,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "7133bc36aae019c7e1d2de20e2ba2832e685eb5927b84fb4960be3322ef8a7b4",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:dmg:troglodyte::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "7133bc36aae019c7e1d2de20e2ba2832e685eb5927b84fb4960be3322ef8a7b4",
+          "completeSnapshotSha256": "7133bc36aae019c7e1d2de20e2ba2832e685eb5927b84fb4960be3322ef8a7b4",
+          "canonicalReboundSnapshotSha256": "7133bc36aae019c7e1d2de20e2ba2832e685eb5927b84fb4960be3322ef8a7b4"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:dmg:troglodyte::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "7133bc36aae019c7e1d2de20e2ba2832e685eb5927b84fb4960be3322ef8a7b4",
+          "completeSnapshotSha256": "7133bc36aae019c7e1d2de20e2ba2832e685eb5927b84fb4960be3322ef8a7b4",
+          "canonicalReboundSnapshotSha256": "7133bc36aae019c7e1d2de20e2ba2832e685eb5927b84fb4960be3322ef8a7b4"
+        }
+      ],
+      "requiredSources": [
+        "DMG"
+      ],
+      "policy": {
+        "operation": "additive-bonus",
+        "constant": 1,
+        "modifier": "none",
+        "wearing": "unconditional",
+        "shield": "unconditional-bonus",
+        "ignoresDex": false
+      },
+      "sourceProof": {
+        "path": "race/150",
+        "sourceIndex": 150,
+        "rawSha256": "edf1232d08f32caba48cad19d376c6d4a218a6ba043b13cd8fdd889379f3a844",
+        "rawHeader": {
+          "name": "穴蜥人",
+          "ENG_name": "Troglodyte",
+          "source": "DMG",
+          "page": 282
+        },
+        "rawHeaderSha256": "75d98a435d574379336e5eb46f1ad41618e2af6cb4af2383691bde0e2c704c46",
+        "trait": {
+          "path": "race/150/entries/3",
+          "header": {
+            "name": "天生护甲",
+            "ENG_name": "Natural Armor",
+            "type": "entries"
+          },
+          "sha256": "ba845617f35740715d96909cb2e46a5b138d3c028928b3cfe9e2ee41f689f2ae"
+        },
+        "clauses": [
+          {
+            "path": "race/150/entries/3/entries/0",
+            "utf8Bytes": 56,
+            "sha256": "47492a985a2012b67affe8d0ac2834b619aadab3ed7ee874ad94c84fc35b0198",
+            "expectedCompleteEntryPath": "raw/entries/3/entries/0",
+            "role": "ac-policy"
+          }
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "normalizationHolds": []
+}

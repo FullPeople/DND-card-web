@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact-six-source-qualified-relative-racial-movement",
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/races.json",
+      "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "bytes": 451902
+    }
+  ],
+  "counts": {
+    "owners": 6,
+    "verifiedRouteProofs": 12,
+    "distinctNormalizedSnapshotForms": 6,
+    "heldOwners": 3
+  },
+  "normalization": {
+    "canonical": "complete-original-races-body-through-installed-normalizeCatalogData",
+    "app": "independent-complete-original-races-body-normalize-then-real-hydrateSpellLookup",
+    "transportRevision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+    "noPayloadRepair": true
+  },
+  "policy": {
+    "relation": "equal-current-walking",
+    "walkingBaseline": "current-derived-walking-after-existing-scalars",
+    "doesNotModifyWalking": true,
+    "qualifiedArmorRestriction": "none",
+    "manualMechanisms": [
+      "dhampir-level-three-hands-free-wall-ceiling-climbing",
+      "dhampir-ancestral-legacy-retained-movement",
+      "conditional-and-world-movement-execution"
+    ]
+  },
+  "rules": [
+    {
+      "id": "kiwee:race:vrgr:dhampir::::::",
+      "kind": "race",
+      "name": "半血裔",
+      "english": "Dhampir",
+      "source": "VRGR",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 16,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/26",
+      "mode": "climb",
+      "relation": "equal-current-walking",
+      "requiredSources": [
+        "VRGR"
+      ],
+      "fullNormalizedSnapshotSha256": "cb8dc00285292fd3f8e34a2fe67847e5c20e3a54366c379fc96eac06f1e2adea",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "cb8dc00285292fd3f8e34a2fe67847e5c20e3a54366c379fc96eac06f1e2adea",
+          "canonicalReboundSnapshotSha256": "cb8dc00285292fd3f8e34a2fe67847e5c20e3a54366c379fc96eac06f1e2adea"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "cb8dc00285292fd3f8e34a2fe67847e5c20e3a54366c379fc96eac06f1e2adea",
+          "canonicalReboundSnapshotSha256": "cb8dc00285292fd3f8e34a2fe67847e5c20e3a54366c379fc96eac06f1e2adea"
+        }
+      ],
+      "sourceClauses": [
+        {
+          "path": "race/26/entries/4/entries/0",
+          "utf8Sha256": "9ad801c084a73eab5dd19a6ae8057207d96b2e2aca96ab4153075dc5dc4688b9"
+        }
+      ],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:race:mpmm:tabaxi::::::",
+      "kind": "race",
+      "name": "斑猫人",
+      "english": "Tabaxi",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 33,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/140",
+      "mode": "climb",
+      "relation": "equal-current-walking",
+      "requiredSources": [
+        "MPMM"
+      ],
+      "fullNormalizedSnapshotSha256": "6fe6f1eeaf2272169523e86ce04d66909602d0d755ccd55b59d07dd1de8fca6d",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "6fe6f1eeaf2272169523e86ce04d66909602d0d755ccd55b59d07dd1de8fca6d",
+          "canonicalReboundSnapshotSha256": "6fe6f1eeaf2272169523e86ce04d66909602d0d755ccd55b59d07dd1de8fca6d"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "6fe6f1eeaf2272169523e86ce04d66909602d0d755ccd55b59d07dd1de8fca6d",
+          "canonicalReboundSnapshotSha256": "6fe6f1eeaf2272169523e86ce04d66909602d0d755ccd55b59d07dd1de8fca6d"
+        }
+      ],
+      "sourceClauses": [
+        {
+          "path": "race/140/entries/1/entries/0",
+          "utf8Sha256": "f8e5437622807682ea08da1bacbeb047204c898b1c250e5f38bab245ea0d14d0"
+        }
+      ],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:race:mpmm:lizardfolk::::::",
+      "kind": "race",
+      "name": "蜥蜴人",
+      "english": "Lizardfolk",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 26,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/105",
+      "mode": "swim",
+      "relation": "equal-current-walking",
+      "requiredSources": [
+        "MPMM"
+      ],
+      "fullNormalizedSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+          "canonicalReboundSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3",
+          "canonicalReboundSnapshotSha256": "ceb6e6e0a7569e80932632ed5998e7a6418a16b4af9bffaa9f7fc8e0f14fc3f3"
+        }
+      ],
+      "sourceClauses": [
+        {
+          "path": "race/105/entries/0/entries/0",
+          "utf8Sha256": "ced322e9ab17945461319b2bf51e2f9606dc7f06d2f31276cd53511e265ed4cb"
+        }
+      ],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:race:mpmm:sea%20elf::::::",
+      "kind": "race",
+      "name": "海精灵",
+      "english": "Sea Elf",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 30,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/132",
+      "mode": "swim",
+      "relation": "equal-current-walking",
+      "requiredSources": [
+        "MPMM"
+      ],
+      "fullNormalizedSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+          "canonicalReboundSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c",
+          "canonicalReboundSnapshotSha256": "9d1c838fa650249af4c79d88cbb5f56f57543c955830316382b0cb6f88f7c85c"
+        }
+      ],
+      "sourceClauses": [
+        {
+          "path": "race/132/entries/1/entries/0",
+          "utf8Sha256": "ced322e9ab17945461319b2bf51e2f9606dc7f06d2f31276cd53511e265ed4cb"
+        }
+      ],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:race:mpmm:triton::::::",
+      "kind": "race",
+      "name": "梭螺鱼人",
+      "english": "Triton",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 35,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/148",
+      "mode": "swim",
+      "relation": "equal-current-walking",
+      "requiredSources": [
+        "MPMM"
+      ],
+      "fullNormalizedSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+          "canonicalReboundSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa",
+          "canonicalReboundSnapshotSha256": "5e3b6ab6c23fcc66fc75932c9c266c080c913d07d6e23f2932bf786536834eaa"
+        }
+      ],
+      "sourceClauses": [
+        {
+          "path": "race/148/entries/0/entries/0",
+          "utf8Sha256": "ced322e9ab17945461319b2bf51e2f9606dc7f06d2f31276cd53511e265ed4cb"
+        }
+      ],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:race:mpmm:genasi%20(water)::::::%E5%85%83%E7%B4%A0%E8%A3%94",
+      "kind": "race",
+      "name": "元素裔（水）",
+      "english": "Genasi (Water)",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "subrace/34",
+      "mode": "swim",
+      "relation": "equal-current-walking",
+      "requiredSources": [
+        "MPMM"
+      ],
+      "fullNormalizedSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+          "canonicalReboundSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176",
+          "canonicalReboundSnapshotSha256": "39d1f08ded0f169035a06fad56bb183995af177cd4d081f4c9e6db2cc85c5176"
+        }
+      ],
+      "sourceClauses": [
+        {
+          "path": "subrace/34/entries/0/entries/0",
+          "utf8Sha256": "ced322e9ab17945461319b2bf51e2f9606dc7f06d2f31276cd53511e265ed4cb"
+        }
+      ],
+      "parentSourcePath": "race/49",
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "holds": [
+    {
+      "id": "kiwee:race:rhw:dhampir::::::",
+      "kind": "race",
+      "name": "半血裔",
+      "english": "Dhampir",
+      "source": "RHW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 28,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/25",
+      "mode": "climb",
+      "rawModeValue": true,
+      "reasonCode": "linked-speed-reference-not-explicit-walking",
+      "fullNormalizedSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+          "canonicalReboundSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f",
+          "canonicalReboundSnapshotSha256": "360eef49df3321b431739efc64f9abf45a5e82d261fa9e023a9212384726517f"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:race:aag:giff::::::",
+      "kind": "race",
+      "name": "诘弗人",
+      "english": "Giff",
+      "source": "AAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 12,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/50",
+      "mode": "swim",
+      "rawModeValue": true,
+      "reasonCode": "source-movement-clause-absent",
+      "fullNormalizedSnapshotSha256": "fbb63e088fd1a77b290d58a98fcfe102cdf0c7ca7f882a2bbc6987602afc89e3",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "fbb63e088fd1a77b290d58a98fcfe102cdf0c7ca7f882a2bbc6987602afc89e3",
+          "canonicalReboundSnapshotSha256": "fbb63e088fd1a77b290d58a98fcfe102cdf0c7ca7f882a2bbc6987602afc89e3"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "fbb63e088fd1a77b290d58a98fcfe102cdf0c7ca7f882a2bbc6987602afc89e3",
+          "canonicalReboundSnapshotSha256": "fbb63e088fd1a77b290d58a98fcfe102cdf0c7ca7f882a2bbc6987602afc89e3"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:race:aag:hadozee::::::",
+      "kind": "race",
+      "name": "鼯猴人",
+      "english": "Hadozee",
+      "source": "AAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 13,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "sourcePath": "race/70",
+      "mode": "climb",
+      "rawModeValue": true,
+      "reasonCode": "source-movement-clause-absent",
+      "fullNormalizedSnapshotSha256": "901c51d9f64f93a620b7348c55cacdccf20bacb663b24eeb54c95524c281a0ed",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "901c51d9f64f93a620b7348c55cacdccf20bacb663b24eeb54c95524c281a0ed",
+          "canonicalReboundSnapshotSha256": "901c51d9f64f93a620b7348c55cacdccf20bacb663b24eeb54c95524c281a0ed"
+        },
+        {
+          "form": "app",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "completeSnapshotSha256": "901c51d9f64f93a620b7348c55cacdccf20bacb663b24eeb54c95524c281a0ed",
+          "canonicalReboundSnapshotSha256": "901c51d9f64f93a620b7348c55cacdccf20bacb663b24eeb54c95524c281a0ed"
+        }
+      ]
+    }
+  ]
+}

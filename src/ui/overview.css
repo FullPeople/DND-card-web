@@ -272,3 +272,9 @@
 .paper .overview-sheet .ability-skill.skill-editing:has(.skill-extra-adjustment){grid-template-columns:10px 18px minmax(20px,1fr) 30px;gap:1px}
 .paper .overview-sheet :is(.ability-skill,.ability-save) input:is(.skill-extra-adjustment,.save-extra-adjustment){padding-inline:0}
 .paper .training-chips input{width:100%;min-width:0}
+
+/* Leave room for the full numeric glyph box in the fixed A4 vital row.
+   The retained Observant cell owns its separate two-label composition. */
+.overview-vitals .sheet-cell:not(.observant-passive-cell) .cell-heading{min-height:16px}
+.overview-vitals .sheet-cell:not(.observant-passive-cell) [data-stat]{line-height:26px}
+.overview-vitals .sheet-cell:not(.observant-passive-cell) [data-stat] small{line-height:1}

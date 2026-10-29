@@ -14,11 +14,11 @@ const feats={feat:[{name:'原创提升专长',ENG_name:'Authored Improvement',so
 const optional={optionalfeature:[{name:'原创祈唤记录',ENG_name:'Authored Invocation',source:'XPHB',featureType:['EI'],entries:['只保存学习记录。']}]};
 async function ready(page:Page,withFeatPrerequisite=false){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{authored:'class-authored.json'}}));
- await page.route('**/data/class/class-authored.json',route=>route.fulfill({json:data}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{authored:'class-authored.json'}}));
+ await page.context().route('**/data/class/class-authored.json',route=>route.fulfill({json:data}));
  const prerequisiteFeats=[{name:'原创起源前置',source:'XPHB',category:'O',entries:[]},{name:'原创前置后续',source:'XPHB',category:'G',prerequisite:[{level:4,feat:['原创起源前置|XPHB']}],entries:[]}];
- await page.route('**/data/feats.json',route=>route.fulfill({json:withFeatPrerequisite?{feat:[...feats.feat,...prerequisiteFeats]}:feats}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:optional}));
+ await page.context().route('**/data/feats.json',route=>route.fulfill({json:withFeatPrerequisite?{feat:[...feats.feat,...prerequisiteFeats]}:feats}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:optional}));
  await page.goto('/');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const entry:Entry={id:'authored-class-entry',kind:'class',name:cls.name,english:cls.ENG_name,source:'XPHB',edition:'2024',packId:'fixture',revision:'1',entries:[],raw:{...cls,_category:'class'}};
  const c=newCharacter();c.name='原创职业选择验收';c.automation=newAutomationState();

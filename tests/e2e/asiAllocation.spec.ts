@@ -14,9 +14,9 @@ async function ready(page:Page,source?:'PHB'|'TCE'){
  const data=source?legacyAsiAllocationData(source):asiAllocationData,card=source?legacyAsiAllocationFixture(source):asiAllocationFixture();
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{asi:'class-asi.json'}}));
- await page.route('**/data/class/class-asi.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
- await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{asi:'class-asi.json'}}));
+ await page.context().route('**/data/class/class-asi.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
+ await page.context().route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
  await page.goto('/card/?intro=0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'asi-authored.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(card)))});
  // Same-edition imports finish directly; only conflicts need review. Wait

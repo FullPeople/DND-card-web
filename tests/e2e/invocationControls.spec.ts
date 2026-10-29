@@ -1,5 +1,8 @@
+import assert from 'node:assert/strict';
+import {savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState';
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
+import {pointerChoiceDrop} from './pointerChoiceDrop';
 import {restoreAuthoredChoices} from './authoredChoicesFixture';
 import {invocationData} from '../fixtures/invocationData';
 import {newCharacter,type Entry} from '../../src/core/model';
@@ -12,17 +15,12 @@ async function mock(page:Page){
  const body=invocationData;
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{invocation:'class-invocation.json'}}));
- await page.route('**/data/class/class-invocation.json',route=>route.fulfill({json:{class:body.class,classFeature:body.classFeature}}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:body.optionalfeature}}));
- await page.route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-invocation.json'}}));
- await page.route('**/data/spells/spells-invocation.json',route=>route.fulfill({json:{spell:body.spell}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{invocation:'class-invocation.json'}}));
+ await page.context().route('**/data/class/class-invocation.json',route=>route.fulfill({json:{class:body.class,classFeature:body.classFeature}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:body.optionalfeature}}));
+ await page.context().route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-invocation.json'}}));
+ await page.context().route('**/data/spells/spells-invocation.json',route=>route.fulfill({json:{spell:body.spell}}));
 }
-async function saved(page:Page){return page.evaluate(async()=>{
- const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;
- const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
- try{const workspace=await new Promise<any>((resolve,reject)=>{const r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});return workspace.characters.find((c:any)=>c.id===workspace.activeId);}finally{db.close();}
-});}
 async function tab(page:Page,name:string){const control=page.getByRole('tab',{name,exact:true});await control.click();await expect(control).toHaveAttribute('aria-selected','true');return page.locator('.paper[data-active-sheet="true"]');}
 async function ready(page:Page,manualSpell=false){
  await mock(page);await page.goto('/card/?intro=0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
@@ -53,8 +51,7 @@ async function learning(page:Page){
 }
 async function drag(page:Page,workspace:Locator,name:string,index:number){
  if((page.viewportSize()?.width||0)<=760)await workspace.getByRole('button',{name:'打开候选资料',exact:true}).click();
- const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await expect(row).toBeVisible();await row.scrollIntoViewIfNeeded();const from=await row.boundingBox();await page.mouse.move(from!.x+25,from!.y+from!.height/2);await page.mouse.down();await page.mouse.move(from!.x+40,from!.y+from!.height/2,{steps:3});
- const slot=workspace.locator('.choice-slot').nth(index);await slot.scrollIntoViewIfNeeded();const to=await slot.boundingBox();await page.mouse.move(to!.x+to!.width/2,to!.y+to!.height/2,{steps:15});await page.mouse.up();await expect(page.locator('.pointer-ghost')).toHaveCount(0);
+ const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await pointerChoiceDrop(page,row,workspace.locator('.choice-slot').nth(index));
  // Narrow Wiki drops can leave the old workspace. Reopen the actual player
  // entrance before asserting instead of waiting on a detached former slot.
  if((page.viewportSize()?.width||0)<=760)workspace=await learning(page);
@@ -66,15 +63,15 @@ async function skill(page:Page,name:string,value:string,proficient:boolean){
 }
 async function freeCast(page:Page,name:string,owner?:string){
  const before=await saved(page),panel=await tab(page,'法术'),scope=owner?panel.locator('.source-spell-group').filter({has:page.locator('h4').filter({hasText:`来自${owner}`})}):panel,badge=scope.getByRole('button',{name:`${name}施放详情`,exact:true});await expect(badge).toContainText('免费 · 随意');await badge.click();const detail=page.getByRole('dialog',{name:`${name}施放详情`,exact:true});await expect(detail).toContainText('免费施法');await detail.getByRole('button',{name:'使用',exact:true}).click();await expect.poll(async()=>(await saved(page)).runtime.automationActions?.sequence||0).toBe((before.runtime.automationActions?.sequence||0)+1);
- const after=await saved(page);expect(after.runtime.resources).toEqual(before.runtime.resources);expect(after.runtime.automationActions.last.resourceId).toBeUndefined();await detail.getByRole('button',{name:'关闭施放详情',exact:true}).click();
+ const after=await saved(page);expect(after.runtime.resources).toEqual(before.runtime.resources);const receipt=after.runtime.automationActions?.last;assert(receipt,'Expected an observed source-cast receipt');expect(receipt.resourceId).toBeUndefined();await detail.getByRole('button',{name:'关闭施放详情',exact:true}).click();
 }
 
 test('learned skills update the real sheet, survive reopen and revoke without deleting manual skill intent',async({page},info)=>{
  test.setTimeout(90000);const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await ready(page);await skill(page,'欺瞒','+0',false);await skill(page,'游说','+0',false);await skill(page,'洞悉','+3',true);
  let workspace=await learning(page);await drag(page,workspace,'诱导话术',0);await closeLearning(page,workspace);await skill(page,'欺瞒','+3',true);await skill(page,'游说','+3',true);
- await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.entry.english==='Beguiling Influence'&&row.grantKey?.startsWith('choice:')).length).toBe(1);const learned=(await saved(page)).selections.find((row:any)=>row.entry.english==='Beguiling Influence'&&row.grantKey?.startsWith('choice:'));
+ await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.entry.english==='Beguiling Influence'&&row.grantKey?.startsWith('choice:')).length).toBe(1);const learned=(await saved(page)).selections.find((row:any)=>row.entry.english==='Beguiling Influence'&&row.grantKey?.startsWith('choice:'));assert(learned,'Expected the learned invocation owner');
  await page.reload();await skill(page,'欺瞒','+3',true);await skill(page,'游说','+3',true);expect((await saved(page)).selections.find((row:any)=>row.id===learned.id)).toBeDefined();
- await page.locator('.paper[data-active-sheet="true"]').getByRole('checkbox',{name:'欺瞒手动熟练',exact:true}).check();await expect.poll(async()=>(await saved(page)).proficiencies.deception).toBe(true);
+ await page.locator('.paper[data-active-sheet="true"]').getByRole('checkbox',{name:'欺瞒手动熟练',exact:true}).check();await expect.poll(async()=>(await saved(page)).proficiencies?.deception).toBe(true);
  workspace=await learning(page);await drag(page,workspace,'魔能视界',0);await closeLearning(page,workspace);await skill(page,'欺瞒','+3',true);await skill(page,'游说','+0',false);await skill(page,'洞悉','+3',true);await freeCast(page,'侦测魔法');
  workspace=await learning(page);await workspace.getByRole('button',{name:'移除魔能视界',exact:true}).click();await closeLearning(page,workspace);await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);
  workspace=await learning(page);await drag(page,workspace,'诱导话术',0);await closeLearning(page,workspace);await skill(page,'游说','+3',true);workspace=await learning(page);await workspace.getByRole('button',{name:'移除诱导话术',exact:true}).click();await closeLearning(page,workspace);await page.reload();await skill(page,'欺瞒','+3',true);await skill(page,'游说','+0',false);await skill(page,'洞悉','+3',true);
@@ -105,9 +102,9 @@ async function learnSpellInvocations(page:Page){
  // imported class snapshot and catalog records intentionally have different IDs.
  return spellInvocations.map(rule=>{
   const owners=card.selections.filter((row:any)=>row.entry.english===rule.english&&row.entry.source==='PHB'&&row.entry.edition==='2014'&&row.grantKey?.startsWith('choice:'));
-  expect(owners).toHaveLength(1);const owner=owners[0];expect(card.answers[owner.requirementId]).toContain(owner.entry.id);
+  expect(owners).toHaveLength(1);const owner=owners[0];assert(owner.requirementId,'Expected the saved choice ownership receipt');expect(card.answers[owner.requirementId]).toContain(owner.entry.id);
   const grants=card.selections.filter((row:any)=>row.parentId===owner.id&&row.entry.english===rule.spellEnglish&&row.grantKey?.startsWith('source-spell:'));
-  expect(grants).toHaveLength(1);const grant=grants[0];expect(card.spellSettings.special[grant.id].sourceGrant).toMatchObject({ownerId:owner.id,key:grant.grantKey,active:true,usage:'free'});
+  expect(grants).toHaveLength(1);const grant=grants[0];expect(card.spellSettings?.special?.[grant.id]?.sourceGrant).toMatchObject({ownerId:owner.id,key:grant.grantKey,active:true,usage:'free'});
   return {ownerId:owner.id,spellId:grant.id};
  });
 }
@@ -123,8 +120,8 @@ async function manualSpellCounter(page:Page){
  await expect.poll(async()=>(await saved(page)).runtime.resources['innate-spell:manual-silent-image']?.current).toBe(1);
 }
 async function source(page:Page,enabled:boolean){
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'PHB');
- const book=page.locator('.source-book').filter({has:page.locator('button[aria-label="设置来源 PHB"]')});await book.locator('input[type=checkbox]').first().setChecked(enabled);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ await setSiteSource(page,'PHB',enabled);
+ await expect.poll(async()=>(await saved(page)).profile.enabledSources.includes('PHB')).toBe(enabled);
 }
 function manualStatePreserved(card:any,before:any){
  expect(card.selections.find((row:any)=>row.id==='manual-silent-image')).toEqual(before.selections.find((row:any)=>row.id==='manual-silent-image'));
@@ -144,12 +141,12 @@ test('three learned at-will spells cast, reopen and revoke without adopting an i
  let workspace=await learning(page);await drag(page,workspace,'魔能视界',0);await closeLearning(page,workspace);
  await expect.poll(async()=>(await saved(page)).selections.some((row:any)=>row.id===ids[0].spellId)).toBe(false);
  let panel=await tab(page,'法术');await expect(panel.getByRole('button',{name:'动物交谈施放详情',exact:true})).toHaveCount(0);await freeCast(page,'侦测魔法','魔能视界');
- const replacementCard=await saved(page),replacementOwner=replacementCard.selections.find((row:any)=>row.entry.english==='Eldritch Sight'&&row.grantKey?.startsWith('choice:'));expect(replacementOwner).toBeDefined();
+ const replacementCard=await saved(page),replacementOwner=replacementCard.selections.find((row:any)=>row.entry.english==='Eldritch Sight'&&row.grantKey?.startsWith('choice:'));expect(replacementOwner).toBeDefined();assert(replacementOwner,'Expected the replacement invocation owner');
  const replacementTree=replacementCard.selections.filter((row:any)=>row.id===replacementOwner.id||row.parentId===replacementOwner.id);expect(replacementTree).toHaveLength(2);
  for(const name of ['千面之脸','迷雾幻影','魔能视界']){workspace=await learning(page);await workspace.getByRole('button',{name:`移除${name}`,exact:true}).click();await closeLearning(page,workspace);}
  await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);
  await page.reload();panel=await tab(page,'法术');await expect(panel.locator('[data-source-spell="true"]')).toHaveCount(0);await expect(panel.locator('[data-source-cantrip-group="manual"]').getByRole('button',{name:'无声幻影施放详情',exact:true})).toContainText('免费 1/3');
- const after=await saved(page);
+ const after=await saved(page);assert(after.classChoiceArchive,'Expected retained choice archives');
  // Archival intentionally retains old special-spell settings for restoration.
  // Authorization requires an active selection, not that preserved config flag.
  for(const id of ids){
@@ -181,15 +178,15 @@ test('three at-will grants suspend with their source and restore exact ownership
  // not the disabled unfinished-choice chip used by the older one-slot case.
  const readonlyRecords=readonly.locator('[data-class-choice="warlock:class-optional:0"]');for(const row of spellInvocations)await expect(readonlyRecords.getByRole('button',{name:row.name,exact:true})).toBeVisible();
  await expect(readonlyRecords.locator('[data-choice-id="warlock:class-optional:0"]:not([disabled])')).toHaveCount(0);
- const readonlyBefore=await saved(other),spells=await tab(other,'法术');await spells.getByRole('button',{name:'无声幻影施放详情',exact:true}).click();const detail=other.getByRole('dialog',{name:'无声幻影施放详情',exact:true});await detail.getByRole('button',{name:'使用',exact:true}).click();await expect(other.locator('.suite-toast')).toContainText('此标签页为只读');await expect(detail.locator('.spell-action-feedback')).not.toHaveAttribute('data-phase','applied');expect(await saved(other)).toEqual(readonlyBefore);await other.close();
+ const readonlyBefore=await saved(other),spells=await tab(other,'法术');await spells.getByRole('button',{name:'无声幻影施放详情',exact:true}).click();const detail=other.getByRole('dialog',{name:'无声幻影施放详情',exact:true});await expect(detail.getByRole('button',{name:'使用',exact:true})).toBeDisabled();await expect(detail.locator('.spell-action-feedback')).toHaveCount(0);expect(await saved(other)).toEqual(readonlyBefore);await other.close();
  await source(page,false);await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);
  let panel=await tab(page,'特性');await expect(panel.locator('[data-class-choice="warlock:class-optional:0"]')).toContainText('来源未启用，原记录保留');
  await page.reload();panel=await tab(page,'法术');for(const row of spellInvocations)await expect(panel.getByRole('button',{name:`${row.spell}施放详情`,exact:true})).toHaveCount(0);
  const suspended=await saved(page);expect(suspended.answers['warlock:class-optional:0']).toEqual(answers);expect(suspended.runtime.resources).toEqual(active.runtime.resources);expect(suspended.runtime.automationActions).toEqual(active.runtime.automationActions);
- for(const id of ids)expect(suspended.classChoiceArchive[id.ownerId].selections.some((row:any)=>row.id===id.spellId)).toBe(true);
+ assert(suspended.classChoiceArchive,'Expected the suspended grant archives');for(const id of ids)expect(suspended.classChoiceArchive[id.ownerId].selections.some((row:any)=>row.id===id.spellId)).toBe(true);
  await page.screenshot({path:info.outputPath('invocation-three-spells-source-suspended.png'),fullPage:true});
  await source(page,true);await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).length).toBe(3);
  await page.reload();for(const row of spellInvocations)await freeCast(page,row.spell,row.name);
- const restored=await saved(page);expect(restored.answers['warlock:class-optional:0']).toEqual(answers);for(const id of ids){expect(restored.selections.some((row:any)=>row.id===id.ownerId)).toBe(true);expect(restored.selections.some((row:any)=>row.id===id.spellId)).toBe(true);expect(restored.spellSettings.special[id.spellId].sourceGrant).toMatchObject({ownerId:id.ownerId,active:true,usage:'free'});}
+ const restored=await saved(page);expect(restored.answers['warlock:class-optional:0']).toEqual(answers);for(const id of ids){expect(restored.selections.some((row:any)=>row.id===id.ownerId)).toBe(true);expect(restored.selections.some((row:any)=>row.id===id.spellId)).toBe(true);expect(restored.spellSettings?.special?.[id.spellId]?.sourceGrant).toMatchObject({ownerId:id.ownerId,active:true,usage:'free'});}
  expect(restored.runtime.resources).toEqual(active.runtime.resources);expect(restored.runtime.hp).toBe(active.runtime.hp);expect(restored.notes).toBe(active.notes);expect(errors).toEqual([]);
 });

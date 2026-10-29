@@ -7,10 +7,10 @@ import {exportCharacter} from '../../src/core/export';
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:infusionData.class,classFeature:infusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:infusionData.class,classFeature:infusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
  const entries=returningWeaponFixture().entries.filter(entry=>entry.raw._category==='optionalfeature').map(entry=>entry.raw);
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:entries},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:entries},headers:{'access-control-allow-origin':'*'}}));
 }
 async function saved(page:Page){return page.evaluate(async()=>{
  const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;

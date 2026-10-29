@@ -19,13 +19,13 @@ test('separate palettes persist UI, Wiki and per-component card colors; right-cl
 });
 
 test('spell tooltip omits learners while preserving spell facts and body',async({page})=>{
- await mockSource(page);await page.route('**/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'测试法师',source:'XPHB',hd:{faces:6},entries:['可以查阅 {@spell 微光术|XPHB}。']}]}}));await suppressAnnouncement(page);await page.goto('/card/?intro=0');await expect(page.locator('.paper')).toBeVisible();
+ await mockSource(page);await page.context().route('**/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'测试法师',source:'XPHB',hd:{faces:6},entries:['可以查阅 {@spell 微光术|XPHB}。']}]}}));await suppressAnnouncement(page);await page.goto('/card/?intro=0');await expect(page.locator('.paper')).toBeVisible();
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'职业',exact:true}).click();await page.locator('.catalog-row').filter({hasText:'测试法师'}).first().click();
  const reference=page.locator('.entry-detail .inline-reference').filter({hasText:'微光术'}).first();await reference.hover();const tooltip=page.getByRole('tooltip');await expect(tooltip).toBeVisible();await expect(tooltip).toContainText('为测试而创作的一点微光');await expect(tooltip.locator('.spell-learners')).toHaveCount(0);await expect(tooltip).not.toContainText('谁能学');
 });
 
 test('Wiki table colors survive night mode and reload',async({page})=>{
- await mockSource(page);await suppressAnnouncement(page);await page.route('**/data/spells/spells-test.json',route=>route.fulfill({headers:{'access-control-allow-origin':'*'},json:{spell:[{name:'微光术',ENG_name:'Test Glow',source:'XPHB',level:0,entries:[{type:'table',caption:'测试配色表',colLabels:['条目','数值'],rows:[['一','1'],['二','2']]}]}]}}));
+ await mockSource(page);await suppressAnnouncement(page);await page.context().route('**/data/spells/spells-test.json',route=>route.fulfill({headers:{'access-control-allow-origin':'*'},json:{spell:[{name:'微光术',ENG_name:'Test Glow',source:'XPHB',level:0,entries:[{type:'table',caption:'测试配色表',colLabels:['条目','数值'],rows:[['一','1'],['二','2']]}]}]}}));
  await page.goto('/card/?intro=0');await expect(page.locator('.paper')).toBeVisible();await page.getByRole('button',{name:'调色盘',exact:true}).click();const drawer=page.getByRole('dialog',{name:'调色盘',exact:true});await drawer.getByRole('button',{name:'Wiki',exact:true}).click();
  for(const [label,value] of [['表头底色','#778899'],['表格底色','#BBDDCC'],['表格交替行','#CCDDCC']]){const field=drawer.getByRole('textbox',{name:label+'颜色代码',exact:true});await field.fill(value);await field.blur();}await drawer.getByRole('button',{name:'关闭调色盘'}).click();
  await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'法术',exact:true}).click();await page.locator('.catalog-row').filter({hasText:'微光术'}).first().click();const table=page.locator('.entry-detail .rules-prose table').first();await expect(table).toBeVisible();

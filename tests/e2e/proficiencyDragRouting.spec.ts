@@ -6,8 +6,8 @@ import {exportCharacter} from '../../src/core/export';
 const name='原创校准器';
 async function ready(page:Page,editing=true){
  await mockSource(page);await suppressAnnouncement(page);
- await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:[{name,ENG_name:'Original Calibrator',source:'XPHB',type:'AT',weight:1,value:100,entries:['原创工具熟练拖拽验收。']}]}}));
- await page.route('**/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'原创技师',source:'XPHB',hd:{faces:8},startingProficiencies:{tools:[`{@item ${name}|XPHB}`]},startingEquipment:{entries:[`{@item ${name}|XPHB}`]},entries:['用于区分熟练与真实装备来源。']}]}}));
+ await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:[{name,ENG_name:'Original Calibrator',source:'XPHB',type:'AT',weight:1,value:100,entries:['原创工具熟练拖拽验收。']}]}}));
+ await page.context().route('**/data/class/class-test.json',route=>route.fulfill({json:{class:[{name:'原创技师',source:'XPHB',hd:{faces:8},startingProficiencies:{tools:[`{@item ${name}|XPHB}`]},startingEquipment:{entries:[`{@item ${name}|XPHB}`]},entries:['用于区分熟练与真实装备来源。']}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  const c=newCharacter();c.name='熟练拖拽验收';c.training={tools:'',armor:'',weapons:'',languages:''};
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'proficiency-drag.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});

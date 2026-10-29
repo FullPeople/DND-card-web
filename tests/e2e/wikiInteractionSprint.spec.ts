@@ -16,7 +16,7 @@ test('cross-category navigation replaces the old facts and body without leaving 
 });
 
 test('global search keeps typing focus, wraps to the last virtual result and opens it with Enter',async({page})=>{
- await page.route('**/data/items.json',route=>route.fulfill({json:{item:Array.from({length:1000},(_,index)=>({name:`检索物品${String(index).padStart(4,'0')}`,ENG_name:`Lookup Item ${index}`,source:'XPHB',entries:['原创搜索键盘验收正文。']}))}}));
+ await page.context().route('**/data/items.json',route=>route.fulfill({json:{item:Array.from({length:1000},(_,index)=>({name:`检索物品${String(index).padStart(4,'0')}`,ENG_name:`Lookup Item ${index}`,source:'XPHB',entries:['原创搜索键盘验收正文。']}))}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  const input=page.getByRole('textbox',{name:'搜索规则资料',exact:true}),results=page.getByRole('region',{name:'全局搜索结果'});
  await input.fill('检索物品');await expect(results.locator('.virtual-list')).toHaveAttribute('data-total-rows','1000');await expect(results).toHaveAttribute('aria-busy','false');
@@ -31,7 +31,7 @@ test('global search keeps typing focus, wraps to the last virtual result and ope
 });
 
 test('filter choices survive closing, exclusion and category changes without changing catalog data',async({page})=>{
- await page.route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:[{name:'初阶检索术',source:'XPHB',level:1,school:'V',entries:['原创一环验收正文。']},{name:'高阶检索术',source:'XPHB',level:3,school:'A',entries:['原创三环验收正文。']}]}}));
+ await page.context().route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:[{name:'初阶检索术',source:'XPHB',level:1,school:'V',entries:['原创一环验收正文。']},{name:'高阶检索术',source:'XPHB',level:3,school:'A',entries:['原创三环验收正文。']}]}}));
  await page.goto('/?tab=spell&edition=all');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await expect(page.locator('.catalog-list')).toHaveAttribute('data-total-rows','2');
  await page.getByRole('button',{name:'筛选',exact:true}).click();const dialog=page.getByRole('dialog',{name:'筛选规则资料'});
  await dialog.getByRole('navigation',{name:'筛选维度'}).getByRole('button',{name:/环阶/}).click();await dialog.getByRole('checkbox',{name:'1 级 / 环'}).check();await expect(dialog.locator('header')).toContainText('1 / 2 条');

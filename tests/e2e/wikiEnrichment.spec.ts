@@ -12,8 +12,8 @@ async function readingSource(page:Page){
   'book/book-paper.json':{bookData:[{id:'PAPER',data:[{type:'section',name:'开篇',entries:['原创第一章。阅读 {@spell 微光术|XPHB}。',{type:'image',href:{type:'internal',path:'authored-paper.svg'}}]},{type:'section',name:'第二章',entries:['原创第二章。',{type:'table',colLabels:['行','内容'],rows:[['1','原创表格']]}]}]}]},
   'adventures.json':{adventure:[{id:'TRIP',name:'纸页旅行',contents:[{name:'启程'}]}]},'adventure/adventure-trip.json':{adventureData:[{id:'TRIP',data:[{type:'section',name:'启程',entries:['原创冒险章节。']}]}]}
  };
- await page.route('https://5e.kiwee.top/data/**',async route=>{const path=new URL(route.request().url()).pathname.replace('/data/','');if(Object.hasOwn(files,path))await route.fulfill({json:files[path],headers:{'access-control-allow-origin':'*'}});else await route.fallback();});
- await page.route('https://5e.kiwee.top/img/authored-paper.svg',route=>route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="#ccc"/></svg>'}));
+ await page.context().route('https://5e.kiwee.top/data/**',async route=>{const path=new URL(route.request().url()).pathname.replace('/data/','');if(Object.hasOwn(files,path))await route.fulfill({json:files[path],headers:{'access-control-allow-origin':'*'}});else await route.fallback();});
+ await page.context().route('https://5e.kiwee.top/img/authored-paper.svg',route=>route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="#ccc"/></svg>'}));
 }
 test.beforeEach(async({page})=>readingSource(page));
 
@@ -46,7 +46,7 @@ test('books load on demand, share chapters, restore navigation and keep pictures
 
 test('failed chapters can be retried without clearing the reading selection',async({page})=>{
  let failed=true;
- await page.route('https://5e.kiwee.top/data/book/book-paper.json',async route=>{if(failed)await route.fulfill({status:404,body:'missing'});else await route.fallback();});
+ await page.context().route('https://5e.kiwee.top/data/book/book-paper.json',async route=>{if(failed)await route.fulfill({status:404,body:'missing'});else await route.fallback();});
  await page.goto('/?reading=book&book=PAPER&chapter=0');await expect(page.getByRole('alert')).toContainText('HTTP 404');failed=false;await page.getByRole('button',{name:'重试读取'}).click();await expect(page.getByRole('region',{name:'章节正文'})).toContainText('原创第一章');
  await page.getByRole('navigation',{name:'阅读内容'}).getByRole('button',{name:'规则条目'}).click();await expect(page.locator('.catalog-row').first()).toBeVisible();await page.getByRole('navigation',{name:'阅读内容'}).getByRole('button',{name:'书籍'}).click();await expect(page.getByRole('region',{name:'章节正文'})).toContainText('原创第一章');
 });

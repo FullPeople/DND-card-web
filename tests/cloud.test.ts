@@ -1,3 +1,4 @@
+import {loopbackFetch as fetch,registerLoopbackServer} from './helpers/loopbackHttp';
 import {afterEach,describe,expect,it} from 'vitest';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -21,7 +22,7 @@ async function listenForFetch(server:ReturnType<typeof createCloudServer>){
     const ready=()=>{server.off('error',failed);resolve();};
     const failed=(error:NodeJS.ErrnoException)=>{server.off('listening',ready);reject(error);};
     server.once('error',failed);server.once('listening',ready);server.listen(randomInt(49152,65536),'127.0.0.1');
-   });return;
+   });registerLoopbackServer(server);return;
   }catch(error){if(!['EADDRINUSE','EACCES'].includes((error as NodeJS.ErrnoException).code||''))throw error;}
  }
  throw Error('Unable to bind a fetch-compatible loopback test port');

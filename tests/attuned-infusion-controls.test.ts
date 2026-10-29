@@ -1,6 +1,9 @@
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {it,expect,vi} from 'vitest';
+// Node SSR needs an authored browser URL for the real authority module.
+// Keep workbench/room/permission implementations intact; no mocked access.
+vi.hoisted(()=>vi.stubGlobal('location',new URL('https://attuned-controls.invalid/')));
 import {InfusionControl} from '../src/ui/InfusionControl';
 import {AutomationPanel} from '../src/ui/AutomationPanel';
 import {evaluate} from '../src/core/engine';

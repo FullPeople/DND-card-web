@@ -4,7 +4,7 @@ import {mockSource,suppressAnnouncement} from './fixtures';
 async function ready(page:Page,preferences?:Record<string,string>){
   await mockSource(page,{displayMode:'default'});await suppressAnnouncement(page);
   if(preferences)await page.addInitScript(values=>{if(!sessionStorage.getItem('wiki232-seeded')){for(const [key,value] of Object.entries(values))localStorage.setItem(key,value);sessionStorage.setItem('wiki232-seeded','true');}},preferences);
-  await page.route('**/data/items.json',route=>route.fulfill({json:{item:Array.from({length:160},(_,i)=>({name:`布局物品${String(i).padStart(3,'0')}`,source:'XPHB',type:'G',entries:Array.from({length:90},(_,n)=>`布局正文第${n+1}段。这是原创布局验收内容，用于验证各阅读区域的独立滚动。`)}))}}));
+  await page.context().route('**/data/items.json',route=>route.fulfill({json:{item:Array.from({length:160},(_,i)=>({name:`布局物品${String(i).padStart(3,'0')}`,source:'XPHB',type:'G',entries:Array.from({length:90},(_,n)=>`布局正文第${n+1}段。这是原创布局验收内容，用于验证各阅读区域的独立滚动。`)}))}}));
   await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
   await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备',exact:true}).click();
   await page.locator('.catalog-row').filter({hasText:'布局物品000'}).click();

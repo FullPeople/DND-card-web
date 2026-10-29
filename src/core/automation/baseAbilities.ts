@@ -1,6 +1,6 @@
 import {ABILITIES,type Ability,type Character,type Selection,type Issue} from '../model';
 import {planRacialAbilities} from '../racialAbilities';
-import {reviewedArmorFeatIdentity,reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity} from './reviewedFeatIdentity';
+import {reviewedArmorFeatIdentity,reviewedWeaponMasterIdentity,reviewedSkilledIdentity,reviewedLinguistIdentity,reviewedObservantIdentity,reviewedAlertIdentity} from './reviewedFeatIdentity';
 import {invocationSkillScope} from './invocations';
 
 /** The pre-advancement layer is shared with training/prerequisite projections.
@@ -9,7 +9,7 @@ export function baseAbilityScores(c:Character,active:Selection[]){
  const abilities={...c.abilities},trace=Object.fromEntries(ABILITIES.map(a=>[a,[`基础 ${abilities[a]}`]])) as Record<Ability,string[]>,issues:Issue[]=[];
  for(const selection of active){
   const e=selection.entry,origin=`${e.name} · ${e.source}`;
-  if(reviewedArmorFeatIdentity(e)||reviewedWeaponMasterIdentity(e)||reviewedSkilledIdentity(e)||reviewedLinguistIdentity(e))continue;
+  if(reviewedArmorFeatIdentity(e)||reviewedWeaponMasterIdentity(e)||reviewedSkilledIdentity(e)||reviewedLinguistIdentity(e)||reviewedObservantIdentity(e)||reviewedAlertIdentity(e))continue;
   if(e.kind==='race'){
    const racial=planRacialAbilities(c,selection);issues.push(...racial.issues);
    for(const a of ABILITIES){abilities[a]+=racial.bonuses[a]||0;if(racial.trace[a])trace[a].push(...racial.trace[a]!);}

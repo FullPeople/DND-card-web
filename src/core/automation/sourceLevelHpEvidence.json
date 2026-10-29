@@ -1,0 +1,1620 @@
+{
+  "schemaVersion": 1,
+  "scope": "source-owned-per-level-maximum-hp-only-explicit-current-acknowledgement-required",
+  "inputs": [
+    {
+      "key": "races",
+      "url": "https://5e.kiwee.top/data/races.json",
+      "bytes": 451902,
+      "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712"
+    },
+    {
+      "key": "sorcerer",
+      "url": "https://5e.kiwee.top/data/class/class-sorcerer.json",
+      "bytes": 140077,
+      "sha256": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670"
+    }
+  ],
+  "sourceCandidateCounts": {
+    "owners": 5,
+    "racialOwners": 3,
+    "nativeSubclassOwners": 2
+  },
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "counts": {
+    "actualOwners": 5,
+    "verifiedOwnerRouteProofs": 10,
+    "distinctOwnerSnapshotForms": 5,
+    "supportingAndOwnerComponents": 12,
+    "verifiedComponentRouteProofs": 24,
+    "distinctComponentSnapshotForms": 12,
+    "heldOwners": 0
+  },
+  "normalization": {
+    "canonical": "each-complete-original-through-installed-normalizeCatalogData",
+    "app": "independent-each-complete-original-normalize-then-real-hydrateSpellLookup",
+    "transportRevision": "exact-single-input-sha256",
+    "noPayloadRepair": true
+  },
+  "policy": {
+    "operation": "maximum-hp-plus-one-times-qualified-current-level",
+    "acknowledgementRequired": true,
+    "manualFinalHpOverride": "hold-new-contribution-preserve-existing-Tough-and-offset-order",
+    "currentAndTemporaryHp": "never-written",
+    "resources": "never-written-or-refilled",
+    "racialLevel": "valid-current-character-class-level-total",
+    "subclassLevel": "exact-native-owning-Sorcerer-level-only",
+    "crossEditionAdaptedSubclass": "excluded",
+    "draconicAc": "manual-not-part-of-this-family",
+    "manualBasis": "baseHp-sheetBonuses.hp-all-hp-adjustment-records",
+    "manualMechanisms": [
+      "current-hp",
+      "temporary-hp",
+      "healing",
+      "dice-rolls",
+      "resource-refill",
+      "draconic-ac",
+      "other-effects"
+    ]
+  },
+  "rules": [
+    {
+      "path": "race/34",
+      "inputKey": "races",
+      "id": "kiwee:race:xphb:dwarf::::::",
+      "kind": "race",
+      "name": "矮人",
+      "english": "Dwarf",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 188,
+      "category": "race",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "completeSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "canonicalReboundSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "completeSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "canonicalReboundSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3"
+        }
+      ],
+      "rawHeader": {
+        "name": "矮人",
+        "ENG_name": "Dwarf",
+        "source": "XPHB",
+        "page": 188,
+        "edition": "one"
+      },
+      "rawHeaderSha256": "7a09d6922889f878bf4125da4fb12b73b7978af3d9a5c0428580500ef09704cc",
+      "rawSha256": "a334dc252c549c6a78c4e4878e77f722fb20ee93ec1a13ea0399151853270e96",
+      "requiredSources": [
+        "XPHB"
+      ],
+      "key": "race/34",
+      "levelBasis": "character-level",
+      "perLevel": 1,
+      "minLevel": 1,
+      "initialAtMin": 1,
+      "clauses": [
+        {
+          "path": "race/34/entries/2/entries/0",
+          "expectedCompleteEntryPath": "raw/entries/2/entries/0",
+          "utf8Bytes": 94,
+          "sha256": "5509e9b04191c819dde6b2dd0ac05146cd34d8f5d3b04f16780b3dce0aa3ff1b",
+          "role": "maximum-hp"
+        }
+      ],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "path": "race/35",
+      "inputKey": "races",
+      "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+      "kind": "race",
+      "name": "矮人 (卡拉德许)",
+      "english": "Dwarf (Kaladesh)",
+      "source": "PSK",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 19,
+      "category": "race",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "completeSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "canonicalReboundSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "completeSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "canonicalReboundSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9"
+        }
+      ],
+      "rawHeader": {
+        "name": "矮人 (卡拉德许)",
+        "ENG_name": "Dwarf (Kaladesh)",
+        "source": "PSK",
+        "page": 19
+      },
+      "rawHeaderSha256": "cdcb7b2cab964f748ef5561356d7d809d4d01f088b0e66e6163458b43dbb120c",
+      "rawSha256": "29897be4c84c2fd3e2118aa04403e838c6a7ede0509fe0833c0e0362282fbed1",
+      "requiredSources": [
+        "PSK"
+      ],
+      "key": "race/35",
+      "levelBasis": "character-level",
+      "perLevel": 1,
+      "minLevel": 1,
+      "initialAtMin": 1,
+      "clauses": [
+        {
+          "path": "race/35/entries/6/entries/0",
+          "expectedCompleteEntryPath": "raw/entries/6/entries/0",
+          "utf8Bytes": 86,
+          "sha256": "c09eecc7e8b4a7c99a1f00fa2e297baef2bbd8d42c9a49c7b2511d4b5eb0f843",
+          "role": "maximum-hp"
+        }
+      ],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "path": "subrace/10",
+      "inputKey": "races",
+      "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+      "kind": "race",
+      "name": "矮人（丘陵）",
+      "english": "Dwarf (Hill)",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 20,
+      "category": "subrace",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": "矮人",
+      "raceSource": "PHB",
+      "parentName": "矮人",
+      "parentSource": "PHB",
+      "subraceName": "丘陵",
+      "shortName": null,
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "completeSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "canonicalReboundSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "completeSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "canonicalReboundSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696"
+        }
+      ],
+      "rawHeader": {
+        "name": "丘陵",
+        "ENG_name": "Hill",
+        "source": "PHB",
+        "page": 20,
+        "raceName": "矮人",
+        "raceSource": "PHB"
+      },
+      "rawHeaderSha256": "7078cb67ab3458802725bb6f51a9a0994c46a0f518ffe593bce15c3a038ae396",
+      "rawSha256": "0acbc519d9dc3ddb823c3b9429470da70db59a05aae4c749da7cc27bfcb2b0a3",
+      "requiredSources": [
+        "PHB"
+      ],
+      "key": "subrace/10",
+      "levelBasis": "character-level",
+      "perLevel": 1,
+      "minLevel": 1,
+      "initialAtMin": 1,
+      "clauses": [
+        {
+          "path": "subrace/10/entries/0/entries/0",
+          "expectedCompleteEntryPath": "raw/entries/9/entries/0",
+          "utf8Bytes": 86,
+          "sha256": "c09eecc7e8b4a7c99a1f00fa2e297baef2bbd8d42c9a49c7b2511d4b5eb0f843",
+          "role": "maximum-hp"
+        }
+      ],
+      "inheritance": {
+        "parent": {
+          "path": "race/33",
+          "inputKey": "races",
+          "id": "kiwee:race:phb:dwarf::::::",
+          "kind": "race",
+          "name": "矮人",
+          "english": "Dwarf",
+          "source": "PHB",
+          "edition": "2014",
+          "packId": "kiwee",
+          "page": 18,
+          "category": "race",
+          "className": null,
+          "classSource": null,
+          "subclassShortName": null,
+          "subclassSource": null,
+          "level": null,
+          "classEdition": null,
+          "raceName": null,
+          "raceSource": null,
+          "parentName": null,
+          "parentSource": null,
+          "subraceName": null,
+          "shortName": null,
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+              "completeSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+              "canonicalReboundSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+              "completeSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+              "canonicalReboundSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            }
+          ],
+          "rawHeader": {
+            "name": "矮人",
+            "ENG_name": "Dwarf",
+            "source": "PHB",
+            "page": 18
+          },
+          "rawHeaderSha256": "9a2dae46d4513c859aaa6a330c8e5b61be3b463661e29433e77469717cd481ce",
+          "rawSha256": "6e51d570accc43fb4d42da125c6268a80c1676b7af17f80b52ec0c16d2f5d5c0",
+          "requiredSources": [
+            "PHB"
+          ]
+        },
+        "separatelySelectedParentRequired": false,
+        "normalizedChildClausePath": "raw/entries/9/entries/0"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "path": "subclass/0",
+      "inputKey": "sorcerer",
+      "id": "kiwee:subclass:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB::::",
+      "kind": "subclass",
+      "name": "龙族血脉",
+      "english": "Draconic Bloodline",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 102,
+      "category": "subclass",
+      "className": "术士",
+      "classSource": "PHB",
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": "2014",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": "龙族血脉",
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:subclass:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "completeSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "canonicalReboundSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:subclass:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "completeSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "canonicalReboundSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族血脉",
+        "ENG_name": "Draconic Bloodline",
+        "source": "PHB",
+        "page": 102,
+        "edition": "classic",
+        "className": "术士",
+        "classSource": "PHB",
+        "shortName": "龙族血脉"
+      },
+      "rawHeaderSha256": "8b6fc99a938233fb042b8ee47ccfb1c997f5cc5d910ee876c017bc0d150631ba",
+      "rawSha256": "133df4e161c9b8aadd277ced39a8cff7f8e8c30f58399314cc3ad0372f0de36a",
+      "requiredSources": [
+        "PHB"
+      ],
+      "key": "subclass/0",
+      "levelBasis": "owning-class-level",
+      "perLevel": 1,
+      "minLevel": 1,
+      "initialAtMin": 1,
+      "clauses": [
+        {
+          "path": "subclassFeature/8/entries/0",
+          "expectedCompleteEntryPath": "raw/entries/0",
+          "utf8Bytes": 195,
+          "sha256": "12a20b945e49cadd4fb074e2b9abc00ae7874bd1470e605b3f0a6adf710b7aff",
+          "role": "maximum-hp"
+        },
+        {
+          "path": "subclassFeature/8/entries/1",
+          "expectedCompleteEntryPath": "raw/entries/1",
+          "utf8Bytes": 121,
+          "sha256": "8dbab7775870a7bd5b3476feafa5cb576466125643457a5b9d1b5daeec4c38ab",
+          "role": "manual-ac"
+        }
+      ],
+      "owner": {
+        "path": "class/0",
+        "inputKey": "sorcerer",
+        "id": "kiwee:class:phb:sorcerer::::::",
+        "kind": "class",
+        "name": "术士",
+        "english": "Sorcerer",
+        "source": "PHB",
+        "edition": "2014",
+        "packId": "kiwee",
+        "page": 99,
+        "category": "class",
+        "className": null,
+        "classSource": null,
+        "subclassShortName": null,
+        "subclassSource": null,
+        "level": null,
+        "classEdition": null,
+        "raceName": null,
+        "raceSource": null,
+        "parentName": null,
+        "parentSource": null,
+        "subraceName": null,
+        "shortName": null,
+        "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+        "fullNormalizedSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:class:phb:sorcerer::::::",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+            "completeSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+            "canonicalReboundSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:class:phb:sorcerer::::::",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+            "completeSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+            "canonicalReboundSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d"
+          }
+        ],
+        "rawHeader": {
+          "name": "术士",
+          "ENG_name": "Sorcerer",
+          "source": "PHB",
+          "page": 99,
+          "edition": "classic"
+        },
+        "rawHeaderSha256": "dd9253f8226363ae9ab4f283382928b5d81845ded84defb269c91d93db69e566",
+        "rawSha256": "5075daac63b917557904e4fb89bfcdab0ffb0c8967ef9fc6d70395f730c7e5e2",
+        "requiredSources": [
+          "PHB"
+        ]
+      },
+      "topFeature": {
+        "path": "subclassFeature/7",
+        "inputKey": "sorcerer",
+        "id": "kiwee:feature:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+        "kind": "feature",
+        "name": "龙族血脉",
+        "english": "Draconic Bloodline",
+        "source": "PHB",
+        "edition": "2014",
+        "packId": "kiwee",
+        "page": 102,
+        "category": "subclassFeature",
+        "className": "术士",
+        "classSource": "PHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "PHB",
+        "level": 1,
+        "classEdition": "2014",
+        "raceName": null,
+        "raceSource": null,
+        "parentName": null,
+        "parentSource": null,
+        "subraceName": null,
+        "shortName": null,
+        "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+        "fullNormalizedSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:feature:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+            "completeSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+            "canonicalReboundSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:feature:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+            "completeSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+            "canonicalReboundSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44"
+          }
+        ],
+        "rawHeader": {
+          "name": "龙族血脉",
+          "ENG_name": "Draconic Bloodline",
+          "source": "PHB",
+          "page": 102,
+          "className": "术士",
+          "classSource": "PHB",
+          "subclassShortName": "龙族血脉",
+          "subclassSource": "PHB",
+          "level": 1
+        },
+        "rawHeaderSha256": "ef254d490726881efa6a08a1bd100992ef1fcf32e746825e3d462fbdac21b4a5",
+        "rawSha256": "136d843bfbb6677414fb034aa64659e00e810b94662fe6b66de659c003dbc6bf",
+        "requiredSources": [
+          "PHB"
+        ]
+      },
+      "hpFeature": {
+        "path": "subclassFeature/8",
+        "inputKey": "sorcerer",
+        "id": "kiwee:feature:phb:draconic%20resilience:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+        "kind": "feature",
+        "name": "龙族体魄",
+        "english": "Draconic Resilience",
+        "source": "PHB",
+        "edition": "2014",
+        "packId": "kiwee",
+        "page": 102,
+        "category": "subclassFeature",
+        "className": "术士",
+        "classSource": "PHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "PHB",
+        "level": 1,
+        "classEdition": "2014",
+        "raceName": null,
+        "raceSource": null,
+        "parentName": null,
+        "parentSource": null,
+        "subraceName": null,
+        "shortName": null,
+        "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+        "fullNormalizedSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:feature:phb:draconic%20resilience:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+            "completeSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+            "canonicalReboundSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:feature:phb:draconic%20resilience:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+            "completeSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+            "canonicalReboundSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334"
+          }
+        ],
+        "rawHeader": {
+          "name": "龙族体魄",
+          "ENG_name": "Draconic Resilience",
+          "source": "PHB",
+          "page": 102,
+          "className": "术士",
+          "classSource": "PHB",
+          "subclassShortName": "龙族血脉",
+          "subclassSource": "PHB",
+          "level": 1
+        },
+        "rawHeaderSha256": "41cd7a381339bdd4784f267d304a6e5e605b62f11a5ea08eb9b74f9fed32b901",
+        "rawSha256": "b8261481b5e58124385aca2b3e5463736d738ccdd50f0287772fc7561bb35eff",
+        "requiredSources": [
+          "PHB"
+        ]
+      },
+      "classProgression": {
+        "path": "class/0/classFeatures/1",
+        "ref": "术法起源|术士||1"
+      },
+      "references": [
+        {
+          "path": "subclass/0/subclassFeatures/0",
+          "ref": "龙族血脉|术士||龙族血脉||1",
+          "utf8Bytes": 36,
+          "sha256": "41955b2e28f573cbe8d4ef2722207ca6a39c2463f94393a807c2dce9d37917b4",
+          "grantKey": "ref:龙族血脉|术士||龙族血脉||1"
+        },
+        {
+          "path": "subclassFeature/7/entries/2/subclassFeature",
+          "ref": "龙族体魄|术士||龙族血脉||1",
+          "utf8Bytes": 36,
+          "sha256": "7e05c3e677878b66163c3ebf355c3ccf7f4042c7f8390af465cb0e0ff3831365",
+          "grantKey": "ref:龙族体魄|术士||龙族血脉||1"
+        }
+      ],
+      "nestedHpFeatureIsNotDraggedAuthority": true,
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "path": "subclass/20",
+      "inputKey": "sorcerer",
+      "id": "kiwee:subclass:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB::::",
+      "kind": "subclass",
+      "name": "龙族术法",
+      "english": "Draconic Sorcery",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 148,
+      "category": "subclass",
+      "className": "术士",
+      "classSource": "XPHB",
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": "2024",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": "龙族血脉",
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:subclass:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "completeSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "canonicalReboundSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:subclass:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "completeSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "canonicalReboundSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族术法",
+        "ENG_name": "Draconic Sorcery",
+        "source": "XPHB",
+        "page": 148,
+        "edition": "one",
+        "className": "术士",
+        "classSource": "XPHB",
+        "shortName": "龙族血脉"
+      },
+      "rawHeaderSha256": "6cc697338cc0d2a25d6e06d69512355f1342c75888c8e47c3fc6e5376b5e431e",
+      "rawSha256": "83536f94389c556b4069fac135dfb89521c23fdf81f0fd48ee5b08cd6459a17f",
+      "requiredSources": [
+        "XPHB"
+      ],
+      "key": "subclass/20",
+      "levelBasis": "owning-class-level",
+      "perLevel": 1,
+      "minLevel": 3,
+      "initialAtMin": 3,
+      "clauses": [
+        {
+          "path": "subclassFeature/94/entries/0",
+          "expectedCompleteEntryPath": "raw/entries/0",
+          "utf8Bytes": 198,
+          "sha256": "c67cb234649a75bb85494bd865b1521af4ed35cd556f621243101c130c20722a",
+          "role": "maximum-hp"
+        },
+        {
+          "path": "subclassFeature/94/entries/1",
+          "expectedCompleteEntryPath": "raw/entries/1",
+          "utf8Bytes": 173,
+          "sha256": "9c2e5832ad5ee9cf17334795e4247f6448b468dd64c68beee0169fed36dde350",
+          "role": "manual-ac"
+        }
+      ],
+      "owner": {
+        "path": "class/1",
+        "inputKey": "sorcerer",
+        "id": "kiwee:class:xphb:sorcerer::::::",
+        "kind": "class",
+        "name": "术士",
+        "english": "Sorcerer",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "page": 138,
+        "category": "class",
+        "className": null,
+        "classSource": null,
+        "subclassShortName": null,
+        "subclassSource": null,
+        "level": null,
+        "classEdition": null,
+        "raceName": null,
+        "raceSource": null,
+        "parentName": null,
+        "parentSource": null,
+        "subraceName": null,
+        "shortName": null,
+        "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+        "fullNormalizedSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:class:xphb:sorcerer::::::",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+            "completeSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+            "canonicalReboundSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:class:xphb:sorcerer::::::",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+            "completeSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+            "canonicalReboundSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2"
+          }
+        ],
+        "rawHeader": {
+          "name": "术士",
+          "ENG_name": "Sorcerer",
+          "source": "XPHB",
+          "page": 138,
+          "edition": "one"
+        },
+        "rawHeaderSha256": "4176a34d2301f68da50d705d03568b2525aceaf40f246b00a8cdb8442cab38dd",
+        "rawSha256": "944d09d345b461e853a710d3e9908a987652059ca277eed8a01b0c31bdbcd75a",
+        "requiredSources": [
+          "XPHB"
+        ]
+      },
+      "topFeature": {
+        "path": "subclassFeature/92",
+        "inputKey": "sorcerer",
+        "id": "kiwee:feature:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+        "kind": "feature",
+        "name": "龙族术法",
+        "english": "Draconic Sorcery",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "page": 148,
+        "category": "subclassFeature",
+        "className": "术士",
+        "classSource": "XPHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "XPHB",
+        "level": 3,
+        "classEdition": "2024",
+        "raceName": null,
+        "raceSource": null,
+        "parentName": null,
+        "parentSource": null,
+        "subraceName": null,
+        "shortName": null,
+        "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+        "fullNormalizedSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:feature:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+            "completeSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+            "canonicalReboundSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:feature:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+            "completeSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+            "canonicalReboundSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa"
+          }
+        ],
+        "rawHeader": {
+          "name": "龙族术法",
+          "ENG_name": "Draconic Sorcery",
+          "source": "XPHB",
+          "page": 148,
+          "className": "术士",
+          "classSource": "XPHB",
+          "subclassShortName": "龙族血脉",
+          "subclassSource": "XPHB",
+          "level": 3
+        },
+        "rawHeaderSha256": "507a07c4813e56d4459f34268f8c921d688e7a98ee9766c28c7eab0bd3966d0f",
+        "rawSha256": "1161a55563581b4a3056827dcf8b35e403022e0fe8a9ba1a64a8bf0779433b47",
+        "requiredSources": [
+          "XPHB"
+        ]
+      },
+      "hpFeature": {
+        "path": "subclassFeature/94",
+        "inputKey": "sorcerer",
+        "id": "kiwee:feature:xphb:draconic%20resilience:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+        "kind": "feature",
+        "name": "龙族体魄",
+        "english": "Draconic Resilience",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "page": 148,
+        "category": "subclassFeature",
+        "className": "术士",
+        "classSource": "XPHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "XPHB",
+        "level": 3,
+        "classEdition": "2024",
+        "raceName": null,
+        "raceSource": null,
+        "parentName": null,
+        "parentSource": null,
+        "subraceName": null,
+        "shortName": null,
+        "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+        "fullNormalizedSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:feature:xphb:draconic%20resilience:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+            "completeSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+            "canonicalReboundSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:feature:xphb:draconic%20resilience:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+            "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+            "sha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+            "completeSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+            "canonicalReboundSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f"
+          }
+        ],
+        "rawHeader": {
+          "name": "龙族体魄",
+          "ENG_name": "Draconic Resilience",
+          "source": "XPHB",
+          "page": 148,
+          "className": "术士",
+          "classSource": "XPHB",
+          "subclassShortName": "龙族血脉",
+          "subclassSource": "XPHB",
+          "level": 3
+        },
+        "rawHeaderSha256": "db7b917289b6776efcef9ca0f0e9ff4db978aa04f84d2228a670d0944a0f9b08",
+        "rawSha256": "241ac7abab3dc430ac2570da95f1092adbb7c66268fd4d019b9735603f347d25",
+        "requiredSources": [
+          "XPHB"
+        ]
+      },
+      "classProgression": {
+        "path": "class/1/classFeatures/5",
+        "ref": "术士子职|术士|XPHB|3"
+      },
+      "references": [
+        {
+          "path": "subclass/20/subclassFeatures/0",
+          "ref": "龙族术法|术士|XPHB|龙族血脉|XPHB|3",
+          "utf8Bytes": 44,
+          "sha256": "0bcca12e3bb6e4b3dd15f9d5a56130eeb636a89294c001deb59e642f82b9a9f2",
+          "grantKey": "ref:龙族术法|术士|XPHB|龙族血脉|XPHB|3"
+        },
+        {
+          "path": "subclassFeature/92/entries/2/subclassFeature",
+          "ref": "龙族体魄|术士|XPHB|龙族血脉|XPHB|3",
+          "utf8Bytes": 44,
+          "sha256": "bae4bf9aa6abe03dbe182d45349e697c28f7e46b0ad734bea79883e3eef12d99",
+          "grantKey": "ref:龙族体魄|术士|XPHB|龙族血脉|XPHB|3"
+        }
+      ],
+      "nestedHpFeatureIsNotDraggedAuthority": true,
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "componentProofs": [
+    {
+      "path": "race/34",
+      "inputKey": "races",
+      "id": "kiwee:race:xphb:dwarf::::::",
+      "kind": "race",
+      "name": "矮人",
+      "english": "Dwarf",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 188,
+      "category": "race",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "completeSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "canonicalReboundSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "completeSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3",
+          "canonicalReboundSnapshotSha256": "ee25b0835123bf16833ca288263a2df0017b0cd50bcd6a0c3064dc87e5e6fdf3"
+        }
+      ],
+      "rawHeader": {
+        "name": "矮人",
+        "ENG_name": "Dwarf",
+        "source": "XPHB",
+        "page": 188,
+        "edition": "one"
+      },
+      "rawHeaderSha256": "7a09d6922889f878bf4125da4fb12b73b7978af3d9a5c0428580500ef09704cc",
+      "rawSha256": "a334dc252c549c6a78c4e4878e77f722fb20ee93ec1a13ea0399151853270e96",
+      "requiredSources": [
+        "XPHB"
+      ]
+    },
+    {
+      "path": "race/35",
+      "inputKey": "races",
+      "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+      "kind": "race",
+      "name": "矮人 (卡拉德许)",
+      "english": "Dwarf (Kaladesh)",
+      "source": "PSK",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 19,
+      "category": "race",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "completeSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "canonicalReboundSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psk:dwarf%20(kaladesh)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "completeSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9",
+          "canonicalReboundSnapshotSha256": "cf053eb4ca2fa5cf9fed56a05e19f60222299116122ce854feca9cd65e91e7c9"
+        }
+      ],
+      "rawHeader": {
+        "name": "矮人 (卡拉德许)",
+        "ENG_name": "Dwarf (Kaladesh)",
+        "source": "PSK",
+        "page": 19
+      },
+      "rawHeaderSha256": "cdcb7b2cab964f748ef5561356d7d809d4d01f088b0e66e6163458b43dbb120c",
+      "rawSha256": "29897be4c84c2fd3e2118aa04403e838c6a7ede0509fe0833c0e0362282fbed1",
+      "requiredSources": [
+        "PSK"
+      ]
+    },
+    {
+      "path": "subrace/10",
+      "inputKey": "races",
+      "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+      "kind": "race",
+      "name": "矮人（丘陵）",
+      "english": "Dwarf (Hill)",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 20,
+      "category": "subrace",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": "矮人",
+      "raceSource": "PHB",
+      "parentName": "矮人",
+      "parentSource": "PHB",
+      "subraceName": "丘陵",
+      "shortName": null,
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "completeSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "canonicalReboundSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "completeSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "canonicalReboundSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696"
+        }
+      ],
+      "rawHeader": {
+        "name": "丘陵",
+        "ENG_name": "Hill",
+        "source": "PHB",
+        "page": 20,
+        "raceName": "矮人",
+        "raceSource": "PHB"
+      },
+      "rawHeaderSha256": "7078cb67ab3458802725bb6f51a9a0994c46a0f518ffe593bce15c3a038ae396",
+      "rawSha256": "0acbc519d9dc3ddb823c3b9429470da70db59a05aae4c749da7cc27bfcb2b0a3",
+      "requiredSources": [
+        "PHB"
+      ]
+    },
+    {
+      "path": "race/33",
+      "inputKey": "races",
+      "id": "kiwee:race:phb:dwarf::::::",
+      "kind": "race",
+      "name": "矮人",
+      "english": "Dwarf",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 18,
+      "category": "race",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "completeSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "canonicalReboundSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dwarf::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "completeSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "canonicalReboundSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+        }
+      ],
+      "rawHeader": {
+        "name": "矮人",
+        "ENG_name": "Dwarf",
+        "source": "PHB",
+        "page": 18
+      },
+      "rawHeaderSha256": "9a2dae46d4513c859aaa6a330c8e5b61be3b463661e29433e77469717cd481ce",
+      "rawSha256": "6e51d570accc43fb4d42da125c6268a80c1676b7af17f80b52ec0c16d2f5d5c0",
+      "requiredSources": [
+        "PHB"
+      ]
+    },
+    {
+      "path": "subclass/0",
+      "inputKey": "sorcerer",
+      "id": "kiwee:subclass:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB::::",
+      "kind": "subclass",
+      "name": "龙族血脉",
+      "english": "Draconic Bloodline",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 102,
+      "category": "subclass",
+      "className": "术士",
+      "classSource": "PHB",
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": "2014",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": "龙族血脉",
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:subclass:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "completeSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "canonicalReboundSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:subclass:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "completeSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33",
+          "canonicalReboundSnapshotSha256": "bd658d8449068d53ca0681989330d25837562e7da596669b9a6fcb8057228b33"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族血脉",
+        "ENG_name": "Draconic Bloodline",
+        "source": "PHB",
+        "page": 102,
+        "edition": "classic",
+        "className": "术士",
+        "classSource": "PHB",
+        "shortName": "龙族血脉"
+      },
+      "rawHeaderSha256": "8b6fc99a938233fb042b8ee47ccfb1c997f5cc5d910ee876c017bc0d150631ba",
+      "rawSha256": "133df4e161c9b8aadd277ced39a8cff7f8e8c30f58399314cc3ad0372f0de36a",
+      "requiredSources": [
+        "PHB"
+      ]
+    },
+    {
+      "path": "class/0",
+      "inputKey": "sorcerer",
+      "id": "kiwee:class:phb:sorcerer::::::",
+      "kind": "class",
+      "name": "术士",
+      "english": "Sorcerer",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 99,
+      "category": "class",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:class:phb:sorcerer::::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+          "completeSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+          "canonicalReboundSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:class:phb:sorcerer::::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+          "completeSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+          "canonicalReboundSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d"
+        }
+      ],
+      "rawHeader": {
+        "name": "术士",
+        "ENG_name": "Sorcerer",
+        "source": "PHB",
+        "page": 99,
+        "edition": "classic"
+      },
+      "rawHeaderSha256": "dd9253f8226363ae9ab4f283382928b5d81845ded84defb269c91d93db69e566",
+      "rawSha256": "5075daac63b917557904e4fb89bfcdab0ffb0c8967ef9fc6d70395f730c7e5e2",
+      "requiredSources": [
+        "PHB"
+      ]
+    },
+    {
+      "path": "subclassFeature/7",
+      "inputKey": "sorcerer",
+      "id": "kiwee:feature:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+      "kind": "feature",
+      "name": "龙族血脉",
+      "english": "Draconic Bloodline",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 102,
+      "category": "subclassFeature",
+      "className": "术士",
+      "classSource": "PHB",
+      "subclassShortName": "龙族血脉",
+      "subclassSource": "PHB",
+      "level": 1,
+      "classEdition": "2014",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+          "completeSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+          "canonicalReboundSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:phb:draconic%20bloodline:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+          "completeSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44",
+          "canonicalReboundSnapshotSha256": "2db4aa087de7f0424d56f629e805bfb886d0db55864e21fb59b36339c4022b44"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族血脉",
+        "ENG_name": "Draconic Bloodline",
+        "source": "PHB",
+        "page": 102,
+        "className": "术士",
+        "classSource": "PHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "PHB",
+        "level": 1
+      },
+      "rawHeaderSha256": "ef254d490726881efa6a08a1bd100992ef1fcf32e746825e3d462fbdac21b4a5",
+      "rawSha256": "136d843bfbb6677414fb034aa64659e00e810b94662fe6b66de659c003dbc6bf",
+      "requiredSources": [
+        "PHB"
+      ]
+    },
+    {
+      "path": "subclassFeature/8",
+      "inputKey": "sorcerer",
+      "id": "kiwee:feature:phb:draconic%20resilience:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+      "kind": "feature",
+      "name": "龙族体魄",
+      "english": "Draconic Resilience",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 102,
+      "category": "subclassFeature",
+      "className": "术士",
+      "classSource": "PHB",
+      "subclassShortName": "龙族血脉",
+      "subclassSource": "PHB",
+      "level": 1,
+      "classEdition": "2014",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:phb:draconic%20resilience:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+          "completeSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+          "canonicalReboundSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:phb:draconic%20resilience:phb:%E6%9C%AF%E5%A3%AB:phb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:1:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+          "completeSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334",
+          "canonicalReboundSnapshotSha256": "d3d0efeacfac837c0d6cf744c27515af073f65b9b40c824ddd65bb8c5f235334"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族体魄",
+        "ENG_name": "Draconic Resilience",
+        "source": "PHB",
+        "page": 102,
+        "className": "术士",
+        "classSource": "PHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "PHB",
+        "level": 1
+      },
+      "rawHeaderSha256": "41cd7a381339bdd4784f267d304a6e5e605b62f11a5ea08eb9b74f9fed32b901",
+      "rawSha256": "b8261481b5e58124385aca2b3e5463736d738ccdd50f0287772fc7561bb35eff",
+      "requiredSources": [
+        "PHB"
+      ]
+    },
+    {
+      "path": "subclass/20",
+      "inputKey": "sorcerer",
+      "id": "kiwee:subclass:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB::::",
+      "kind": "subclass",
+      "name": "龙族术法",
+      "english": "Draconic Sorcery",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 148,
+      "category": "subclass",
+      "className": "术士",
+      "classSource": "XPHB",
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": "2024",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": "龙族血脉",
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:subclass:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "completeSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "canonicalReboundSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:subclass:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "completeSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9",
+          "canonicalReboundSnapshotSha256": "e649947fe91e9616e7bb68d4302ff9ea1c163df83925085309260a9df1f583e9"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族术法",
+        "ENG_name": "Draconic Sorcery",
+        "source": "XPHB",
+        "page": 148,
+        "edition": "one",
+        "className": "术士",
+        "classSource": "XPHB",
+        "shortName": "龙族血脉"
+      },
+      "rawHeaderSha256": "6cc697338cc0d2a25d6e06d69512355f1342c75888c8e47c3fc6e5376b5e431e",
+      "rawSha256": "83536f94389c556b4069fac135dfb89521c23fdf81f0fd48ee5b08cd6459a17f",
+      "requiredSources": [
+        "XPHB"
+      ]
+    },
+    {
+      "path": "class/1",
+      "inputKey": "sorcerer",
+      "id": "kiwee:class:xphb:sorcerer::::::",
+      "kind": "class",
+      "name": "术士",
+      "english": "Sorcerer",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 138,
+      "category": "class",
+      "className": null,
+      "classSource": null,
+      "subclassShortName": null,
+      "subclassSource": null,
+      "level": null,
+      "classEdition": null,
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:class:xphb:sorcerer::::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+          "completeSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+          "canonicalReboundSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:class:xphb:sorcerer::::::",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+          "completeSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+          "canonicalReboundSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2"
+        }
+      ],
+      "rawHeader": {
+        "name": "术士",
+        "ENG_name": "Sorcerer",
+        "source": "XPHB",
+        "page": 138,
+        "edition": "one"
+      },
+      "rawHeaderSha256": "4176a34d2301f68da50d705d03568b2525aceaf40f246b00a8cdb8442cab38dd",
+      "rawSha256": "944d09d345b461e853a710d3e9908a987652059ca277eed8a01b0c31bdbcd75a",
+      "requiredSources": [
+        "XPHB"
+      ]
+    },
+    {
+      "path": "subclassFeature/92",
+      "inputKey": "sorcerer",
+      "id": "kiwee:feature:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+      "kind": "feature",
+      "name": "龙族术法",
+      "english": "Draconic Sorcery",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 148,
+      "category": "subclassFeature",
+      "className": "术士",
+      "classSource": "XPHB",
+      "subclassShortName": "龙族血脉",
+      "subclassSource": "XPHB",
+      "level": 3,
+      "classEdition": "2024",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+          "completeSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+          "canonicalReboundSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:xphb:draconic%20sorcery:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+          "completeSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa",
+          "canonicalReboundSnapshotSha256": "f1359f7df2240839803ea9a063d3695c90a85081f18c1965e50145f7121ca4aa"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族术法",
+        "ENG_name": "Draconic Sorcery",
+        "source": "XPHB",
+        "page": 148,
+        "className": "术士",
+        "classSource": "XPHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "XPHB",
+        "level": 3
+      },
+      "rawHeaderSha256": "507a07c4813e56d4459f34268f8c921d688e7a98ee9766c28c7eab0bd3966d0f",
+      "rawSha256": "1161a55563581b4a3056827dcf8b35e403022e0fe8a9ba1a64a8bf0779433b47",
+      "requiredSources": [
+        "XPHB"
+      ]
+    },
+    {
+      "path": "subclassFeature/94",
+      "inputKey": "sorcerer",
+      "id": "kiwee:feature:xphb:draconic%20resilience:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+      "kind": "feature",
+      "name": "龙族体魄",
+      "english": "Draconic Resilience",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 148,
+      "category": "subclassFeature",
+      "className": "术士",
+      "classSource": "XPHB",
+      "subclassShortName": "龙族血脉",
+      "subclassSource": "XPHB",
+      "level": 3,
+      "classEdition": "2024",
+      "raceName": null,
+      "raceSource": null,
+      "parentName": null,
+      "parentSource": null,
+      "subraceName": null,
+      "shortName": null,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "fullNormalizedSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:xphb:draconic%20resilience:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+          "completeSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+          "canonicalReboundSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:xphb:draconic%20resilience:xphb:%E6%9C%AF%E5%A3%AB:xphb:%E9%BE%99%E6%97%8F%E8%A1%80%E8%84%89:3:",
+          "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+          "sha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+          "completeSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f",
+          "canonicalReboundSnapshotSha256": "dd4019a0a732bc9b86bf3806f5af2989ce5d283a3ed8cdc6e20d98d1a6c0274f"
+        }
+      ],
+      "rawHeader": {
+        "name": "龙族体魄",
+        "ENG_name": "Draconic Resilience",
+        "source": "XPHB",
+        "page": 148,
+        "className": "术士",
+        "classSource": "XPHB",
+        "subclassShortName": "龙族血脉",
+        "subclassSource": "XPHB",
+        "level": 3
+      },
+      "rawHeaderSha256": "db7b917289b6776efcef9ca0f0e9ff4db978aa04f84d2228a670d0944a0f9b08",
+      "rawSha256": "241ac7abab3dc430ac2570da95f1092adbb7c66268fd4d019b9735603f347d25",
+      "requiredSources": [
+        "XPHB"
+      ]
+    }
+  ],
+  "normalizationHolds": [],
+  "excluded": [
+    {
+      "inputKey": "sorcerer",
+      "path": "subclass/1",
+      "rawSha256": "b48a20e1987a5c195fbe5de2b8f385b3e386c32773f8d386a848f98faf665c81",
+      "reasonCode": "cross-edition-legacy-adaptation-not-native-owner"
+    }
+  ]
+}

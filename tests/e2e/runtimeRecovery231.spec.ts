@@ -65,7 +65,7 @@ test.describe('physical server outage',()=>{
    await page.locator('[data-sheet-tab=法术]').click();await expect(page.locator('.header-法术')).toBeVisible();
    await expect.poll(()=>page.evaluate(async()=>{const names=await caches.keys(),cache=await caches.open(names.find(n=>n.startsWith('dnd-card-shell:'))!),urls=(await cache.keys()).map(r=>r.url);return ['WikiUi','catalog','cardRuntime','SpellsPage'].every(tool=>urls.some(url=>url.includes('/assets/'+tool+'-')));})).toBe(true);
    await stop();
-   await page.unroute('https://5e.kiwee.top/data/**');await page.route('https://5e.kiwee.top/data/**',route=>route.abort('connectionrefused'));
+   await page.context().unroute('https://5e.kiwee.top/data/**');await page.context().route('https://5e.kiwee.top/data/**',route=>route.abort('connectionrefused'));
    await page.reload();await expect(page.locator('.paper')).toBeVisible();
    await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toBeEnabled();
    await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();

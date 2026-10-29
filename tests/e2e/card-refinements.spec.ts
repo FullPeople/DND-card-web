@@ -3,9 +3,9 @@ import { mockSource } from './fixtures';
 
 test('derived skill markers, card-wide additions, bounded removal, sizes, chains and spell levels', async ({ page }) => {
   await mockSource(page);
-  await page.route('**/data/conditionsdiseases.json', r => r.fulfill({json:{condition:[{name:'束缚',ENG_name:'Restrained',source:'XPHB',entries:['自制状态说明。']}],status:[{name:'空状态',source:'XPHB',entries:[]}]}}));
-  await page.route('**/data/spells/spells-test.json', r => r.fulfill({json:{spell:[0,1,1,3].map((level,i)=>({name:`测试法术${i}`,source:'XPHB',level,entries:['测试法术说明。']}))}}));
-  await page.route('**/data/languages.json', r => r.fulfill({json:{language:[{name:'测试语',source:'XPHB',entries:['测试语言正文。']}]}}));
+  await page.context().route('**/data/conditionsdiseases.json', r => r.fulfill({json:{condition:[{name:'束缚',ENG_name:'Restrained',source:'XPHB',entries:['自制状态说明。']}],status:[{name:'空状态',source:'XPHB',entries:[]}]}}));
+  await page.context().route('**/data/spells/spells-test.json', r => r.fulfill({json:{spell:[0,1,1,3].map((level,i)=>({name:`测试法术${i}`,source:'XPHB',level,entries:['测试法术说明。']}))}}));
+  await page.context().route('**/data/languages.json', r => r.fulfill({json:{language:[{name:'测试语',source:'XPHB',entries:['测试语言正文。']}]}}));
   await page.goto('/'); await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
   const category = (name:string) => page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name,exact:true});
   await expect(page.getByRole('checkbox',{name:/^察觉手动熟练$/})).toHaveCount(0);

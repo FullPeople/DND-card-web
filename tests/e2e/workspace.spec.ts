@@ -97,7 +97,7 @@ test('resources and manual adjustments survive source refresh without being gran
 });
 
 test('failed updates expose stale-cache use and corrupt storage does not overwrite the record', async ({ page }) => {
-  await page.route('https://5e.kiwee.top/data/**', route => route.abort());
+  await page.context().route('https://5e.kiwee.top/data/**', route => route.abort());
   await page.getByRole('button', { name: '更新资料', exact: true }).click();
   await expect(page.locator('.load-errors')).toContainText('旧缓存');
   await page.evaluate(async () => {

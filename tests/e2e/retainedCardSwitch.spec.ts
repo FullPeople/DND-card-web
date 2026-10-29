@@ -1,5 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
-import {mockSource,suppressAnnouncement} from './fixtures';
+import {mockSource,suppressAnnouncement,waitForCatalog} from './fixtures';
 
 async function saved(page:Page){return page.evaluate(async()=>{
  const p='/card/src/platform/workspaceIdentity.ts',name=(await import(p)).workspaceIdentity.database;
@@ -8,12 +8,12 @@ async function saved(page:Page){return page.evaluate(async()=>{
 });}
 async function start(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.goto('/card/?intro=0');await expect(page.locator('.paper[data-active-sheet="true"]')).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await page.goto('/card/?intro=0');await expect(page.locator('.paper[data-active-sheet="true"]')).toBeVisible();await expect(page.locator('.save-status')).toContainText('已保存到本机');await waitForCatalog(page);
  await page.evaluate(async()=>{
   const p='/card/src/platform/workspaceIdentity.ts',name=(await import(p)).workspaceIdentity.database;
   const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
   const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),get=store.get('workspace');get.onsuccess=()=>{const w=get.result,original=w.characters.find((c:any)=>c.id===w.activeId);w.characters=[0,1,2].map(i=>({...structuredClone(original),id:'retained-'+i,name:'保留卡面'+i,notes:'独立笔记'+i,runtime:{...structuredClone(original.runtime),hp:7+i}}));w.activeId='retained-0';store.put(w,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();
- });await page.reload();await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ });await page.reload();await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-0');await expect(page.locator('.save-status')).toContainText('已保存到本机');await waitForCatalog(page);
 }
 async function choose(page:Page,i:number){await page.locator('.character-tabs').getByRole('tab',{name:'保留卡面'+i,exact:true}).click();await expect(page.locator('.paper[data-active-sheet="true"]')).toHaveAttribute('data-character-id','retained-'+i);}
 

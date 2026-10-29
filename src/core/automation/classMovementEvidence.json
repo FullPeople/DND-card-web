@@ -1,0 +1,666 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact-five-native-class-movement-features",
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "inputs": [
+    {
+      "inputPath": "class/class-barbarian.json",
+      "url": "https://5e.kiwee.top/data/class/class-barbarian.json",
+      "sha256": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+      "bytes": 103531
+    },
+    {
+      "inputPath": "class/class-monk.json",
+      "url": "https://5e.kiwee.top/data/class/class-monk.json",
+      "sha256": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+      "bytes": 120951
+    },
+    {
+      "inputPath": "class/class-ranger.json",
+      "url": "https://5e.kiwee.top/data/class/class-ranger.json",
+      "sha256": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+      "bytes": 122674
+    }
+  ],
+  "counts": {
+    "owners": 5,
+    "features": 5,
+    "verifiedRouteProofs": 20,
+    "distinctNormalizedSnapshotForms": 10,
+    "heldFeatures": 2
+  },
+  "heldProofCounts": {
+    "features": 2,
+    "verifiedRouteProofs": 4,
+    "distinctNormalizedSnapshotForms": 2
+  },
+  "normalization": {
+    "canonical": "each-complete-original-class-body-through-installed-normalizeCatalogData",
+    "app": "independent-each-complete-original-class-body-normalize-then-real-hydrateSpellLookup",
+    "transportRevision": "exact-single-input-sha256",
+    "noPayloadRepair": true
+  },
+  "policy": {
+    "runtimeScope": "walking-projection-and-source-qualified-ranger-relative-modes-only",
+    "walkingBonusBaseline": "owning-class-level-only",
+    "rangerRelativeModeArmorRestriction": "none",
+    "rangerRelativeModeBaseline": "actual-final-walking-after-manual-total-and-sheet-offset",
+    "manualMechanisms": [
+      "wall-water-surface-execution",
+      "map-distance",
+      "turn-state",
+      "terrain",
+      "actions",
+      "resources",
+      "other-effects"
+    ]
+  },
+  "rules": [
+    {
+      "key": "barbarian-phb",
+      "id": "kiwee:feature:phb:fast%20movement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::5:",
+      "kind": "feature",
+      "name": "快速移动",
+      "english": "Fast Movement",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 46,
+      "category": "classFeature",
+      "className": "野蛮人",
+      "classSource": "PHB",
+      "level": 5,
+      "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+      "inputPath": "class/class-barbarian.json",
+      "sourcePath": "classFeature/8",
+      "reference": "快速移动|野蛮人||5",
+      "minLevel": 5,
+      "grantKey": "ref:快速移动|野蛮人||5",
+      "walkingPolicy": "no-heavy-armor",
+      "walkingBonus": 10,
+      "fullNormalizedSnapshotSha256": "f01378d8ec2641fb5a9d6041c8b04d4b2d2a14fa79489f7db2e4afd8240cdb90",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:phb:fast%20movement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::5:",
+          "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+          "completeSnapshotSha256": "f01378d8ec2641fb5a9d6041c8b04d4b2d2a14fa79489f7db2e4afd8240cdb90"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:phb:fast%20movement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::5:",
+          "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+          "completeSnapshotSha256": "f01378d8ec2641fb5a9d6041c8b04d4b2d2a14fa79489f7db2e4afd8240cdb90"
+        }
+      ],
+      "owner": {
+        "id": "kiwee:class:phb:barbarian::::::",
+        "kind": "class",
+        "name": "野蛮人",
+        "english": "Barbarian",
+        "source": "PHB",
+        "edition": "2014",
+        "packId": "kiwee",
+        "page": 46,
+        "category": "class",
+        "className": null,
+        "classSource": null,
+        "level": null,
+        "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+        "sourcePath": "class/0",
+        "fullNormalizedSnapshotSha256": "a746c2755ec52d73cca39aca3be228d844ef2cf2457f993d73722062137e2d48",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:class:phb:barbarian::::::",
+            "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+            "completeSnapshotSha256": "a746c2755ec52d73cca39aca3be228d844ef2cf2457f993d73722062137e2d48"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:class:phb:barbarian::::::",
+            "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+            "completeSnapshotSha256": "a746c2755ec52d73cca39aca3be228d844ef2cf2457f993d73722062137e2d48"
+          }
+        ],
+        "ordinarySnapshotSha256": "d34a855807addd445cde3aed316d2fe38788403262e3ab65b9fa0b5e5430e93a",
+        "declaredReference": {
+          "path": "class/0/classFeatures/8",
+          "ref": "快速移动|野蛮人||5",
+          "grantKey": "ref:快速移动|野蛮人||5"
+        }
+      },
+      "sourceClauses": [
+        {
+          "path": "classFeature/8/entries/0",
+          "utf8Sha256": "0183f8d64a2e4a83b078e1285ba08397237480f84cb6d1ef13bee8c58e0f36de"
+        }
+      ],
+      "relativeModes": [],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "barbarian-xphb",
+      "id": "kiwee:feature:xphb:fast%20movement:xphb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::5:",
+      "kind": "feature",
+      "name": "快速移动",
+      "english": "Fast Movement",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 53,
+      "category": "classFeature",
+      "className": "野蛮人",
+      "classSource": "XPHB",
+      "level": 5,
+      "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+      "inputPath": "class/class-barbarian.json",
+      "sourcePath": "classFeature/34",
+      "reference": "快速移动|野蛮人|XPHB|5",
+      "minLevel": 5,
+      "grantKey": "ref:快速移动|野蛮人|XPHB|5",
+      "walkingPolicy": "no-heavy-armor",
+      "walkingBonus": 10,
+      "fullNormalizedSnapshotSha256": "6682096471898c029ee1c383ec5b404fec4f76befa10d888d639ebbb20f78ada",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:xphb:fast%20movement:xphb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::5:",
+          "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+          "completeSnapshotSha256": "6682096471898c029ee1c383ec5b404fec4f76befa10d888d639ebbb20f78ada"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:xphb:fast%20movement:xphb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::5:",
+          "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+          "completeSnapshotSha256": "6682096471898c029ee1c383ec5b404fec4f76befa10d888d639ebbb20f78ada"
+        }
+      ],
+      "owner": {
+        "id": "kiwee:class:xphb:barbarian::::::",
+        "kind": "class",
+        "name": "野蛮人",
+        "english": "Barbarian",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "page": 50,
+        "category": "class",
+        "className": null,
+        "classSource": null,
+        "level": null,
+        "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+        "sourcePath": "class/1",
+        "fullNormalizedSnapshotSha256": "6a209c86b95488e105c78a4f39c41d9379d33f20e75f897c28db9d6c9b360a41",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:class:xphb:barbarian::::::",
+            "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+            "completeSnapshotSha256": "6a209c86b95488e105c78a4f39c41d9379d33f20e75f897c28db9d6c9b360a41"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:class:xphb:barbarian::::::",
+            "revision": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+            "completeSnapshotSha256": "6a209c86b95488e105c78a4f39c41d9379d33f20e75f897c28db9d6c9b360a41"
+          }
+        ],
+        "ordinarySnapshotSha256": "e338804a2657295c51eeb371b9744af549171bc77721e226880e152b18e2d1ba",
+        "declaredReference": {
+          "path": "class/1/classFeatures/9",
+          "ref": "快速移动|野蛮人|XPHB|5",
+          "grantKey": "ref:快速移动|野蛮人|XPHB|5"
+        }
+      },
+      "sourceClauses": [
+        {
+          "path": "classFeature/34/entries/0",
+          "utf8Sha256": "bd844e49e21027857fc9045331ec70ce43ecfc5da32a4343083914529d28ee2a"
+        }
+      ],
+      "relativeModes": [],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "monk-phb",
+      "id": "kiwee:feature:phb:unarmored%20movement:phb:%E6%AD%A6%E5%83%A7:::2:",
+      "kind": "feature",
+      "name": "无甲移动",
+      "english": "Unarmored Movement",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 76,
+      "category": "classFeature",
+      "className": "武僧",
+      "classSource": "PHB",
+      "level": 2,
+      "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+      "inputPath": "class/class-monk.json",
+      "sourcePath": "classFeature/7",
+      "reference": "无甲移动|武僧||2",
+      "minLevel": 2,
+      "grantKey": "ref:无甲移动|武僧||2",
+      "walkingPolicy": "no-armor-and-no-shield",
+      "walkingBonus": null,
+      "levelBonuses": [
+        0,
+        10,
+        10,
+        10,
+        10,
+        15,
+        15,
+        15,
+        15,
+        20,
+        20,
+        20,
+        20,
+        25,
+        25,
+        25,
+        25,
+        30,
+        30,
+        30
+      ],
+      "fullNormalizedSnapshotSha256": "313d9d372fc3589e739cd8a641f50b513e3c8736ee7a417694ec35a9dd151c25",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:phb:unarmored%20movement:phb:%E6%AD%A6%E5%83%A7:::2:",
+          "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+          "completeSnapshotSha256": "313d9d372fc3589e739cd8a641f50b513e3c8736ee7a417694ec35a9dd151c25"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:phb:unarmored%20movement:phb:%E6%AD%A6%E5%83%A7:::2:",
+          "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+          "completeSnapshotSha256": "313d9d372fc3589e739cd8a641f50b513e3c8736ee7a417694ec35a9dd151c25"
+        }
+      ],
+      "owner": {
+        "id": "kiwee:class:phb:monk::::::",
+        "kind": "class",
+        "name": "武僧",
+        "english": "Monk",
+        "source": "PHB",
+        "edition": "2014",
+        "packId": "kiwee",
+        "page": 76,
+        "category": "class",
+        "className": null,
+        "classSource": null,
+        "level": null,
+        "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+        "sourcePath": "class/0",
+        "fullNormalizedSnapshotSha256": "6110d3c7516626f0b302454fe3e9ebaa3be61cb65634f169337b1fa4fdcd3c8b",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:class:phb:monk::::::",
+            "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+            "completeSnapshotSha256": "6110d3c7516626f0b302454fe3e9ebaa3be61cb65634f169337b1fa4fdcd3c8b"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:class:phb:monk::::::",
+            "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+            "completeSnapshotSha256": "6110d3c7516626f0b302454fe3e9ebaa3be61cb65634f169337b1fa4fdcd3c8b"
+          }
+        ],
+        "ordinarySnapshotSha256": "7e80438deece46fc6c27c416193519da91f44981672a59556ddcc67e4f0885a9",
+        "declaredReference": {
+          "path": "class/0/classFeatures/4",
+          "ref": "无甲移动|武僧||2",
+          "grantKey": "ref:无甲移动|武僧||2"
+        }
+      },
+      "sourceClauses": [
+        {
+          "path": "classFeature/7/entries/0",
+          "utf8Sha256": "5d92fd226cc8d25c589a8e4dd878a7bea3a9e0c0bd7f5826087cbf75158cd991"
+        },
+        {
+          "path": "classFeature/7/entries/1",
+          "utf8Sha256": "180d6b5369c79ef591e1c9b59da3800202b37a79d1cb064d7e1d95e7c085d74b"
+        }
+      ],
+      "sourceTable": {
+        "path": "class/0/classTableGroups/0",
+        "canonicalSha256": "2826c39c03de7b054193bf981be8cb4faa9fa0a01d41089b893af670f9525288",
+        "columnIndex": 2,
+        "rowCount": 20,
+        "levelBonuses": [
+          0,
+          10,
+          10,
+          10,
+          10,
+          15,
+          15,
+          15,
+          15,
+          20,
+          20,
+          20,
+          20,
+          25,
+          25,
+          25,
+          25,
+          30,
+          30,
+          30
+        ]
+      },
+      "relativeModes": [],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "monk-xphb",
+      "id": "kiwee:feature:xphb:unarmored%20movement:xphb:%E6%AD%A6%E5%83%A7:::2:",
+      "kind": "feature",
+      "name": "无甲移动",
+      "english": "Unarmored Movement",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 102,
+      "category": "classFeature",
+      "className": "武僧",
+      "classSource": "XPHB",
+      "level": 2,
+      "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+      "inputPath": "class/class-monk.json",
+      "sourcePath": "classFeature/43",
+      "reference": "无甲移动|武僧|XPHB|2",
+      "minLevel": 2,
+      "grantKey": "ref:无甲移动|武僧|XPHB|2",
+      "walkingPolicy": "no-armor-and-no-shield",
+      "walkingBonus": null,
+      "levelBonuses": [
+        0,
+        10,
+        10,
+        10,
+        10,
+        15,
+        15,
+        15,
+        15,
+        20,
+        20,
+        20,
+        20,
+        25,
+        25,
+        25,
+        25,
+        30,
+        30,
+        30
+      ],
+      "fullNormalizedSnapshotSha256": "30a7636dff5715ed8d049e19135f01322617082c8107f86a31f1e930295ac732",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:xphb:unarmored%20movement:xphb:%E6%AD%A6%E5%83%A7:::2:",
+          "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+          "completeSnapshotSha256": "30a7636dff5715ed8d049e19135f01322617082c8107f86a31f1e930295ac732"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:xphb:unarmored%20movement:xphb:%E6%AD%A6%E5%83%A7:::2:",
+          "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+          "completeSnapshotSha256": "30a7636dff5715ed8d049e19135f01322617082c8107f86a31f1e930295ac732"
+        }
+      ],
+      "owner": {
+        "id": "kiwee:class:xphb:monk::::::",
+        "kind": "class",
+        "name": "武僧",
+        "english": "Monk",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "page": 100,
+        "category": "class",
+        "className": null,
+        "classSource": null,
+        "level": null,
+        "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+        "sourcePath": "class/1",
+        "fullNormalizedSnapshotSha256": "4d385aa95e118860bed0d4dfad66acf82b50be8013682e396b0c9277fa4455a3",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:class:xphb:monk::::::",
+            "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+            "completeSnapshotSha256": "4d385aa95e118860bed0d4dfad66acf82b50be8013682e396b0c9277fa4455a3"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:class:xphb:monk::::::",
+            "revision": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+            "completeSnapshotSha256": "4d385aa95e118860bed0d4dfad66acf82b50be8013682e396b0c9277fa4455a3"
+          }
+        ],
+        "ordinarySnapshotSha256": "4cd9679cf981d7acf58f00ea50ca7aaf41852e5a6815f44b065d9d506ba47e35",
+        "declaredReference": {
+          "path": "class/1/classFeatures/3",
+          "ref": "无甲移动|武僧|XPHB|2",
+          "grantKey": "ref:无甲移动|武僧|XPHB|2"
+        }
+      },
+      "sourceClauses": [
+        {
+          "path": "classFeature/43/entries/0",
+          "utf8Sha256": "767d97e50a889f3fb5a45636f7749a9af96d48e59f674d60ae173935674b29d4"
+        }
+      ],
+      "sourceTable": {
+        "path": "class/1/classTableGroups/0",
+        "canonicalSha256": "c5d2eca7dfedeae7a1ca0b57b846c0603dd2843d1c56a2507f3efa9ecc3554c9",
+        "columnIndex": 2,
+        "rowCount": 20,
+        "levelBonuses": [
+          0,
+          10,
+          10,
+          10,
+          10,
+          15,
+          15,
+          15,
+          15,
+          20,
+          20,
+          20,
+          20,
+          25,
+          25,
+          25,
+          25,
+          30,
+          30,
+          30
+        ]
+      },
+      "relativeModes": [],
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "ranger-xphb",
+      "id": "kiwee:feature:xphb:roving:xphb:%E6%B8%B8%E4%BE%A0:::6:",
+      "kind": "feature",
+      "name": "越野",
+      "english": "Roving",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 121,
+      "category": "classFeature",
+      "className": "游侠",
+      "classSource": "XPHB",
+      "level": 6,
+      "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+      "inputPath": "class/class-ranger.json",
+      "sourcePath": "classFeature/39",
+      "reference": "越野|游侠|XPHB|6",
+      "minLevel": 6,
+      "grantKey": "ref:越野|游侠|XPHB|6",
+      "walkingPolicy": "no-heavy-armor",
+      "walkingBonus": 10,
+      "fullNormalizedSnapshotSha256": "64308b9db806759ef7dc94bda9b87e82c77c3fdaf8bc587fd475e78e3b27baa4",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:feature:xphb:roving:xphb:%E6%B8%B8%E4%BE%A0:::6:",
+          "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+          "completeSnapshotSha256": "64308b9db806759ef7dc94bda9b87e82c77c3fdaf8bc587fd475e78e3b27baa4"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:feature:xphb:roving:xphb:%E6%B8%B8%E4%BE%A0:::6:",
+          "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+          "completeSnapshotSha256": "64308b9db806759ef7dc94bda9b87e82c77c3fdaf8bc587fd475e78e3b27baa4"
+        }
+      ],
+      "owner": {
+        "id": "kiwee:class:xphb:ranger::::::",
+        "kind": "class",
+        "name": "游侠",
+        "english": "Ranger",
+        "source": "XPHB",
+        "edition": "2024",
+        "packId": "kiwee",
+        "page": 118,
+        "category": "class",
+        "className": null,
+        "classSource": null,
+        "level": null,
+        "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+        "sourcePath": "class/1",
+        "fullNormalizedSnapshotSha256": "5d21c0f30003085a0ea1d402969121c55521a50f8179047187ec20b1c21fafc2",
+        "forms": [
+          {
+            "form": "canonical",
+            "id": "kiwee:class:xphb:ranger::::::",
+            "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+            "completeSnapshotSha256": "5d21c0f30003085a0ea1d402969121c55521a50f8179047187ec20b1c21fafc2"
+          },
+          {
+            "form": "app",
+            "id": "kiwee:class:xphb:ranger::::::",
+            "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+            "completeSnapshotSha256": "5d21c0f30003085a0ea1d402969121c55521a50f8179047187ec20b1c21fafc2"
+          }
+        ],
+        "ordinarySnapshotSha256": "6faef3f8b82c59b831aa3a2769d08e9efa377fb922789fd636cf26c57048ac2c",
+        "declaredReference": {
+          "path": "class/1/classFeatures/8",
+          "ref": "越野|游侠|XPHB|6",
+          "grantKey": "ref:越野|游侠|XPHB|6"
+        }
+      },
+      "sourceClauses": [
+        {
+          "path": "classFeature/39/entries/0",
+          "utf8Sha256": "f3c80c0fc05e4b124464adb9022ed83b52b2a3e35bcf1fb59277153ea010e887"
+        }
+      ],
+      "relativeModes": [
+        "swim",
+        "climb"
+      ],
+      "relativeModeCondition": "independent-of-heavy-armor",
+      "modeBaseline": "actual-final-walking-after-manual-total-and-sheet-offset",
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "holds": [
+    {
+      "inputPath": "class/class-ranger.json",
+      "source": "TCE",
+      "sourcePaths": [
+        "classFeature/0",
+        "classFeature/13"
+      ],
+      "reasonCode": "explicit-natural-explorer-replacement-choice-not-proven-by-current-auto-attachment",
+      "genericSyncProvesReplacementChoice": false,
+      "features": [
+        {
+          "id": "kiwee:feature:tce:deft%20explorer:phb:%E6%B8%B8%E4%BE%A0:::1:",
+          "kind": "feature",
+          "name": "熟练探险家",
+          "english": "Deft Explorer",
+          "source": "TCE",
+          "edition": "both",
+          "packId": "kiwee",
+          "page": 56,
+          "category": "classFeature",
+          "className": "游侠",
+          "classSource": "PHB",
+          "level": 1,
+          "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+          "inputPath": "class/class-ranger.json",
+          "sourcePath": "classFeature/0",
+          "fullNormalizedSnapshotSha256": "26c6546bef2af4f72645bb37c903d8f3ef3aa956e72818a72fc606d462a75273",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:feature:tce:deft%20explorer:phb:%E6%B8%B8%E4%BE%A0:::1:",
+              "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+              "completeSnapshotSha256": "26c6546bef2af4f72645bb37c903d8f3ef3aa956e72818a72fc606d462a75273"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:feature:tce:deft%20explorer:phb:%E6%B8%B8%E4%BE%A0:::1:",
+              "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+              "completeSnapshotSha256": "26c6546bef2af4f72645bb37c903d8f3ef3aa956e72818a72fc606d462a75273"
+            }
+          ],
+          "reasonCode": "explicit-natural-explorer-replacement-choice-not-proven-by-current-auto-attachment"
+        },
+        {
+          "id": "kiwee:feature:tce:deft%20explorer%20improvement:phb:%E6%B8%B8%E4%BE%A0:::6:",
+          "kind": "feature",
+          "name": "熟练探险家增效",
+          "english": "Deft Explorer Improvement",
+          "source": "TCE",
+          "edition": "both",
+          "packId": "kiwee",
+          "page": 56,
+          "category": "classFeature",
+          "className": "游侠",
+          "classSource": "PHB",
+          "level": 6,
+          "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+          "inputPath": "class/class-ranger.json",
+          "sourcePath": "classFeature/13",
+          "fullNormalizedSnapshotSha256": "cf58013e195dbf6b4879ebf932415d95afd65e8a19f83cfce8f85e657e8e6359",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:feature:tce:deft%20explorer%20improvement:phb:%E6%B8%B8%E4%BE%A0:::6:",
+              "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+              "completeSnapshotSha256": "cf58013e195dbf6b4879ebf932415d95afd65e8a19f83cfce8f85e657e8e6359"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:feature:tce:deft%20explorer%20improvement:phb:%E6%B8%B8%E4%BE%A0:::6:",
+              "revision": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+              "completeSnapshotSha256": "cf58013e195dbf6b4879ebf932415d95afd65e8a19f83cfce8f85e657e8e6359"
+            }
+          ],
+          "reasonCode": "explicit-natural-explorer-replacement-choice-not-proven-by-current-auto-attachment"
+        }
+      ]
+    }
+  ]
+}

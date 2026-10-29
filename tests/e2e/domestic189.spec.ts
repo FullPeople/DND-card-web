@@ -2,7 +2,7 @@ import {test,expect,type Page} from '@playwright/test';
 import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 const items=Array.from({length:220},(_,i)=>({name:`旅行用品 ${String(i+1).padStart(3,'0')}`,ENG_name:`Travel Gear ${i+1}`,source:'XGE',type:'G',weight:1,value:100,entries:Array.from({length:80},(_,n)=>`阅读片段 ${n+1}：旅人可以在这里记录用途、来源与使用方式。这是为界面验收编写的测试条目。`)}));
 async function ready(page:Page,baseURL:string){
- await mockSource(page);await page.route('https://5e.kiwee.top/data/items.json',route=>route.fulfill({json:{item:items},headers:{'access-control-allow-origin':'*'}}));await suppressAnnouncement(page);
+ await mockSource(page);await page.context().route('https://5e.kiwee.top/data/items.json',route=>route.fulfill({json:{item:items},headers:{'access-control-allow-origin':'*'}}));await suppressAnnouncement(page);
  await page.goto(baseURL);await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await page.getByRole('button',{name:'装备',exact:true}).click();
  await expect(page.locator('.catalog-row')).not.toHaveCount(0);

@@ -1,0 +1,12 @@
+/* A recognized retained Observant needs four extra A4 pixels for a genuine
+   second readable score. Normal/withdrawn cards retain the original 48px row;
+   all four cells, columns, fixed paper size and remaining row ratios stay put. */
+.overview-right:has(.observant-passive-cell){grid-template-rows:52px minmax(95px,1fr) minmax(150px,1.6fr) minmax(130px,1.35fr)}
+.observant-passive-cell .cell-heading{display:flex;flex-direction:column;justify-content:center;gap:0;min-height:24px}
+.observant-passive-cell .cell-heading h3{order:1;line-height:11px;font-size:11px}
+.observant-passive-investigation{order:0;display:flex;align-items:center;justify-content:center;gap:3px;font-size:10px;line-height:14px;white-space:nowrap;max-width:100%}
+.overview-vitals .observant-passive-investigation strong,.observant-passive-investigation strong{font-size:12px;line-height:12px;font-weight:600}
+.observant-passive-investigation .trace-value{display:inline-flex;line-height:12px}
+/* Keep numeric glyph metrics independent of the platform CJK fallback font,
+   whose full ascent can exceed both compact score rows on Windows. */
+.sheet-viewport .paper .observant-passive-cell .cell-surface [data-stat]{font-family:Arial,sans-serif}

@@ -7,13 +7,13 @@ import {source,shieldTrainingEntries} from '../helpers/shieldTrainingFixture';
 
 async function savedCard(page:Page){return page.evaluate(async()=>{
  const request=indexedDB.open('dnd-card-standalone'),db=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
- try{return await new Promise<Character>((resolve,reject)=>{const get=db.transaction('documents').objectStore('documents').get('workspace');get.onsuccess=()=>resolve(get.result.characters.find((c:Character)=>c.id===get.result.activeId));get.onerror=()=>reject(get.error);});}finally{db.close();}
+ try{const store=db.transaction('documents','readonly').objectStore('documents'),read=(key:string)=>new Promise<any>((resolve,reject)=>{const get=store.get(key);get.onsuccess=()=>resolve(get.result);get.onerror=()=>reject(get.error);});const [workspace,navigation]=await Promise.all([read('workspace'),read('workspace-active-id')]);const activeId=navigation===undefined?workspace.activeId:navigation,card=workspace.characters.find((c:Character)=>c.id===activeId);if(typeof activeId!=='string'||!card)throw Error('Invalid durable active character');return card as Character;}finally{db.close();}
 });}
 async function ready(page:Page,edition:'2014'|'2024',manualArmor?:string,mobile=false){
  await mockSource(page,{displayMode:mobile?'screen':'a4'});await suppressAnnouncement(page);
- await page.route('**/data/class/class-test.json',route=>route.fulfill({json:{class:source.projection.class}}));
- await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:source.projection.baseitem,itemType:['PHB','XPHB'].map(source=>({name:'盾牌',ENG_name:'Shield',source,entries:['原创装备类型碰撞夹具。']}))}}));
- await page.route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:['PHB','XPHB'].map(source=>({name:'盾牌',ENG_name:'Shield',source,level:1,entries:['原创法术碰撞夹具；不授予装备训练。']}))}}));
+ await page.context().route('**/data/class/class-test.json',route=>route.fulfill({json:{class:source.projection.class}}));
+ await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:source.projection.baseitem,itemType:['PHB','XPHB'].map(source=>({name:'盾牌',ENG_name:'Shield',source,entries:['原创装备类型碰撞夹具。']}))}}));
+ await page.context().route('**/data/spells/spells-test.json',route=>route.fulfill({json:{spell:['PHB','XPHB'].map(source=>({name:'盾牌',ENG_name:'Shield',source,level:1,entries:['原创法术碰撞夹具；不授予装备训练。']}))}}));
  const c=newCharacter(edition);c.name='盾牌训练入口 '+edition;c.automation=newAutomationState();c.abilities.dex=10;c.training={tools:'手工工具记录',languages:'手工语言'};c.runtime.hp=7;c.runtime.resources={manual:{current:1,max:4}};
  c.selections=shieldTrainingEntries().filter(e=>e.edition===edition).map(entry=>({id:entry.kind==='class'?'class':'shield',entry,quantity:1,level:1,equipped:entry.kind==='item'}));
  if(manualArmor!==undefined)c.training!.armor=manualArmor;
@@ -21,6 +21,11 @@ async function ready(page:Page,edition:'2014'|'2024',manualArmor?:string,mobile=
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'synthetic-shield-entry-card.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  if(edition==='2014')await page.getByRole('dialog',{name:'导入前核对',exact:true}).getByRole('button',{name:'保留全部记录并导入',exact:true}).click();
  await expect(page.getByRole('tab',{name:c.name+'（导入）',exact:true})).toHaveAttribute('aria-selected','true');await page.getByRole('dialog',{name:/^导入与导出(?:\s|$)/}).getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ // A fresh imported Fighter still completes the normal deferred first-open
+ // reconciliation. Observe its real saved resource before taking the immutable
+ // hover baseline; never hide those fields from the whole-card comparison.
+ await expect.poll(async()=>(await savedCard(page)).runtime.resources['hit-die:10']).toMatchObject({automatic:true,max:1,current:1});
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');
  return c;
 }
 const armor=(page:Page)=>page.locator('.training-row').filter({has:page.locator('dt').filter({hasText:/^护甲$/})});

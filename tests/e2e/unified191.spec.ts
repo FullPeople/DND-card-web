@@ -3,7 +3,7 @@ import {mockSource,expandSourceBook} from './fixtures';
 import {newCharacter} from '../../src/core/model';
 const card=newCharacter(),profile=card.profile;
 async function openRoom(page:Page,url:string,role:string,auto:boolean){
- await mockSource(page);await page.route('**/data/items.json',r=>r.fulfill({json:{item:[{name:'共享扩展物品',source:'XGE',type:'G',entries:['原创测试条目。']}]}}));
+ await mockSource(page);await page.context().route('**/data/items.json',r=>r.fulfill({json:{item:[{name:'共享扩展物品',source:'XGE',type:'G',entries:['原创测试条目。']}]}}));
  const entry=new URL(url);entry.hash='suite=unified191&bridge='+encodeURIComponent(entry.origin);await page.goto(entry.href);
  await expect(page.locator('.app-shell')).toBeVisible();
  const send=async(type:string,data:any={})=>page.evaluate(({type,data})=>window.dispatchEvent(new MessageEvent('message',{origin:location.origin,source:window,data:{protocol:'full-suite-workbench/v1',session:'unified191',hostStarted:191,type,...data}})),{type,data});

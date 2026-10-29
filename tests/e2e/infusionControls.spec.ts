@@ -7,16 +7,16 @@ import {setInfusionTarget} from '../../src/core/automation/infusions';
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:infusionData.class,classFeature:infusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:infusionData.optionalfeature},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:infusionData.class,classFeature:infusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:infusionData.optionalfeature},headers:{'access-control-allow-origin':'*'}}));
 }
 async function saved(page:Page){return page.evaluate(async()=>{
  const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;
  const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
  try{const workspace=await new Promise<any>((resolve,reject)=>{const r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});return workspace.characters.find((c:any)=>c.id===workspace.activeId);}finally{db.close();}
 });}
-async function assertAc(page:Page,value:number){await page.getByRole('button',{name:'自动化设置',exact:true}).click();await expect(page.getByTestId('automation-ac')).toHaveText(String(value));await page.keyboard.press('Escape');}
+async function assertAc(page:Page,value:number){await page.getByRole('button',{name:'自动化设置',exact:true}).click();const dialog=page.getByRole('dialog',{name:/^基础自动化(?:\s|$)/});await expect(dialog.getByTestId('automation-ac')).toHaveText(String(value));await dialog.getByRole('button',{name:'关闭弹窗',exact:true}).click();await expect(dialog).toBeHidden();}
 async function features(page:Page){
  const tab=page.getByRole('tab',{name:'特性',exact:true});await tab.click();await expect(tab).toHaveAttribute('aria-selected','true');
  const panel=page.locator('.paper[data-active-sheet="true"] .detail-class-features');await expect(panel).toBeVisible();return panel;

@@ -37,7 +37,7 @@ export function exportOwlbear(c: Character, d: Derived) {
     web_resources: c.runtime.resources,
     ...(c.quickbarLayout?.widgets?{web_resource_widgets:Object.fromEntries(Object.entries(c.quickbarLayout.widgets).filter(([id])=>Object.hasOwn(c.runtime.resources,id)))}:{}),
     ...(c.quickbarLayout?.attacks?{web_quickbar_attacks:c.quickbarLayout.attacks}:{}),
-    export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...(d.resistances?.length?[`已核对的注法抗性：${d.resistances.join('、')}；伤害结算仍需手动核对，未写入枭熊 defenses。`]:[]), ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };
+    export_warnings: ['手动记录、选择历史和自定义规则包请保留在原生角色备份中。未预备的法术库保留在 always_known；武器攻击、抗性和复杂特性需在枭熊中核对。', ...(d.resistances?.length?[`已核对的自动抗性：${d.resistances.join('、')}；伤害结算仍需手动核对，未写入枭熊 defenses。`]:[]), ...d.requirements.filter(r => !r.complete).map(r => `未完成：${r.label}（${r.origin}）`), ...d.issues.map(i => i.message), ...(c.adjustments || []).map(a => `人工修正 ${a.target}=${a.value}：${a.reason}`)] };
 }
 export function plainText(value: unknown): string {
   if (typeof value === 'string') return value.replace(/\{@(\w+)(?:\s+([^{}]*))?\}/g, (_, tag: string, body = '') => inlineLabel(tag, body));
@@ -53,8 +53,8 @@ export function exportReview(c: Character, d: Derived, sourceName: (id:string)=>
     `<h1>${esc(c.name)}</h1><p>玩家 ${esc(c.player)} · ${c.edition} · 修订 ${c.revision} · ${esc(c.updatedAt)}</p><p class="muted">固定修订的审阅副本，可离线阅读或使用浏览器打印为 PDF。基础计算不代替特殊规则核对。</p>`,
     `<p>${esc(c.selections.filter(s => s.entry.kind === 'class').map(s => `${s.entry.name} ${s.level} 级`).join(' / '))} · ${esc(c.identity.gender)} · ${esc(c.identity.alignment)}</p>`,
     table(['属性', '基础', '最终值', '调整值', '豁免'], ABILITIES.map(a => [ABILITY_LABELS[a], c.abilities[a], d.abilities[a], signed(d.modifiers[a]), `${signed(d.saves[a].value)}${d.saves[a].proficient ? '（熟练）' : ''}`])),
-    `<p>等级 ${d.level} · AC ${d.ac} · HP ${c.runtime.hp}/${d.maxHp}（临时 ${c.runtime.tempHp}）· 先攻 ${signed(d.initiative)} · 速度 ${d.speed} 尺 · 熟练 ${signed(d.proficiency)} · 被动察觉 ${d.passive} · 生命骰 ${esc(d.hitDice)}${c.size ? ` · 体型 ${esc(SIZE_LABELS[c.size])}` : ''}</p>`,
-    ...(d.resistances?.length?[`<h2>已核对的注法抗性</h2><p>${d.resistances.map(esc).join('、')}。仅显示已生效的注法抗性，不汇总手写或未知规则；伤害结算仍需手动核对。</p>`]:[]),
+    `<p>等级 ${d.level} · AC ${d.ac} · HP ${c.runtime.hp}/${d.maxHp}（临时 ${c.runtime.tempHp}）· 先攻 ${signed(d.initiative)} · 速度 ${d.speed} 尺 · 熟练 ${signed(d.proficiency)} · 被动察觉 ${d.passive}${d.passiveInvestigation===undefined?'':` · 被动调查 ${d.passiveInvestigation}`} · 生命骰 ${esc(d.hitDice)}${c.size ? ` · 体型 ${esc(SIZE_LABELS[c.size])}` : ''}</p>`,
+    ...(d.resistances?.length?[`<h2>已核对的自动抗性</h2><p>${d.resistances.map(esc).join('、')}。仅显示已生效的自动抗性，不汇总手写或未知规则；伤害结算仍需手动核对。</p>`]:[]),
     '<h2>技能与熟练</h2>', table(['技能', '检定', '熟练来源'], Object.entries(SKILLS).map(([key, skill]) => [skill.name, signed(d.skills[key].value), d.skills[key].sources.join('；') || '无'])),
     '<h2>装备训练记录</h2>', table(['类别', '记录'], Object.entries(c.training || {})),
     '<h2>填写与核对</h2>', `<ul>${pending.map(r => `<li>${esc(r.label)} — ${esc(r.origin)}（${r.selected.length}/${r.count}）</li>`).join('') || '<li>本卡由玩家手动记录，不自动判定选择数量或前提是否合法；请由 DM 核对。</li>'}${d.issues.map(i => `<li>${esc(i.message)}</li>`).join('')}</ul>`,
@@ -64,7 +64,7 @@ export function exportReview(c: Character, d: Derived, sourceName: (id:string)=>
     '<h2>当前资源</h2>', table(['资源', '剩余', '上限'], Object.entries(c.runtime.resources).map(([name, v]) => [name, v.current, v.max])),
     '<h2>角色条目与固定来源</h2>', ...c.selections.map(s => `<article><h3>${esc(s.entry.name)} <small>${esc(KIND_LABELS[s.entry.kind])}</small></h3><p class="muted">${esc(sourceName(s.entry.source))} · ${esc(s.entry.edition)} · 资料修订 ${esc(s.entry.revision)}${s.entry.page ? ` · 第 ${s.entry.page} 页` : ''}</p><p>${s.entry.kind === 'class' ? `${s.level} 级 · ` : ''}${s.entry.kind === 'item' ? `数量 ${s.quantity} · ${s.equipped ? '已装备' : '未装备'} · ` : ''}${selectionEffectsAllowed(c, s.entry) ? '来源已启用' : '来源或规则未启用，效果暂停'}${s.parentId ? ` · 来自：${esc(c.selections.find(p => p.id === s.parentId)?.entry.name || '已移除来源')}` : ''}${c.reviewed.includes(s.id) ? ' · 特殊效果已人工核对' : ''}</p><pre>${esc(plainText(s.entry.entries))}</pre></article>`),
     `<h2>人物印象与笔记</h2><pre>${esc(c.identity.description)}\n${esc(c.biography?.story??c.notes)}</pre>`,
-    '<h2>数值依据</h2>', ...Object.entries(d.trace).map(([key, values]) => `<p>${esc(choiceLabel(key))}：${values.map(esc).join('；')}</p>`),
+    '<h2>数值依据</h2>', ...Object.entries(d.trace).map(([key, values]) => `<p>${esc(key==='passiveInvestigation'?'被动调查':choiceLabel(key))}：${values.map(esc).join('；')}</p>`),
   ];
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(c.name)} · 审卡记录</title><style>body{max-width:900px;margin:35px auto;padding:0 24px;font:15px/1.8 system-ui;color:#292d27;background:#fff}h1{border-bottom:3px solid #555}h2{font-size:20px;border-bottom:1px solid #aaa;margin-top:30px}h3{font-size:17px}table{border-collapse:collapse;width:100%;margin:14px 0}td,th{border:1px solid #bbb;padding:6px 9px;text-align:left}th{background:#eee}tr{break-inside:avoid}article{border-bottom:1px solid #ccc}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}.muted,small{color:#76796f;font-size:12px;overflow-wrap:anywhere}@media print{body{margin:0;max-width:none;font-size:11px}h2,h3{break-after:avoid}th{print-color-adjust:exact}}</style></head><body>${sections.join('')}</body></html>`;
 }

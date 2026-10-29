@@ -3,8 +3,8 @@ import { mockSource } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
   await mockSource(page);
-  await page.route('**/data/class/class-test.json', route => route.fulfill({ json: { class: [{ name: '测试法师', source: 'XPHB', hd: { faces: 6 }, proficiency: ['int', 'wis'], startingProficiencies: { skills: [{ perception: true }] }, classFeatures: ['测试特性|测试法师|XPHB|1'], classTableGroups: [{ colLabels: ['回气次数', '固定值'], rows: [[2, 0], [2, 0], [2, 0], [3, 0]] }], startingEquipment: { default: ['测试装备。'] } }], classFeature: [{ name: '测试特性', source: 'XPHB', className: '测试法师', classSource: 'XPHB', level: 1, entries: ['自制正文。参见 {@item 测试皮甲|XPHB}。', { name: '细节', type: 'entries', entries: ['第二段。'] }] }] } }));
-  await page.route('**/data/items-base.json', route => route.fulfill({ json: { baseitem: [{ name: '测试皮甲', source: 'XPHB', weight: 2, value: 50, entries: [{ name: '装备正文', type: 'entries', entries: ['短正文。'] }] }] } }));
+  await page.context().route('**/data/class/class-test.json', route => route.fulfill({ json: { class: [{ name: '测试法师', source: 'XPHB', hd: { faces: 6 }, proficiency: ['int', 'wis'], startingProficiencies: { skills: [{ perception: true }] }, classFeatures: ['测试特性|测试法师|XPHB|1'], classTableGroups: [{ colLabels: ['回气次数', '固定值'], rows: [[2, 0], [2, 0], [2, 0], [3, 0]] }], startingEquipment: { default: ['测试装备。'] } }], classFeature: [{ name: '测试特性', source: 'XPHB', className: '测试法师', classSource: 'XPHB', level: 1, entries: ['自制正文。参见 {@item 测试皮甲|XPHB}。', { name: '细节', type: 'entries', entries: ['第二段。'] }] }] } }));
+  await page.context().route('**/data/items-base.json', route => route.fulfill({ json: { baseitem: [{ name: '测试皮甲', source: 'XPHB', weight: 2, value: 50, entries: [{ name: '装备正文', type: 'entries', entries: ['短正文。'] }] }] } }));
   await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled();
 });
 

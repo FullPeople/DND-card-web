@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { mockSource } from './fixtures';
 
-test.beforeEach(async ({ page }) => { await mockSource(page); await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'微光术',source:'XPHB',level:0,entries:['为测试而创作的一点微光。参阅 {@race 测试旅人|XPHB}。']}]}})); await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); });
+test.beforeEach(async ({ page }) => { await mockSource(page); await page.context().route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'微光术',source:'XPHB',level:0,entries:['为测试而创作的一点微光。参阅 {@race 测试旅人|XPHB}。']}]}})); await page.goto('/'); await expect(page.getByRole('button', { name: '更新资料', exact: true })).toBeEnabled(); });
 
 test('right and middle buttons pin nested tooltips; one outside click dismisses without activating the page', async ({ page }) => {
   await page.locator('.catalog-row').filter({ hasText: '测试法师' }).click();

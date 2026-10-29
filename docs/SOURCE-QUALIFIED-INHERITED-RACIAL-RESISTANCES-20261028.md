@@ -1,0 +1,13 @@
+# Source-qualified inherited racial resistance — stacked draft checkpoint
+
+This independent draft applies the exact tested inherited-resistance delta to published Draft PR130 at `58e0faa707b5219b428235282de1865bf06c40bb`, retaining its Armor, class-movement and explicit-racial-resistance composition. The earlier isolated local source parent was `15d15a102e0cd149f1d81405d5441b396c56989d`; it was not published as the complete composed source. PR130 and its fixed fourteen-family gate remain unchanged.
+
+The single pinned original independently yields 26 additional complete subrace owners with 32 fixed-type associations, 52 canonical/App route proofs and no normalization holds. A child must truly lack its own resistance field; explicit null does not mean inheritance. Exact child, parent and surviving-clause proofs are required. Duergar's replacement clause is authenticated separately; the genuinely unnamed Tiefling retains the normalizer's no-suffix form. No invented names, IDs, payload repairs, parent-owned rows or transitive disabled-parent switches are introduced.
+
+All 38 previous explicit proof records remain byte-identical. Choice-dependent headers, three null overrides, the unreviewed copied row and four version definitions remain held. The derived union does not apply damage, HP changes, immunity, advantage or temporary/conditional resistance.
+
+Before the new evidence was connected, four source checks passed and all 26 existing-engine cases demonstrated the missing effect on both routes. A separate exact-name alias collision was reproduced after the rule-list union; a category-qualified alias lookup preserves the distinct authenticated race/subrace domains without relaxing full-snapshot or canonical reservation checks. The same targeted alias case passed after that narrow fix. Full local verification passed 173/173 checks (39 new and 134 retained), with zero failures/skips/retries; type checking completed with zero diagnostics. Mounted interaction and the 148 full-App release gate remain NOT RUN.
+
+On the published PR130 composition, a fresh bounded verification passed 69/69 checks and type checking with zero diagnostics. It retains the inherited-source, native reopening, prior item/Armor resistance and infusion checks, and adds a genuine inherited-root plus worn/attuned Armor union and independent opt-out flow. These 69 checks are not added to the earlier 173 as a cumulative acceptance count. The authored two mounted cases remain NOT RUN on this new head.
+
+No new coverage-report/page-percentage or whole-entry completion credit is claimed. This is not a merged or deployed release.

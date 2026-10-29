@@ -1,0 +1,2296 @@
+{
+  "schemaVersion": 1,
+  "inputSetSha256": "c32dc7d8000a47bf3b5b6d00022f968e87d02bc3bcce54b4d7986ee5bc245d7e",
+  "rows": [
+    {
+      "url": "https://5e.kiwee.top/data/actions.json",
+      "sha256": "d6bb002dd6008958bb6fb1fb732a1b1822a2c8da42b3d571eb56cb300af111d7",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/actions.json",
+      "gitBlobSha1": "1b7770ff0d5d027e483bf47dba409b0114fdf53a",
+      "sourceBytes": 47896,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/actions.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/adventures.json",
+      "sha256": "b013b5ae029950740beec14f2be9801c10e7a661a5101ae03ab61d23bc50926f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/adventures.json",
+      "gitBlobSha1": "9322f0ceeeff3371f72c07b927c6db044c97b9bd",
+      "sourceBytes": 764577,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/adventures.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/backgrounds.json",
+      "sha256": "b71ce16364fa2603d5d148f8324fd0694a521cabfda5b02391007d2f1cd53215",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/backgrounds.json",
+      "gitBlobSha1": "a44f88e0ccebf3e3e1086fdc3e88fa2c46bb90fa",
+      "sourceBytes": 750845,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/backgrounds.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bastions.json",
+      "sha256": "b7cb643d3386ad484bb28cbadc23acc71829fd6512ffeef70f4df8c9d46df503",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bastions.json",
+      "gitBlobSha1": "fcd2919b991e81e691a04b7dfab4da8f1623e4ba",
+      "sourceBytes": 133327,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bastions.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-aatm.json",
+      "sha256": "cab8f5f7b7d77aa6cedad74cd2958458890bfe475b3c55452529e93da18b11d3",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-aatm.json",
+      "gitBlobSha1": "71f6983647e991d01db80623e84cf5caf987c672",
+      "sourceBytes": 12566,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-aatm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-abh.json",
+      "sha256": "3e65d78e6ea1c64e726aac229f6696a9928b9bcbff573df16ac89d023db29b47",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-abh.json",
+      "gitBlobSha1": "de3c6bc6fee2fc65037e0ec75f23d7a3bab457a8",
+      "sourceBytes": 22963,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-abh.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ai.json",
+      "sha256": "d7e76243733ee3aff5f62363c16da2bd1cad3ab448b8b514215b964baea6f866",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ai.json",
+      "gitBlobSha1": "e79dfcbff0a4febff25180f699c253b75d87a24e",
+      "sourceBytes": 72822,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ai.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-aitfr-dn.json",
+      "sha256": "b62814679031f017d3fb3fdfeec12d5de5d8968aa7b6bff78c8ad426f26690ba",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-aitfr-dn.json",
+      "gitBlobSha1": "e087832f6153b07f9230fd7617f4ee78ee2e8061",
+      "sourceBytes": 12254,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-aitfr-dn.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-aitfr-fcd.json",
+      "sha256": "261f8b491d321393b5c634b1d09e7cf4590ba4f5afdd5801843f2d0ebcb9d453",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-aitfr-fcd.json",
+      "gitBlobSha1": "b53528bd4e37d16b9528d1fdabd4048ccd37e2af",
+      "sourceBytes": 8262,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-aitfr-fcd.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-aitfr-isf.json",
+      "sha256": "12f8a7f1b4a129f7806fb081226430886164cb6378296c3fc7e231214fbe33d2",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-aitfr-isf.json",
+      "gitBlobSha1": "bfe7a94d79e17beb5a66eabd952627e3e143314d",
+      "sourceBytes": 6236,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-aitfr-isf.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-aitfr-thp.json",
+      "sha256": "f1955f1391acaa1bdcb914a490765cc1b451e38c8cfde567190081ff60d37b05",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-aitfr-thp.json",
+      "gitBlobSha1": "8661491931bf4236c247c8e0bfad38f33a6969a0",
+      "sourceBytes": 11841,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-aitfr-thp.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-au.json",
+      "sha256": "c1f61fb83f5fc4604f934cf15a0f1d8442214ae04e3e9537b2b40777a35b33f4",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-au.json",
+      "gitBlobSha1": "35fb1a6f42142dd1f7d2be3f8b183762ef085752",
+      "sourceBytes": 84934,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-au.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-aud.json",
+      "sha256": "99ceccbe445ab6d032454a42a7b459433e10cf26bc6fd9039678ba51363ed0e3",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-aud.json",
+      "gitBlobSha1": "762f50507ad7ecfbb49d11914f4b4958d94387af",
+      "sourceBytes": 24933,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-aud.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-awm.json",
+      "sha256": "a9c4125d24c1834a0dab7e83672ccaba0ac01f9b449590f2baf366affc06993b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-awm.json",
+      "gitBlobSha1": "f9680bc05c642974ba60a90487a248b89ac1d82d",
+      "sourceBytes": 20454,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-awm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-bam.json",
+      "sha256": "1e8be5d9690007fd56b6f90bea47f7744b8aa044f6f0146227c6713e0f161257",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-bam.json",
+      "gitBlobSha1": "3e8fbfe860ef49556b0192cda072ddb2ae5567ad",
+      "sourceBytes": 200885,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-bam.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-bgdia.json",
+      "sha256": "9bab564d688ff1cbeb0ca7e9fab454d78ccc505cfc526425f8682626b56b156f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-bgdia.json",
+      "gitBlobSha1": "89506a5920732e7c148644b809f82df4e747213a",
+      "sourceBytes": 107043,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-bgdia.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-bgg.json",
+      "sha256": "cc1f1923c4417f298cb39a0693172d0da826c15eabc07c9bc22c9c900e994599",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-bgg.json",
+      "gitBlobSha1": "d43d0e486385d4a11e976daec062c4bf7fb4acdd",
+      "sourceBytes": 239609,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-bgg.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-bmt.json",
+      "sha256": "d8de24b29b8c15b8b3cbb50f59fef28f136e0f314d347a18a3f94cb875c0aebd",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-bmt.json",
+      "gitBlobSha1": "8ca9bb708edf45dec8c5d9844b2f5ee2dac5c514",
+      "sourceBytes": 151565,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-bmt.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-cm.json",
+      "sha256": "d56cdc3f2db9ee2df94ac624430838c18c790be2092ebcbf9b465591b7401b18",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-cm.json",
+      "gitBlobSha1": "1e8ca53fc58bf6575b987c009ed57eb269f32ee7",
+      "sourceBytes": 117468,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-cm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-coa.json",
+      "sha256": "c4639e23a2db1604cfd6b21c0db2279985e608b0e64e33e3806023675eb1fcc0",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-coa.json",
+      "gitBlobSha1": "494a2516976183ea7a9f5a868f69101683504c59",
+      "sourceBytes": 235778,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-coa.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-cos.json",
+      "sha256": "77260e5a163f6d7d8f29e289b6a95ca78f75766dea2a3e8c87618a724a30c76c",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-cos.json",
+      "gitBlobSha1": "30ae677a2ebbe520e4e4c334bbba2460c6e830f5",
+      "sourceBytes": 120325,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-cos.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-crcotn.json",
+      "sha256": "98f75cb311ec05443953c716ab3535979b6bb4faf3f3646d8ef4584de63fa79b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-crcotn.json",
+      "gitBlobSha1": "894d6ab264f1b43a875b236e343d0fd18fb60d9d",
+      "sourceBytes": 152982,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-crcotn.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-dc.json",
+      "sha256": "06d662d484a299d000f651b52bd711f1b9ee66d9f2d33bcf24f7039aebc5ba02",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-dc.json",
+      "gitBlobSha1": "77c68f5974da2ae52737a95d141a2ac0e0b9b1c2",
+      "sourceBytes": 17905,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-dc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-dip.json",
+      "sha256": "4850957ebc63d706de773a23fc946cd32fbcfe8277e822fea1e19b04d5d18a68",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-dip.json",
+      "gitBlobSha1": "067244f0afccfe9ce28d79a7171cf35f9304e814",
+      "sourceBytes": 12764,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-dip.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ditlcot.json",
+      "sha256": "fc3703049b89f8b147e1517bb73f7098a36d65949469338170c334e457b916f9",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ditlcot.json",
+      "gitBlobSha1": "2587b9765757429860594a95b76b97c3c3443b22",
+      "sourceBytes": 3765,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ditlcot.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-dmg.json",
+      "sha256": "85e37d503e82cf7ec80ddb8deb458b3256c3316419c46612e489da2309631cf0",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-dmg.json",
+      "gitBlobSha1": "70994aa38865b189d6cdb4dfd30bd360868be216",
+      "sourceBytes": 3595,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-dmg.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-dod.json",
+      "sha256": "988f2a52fc8c668c68e3c3f850a29605c165d27ad5168ab22ff40022e7b4095e",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-dod.json",
+      "gitBlobSha1": "f61e97f980debdef646ce6fab406ca71412bcbde",
+      "sourceBytes": 4746,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-dod.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-dosi.json",
+      "sha256": "0a0c8ddf7ead8cf44b44d11897c3319f7a848c45c7a89542424d6fcba0dc4428",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-dosi.json",
+      "gitBlobSha1": "af55872705b52ae9c895408634ef5403c31076fb",
+      "sourceBytes": 14516,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-dosi.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-drde-bd.json",
+      "sha256": "db63bfc2cf73f70ca01c20931b339bcaaf0d0693e592619e57f200214b007431",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-drde-bd.json",
+      "gitBlobSha1": "40cb703fd2470c70c885c8b3921373548e74834d",
+      "sourceBytes": 478,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-drde-bd.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-dsotdq.json",
+      "sha256": "ea171e9ca06936696c2e59347be1db1a79b8a1619dd8a4bdf268b1446580ba68",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-dsotdq.json",
+      "gitBlobSha1": "c78937cf3a4b8bcf6698c0ed7de83c7c76abf498",
+      "sourceBytes": 229399,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-dsotdq.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-efa.json",
+      "sha256": "55c2b4c669786cbba1178dff1017b6a1194ddd0a8bda5d38725129f6a81b846f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-efa.json",
+      "gitBlobSha1": "3af412ab60aa95e4b52890bff913292dd17d1a5f",
+      "sourceBytes": 69085,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-efa.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-egw.json",
+      "sha256": "83b558b91021cf47cc267ea92e0634e31d4e645fd686ccf2eb5725805e303225",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-egw.json",
+      "gitBlobSha1": "bf1093e65042b824c6127734c475978136fe6e66",
+      "sourceBytes": 100260,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-egw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-erlw.json",
+      "sha256": "3a7bd60ae4926319488c0deeb5fa043bb2e97356f40a853986bbd8f2875d4331",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-erlw.json",
+      "gitBlobSha1": "dca49d4ac749f1382e1bc777508ec5df6ace5959",
+      "sourceBytes": 137732,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-erlw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-esk.json",
+      "sha256": "873d0a2958c8af7a934fd0493e112d5b0ad408b5a1dcbba2136cbae72d501e14",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-esk.json",
+      "gitBlobSha1": "49715ccffb209e6c7464c64643523d14bb07f566",
+      "sourceBytes": 7501,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-esk.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-fraif.json",
+      "sha256": "d5e47e5c584686d68a48223ee8b3598f7d0566b5871889d395b2c14d500cea0f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-fraif.json",
+      "gitBlobSha1": "d8c4113081fb69548248ca2ced7e8f497ea63943",
+      "sourceBytes": 143879,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-fraif.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ftd.json",
+      "sha256": "aaa9f32f9f2407f2852ac12cc7bbd7faeb1a96498080f9acf0996afa7ac7bb11",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ftd.json",
+      "gitBlobSha1": "05229f24048719ef09a55d955562e0e5015e2f0b",
+      "sourceBytes": 553145,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ftd.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ggr.json",
+      "sha256": "71013000716c2982856a81fbbf928e978fb2af8e003f22877e2aec82a33d93e1",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ggr.json",
+      "gitBlobSha1": "370909101942fcf80f9f370c3c7af485ec744e35",
+      "sourceBytes": 242265,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ggr.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-gos.json",
+      "sha256": "1af286aeb017d121edbfe835a6b78887c86db11caaa4e076ce3527fdb847cffb",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-gos.json",
+      "gitBlobSha1": "0bde5fcd263415dd60f5db0045d6f1dc689a999e",
+      "sourceBytes": 131092,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-gos.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-gotsf.json",
+      "sha256": "1152e28fc39238c295ffed16aa0d657e3973c4b712649e3a1430deb51451959d",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-gotsf.json",
+      "gitBlobSha1": "36a3297b3bdfd86a8062934475b63dfdc525bd35",
+      "sourceBytes": 902,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-gotsf.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-hat-tg.json",
+      "sha256": "83c4788d16f85e0347d0a7271235dd824b096e661960ba0b24523d8ff8e08a17",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-hat-tg.json",
+      "gitBlobSha1": "c123692cf2e2881e16abffc55f27621e1048857a",
+      "sourceBytes": 25911,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-hat-tg.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-hftt.json",
+      "sha256": "037fa1a3fb86f09338803fc9cf893fc4c5cd26f4a330e105f69eaca654ad64f5",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-hftt.json",
+      "gitBlobSha1": "de7833a457e623f6205dc25ab3b6e891a89d4e45",
+      "sourceBytes": 7366,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-hftt.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-hol.json",
+      "sha256": "37cce5478c4decf42bf375ba140e962cf0d64e2d376572a0aa63913b3d61a15f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-hol.json",
+      "gitBlobSha1": "5039336e4527aab7e66728609696fa737f1569fb",
+      "sourceBytes": 7443,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-hol.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-hotb.json",
+      "sha256": "574b335acc184502cbd1ea6e3c7ea4be31d7ec852b274a8a877bb0e43d50455f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-hotb.json",
+      "gitBlobSha1": "616476d8e3a30266f4f210049c18a2d917ad7e8c",
+      "sourceBytes": 20770,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-hotb.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-hotdq.json",
+      "sha256": "b42fe1fca04a843011584d9151ee6eebb852682e9a1211372afff58c04dba598",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-hotdq.json",
+      "gitBlobSha1": "cc0e12bf744c25558d7973e1b53d669758e5d99f",
+      "sourceBytes": 55897,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-hotdq.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-idrotf.json",
+      "sha256": "881918aeebaf53781dc3f6186bde7d61e9edae6ef2903e9bcd04f16389eb5092",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-idrotf.json",
+      "gitBlobSha1": "c411b19b4a9f662edaa340ba63ad102ffd1111b6",
+      "sourceBytes": 175835,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-idrotf.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-imr.json",
+      "sha256": "414d7df4947139f708d9031127df35638098a754fda1199e83be29183e8d6727",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-imr.json",
+      "gitBlobSha1": "0fc3966bf08fe1c69bae77f361a8cd66dbad229b",
+      "sourceBytes": 53428,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-imr.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-jttrc.json",
+      "sha256": "0e99aa00247982501c94bcac04f49ae558736302327a39ec5343b685f534f1fc",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-jttrc.json",
+      "gitBlobSha1": "da0a990eeee68bbe500e85611abb7775008077bd",
+      "sourceBytes": 67445,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-jttrc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-kftgv.json",
+      "sha256": "c7ad902bbf9eec6d836eb8291c8720484236815bb2c8c1235e93cc2d5844715d",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-kftgv.json",
+      "gitBlobSha1": "9445b3cbe9721faa08a6ae57abff0c4a4a0c0ce0",
+      "sourceBytes": 58630,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-kftgv.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-kkw.json",
+      "sha256": "a0b75abb116da92957da59856475b98e22beb2a15e8d66119f55a30a8e92fc60",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-kkw.json",
+      "gitBlobSha1": "3164ee8131707e2ebb083b6514f7c196cb7548e7",
+      "sourceBytes": 6331,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-kkw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-lfl.json",
+      "sha256": "9a4cad5bbf6e3e128d5467d5b46db5842ef044e456a4415004b9037f31ecc4af",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-lfl.json",
+      "gitBlobSha1": "0784bf3ce0012b9c446f4df5dc4fb67e1bcbdc84",
+      "sourceBytes": 19408,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-lfl.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-llk.json",
+      "sha256": "243392848c9bd932bb275a19957c09a1328043cc3b775d72e2d2516d7280274b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-llk.json",
+      "gitBlobSha1": "7d8b1df91c2088ec00f5cce0ee28aec35cb64952",
+      "sourceBytes": 24800,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-llk.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-lmop.json",
+      "sha256": "dab10d509da18ac9469fee2bf2002db3dc8564906f5e9e9047998abbb278ce10",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-lmop.json",
+      "gitBlobSha1": "270cd8c3df29c40ba9f3a681fb83aac9ef357c8e",
+      "sourceBytes": 14964,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-lmop.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-lox.json",
+      "sha256": "c6aa0ae8745eacabf16b904a784e58e0e40d2231ed7df74e159a2062747ca0c1",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-lox.json",
+      "gitBlobSha1": "e24d5958de5fbe31c0879db5beb2ea879df2da3f",
+      "sourceBytes": 9513,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-lox.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-lr.json",
+      "sha256": "2c5616d4b2dbcf2afdad69093844eec138a4ff65a81f37e089898ffd6a763625",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-lr.json",
+      "gitBlobSha1": "4aadfdf4219696081345377e9f52eae6ea120a38",
+      "sourceBytes": 25534,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-lr.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-lrdt.json",
+      "sha256": "5f0f8ad1e1edf7abe8e614783953746dd1e980199acca04dc2a05069bc63c1eb",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-lrdt.json",
+      "gitBlobSha1": "38c71ac88359e3a983211fd162e42bded9194501",
+      "sourceBytes": 5200,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-lrdt.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mabjov.json",
+      "sha256": "19e108db01e52291bf37dd350dfbeb83c5b1b9d874ac6d781d9fefaa0f14d21b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mabjov.json",
+      "gitBlobSha1": "37eaf9261fafa3be29ddc9b8243214151608c1db",
+      "sourceBytes": 238872,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mabjov.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mcv1sc.json",
+      "sha256": "83e3f6dd4b333f6acf478477d9444c4b996e0280251570a60f04952a3b8e05c5",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mcv1sc.json",
+      "gitBlobSha1": "de40fe67e953411ec8e664e091849221e135ca35",
+      "sourceBytes": 33318,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mcv1sc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mcv2dc.json",
+      "sha256": "c17e5ae223c38408afb0d759de4aa348ed87cf73a32c682266a2a986431cce38",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mcv2dc.json",
+      "gitBlobSha1": "3ff374a7faeb6faaeafea31acae1bd1fe1947337",
+      "sourceBytes": 41712,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mcv2dc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mcv3mc.json",
+      "sha256": "1428fb6760f59e01d3006ab923c1b5d9e872daa33235b0b96ed9c23d2a108066",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mcv3mc.json",
+      "gitBlobSha1": "2034fdb55a69edb185d292af4449426e39fd553b",
+      "sourceBytes": 14595,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mcv3mc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mcv4ec.json",
+      "sha256": "678829db1ad55cd1448a91a85d4c5e020877edb7547b608ab393a9f9794515e5",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mcv4ec.json",
+      "gitBlobSha1": "615337178214fe4212f7c246c4e9ce61895b845b",
+      "sourceBytes": 80967,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mcv4ec.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mff.json",
+      "sha256": "79d60293464d1b25d57faa886ddfedb1baa3500585b6db1410b81e20fddc3432",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mff.json",
+      "gitBlobSha1": "010f4675b6940f8bee6a3c7ce38958e2d85519f4",
+      "sourceBytes": 45753,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mff.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mgelft.json",
+      "sha256": "83224cbff60731cdab1c7f79473764c7cef214a3b9a460294d6f982196bbac58",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mgelft.json",
+      "gitBlobSha1": "0cfd99ccd9807a8905814aee86008f7f5b179520",
+      "sourceBytes": 14441,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mgelft.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mismv1.json",
+      "sha256": "00e79b5f638a9054676e39031d4f180bb0276e52800e0816efb6a0ad15a8c143",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mismv1.json",
+      "gitBlobSha1": "debeeb092754f52e2ccc3a6c714c42f42bad4c05",
+      "sourceBytes": 22619,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mismv1.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mm.json",
+      "sha256": "99d35fe87416eafc482e42fcda47fada55d916f3547e448596f46df72a80e097",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mm.json",
+      "gitBlobSha1": "6888064f3640d2daf0426432aa782c869466c42b",
+      "sourceBytes": 1670921,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mot.json",
+      "sha256": "6475665733cbe4ccafc89eb3665f185e1ddd8e745d1bde420f8f7da81ea5dca0",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mot.json",
+      "gitBlobSha1": "3acf9a364c41ce7e30a162ab344c44716a7a0b63",
+      "sourceBytes": 153477,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mot.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mpmm.json",
+      "sha256": "4e0a9a769a157b35b29eada559c5826ceb85e226e2dab98ee46fbf0e08f4e287",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mpmm.json",
+      "gitBlobSha1": "90587ecb9e41c3dcf829821ce5002576bce4acaf",
+      "sourceBytes": 942291,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mpmm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mpp.json",
+      "sha256": "8547843dcd7f94156a4bd271a92655d2afd9261eac455834625021b61253ebcb",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mpp.json",
+      "gitBlobSha1": "1932908922a24b0d09f1c61466fc082435f175be",
+      "sourceBytes": 183858,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mpp.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-mtf.json",
+      "sha256": "25a5d7ea5c0591e3676adf25dedede3e1f635d077fd5ce110ba95b1d8d7540cf",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-mtf.json",
+      "gitBlobSha1": "7e7778ad611e0c5a433096dc4d459b529dfd5d0d",
+      "sourceBytes": 561023,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-mtf.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nf.json",
+      "sha256": "93ca93d6a9343a1b67a204160fc50efd089e357a444a58f2faffa84d26623447",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nf.json",
+      "gitBlobSha1": "71f902b54d415efdc45b844e732952f4ac41f551",
+      "sourceBytes": 18470,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nf.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nrh-ass.json",
+      "sha256": "d880b0036eb97dd1bcc5d485cddeeb0a411bf630fbbef8efc52bfe9d5d79905e",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nrh-ass.json",
+      "gitBlobSha1": "93873da9392c96cf079b93767d9694b191c00fd6",
+      "sourceBytes": 1460,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nrh-ass.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nrh-at.json",
+      "sha256": "abc58c401aa83eaa556d87860cf9d31631f6f43f351bdc4080147b7e6c060c7a",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nrh-at.json",
+      "gitBlobSha1": "55c8a6e81484a745232a87e4b0c189a15d255bb3",
+      "sourceBytes": 8635,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nrh-at.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nrh-avitw.json",
+      "sha256": "d72dbad452a5647bd65253f4b2ab8e919da9e86bea94b991f4abf5d15254cdeb",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nrh-avitw.json",
+      "gitBlobSha1": "7d4c90e82301614132feb9469e7ea6e13e343c61",
+      "sourceBytes": 3073,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nrh-avitw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nrh-awol.json",
+      "sha256": "92222cf41e18ac548b338c7fd7cefc8881c95160c72e443607987f531679fc91",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nrh-awol.json",
+      "gitBlobSha1": "05713515339c2ea5a1551c8276b24e5f03f83649",
+      "sourceBytes": 627,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nrh-awol.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nrh-coi.json",
+      "sha256": "30117314ec8ad4b402206657957977d6a28c53721e4c503156e04db3c06b508a",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nrh-coi.json",
+      "gitBlobSha1": "8cb450512bf02740f0bf3f0bb3b963ee4a3282f7",
+      "sourceBytes": 4202,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nrh-coi.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nrh-tcmc.json",
+      "sha256": "a2aa6d17945c4e474c5f74ff6b9120333e10c4f9a568d2939f8198249f17d7b0",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nrh-tcmc.json",
+      "gitBlobSha1": "f970fcfb1d108805b98e31e3179bdd04dde44367",
+      "sourceBytes": 2331,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nrh-tcmc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-nrh-tlt.json",
+      "sha256": "f634b1ed5d8e5242efc2f4d169dffc5af032c2959abcbc3d12d18afe720dc5a8",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-nrh-tlt.json",
+      "gitBlobSha1": "2bd1c1010ee23c1792e6f543308bc8edbf50233c",
+      "sourceBytes": 127,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-nrh-tlt.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-oota.json",
+      "sha256": "592b3b833caa222b5f07e56dfc4296ac1a537928a792a41eb66b6fbce30e7ea9",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-oota.json",
+      "gitBlobSha1": "c133ca24ad4a82137675545017eb0f299014f00c",
+      "sourceBytes": 139239,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-oota.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-oow.json",
+      "sha256": "68086a5fa4bc375c665596a329ee16e29fcbcc1474f0122df7fb26013593040f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-oow.json",
+      "gitBlobSha1": "e00d5abb1148d274d4b5a4624951a5d7f9011d33",
+      "sourceBytes": 13338,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-oow.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-pabtso.json",
+      "sha256": "4d6b5c7f12ef77ce941faef22ff55ba8c7f517c786f825abc7dd44f0f4bad6f2",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-pabtso.json",
+      "gitBlobSha1": "40868d54b06b257cd1b189f4364caedd86200adc",
+      "sourceBytes": 107648,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-pabtso.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-phb.json",
+      "sha256": "b8bed355661d2b645c0f96bdf89b8f76a53d471c1ed0a8aaec7b2c54d3698a9b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-phb.json",
+      "gitBlobSha1": "a0b96d21eb12fbb383895afd1366ce393e766cc6",
+      "sourceBytes": 7657,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-phb.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-pota.json",
+      "sha256": "e1ee78af59a4d72506081ebde3b85b677b2b559f7a6283a5fd7c3ea1bb2a2ec2",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-pota.json",
+      "gitBlobSha1": "f2ef4036fe0eb09bf3817a522849adb2562c2b31",
+      "sourceBytes": 140020,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-pota.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ps-a.json",
+      "sha256": "90be1729f2b65e8b00f0adeceab8546c1989ff9385e7d3789b2ba32e1a011393",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ps-a.json",
+      "gitBlobSha1": "26f2a0c5e196b15b5e71aec37b305d9259d95d35",
+      "sourceBytes": 16589,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ps-a.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ps-d.json",
+      "sha256": "37ea490b13ece16cf5b83f15a2de3b07f7a983235ee6aaa82ae0ac2c3d7f430d",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ps-d.json",
+      "gitBlobSha1": "6b7433d1c82962a9c73df5fa4f4f0e6749c1da5d",
+      "sourceBytes": 7047,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ps-d.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ps-i.json",
+      "sha256": "46d48c0658da7b1f3319c3348a41c88594926b2e66ca340c46dfffd4bef93851",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ps-i.json",
+      "gitBlobSha1": "3cb6760248721ecff7a173677c458f30cd102083",
+      "sourceBytes": 52639,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ps-i.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ps-k.json",
+      "sha256": "282ceb969113700e528af51d4779a96346ffb93d48794aebec41b028f031b866",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ps-k.json",
+      "gitBlobSha1": "674a50adeba0e49edf4f2eb69a0ac917efa3b71a",
+      "sourceBytes": 17917,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ps-k.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ps-x.json",
+      "sha256": "bf07e533563a0964142045d809f0f1db313a617472d2b2eb2615f4e6e461a287",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ps-x.json",
+      "gitBlobSha1": "2c7bb9129da2a1369b25c89c27d3c1e4730e0b4b",
+      "sourceBytes": 44651,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ps-x.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ps-z.json",
+      "sha256": "df54ab4ff958d05b6d2a2d9f394ae7bb6bf77bd85a256c7958b4d72d84b9d90e",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ps-z.json",
+      "gitBlobSha1": "4c2766b518ffe4b8482351c58f1ee7dd83a2a8ea",
+      "sourceBytes": 27129,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ps-z.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-qftis.json",
+      "sha256": "86c2c15ab74333d9e4d511fea621a1a6cfed0e254c9832a107db5fe3f8944f5b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-qftis.json",
+      "gitBlobSha1": "720b96b00a7324a26127aa3da9e9b28707cb73dd",
+      "sourceBytes": 121569,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-qftis.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-rhw.json",
+      "sha256": "dbb8440916d12e76a12d76116c426e67c4e45bd4595fd7d0573ec014fc61c187",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-rhw.json",
+      "gitBlobSha1": "3bdf05f5b1797f129559fbe3ad6533e7d8f1ca8f",
+      "sourceBytes": 264517,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-rhw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-rmbre.json",
+      "sha256": "f4521b0f65e542884ea4f7b628428b056bc5a3abc978ae2548ba16c0c5a60d24",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-rmbre.json",
+      "gitBlobSha1": "d1658fc4b49717bcf04e152a95d67785d4fd7248",
+      "sourceBytes": 9468,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-rmbre.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-rot.json",
+      "sha256": "3001d68a904248f2a5330a1171909dabc24ab40abcaa8162485beab62f35b8c3",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-rot.json",
+      "gitBlobSha1": "e13837847e275f3245b8348f610e84ceb2a94399",
+      "sourceBytes": 42924,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-rot.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-rtg.json",
+      "sha256": "062a68cad8470665bae7f8b217d15af7967cda4329f92e11d3dacac3e81905ed",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-rtg.json",
+      "gitBlobSha1": "bb7da20ebd0522ab70fac3529df7c8576570b802",
+      "sourceBytes": 8952,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-rtg.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-sads.json",
+      "sha256": "1a5700dd26a10907ecdbc2dcfb4fb41cb3e5d55c261579ce9d0b949d63b466e9",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-sads.json",
+      "gitBlobSha1": "b71de624d4737bf9bbe66524969d4c8749c7bca9",
+      "sourceBytes": 10753,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-sads.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-scc.json",
+      "sha256": "47e32e01d99b60b96c82133c088410d145d9358082596112a5860897cc557861",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-scc.json",
+      "gitBlobSha1": "75de598c2d0565f6512ed7fc4bf363c4bcd4ce99",
+      "sourceBytes": 147840,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-scc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-sdw.json",
+      "sha256": "432e27ebfd38bb5e58ae5b4406ccddf238d70344d9d892c659b8e4bccabbe04f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-sdw.json",
+      "gitBlobSha1": "d780ce8e5c0fd527fbe9f2fdeed6f17a20f2c934",
+      "sourceBytes": 21286,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-sdw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-skt.json",
+      "sha256": "69488f5bae7b7d78135b36fda9fc277434aacab464dcf5aa3c54a25b8650dd0b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-skt.json",
+      "gitBlobSha1": "6df1af4fc82da4b0756dc209982696a8107ce4e4",
+      "sourceBytes": 186328,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-skt.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-slw.json",
+      "sha256": "f16b5d2f04c95071fb06aa72415b7db126a38f5aa86df56d578516ec69e38f60",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-slw.json",
+      "gitBlobSha1": "eea1619fcef781ecbefb2a6a5e9b053f03429f87",
+      "sourceBytes": 16661,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-slw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-tce.json",
+      "sha256": "11f24075df41aa62cb159273389218b76b1eb7fc080b23a74815037c775cfe53",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-tce.json",
+      "gitBlobSha1": "1eb8db2536170d4e052c64baaf8f86fb6f201eb1",
+      "sourceBytes": 64217,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-tce.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-tftyp.json",
+      "sha256": "3fa99a3eaf5352e94e24b3f1cfd71ebc056fe1ae4fd6002d0a1ddb2e43f5c887",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-tftyp.json",
+      "gitBlobSha1": "844358ceda7150256cd823726e163b1f667882c1",
+      "sourceBytes": 171342,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-tftyp.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-toa.json",
+      "sha256": "d83bd41ca8da8fa0e118706fe38d62c0d28c12e63bc61ada1c17e0447258652f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-toa.json",
+      "gitBlobSha1": "c61899967dfc0c0cc5194da6fcc1575b614b8faf",
+      "sourceBytes": 158713,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-toa.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-tofw.json",
+      "sha256": "d75404c0a484e34dc612fefc933ab4931e5b606fa645148642955284a5b5d927",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-tofw.json",
+      "gitBlobSha1": "40399b7f28a4d71868fc88fe647d7dd15916ef7a",
+      "sourceBytes": 12283,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-tofw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-ttp.json",
+      "sha256": "b234cdb2a08ead1f8d6ab0fc19cf3082786b53d91a36b24b4629b7b26de1d385",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-ttp.json",
+      "gitBlobSha1": "b44ef5f44d68e9c804ddc68b73f2222cc81de8cc",
+      "sourceBytes": 10296,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-ttp.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-vd.json",
+      "sha256": "c974e72eb57d4b50a498bea7fd720439efb7073cb341fb45eda2eb4e7f2b3e30",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-vd.json",
+      "gitBlobSha1": "2bea7c572003e1e657aa3cc3353aa28f92c4a444",
+      "sourceBytes": 7620,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-vd.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-veor.json",
+      "sha256": "449d0ff8f3af9d8e092a8fe201f4a3bd1e536996daa1fc67b53a627ecb293918",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-veor.json",
+      "gitBlobSha1": "676656e24e10ce828ea8e05835167e5f86cc958b",
+      "sourceBytes": 153381,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-veor.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-vgm.json",
+      "sha256": "6f585af08d053777c68addad349e63da6cbc1ab792be30e26e228bcb64350e4c",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-vgm.json",
+      "gitBlobSha1": "a05b8ea23bd18d4b0d4bb04ddf8528547ff246db",
+      "sourceBytes": 506810,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-vgm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-vrgr.json",
+      "sha256": "884ae0ceca29ef35ffded204a67c8c1a8ad7c2e139d382ee55e14bc61c7be9b1",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-vrgr.json",
+      "gitBlobSha1": "c10406175bddfaf2d8831fe7a250a4a988cf0fef",
+      "sourceBytes": 131207,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-vrgr.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-wbtw.json",
+      "sha256": "df37442dd6efee99aa6161cee39462ac708afe1bfa0b3876a342faf694abdce7",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-wbtw.json",
+      "gitBlobSha1": "7d3df0d806802cf7276b1ceea648653a58c2439e",
+      "sourceBytes": 135884,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-wbtw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-wdh.json",
+      "sha256": "fc27801b4f328f0e96a34da9f8194a11a3fda590ee760c1900a511bb1649cf6a",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-wdh.json",
+      "gitBlobSha1": "496e150d87e12c5360c640088927e82048298774",
+      "sourceBytes": 185824,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-wdh.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-wdmm.json",
+      "sha256": "86bbfc25d73cb670a7b5fa91c9445bb57fca6bfe82f657b3714119aedcc5e7ae",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-wdmm.json",
+      "gitBlobSha1": "c6b3ca435d631753290ddc586a6fae0dcbf0d570",
+      "sourceBytes": 151962,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-wdmm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-wtthc.json",
+      "sha256": "d483824dabc2e89c585ab621ac03aabd2cca28540db546ad1f517e5c84b0d36c",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-wtthc.json",
+      "gitBlobSha1": "3b3ee5790f01ff55f947ab00bce1158e5186f90f",
+      "sourceBytes": 31449,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-wtthc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-xdmg.json",
+      "sha256": "9bfc51f50c8da9b5ef7ca7d22ced061c4a26ca6a6559ac61c7197b263621b5fb",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-xdmg.json",
+      "gitBlobSha1": "9a57af369e22b3b262f211bea1197e2f507b55b5",
+      "sourceBytes": 2586,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-xdmg.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-xge.json",
+      "sha256": "6e42c0a93ad7f849ac1409a1ccb4cc1e93eb87a527fc63f4213dbed225bfc190",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-xge.json",
+      "gitBlobSha1": "aa7191031a8c3335cab88a34ed2e2aee3987cddb",
+      "sourceBytes": 3259,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-xge.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-xmm.json",
+      "sha256": "eb1ca3939b763fd2c78797f9b981404c8ec6fef7685fcf3dca7365ffd8e7b076",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-xmm.json",
+      "gitBlobSha1": "5f61ed65fe332c38bd42a4b016047abe1686b97c",
+      "sourceBytes": 1347058,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-xmm.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/bestiary-xphb.json",
+      "sha256": "2b5e2bc1b4d6d61e5637a0e147b5813a5fa5db3993f0663a2e4430e195d3f396",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/bestiary-xphb.json",
+      "gitBlobSha1": "b24a4dd1a5164a144b388fe9e2f2c4ad034666df",
+      "sourceBytes": 61943,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/bestiary-xphb.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/index.json",
+      "sha256": "fe1a49089ac8cc03dcbec9d046693cad4f3b8d880fa6628f70da50cf53f52cb2",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/index.json",
+      "gitBlobSha1": "6324c0862b7f10b670716eac5cb29a618b42c4a1",
+      "sourceBytes": 3455,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/index.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/legendarygroups.json",
+      "sha256": "da8b50bd299cf6164c468e496e9bcf4c81f7c445bfdbe0e7ef289d346deffb7d",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/legendarygroups.json",
+      "gitBlobSha1": "e2718634726ce7e1194b9683ed6ba300df224104",
+      "sourceBytes": 400661,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/legendarygroups.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/bestiary/template.json",
+      "sha256": "70435d36df341be144c64791458693fca812fc54ec04be695306db71dad48440",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/bestiary/template.json",
+      "gitBlobSha1": "bc735f185ce0a2661fea37aa1bb529555d2ae89b",
+      "sourceBytes": 84688,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/bestiary/template.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/books.json",
+      "sha256": "1acde5805a730e768153ebbd73602915cd3c6e83d77e13f88e6332bad47f6daf",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/books.json",
+      "gitBlobSha1": "f278b5fe1cf0cfa4fb9fcb4972bc48867f1e90ce",
+      "sourceBytes": 300099,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/books.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/charcreationoptions.json",
+      "sha256": "04033571b7322f614240f24c6f1fa6e460920cf440c0957502478abe55f51cc5",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/charcreationoptions.json",
+      "gitBlobSha1": "86837907e1abae9eed9246e2299e1607f71059f4",
+      "sourceBytes": 71297,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/charcreationoptions.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-artificer.json",
+      "sha256": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-artificer.json",
+      "gitBlobSha1": "c0b306c812cd4fe89f73aa39e778d81e72254810",
+      "sourceBytes": 165289,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-artificer.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-barbarian.json",
+      "sha256": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-barbarian.json",
+      "gitBlobSha1": "cc23563911ebc54f74168071ff6665ce0d204275",
+      "sourceBytes": 125399,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-barbarian.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-bard.json",
+      "sha256": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-bard.json",
+      "gitBlobSha1": "c0fadbfda5522388bba3c8b3c90d58ddc0d16bd8",
+      "sourceBytes": 144129,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-bard.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-cleric.json",
+      "sha256": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-cleric.json",
+      "gitBlobSha1": "fb5b063cfef30d1416841d6cf12d3e26d7d7ed4f",
+      "sourceBytes": 263834,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-cleric.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-druid.json",
+      "sha256": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-druid.json",
+      "gitBlobSha1": "b1cdb6112896e52409f0ecc546ef5459c849c006",
+      "sourceBytes": 148460,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-druid.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-fighter.json",
+      "sha256": "a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-fighter.json",
+      "gitBlobSha1": "26bcdda4c43143cc026f9a13856a9f31d7463da0",
+      "sourceBytes": 170179,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-fighter.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-monk.json",
+      "sha256": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-monk.json",
+      "gitBlobSha1": "3208dc55849af4f854bb79157839a06a45ab5d9d",
+      "sourceBytes": 152948,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-monk.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-mystic.json",
+      "sha256": "51920b9ec26e0b5280a35a51054c33889b06e2ef1eed80bd8567e3d05ddce061",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-mystic.json",
+      "gitBlobSha1": "7e278cc8b34211e0c8e62e07e29ed526a1ad9a69",
+      "sourceBytes": 51348,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-mystic.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-paladin.json",
+      "sha256": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-paladin.json",
+      "gitBlobSha1": "5c4abf3efdeb624dcf1844911728120fd7fe298b",
+      "sourceBytes": 168186,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-paladin.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-ranger.json",
+      "sha256": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-ranger.json",
+      "gitBlobSha1": "4a7186ba5cb737bae351c4bbf1e2639303ed7eae",
+      "sourceBytes": 152703,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-ranger.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-rogue.json",
+      "sha256": "b5c62a8c5356438a09bc64bc96b71968fa3766d46102a0a1de11713e5ee0d251",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-rogue.json",
+      "gitBlobSha1": "4d1d67d40d7a20b05e94ecba41f5728fdf6a1459",
+      "sourceBytes": 151196,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-rogue.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-sidekick.json",
+      "sha256": "f3e0750aed5f79b9b5cb34d8a64e311e52cd3a34a0505544ba7236a2e9bef1e1",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-sidekick.json",
+      "gitBlobSha1": "14b0bd3b3c5a5279aee12ad9722d5dc5e5e5786a",
+      "sourceBytes": 33025,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-sidekick.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-sorcerer.json",
+      "sha256": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-sorcerer.json",
+      "gitBlobSha1": "626b69cc49e7c3692876ab0f31bb7a0b1077b2c7",
+      "sourceBytes": 178613,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-sorcerer.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-warlock.json",
+      "sha256": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-warlock.json",
+      "gitBlobSha1": "6d2db6357a4a3c6e97e628eaa9b937eacd7b5ee6",
+      "sourceBytes": 166421,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-warlock.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-wizard.json",
+      "sha256": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/class-wizard.json",
+      "gitBlobSha1": "dfdd3305cffdc34e88b6c50d1bab5eb0e75d2bec",
+      "sourceBytes": 195059,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/class-wizard.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/index.json",
+      "sha256": "df3b169d180b64285926b206848c5241a89497b9433af4e90e0e83feece8d5c7",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/class/index.json",
+      "gitBlobSha1": "b9eb4a52963a42edff477170d7f8f9a15507d87c",
+      "sourceBytes": 497,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/class/index.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/conditionsdiseases.json",
+      "sha256": "3681f60e092ca8d9fad9a51bfce6dc52bc66d80af59922c68ba144c1fe2d697e",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/conditionsdiseases.json",
+      "gitBlobSha1": "2d857f5baf550295de24e7dee15d21b58108a304",
+      "sourceBytes": 70075,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/conditionsdiseases.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/cultsboons.json",
+      "sha256": "f7ab4595c0b7dbf09737b9fd2e56bf8f7b47da12546a8961bf46cc5a75f3f66b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/cultsboons.json",
+      "gitBlobSha1": "5e33f482bb2838db88c35b4d4a8eb10cf1a3721f",
+      "sourceBytes": 73732,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/cultsboons.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/deities.json",
+      "sha256": "49116284f69877d196bcca61315d7908d533789f3b1e15590a3058119e002eb5",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/deities.json",
+      "gitBlobSha1": "241604434d313be1d70841ae5352cc4d7805cb8c",
+      "sourceBytes": 792522,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/deities.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/feats.json",
+      "sha256": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/feats.json",
+      "gitBlobSha1": "604ff80bfcdaa9e583f4c7ce79c5c153a08a8d49",
+      "sourceBytes": 426735,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/feats.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/generated/gendata-spell-source-lookup.json",
+      "sha256": "8b78d1ce68d080a760b41bc65e846755c98fa1a3916b70d3d5d0dc8f5af1b9a9",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/generated/gendata-spell-source-lookup.json",
+      "gitBlobSha1": "de9f99835955994749c1ff713e6e2de9712abf67",
+      "sourceBytes": 673279,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/generated/gendata-spell-source-lookup.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/generated/gendata-tables.json",
+      "sha256": "904e726f5b361f20456f2f2569f52bc82607ff0285d393e60d6cc947497806cf",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/generated/gendata-tables.json",
+      "gitBlobSha1": "246936ff60fe5c65ac5552fcd67c727c27efdaa4",
+      "sourceBytes": 2839187,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/generated/gendata-tables.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/generated/gendata-variantrules.json",
+      "sha256": "a1e8f65be9f17be8309498c4ef698c2c718e39465070515e5b05e7f983b9e5a3",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/generated/gendata-variantrules.json",
+      "gitBlobSha1": "456e82d0ab33c7270dd4a42a4510725bf463f0d2",
+      "sourceBytes": 49970,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/generated/gendata-variantrules.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/items-base.json",
+      "gitBlobSha1": "f9eb1aa9fc6841ba00297e4e21f8d72ead3594c4",
+      "sourceBytes": 197272,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/items-base.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/items.json",
+      "gitBlobSha1": "363e96d4d29b6c984ea92a7a7761fe2e8297dcfc",
+      "sourceBytes": 2951589,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/items.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/languages.json",
+      "sha256": "fae8ff63ba6d28b71a132f37da85dfb53c8a3dce9f931d49d2b7e12214afae98",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/languages.json",
+      "gitBlobSha1": "5d8f5d367873ca7fdf6c65a6e76f82f1cba1341c",
+      "sourceBytes": 68664,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/languages.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/magicvariants.json",
+      "gitBlobSha1": "4582735f022a2b932be9a5361e06bb281956d245",
+      "sourceBytes": 240345,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/magicvariants.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/optionalfeatures.json",
+      "sha256": "031970dfac1770a548549bd30535319c2493c47ebeaedfdb6a601651bbfc3844",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/optionalfeatures.json",
+      "gitBlobSha1": "133dcac745d1a630604122b5e063be8ed47bf065",
+      "sourceBytes": 161345,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/optionalfeatures.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/psionics.json",
+      "sha256": "99d0d8f5edfbc3c34bff024ff354d62cf21d6ff27a43c688859fc8c05133e77c",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/psionics.json",
+      "gitBlobSha1": "721988f610152e18b09dad88de44e4fffeb01a80",
+      "sourceBytes": 113252,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/psionics.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/races.json",
+      "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/races.json",
+      "gitBlobSha1": "3cf6267749f90bf12ffc7e882879ae95fd09ec28",
+      "sourceBytes": 603288,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/races.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/rewards.json",
+      "sha256": "03062ce964d2cd88be4b538bf8cbb10eb5b96dc33ab6f94720b4a1790ca30871",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/rewards.json",
+      "gitBlobSha1": "9aeae614ca84ee8293469737984fbc3e1116d010",
+      "sourceBytes": 154502,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/rewards.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/senses.json",
+      "sha256": "9becc87985495860708bb68cf6f82fae4a05625e47fb014e843912777ea30326",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/senses.json",
+      "gitBlobSha1": "477406720c67716ad5f0810d3701ad14931b3d7b",
+      "sourceBytes": 5552,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/senses.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/skills.json",
+      "sha256": "313019e6987bffdcdb4c74bdd05edd475c6f33410637f7b42f85760c5beb8941",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/skills.json",
+      "gitBlobSha1": "b0aff2fcbd0134ceac49d5c04a45c946ea12c2cc",
+      "sourceBytes": 13576,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/skills.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/index.json",
+      "sha256": "d8a5b1ec7602aba4c10b12c95fe356da2fc3d18a1f6127603e5920a4a7f075a8",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/index.json",
+      "gitBlobSha1": "dedffc46057cfe2f7eb9687504f05afd964dabd2",
+      "sourceBytes": 511,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/index.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-aag.json",
+      "sha256": "3a7425c28fae9eabd41c3669b72312140a30d68c10e4d1e3404c2cb0cf26d16f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-aag.json",
+      "gitBlobSha1": "6d30ac206a99bdf8a7a075a619788e8e87d2f872",
+      "sourceBytes": 2102,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-aag.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-ai.json",
+      "sha256": "405dd967e236331734eda98a72e5ed36d691418edc2f92285ef22fb9f6df31d0",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-ai.json",
+      "gitBlobSha1": "ae7cb72a79cba2d707964867869d965721b811b1",
+      "sourceBytes": 11962,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-ai.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-aitfr-avt.json",
+      "sha256": "e271138ff96111085b23ae9ddef7b5a6f325d6d6c99ee4009e7c36a21e5786d6",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-aitfr-avt.json",
+      "gitBlobSha1": "8bbaeaf65d371be39de1135c3451b4acb10e66c6",
+      "sourceBytes": 4141,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-aitfr-avt.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-au.json",
+      "sha256": "c56695c6ca5cbf77dc79358ac317895fe15e812aed99fc65263a48583896b063",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-au.json",
+      "gitBlobSha1": "b300e16e56a06861cc3d28d8f6a050e6417363b3",
+      "sourceBytes": 48934,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-au.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-bmt.json",
+      "sha256": "e11ac77883b9554bff280a7cbe4e5533a4f69a4792601ad97d04ff803c69d2b2",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-bmt.json",
+      "gitBlobSha1": "80e3cd25e03b748003431fcd14b0547e0e17f506",
+      "sourceBytes": 4266,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-bmt.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-efa.json",
+      "sha256": "486f693b055ce523a098ecf358d602531130454202f88f6f5b463bfc5775d336",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-efa.json",
+      "gitBlobSha1": "a69a9aca6f1a6e9bd095d5b8baf32bc5eb92ba9e",
+      "sourceBytes": 1634,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-efa.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-egw.json",
+      "sha256": "c9441877de9104e6b8bb79599dacfd9032b9a2d58c81c8e04b9336510b751b8b",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-egw.json",
+      "gitBlobSha1": "70b86c84502ee784f79df29bb1b7b9ec5b530f41",
+      "sourceBytes": 23423,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-egw.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-frhof.json",
+      "sha256": "7e4f37e5e159137bf76214a7d40ab24bd6c496ea373d822ed9c7cf0ac329d91c",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-frhof.json",
+      "gitBlobSha1": "4096a9c6f5f3395cc49083fef9828f47be7880cf",
+      "sourceBytes": 34373,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-frhof.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-ftd.json",
+      "sha256": "a4d82d2bd475d13cbd7b1c61aee2f48c85cd0f5906b28c560997d06cf9b30bd6",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-ftd.json",
+      "gitBlobSha1": "13920a11f8556b29a20528cd8a1aa19affa6f6b7",
+      "sourceBytes": 12309,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-ftd.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-ggr.json",
+      "sha256": "5b283f618907aed1db8cbf92015229b94a1b493bc55139b6908767f1c54f9d97",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-ggr.json",
+      "gitBlobSha1": "4d3402a635376aec212ef3f5ac8d21dad3cea4c0",
+      "sourceBytes": 1583,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-ggr.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-idrotf.json",
+      "sha256": "bde56b310bf660254b2a4ef1dd121c1ade2f9fb54826c3c58da7d3155bd6003f",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-idrotf.json",
+      "gitBlobSha1": "1ae97fe2d966d44e4b1b1d80e264c5352acbcc46",
+      "sourceBytes": 2758,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-idrotf.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-llk.json",
+      "sha256": "17bcab786f27fbb5a5e693f35ab550966bff0a6e9630d50344d6781a60cb90ae",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-llk.json",
+      "gitBlobSha1": "5dc08c8cf65e70a5169bec57a51616c8f43b8c03",
+      "sourceBytes": 6157,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-llk.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-phb.json",
+      "sha256": "e1f2221020cfb5d31995c99b78dc09435c9962476ef1cef81b52399e6df0263d",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-phb.json",
+      "gitBlobSha1": "46a84d1f19ec14e2ebf942d2b1277dedbc69dff9",
+      "sourceBytes": 648463,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-phb.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-sato.json",
+      "sha256": "935052bbecd1cb85247061b6eb74513f24d73de2f5d3da24761487b5c86276fe",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-sato.json",
+      "gitBlobSha1": "dc74f72b8c759c1c347680c052bf44fbb582d41d",
+      "sourceBytes": 2730,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-sato.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-scc.json",
+      "sha256": "a23d5390ee2c9f942bdee65a00c70c3094e697d9aefb05b9e3c7b0b64d40cfea",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-scc.json",
+      "gitBlobSha1": "9508f10733392f448d7f1d440dc1c04ab8375279",
+      "sourceBytes": 5716,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-scc.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-tce.json",
+      "sha256": "f87123ff4970d6b39fb6260c24027bfd0bd720534c9f75d6c87d884470d28847",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-tce.json",
+      "gitBlobSha1": "691d6da98d1c5f5904ea51eaff19b806265342df",
+      "sourceBytes": 34531,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-tce.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-xge.json",
+      "sha256": "1add6373964ebf0c22cdf8e5192f0478e0953b6745607bb601e16174f5828012",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-xge.json",
+      "gitBlobSha1": "5835b74b85a7660bc21984a2ffaea14114305137",
+      "sourceBytes": 166612,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-xge.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/spells/spells-xphb.json",
+      "sha256": "87e4b76595ea895e01641de2cba3d75bff590957f08a9210530c28ffa296770d",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/spells/spells-xphb.json",
+      "gitBlobSha1": "deb7bb57f90c30d8189dc264ae695a17504b76c4",
+      "sourceBytes": 624811,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/spells/spells-xphb.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/tables.json",
+      "sha256": "4a09885f0ac7ef140bf8d08d0892309536e613f004ce30e3466b8ee288f54663",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/tables.json",
+      "gitBlobSha1": "7c1a9109ca6bde447199071d7a178f5b821a64bd",
+      "sourceBytes": 19153,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/tables.json"
+    },
+    {
+      "url": "https://5e.kiwee.top/data/variantrules.json",
+      "sha256": "21eef107d25cf438eb85894387fb6f834478d80bc467791c54fe66db9e498c44",
+      "repository": "tjliqy/5etools-cn",
+      "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+      "path": "data/variantrules.json",
+      "gitBlobSha1": "d06d762035c1c1d7a0638727b365cea52a3b6f1a",
+      "sourceBytes": 672013,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/5etools-cn/5cc0bbe2c2b241a334e731af4448bdba2168e8bd/data/variantrules.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/_generated/index-sources.json",
+      "sha256": "338a5a75144937eefcbf9d9b6e280d03aa4b9d7673dc9532b9bb7ad7e44c80af",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "_generated/index-sources.json",
+      "gitBlobSha1": "e21f97b1bc53201dc7a42abfaebdce60bac46993",
+      "sourceBytes": 3688,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/_generated/index-sources.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/action/Sample%20-%20Giddy%3B%20%E7%86%84%E7%81%AD.json",
+      "sha256": "b5ac4c848dcff78e660a8296b83714ed38832bdb0e2697b87dc9e4c9272913ca",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "action/Sample - Giddy; 熄灭.json",
+      "gitBlobSha1": "35bb6fb0d37d11b28a900113283e96a5a4dd8ccc",
+      "sourceBytes": 686,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/action/Sample%20-%20Giddy%3B%20%E7%86%84%E7%81%AD.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/adventure/Sample%20-%20Giddy%3B%20%E7%81%BE%E5%8E%84%E6%B4%9E%E7%A9%B4.json",
+      "sha256": "d91aa44834c68c1585bd791eca36c41c5538f55d98a05507ad565bf219cff9e4",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "adventure/Sample - Giddy; 灾厄洞穴.json",
+      "gitBlobSha1": "3e692442a1104a310182b7f06b87c3a27af212e6",
+      "sourceBytes": 1680,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/adventure/Sample%20-%20Giddy%3B%20%E7%81%BE%E5%8E%84%E6%B4%9E%E7%A9%B4.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/background/Sample%20-%20Giddy%3B%20%E5%86%9C%E6%B0%91.json",
+      "sha256": "59d3e4b9c24780b13a4797c07d1c801e1e953a842801bd1f5d3431f8f6c218ce",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "background/Sample - Giddy; 农民.json",
+      "gitBlobSha1": "0756fcb6fa246f1a996e1cb4ab2a0d7633d46213",
+      "sourceBytes": 6619,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/background/Sample%20-%20Giddy%3B%20%E5%86%9C%E6%B0%91.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/boon/Sample%20-%20Giddy%3B%20%E5%8F%AF%E7%96%91%E7%9A%84%E8%B5%A0%E7%A4%BC.json",
+      "sha256": "3d9db1400453a3c4873120c2183d514479cbce658b7b65ce735982e79ec6435a",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "boon/Sample - Giddy; 可疑的赠礼.json",
+      "gitBlobSha1": "bac61ded04ac81e719fc0d4be6c6cc98751cdf40",
+      "sourceBytes": 2329,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/boon/Sample%20-%20Giddy%3B%20%E5%8F%AF%E7%96%91%E7%9A%84%E8%B5%A0%E7%A4%BC.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/charoption/Sample%20-%20Giddy%3B%20%E7%A7%98%E5%AF%86%E5%AF%B9%E6%89%8B.json",
+      "sha256": "e88e1484547d2a4000dc7b4ed433d792070b12f8f79eb3240d57db7aee67801d",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "charoption/Sample - Giddy; 秘密对手.json",
+      "gitBlobSha1": "36f79f031174c9f4e03762bee45085f6ea52ec76",
+      "sourceBytes": 2616,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/charoption/Sample%20-%20Giddy%3B%20%E7%A7%98%E5%AF%86%E5%AF%B9%E6%89%8B.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/AluStar%3B%20%E9%BE%99%E9%A9%AC%E8%BF%8E%E6%98%A5.json",
+      "sha256": "fef022263e4793caf389af73bd1dfd9d44a5f73d8876aabd264df33daca24bb7",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "class/AluStar; 龙马迎春.json",
+      "gitBlobSha1": "3ca983fe9a39b90c8a2aa6eedbba2c9180fa9ec5",
+      "sourceBytes": 19195,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/class/AluStar%3B%20%E9%BE%99%E9%A9%AC%E8%BF%8E%E6%98%A5.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202014.json",
+      "sha256": "0593dd1ff41efae5fe35732dac306d6af94f3393f8224493e1368bb7924b3b5a",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "class/Benjamin Huffman; 拳斗士Pugilist - 2014.json",
+      "gitBlobSha1": "9ddf59786ef0d391ff570bf70e55adb180488140",
+      "sourceBytes": 146945,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202014.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202024.json",
+      "sha256": "526f2cce3f2e77a9690f79582ae1f9a13e2b6049abc9730fc93dccac5b18c6b7",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "class/Benjamin Huffman; 拳斗士Pugilist - 2024.json",
+      "gitBlobSha1": "e706aac5e5cdff07802b4ce782a7e1a722c134b3",
+      "sourceBytes": 161312,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202024.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/MCDM%20Productions%3B%20%E9%82%AA%E7%8B%B1%E4%BD%BF%E4%BF%AE%E8%AE%A2%E7%89%88.json",
+      "sha256": "618085edd03dd88636f3feba3f36ebe8462dc552a542c9e3add7fb20a045ba1f",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "class/MCDM Productions; 邪狱使修订版.json",
+      "gitBlobSha1": "14afc7663617d630a700d90a72326aec0b43edc5",
+      "sourceBytes": 201218,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/class/MCDM%20Productions%3B%20%E9%82%AA%E7%8B%B1%E4%BD%BF%E4%BF%AE%E8%AE%A2%E7%89%88.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/Mage%20Hand%20Press%3B%20%E9%93%B3%E5%A3%ABGunslinger.json",
+      "sha256": "3bb6711aca5a2412aed362ef2aaaaefae78e079087155c76c95669e411745125",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "class/Mage Hand Press; 铳士Gunslinger.json",
+      "gitBlobSha1": "1341a585a1eebacf324a2b8cbb6815d4dcbf2998",
+      "sourceBytes": 154974,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/class/Mage%20Hand%20Press%3B%20%E9%93%B3%E5%A3%ABGunslinger.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/Sam%20Grierson%3B%20%E5%8E%A8%E5%B8%88The%20Cook%20Class.json",
+      "sha256": "af39ee6714a9fa70bfe2d186af1f6beb0cab8b3434c19cbf1f3d90a054cbbd36",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "class/Sam Grierson; 厨师The Cook Class.json",
+      "gitBlobSha1": "789184af68e72407c3b4afa053e229151b48c5b3",
+      "sourceBytes": 71986,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/class/Sam%20Grierson%3B%20%E5%8E%A8%E5%B8%88The%20Cook%20Class.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/class/SnowWolf%3B%20%E8%A1%80%E7%8C%8E%E6%89%8B%20(2024).json",
+      "sha256": "1e723b2981f9eb67fb51a2d1d8d2e9269558ea85a95899fe9f9b3f6bdbf59f26",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "class/SnowWolf; 血猎手 (2024).json",
+      "gitBlobSha1": "3dcfab87241ec8c65a5fd9550134a988813de905",
+      "sourceBytes": 88681,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/class/SnowWolf%3B%20%E8%A1%80%E7%8C%8E%E6%89%8B%20(2024).json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/%E5%B0%8F%E9%B8%9F%3B%20%E5%90%91%E9%95%9C%E4%B8%AD%E7%9C%8B.json",
+      "sha256": "8988828d7ef29290f0e4301f7386cf606352a38d9e00a4a81412b62992b53a13",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/小鸟; 向镜中看.json",
+      "gitBlobSha1": "b6bc50dc33c2d77433567c511cdf1e6a0f8d4f18",
+      "sourceBytes": 49811,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/%E5%B0%8F%E9%B8%9F%3B%20%E5%90%91%E9%95%9C%E4%B8%AD%E7%9C%8B.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/1985%20Games%3B%20%E8%83%A7%E5%BF%86%E5%B2%9B%EF%BC%9A%E8%92%BF%E9%87%8E%E7%89%A9%E8%AF%AD.json",
+      "sha256": "d53f251428233b1b8852e3044093348909b8be0ebafad30196e594a43de9a007",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/1985 Games; 胧忆岛：蒿野物语.json",
+      "gitBlobSha1": "453e5cd2c3c8fe14592d7b4a382d248a3772204f",
+      "sourceBytes": 2343015,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/1985%20Games%3B%20%E8%83%A7%E5%BF%86%E5%B2%9B%EF%BC%9A%E8%92%BF%E9%87%8E%E7%89%A9%E8%AF%AD.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Avantris%3B%20%E6%AD%AA%E6%9B%B2%E4%B9%8B%E6%9C%88.json",
+      "sha256": "300d3b501af0bfde6f26c7044fa2086c5a47f46f843e57b5466f32297a4586e4",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Avantris; 歪曲之月.json",
+      "gitBlobSha1": "060b85bd4fd53a11b9218025643d42990fdffd03",
+      "sourceBytes": 4256737,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Avantris%3B%20%E6%AD%AA%E6%9B%B2%E4%B9%8B%E6%9C%88.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Chaosium%20Inc.%3B%20%E7%81%AB%E7%82%AC%E5%85%89%E4%B8%8B%E7%9A%84%E5%85%8B%E8%8B%8F%E9%B2%81.json",
+      "sha256": "e56c2fb52670eef51a96285a8c6d9af92e673b15deb8e9a9d817cf3d8682bda8",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Chaosium Inc.; 火炬光下的克苏鲁.json",
+      "gitBlobSha1": "2acc74f687f9b49b228d9da6eef668b3d9eeeed5",
+      "sourceBytes": 452453,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Chaosium%20Inc.%3B%20%E7%81%AB%E7%82%AC%E5%85%89%E4%B8%8B%E7%9A%84%E5%85%8B%E8%8B%8F%E9%B2%81.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Darrington%20Press%3B%20%E5%A1%94%E5%B0%94%E5%A4%9A%E9%9B%B7%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86%E9%87%8D%E5%88%B6%E7%89%88.json",
+      "sha256": "9b5b07f9bdce7a1825beaabfed186e225c855511dd65d650dc4a3ad2d9b39b44",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Darrington Press; 塔尔多雷战役设定集重制版.json",
+      "gitBlobSha1": "cc18e626970de6679885ca93c2b6d7939f0841d1",
+      "sourceBytes": 1916365,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Darrington%20Press%3B%20%E5%A1%94%E5%B0%94%E5%A4%9A%E9%9B%B7%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86%E9%87%8D%E5%88%B6%E7%89%88.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Ghostfire%20Gaming%3B%20%E5%A1%9E%E5%B7%B4%E6%96%AF%E8%92%82%E5%AE%89%C2%B7%E5%85%8B%E5%8A%B3%E7%9A%84%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E6%8C%87%E5%8D%97.json",
+      "sha256": "cf930f0a4f0872db8ddf2bef71418f64b9e67efe3629f4c242cb0e21fd5749d8",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Ghostfire Gaming; 塞巴斯蒂安·克劳的德拉肯海姆指南.json",
+      "gitBlobSha1": "80eeb5761f2c96961c24545a98cd7a63fd773c83",
+      "sourceBytes": 730095,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Ghostfire%20Gaming%3B%20%E5%A1%9E%E5%B7%B4%E6%96%AF%E8%92%82%E5%AE%89%C2%B7%E5%85%8B%E5%8A%B3%E7%9A%84%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E6%8C%87%E5%8D%97.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E4%B9%8B%E5%A2%9F.json",
+      "sha256": "51cd60d69ccd02772a5c87aa04671ddab525c6a83b8c2c99be27cf6429167d28",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Ghostfire Gaming; 德拉肯海姆之墟.json",
+      "gitBlobSha1": "096aa37f533b7384890282d783f1b4c79bf89a82",
+      "sourceBytes": 2048492,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E4%B9%8B%E5%A2%9F.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E7%9A%84%E6%80%AA%E7%89%A9.json",
+      "sha256": "dd22507c1ca4957e3ff2600f864be44cc10d3c3d54a3fc6474d007371385811a",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Ghostfire Gaming; 德拉肯海姆的怪物.json",
+      "gitBlobSha1": "12925494b5318d264856b3a98dd2c00d0a89d593",
+      "sourceBytes": 2887680,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E7%9A%84%E6%80%AA%E7%89%A9.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Ghostfire%20Gaming%3B%20%E9%AC%BC%E9%AD%85%E5%B9%BD%E8%B0%B7%20-%20%E7%8E%A9%E5%AE%B6%E6%8C%87%E5%8D%97%20-%202024.json",
+      "sha256": "6e8293285d818760e590e174461f514cee3579301e435739332fe97a2b81f3df",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Ghostfire Gaming; 鬼魅幽谷 - 玩家指南 - 2024.json",
+      "gitBlobSha1": "a86a3a762479e4ea1da978a633d4b3153ec1638c",
+      "sourceBytes": 1771322,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Ghostfire%20Gaming%3B%20%E9%AC%BC%E9%AD%85%E5%B9%BD%E8%B0%B7%20-%20%E7%8E%A9%E5%AE%B6%E6%8C%87%E5%8D%97%20-%202024.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+      "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Griffin Macaulay; 狮鹫的鞍中珍宝Ⅱ.json",
+      "gitBlobSha1": "813c9a7b08d5243e8d061fdd5f3d41baa77e43e4",
+      "sourceBytes": 2741848,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86.json",
+      "sha256": "1bef02d5e1e90cc94515734ac352c1f888e69ab059c01858abe5d6f43709422f",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Hit Point Press; 谦卑林战役设定集.json",
+      "gitBlobSha1": "fb94685bdf80cfd090155dd600b47605ee54bdd6",
+      "sourceBytes": 1245673,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%95%85%E4%BA%8B%E9%9B%86.json",
+      "sha256": "58226d6315b3e17c0c9746dba4b248b1d620b11fa21b12cf9e6d3b151873de4d",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Hit Point Press; 谦卑林故事集.json",
+      "gitBlobSha1": "126c5403b1927cc6c5e5259446b64c790f2d97da",
+      "sourceBytes": 1479880,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%95%85%E4%BA%8B%E9%9B%86.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/James%20Ohlen%3B%20%E5%8D%9A%E5%BE%B7%E4%B9%8B%E9%97%A8%E7%9A%84%E8%8B%B1%E9%9B%84%E4%BB%AC.json",
+      "sha256": "d9bafc78002d14ba68715af1c0f655c6b7f74fdb1175ac25b0183264b4bb9426",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/James Ohlen; 博德之门的英雄们.json",
+      "gitBlobSha1": "ef59e7c6ea4e8a853fb1f641c140c2be988e803a",
+      "sourceBytes": 673324,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/James%20Ohlen%3B%20%E5%8D%9A%E5%BE%B7%E4%B9%8B%E9%97%A8%E7%9A%84%E8%8B%B1%E9%9B%84%E4%BB%AC.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Kobold%20Press%3B%20%E9%BB%AF%E6%BD%AE%E4%B9%8B%E4%B9%A6.json",
+      "sha256": "de3956d245e3e170bc01e76b82a4114b850484d1d3dd542dca7a0066c02c438b",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Kobold Press; 黯潮之书.json",
+      "gitBlobSha1": "13eb3dac83c75f1588c736e5f1e0f39860a19964",
+      "sourceBytes": 1373845,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Kobold%20Press%3B%20%E9%BB%AF%E6%BD%AE%E4%B9%8B%E4%B9%A6.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/collection/Scichopath%3B%20%E5%AF%82%E9%9D%99%E6%8C%BD%E6%AD%8C.json",
+      "sha256": "6323238e2a0add2e66f92a5690721900cbf9121835f47251d68d8ede8aa7fac3",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "collection/Scichopath; 寂静挽歌.json",
+      "gitBlobSha1": "2c64618f73d785512c07a5092870cb374b4d6e0b",
+      "sourceBytes": 96313,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/collection/Scichopath%3B%20%E5%AF%82%E9%9D%99%E6%8C%BD%E6%AD%8C.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/condition/Sample%20-%20Giddy%3B%20%E7%9D%80%E7%81%AB.json",
+      "sha256": "4564ccf23766083a4aca22241856fc78b2df766a357fb7da1fd5f2c028f71ab7",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "condition/Sample - Giddy; 着火.json",
+      "gitBlobSha1": "ed8de3af281cc5ba4bc6380c1b4263e68d4ca420",
+      "sourceBytes": 827,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/condition/Sample%20-%20Giddy%3B%20%E7%9D%80%E7%81%AB.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97%202.json",
+      "sha256": "fa938100088f2d42b17688dc960d5b4da7ccc6ad6f721f4606541c1f01f13bc2",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "creature/Kobold Press; 万兽图志 2.json",
+      "gitBlobSha1": "7d0d2a3c5667ddfb6cbd33285bd207191b3dcbd1",
+      "sourceBytes": 2531236,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97%202.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97%203.json",
+      "sha256": "58f0c451834be7bf29a4e786ca982a73b183689d298e49ccd8e418b047891fa4",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "creature/Kobold Press; 万兽图志 3.json",
+      "gitBlobSha1": "49ad96464cbf6ea44f88c42889160eef9369127a",
+      "sourceBytes": 2693809,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97%203.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97.json",
+      "sha256": "696d3435b7ab3677117558ed464640fc21785c5514976826b7feb7c38a0596d6",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "creature/Kobold Press; 万兽图志.json",
+      "gitBlobSha1": "12a9844295bf8dbfa593d1ade66874771c2f0b70",
+      "sourceBytes": 2520737,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%971%EF%BC%882023%E7%89%88%EF%BC%89.json",
+      "sha256": "29abdc632931ab2d468724780ede105e4e03ea7641e4405781ccba2a105a4ab7",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "creature/Kobold Press; 万兽图志1（2023版）.json",
+      "gitBlobSha1": "a29984baff9b2f946bac89a498f231e9e5eee105",
+      "sourceBytes": 2614814,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%971%EF%BC%882023%E7%89%88%EF%BC%89.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/creature/MCDM%20Productions%3B%20%E5%87%A1%E4%BA%BA%EF%BC%8C%E5%BF%AB%E9%80%83%EF%BC%81.json",
+      "sha256": "5f5337d81122cecd26e6f7d78119b1fe0b8bc93b089d911c749593d0ad1b53aa",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "creature/MCDM Productions; 凡人，快逃！.json",
+      "gitBlobSha1": "2e5e237917a8740f451a6b8a60631f19cbb8ebd1",
+      "sourceBytes": 1982563,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/creature/MCDM%20Productions%3B%20%E5%87%A1%E4%BA%BA%EF%BC%8C%E5%BF%AB%E9%80%83%EF%BC%81.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/creature/Sample%20-%20Giddy%3B%20%E6%A9%A1%E6%9C%A8%E6%8A%95%E5%B0%84%E6%9C%BA.json",
+      "sha256": "931d01505908e85027a99edebc135b19735d0eb5382179a94e3d4ae7b61d8888",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "creature/Sample - Giddy; 橡木投射机.json",
+      "gitBlobSha1": "2c83b53597befb2053de8704be6255389395a53f",
+      "sourceBytes": 5587,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/creature/Sample%20-%20Giddy%3B%20%E6%A9%A1%E6%9C%A8%E6%8A%95%E5%B0%84%E6%9C%BA.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/cult/Sample%20-%20Giddy%3B%20%E7%9C%9F%E5%AE%9E%E7%81%AB%E7%84%B0%E9%82%AA%E6%95%99.json",
+      "sha256": "844515cf9a552b4a72310fa2432c6925c7ee2e83208ef0bb5980f6d9fcca6dd3",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "cult/Sample - Giddy; 真实火焰邪教.json",
+      "gitBlobSha1": "e202c9af1d3f1be27b0688831dffe7d23b192bf3",
+      "sourceBytes": 1161,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/cult/Sample%20-%20Giddy%3B%20%E7%9C%9F%E5%AE%9E%E7%81%AB%E7%84%B0%E9%82%AA%E6%95%99.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/deity/Sample%20-%20Giddy%3B%20%E8%90%8E%E7%BC%A9.json",
+      "sha256": "e7b96276a13cd5f435557561e8c9dec41be5071c7f20bb39e044b6433113caa9",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "deity/Sample - Giddy; 萎缩.json",
+      "gitBlobSha1": "1789ba5192210d8f23830c0bd79f439b5626cb6a",
+      "sourceBytes": 909,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/deity/Sample%20-%20Giddy%3B%20%E8%90%8E%E7%BC%A9.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/disease/Sample%20-%20Giddy%3B%20%E9%A2%A4%E6%8A%96%E7%97%87.json",
+      "sha256": "ffa5cef20d3663428f1dee1fa5ea682af90095cd7a019dfee480b1e3759981c9",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "disease/Sample - Giddy; 颤抖症.json",
+      "gitBlobSha1": "4974b39ea4e8fe0827f20f8c4cc56617213cfcd5",
+      "sourceBytes": 1715,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/disease/Sample%20-%20Giddy%3B%20%E9%A2%A4%E6%8A%96%E7%97%87.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/facility/Sample%20-%20Giddy%3B%20%E8%B6%8A%E9%87%8E%E5%9E%83%E5%9C%BE%E5%A0%86.json",
+      "sha256": "e2ca193647fe6aa1fe0d6964d9367745d97b0e036d5772480ca92e9d6f63bfa8",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "facility/Sample - Giddy; 越野垃圾堆.json",
+      "gitBlobSha1": "34ada9e12a96587b271adf0a6e7024d66adb468b",
+      "sourceBytes": 1473,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/facility/Sample%20-%20Giddy%3B%20%E8%B6%8A%E9%87%8E%E5%9E%83%E5%9C%BE%E5%A0%86.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/feat/Sample%20-%20Giddy%3B%20%E9%AD%94%E6%B3%95%E5%A4%A9%E8%B5%8B%EF%BC%8C%E9%9E%AD%E5%AD%90%E7%88%B1%E5%A5%BD%E8%80%85.json",
+      "sha256": "bd9e9291b99fc53c742facab4dfeb969f5bacc73d1153d4c1003ed9c814a1fd0",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "feat/Sample - Giddy; 魔法天赋，鞭子爱好者.json",
+      "gitBlobSha1": "def66dce33bd773f11a74557cd92bfd76023317e",
+      "sourceBytes": 2183,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/feat/Sample%20-%20Giddy%3B%20%E9%AD%94%E6%B3%95%E5%A4%A9%E8%B5%8B%EF%BC%8C%E9%9E%AD%E5%AD%90%E7%88%B1%E5%A5%BD%E8%80%85.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/hazard/Sample%20-%20Giddy%3B%20%E6%B5%81%E6%B2%99.json",
+      "sha256": "9728d2009b2660059ec2a5a7ea363e3dbb1ecfd035af1a30a07b7570ce35af91",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "hazard/Sample - Giddy; 流沙.json",
+      "gitBlobSha1": "efd2768e94d283368f1f0289eaa8e80cb2a0014e",
+      "sourceBytes": 1282,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/hazard/Sample%20-%20Giddy%3B%20%E6%B5%81%E6%B2%99.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/item/Sample%20-%20Giddy%3B%20%E9%92%A9%E7%88%AA%E5%B1%A0%E6%88%AE.json",
+      "sha256": "49355388eab2c79948f1cb00e9301abd0e621c1126ff148d92418fe4eb699de6",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "item/Sample - Giddy; 钩爪屠戮.json",
+      "gitBlobSha1": "834b2b1296af600c53d1e1e732f7c9d84394dc62",
+      "sourceBytes": 4307,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/item/Sample%20-%20Giddy%3B%20%E9%92%A9%E7%88%AA%E5%B1%A0%E6%88%AE.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/language/Sample%20-%20Giddy%3B%20%E6%97%97%E8%AF%AD.json",
+      "sha256": "8d1639a396aee8636dffc282473aaa3736f0f1927aadc21ce2e91fe81c363750",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "language/Sample - Giddy; 旗语.json",
+      "gitBlobSha1": "9f787cb6468dc71a033c5e81c2cdba63ce80e0d6",
+      "sourceBytes": 578,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/language/Sample%20-%20Giddy%3B%20%E6%97%97%E8%AF%AD.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/magicvariant/Sample%20-%20Giddy%3B%20%E6%AD%A6%E5%99%A8%20%2B4.json",
+      "sha256": "40eb75b168be86fd60ab2cec6017e3e9a7a7e19e6480498bd7aeea8bd1a44c7a",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "magicvariant/Sample - Giddy; 武器 +4.json",
+      "gitBlobSha1": "5127b0fca60f5bdd79f1a9ad5087b51921efec64",
+      "sourceBytes": 1498,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/magicvariant/Sample%20-%20Giddy%3B%20%E6%AD%A6%E5%99%A8%20%2B4.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/object/Sample%20-%20Giddy%3B%20%E9%AB%98%E7%AD%89%E7%88%86%E7%82%B8%E7%89%A9.json",
+      "sha256": "142aaeb839dce95d6da478743af94f9e6deb00594127e0b9bb36b5db6d3b1672",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "object/Sample - Giddy; 高等爆炸物.json",
+      "gitBlobSha1": "c3d2dfeb7a448c1dfc54d510a1c882d8a6654f4b",
+      "sourceBytes": 1657,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/object/Sample%20-%20Giddy%3B%20%E9%AB%98%E7%AD%89%E7%88%86%E7%82%B8%E7%89%A9.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/optionalfeature/Sample%20-%20Giddy%3B%20%E8%8B%A6%E7%97%9B%E6%A0%87%E8%AE%B0%EF%BC%8C%E8%BF%9C%E5%8F%A4%E6%95%8C%E6%84%8F.json",
+      "sha256": "b42f462d7399ab23820d5898e3c4ef36d4d79ae28ae8d001ad8479575649c804",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "optionalfeature/Sample - Giddy; 苦痛标记，远古敌意.json",
+      "gitBlobSha1": "ea8dc9107216e6e70a8b5e8f62001fb33b879fe9",
+      "sourceBytes": 1463,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/optionalfeature/Sample%20-%20Giddy%3B%20%E8%8B%A6%E7%97%9B%E6%A0%87%E8%AE%B0%EF%BC%8C%E8%BF%9C%E5%8F%A4%E6%95%8C%E6%84%8F.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/psionic/Sample%20-%20Giddy%3B%20%E9%BB%91%E8%8E%89%E8%8E%89%E6%8A%80%E5%B7%A7.json",
+      "sha256": "8551222bb3adfffcff2439b5d7d93c0d5832a83dd5d19c9f1ad11702a1ec383f",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "psionic/Sample - Giddy; 黑莉莉技巧.json",
+      "gitBlobSha1": "37cc4f74d318e0eebd53f33800da0e5563d27afd",
+      "sourceBytes": 1610,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/psionic/Sample%20-%20Giddy%3B%20%E9%BB%91%E8%8E%89%E8%8E%89%E6%8A%80%E5%B7%A7.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/race/Sample%20-%20Giddy%3B%20%E8%A7%89%E9%86%92%E9%AA%B7%E9%AB%85.json",
+      "sha256": "c598cb6c84cb81354ebb600c8b5ecfbde8303a189705f400370db22e3b125c73",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "race/Sample - Giddy; 觉醒骷髅.json",
+      "gitBlobSha1": "1509d8703bfe6a922d90333e63d1a398a60b6e4a",
+      "sourceBytes": 2122,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/race/Sample%20-%20Giddy%3B%20%E8%A7%89%E9%86%92%E9%AA%B7%E9%AB%85.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/recipe/Sample%20-%20Giddy%3B%20%E5%90%90%E5%8F%B8%E4%B8%89%E6%98%8E%E6%B2%BB.json",
+      "sha256": "55cc772bb2446a026643e2b57a165670bca702e014630352755ef4e5e1bf53c1",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "recipe/Sample - Giddy; 吐司三明治.json",
+      "gitBlobSha1": "ee31d787d098b64b0d9572eae2fb394b1c23c766",
+      "sourceBytes": 1495,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/recipe/Sample%20-%20Giddy%3B%20%E5%90%90%E5%8F%B8%E4%B8%89%E6%98%8E%E6%B2%BB.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/reward/Sample%20-%20Giddy%3B%20%E6%B4%BB%E5%8A%9B%E6%81%A9%E6%83%A0.json",
+      "sha256": "3146a79d658dcbdf607b9bec4622de5ff3ef963346ecb343b1fdd723369b81e1",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "reward/Sample - Giddy; 活力恩惠.json",
+      "gitBlobSha1": "a65290aa573a07c900b986e3675203e00e33a46b",
+      "sourceBytes": 853,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/reward/Sample%20-%20Giddy%3B%20%E6%B4%BB%E5%8A%9B%E6%81%A9%E6%83%A0.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/spell/Sample%20-%20Giddy%3B%20%E3%80%8A%E4%B9%8F%E5%91%B3%E5%B7%AB%E5%B8%88%E6%8C%87%E5%8D%97%E3%80%8B.json",
+      "sha256": "f39cbb70f9078bd73e5f34ec1fa09dde685f4e92e2c2d370e74e354fbd1993f0",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "spell/Sample - Giddy; 《乏味巫师指南》.json",
+      "gitBlobSha1": "24f394903ecdd5e431c04e72a50fa72f06e6fe4b",
+      "sourceBytes": 1442,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/spell/Sample%20-%20Giddy%3B%20%E3%80%8A%E4%B9%8F%E5%91%B3%E5%B7%AB%E5%B8%88%E6%8C%87%E5%8D%97%E3%80%8B.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/spell/Sample%20-%20Giddy%3B%20%E6%9D%82%E9%A1%B9%E6%97%81%E6%B3%A8.json",
+      "sha256": "4b485100c734df4e1853b12cdb42985c3810f1dc486585328a98534b7a033631",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "spell/Sample - Giddy; 杂项旁注.json",
+      "gitBlobSha1": "95bd9f6de5973caa31da55ff007ac272bd833ddf",
+      "sourceBytes": 3374,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/spell/Sample%20-%20Giddy%3B%20%E6%9D%82%E9%A1%B9%E6%97%81%E6%B3%A8.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/table/Sample%20-%20Giddy%3B%20%E8%B0%8B%E6%9D%80%E8%AF%81%E6%8D%AE.json",
+      "sha256": "76be162bcb9605aa49a8c9673c068de14443f7a74a791cc3a453feda8b67dd1c",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "table/Sample - Giddy; 谋杀证据.json",
+      "gitBlobSha1": "3641b0e2a9dbae4f771d8da04e2b7a548a3c50fb",
+      "sourceBytes": 1523,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/table/Sample%20-%20Giddy%3B%20%E8%B0%8B%E6%9D%80%E8%AF%81%E6%8D%AE.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/trap/Sample%20-%20Giddy%3B%20%E9%AA%91%E4%B9%98%E7%9F%B3%E5%8C%96%E8%9C%A5%E8%9C%B4%E5%A4%B4%E9%83%A8.json",
+      "sha256": "c05ae0e8fdd52c3f0d2f850dc56d5ddc8d9ef32a4d50a2d2010dc640368c2c6f",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "trap/Sample - Giddy; 骑乘石化蜥蜴头部.json",
+      "gitBlobSha1": "c330e41a7ae8b99b369499dfd7c9ff3a5ff86495",
+      "sourceBytes": 1410,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/trap/Sample%20-%20Giddy%3B%20%E9%AA%91%E4%B9%98%E7%9F%B3%E5%8C%96%E8%9C%A5%E8%9C%B4%E5%A4%B4%E9%83%A8.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/variantrule/Sample%20-%20Giddy%3B%20%E6%88%BF%E8%A7%84.json",
+      "sha256": "6e3547b462083bb877ea4c56ca7533ecdd4ca8a93b40d796eb4b5410e51a9a36",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "variantrule/Sample - Giddy; 房规.json",
+      "gitBlobSha1": "7b3f23f71d51fac2870843d765ae34690ad30422",
+      "sourceBytes": 2153,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/variantrule/Sample%20-%20Giddy%3B%20%E6%88%BF%E8%A7%84.json"
+    },
+    {
+      "url": "https://homebrew.kiwee.top/vehicle/Sample%20-%20Giddy%3B%20%E7%A7%91%E6%8B%89%E7%A7%91%E5%B0%94.json",
+      "sha256": "07030c1d5555d5e9e6c14d9806a481a05d96070560971e0455ba5e082c62c0db",
+      "repository": "tjliqy/homebrew-deploy",
+      "revision": "546b44d773394f71bffe598f0161338361c26f56",
+      "path": "vehicle/Sample - Giddy; 科拉科尔.json",
+      "gitBlobSha1": "a1efed083f98740b3761199f0ee8cc9db889d747",
+      "sourceBytes": 1561,
+      "retrievalUrl": "https://raw.githubusercontent.com/tjliqy/homebrew-deploy/546b44d773394f71bffe598f0161338361c26f56/vehicle/Sample%20-%20Giddy%3B%20%E7%A7%91%E6%8B%89%E7%A7%91%E5%B0%94.json"
+    }
+  ]
+}

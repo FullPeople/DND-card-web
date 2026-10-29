@@ -19,7 +19,7 @@ test('one global query survives navigation and reload without filtering or reset
 test('subclasses wrap their full name with a smaller source on a separate line',async({page})=>{
  await mockSource(page);
  const name='来自遥远银月群岛的星光与秘法传承学派';
- await page.route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'测试法师',source:'XPHB',entries:['职业正文。']}],subclass:Array.from({length:5},(_,i)=>({name:name+i,shortName:'学派'+i,className:'测试法师',classSource:'XPHB',source:'XPHB',entries:['子职正文。']}))}}));
+ await page.context().route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'测试法师',source:'XPHB',entries:['职业正文。']}],subclass:Array.from({length:5},(_,i)=>({name:name+i,shortName:'学派'+i,className:'测试法师',classSource:'XPHB',source:'XPHB',entries:['子职正文。']}))}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await page.locator('.catalog-row').click();
  await page.getByRole('button',{name:'子职',exact:true}).click();const nav=page.locator('.class-subclasses');await expect(nav.locator('button')).toHaveCount(5);
  const layout=await nav.evaluate(node=>{const buttons=[...node.querySelectorAll('button')];return {overflow:node.scrollWidth>node.clientWidth+1,tops:buttons.map(b=>b.getBoundingClientRect().top),rows:buttons.map(b=>{const n=b.querySelector('.subclass-name')!,s=b.querySelector('small')!;return{fits:n.scrollWidth<=n.clientWidth+1,below:s.getBoundingClientRect().top>=n.getBoundingClientRect().bottom-.5,font:parseFloat(getComputedStyle(s).fontSize),main:parseFloat(getComputedStyle(n).fontSize)};})};});

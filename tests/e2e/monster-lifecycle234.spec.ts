@@ -9,7 +9,7 @@ import {mockSource} from './fixtures';
 async function open(page:Page,options:{offRoster?:boolean;malformed?:boolean}={}){
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await mockSource(page);
- await page.route('**/data/conditionsdiseases.json',r=>r.fulfill({json:{condition:[{name:'隐形',ENG_name:'Invisible',source:'XPHB',entries:['原创隐形测试状态。']},{name:'束缚',ENG_name:'Restrained',source:'XPHB',entries:['原创束缚测试状态。']}]}}));
+ await page.context().route('**/data/conditionsdiseases.json',r=>r.fulfill({json:{condition:[{name:'隐形',ENG_name:'Invisible',source:'XPHB',entries:['原创隐形测试状态。']},{name:'束缚',ENG_name:'Restrained',source:'XPHB',entries:['原创束缚测试状态。']}]}}));
  const c=newCharacter();c.name='双绑定旅人';c.baseHp=40;c.runtime.hp=20;const document={...exportOwlbear(c,evaluate(c)),dnd_card_web:c,_suiteRevision:1};
  await page.addInitScript(({document,options})=>{
   const protocol='full-suite-workbench/v1',session='monster234';let sequence=0;

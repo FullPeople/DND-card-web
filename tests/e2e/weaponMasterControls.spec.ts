@@ -11,10 +11,10 @@ import {weaponAttackSummary} from './reviewedWeaponMasterLocators';
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{weapon:'class-weapon-master.json'}}));
- await page.route('**/data/class/class-weapon-master.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
- await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
- await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:data.baseitem}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{weapon:'class-weapon-master.json'}}));
+ await page.context().route('**/data/class/class-weapon-master.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
+ await page.context().route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
+ await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:data.baseitem}}));
 }
 async function tab(page:Page,name:string){const button=page.getByRole('tab',{name,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(name)}(?: |$)`));await expect(panel).toBeVisible();return panel;}
 async function editor(page:Page,enabled=true){const toggle=page.getByRole('switch',{name:'编辑模式',exact:true});await expect(toggle).toBeEnabled();await expect(toggle).toHaveAttribute('aria-busy','false');if(await toggle.getAttribute('aria-checked')!==String(enabled))await toggle.click();await expect(toggle).toHaveAttribute('aria-checked',String(enabled));}

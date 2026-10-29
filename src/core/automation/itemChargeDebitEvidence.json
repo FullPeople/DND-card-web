@@ -1,0 +1,3309 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "owned-item-fixed-charge-debit",
+  "scope": "One source-proved constant-cost bookkeeping action per exact physical item. This records expenditure, not permission to activate or apply a spell/effect. No recovery or terminal transition automation.",
+  "sourceProseIncluded": false,
+  "investigatedEntries": 88,
+  "supportedEntries": 56,
+  "heldEntries": 32,
+  "fullSnapshotHashMethod": "SHA256(JSON.stringify(recursivelySorted(entire normalized Entry))); original proof includes canonical id and input revision. Runtime unreserved exact-source alias id and transport-only string revision are canonicalized nonmutatingly to the pinned values; every other field remains hashed.",
+  "mechanicsHashMethod": "SHA256(JSON.stringify(recursivelySorted({raw,entries,effects,choices,dependencies}))); undefined object fields omitted; array order retained.",
+  "rules": [
+    {
+      "id": "kiwee:item:idrotf:abracadabrus::::::",
+      "kind": "item",
+      "name": "如意箱",
+      "english": "Abracadabrus",
+      "source": "IDROTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 314,
+      "fullNormalizedSnapshotSha256": "62438467404b2cfb61233ee0b63fa49f6a56ad92f4561faff7c4be8c96f3f015",
+      "mechanicsSnapshotSha256": "903559a824fa3a96dd66899d3b23cfa8d06bc7bfdf973569930f847573df6551",
+      "originalRawSha256": "935cd7ab8d5a237e1961dea34c4689238b43896ae2aa15709e32baa0749a3f42",
+      "originalEntriesSha256": "f5be0ae649dd49a1b8ee03abea48257f1d64cb7f4556ba26775341291f21ea0e",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 43
+      },
+      "capacity": 20,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "touch-closed-lid",
+          "requested-object-value-volume-and-empty-container-restrictions"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:qftis:antigravity%20belt::::::",
+      "kind": "item",
+      "name": "反重力腰带",
+      "english": "Antigravity Belt",
+      "source": "QFTIS",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 192,
+      "fullNormalizedSnapshotSha256": "c0b2b8c65fcde0bf45b818b462c689f4825e76ceda319d837befddb988871040",
+      "mechanicsSnapshotSha256": "edf86658484726d79ebec9832972dd581a13cb6855a83e923e3509692c7e63cd",
+      "originalRawSha256": "b64bb01107b474b307bbef68e8e17a83f1ead0840c805a1f1f48f4180eb1e2b3",
+      "originalEntriesSha256": "ea7f2f1d8a49dda4f164627e9181bc9dc5d9f0aa3630c0f2bffd48e61a1ab80e",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 94
+      },
+      "capacity": 10,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:au:bellows%20of%20strangulation::::::",
+      "kind": "item",
+      "name": "扼杀风箱",
+      "english": "Bellows of Strangulation",
+      "source": "AU",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 116,
+      "fullNormalizedSnapshotSha256": "127aa4425404e99ede433369ae192b9749c9a9d6141680746de7903eed214d6c",
+      "mechanicsSnapshotSha256": "dc7b5cac4314ca66ea689d4802b391f5ae992e34b2bf268cbae52771ae23a0fb",
+      "originalRawSha256": "72e2e3a6e793a515be54cc793ad573012a671f58c78e7e92c09a691290027cbb",
+      "originalEntriesSha256": "350df21ab729844a4cb3ea2b19d73d1632f1a34863fe2c72769bf291d55cfcca",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 192
+      },
+      "capacity": 6,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "drain-single",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held",
+          "command-selection"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:wdh:charred%20wand%20of%20magic%20missiles::::::",
+      "kind": "item",
+      "name": "烧焦的魔法飞弹魔杖",
+      "english": "Charred Wand of Magic Missiles",
+      "source": "WDH",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 77,
+      "fullNormalizedSnapshotSha256": "6ef6c7211983df3e0005e791eca2ba7f7dd633c11fe067dc5af38a5495ce3f32",
+      "mechanicsSnapshotSha256": "4b214cfe29a93f5faa121ec5d130b7c38b3c53408b15d7b2a1a91d75e97d91b0",
+      "originalRawSha256": "63f1ffa4396a28f7067321c18defabba73d6c3c277a23b410c210f085c3fc43f",
+      "originalEntriesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 410
+      },
+      "capacity": 7,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:clockwork%20amulet::::::",
+      "kind": "item",
+      "name": "发条护符",
+      "english": "Clockwork Amulet",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 245,
+      "fullNormalizedSnapshotSha256": "e0db57e5c2bc666a51f3e527a90752908302722ea9794c07183437d4a9c92b7a",
+      "mechanicsSnapshotSha256": "63208ca03d376d68a15f0d0ae6fd31b8e2997954c83b2125176835b98fb05048",
+      "originalRawSha256": "262f1d0dbe139b0a77eb1bcfc53adbcff84fba6eaa1d7fd0fb5dead130492421",
+      "originalEntriesSha256": "e57528c6ee85f72ff9414d80de0e101e40daf8a4118f80a9d437318bff6580dc",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 459
+      },
+      "capacity": 1,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:cubic%20gate::::::",
+      "kind": "item",
+      "name": "异界之门魔方",
+      "english": "Cubic Gate",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 160,
+      "fullNormalizedSnapshotSha256": "981c89280947fd21743aa0099fd7cb12e8c7ea315306cd791aea9a3f6c5eb94b",
+      "mechanicsSnapshotSha256": "27faca9cf03dd381264285fca771cbffc5fc494e1a467e037f5f0b19d9218ba3",
+      "originalRawSha256": "8272b6e9b9deb677ef817e28903d5d5b8f9518bee350f11d29c612b7c74c2d19",
+      "originalEntriesSha256": "234a9b41110ee3516c3ee4dd8b57ac6649e9f71629c00605df7f14d4a9891dfc",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 537
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-gate",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "cube-face-selection",
+          "known-dm-configured-destination"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:cubic%20gate::::::",
+      "kind": "item",
+      "name": "异界之门魔方",
+      "english": "Cubic Gate",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 247,
+      "fullNormalizedSnapshotSha256": "44d260306de2aa36f1cac161e243bc1235360c205322d15c9ce92b6c9047fcd4",
+      "mechanicsSnapshotSha256": "cb900d6b44c22cbff6a0da4d1e2f4bebc8d81335129553d89d88be559db0e93d",
+      "originalRawSha256": "5e78ebfade70aee69931f23753c2aa13e83dc4400f933fdf1bb5fa041a023ff7",
+      "originalEntriesSha256": "c444afa8d5ae624c2aefa69a6df6a8c63fb3b25c04fb47f79fb8a6fae7c15a34",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 538
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-gate",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "cube-face-selection",
+          "known-dm-configured-destination"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:hotdq:dragongleam::::::",
+      "kind": "item",
+      "name": "龙光一闪",
+      "english": "Dragongleam",
+      "source": "HOTDQ",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 84,
+      "fullNormalizedSnapshotSha256": "95cf1301cf502fada772da7bc4f2421ca5fcdc652eb7fbed59e0c797167ebee9",
+      "mechanicsSnapshotSha256": "9a8d3c3bac335e6d962e641f6872392bf1a7ba2a86f1968d52613925c9804802",
+      "originalRawSha256": "e01ac345cf550b87b4a315943c5cae0f384d3ac337ce6e5e861197ece853b81c",
+      "originalEntriesSha256": "06935860d3e57991351125c1103460a011b433f855d61bcf2c05853075fdeac1",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 622
+      },
+      "capacity": 10,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:crcotn:earring%20of%20message::::::",
+      "kind": "item",
+      "name": "传讯耳环",
+      "english": "Earring of Message",
+      "source": "CRCOTN",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 212,
+      "fullNormalizedSnapshotSha256": "8dce637d45431a9515f95decd611a42110475f5bb70bd9a7a5cdd0e10c2f7014",
+      "mechanicsSnapshotSha256": "40714c161a6a3e2c811ce7c22c8bc623042a05b3cbf506d9dc8512c69ba66802",
+      "originalRawSha256": "0b83b102b64594020c8caed9f93c059ba038a768aade104f3658ee5dfc252c20",
+      "originalEntriesSha256": "d39c38b042d33923e95cace56fccb64802eaddb53d1bbcc2b9f929667b3e49bf",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 658
+      },
+      "capacity": 5,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "worn"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:dmg:figurine%20of%20wondrous%20power%2C%20ivory%20goats::::::",
+      "kind": "item",
+      "name": "异能塑像，象牙山羊",
+      "english": "Figurine of Wondrous Power, Ivory Goats",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 169,
+      "fullNormalizedSnapshotSha256": "0aea2e8d946ffb56442fa76fd5fb09961b2dea057cf1ffd461e48b1614e59047",
+      "mechanicsSnapshotSha256": "bf7df4869d7d8b5c90ccae0b999979a55ef05a271a941c3fb19e58e820fbdbd4",
+      "originalRawSha256": "37455d7dfc764dd74a7510ce8d4153f1f5f872612336319feaf1094c4d84208f",
+      "originalEntriesSha256": "d5dcb1d6825c41d09aa65b97e63f8d4a3327bda76ce29a9b3d61d5de04dc3d66",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 772
+      },
+      "capacity": 24,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:figurine%20of%20wondrous%20power%2C%20ivory%20goats::::::",
+      "kind": "item",
+      "name": "异能塑像，象牙山羊",
+      "english": "Figurine of Wondrous Power, Ivory Goats",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 261,
+      "fullNormalizedSnapshotSha256": "b2447904e1913a3000e8474eb3973e582228b03d326d0c42d0de6f59ad2366b6",
+      "mechanicsSnapshotSha256": "0062233cb870b1f53ac03f72794777e7bfba1c8f2d6f1cfe11e8d0ffff7d59c9",
+      "originalRawSha256": "be3d8ece6ac4fc0d07ddb0c475ead9a30fb24094ad687de9d2f64b70d8eb28ae",
+      "originalEntriesSha256": "c53e9e4e1a62d70fc876e829a9984c4144f300020d8f3bffd11a0c2fb724241c",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 773
+      },
+      "capacity": 24,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:gem%20of%20brightness::::::",
+      "kind": "item",
+      "name": "光彩夺目宝石",
+      "english": "Gem of Brightness",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 171,
+      "fullNormalizedSnapshotSha256": "984707ac760661971f774dd1d5189d88a9b3bd84af61d2351b5bb5ae568bc6b2",
+      "mechanicsSnapshotSha256": "fbd5f3dc300a1ceff0d32c469e78a9520b1c340f548887a95a17450eaa56392d",
+      "originalRawSha256": "390a82e5736cc76dff26ac11487ed8e212bd974b5c155c24728e85b801b7d6bb",
+      "originalEntriesSha256": "86128c0e5b0b1917a09fe67853153b0d9419dae4c047910ff7897ad001c8b059",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 841
+      },
+      "capacity": 50,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "single-blinding-ray",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held",
+          "command-selection"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:gem%20of%20brightness::::::",
+      "kind": "item",
+      "name": "光彩夺目宝石",
+      "english": "Gem of Brightness",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 264,
+      "fullNormalizedSnapshotSha256": "8ce8490182f208ca64835392d5dc25914b767d900894a8c1034f879d6162557b",
+      "mechanicsSnapshotSha256": "77aa6d1f2b7f77fb8b995183de450f8d7c3600dbd1c0a980e82c3b2adb062622",
+      "originalRawSha256": "d7cff6eb652c8c6f25f99c407d85bcb1723fbb437627b5edbbe22096c226bc7d",
+      "originalEntriesSha256": "f8154459d05d63ce5c7c112f4cc4810b2df5021f8b1d25e72e54653081927501",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 842
+      },
+      "capacity": 50,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "single-blinding-ray",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held",
+          "command-selection"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:hag%20eye::::::",
+      "kind": "item",
+      "name": "鬼婆之眼",
+      "english": "Hag Eye",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 265,
+      "fullNormalizedSnapshotSha256": "addfd4e88bf56360ea7a2cfa65c8d7a45f39b3b580b05bd457c6f2cd48adca35",
+      "mechanicsSnapshotSha256": "7da9dcd3cfe7ea92df70343bff6ff023239a275cfd10eaaeb93b8e098e2a5d44",
+      "originalRawSha256": "84c32e16bc03c200bca758671ed1295a6e82777b7d2e962e193d88dd88d4f22f",
+      "originalEntriesSha256": "a985e62f2eeffe327c3757eb956a423cbb04afa60e5cfa5405900942591b24dc",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 941
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-darkvision-self",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "worn-or-held",
+          "darkvision-route-self-only"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:dmg:hammer%20of%20thunderbolts::::::",
+      "kind": "item",
+      "name": "雷神之锤",
+      "english": "Hammer of Thunderbolts",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 173,
+      "fullNormalizedSnapshotSha256": "42c4e6ffbd2318e9043c1d8da5301dbddd8bd769c88f6f48f27ff688407f8cf2",
+      "mechanicsSnapshotSha256": "25ee4f3a9b9d065317fff22357e1fd59c3213c1b18d7d568cbf73bfde2882d09",
+      "originalRawSha256": "619407fa2ef37b09f4ecc9099c2b9aa58773403b9c19c2dcc653e90ff6169afd",
+      "originalEntriesSha256": "ef06c54668fac8ae10ac00f92ac8abdf2c569c126f63b045302e77611a910c85",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 944
+      },
+      "capacity": 5,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:hat%20of%20vermin::::::",
+      "kind": "item",
+      "name": "害兽帽",
+      "english": "Hat of Vermin",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 267,
+      "fullNormalizedSnapshotSha256": "788704865f6893309bfdfa834f87e0607db32ee0be3c06543aaafaf25dd8362b",
+      "mechanicsSnapshotSha256": "4215bcb08f3851afe668af7da0e9905c1dba7a650bed0d164cad419f85b97ea0",
+      "originalRawSha256": "e732d9bb994f05788d154e3c557b80d1ac0b1254d09190e18f15e22334067408",
+      "originalEntriesSha256": "282aea8a8c1de6fa7f97237002a98e07d21f9b2d8d072c1df78d1e9e36002728",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 959
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held",
+          "summon-choice"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:hat%20of%20vermin::::::",
+      "kind": "item",
+      "name": "害兽帽",
+      "english": "Hat of Vermin",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 137,
+      "fullNormalizedSnapshotSha256": "a2c9ff5d5bd7948973ba77f8f6eb5547b279f0df46d1b2e104ceb43af08c730f",
+      "mechanicsSnapshotSha256": "2b3e83f62850d496de4d07b10037da9ad5392f104bc7f68c7ecdd2932e1446b0",
+      "originalRawSha256": "8bb0ecceeb2d8ece0ed6a5e802ba3e0041f3b66ae23df8a62b1bf3f136e991cb",
+      "originalEntriesSha256": "4ca4bb17495161ca7a98614c1d13b7bec99538f47b7672c026e3d8ec6270d486",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 960
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "worn",
+          "summon-choice"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:heward's%20handy%20spice%20pouch::::::",
+      "kind": "item",
+      "name": "霍华德便利香料包",
+      "english": "Heward's Handy Spice Pouch",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 269,
+      "fullNormalizedSnapshotSha256": "f1722fa3da8dfc5c1c04a94199a0763ad51fdf32641f591a20123b9ce6051677",
+      "mechanicsSnapshotSha256": "080fa01dc5e8ea133f529c8a217e6682efd9ae6c88d9c54e9cd791818cb6b960",
+      "originalRawSha256": "973389bb0e4011786e17751960a52d8edc05f5165aae2f12fbd95605d76d10c3",
+      "originalEntriesSha256": "e6253473d5fc944106271adf8b88d65a8fc451e71448769f102941ad156cfead",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 998
+      },
+      "capacity": 10,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held",
+          "nonmagical-seasoning-choice"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:heward's%20handy%20spice%20pouch::::::",
+      "kind": "item",
+      "name": "霍华德便利香料包",
+      "english": "Heward's Handy Spice Pouch",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 137,
+      "fullNormalizedSnapshotSha256": "e7cca08ce20409b355e3770f4ca1bef5d13b50df3a7c02ab2cbefe67a08053b7",
+      "mechanicsSnapshotSha256": "0feb552b5def47570dbd817772494d7c59a6e6a6cf18bde1474e521ebc87e99c",
+      "originalRawSha256": "fc8461e1936cbe8e6ea38a90ee9b6e96b1ddf6149bf1e552053f8da6ddc14572",
+      "originalEntriesSha256": "586c4ec85c477396634111efa582eb06b41f3eccfcc452ff3b334921a3d7c17a",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 999
+      },
+      "capacity": 10,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held",
+          "nonmagical-seasoning-choice"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:hat-lmi:hither-thither%20staff::::::",
+      "kind": "item",
+      "name": "传送法杖",
+      "english": "Hither-Thither Staff",
+      "source": "HAT-LMI",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": null,
+      "fullNormalizedSnapshotSha256": "71d8e626dba066fe67f612742312faad17b03ab21cd178a2f718af1c1b93a364",
+      "mechanicsSnapshotSha256": "81af03276af654e0f701d042245a7ee52635564fa12371f5ae11ce6b164a69cd",
+      "originalRawSha256": "29e3a6a29ef33d12891301d4b46305fe90fccef7ef91845c45366aa21cfbf337",
+      "originalEntriesSha256": "d41c65c915f1cb44e1495671605c44c6d2522edcfa571c3ded76874e186ff5e5",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1004
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "create-portal-pair",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "portal-create-or-reposition-choice",
+          "visible-valid-surfaces",
+          "free-dismissal-requires-held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:horn%20of%20silent%20alarm::::::",
+      "kind": "item",
+      "name": "静报号角",
+      "english": "Horn of Silent Alarm",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 270,
+      "fullNormalizedSnapshotSha256": "d0d27da551ce6c5c1bf0abd5ee58fcf38d153caeea2fb4c22da7117e47a628fc",
+      "mechanicsSnapshotSha256": "4c630d16cf48eaae6e2d73c654993e69f251e5f2f2a5897c60f10c9bcd12a028",
+      "originalRawSha256": "8b2d2951b0100c34e17721390bbfb9d9fbaa40276d2453143d40c5a1457fde29",
+      "originalEntriesSha256": "1063a7496b329e4ade8f60e4e78a5759f90ad4b8f43eb706b38c3f0c2b9e7739",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1018
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "blow-horn",
+          "target-within600ft"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:horn%20of%20silent%20alarm::::::",
+      "kind": "item",
+      "name": "静报号角",
+      "english": "Horn of Silent Alarm",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 137,
+      "fullNormalizedSnapshotSha256": "3bccd0c399363bc5bab81460e4404d37c242c4a266ec8dfa2a8eab4b5763bd08",
+      "mechanicsSnapshotSha256": "28d9f5d09e4eb77e2e49a2b6c3658b5208f23d9586c70627f9bb647276957ea6",
+      "originalRawSha256": "2ceeb42b342d090589dfc87bfc9429e9a9e27203b5293195897bcab588c1438a",
+      "originalEntriesSha256": "ff7b7cf039d753c278419f1894e60edfe4b325a6403f6a3d3280d5a8d4f34740",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1019
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "blow-horn",
+          "target-within600ft",
+          "target-not-deaf"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:toa:insect%20repellent%20(block%20of%20incense)::::::",
+      "kind": "item",
+      "name": "驱虫剂（一整块香）",
+      "english": "Insect Repellent (block of incense)",
+      "source": "TOA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 32,
+      "fullNormalizedSnapshotSha256": "db91658e7e902011ee415eb992f66623881ceea76e58aad288bbd0701c49a1cc",
+      "mechanicsSnapshotSha256": "cebcf5533c46b48130c49bb3abd7d0cf347c2db97d00a649409bd3ab9d639414",
+      "originalRawSha256": "9fc5682bfa1a3e06a7a293ac9ed6885761d805dc32e52bbef2987e3371b36904",
+      "originalEntriesSha256": "e1705a565d8c94ca6b27686f9b277d00c1a00e3c51da59fb4b5769692f55b292",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1061
+      },
+      "capacity": 1,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:toa:insect%20repellent%20(greasy%20salve)::::::",
+      "kind": "item",
+      "name": "驱虫剂（油腻药膏）",
+      "english": "Insect Repellent (greasy salve)",
+      "source": "TOA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 32,
+      "fullNormalizedSnapshotSha256": "98604a65242c8782cddac1388f7c17f414f275a4413b3c3440966c10deb4be87",
+      "mechanicsSnapshotSha256": "441baf76a121b44380912ad5b37124bbaa87ac65b90e0e0b36f88feda2d0cfe4",
+      "originalRawSha256": "b3ce98c0e459300fec1d8a2cd6a1acf92183943888892d531dbd274146c9fcea",
+      "originalEntriesSha256": "0c8e9b0a78f2b1324e9ba73d38810c1382aa8e5155f6d9b4ea4f54a45154b2a7",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1062
+      },
+      "capacity": 20,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:instrument%20of%20scribing::::::",
+      "kind": "item",
+      "name": "撰写乐器",
+      "english": "Instrument of Scribing",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 271,
+      "fullNormalizedSnapshotSha256": "161b950306c8c9df477340216664a9922a566809e84975b33b95839836fe602c",
+      "mechanicsSnapshotSha256": "dcda240c7519011cbb8c33776cdbfeaf4e9a6c472676dfaf3ceb638dda84e583",
+      "originalRawSha256": "91c4a4fa12f0cc92899d6a9e1bbab62669b822caf627d114aac92ab4eff994b7",
+      "originalEntriesSha256": "98d5e1787a55893c9941a9b608dfe7ad55f3a2a8878e068985e9eae8b61fb0ce",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1066
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "playing-instrument",
+          "known-language",
+          "visible-nonmagical-surface"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:bmt:key%20card::::::",
+      "kind": "item",
+      "name": "钥匙卡",
+      "english": "Key Card",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 14,
+      "fullNormalizedSnapshotSha256": "106ee92a8cb24035bf4ca56b34cd567b053f7ef92ded84f25ab7a6ea27d824f0",
+      "mechanicsSnapshotSha256": "db1200b8a977aaa33424b39b6ab74c62553f072648a65dfdb10d20a45e979a7f",
+      "originalRawSha256": "8e3edb749a2e5ee1d2b30a5c833cdf323bc9a22bc354f3715f37068fbdcd148e",
+      "originalEntriesSha256": "bd816e93a1294cd16ee6aa9c1ce8c87033da63052a9f3dec6cb76215bde20686",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1175
+      },
+      "capacity": 5,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:nf:mask%20of%20changed%20appearance::::::",
+      "kind": "item",
+      "name": "变容面具Mask of Changed Appearance",
+      "english": "Mask of Changed Appearance",
+      "source": "NF",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": null,
+      "fullNormalizedSnapshotSha256": "671a7eb75c8ec56d6b7ab87da9baa98c3ab3a5c85afe35d7c97cb544fcca4f08",
+      "mechanicsSnapshotSha256": "3b753879e1e0990b5195a7a4b643218c61d4f4871b5be2558565aa35982743c9",
+      "originalRawSha256": "eee7bc370412f213cdc20ee972de3808ba6258f3d6442f10d64323a6c5edf0af",
+      "originalEntriesSha256": "1fc5614f6b4aa5ad962670a3923e32f2dcf5bf646a64ffb488833d160aa9e897",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1296
+      },
+      "capacity": 3,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "cosmetic-self-face-adjustment"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:toa:mask%20of%20the%20beast::::::",
+      "kind": "item",
+      "name": "野兽面具",
+      "english": "Mask of the Beast",
+      "source": "TOA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 207,
+      "fullNormalizedSnapshotSha256": "4306d07fb0e679a6e93744a5388fa0b9556405ac61242c39f076eb7f1b2408d8",
+      "mechanicsSnapshotSha256": "887817b75c1f90ddf599f2930877896a288b27edffda4304757ad33bd8fce7f9",
+      "originalRawSha256": "a70062c15dbee8c6890878f81212b775a6efe89a5353d1f1f2cfe6110dfba29b",
+      "originalEntriesSha256": "dcc3f60445e8f87e7337177cb37e4aed3557bd18b8201aad014f9580a2eebc8c",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1297
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "worn"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:ggr:mizzium%20mortar::::::",
+      "kind": "item",
+      "name": "米捷轰击炮",
+      "english": "Mizzium Mortar",
+      "source": "GGR",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 179,
+      "fullNormalizedSnapshotSha256": "dc38fbef78b9b337a7f9204c52f7e1168d6f3e91a3da12d104581a2a0bf4bd8f",
+      "mechanicsSnapshotSha256": "54668e24e771cd2299d68e2bb01909b532751535310f651f96fa0ed884d826f9",
+      "originalRawSha256": "b859c18e6ba1816e9987c782e215b0505a55499a55983f9d944b188157a42d18",
+      "originalEntriesSha256": "a077ca6c6786f32c19e8ba383604f7bc35ac88b42a0d3f30e6994511012296d1",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1351
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "molten-spray",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "selected-area-attack-mode"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:qftis:needler%20pistol::::::",
+      "kind": "item",
+      "name": "针刺手枪",
+      "english": "Needler Pistol",
+      "source": "QFTIS",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 192,
+      "fullNormalizedSnapshotSha256": "62fea46570a5efa31fa58205595a9c75377d18dcaaa1bf9f6a6fb1edb596f1a6",
+      "mechanicsSnapshotSha256": "8549cf40dcd7c42891c406eeacc1b0d40d039b304af97b4b6d998fa0e8759da0",
+      "originalRawSha256": "ea3f2311eb941280f69fabf643469af2974b5fd0b9cd9113e808b4d330cac9dc",
+      "originalEntriesSha256": "01431cbe576810bbbbb9b3a6df01344fa0aa86d312e278ef7686aa7cdefd225c",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1399
+      },
+      "capacity": 10,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:qftis:paralysis%20pistol::::::",
+      "kind": "item",
+      "name": "麻痹手枪",
+      "english": "Paralysis Pistol",
+      "source": "QFTIS",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 192,
+      "fullNormalizedSnapshotSha256": "eab9b6d7b4e2ff4e1da075c1de75957b3bbbeb7b38bba205a7a5ea6174a87a0d",
+      "mechanicsSnapshotSha256": "15f85e49831a81b2071e9295c833af68d2f33825462f13a6d3f7c88a7635ddef",
+      "originalRawSha256": "00434fd9a4b5f474c0c4d69218397df910b2dc11852db7aec4dcd994d869abda",
+      "originalEntriesSha256": "239583f2583ac2b8ce76402b4cbf06b1069e58be40b9860738039a7e071b848e",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1484
+      },
+      "capacity": 6,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:dmg:pipes%20of%20haunting::::::",
+      "kind": "item",
+      "name": "颤栗乐笙",
+      "english": "Pipes of Haunting",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 185,
+      "fullNormalizedSnapshotSha256": "803be868459180224f505bfda00ece1212ace6e197cbe6c0745cf36c4ae4d5bd",
+      "mechanicsSnapshotSha256": "713d7fcda36cec86fc9164a15f561c0d03a3706fe69449d39b0247dc86db43f2",
+      "originalRawSha256": "fffac6ae1aee7b236ebad91bfea79b23e17ae2fe00859a7112c7be15a5a9cd83",
+      "originalEntriesSha256": "fc99cd4b4d43dd1572ca349b45c2caa18943ec752dd0ee545282625d65bb197a",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1521
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:xdmg:pipes%20of%20haunting::::::",
+      "kind": "item",
+      "name": "颤栗乐笙",
+      "english": "Pipes of Haunting",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 285,
+      "fullNormalizedSnapshotSha256": "7b3924b6dbb3e1450a99729a7f7b0f8fd4147b6ac74b6674d169980a2285f925",
+      "mechanicsSnapshotSha256": "d6cb647f112f3ca7f9368a7593294c4b3592ca417156592c2e45692226f0dfd6",
+      "originalRawSha256": "7466aea94971b6ae9ca5cedfe347a3c81fdf7a4712da0f34298f2aef18dd7159",
+      "originalEntriesSha256": "05576af67483f5b42c81cf9534d04ca200e87dfe964b3721806511eba6780be8",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1522
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "play-pipes",
+          "target-choice"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:qftis:powered%20armor::::::",
+      "kind": "item",
+      "name": "动力装甲",
+      "english": "Powered Armor",
+      "source": "QFTIS",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 192,
+      "fullNormalizedSnapshotSha256": "75b6f952e33bd0ed3824750d1abae857101de96f76e2fa3296bbc78f3dab8767",
+      "mechanicsSnapshotSha256": "63124244afd56479888dee549e61e63b885c3df030cb464f36948f52e0c44a24",
+      "originalRawSha256": "e952f385a72c1fce96df8880fc9423b53d36244d344eb3a0cc1d7cb826944a7c",
+      "originalEntriesSha256": "2a5b166984a3ea013a58cfee4535b38e69927e478697e664b0c2272dccdd04a5",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1665
+      },
+      "capacity": 24,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:efa:repulsion%20shield::::::",
+      "kind": "item",
+      "name": "斥力之盾",
+      "english": "Repulsion Shield",
+      "source": "EFA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 112,
+      "fullNormalizedSnapshotSha256": "4add3f648f3c88cf714b62bbe0a25d99141a2434d02e639b457fea5a5f91da30",
+      "mechanicsSnapshotSha256": "efcc803432b40d87f49bed335a7d9826279aea30a56042f456c79fa4bd19c477",
+      "originalRawSha256": "5dc9260c21c5d50a8d39a2d9bb655d9c6b9eba9daaa59ffbc3a0e357922ef153",
+      "originalEntriesSha256": "5b38cca03668a42bf3e21cd67583a5619f94cdecb46bf66c1c72e97c24f107d6",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1743
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held",
+          "hit-by-melee-attacker-within5ft",
+          "attacker-size-at-most-large"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:dmg:ring%20of%20animal%20influence::::::",
+      "kind": "item",
+      "name": "影响动物戒指",
+      "english": "Ring of Animal Influence",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 189,
+      "fullNormalizedSnapshotSha256": "fe7f20fa8c5bf78002840953b17be749ae7218b0716d4dc484772651d23ee6a9",
+      "mechanicsSnapshotSha256": "fa3bd55286775c9269c40504d8368a95eea4efeaab6077582d76792b2e53d79a",
+      "originalRawSha256": "8424990c522d68f39bbfddefd0414a6801c5507c19083e9c48379bb01435c79d",
+      "originalEntriesSha256": "f3dbabb9c24db5298ea1ac995d01ed0755502c3751e8d2fe929872c071a30483",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1756
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-animal-friendship",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "worn",
+          "spell-route-specific-target-restrictions"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:ring%20of%20animal%20influence::::::",
+      "kind": "item",
+      "name": "影响动物戒指",
+      "english": "Ring of Animal Influence",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 292,
+      "fullNormalizedSnapshotSha256": "3cba25c1191f56d17bb145c2d9479c487085688289b267865ee125bf10574478",
+      "mechanicsSnapshotSha256": "f28a9d9e129da7747f9cd1d20b3cba2ebdbf218befa6dfbfaab9c7e2994d129c",
+      "originalRawSha256": "9eef2bc5da16da2da55c620ab97e824090b2198eec0ba1f4b7fa48d06c0ee5db",
+      "originalEntriesSha256": "d56095cbf4e18366701a3ffd2562787cd347197fdb89f2b87b1069649fb712ce",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1757
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-animal-friendship",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "worn",
+          "spell-route-specific-target-restrictions"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:bmt:ring%20of%20puzzler's%20wit::::::",
+      "kind": "item",
+      "name": "谜题急智戒指",
+      "english": "Ring of Puzzler's Wit",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 37,
+      "fullNormalizedSnapshotSha256": "00c96fe263ae979cac71e8da99e4cf43e4bbfe20571cd676789b26011064f631",
+      "mechanicsSnapshotSha256": "a5771c548812c8a28bd75523c5e9f17e05a8418006fc543a99b6acaaed4068f0",
+      "originalRawSha256": "88a289c22160b5c106b1a49def64829fbdddba19d59bc2599fc5692a1fa44c81",
+      "originalEntriesSha256": "e8811c2e6ba2f0afed3c4cc5bc8b0402cbaf4f6be0897390b9ae077e56b13cc6",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1798
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "worn",
+          "current-intelligence-check"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:rival%20coin::::::",
+      "kind": "item",
+      "name": "劲敌硬币",
+      "english": "Rival Coin",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 296,
+      "fullNormalizedSnapshotSha256": "f3284c63160827c60b4510d69d6a958e3b793879d93bab65f79e8a2f75f943da",
+      "mechanicsSnapshotSha256": "6e53172633f9e8f48bb437414681601098d3ea0f8c27b6f0a3c3b06d09491d1e",
+      "originalRawSha256": "3efd5eef321de92df6572b11ebac0edcf3bc4fbcceff1de3b804483fea2b3804",
+      "originalEntriesSha256": "fa52ef147a30a4aab009b80a2cede1c2831cc60c2746901dd57f6b34e7222000",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1833
+      },
+      "capacity": 1,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "coin-flip"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:qftis:robot%20controller::::::",
+      "kind": "item",
+      "name": "机器人控制器",
+      "english": "Robot Controller",
+      "source": "QFTIS",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 193,
+      "fullNormalizedSnapshotSha256": "502c315f8adf65d3faa39dc26eb3110c48bcd832f45d882b05b8811264ead906",
+      "mechanicsSnapshotSha256": "fddc58a776d0d48fb0f0de373d9cff52b799a731dc0c1bd4f102151ff919f698",
+      "originalRawSha256": "9bdefe91cca042ede9efe5773f02a907a8334e2e4042cc139e8d078fcb9b7a86",
+      "originalEntriesSha256": "3b1db6854138f3fc30b912d823e88b9bdf7cb59c8cbccc86e162467ac7844704",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1849
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:coa:sage's%20mirror::::::",
+      "kind": "item",
+      "name": "贤者之镜",
+      "english": "Sage's Mirror",
+      "source": "COA",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 269,
+      "fullNormalizedSnapshotSha256": "70f732d08c8131927d6cc58cefb610d821ea1642c8d173a3f3f33dcccd0c470e",
+      "mechanicsSnapshotSha256": "a33f9c906399a8a6374d582e82a77230977f01120b5ae8114091c562adee2dd4",
+      "originalRawSha256": "6cc82135582b60943cd6b985565daa947845b64fc4b9dcdb308527c556e0f6ed",
+      "originalEntriesSha256": "478fa4212954d0ff3876e255e03aee29c9691b84e5b294e1cf2d5d358ef93bd1",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 1902
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-find-the-path",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "use-mirror"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:spirit%20board::::::",
+      "kind": "item",
+      "name": "通灵板",
+      "english": "Spirit Board",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 306,
+      "fullNormalizedSnapshotSha256": "ded1d648606873bbd6d2a3ce5236ac1150891db818d5f520b1f9e16b8c2df30a",
+      "mechanicsSnapshotSha256": "15c02cec133c9ea65e2c94cf769f6d7004fe8a7f806b8d98d2a4dd11929a5031",
+      "originalRawSha256": "8b008669fba63671cd9f51c93e48fa5ae94b757aac1fc6308e068df142bc66dd",
+      "originalEntriesSha256": "297523c715de4c172a3c1877797b70db1dbe1015059645aba9ee24d83deb8e11",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2149
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-augury",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "planchette-correct-side-placement",
+          "touch-planchette",
+          "spell-selection"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:staff%20of%20birdcalls::::::",
+      "kind": "item",
+      "name": "鸟鸣法杖",
+      "english": "Staff of Birdcalls",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 307,
+      "fullNormalizedSnapshotSha256": "b9ec8f7a8176fc6c364d384e77383d27b9178958575afab6cb5c91a348dd3c4a",
+      "mechanicsSnapshotSha256": "2247169acca132ec5dfc21c94857bdfad2d64902af2282c2149c6dde25772a74",
+      "originalRawSha256": "1bb6b6fa04d7306c64e3fdd368905fd5eb881908506afcd3765ae5555e2a2aa0",
+      "originalEntriesSha256": "2ab38f060a3f23e0de7613ac086ea69166f18eee90cd2a915c0429003cf010bb",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2161
+      },
+      "capacity": 10,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:staff%20of%20birdcalls::::::",
+      "kind": "item",
+      "name": "鸟鸣法杖",
+      "english": "Staff of Birdcalls",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 139,
+      "fullNormalizedSnapshotSha256": "41e0ba602627fba29a30531ffaca190bf9d92136b7d16d739a11e49002d9eb62",
+      "mechanicsSnapshotSha256": "ec63738ffc2e39040310b5d6bec9d4b740436bff7bb2b4c78adcb719a55afc1b",
+      "originalRawSha256": "ed1643f24c1872b1f887da1f3d4fa6d2184e4dcf87262896c6c6d087eef338f2",
+      "originalEntriesSha256": "cd517b050f736d65b6306a3752d832736a7b9ede4e148c9e5c0557a3ccb8f06d",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2162
+      },
+      "capacity": 10,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:staff%20of%20flowers::::::",
+      "kind": "item",
+      "name": "鲜花法杖",
+      "english": "Staff of Flowers",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 308,
+      "fullNormalizedSnapshotSha256": "64adb8c6568d8b82962b1266911457a0be266dbd45d8d2c1bd75f669ae4f2ec9",
+      "mechanicsSnapshotSha256": "39eb5bd93fb0059ad47cad6116dfb3d3917c3c9acd91b8f8cbcfb8da032b881b",
+      "originalRawSha256": "e5a4fdcc36e9574efd6faa1eed872fdc461312703cac604eaaa78245f93d3563",
+      "originalEntriesSha256": "4b389e249e7f9655d7296ac2a9d251ff49b44a51a5b0d6911a8dd2d4026cc32a",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2171
+      },
+      "capacity": 10,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:staff%20of%20flowers::::::",
+      "kind": "item",
+      "name": "鲜花法杖",
+      "english": "Staff of Flowers",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 139,
+      "fullNormalizedSnapshotSha256": "3dff61e7e4c0d61d339f2ac450f2bff7fce559178c69a6d47034df8fcd81663e",
+      "mechanicsSnapshotSha256": "50d47a42bfdc8cbeb80a7275e2ce4e79730f1e3ce91c43a6665a9d7a1c64ec13",
+      "originalRawSha256": "3e443868b5941090829b1c82d62f6026952c2ab9c95e0d39dd446dd8ccd48122",
+      "originalEntriesSha256": "17700819d033271f5dc251299492fcb228a7386d6bafdbc2d10376cdb7b6da92",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2172
+      },
+      "capacity": 10,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:wand%20of%20conducting::::::",
+      "kind": "item",
+      "name": "指挥魔杖",
+      "english": "Wand of Conducting",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 319,
+      "fullNormalizedSnapshotSha256": "77af00154969fa89a3e2d86b036eeb0616472edc02e747e65b27f062254e90c5",
+      "mechanicsSnapshotSha256": "5a40637b915dfd55c8927ec97ac9563269d62c8e44ff93a43a4b5c2ca21e53a9",
+      "originalRawSha256": "c740017414b7cf3f99766812cb089caff89141529e79b7f80775a8c2530e1b74",
+      "originalEntriesSha256": "451987b563bf381fbce3e7922c63a6bcc64c2462f6f4e191456ec9cd42c40c28",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2393
+      },
+      "capacity": 3,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:wand%20of%20conducting::::::",
+      "kind": "item",
+      "name": "指挥魔杖",
+      "english": "Wand of Conducting",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 140,
+      "fullNormalizedSnapshotSha256": "d16133d8162873b3b4a1583b40033d49fd869ad6f89fd31089595246d28aada7",
+      "mechanicsSnapshotSha256": "dc3c568e4f493f04560795dd33d4bdb0b7ab8ee84320c4782843d032cc2a5484",
+      "originalRawSha256": "76a69291572775d9bdf41006d11fb72b353f016d5285cf494cce08aef61bf8d9",
+      "originalEntriesSha256": "e907dea72af6c62bdc08c0cf3f76f26abc46dd51314b53e669b7f067fdc2fdde",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2394
+      },
+      "capacity": 3,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:au:wand%20of%20freshness::::::",
+      "kind": "item",
+      "name": "新鲜魔杖",
+      "english": "Wand of Freshness",
+      "source": "AU",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 125,
+      "fullNormalizedSnapshotSha256": "52a261fce7d8cf8081713ddbc8c1a7cbce2561840fc0b667b28dc2be4e0f8020",
+      "mechanicsSnapshotSha256": "425db37c77e5be5b91757e9c807540589e242c61fa24b3ff2ce1759d00f6628c",
+      "originalRawSha256": "c291a41b0085878309e5cb5e9224f8c07915540fa529270259167f939e74a1c2",
+      "originalEntriesSha256": "41e78c9fa0caf84756c93144cece97727b93e9a73c13a48da9b0534b3fb5bce9",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2403
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held",
+          "explicit-XPHB-spell-source"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [
+          "XPHB"
+        ],
+        "requiredCardEdition": "2024",
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:dmg:wand%20of%20magic%20detection::::::",
+      "kind": "item",
+      "name": "搜魔魔杖",
+      "english": "Wand of Magic Detection",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 211,
+      "fullNormalizedSnapshotSha256": "c4e5f140ef0bb74e0fa3396d06b8b9cf15090b778ee76565562e274ee31718fb",
+      "mechanicsSnapshotSha256": "3d1adc8c754079ab172d6b38d0c519c7d1e9e0289a470ba72320abcf79ebcad6",
+      "originalRawSha256": "43a92d1b9ce12980dc41ea839ea692ba9244ddb7096f4d842e0183d54e112de2",
+      "originalEntriesSha256": "217f75db758e611aace236848b798564b16808d12930f4a26dcdf28a99d2b343",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2406
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:wand%20of%20magic%20detection::::::",
+      "kind": "item",
+      "name": "搜魔魔杖",
+      "english": "Wand of Magic Detection",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 320,
+      "fullNormalizedSnapshotSha256": "a962d4a9383f14a42085c546c416476172df2b8b4bb4346bb965c3b795ef1236",
+      "mechanicsSnapshotSha256": "208ed2292f007a76573e5add568307de4356f33fc94a9ccd88908ae740bf8a12",
+      "originalRawSha256": "1348244faabc7ee0fd0ea9da5982066d8d3a23ffd8590078e4af7e83bfe48315",
+      "originalEntriesSha256": "20d55f4c719e1cba3fdc944202701da0058e51233a1b4db22e314a9e256fcc09",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2407
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held",
+          "explicit-XPHB-spell-source"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [
+          "XPHB"
+        ],
+        "requiredCardEdition": "2024",
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:dmg:wand%20of%20magic%20missiles::::::",
+      "kind": "item",
+      "name": "魔法飞弹魔杖",
+      "english": "Wand of Magic Missiles",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 211,
+      "fullNormalizedSnapshotSha256": "5459cc2d9b7ddb7492500cfd8350cc832d47998b25e2912ca5bc519548488baf",
+      "mechanicsSnapshotSha256": "29322f36ea746ce5ed8096d6de8d22bdb0013eb19eb1104ee4378b3c65fa48f2",
+      "originalRawSha256": "41d795c294b459db4e55cafa9abcfe13d45395c25efdacab61a44d78c9fe8083",
+      "originalEntriesSha256": "e8a0526878f6aeb50ad3fd659e0c1569580784dab8e60c96f3cd00f4c2ce6dd1",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2408
+      },
+      "capacity": 7,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-magic-missile-rank-1",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": {
+          "spellRank": 1
+        }
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:wand%20of%20magic%20missiles::::::",
+      "kind": "item",
+      "name": "魔法飞弹魔杖",
+      "english": "Wand of Magic Missiles",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 320,
+      "fullNormalizedSnapshotSha256": "3bdbc453be7c765441f21049306b9f5ac203d7fa87f39d3b65ad1b40391c9110",
+      "mechanicsSnapshotSha256": "198cd8347f78cdd0020b1e6cdf6afb0f426494482466a17c97f903656d4efe15",
+      "originalRawSha256": "be32f2c29cdddcd47c27351e49ac861f9b299f892861c3dda651eddfe5123795",
+      "originalEntriesSha256": "7e9ff498ad5971f91c241afddf145e681425b469ed447b789828210b8556baa8",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2409
+      },
+      "capacity": 7,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "cast-magic-missile-rank-1",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held",
+          "explicit-XPHB-spell-source"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [
+          "XPHB"
+        ],
+        "requiredCardEdition": "2024",
+        "fixedUnits": {
+          "spellRank": 1
+        }
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:wand%20of%20pyrotechnics::::::",
+      "kind": "item",
+      "name": "烟火魔杖",
+      "english": "Wand of Pyrotechnics",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 321,
+      "fullNormalizedSnapshotSha256": "c3bcaef9d7c1b73620643c8ba4b58e95d300c640e5c066698a3471a193d4e5a7",
+      "mechanicsSnapshotSha256": "e753a2826e9d73cf3961d8510ccd0f990f851c94aaeebc62fbf2508aec7561bd",
+      "originalRawSha256": "0f83c4c70ae553ce758e1453e28b9b53d64d41604bb99521f41801d6ac790be4",
+      "originalEntriesSha256": "b8fb655c3c5b6daba913f39eb5fd0d1a0f12f2f3dc1791d0da5ffaa24d2680ec",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2416
+      },
+      "capacity": 7,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:wand%20of%20pyrotechnics::::::",
+      "kind": "item",
+      "name": "烟火魔杖",
+      "english": "Wand of Pyrotechnics",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 140,
+      "fullNormalizedSnapshotSha256": "4c64f35d6ac88a9526b2f8fe1d624b8b7544518322183a1cb38214461dbf64e3",
+      "mechanicsSnapshotSha256": "7627b7e271f87ceaf228dc3c8a11428a04700d1902b165a55abf1e03372f0666",
+      "originalRawSha256": "44974e117d8639564c1db496e7e46e43e2bf607f1f98271958f9b6318f40ca62",
+      "originalEntriesSha256": "804b1d9372f46f896523ad4dbaf7e9b15259ca2ee8362c1448a5b529600540b5",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2417
+      },
+      "capacity": 7,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:wand%20of%20scowls::::::",
+      "kind": "item",
+      "name": "愁苦魔杖",
+      "english": "Wand of Scowls",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 140,
+      "fullNormalizedSnapshotSha256": "50a020f03e945792dd3969d8d7210b49a0a62f7e2b60b55943a847e9adfead0f",
+      "mechanicsSnapshotSha256": "cb33ab53d5c568dd07f317fff56ecdccec637294ff1bfc06e5278d8649412c78",
+      "originalRawSha256": "8ce8edf8424cfc6b8655e944346e659023aea956396d6e61a8eeae9750c3ce82",
+      "originalEntriesSha256": "d5e24b32a6396690a8607fb99451b3b9853095a230fd9c7cb7d4af37beb82663",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2418
+      },
+      "capacity": 3,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held",
+          "humanoid-target-within30ft"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:dmg:wand%20of%20secrets::::::",
+      "kind": "item",
+      "name": "探秘魔杖",
+      "english": "Wand of Secrets",
+      "source": "DMG",
+      "edition": "2014",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 211,
+      "fullNormalizedSnapshotSha256": "b60401cb36b335934a12934895b155a4aa9765e34a499fedf9970567b7d24bb5",
+      "mechanicsSnapshotSha256": "6b27ec903473819f0fec7a56ad7b1ba7682215d3ec1f31ba83f9d4810eb779f2",
+      "originalRawSha256": "18b4e2c0b6bc2b6b79250e49b066fe13dabc39e5336013008baa6a1a99c1081f",
+      "originalEntriesSha256": "bbcb63abda7ae8111cf1a525ad73c36c9d2058f99d1fbdbdb91b59d72bbe8863",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2419
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xdmg:wand%20of%20secrets::::::",
+      "kind": "item",
+      "name": "探秘魔杖",
+      "english": "Wand of Secrets",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 322,
+      "fullNormalizedSnapshotSha256": "2ee4767d76e8867dd5e87875abe7c13d8b38bf1c93efaeee1211ccb1f816f202",
+      "mechanicsSnapshotSha256": "f54dcf8ecbc233ef1a59b163325fe09cee59e44c63fc162dd4e22fa1efe221f5",
+      "originalRawSha256": "d6ed602c3d1eb72c6bde883ea578f7ee6b7a20fefa1a4ad604a08c137e91318b",
+      "originalEntriesSha256": "26d72583af05f882708b31594883e0f14295fc5614546bdcd46897875ea266f7",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2420
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:xge:wand%20of%20smiles::::::",
+      "kind": "item",
+      "name": "欢笑魔杖",
+      "english": "Wand of Smiles",
+      "source": "XGE",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 140,
+      "fullNormalizedSnapshotSha256": "4d86bb4084cd2bf7276d662c8918496fbb2b63f74600fda2b99498364a25e1c2",
+      "mechanicsSnapshotSha256": "b9eb1992e8659ad6c0930e4bfffaceed7dc190a1847ae472f4efa8931ff70183",
+      "originalRawSha256": "41ad401e4bb4575b70fb2a36c279707631bcc17eef57ebc15c8f45628f8db86b",
+      "originalEntriesSha256": "c1be2a8ddbcb0154d53619992c98f6c6aa08f39a5f4006b3026fb0e9040bb9b4",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2422
+      },
+      "capacity": 3,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held",
+          "humanoid-target-within30ft"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee:item:au:wand%20of%20teeth::::::",
+      "kind": "item",
+      "name": "利齿魔杖",
+      "english": "Wand of Teeth",
+      "source": "AU",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 125,
+      "fullNormalizedSnapshotSha256": "127cdbbc6c1799c7db88b4579496d82b0f230ea6f4cce4a1a2b61905cfb09d13",
+      "mechanicsSnapshotSha256": "592bff154c6e80962a29a8baad3e129c1597b045e75d1843362aabeff98c05f3",
+      "originalRawSha256": "eda2d146c63fac7885901df372575404dbf419e5374049813cae76e730db4da3",
+      "originalEntriesSha256": "41e2aec89a50c22c16912f0159f50031aacf6ba201da7218e3c495639198c977",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2423
+      },
+      "capacity": 10,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "spectral-teeth-cone-one-charge",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "held"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": {
+          "chosenCharges": 1
+        }
+      }
+    },
+    {
+      "id": "kiwee:item:fraif:windskiff::::::",
+      "kind": "item",
+      "name": "乘风板",
+      "english": "Windskiff",
+      "source": "FRAIF",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 247,
+      "fullNormalizedSnapshotSha256": "cb7f6fc69b3aa01bc95296c740c7a742fe6487015557c46975b1dc8aa3194710",
+      "mechanicsSnapshotSha256": "072eb6f60ac09799ae4eae3d876fb279dba4fd5223c6139fef7839bd1370abba",
+      "originalRawSha256": "0dc6e8e95d600995d19a5a967b9832f1f0de7bac40c924f5d4f9d31724daed0b",
+      "originalEntriesSha256": "af83678c33f7ff7d5976c9c2405c4bd1444e8d1b2dead1d3aecf3182e1c9c29f",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2474
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee:item:skt:wyrmskull%20throne::::::",
+      "kind": "item",
+      "name": "龙颅王座",
+      "english": "Wyrmskull Throne",
+      "source": "SKT",
+      "edition": "both",
+      "packId": "kiwee",
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "page": 237,
+      "fullNormalizedSnapshotSha256": "2b4c9d3deec7c7028ce412370be7c3b63d39ceccaa34cdcebebceda1ecf3b6c6",
+      "mechanicsSnapshotSha256": "e65fae70f06a62250ff40cd94c10e073b62f9d388f482c65e7fd4341b51fa586",
+      "originalRawSha256": "b3156266f1e143503b8c8dab28aaa3a3af791a40af9e11933315eb5fce7a5b7d",
+      "originalEntriesSha256": "b3c05051d1d2a1050ae877c6c05aadaad68ad89901642806612170f0e776db95",
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 2496
+      },
+      "capacity": 9,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:pugilist2024:bottomless%20box%20of%20treats::::::",
+      "kind": "item",
+      "name": "无尽零食盒",
+      "english": "Bottomless Box of Treats",
+      "source": "PUGILIST2024",
+      "edition": "2024",
+      "packId": "kiwee-homebrew",
+      "revision": "526f2cce3f2e77a9690f79582ae1f9a13e2b6049abc9730fc93dccac5b18c6b7",
+      "page": 0,
+      "fullNormalizedSnapshotSha256": "afeee4155c3311eae6aab1365fdae79114f5393cf5f86e71ee9c432fc9616b5b",
+      "mechanicsSnapshotSha256": "01be851508bc72d4edad1f4c0b8f80f0b6cfaae2d92396a2b08bcb3c092346f3",
+      "originalRawSha256": "7469ce679171523908efa9199e577c7255aeff2c0dbdd7fab81df31dc4a95441",
+      "originalEntriesSha256": "8b7f291fd2c27f194ce6d80fb446d44e5216a7d0d946f537528a46c6cf511fb4",
+      "input": {
+        "url": "https://homebrew.kiwee.top/class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202024.json",
+        "sha256": "526f2cce3f2e77a9690f79582ae1f9a13e2b6049abc9730fc93dccac5b18c6b7"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 9
+      },
+      "capacity": 5,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:obojimatallgrass:keys%20to%20the%20sandcastle::::::",
+      "kind": "item",
+      "name": "沙堡之钥",
+      "english": "Keys to the Sandcastle",
+      "source": "OBOJIMATALLGRASS",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "d53f251428233b1b8852e3044093348909b8be0ebafad30196e594a43de9a007",
+      "page": 171,
+      "fullNormalizedSnapshotSha256": "23cc4ccdc73bb2d71dfc538219643fda611858847424516ed9cde70b0731e60d",
+      "mechanicsSnapshotSha256": "caacbcf98b2d84dbd339de8893747bcc64a5985f9b1f70ec61727b55a9103ca6",
+      "originalRawSha256": "e8a8e7b45b03b0a7bb74a9ef09080650d4a7c37233e3d078116b5d4b0ee1c2e1",
+      "originalEntriesSha256": "6a961f8f2158ee999d63aed9c8cff4e7167d3c4d3967e6912eef7bfb768c88c6",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/1985%20Games%3B%20%E8%83%A7%E5%BF%86%E5%B2%9B%EF%BC%9A%E8%92%BF%E9%87%8E%E7%89%A9%E8%AF%AD.json",
+        "sha256": "d53f251428233b1b8852e3044093348909b8be0ebafad30196e594a43de9a007"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 113
+      },
+      "capacity": 50,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "holding",
+          "command-word",
+          "exact-own-book-spell",
+          "exhaustion-transforms-nonmagical"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:dungeonsdrakkenheim:flame%20lance::::::",
+      "kind": "item",
+      "name": "喷火骑枪",
+      "english": "Flame Lance",
+      "source": "DUNGEONSDRAKKENHEIM",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "51cd60d69ccd02772a5c87aa04671ddab525c6a83b8c2c99be27cf6429167d28",
+      "page": 231,
+      "fullNormalizedSnapshotSha256": "d1a5cb8f35e8fa40cedce4379e32f279775bfa3a878872fb81cdee05e7e40817",
+      "mechanicsSnapshotSha256": "6c39289f98c6a3dcd703902747c9381aec1100ed57160e29acd3df23d5183980",
+      "originalRawSha256": "6cdd393d25970d7b1b844aff72b1bf88d4c7f716a51499afa4a516b4936333b1",
+      "originalEntriesSha256": "52eba65b1c73c2abf0b1ed40efff94eed9c03d0f9e28fdb53be6c283d6093aff",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E4%B9%8B%E5%A2%9F.json",
+        "sha256": "51cd60d69ccd02772a5c87aa04671ddab525c6a83b8c2c99be27cf6429167d28"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 6
+      },
+      "capacity": 5,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:monstersofdrakkenheim:pendant%20of%20prismatic%20protection::::::",
+      "kind": "item",
+      "name": "虹彩防护吊坠",
+      "english": "Pendant of Prismatic Protection",
+      "source": "MONSTERSOFDRAKKENHEIM",
+      "edition": "2024",
+      "packId": "kiwee-homebrew",
+      "revision": "dd22507c1ca4957e3ff2600f864be44cc10d3c3d54a3fc6474d007371385811a",
+      "page": 391,
+      "fullNormalizedSnapshotSha256": "ca65dd11af3be259b94df00445e6215ceeee8c177dd20dcd706c1ae9a16a1bc2",
+      "mechanicsSnapshotSha256": "008149252b3f9495cbf24ecffffe5594451dbad0d3c2d8fdb4da907733d1590c",
+      "originalRawSha256": "7bc78153b4a089f7beb900cf1d95ac14ddf0f4be3bcf8e2563098e64f723b357",
+      "originalEntriesSha256": "d66336325f914f5121b9e29618d236ecc33288baf1209c81ed561e1d639efacd",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E7%9A%84%E6%80%AA%E7%89%A9.json",
+        "sha256": "dd22507c1ca4957e3ff2600f864be44cc10d3c3d54a3fc6474d007371385811a"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 31
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "damage-trigger-current",
+          "five-enumerated-damage-types",
+          "effect-until-next-turn-manual"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:monstersofdrakkenheim:time%20dilation%20medallion::::::",
+      "kind": "item",
+      "name": "时间膨胀证章",
+      "english": "Time Dilation Medallion",
+      "source": "MONSTERSOFDRAKKENHEIM",
+      "edition": "2024",
+      "packId": "kiwee-homebrew",
+      "revision": "dd22507c1ca4957e3ff2600f864be44cc10d3c3d54a3fc6474d007371385811a",
+      "page": 394,
+      "fullNormalizedSnapshotSha256": "f3390a6113a3b0cc8565f5286ffd445c518b5b9d48a74a855c2e4302ca1b4c9a",
+      "mechanicsSnapshotSha256": "d89e7ed79ea8d1b4f5f4d39cc01601f412f470e7b6292132a5722b468e40bb24",
+      "originalRawSha256": "202a58e53ffc200f09074910539d4fe60519f63cb27d140eae14478d3acd3ff3",
+      "originalEntriesSha256": "a2a71c51be9a8677eb7c82b9496a60f1af0710a0b12581bfa11741a575b3034e",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E7%9A%84%E6%80%AA%E7%89%A9.json",
+        "sha256": "dd22507c1ca4957e3ff2600f864be44cc10d3c3d54a3fc6474d007371385811a"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 43
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:aged%20goodberry%20wine::::::",
+      "kind": "item",
+      "name": "神莓陈酿",
+      "english": "Aged Goodberry Wine",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 33,
+      "fullNormalizedSnapshotSha256": "cc065638a3e388f59cecaf355561bc4f3c7bfa41ba75fe4b1399b59c71032a62",
+      "mechanicsSnapshotSha256": "cb95c6a109a2618643219a70eb53f9096d379265c4c54467b8ae179de7ac024f",
+      "originalRawSha256": "855c9549c222cc3f563d33759b474c9b4b6754e8992774480280a85f5efbcfe0",
+      "originalEntriesSha256": "77479f0ac4f5dc5a2c470e3adcee15154c7f0748a2dabf33c7b05ad9a9039941",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 7
+      },
+      "capacity": 8,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:bell%20of%20alarm::::::",
+      "kind": "item",
+      "name": "计时铃",
+      "english": "Bell of Alarm",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 44,
+      "fullNormalizedSnapshotSha256": "b9cbdbfedf0f999eb1341d2eefe4b5d0d8d76f15feddfa3df60642f8283c6c3d",
+      "mechanicsSnapshotSha256": "d2ae295461bc5c477e5a356353028e2afecac5686e227ddcd46fd2077efe0317",
+      "originalRawSha256": "4b74a5c280688c5246746180c4ebf80f6db2091d024452624da989244eec36b2",
+      "originalEntriesSha256": "ef1c4737c725079a5870fe134f4509af998e64f0ac9b77fdc52fb7acb774e7e4",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 50
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "holding-or-shaking",
+          "command-word",
+          "timer-duration-up-to-eight-hours",
+          "timer-and-cancel-effects-manual"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:bellhop%20topper::::::",
+      "kind": "item",
+      "name": "行李员礼帽",
+      "english": "Bellhop Topper",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 44,
+      "fullNormalizedSnapshotSha256": "35e63840efda44c6c350ff2409b2e8a9e6b4f624421be97522eb0fb28c3af2f8",
+      "mechanicsSnapshotSha256": "3b619fa725979b3ee46cfc09e149d308e9e2cbd168a7224f2af6892865bb5f80",
+      "originalRawSha256": "0ae36ee021ad79b078ea602fda7ff2d0f8f50d3f98bdf58d3ed0ba823394aca7",
+      "originalEntriesSha256": "5c00c617525495c1ebfce626892ce5726251e26802cd73713784cf9a1fb60548",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 51
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:claymore%20of%20the%20great%20badger::::::",
+      "kind": "item",
+      "name": "巨獾重剑",
+      "english": "Claymore of the Great Badger",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 61,
+      "fullNormalizedSnapshotSha256": "33d1062ed35a0edb6cea819272d176d62505ce4ad4c0931e35ad6767ea93347b",
+      "mechanicsSnapshotSha256": "b573d28a5c6c4174f5f0a9cc4490b7b59ef75cc8a555eff4329c3178671d7aed",
+      "originalRawSha256": "61da7bbecfc311af913c154c557a73ec5b9fcc856e9e62892b13bb64ba5cb13b",
+      "originalEntriesSha256": "bd01595b88631612360480c1c858661743b8ccf7efdc8611751e779600cbf817",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 98
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "this-weapon-hit",
+          "target-large-or-smaller",
+          "push-resolution-manual"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:hedonic%20motivator::::::",
+      "kind": "item",
+      "name": "极乐驭鞭",
+      "english": "Hedonic Motivator",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 102,
+      "fullNormalizedSnapshotSha256": "32dd9c1d03f1ba46af3971ca1ff6db48cb3aaed86c818fed52f51aeb7eda8685",
+      "mechanicsSnapshotSha256": "e4d2bf1db0b332e97cdbc3e98af71436aa34bc7d974ba9b551ff5fdf713add74",
+      "originalRawSha256": "fdb8cbb422bab356be17788abe1a7369efff3224f5d20d402e7430aa1f15a494",
+      "originalEntriesSha256": "f76770460506fcc82b7025305b62454d255df93e04413ad971cb55d9c69a1ddf",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 224
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "holding",
+          "friendly-target-within-ten-feet",
+          "choose-one-of-two-nonspell-benefits"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:hourglass%20of%20slumber::::::",
+      "kind": "item",
+      "name": "沉眠沙漏",
+      "english": "Hourglass of Slumber",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 107,
+      "fullNormalizedSnapshotSha256": "3be03915e544110397c5c95ac4bbb2c7e49823e56d4150708dbd96906c49b301",
+      "mechanicsSnapshotSha256": "f1c86cdce89dc6001fab1e4726911226cef7b93289fad6e67a3fa1d890b29bb0",
+      "originalRawSha256": "352e85600c618545e17a9b844fc721b9b7fbf278d9c507cb47e85d04c6673492",
+      "originalEntriesSha256": "674cf52e5c8fc836390e8ff206f62b52c7bc8aff47cb5b75454c3b6d3c050f53",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 240
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:inspector's%20silverware::::::",
+      "kind": "item",
+      "name": "验毒银器",
+      "english": "Inspector's Silverware",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 110,
+      "fullNormalizedSnapshotSha256": "8a4207a2e7bffca4e27b8a3055c7c670bdc953bc2516865ca72cb1e07a3eb9d3",
+      "mechanicsSnapshotSha256": "fdc3cf99417e9573b7d5617eeb45df03dcf7113065369195ba0b6f1c8935b507",
+      "originalRawSha256": "d3fe1c89718132cc5897e94b74f21bbd1b5b6daf5d7dbe5a8d917816172e8372",
+      "originalEntriesSha256": "0ebb1a244948b2cd28958bcef93025a3fc15e1c2a93de37ae702fcbbce32249b",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 249
+      },
+      "capacity": 3,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:lamian%20facestealer::::::",
+      "kind": "item",
+      "name": "拉米安窃面者",
+      "english": "Lamian Facestealer",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 113,
+      "fullNormalizedSnapshotSha256": "4b48db2a25f10eb069d8e44c73b63fd19065558e9ef0f58cb91aff02e8f351cc",
+      "mechanicsSnapshotSha256": "e022aafb74dc8966209ec7e27b3704799f28bb8a6e2cd2c49c064fa064ef9636",
+      "originalRawSha256": "f50fac7e63aec959e837fbce3f1647ba43312594f61b04c41a709b458a40a546",
+      "originalEntriesSha256": "68b8077a5db12fa3934417d7c405e75c5311e62f69f1a5800e55ed37b5ca16be",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 257
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:magentan%20sun-saw%20(uncommon)::::::",
+      "kind": "item",
+      "name": "品红太阳锯（非普通）",
+      "english": "Magentan Sun-Saw (Uncommon)",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 118,
+      "fullNormalizedSnapshotSha256": "13c0aff196afce9b48a881e398b9acf18f32a7870e0a000cca25f3611e419b6d",
+      "mechanicsSnapshotSha256": "be1d8eb3dcf73785a3e8b38d782a77c131071c08c6c27b7fcf5d5ff4f7857d42",
+      "originalRawSha256": "06595ae61bae7eb380377e5ba326208f58d145586fe656a6f7f0988b4251412f",
+      "originalEntriesSha256": "ea2900b6eca77e548bf5660685835b2507243c6c068c6b86691b13e9859c78b7",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 276
+      },
+      "capacity": 7,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "same-attack",
+          "trigger-weapon-guard",
+          "extra-damage-manual",
+          "explicit-source-rarity-record"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:magentan%20sun-saw%20(very%20rare)::::::",
+      "kind": "item",
+      "name": "品红太阳锯（极珍稀）",
+      "english": "Magentan Sun-Saw (Very Rare)",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 118,
+      "fullNormalizedSnapshotSha256": "ea0a939f0a7278395a739e81275c9f0e3a9c618c5027ffbf16e1cf0e4856413e",
+      "mechanicsSnapshotSha256": "279837d440b43d523fbad284164e8d9b18b67e2468a6168aa1da3c0f42c58fb4",
+      "originalRawSha256": "74042b3181b22b38c7fb1680d56dc1a38d452432259e1d46c33779cc99dfdd47",
+      "originalEntriesSha256": "c283720c391d04ca82eb3ade8451b1d2c44cf29788081f0c0458d342e8267c0a",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 277
+      },
+      "capacity": 7,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "same-attack",
+          "variant-radiant-and-sunlight-conditions-manual",
+          "explicit-source-rarity-record"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:magnificent%20pocket%20vanity::::::",
+      "kind": "item",
+      "name": "华丽的袖珍化妆镜",
+      "english": "Magnificent Pocket Vanity",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 118,
+      "fullNormalizedSnapshotSha256": "ecbb89a2d7570de33c1d258fd3ba52ae7350f8fddcba284991304bfef418f956",
+      "mechanicsSnapshotSha256": "0f366457572b6be9fe9c6a8c00335964f767c4583d22f8775ffc0438d1654bc7",
+      "originalRawSha256": "85c2083c84f078bf780aa97d88d9ffbd13a8f76fca90a545039e075c8e6a65e9",
+      "originalEntriesSha256": "16e6b92a71bfe135a35c1778e83d0183dbe0c8fbb691312cd6fe88c8d74d08aa",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 279
+      },
+      "capacity": 3,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:riff's%20dimensional%20ripper::::::",
+      "kind": "item",
+      "name": "里夫的裂界短匕",
+      "english": "Riff's Dimensional Ripper",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 144,
+      "fullNormalizedSnapshotSha256": "807c519a631ce6dfc8ab2f23f0d70f78ebe4ee2c414f72b483abba410d73ad78",
+      "mechanicsSnapshotSha256": "66e0c48431e4b75a8caeecea55e5b14124c7bb6e7b5a6ad4a83886426e24a880",
+      "originalRawSha256": "2f396df04652ee07bb7c2fab0f959da738f1969c058979aaf3630ad0fa67cfe2",
+      "originalEntriesSha256": "1b70e319c18b6dda57b1a70107baa51b34a43a9ff00a5285dfdb5577cdabfca0",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 363
+      },
+      "capacity": 4,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:ring%20of%20stolen%20alacrity::::::",
+      "kind": "item",
+      "name": "掠影疾行之戒",
+      "english": "Ring of Stolen Alacrity",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 147,
+      "fullNormalizedSnapshotSha256": "fc4f1264be8a8d303e8d8eb7077ce5f0dc1004d23ce5b07e3ae8f6556545f7de",
+      "mechanicsSnapshotSha256": "9a87a7c5e38fdfa018244c6d4927ac16abc2175237b3c01f95bea04e3f93d90e",
+      "originalRawSha256": "0864f3816311af6b80a44f1c2609671119f5f5149bb620c49cf63855ae524f0b",
+      "originalEntriesSha256": "4ee5753d88934cba62882eb1104c055edffc37a75f5b84fbd00e821cf9f759b1",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 371
+      },
+      "capacity": 1,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:scroll%20of%20the%20jester::::::",
+      "kind": "item",
+      "name": "小丑卷轴",
+      "english": "Scroll of the Jester",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 156,
+      "fullNormalizedSnapshotSha256": "6938fcb42b713e588913877361a48709c7626a76d0e5a393da0fd0efc656e72b",
+      "mechanicsSnapshotSha256": "e51e5539501cbb3143c32d68573176413c5753f3d029223c5fcadf89e14795dc",
+      "originalRawSha256": "9f18bd2e3591751dc55a6bd8aaba30f1f8d104047cccce995fee439ad2ced813",
+      "originalEntriesSha256": "97094670b8b04949c033682e1a352211f13f68d782e5606036bc627392229a2b",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 403
+      },
+      "capacity": 8,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:shield%20of%20the%20justicars::::::",
+      "kind": "item",
+      "name": "公理裁决盾",
+      "english": "Shield of the Justicars",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 158,
+      "fullNormalizedSnapshotSha256": "608f221067f0935518cde3c26f8fbae179e41b6e7cfeccd4588d6f597d4d9b8b",
+      "mechanicsSnapshotSha256": "e62f95822e59c837e58ccb1fce288c9f81a78a7fda27d325f2a515c19ce4b778",
+      "originalRawSha256": "8dcc8f12423e995ce7a82d274ec9d386ace2c22eba795fc42bc71cd0c5e5348e",
+      "originalEntriesSha256": "c11c6aa403f64471aa29841f551ae537c86c2eda7ed682de05eeaf42496eda12",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 411
+      },
+      "capacity": 4,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "wielding-shield",
+          "see-caster-within-thirty-feet",
+          "command-word",
+          "target-save-and-temporary-penalty-manual"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:skyglider%20shield::::::",
+      "kind": "item",
+      "name": "天翔盾牌",
+      "english": "Skyglider Shield",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 163,
+      "fullNormalizedSnapshotSha256": "8f37b1076fa78e5e7c6ec419146e5daf17fc02cd57a7f705f8df9a3dc18dec4e",
+      "mechanicsSnapshotSha256": "5c9822d711142c0e1b99165956bc882a5a61d011d8493cc07bf111151805fe08",
+      "originalRawSha256": "5c58bec7a15414bc5bb869b6e638a9dbe1f21166f6f01fced8c02e09bc126182",
+      "originalEntriesSha256": "f152afb78695eaf14e30a25a35d34ec2ee552e6f1d9eae02b324ed35d1aa7a83",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 428
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "holding-shield",
+          "flight-and-landing-state-manual",
+          "movement-limit-and-folding-conditions-manual"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:sovereignseed%20satchel::::::",
+      "kind": "item",
+      "name": "至高种袋",
+      "english": "Sovereignseed Satchel",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 166,
+      "fullNormalizedSnapshotSha256": "78847dd697dec6c09ef539bd26389537740669b1b888aad47fa4f5aac30b2411",
+      "mechanicsSnapshotSha256": "7122168dadbca22029025ba13e81ad446a795c6d7983357883f716024081c864",
+      "originalRawSha256": "382c747c13f0fee7b3cdfdd14880e4ad788d9d44485bfab317cff6da2a2bc9de",
+      "originalEntriesSha256": "3cd5e200ac9c2f802a151a3fd798a668d5f4c5de54d02671ee9dbc66ee97b7c2",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 436
+      },
+      "capacity": 4,
+      "reviewBucket": "D",
+      "supported": false,
+      "holdCodes": [
+        "different-physical-accounting-unit-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:staff%20of%20cubic%20cultivation::::::",
+      "kind": "item",
+      "name": "凝胶法杖",
+      "english": "Staff of Cubic Cultivation",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 169,
+      "fullNormalizedSnapshotSha256": "926e308f3483004e4e9e67d08b4ee13c2df9924a536a0992f43bed1ad03af272",
+      "mechanicsSnapshotSha256": "5335c16eca7979bd8d8e7cc0ce1c021d80149a1a15f7cf750e7518408e998b85",
+      "originalRawSha256": "2d722342bfb901b6bff5aaad9ad2175d7b35664abb9178fd636b5fd0d2210272",
+      "originalEntriesSha256": "7b205b4242df7d72b0bd5252d615f07e8b4bff0cdf0557fe1da7d8fe963921bc",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 445
+      },
+      "capacity": 10,
+      "reviewBucket": "B",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "create-one-cube",
+        "cost": 1,
+        "equipmentRequired": false,
+        "minAfter": 1,
+        "manualBoundaries": [
+          "strike-ground-with-staff",
+          "multiple-placement-conditions",
+          "cube-health-and-duration-manual",
+          "last-charge-random-destruction-and-hostile-creation"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": {
+          "numberOfCubes": 1
+        }
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:griffonssaddlebag2:the%20griffon's%20saddlebag::::::",
+      "kind": "item",
+      "name": "狮鹫鞍囊",
+      "english": "The Griffon's Saddlebag",
+      "source": "GRIFFONSSADDLEBAG2",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e",
+      "page": 174,
+      "fullNormalizedSnapshotSha256": "bdb156ef8a08f5170d6c3c8d2dae421eef2df7dd0c203ae4214503f8cbb7a231",
+      "mechanicsSnapshotSha256": "f775b8a593bb8a53078ccb867b81c338111078f433e818d20a7a7b114f1920a8",
+      "originalRawSha256": "58b1237aac93bb4cdc905eb279980a44bd63cd75fec88467fb3023131f664317",
+      "originalEntriesSha256": "472df130a395e9294f64a940467b7acfb92c1ca26099200733e14351d025957d",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "sha256": "3a0ebbb8eda1d4f327d64801ea55972d342b280c08821914a8f642e630a6e98e"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 465
+      },
+      "capacity": 8,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    },
+    {
+      "id": "kiwee-homebrew:item:bookofebontides:ring%20of%20the%20ghouls::::::",
+      "kind": "item",
+      "name": "食尸鬼戒指",
+      "english": "Ring of the Ghouls",
+      "source": "BOOKOFEBONTIDES",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "de3956d245e3e170bc01e76b82a4114b850484d1d3dd542dca7a0066c02c438b",
+      "page": 208,
+      "fullNormalizedSnapshotSha256": "5b43c857d4259f796f1bc01f96bd07aa8af0327f1a6bed3a6af8592a77b9e253",
+      "mechanicsSnapshotSha256": "fc8b429752bfe94aacd23173fa5d896d01dfef1095cb15b5cf85d7fb9ef180b9",
+      "originalRawSha256": "381173a53eebc91849b061712788552063308bfef4fdba2b3903e93dcd345513",
+      "originalEntriesSha256": "49c24847bb0266f707d73e2fd968ee1c2907a3b15882d564ad060b25ab65537f",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Kobold%20Press%3B%20%E9%BB%AF%E6%BD%AE%E4%B9%8B%E4%B9%A6.json",
+        "sha256": "de3956d245e3e170bc01e76b82a4114b850484d1d3dd542dca7a0066c02c438b"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 42
+      },
+      "capacity": 3,
+      "reviewBucket": "A",
+      "supported": true,
+      "holdCodes": [],
+      "action": {
+        "key": "primary-charge-action",
+        "cost": 1,
+        "equipmentRequired": true,
+        "minAfter": 0,
+        "manualBoundaries": [
+          "wearing-ring",
+          "successful-melee-attack",
+          "target-save-and-paralysis-manual"
+        ],
+        "effects": "manual",
+        "recovery": "not-supported",
+        "requiredSources": [],
+        "requiredCardEdition": null,
+        "fixedUnits": null
+      }
+    },
+    {
+      "id": "kiwee-homebrew:item:bookofebontides:shield%20of%20swans::::::",
+      "kind": "item",
+      "name": "天鹅护盾",
+      "english": "Shield of Swans",
+      "source": "BOOKOFEBONTIDES",
+      "edition": "2014",
+      "packId": "kiwee-homebrew",
+      "revision": "de3956d245e3e170bc01e76b82a4114b850484d1d3dd542dca7a0066c02c438b",
+      "page": 199,
+      "fullNormalizedSnapshotSha256": "218fde51a30d75a797b20b656cdac1ec5d0cceb8ba272bb69dead98a0a077bc9",
+      "mechanicsSnapshotSha256": "91ed43b338cad3557340804726216ca693c73df71dcf1b061739f7ff82ddf2da",
+      "originalRawSha256": "4eb7f4cadd26163f78487731d693253614815d6e99a4b06ac2e67c1f953141dd",
+      "originalEntriesSha256": "49e8947bcb8c1c5060b6f599ef6dccf1071c4550d09c0e9d32501f89ad7b2510",
+      "input": {
+        "url": "https://homebrew.kiwee.top/collection/Kobold%20Press%3B%20%E9%BB%AF%E6%BD%AE%E4%B9%8B%E4%B9%A6.json",
+        "sha256": "de3956d245e3e170bc01e76b82a4114b850484d1d3dd542dca7a0066c02c438b"
+      },
+      "sourceLocator": {
+        "category": "item",
+        "index": 53
+      },
+      "capacity": 3,
+      "reviewBucket": "C",
+      "supported": false,
+      "holdCodes": [
+        "source-pool-or-action-authority-held"
+      ]
+    }
+  ]
+}

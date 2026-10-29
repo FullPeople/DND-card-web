@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "mechanism": "reviewed-phb2014-observant",
+  "source": "PHB",
+  "edition": "2014",
+  "inputs": {
+    "feats.json": "0491b421f5f1db6628c3a8aeb86bbc3b72b56bf101a14ba96acbe19c829a56a6",
+    "variantrules.json": "21eef107d25cf438eb85894387fb6f834478d80bc467791c54fe66db9e498c44"
+  },
+  "feat": {
+    "reference": "Observant|PHB",
+    "entryId": "kiwee:feat:phb:observant::::::",
+    "name": "观察力",
+    "english": "Observant",
+    "page": 168,
+    "entryHash": "dc6366743eb9242179fa25e00124d79e7e281c966242ac3beac52a9b9c905e8b",
+    "rawKeys": [
+      "ENG_name",
+      "name",
+      "source",
+      "page",
+      "reprintedAs",
+      "ability",
+      "entries",
+      "translator"
+    ],
+    "mechanics": {
+      "ability": [
+        {
+          "choose": {
+            "from": [
+              "int",
+              "wis"
+            ],
+            "amount": 1
+          }
+        }
+      ]
+    },
+    "entriesShape": {
+      "length": 2,
+      "introduction": "nonempty-string",
+      "list": {
+        "type": "list",
+        "keys": [
+          "type",
+          "items"
+        ],
+        "count": 2,
+        "itemType": "nonempty-string"
+      }
+    },
+    "clauses": {
+      "lipReading": {
+        "index": 0,
+        "sha256": "3dafc45f7a4cfe5101dfb90eca3ad9211ee49330363df8ffe9ada38b1e7bc240"
+      },
+      "passives": {
+        "index": 1,
+        "sha256": "e698e33cae17248724563b933c5fc9425c009996a73c2a6a7de206b0a9c5b983",
+        "bonuses": {
+          "perception": 5,
+          "investigation": 5
+        }
+      }
+    }
+  },
+  "modern": {
+    "reference": "Observant|XPHB",
+    "entryId": "kiwee:feat:xphb:observant::::::",
+    "name": "观察力",
+    "english": "Observant",
+    "page": 205,
+    "entryHash": "7008f8c724a3a19a2aa276bff3e19c354ff218f461934dfd66dcebd0125b5855",
+    "rawKeys": [
+      "ENG_name",
+      "name",
+      "source",
+      "page",
+      "category",
+      "prerequisite",
+      "ability",
+      "skillProficiencies",
+      "entries",
+      "translator"
+    ],
+    "mechanics": {
+      "category": "G",
+      "prerequisite": [
+        {
+          "level": 4,
+          "ability": [
+            {
+              "int": 13
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "ability": [
+            {
+              "wis": 13
+            }
+          ]
+        }
+      ],
+      "ability": [
+        {
+          "choose": {
+            "from": [
+              "int",
+              "wis"
+            ]
+          }
+        }
+      ],
+      "skillProficiencies": [
+        {
+          "choose": {
+            "from": [
+              "洞悉",
+              "调查",
+              "察觉"
+            ]
+          }
+        }
+      ]
+    },
+    "entriesSha256": "232a8430660648745621c6f964f269aa9edad485ed83644c169f5a3ef2074aa8"
+  },
+  "legacyClassInputs": {
+    "class/class-artificer.json": "c65cad57eebdfff6508a0cfb821ec670a41cc3f057512cadd19f3805cf1a01d7",
+    "class/class-barbarian.json": "23e2316b63e09a716519833a477f3452ec3ce229bd32c72374eb0c6673e5cb6f",
+    "class/class-bard.json": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+    "class/class-cleric.json": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+    "class/class-druid.json": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+    "class/class-fighter.json": "a4c5afc0e7ec7a444d1418a04ab4fe392b9a7a25907ac0fb9b8618a79d1ee509",
+    "class/class-monk.json": "17f8612781788c6b614fdafb81711cb537e0bdb8bec5d1da2f32864d6ec28dcb",
+    "class/class-paladin.json": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+    "class/class-ranger.json": "a0e58735bc5f1ef9b260b88cf2c9778ffc0d367c0b132e72fadc95baf198310a",
+    "class/class-rogue.json": "b5c62a8c5356438a09bc64bc96b71968fa3766d46102a0a1de11713e5ee0d251",
+    "class/class-sorcerer.json": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+    "class/class-warlock.json": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+    "class/class-wizard.json": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03"
+  },
+  "legacyClassSlots": [
+    {
+      "owner": "Artificer|TCE",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Artificer|TCE",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:tce:artificer::::::",
+      "featureEntryId": "kiwee:feature:tce:ability%20score%20improvement:tce:%E5%A5%87%E6%A2%B0%E5%B8%88:::19:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::4:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::8:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::12:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::16:"
+    },
+    {
+      "owner": "Barbarian|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:barbarian::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%87%8E%E8%9B%AE%E4%BA%BA:::19:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::4:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::8:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::12:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::16:"
+    },
+    {
+      "owner": "Bard|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:bard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA:::19:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Cleric|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:cleric::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E7%89%A7%E5%B8%88:::19:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::4:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::8:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::12:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::16:"
+    },
+    {
+      "owner": "Druid|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:druid::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%BE%B7%E9%B2%81%E4%BC%8A:::19:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::4:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 6,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::6:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::8:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::12:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 14,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::14:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::16:"
+    },
+    {
+      "owner": "Fighter|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:fighter::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%88%98%E5%A3%AB:::19:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::4:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::8:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::12:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::16:"
+    },
+    {
+      "owner": "Monk|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:monk::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%AD%A6%E5%83%A7:::19:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::4:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::8:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::12:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::16:"
+    },
+    {
+      "owner": "Paladin|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:paladin::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E5%9C%A3%E6%AD%A6%E5%A3%AB:::19:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::4:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::8:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::12:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::16:"
+    },
+    {
+      "owner": "Ranger|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:ranger::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E4%BE%A0:::19:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::4:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::8:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 10,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::10:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::12:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::16:"
+    },
+    {
+      "owner": "Rogue|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:rogue::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B8%B8%E8%8D%A1%E8%80%85:::19:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::4:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::8:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::12:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::16:"
+    },
+    {
+      "owner": "Sorcerer|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:sorcerer::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%9C%AF%E5%A3%AB:::19:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Warlock|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:warlock::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E9%AD%94%E5%A5%91%E5%B8%88:::19:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 4,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::4:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 8,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::8:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 12,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::12:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 16,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::16:"
+    },
+    {
+      "owner": "Wizard|PHB",
+      "level": 19,
+      "ownerEntryId": "kiwee:class:phb:wizard::::::",
+      "featureEntryId": "kiwee:feature:phb:ability%20score%20improvement:phb:%E6%B3%95%E5%B8%88:::19:"
+    }
+  ],
+  "passiveBaseline": {
+    "source": "PHB",
+    "edition": "2014",
+    "page": 175,
+    "input": {
+      "path": "data/book/book-phb.json",
+      "revision": "e2623b204ddbdf2bcfa8317acfc962de89c676e2",
+      "gitBlob": "ed5cf92310a2bab6f6edbab93b68cc4b3f0d1dbc",
+      "byteSha256": "cfeb7945e3037243bcceb87842a52b1266f5a09245a44c2b8a9b29b9ce3cb736",
+      "canonicalSha256": "0562fea72f24f845b599a309141812eb3e8eb69ee60c7bf1468346c35cc35941"
+    },
+    "entry": {
+      "path": [
+        "data",
+        7,
+        "entries",
+        9,
+        "entries",
+        7
+      ],
+      "english": "Passive Checks",
+      "sha256": "6f4c21191fca29b8e98d2b1ca5c1f7b76eb5686dc73822ac29ac89119bfe9925",
+      "formulaSha256": "211e7e616f0ac663fae918c45164f491448a15c6f42d6ae201c92102cc525495"
+    },
+    "base": 10,
+    "modifier": "final Investigation check modifier",
+    "situationalAdvantageDisadvantage": "manual",
+    "primaryReferences": [
+      "https://www.dndbeyond.com/sources/dnd/basic-rules-2014/using-ability-scores#PassiveChecks",
+      "https://media.wizards.com/2016/downloads/DND/SRD-OGL_V5.1.pdf"
+    ]
+  },
+  "abilityDefault": {
+    "max": 20,
+    "revision": "5cc0bbe2c2b241a334e731af4448bdba2168e8bd",
+    "blob": "fd559e0baad858c2bc59a813603a55e41972a1f4",
+    "path": "js/render.js",
+    "startLine": 7093,
+    "endLine": 7123,
+    "expression": "abilityObj.max ?? 20",
+    "chooseAmount": 1
+  }
+}

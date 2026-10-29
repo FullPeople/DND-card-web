@@ -16,10 +16,10 @@ const choiceId='artificer:class-optional:0',sourceKey='ref:物品注法|奇械�
 // Storage rejection is a failure-only fault, never an injected success state.
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{artificer:'class-radiant-refueling.json'}}));
- await page.route('**/data/class/class-radiant-refueling.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:data.optionalfeature}}));
- await page.route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:data.baseitem}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{artificer:'class-radiant-refueling.json'}}));
+ await page.context().route('**/data/class/class-radiant-refueling.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:data.optionalfeature}}));
+ await page.context().route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:data.baseitem}}));
 }
 async function tab(page:Page,label:string){
  const button=page.getByRole('tab',{name:label,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(label)}(?: |$)`));await expect(panel).toBeVisible();return panel;

@@ -1,3 +1,6 @@
+import {ownedItemChargeResource} from './itemChargeDebits';
+import {ownedLimitedSourceResource} from './limitedSourceUses';
+import {reviewedAlertIdentity} from './reviewedFeatIdentity';
 import {planRacialAbilities} from '../racialAbilities';
 import {numericExpression} from '../numericExpression';
 import {type Character,type Selection,type Issue,type RuntimeResource,type Ability} from '../model';
@@ -50,7 +53,7 @@ function tableUses(row:Selection,cls:Selection|undefined,level:number):{max:numb
 function refersToUsesColumn(text:string,column:string){
  return clean(text).split(/[。；]/).some(clause=>/(?:次数|数量)/.test(clause)&&/(?:参见|详见|见|列于|列出)/.test(clause)&&/(?:表|一栏|列)/.test(clause)&&clause.includes(column));
 }
-function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
+function abilityModifier(c:Character,ability:Ability){let value=c.abilities[ability];for(const row of c.selections)if(row.entry.kind!=='background'&&!reviewedAlertIdentity(row.entry)&&selectionActive(c,row)){value+=planRacialAbilities(c,row).bonuses[ability]||0;for(const effect of row.entry.effects||[])if(effect.op!=='proficiency'&&effect.target===ability)value=effect.op==='set'?effect.value:value+effect.value;}return Math.floor((value-10)/2);}
 function context(c:Character,row:Selection){const cls=row.entry.kind==='class'?row:parentClass(c,row)||(()=>{let p:Selection|undefined=row;const seen=new Set<string>();while(p?.parentId&&!seen.has(p.id)){seen.add(p.id);p=c.selections.find(s=>s.id===p!.parentId);if(p?.entry.kind==='class')return p;}return undefined;})();const classes=c.selections.filter(s=>s.entry.kind==='class'&&selectionActive(c,s)),total=classes.reduce((n,s)=>n+s.level,0);return {cls,classes,total,level:cls?.level||row.level,prof:2+Math.floor((Math.max(1,total)-1)/4)+(c.sheetBonuses?.proficiency||0)};}
 function formulaText(c:Character,row:Selection,formula:string):string{
  const {cls,classes,total,level,prof}=context(c,row);
@@ -74,6 +77,9 @@ function numericMax(c:Character,row:Selection,value:unknown){if(typeof value==='
 export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues:Issue[]}{
  const grants:ResourceGrant[]=[],issues:Issue[]=[];if(!automationEnabled(c))return {grants,issues};
  for(const row of c.selections){
+  // Reviewed PHB/forged Alert is never an implicit resource or formula grant.
+  // Genuine XPHB keeps its separate preexisting compatibility path.
+  if(reviewedAlertIdentity(row.entry))continue;
   if(!['feature','feat','race','background','class','subclass'].includes(row.entry.kind)||!selectionActive(c,row))continue;
   const raw=row.entry.raw,text=strings(row.entry.entries).join(' '),{cls,level}=context(c,row);
   const explicit=Array.isArray(raw.resources)?raw.resources:plain(raw.resource)?[raw.resource]:plain(raw.uses)?[{...raw.uses,name:row.entry.name,recovery:raw.uses.recovery||raw.uses.per}]:plain(raw.system?.uses)&&raw.system.uses.max!==undefined?[{...raw.system.uses,name:row.entry.name}]:[];
@@ -116,20 +122,21 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
  }
  grants.push(...planClassResourcePools(c,grants));return {grants,issues};
 }
-export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
+export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id)&&!ownedItemChargeResource(c,id)){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
 /** Own lifecycle and recovery only; preserve player-owned presentation and overrides. */
 export function syncFeatureResources(c:Character){
  const before=JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);rememberFeatureResources(c);
  const needed=new Set<string>();
- for(const grant of planFeatureResources(c).grants){needed.add(grant.key);const old=c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key];
+ for(const grant of planFeatureResources(c).grants){if(ownedItemChargeResource(c,grant.key))continue;needed.add(grant.key);const old=c.runtime.resources[grant.key]||c.runtime.featureResourceArchive?.[grant.key];
   const manual=old?.featureGrant?.manualMax||!!old?.featureGrant&&old.max!==old.featureGrant.ruleMax;
   const max=manual?old!.max:grant.max,spent=old?old.featureGrant?.spent??Math.max(0,old.max-old.current):0;
   c.runtime.resources[grant.key]={...old,name:grant.name,type:old?.type||'count',icon:old?.icon||'gem',max,current:Math.max(0,max-spent),featureGrant:{ownerId:grant.ownerId,ruleMax:grant.max,manualMax:manual,spent,recovery:grant.recovery,formula:grant.formula,origin:grant.origin,classPool:grant.classPool}};
  }
- for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key))delete c.runtime.resources[key];
- for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant)(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);
+ for(const [key,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!needed.has(key)&&!ownedLimitedSourceResource(c,key)&&!ownedItemChargeResource(c,key))delete c.runtime.resources[key];
+ for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id)&&!ownedItemChargeResource(c,id))(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);
 }
 export function resourceRestRecovery(c:Character,key:string,kind:'short'|'long'):number|'all'|undefined{
+ if(ownedLimitedSourceResource(c,key)||ownedItemChargeResource(c,key))return;
  const r=c.runtime.resources[key];if(!r)return undefined;
   let recovery:number|'all'|undefined=r.featureGrant?.recovery[kind];
   if(!r.featureGrant){if(key.startsWith('pact-slot:')||kind==='long'&&key.startsWith('spell-slot:'))recovery='all';

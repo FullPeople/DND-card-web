@@ -1,0 +1,875 @@
+{
+  "schemaVersion": 1,
+  "scope": "source-qualified-direct-medium-racial-carrying-capacity-only",
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/races.json",
+      "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "bytes": 451902
+    }
+  ],
+  "sourceCandidateCounts": {
+    "owners": 14
+  },
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "counts": {
+    "actualOwners": 14,
+    "verifiedRouteProofs": 28,
+    "distinctNormalizedSnapshotForms": 14,
+    "heldOwners": 0
+  },
+  "normalization": {
+    "canonical": "complete-original-races-body-through-installed-normalizeCatalogData",
+    "app": "independent-complete-original-races-body-normalize-then-real-hydrateSpellLookup",
+    "transportRevision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+    "noPayloadRepair": true
+  },
+  "policy": {
+    "operation": "carrying-capacity-only",
+    "sizeIncrement": 1,
+    "sourceSize": [
+      "M"
+    ],
+    "changesActualSize": false,
+    "manualMechanisms": [
+      "push-drag-lift",
+      "grapple-checks",
+      "skill-proficiency",
+      "temporary-size-changes",
+      "movement",
+      "other-effects"
+    ]
+  },
+  "rules": [
+    {
+      "key": "race/13",
+      "id": "kiwee:race:erlw:bugbear::::::",
+      "kind": "race",
+      "name": "熊地精",
+      "english": "Bugbear",
+      "source": "ERLW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 25,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "08006dd125bdcc92331cca682abcbc5fd0cc1b8200208bd963b4e717c33aa803",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:erlw:bugbear::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "08006dd125bdcc92331cca682abcbc5fd0cc1b8200208bd963b4e717c33aa803",
+          "completeSnapshotSha256": "08006dd125bdcc92331cca682abcbc5fd0cc1b8200208bd963b4e717c33aa803",
+          "canonicalReboundSnapshotSha256": "08006dd125bdcc92331cca682abcbc5fd0cc1b8200208bd963b4e717c33aa803"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:erlw:bugbear::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "08006dd125bdcc92331cca682abcbc5fd0cc1b8200208bd963b4e717c33aa803",
+          "completeSnapshotSha256": "08006dd125bdcc92331cca682abcbc5fd0cc1b8200208bd963b4e717c33aa803",
+          "canonicalReboundSnapshotSha256": "08006dd125bdcc92331cca682abcbc5fd0cc1b8200208bd963b4e717c33aa803"
+        }
+      ],
+      "requiredSources": [
+        "ERLW"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/13",
+        "sourceIndex": 13,
+        "rawSha256": "0067ca5c5166bb6c7ff6e103a61fa7426229bf31a6420f4549aa833720dd974e",
+        "rawHeader": {
+          "name": "熊地精",
+          "ENG_name": "Bugbear",
+          "source": "ERLW",
+          "page": 25
+        },
+        "sourceClause": {
+          "path": "race/13/entries/5/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/5/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/14",
+      "id": "kiwee:race:mpmm:bugbear::::::",
+      "kind": "race",
+      "name": "熊地精",
+      "english": "Bugbear",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 8,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1f8c86d501af8efdf6689b4b05396a0dfa713e7eff352775586bcc7fe22bf907",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:bugbear::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1f8c86d501af8efdf6689b4b05396a0dfa713e7eff352775586bcc7fe22bf907",
+          "completeSnapshotSha256": "1f8c86d501af8efdf6689b4b05396a0dfa713e7eff352775586bcc7fe22bf907",
+          "canonicalReboundSnapshotSha256": "1f8c86d501af8efdf6689b4b05396a0dfa713e7eff352775586bcc7fe22bf907"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:bugbear::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1f8c86d501af8efdf6689b4b05396a0dfa713e7eff352775586bcc7fe22bf907",
+          "completeSnapshotSha256": "1f8c86d501af8efdf6689b4b05396a0dfa713e7eff352775586bcc7fe22bf907",
+          "canonicalReboundSnapshotSha256": "1f8c86d501af8efdf6689b4b05396a0dfa713e7eff352775586bcc7fe22bf907"
+        }
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/14",
+        "sourceIndex": 14,
+        "rawSha256": "80d894d31438b01ef0edbeff9e11ad72bd6939e363dc76975a2dd74e44f07ab0",
+        "rawHeader": {
+          "name": "熊地精",
+          "ENG_name": "Bugbear",
+          "source": "MPMM",
+          "page": 8
+        },
+        "sourceClause": {
+          "path": "race/14/entries/4/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/15",
+      "id": "kiwee:race:vgm:bugbear::::::",
+      "kind": "race",
+      "name": "熊地精",
+      "english": "Bugbear",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 119,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "3578f2619923a19158dda88b6dcbc02327443ad0a31856cd1b9c9c429cdf9cad",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:bugbear::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "3578f2619923a19158dda88b6dcbc02327443ad0a31856cd1b9c9c429cdf9cad",
+          "completeSnapshotSha256": "3578f2619923a19158dda88b6dcbc02327443ad0a31856cd1b9c9c429cdf9cad",
+          "canonicalReboundSnapshotSha256": "3578f2619923a19158dda88b6dcbc02327443ad0a31856cd1b9c9c429cdf9cad"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:bugbear::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "3578f2619923a19158dda88b6dcbc02327443ad0a31856cd1b9c9c429cdf9cad",
+          "completeSnapshotSha256": "3578f2619923a19158dda88b6dcbc02327443ad0a31856cd1b9c9c429cdf9cad",
+          "canonicalReboundSnapshotSha256": "3578f2619923a19158dda88b6dcbc02327443ad0a31856cd1b9c9c429cdf9cad"
+        }
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/15",
+        "sourceIndex": 15,
+        "rawSha256": "30b04b9dc2ca4b30005de122ebe58d90a8ce867f04177930c88bd37a112e0bdf",
+        "rawHeader": {
+          "name": "熊地精",
+          "ENG_name": "Bugbear",
+          "source": "VGM",
+          "page": 119
+        },
+        "sourceClause": {
+          "path": "race/15/entries/4/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/17",
+      "id": "kiwee:race:ggr:centaur::::::",
+      "kind": "race",
+      "name": "人马",
+      "english": "Centaur",
+      "source": "GGR",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 15,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "6f8afc4ea329243703df7971eca07fbd382bc4c8e291fc1d5439246f9344915a",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ggr:centaur::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "6f8afc4ea329243703df7971eca07fbd382bc4c8e291fc1d5439246f9344915a",
+          "completeSnapshotSha256": "6f8afc4ea329243703df7971eca07fbd382bc4c8e291fc1d5439246f9344915a",
+          "canonicalReboundSnapshotSha256": "6f8afc4ea329243703df7971eca07fbd382bc4c8e291fc1d5439246f9344915a"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ggr:centaur::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "6f8afc4ea329243703df7971eca07fbd382bc4c8e291fc1d5439246f9344915a",
+          "completeSnapshotSha256": "6f8afc4ea329243703df7971eca07fbd382bc4c8e291fc1d5439246f9344915a",
+          "canonicalReboundSnapshotSha256": "6f8afc4ea329243703df7971eca07fbd382bc4c8e291fc1d5439246f9344915a"
+        }
+      ],
+      "requiredSources": [
+        "GGR"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/17",
+        "sourceIndex": 17,
+        "rawSha256": "56fd736d34747ec29a47df82c12c10dcb4aae39fb2e135939a8061dc51070b78",
+        "rawHeader": {
+          "name": "人马",
+          "ENG_name": "Centaur",
+          "source": "GGR",
+          "page": 15
+        },
+        "sourceClause": {
+          "path": "race/17/entries/6/entries/0",
+          "utf8Bytes": 99,
+          "sha256": "d22721bdcdd78409f6886512e86c2dcad3685f62524a916063be421cd8840ea6",
+          "expectedCompleteEntryPath": "raw/entries/6/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/19",
+      "id": "kiwee:race:mpmm:centaur::::::",
+      "kind": "race",
+      "name": "人马",
+      "english": "Centaur",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 9,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "119729a862afcf778eb159802d7e3d6a68d76f741d358d07113793280f52491b",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:centaur::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "119729a862afcf778eb159802d7e3d6a68d76f741d358d07113793280f52491b",
+          "completeSnapshotSha256": "119729a862afcf778eb159802d7e3d6a68d76f741d358d07113793280f52491b",
+          "canonicalReboundSnapshotSha256": "119729a862afcf778eb159802d7e3d6a68d76f741d358d07113793280f52491b"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:centaur::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "119729a862afcf778eb159802d7e3d6a68d76f741d358d07113793280f52491b",
+          "completeSnapshotSha256": "119729a862afcf778eb159802d7e3d6a68d76f741d358d07113793280f52491b",
+          "canonicalReboundSnapshotSha256": "119729a862afcf778eb159802d7e3d6a68d76f741d358d07113793280f52491b"
+        }
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/19",
+        "sourceIndex": 19,
+        "rawSha256": "ef3392bfe4092321aec95ca72716421353e834a4d2c08498e1d73f76ef03d88f",
+        "rawHeader": {
+          "name": "人马",
+          "ENG_name": "Centaur",
+          "source": "MPMM",
+          "page": 9
+        },
+        "sourceClause": {
+          "path": "race/19/entries/2/entries/0",
+          "utf8Bytes": 99,
+          "sha256": "d22721bdcdd78409f6886512e86c2dcad3685f62524a916063be421cd8840ea6",
+          "expectedCompleteEntryPath": "raw/entries/2/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/45",
+      "id": "kiwee:race:mpmm:firbolg::::::",
+      "kind": "race",
+      "name": "费尔伯格人",
+      "english": "Firbolg",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 15,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "24b294922d518bc731449cc44077f3ab2684b6697e8f3a0e4f107410c2ecc210",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:firbolg::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "24b294922d518bc731449cc44077f3ab2684b6697e8f3a0e4f107410c2ecc210",
+          "completeSnapshotSha256": "24b294922d518bc731449cc44077f3ab2684b6697e8f3a0e4f107410c2ecc210",
+          "canonicalReboundSnapshotSha256": "24b294922d518bc731449cc44077f3ab2684b6697e8f3a0e4f107410c2ecc210"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:firbolg::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "24b294922d518bc731449cc44077f3ab2684b6697e8f3a0e4f107410c2ecc210",
+          "completeSnapshotSha256": "24b294922d518bc731449cc44077f3ab2684b6697e8f3a0e4f107410c2ecc210",
+          "canonicalReboundSnapshotSha256": "24b294922d518bc731449cc44077f3ab2684b6697e8f3a0e4f107410c2ecc210"
+        }
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/45",
+        "sourceIndex": 45,
+        "rawSha256": "cbf4a0ad58dc8c0e854cb7c516a38dbfa314c1f671567d7d7fdd13ae6e1dd78b",
+        "rawHeader": {
+          "name": "费尔伯格人",
+          "ENG_name": "Firbolg",
+          "source": "MPMM",
+          "page": 15
+        },
+        "sourceClause": {
+          "path": "race/45/entries/2/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/2/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/46",
+      "id": "kiwee:race:vgm:firbolg::::::",
+      "kind": "race",
+      "name": "费尔伯格人",
+      "english": "Firbolg",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 107,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "17c2821d894eaaa1f623db99ac2934e0b5af68418342046c6983cf195bb3db97",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:firbolg::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "17c2821d894eaaa1f623db99ac2934e0b5af68418342046c6983cf195bb3db97",
+          "completeSnapshotSha256": "17c2821d894eaaa1f623db99ac2934e0b5af68418342046c6983cf195bb3db97",
+          "canonicalReboundSnapshotSha256": "17c2821d894eaaa1f623db99ac2934e0b5af68418342046c6983cf195bb3db97"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:firbolg::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "17c2821d894eaaa1f623db99ac2934e0b5af68418342046c6983cf195bb3db97",
+          "completeSnapshotSha256": "17c2821d894eaaa1f623db99ac2934e0b5af68418342046c6983cf195bb3db97",
+          "canonicalReboundSnapshotSha256": "17c2821d894eaaa1f623db99ac2934e0b5af68418342046c6983cf195bb3db97"
+        }
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/46",
+        "sourceIndex": 46,
+        "rawSha256": "d9ca7df8c3d90ae1d8e68bd092976b063804155781187d9dfece5e3c94dcd6da",
+        "rawHeader": {
+          "name": "费尔伯格人",
+          "ENG_name": "Firbolg",
+          "source": "VGM",
+          "page": 107
+        },
+        "sourceClause": {
+          "path": "race/46/entries/4/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/65",
+      "id": "kiwee:race:mpmm:goliath::::::",
+      "kind": "race",
+      "name": "歌利亚",
+      "english": "Goliath",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 21,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "completeSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "canonicalReboundSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "completeSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0",
+          "canonicalReboundSnapshotSha256": "d2323b3a4150e016a04759c3c8daeb73c87aabdadf0dc643962f4e24f54185b0"
+        }
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/65",
+        "sourceIndex": 65,
+        "rawSha256": "d141f667825f4e353c844e38c3976988688403905891ee00277f9f4c0af0ac49",
+        "rawHeader": {
+          "name": "歌利亚",
+          "ENG_name": "Goliath",
+          "source": "MPMM",
+          "page": 21
+        },
+        "sourceClause": {
+          "path": "race/65/entries/0/entries/0",
+          "utf8Bytes": 153,
+          "sha256": "3c72bd2bca5bbdeebb2a3720c785bf60c0504bbad9aa14b715a2376901260fb5",
+          "expectedCompleteEntryPath": "raw/entries/0/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/66",
+      "id": "kiwee:race:vgm:goliath::::::",
+      "kind": "race",
+      "name": "歌利亚",
+      "english": "Goliath",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 108,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "completeSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "canonicalReboundSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "completeSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95",
+          "canonicalReboundSnapshotSha256": "aa64b885e7b9cd297513b083375949af9247abfcb6753e5f7f01b9345c67de95"
+        }
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/66",
+        "sourceIndex": 66,
+        "rawSha256": "c6af3ee9e70bebb9836449ef00ae18dfd2627a6cfff4d8ef8020b34174b4afea",
+        "rawHeader": {
+          "name": "歌利亚",
+          "ENG_name": "Goliath",
+          "source": "VGM",
+          "page": 108
+        },
+        "sourceClause": {
+          "path": "race/66/entries/4/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/67",
+      "id": "kiwee:race:xphb:goliath::::::",
+      "kind": "race",
+      "name": "歌利亚",
+      "english": "Goliath",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 192,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b55525d77049f197293a1f09c2d71eb46ea08d0ee585a1651f963fb72b5c7901",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b55525d77049f197293a1f09c2d71eb46ea08d0ee585a1651f963fb72b5c7901",
+          "completeSnapshotSha256": "b55525d77049f197293a1f09c2d71eb46ea08d0ee585a1651f963fb72b5c7901",
+          "canonicalReboundSnapshotSha256": "b55525d77049f197293a1f09c2d71eb46ea08d0ee585a1651f963fb72b5c7901"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:goliath::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b55525d77049f197293a1f09c2d71eb46ea08d0ee585a1651f963fb72b5c7901",
+          "completeSnapshotSha256": "b55525d77049f197293a1f09c2d71eb46ea08d0ee585a1651f963fb72b5c7901",
+          "canonicalReboundSnapshotSha256": "b55525d77049f197293a1f09c2d71eb46ea08d0ee585a1651f963fb72b5c7901"
+        }
+      ],
+      "requiredSources": [
+        "XPHB"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/67",
+        "sourceIndex": 67,
+        "rawSha256": "a1638b44231efd8d05bf97b7bd6d9d4a84582e6f838e086ef80cc4c42a5fc530",
+        "rawHeader": {
+          "name": "歌利亚",
+          "ENG_name": "Goliath",
+          "source": "XPHB",
+          "page": 192,
+          "edition": "one"
+        },
+        "sourceClause": {
+          "path": "race/67/entries/2/entries/0",
+          "utf8Bytes": 176,
+          "sha256": "59b9e4d48de43b346cd7cf0209e46c98b1d5b139ef80b672668527e2a164cc97",
+          "expectedCompleteEntryPath": "raw/entries/2/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/109",
+      "id": "kiwee:race:ggr:loxodon::::::",
+      "kind": "race",
+      "name": "象族",
+      "english": "Loxodon",
+      "source": "GGR",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ggr:loxodon::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "completeSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "canonicalReboundSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ggr:loxodon::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "completeSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9",
+          "canonicalReboundSnapshotSha256": "857b10192b56f0674e1e30371a46425324c456077a47a82e2489e572128498b9"
+        }
+      ],
+      "requiredSources": [
+        "GGR"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/109",
+        "sourceIndex": 109,
+        "rawSha256": "4c955812ee3c504ab66882d1b3140bbcfac958b5d740f534d83227384c73a62d",
+        "rawHeader": {
+          "name": "象族",
+          "ENG_name": "Loxodon",
+          "source": "GGR",
+          "page": 17
+        },
+        "sourceClause": {
+          "path": "race/109/entries/3/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/120",
+      "id": "kiwee:race:erlw:orc::::::",
+      "kind": "race",
+      "name": "兽人",
+      "english": "Orc",
+      "source": "ERLW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 31,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "996398be1fc7197af584fcc3f22719cb9c7230d89706f1474e30a2fb44a6e9cd",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:erlw:orc::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "996398be1fc7197af584fcc3f22719cb9c7230d89706f1474e30a2fb44a6e9cd",
+          "completeSnapshotSha256": "996398be1fc7197af584fcc3f22719cb9c7230d89706f1474e30a2fb44a6e9cd",
+          "canonicalReboundSnapshotSha256": "996398be1fc7197af584fcc3f22719cb9c7230d89706f1474e30a2fb44a6e9cd"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:erlw:orc::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "996398be1fc7197af584fcc3f22719cb9c7230d89706f1474e30a2fb44a6e9cd",
+          "completeSnapshotSha256": "996398be1fc7197af584fcc3f22719cb9c7230d89706f1474e30a2fb44a6e9cd",
+          "canonicalReboundSnapshotSha256": "996398be1fc7197af584fcc3f22719cb9c7230d89706f1474e30a2fb44a6e9cd"
+        }
+      ],
+      "requiredSources": [
+        "ERLW"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/120",
+        "sourceIndex": 120,
+        "rawSha256": "d392d270415fda3ac4b281b21670e5d001abb89599435b89f7351404d71f80ca",
+        "rawHeader": {
+          "name": "兽人",
+          "ENG_name": "Orc",
+          "source": "ERLW",
+          "page": 31
+        },
+        "sourceClause": {
+          "path": "race/120/entries/6/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/6/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/121",
+      "id": "kiwee:race:mpmm:orc::::::",
+      "kind": "race",
+      "name": "兽人",
+      "english": "Orc",
+      "source": "MPMM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 28,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "f697e51d860045175a1ed679c3d090e16fc9e69b5c452857f4bfd2f6eb11ec27",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mpmm:orc::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "f697e51d860045175a1ed679c3d090e16fc9e69b5c452857f4bfd2f6eb11ec27",
+          "completeSnapshotSha256": "f697e51d860045175a1ed679c3d090e16fc9e69b5c452857f4bfd2f6eb11ec27",
+          "canonicalReboundSnapshotSha256": "f697e51d860045175a1ed679c3d090e16fc9e69b5c452857f4bfd2f6eb11ec27"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mpmm:orc::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "f697e51d860045175a1ed679c3d090e16fc9e69b5c452857f4bfd2f6eb11ec27",
+          "completeSnapshotSha256": "f697e51d860045175a1ed679c3d090e16fc9e69b5c452857f4bfd2f6eb11ec27",
+          "canonicalReboundSnapshotSha256": "f697e51d860045175a1ed679c3d090e16fc9e69b5c452857f4bfd2f6eb11ec27"
+        }
+      ],
+      "requiredSources": [
+        "MPMM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/121",
+        "sourceIndex": 121,
+        "rawSha256": "6a774d11028147af226fc842206d81aac3372d335676f08479e8dda55d935030",
+        "rawHeader": {
+          "name": "兽人",
+          "ENG_name": "Orc",
+          "source": "MPMM",
+          "page": 28
+        },
+        "sourceClause": {
+          "path": "race/121/entries/2/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/2/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "race/122",
+      "id": "kiwee:race:vgm:orc::::::",
+      "kind": "race",
+      "name": "兽人",
+      "english": "Orc",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 120,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "e1ac07a324ceb6365e7c6909cfb8250d3a267efe80942b656f5fc3a0c390ea48",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:orc::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "e1ac07a324ceb6365e7c6909cfb8250d3a267efe80942b656f5fc3a0c390ea48",
+          "completeSnapshotSha256": "e1ac07a324ceb6365e7c6909cfb8250d3a267efe80942b656f5fc3a0c390ea48",
+          "canonicalReboundSnapshotSha256": "e1ac07a324ceb6365e7c6909cfb8250d3a267efe80942b656f5fc3a0c390ea48"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:orc::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "e1ac07a324ceb6365e7c6909cfb8250d3a267efe80942b656f5fc3a0c390ea48",
+          "completeSnapshotSha256": "e1ac07a324ceb6365e7c6909cfb8250d3a267efe80942b656f5fc3a0c390ea48",
+          "canonicalReboundSnapshotSha256": "e1ac07a324ceb6365e7c6909cfb8250d3a267efe80942b656f5fc3a0c390ea48"
+        }
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sizeIncrement": 1,
+      "scope": "carrying-capacity-only",
+      "sourceProof": {
+        "path": "race/122",
+        "sourceIndex": 122,
+        "rawSha256": "1dec36cd92902745cd2d4476135a888db432b487676fdd3e7b0567691755f1d3",
+        "rawHeader": {
+          "name": "兽人",
+          "ENG_name": "Orc",
+          "source": "VGM",
+          "page": 120
+        },
+        "sourceClause": {
+          "path": "race/122/entries/5/entries/0",
+          "utf8Bytes": 105,
+          "sha256": "50db3e1b7f716b77afd354c91ee4b648475b34e08edaa9b3e8e234310e942e3c",
+          "expectedCompleteEntryPath": "raw/entries/5/entries/0"
+        },
+        "sourceSize": [
+          "M"
+        ],
+        "directNoCopy": true
+      },
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "normalizationHolds": []
+}

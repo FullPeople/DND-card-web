@@ -60,7 +60,7 @@ test('record first and thirty warm interaction samples without real account or c
   for(const [ordinal,row] of index.rows.entries()){const body=JSON.parse(readFileSync(resolve(corpusRoot,row.path),'utf8')),json=JSON.stringify(body);expect(createHash('sha256').update(json).digest('hex'),row.url).toBe(row.sha256);bodies.set(row.url,json);paths.set(row.url,'/corpus/'+ordinal);}
   const fulfilled=new Set<string>();corpusProof={files:bodies.size,fulfilledFiles:0,indexSha256:createHash('sha256').update(indexBytes).digest('hex'),unmatchedRequests:[]};
   const source=async(route:any)=>{const url=route.request().url(),body=bodies.get(url);if(body===undefined&&!corpusProof!.unmatchedRequests.includes(url))corpusProof!.unmatchedRequests.push(url);if(body!==undefined){fulfilled.add(url);corpusProof!.fulfilledFiles=fulfilled.size;if(corpusOrigin){await route.continue({url:new URL(paths.get(url)!,corpusOrigin).href});return;}}await route.fulfill({body:body||'{}',contentType:'application/json',headers:{'access-control-allow-origin':'*'}});};
-  await page.route('https://5e.kiwee.top/data/**',source);await page.route('https://homebrew.kiwee.top/**',source);
+  await page.context().route('https://5e.kiwee.top/data/**',source);await page.context().route('https://homebrew.kiwee.top/**',source);
   if(process.env.PERF_CARD_COUNT){
    const adapterPath=process.env.PERF_CONSUMER_ADAPTER;if(!adapterPath)throw Error('A verified consumer adapter is required for complex card scenarios');
    const api=await import((await import('node:url')).pathToFileURL(resolve(adapterPath)).href),entries:any[]=[];

@@ -1,3 +1,4 @@
+import {loopbackFetch as fetch,registerLoopbackServer} from './helpers/loopbackHttp';
 import {afterEach,describe,expect,it} from 'vitest';
 import {CloudStore,createCloudServer} from '../server/cloud/server';
 import {qqReturnTo,type QQConfig} from '../server/cloud/qq';
@@ -9,7 +10,7 @@ afterEach(async()=>{for(const cleanup of cleanups.splice(0))await cleanup();});
 async function setup(variant:'ok'|'wrong-app'|'no-profile'='ok',isolation?:'stage2'){
   const store=new CloudStore(':memory:'),calls:URL[]=[];
   const qq:QQConfig={appId,appKey:'test-only-not-a-real-key',callback:origin+'/api/auth/qq/callback'+(isolation?'?cloud_lab=stage2':''),isolation,fetch:(async(input:URL|RequestInfo)=>{const url=new URL(String(input));calls.push(url);return new Response(url.pathname.endsWith('/token')?'access_token=server-only-token&expires_in=3600':url.pathname.endsWith('/me')?'callback( '+JSON.stringify({client_id:variant==='wrong-app'?'999999999':appId,openid})+' );':JSON.stringify(variant==='no-profile'?{ret:100030}:{ret:0,nickname:'测试玩家',figureurl_qq_2:'https://q1.qlogo.cn/test.png'}));}) as typeof fetch};
-  const server=createCloudServer(store,origin,{qq,temporaryUpload:!isolation,accountPrivate:!!isolation});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const server=createCloudServer(store,origin,{qq,temporaryUpload:!isolation,accountPrivate:!!isolation});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));registerLoopbackServer(server);
   cleanups.push(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));store.close();});
   const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
   const begin=async(returnTo='/library/')=>{const response=await fetch(base+'/api/auth/qq/login?returnTo='+encodeURIComponent(returnTo),{redirect:'manual'});expect(response.status).toBe(302);const url=new URL(response.headers.get('location')!);return {state:url.searchParams.get('state')!,cookie:response.headers.get('set-cookie')!.split(';')[0],response,url};};

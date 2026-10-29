@@ -9,8 +9,8 @@ import {restoreAuthoredChoices} from './authoredChoicesFixture';
 
 async function ready(page:Page){
  await mockSource(page);await suppressAnnouncement(page);
- await page.route('**/data/races.json',route=>route.fulfill({json:{race:originFeatData.race}}));
- await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:originFeatData.feat}}));
+ await page.context().route('**/data/races.json',route=>route.fulfill({json:{race:originFeatData.race}}));
+ await page.context().route('**/data/feats.json',route=>route.fulfill({json:{feat:originFeatData.feat}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
  const c=newCharacter();c.name='起源专长验收';c.automation=newAutomationState();const raw=originFeatData.race[0];c.selections=[{id:'origin-race',entry:{id:'fixture-origin-race',kind:'race',name:raw.name,english:raw.ENG_name,source:raw.source,edition:'2024',packId:'fixture',revision:'1',entries:raw.entries,raw},level:1,quantity:1,equipped:false}];

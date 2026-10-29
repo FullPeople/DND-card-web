@@ -1,0 +1,930 @@
+{
+  "schemaVersion": 1,
+  "scope": "source-qualified worn item spell attack and save DC bonuses only",
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/items-base.json",
+      "sha256": "8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff",
+      "bytes": 149813
+    },
+    {
+      "url": "https://5e.kiwee.top/data/items.json",
+      "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "bytes": 2458443
+    },
+    {
+      "url": "https://5e.kiwee.top/data/magicvariants.json",
+      "sha256": "4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+      "bytes": 190573
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-bard.json",
+      "sha256": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+      "bytes": 117283
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-cleric.json",
+      "sha256": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+      "bytes": 211422
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-druid.json",
+      "sha256": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+      "bytes": 116030
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-paladin.json",
+      "sha256": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+      "bytes": 134796
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-sorcerer.json",
+      "sha256": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "bytes": 140077
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-warlock.json",
+      "sha256": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+      "bytes": 133330
+    },
+    {
+      "url": "https://5e.kiwee.top/data/class/class-wizard.json",
+      "sha256": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03",
+      "bytes": 160486
+    }
+  ],
+  "counts": {
+    "owners": 9,
+    "numericBranches": 18,
+    "completeOwnerForms": 18,
+    "classes": 14,
+    "heldOwners": 5
+  },
+  "rules": [
+    {
+      "id": "kiwee:item:tce:%2B1%20amulet%20of%20the%20devout::::::",
+      "kind": "item",
+      "name": "+1 虔信护符",
+      "english": "+1 Amulet of the Devout",
+      "source": "TCE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 119,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 1,
+      "fullNormalizedSnapshotSha256": "147c511093a51c90b770faf172c7040f3ca4ef6bc943cf254905a72feea239e9",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "147c511093a51c90b770faf172c7040f3ca4ef6bc943cf254905a72feea239e9",
+          "canonicalReboundSnapshotSha256": "147c511093a51c90b770faf172c7040f3ca4ef6bc943cf254905a72feea239e9"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "b1e87ae12ba862360839bd7a0276a630b37bc16df0f4cba8f2a8991ac5b0d733",
+          "canonicalReboundSnapshotSha256": "147c511093a51c90b770faf172c7040f3ca4ef6bc943cf254905a72feea239e9"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Cleric",
+        "Paladin"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:cleric::::::",
+        "kiwee:class:xphb:cleric::::::",
+        "kiwee:class:phb:paladin::::::",
+        "kiwee:class:xphb:paladin::::::"
+      ],
+      "scope": "all-your-spells",
+      "recipientRoleIds": [],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": "amulet-of-the-devout-ranks",
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 1,
+      "dcBonus": 1,
+      "attunementFieldUtf8Sha256": "949ac1589097fafd99339b6ac5b21351b81a8560eafcac5a48e91ac483f484ef",
+      "clauses": [
+        {
+          "path": "item/1/entries/0",
+          "utf8Sha256": "443b7f0b308d55b3f8ccd5ec61bedbbade6addca9dd4cf59d34cab8cdd9b0002"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:tce:%2B2%20amulet%20of%20the%20devout::::::",
+      "kind": "item",
+      "name": "+2 虔信护符",
+      "english": "+2 Amulet of the Devout",
+      "source": "TCE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 119,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 15,
+      "fullNormalizedSnapshotSha256": "67487d6f9c3a0327e683ecd6853e20817ddd4264075729bcbb3da7b267e4d98e",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "67487d6f9c3a0327e683ecd6853e20817ddd4264075729bcbb3da7b267e4d98e",
+          "canonicalReboundSnapshotSha256": "67487d6f9c3a0327e683ecd6853e20817ddd4264075729bcbb3da7b267e4d98e"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "7b301102935f607ed3a08dac833588bf99019281d9ef4b3d2b37dc08f0585b7e",
+          "canonicalReboundSnapshotSha256": "67487d6f9c3a0327e683ecd6853e20817ddd4264075729bcbb3da7b267e4d98e"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Cleric",
+        "Paladin"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:cleric::::::",
+        "kiwee:class:xphb:cleric::::::",
+        "kiwee:class:phb:paladin::::::",
+        "kiwee:class:xphb:paladin::::::"
+      ],
+      "scope": "all-your-spells",
+      "recipientRoleIds": [],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": "amulet-of-the-devout-ranks",
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 2,
+      "dcBonus": 2,
+      "attunementFieldUtf8Sha256": "949ac1589097fafd99339b6ac5b21351b81a8560eafcac5a48e91ac483f484ef",
+      "clauses": [
+        {
+          "path": "item/15/entries/0",
+          "utf8Sha256": "37fb2c1caf5aec0f026a6777538928fb1061e60986197de6ded1d44ff3b3d89d"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:tce:%2B3%20amulet%20of%20the%20devout::::::",
+      "kind": "item",
+      "name": "+3 虔信护符",
+      "english": "+3 Amulet of the Devout",
+      "source": "TCE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 119,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 29,
+      "fullNormalizedSnapshotSha256": "0083809a3c2082819441ee0f41d6bd4a359dfbd7283a2d8593d4fa6ccd715d54",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "0083809a3c2082819441ee0f41d6bd4a359dfbd7283a2d8593d4fa6ccd715d54",
+          "canonicalReboundSnapshotSha256": "0083809a3c2082819441ee0f41d6bd4a359dfbd7283a2d8593d4fa6ccd715d54"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "e0b4045b8a59617939c181de12c8f958e959a1456c98c5b3c8e515e17f058aca",
+          "canonicalReboundSnapshotSha256": "0083809a3c2082819441ee0f41d6bd4a359dfbd7283a2d8593d4fa6ccd715d54"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Cleric",
+        "Paladin"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:cleric::::::",
+        "kiwee:class:xphb:cleric::::::",
+        "kiwee:class:phb:paladin::::::",
+        "kiwee:class:xphb:paladin::::::"
+      ],
+      "scope": "all-your-spells",
+      "recipientRoleIds": [],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": "amulet-of-the-devout-ranks",
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 3,
+      "dcBonus": 3,
+      "attunementFieldUtf8Sha256": "949ac1589097fafd99339b6ac5b21351b81a8560eafcac5a48e91ac483f484ef",
+      "clauses": [
+        {
+          "path": "item/29/entries/0",
+          "utf8Sha256": "d414cb7bb269e1f2d1df179531b51087f9875ce768c8219c2992523af741b255"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:tce:%2B1%20bloodwell%20vial::::::",
+      "kind": "item",
+      "name": "+1 血源瓶",
+      "english": "+1 Bloodwell Vial",
+      "source": "TCE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 122,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 3,
+      "fullNormalizedSnapshotSha256": "81ef0554e1757be2988a06db30f653b71ae59f6f4d1f92e3e65565542292ef28",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "81ef0554e1757be2988a06db30f653b71ae59f6f4d1f92e3e65565542292ef28",
+          "canonicalReboundSnapshotSha256": "81ef0554e1757be2988a06db30f653b71ae59f6f4d1f92e3e65565542292ef28"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "b125fc2007830d92a9625fe0f5aed1428936063abe565ab1fc8ca6d0c43e173e",
+          "canonicalReboundSnapshotSha256": "81ef0554e1757be2988a06db30f653b71ae59f6f4d1f92e3e65565542292ef28"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Sorcerer"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::"
+      ],
+      "scope": "sorcerer-spells",
+      "recipientRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::"
+      ],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": "bloodwell-vial-ranks",
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 1,
+      "dcBonus": 1,
+      "attunementFieldUtf8Sha256": "9b06d10b0d023e8f73927a81bad8a11d122790ac5f07b1092cea8a30e536a2ea",
+      "clauses": [
+        {
+          "path": "item/3/entries/0",
+          "utf8Sha256": "4ffcc5410e43340be6e5b4a76a8acf43bc0247ec68184f83566742dbcb4a461e"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:tce:%2B2%20bloodwell%20vial::::::",
+      "kind": "item",
+      "name": "+2 血源瓶",
+      "english": "+2 Bloodwell Vial",
+      "source": "TCE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 122,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 17,
+      "fullNormalizedSnapshotSha256": "40ec95b71cf15332764bb083885e695ceb788725a437231d3267a275ffc85da6",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "40ec95b71cf15332764bb083885e695ceb788725a437231d3267a275ffc85da6",
+          "canonicalReboundSnapshotSha256": "40ec95b71cf15332764bb083885e695ceb788725a437231d3267a275ffc85da6"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "2a5f58d030b9694ce515eff8e9b37d487ca93d10830ba2cc4a46c1e20de93023",
+          "canonicalReboundSnapshotSha256": "40ec95b71cf15332764bb083885e695ceb788725a437231d3267a275ffc85da6"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Sorcerer"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::"
+      ],
+      "scope": "sorcerer-spells",
+      "recipientRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::"
+      ],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": "bloodwell-vial-ranks",
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 2,
+      "dcBonus": 2,
+      "attunementFieldUtf8Sha256": "9b06d10b0d023e8f73927a81bad8a11d122790ac5f07b1092cea8a30e536a2ea",
+      "clauses": [
+        {
+          "path": "item/17/entries/0",
+          "utf8Sha256": "b89ba70d703f248e51438dfccfff5fc4e782d4c521c7075c3131b78658f26fbf"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:tce:%2B3%20bloodwell%20vial::::::",
+      "kind": "item",
+      "name": "+3 血源瓶",
+      "english": "+3 Bloodwell Vial",
+      "source": "TCE",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 122,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 31,
+      "fullNormalizedSnapshotSha256": "85c9216d2f7e250daf1638ad73cd253c7660eb46d3eb496838fd0ad75c047cc7",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "85c9216d2f7e250daf1638ad73cd253c7660eb46d3eb496838fd0ad75c047cc7",
+          "canonicalReboundSnapshotSha256": "85c9216d2f7e250daf1638ad73cd253c7660eb46d3eb496838fd0ad75c047cc7"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "91b8b14616dcb48ff47d943e794fcc065ecb05063e3bceb648102d47d85ae95c",
+          "canonicalReboundSnapshotSha256": "85c9216d2f7e250daf1638ad73cd253c7660eb46d3eb496838fd0ad75c047cc7"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Sorcerer"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::"
+      ],
+      "scope": "sorcerer-spells",
+      "recipientRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::"
+      ],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": "bloodwell-vial-ranks",
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 3,
+      "dcBonus": 3,
+      "attunementFieldUtf8Sha256": "9b06d10b0d023e8f73927a81bad8a11d122790ac5f07b1092cea8a30e536a2ea",
+      "clauses": [
+        {
+          "path": "item/31/entries/0",
+          "utf8Sha256": "ef041eb2d7a21bb7bb3d40d91cc60fdb15206e0f07f35c3e3016b9870945625e"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:bmt:jester's%20mask::::::",
+      "kind": "item",
+      "name": "小丑面具",
+      "english": "Jester's Mask",
+      "source": "BMT",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 36,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 1153,
+      "fullNormalizedSnapshotSha256": "088baf445bf16c5ba36fa689e475a3c56bfbeb04372488da2640934bcf1970e4",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "088baf445bf16c5ba36fa689e475a3c56bfbeb04372488da2640934bcf1970e4",
+          "canonicalReboundSnapshotSha256": "088baf445bf16c5ba36fa689e475a3c56bfbeb04372488da2640934bcf1970e4"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "bd7aa3089e53aca7a8e3091d616889cf4b8d8a5b3a1b5b3882c66864c3f69193",
+          "canonicalReboundSnapshotSha256": "088baf445bf16c5ba36fa689e475a3c56bfbeb04372488da2640934bcf1970e4"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Bard",
+        "Sorcerer",
+        "Warlock"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:bard::::::",
+        "kiwee:class:xphb:bard::::::",
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::",
+        "kiwee:class:phb:warlock::::::",
+        "kiwee:class:xphb:warlock::::::"
+      ],
+      "scope": "spells-using-charisma",
+      "recipientRoleIds": [],
+      "requiredCastingAbility": "cha",
+      "rankOverlapGroup": null,
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 3,
+      "dcBonus": 3,
+      "attunementFieldUtf8Sha256": "fae1e8ff500d1e23723e76e9d89d4f36664d15c7709116f7bdfc9957176e7a08",
+      "clauses": [
+        {
+          "path": "item/1153/entries/0",
+          "utf8Sha256": "e0ef8b697421cad59149ed75ae268c347fc34cf5d9fdbc47ca078b11987f65b0"
+        },
+        {
+          "path": "item/1153/entries/1/items/0/entries/0",
+          "utf8Sha256": "5ff3778aed94cd56ccdd9422dd9c692da3530d3d844a2182e1e38cb03a29d83a"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:aud:robe%20of%20thayan%20arcana::::::",
+      "kind": "item",
+      "name": "赛尔奥术法袍",
+      "english": "Robe of Thayan Arcana",
+      "source": "AUD",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": null,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 1843,
+      "fullNormalizedSnapshotSha256": "1505f556230521664a50df7ecc5b13f89e15939a8c5004d6b63e96b0667dbbbd",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "1505f556230521664a50df7ecc5b13f89e15939a8c5004d6b63e96b0667dbbbd",
+          "canonicalReboundSnapshotSha256": "1505f556230521664a50df7ecc5b13f89e15939a8c5004d6b63e96b0667dbbbd"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "b0f02feed912e9d70175278db16036e5ae81c41e59e0ad59506dd2fb38fb7064",
+          "canonicalReboundSnapshotSha256": "1505f556230521664a50df7ecc5b13f89e15939a8c5004d6b63e96b0667dbbbd"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::",
+        "kiwee:class:phb:warlock::::::",
+        "kiwee:class:xphb:warlock::::::",
+        "kiwee:class:phb:wizard::::::",
+        "kiwee:class:xphb:wizard::::::"
+      ],
+      "scope": "all-your-spells",
+      "recipientRoleIds": [],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": null,
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 1,
+      "dcBonus": 1,
+      "attunementFieldUtf8Sha256": "106cd0660e115b7b568821cfc7bebecd0ddbf0163614d026bdc4c3eca3fa907a",
+      "clauses": [
+        {
+          "path": "item/1843/entries/0",
+          "utf8Sha256": "36d32efd5922a05757ab7bbd2eb9a8394960ba788fc5c7f83f1454c37b434f7c"
+        },
+        {
+          "path": "item/1843/entries/1/entries/0",
+          "utf8Sha256": "97c88378a89d926efc1c3e4afd28776d0f8945071e1e37595f7982956859eab9"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "id": "kiwee:item:xdmg:robe%20of%20the%20archmagi::::::",
+      "kind": "item",
+      "name": "大法师法袍",
+      "english": "Robe of the Archmagi",
+      "source": "XDMG",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 298,
+      "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "category": "item",
+      "sourceIndex": 1845,
+      "fullNormalizedSnapshotSha256": "8bbe4cf1f3149fa6bd9475352540a7c556e9a5b0ea913021a79fb80f9dd57691",
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "completeSnapshotSha256": "8bbe4cf1f3149fa6bd9475352540a7c556e9a5b0ea913021a79fb80f9dd57691",
+          "canonicalReboundSnapshotSha256": "8bbe4cf1f3149fa6bd9475352540a7c556e9a5b0ea913021a79fb80f9dd57691"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "completeSnapshotSha256": "6de76fc85c8c31528656f5ec79c5f4641352255190bc9db2f58b6d69e7cbed80",
+          "canonicalReboundSnapshotSha256": "8bbe4cf1f3149fa6bd9475352540a7c556e9a5b0ea913021a79fb80f9dd57691"
+        }
+      ],
+      "requiresAttunement": true,
+      "sourceCondition": "worn",
+      "attunementClassRoles": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "attunementRoleIds": [
+        "kiwee:class:phb:sorcerer::::::",
+        "kiwee:class:xphb:sorcerer::::::",
+        "kiwee:class:phb:warlock::::::",
+        "kiwee:class:xphb:warlock::::::",
+        "kiwee:class:phb:wizard::::::",
+        "kiwee:class:xphb:wizard::::::"
+      ],
+      "scope": "all-your-spells",
+      "recipientRoleIds": [],
+      "requiredCastingAbility": null,
+      "rankOverlapGroup": null,
+      "rankOverlapHoldReason": "unreviewed-simultaneous-rank-effect-stacking",
+      "attackBonus": 2,
+      "dcBonus": 2,
+      "attunementFieldUtf8Sha256": "106cd0660e115b7b568821cfc7bebecd0ddbf0163614d026bdc4c3eca3fa907a",
+      "clauses": [
+        {
+          "path": "item/1845/entries/1",
+          "utf8Sha256": "300e10e95447046e1766edb941471d4b3d024867f1fc8b4537a75212364ce3a2"
+        },
+        {
+          "path": "item/1845/entries/4/entries/0",
+          "utf8Sha256": "65db293bd2b288f894be4d82d1c7d9bd103c1ed0a7fe7a874aa065f8795625ca"
+        }
+      ],
+      "input": {
+        "url": "https://5e.kiwee.top/data/items.json",
+        "sha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488"
+      },
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "classes": [
+    {
+      "id": "kiwee:class:phb:bard::::::",
+      "kind": "class",
+      "name": "吟游诗人",
+      "english": "Bard",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 51,
+      "revision": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+      "role": "Bard",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "15990eab5631710ddc1cef25b022828a29262d7a267a58734d6f726c1fcf6442",
+      "fullNormalizedSnapshotSha256": "7a6077bcb9afff92008e664e7621b114c7b492fbdc8ba32fc40b62c8d0d9920e",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-bard.json",
+        "sha256": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c"
+      }
+    },
+    {
+      "id": "kiwee:class:xphb:bard::::::",
+      "kind": "class",
+      "name": "吟游诗人",
+      "english": "Bard",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 58,
+      "revision": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c",
+      "role": "Bard",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "7b2e45ee492e2a4e6a26ef9a00302c6c97a22d7bd8e2914363bea37ec908220a",
+      "fullNormalizedSnapshotSha256": "474c806ebfe8767a67f1a1353988d4ba91d6de83300b19c9fa1be47638d0db68",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-bard.json",
+        "sha256": "ac95dc8f1d795c0764ae6314e846d8efdcbbb4b42a8c721551265467885ed31c"
+      }
+    },
+    {
+      "id": "kiwee:class:phb:cleric::::::",
+      "kind": "class",
+      "name": "牧师",
+      "english": "Cleric",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 56,
+      "revision": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+      "role": "Cleric",
+      "spellcastingAbility": "wis",
+      "snapshotSha256": "63932677ca2370a5242f4e74cf6f0b3ca56df79ad314c621e724573c770401d3",
+      "fullNormalizedSnapshotSha256": "dc5acae7d783297a09b1d5dd5c8ec7b7dc844454cbe3c19aa2d9cd80d2126cff",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-cleric.json",
+        "sha256": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344"
+      }
+    },
+    {
+      "id": "kiwee:class:xphb:cleric::::::",
+      "kind": "class",
+      "name": "牧师",
+      "english": "Cleric",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 68,
+      "revision": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344",
+      "role": "Cleric",
+      "spellcastingAbility": "wis",
+      "snapshotSha256": "f2262eaf553bd9626dd16ce76a34dca34322ff1849d0a5e2cc497c83ac896a41",
+      "fullNormalizedSnapshotSha256": "1065be3b0329c1b120c87d870a2dbde9b2e520b55534ffe21019e7b5b48c782b",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-cleric.json",
+        "sha256": "011edfef6c76cd0f70143d83db3b5e8b9b0d31ca1557b4c0954bedc619615344"
+      }
+    },
+    {
+      "id": "kiwee:class:phb:druid::::::",
+      "kind": "class",
+      "name": "德鲁伊",
+      "english": "Druid",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 64,
+      "revision": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+      "role": "Druid",
+      "spellcastingAbility": "wis",
+      "snapshotSha256": "c1d43d0ddce6dcefbef69dddee0a7db6dc839656eb2bd719a6eb9b4fdd47f065",
+      "fullNormalizedSnapshotSha256": "1e0831bcabe0970ab46c873316bff0d4990db9f92ff1d1629a6700cb4ea9daa3",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-druid.json",
+        "sha256": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c"
+      }
+    },
+    {
+      "id": "kiwee:class:xphb:druid::::::",
+      "kind": "class",
+      "name": "德鲁伊",
+      "english": "Druid",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 78,
+      "revision": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c",
+      "role": "Druid",
+      "spellcastingAbility": "wis",
+      "snapshotSha256": "c598f25bc82bf08dcecf480b84507ede99edaf511a786c4d21d4a469c32da5f9",
+      "fullNormalizedSnapshotSha256": "1df09908cdc5bbb7fc8e66729d4bd5290266a7aa86b1270dd00c177f21423e63",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-druid.json",
+        "sha256": "71fca887392f6653f41d5900066cbe6fa1cac0280bb908257075925311e1ec2c"
+      }
+    },
+    {
+      "id": "kiwee:class:phb:paladin::::::",
+      "kind": "class",
+      "name": "圣武士",
+      "english": "Paladin",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 82,
+      "revision": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+      "role": "Paladin",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "ee39142888f2de8f1efef9e369df60f852f2ea15262549210745ef528e05f876",
+      "fullNormalizedSnapshotSha256": "e3651fdad89f9df90bb4f63e85de21b08c1c02874f6f1beff332a717a02542a7",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-paladin.json",
+        "sha256": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e"
+      }
+    },
+    {
+      "id": "kiwee:class:xphb:paladin::::::",
+      "kind": "class",
+      "name": "圣武士",
+      "english": "Paladin",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 108,
+      "revision": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e",
+      "role": "Paladin",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "63e3fd8361b5a575c96a3c777ee1ad68638b1420d2f50368c0a4f9dec3c8a750",
+      "fullNormalizedSnapshotSha256": "5a2268784b0afda44ea55b07341b2f3c760a837e182c7d76588ec8913c9e2006",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-paladin.json",
+        "sha256": "aa125ed2f15782924cf4d48677e1ff64c934076bbc4f66fa65f21ba797007b2e"
+      }
+    },
+    {
+      "id": "kiwee:class:phb:sorcerer::::::",
+      "kind": "class",
+      "name": "术士",
+      "english": "Sorcerer",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 99,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "role": "Sorcerer",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "b719e0740c6f5dce1d857d3f65c51fb6e3845ec26ec60b096fb8e42b71804b61",
+      "fullNormalizedSnapshotSha256": "d3eae38cb2d806750e873f91d323e09980000a3f24722415fe7f1ed9d63c916d",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-sorcerer.json",
+        "sha256": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670"
+      }
+    },
+    {
+      "id": "kiwee:class:xphb:sorcerer::::::",
+      "kind": "class",
+      "name": "术士",
+      "english": "Sorcerer",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 138,
+      "revision": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670",
+      "role": "Sorcerer",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "55278ee3d4486d0c11d1333df8a560a2167e6c7a6a5e7e41e463bd71b331ebd7",
+      "fullNormalizedSnapshotSha256": "c4eb9469373a9f07cc4076ebedc3766c16f5cac195f4a84c6cf8073efced33c2",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-sorcerer.json",
+        "sha256": "cc1c7c87b28903114e98310b00f6c820541a6f3458bd67e6badb79b014e4c670"
+      }
+    },
+    {
+      "id": "kiwee:class:phb:warlock::::::",
+      "kind": "class",
+      "name": "魔契师",
+      "english": "Warlock",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 105,
+      "revision": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+      "role": "Warlock",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "133a33d946f975a29c44a7c2d4d735819cdc44b8d57e29def92f1facfa16be28",
+      "fullNormalizedSnapshotSha256": "c3768a0aabb36c5ee354d734eed5d5624c6b53dd8686df578aa59159594a3e56",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-warlock.json",
+        "sha256": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4"
+      }
+    },
+    {
+      "id": "kiwee:class:xphb:warlock::::::",
+      "kind": "class",
+      "name": "魔契师",
+      "english": "Warlock",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 152,
+      "revision": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4",
+      "role": "Warlock",
+      "spellcastingAbility": "cha",
+      "snapshotSha256": "300a4a9ff66342aec3ae0f63f0f929c54c1818cb48c764b991a24a4c5bf79283",
+      "fullNormalizedSnapshotSha256": "e1245c80564220cf80c6d5b7284c3b438cd2d0f65bbec2e459fedda8ad3a13ac",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-warlock.json",
+        "sha256": "34721a04db792923cf0a19fbab3f90616093d9f6519a7cfe6f81a9eb52e775d4"
+      }
+    },
+    {
+      "id": "kiwee:class:phb:wizard::::::",
+      "kind": "class",
+      "name": "法师",
+      "english": "Wizard",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 112,
+      "revision": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03",
+      "role": "Wizard",
+      "spellcastingAbility": "int",
+      "snapshotSha256": "3e0c7a5b8b45ee46b335ae13732a4480ad9daee1bb37aad1eb04088100236627",
+      "fullNormalizedSnapshotSha256": "7f351a996a1f5ea15d98f1cb680f81f5b34a0335ef87c79cfd260b674f1c11e3",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-wizard.json",
+        "sha256": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03"
+      }
+    },
+    {
+      "id": "kiwee:class:xphb:wizard::::::",
+      "kind": "class",
+      "name": "法师",
+      "english": "Wizard",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 164,
+      "revision": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03",
+      "role": "Wizard",
+      "spellcastingAbility": "int",
+      "snapshotSha256": "349081b039a39c92cf61fa60b0992e6f1b4c625c1314c8fce9de2431594f3dac",
+      "fullNormalizedSnapshotSha256": "96e3fd4901b84900666a1f08c239984b36c8b133ef6852d26418c42d48ebf2b7",
+      "input": {
+        "url": "https://5e.kiwee.top/data/class/class-wizard.json",
+        "sha256": "7533f3fb7bab70cd2d2f2b5dfb7e259dc66a2bfee24ee6ad3809042e53ba8a03"
+      }
+    }
+  ],
+  "held": [
+    {
+      "sourceIndex": 1844,
+      "name": "大法师法袍",
+      "english": "Robe of the Archmagi",
+      "source": "DMG",
+      "page": 194,
+      "reasonCode": "robe-colour-alignment-attunement-policy-unreviewed"
+    },
+    {
+      "sourceIndex": 2259,
+      "name": "纯善护符",
+      "english": "Talisman of Pure Good",
+      "source": "DMG",
+      "page": 207,
+      "reasonCode": "alignment-class-and-harmful-item-policy-unreviewed"
+    },
+    {
+      "sourceIndex": 2263,
+      "name": "至恶护符",
+      "english": "Talisman of Ultimate Evil",
+      "source": "DMG",
+      "page": 207,
+      "reasonCode": "alignment-class-and-harmful-item-policy-unreviewed"
+    },
+    {
+      "sourceIndex": 2260,
+      "name": "纯善护符",
+      "english": "Talisman of Pure Good",
+      "source": "XDMG",
+      "page": 314,
+      "reasonCode": "harmful-creature-type-policy-unreviewed-no-alignment-inferred"
+    },
+    {
+      "sourceIndex": 2264,
+      "name": "至恶护符",
+      "english": "Talisman of Ultimate Evil",
+      "source": "XDMG",
+      "page": 315,
+      "reasonCode": "harmful-creature-type-policy-unreviewed-no-caster-entitlement"
+    }
+  ]
+}

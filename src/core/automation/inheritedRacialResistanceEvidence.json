@@ -1,0 +1,3030 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact-reviewed-inherited-fixed-racial-resistance-type-union",
+  "inputs": [
+    {
+      "url": "https://5e.kiwee.top/data/races.json",
+      "sha256": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "bytes": 451902
+    }
+  ],
+  "preserveR1": {
+    "evidenceBytes": 117054,
+    "evidenceSha256": "368a9dfba6d8f07040bca391162d7a185643dfd6d8b49e0966f05d1142c09f80",
+    "rules": 38,
+    "typedAssociations": 44,
+    "rulesSortedUtf8Sha256": "ce68b9fbd6a1932eeec348ce02b43d6d6dba155639c712986455c79a01aa5ca8"
+  },
+  "sourceCandidateCounts": {
+    "owners": 26,
+    "typedAssociations": 32,
+    "parentGroups": 5
+  },
+  "sourceProseIncluded": false,
+  "wholeEntryCompletionCredit": 0,
+  "newReportWitnessCredit": 0,
+  "counts": {
+    "actualOwners": 26,
+    "typedAssociations": 32,
+    "verifiedRouteProofs": 52,
+    "distinctNormalizedSnapshotForms": 26,
+    "heldOwners": 11,
+    "parentGroups": 5
+  },
+  "normalization": {
+    "canonical": "complete-original-races-body-through-installed-normalizeCatalogData",
+    "app": "independent-complete-original-races-body-normalize-then-real-hydrateSpellLookup",
+    "transportRevision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+    "noPayloadRepair": true
+  },
+  "policy": {
+    "operation": "derived-fixed-damage-type-union-only",
+    "inheritance": "exact-own-resist-absence-and-qualified-surviving-clause",
+    "runtimeSources": "actual-child-source-and-actual-dependencies-only",
+    "separatelyOwnedParentRequired": false,
+    "parentCanonicalDisableIsTransitive": false,
+    "manualMechanisms": [
+      "numeric-damage",
+      "hp",
+      "saving-throw-advantage",
+      "immunity",
+      "temporary-all-damage-resistance",
+      "ancestry-choice",
+      "conditional-resistance"
+    ]
+  },
+  "rules": [
+    {
+      "key": "subrace/1",
+      "id": "kiwee:race:vgm:aasimar%20(fallen)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+      "kind": "race",
+      "name": "阿斯莫（堕落）",
+      "english": "Aasimar (Fallen)",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 105,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "92a751d0eee89faabc63aaa6ec11f9d3c4248c473e6bba9dbf86ecfe979134d1",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:aasimar%20(fallen)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "92a751d0eee89faabc63aaa6ec11f9d3c4248c473e6bba9dbf86ecfe979134d1",
+          "completeSnapshotSha256": "92a751d0eee89faabc63aaa6ec11f9d3c4248c473e6bba9dbf86ecfe979134d1",
+          "canonicalReboundSnapshotSha256": "92a751d0eee89faabc63aaa6ec11f9d3c4248c473e6bba9dbf86ecfe979134d1"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:aasimar%20(fallen)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "92a751d0eee89faabc63aaa6ec11f9d3c4248c473e6bba9dbf86ecfe979134d1",
+          "completeSnapshotSha256": "92a751d0eee89faabc63aaa6ec11f9d3c4248c473e6bba9dbf86ecfe979134d1",
+          "canonicalReboundSnapshotSha256": "92a751d0eee89faabc63aaa6ec11f9d3c4248c473e6bba9dbf86ecfe979134d1"
+        }
+      ],
+      "resistances": [
+        "necrotic",
+        "radiant"
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sourceProof": {
+        "path": "subrace/1",
+        "rawSha256": "31a1e0cff56ec7dde3597faea0fde8a980369adf57a2ac814ad276ff0d3042e6",
+        "rawHeader": {
+          "name": "堕落",
+          "ENG_name": "Fallen",
+          "source": "VGM",
+          "page": 105,
+          "raceName": "阿斯莫",
+          "raceSource": "VGM"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/5/entries/3/entries/0",
+          "utf8Bytes": 42,
+          "sha256": "47c4598056500e44746cc76746b05e25ea7df10f00d5449fe7cd5aedb1caab8e",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/5",
+          "rawSha256": "e3a57bc345e934cca5555719944e027f920852b6110136a92bc545a6b7be344d",
+          "header": {
+            "name": "阿斯莫",
+            "ENG_name": "Aasimar",
+            "source": "VGM",
+            "page": 104
+          },
+          "fixedSourceTagsSha256": "83b79b61006acf69fa9118eb05f353d555d35a75965717d481f39b3bb3d7e240",
+          "normalizedId": "kiwee:race:vgm:aasimar::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:vgm:aasimar::::::",
+            "kind": "race",
+            "name": "阿斯莫",
+            "english": "Aasimar",
+            "source": "VGM",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 104,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:vgm:aasimar::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:vgm:aasimar::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/2",
+      "id": "kiwee:race:vgm:aasimar%20(protector)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+      "kind": "race",
+      "name": "阿斯莫（守护）",
+      "english": "Aasimar (Protector)",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 105,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "5fc2646d992fe7e6edeb4915bc7f9d2c29adb6157afc9bab6917869af9613811",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:aasimar%20(protector)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5fc2646d992fe7e6edeb4915bc7f9d2c29adb6157afc9bab6917869af9613811",
+          "completeSnapshotSha256": "5fc2646d992fe7e6edeb4915bc7f9d2c29adb6157afc9bab6917869af9613811",
+          "canonicalReboundSnapshotSha256": "5fc2646d992fe7e6edeb4915bc7f9d2c29adb6157afc9bab6917869af9613811"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:aasimar%20(protector)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5fc2646d992fe7e6edeb4915bc7f9d2c29adb6157afc9bab6917869af9613811",
+          "completeSnapshotSha256": "5fc2646d992fe7e6edeb4915bc7f9d2c29adb6157afc9bab6917869af9613811",
+          "canonicalReboundSnapshotSha256": "5fc2646d992fe7e6edeb4915bc7f9d2c29adb6157afc9bab6917869af9613811"
+        }
+      ],
+      "resistances": [
+        "necrotic",
+        "radiant"
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sourceProof": {
+        "path": "subrace/2",
+        "rawSha256": "093dbfa4e6eda0e36bf5ea5d57825542d769944fa211dc687f83739305ef5cd7",
+        "rawHeader": {
+          "name": "守护",
+          "ENG_name": "Protector",
+          "source": "VGM",
+          "page": 105,
+          "raceName": "阿斯莫",
+          "raceSource": "VGM"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/5/entries/3/entries/0",
+          "utf8Bytes": 42,
+          "sha256": "47c4598056500e44746cc76746b05e25ea7df10f00d5449fe7cd5aedb1caab8e",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/5",
+          "rawSha256": "e3a57bc345e934cca5555719944e027f920852b6110136a92bc545a6b7be344d",
+          "header": {
+            "name": "阿斯莫",
+            "ENG_name": "Aasimar",
+            "source": "VGM",
+            "page": 104
+          },
+          "fixedSourceTagsSha256": "83b79b61006acf69fa9118eb05f353d555d35a75965717d481f39b3bb3d7e240",
+          "normalizedId": "kiwee:race:vgm:aasimar::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:vgm:aasimar::::::",
+            "kind": "race",
+            "name": "阿斯莫",
+            "english": "Aasimar",
+            "source": "VGM",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 104,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:vgm:aasimar::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:vgm:aasimar::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/3",
+      "id": "kiwee:race:vgm:aasimar%20(scourge)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+      "kind": "race",
+      "name": "阿斯莫（天罚）",
+      "english": "Aasimar (Scourge)",
+      "source": "VGM",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 105,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b7434f2f8be2ddb6ac134382bd61081ca46cfc77e65307b572414248ad9a2be8",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:vgm:aasimar%20(scourge)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b7434f2f8be2ddb6ac134382bd61081ca46cfc77e65307b572414248ad9a2be8",
+          "completeSnapshotSha256": "b7434f2f8be2ddb6ac134382bd61081ca46cfc77e65307b572414248ad9a2be8",
+          "canonicalReboundSnapshotSha256": "b7434f2f8be2ddb6ac134382bd61081ca46cfc77e65307b572414248ad9a2be8"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:vgm:aasimar%20(scourge)::::::%E9%98%BF%E6%96%AF%E8%8E%AB",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b7434f2f8be2ddb6ac134382bd61081ca46cfc77e65307b572414248ad9a2be8",
+          "completeSnapshotSha256": "b7434f2f8be2ddb6ac134382bd61081ca46cfc77e65307b572414248ad9a2be8",
+          "canonicalReboundSnapshotSha256": "b7434f2f8be2ddb6ac134382bd61081ca46cfc77e65307b572414248ad9a2be8"
+        }
+      ],
+      "resistances": [
+        "necrotic",
+        "radiant"
+      ],
+      "requiredSources": [
+        "VGM"
+      ],
+      "sourceProof": {
+        "path": "subrace/3",
+        "rawSha256": "98fb45e6d20a44804514a9b84f7d05207b55894f1f80fcd38f64f8ec6e0cc544",
+        "rawHeader": {
+          "name": "天罚",
+          "ENG_name": "Scourge",
+          "source": "VGM",
+          "page": 105,
+          "raceName": "阿斯莫",
+          "raceSource": "VGM"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/5/entries/3/entries/0",
+          "utf8Bytes": 42,
+          "sha256": "47c4598056500e44746cc76746b05e25ea7df10f00d5449fe7cd5aedb1caab8e",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/5",
+          "rawSha256": "e3a57bc345e934cca5555719944e027f920852b6110136a92bc545a6b7be344d",
+          "header": {
+            "name": "阿斯莫",
+            "ENG_name": "Aasimar",
+            "source": "VGM",
+            "page": 104
+          },
+          "fixedSourceTagsSha256": "83b79b61006acf69fa9118eb05f353d555d35a75965717d481f39b3bb3d7e240",
+          "normalizedId": "kiwee:race:vgm:aasimar::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:vgm:aasimar::::::",
+            "kind": "race",
+            "name": "阿斯莫",
+            "english": "Aasimar",
+            "source": "VGM",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 104,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:vgm:aasimar::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:vgm:aasimar::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b5ba274b07f4b7f1c2f538170bbb9103071006042092b4a0e632a32cf4ec747f"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/9",
+      "id": "kiwee:race:mtf:dwarf%20(duergar)::::::%E7%9F%AE%E4%BA%BA",
+      "kind": "race",
+      "name": "矮人（灰矮人）",
+      "english": "Dwarf (Duergar)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 81,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "9ffdf223d610d0e872adfc84fb6de70cc91f93255b231781f85bb2f974a73b43",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:dwarf%20(duergar)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9ffdf223d610d0e872adfc84fb6de70cc91f93255b231781f85bb2f974a73b43",
+          "completeSnapshotSha256": "9ffdf223d610d0e872adfc84fb6de70cc91f93255b231781f85bb2f974a73b43",
+          "canonicalReboundSnapshotSha256": "9ffdf223d610d0e872adfc84fb6de70cc91f93255b231781f85bb2f974a73b43"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:dwarf%20(duergar)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9ffdf223d610d0e872adfc84fb6de70cc91f93255b231781f85bb2f974a73b43",
+          "completeSnapshotSha256": "9ffdf223d610d0e872adfc84fb6de70cc91f93255b231781f85bb2f974a73b43",
+          "canonicalReboundSnapshotSha256": "9ffdf223d610d0e872adfc84fb6de70cc91f93255b231781f85bb2f974a73b43"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/9",
+        "rawSha256": "d9796a53120ec41687ff0cf73de6f2173367f1fb0f7a073819170378d271aec9",
+        "rawHeader": {
+          "name": "灰矮人",
+          "ENG_name": "Duergar",
+          "source": "MTF",
+          "page": 81,
+          "raceName": "矮人",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "child-replacement-still-unconditional",
+          "path": "subrace/9/entries/1/entries/0",
+          "utf8Bytes": 206,
+          "sha256": "d8cbc7fb20c5b33fc9de07d1e9946bb7d623ca8eb87106dfa3078b07433dd508",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "parent": {
+          "path": "race/33",
+          "rawSha256": "6e51d570accc43fb4d42da125c6268a80c1676b7af17f80b52ec0c16d2f5d5c0",
+          "header": {
+            "name": "矮人",
+            "ENG_name": "Dwarf",
+            "source": "PHB",
+            "page": 18
+          },
+          "fixedSourceTagsSha256": "82aaf540212cd040621e6dd22db2a1ccd2dd1b2d02b2405979b342f3e47375a4",
+          "normalizedId": "kiwee:race:phb:dwarf::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:dwarf::::::",
+            "kind": "race",
+            "name": "矮人",
+            "english": "Dwarf",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 18,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/10",
+      "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+      "kind": "race",
+      "name": "矮人（丘陵）",
+      "english": "Dwarf (Hill)",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 20,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "completeSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "canonicalReboundSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dwarf%20(hill)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "completeSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696",
+          "canonicalReboundSnapshotSha256": "a257615660c99798feaf3fca9a812884262e9f92d24a8c56d843a3deb32e2696"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "PHB"
+      ],
+      "sourceProof": {
+        "path": "subrace/10",
+        "rawSha256": "0acbc519d9dc3ddb823c3b9429470da70db59a05aae4c749da7cc27bfcb2b0a3",
+        "rawHeader": {
+          "name": "丘陵",
+          "ENG_name": "Hill",
+          "source": "PHB",
+          "page": 20,
+          "raceName": "矮人",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/33/entries/4/entries/0",
+          "utf8Bytes": 87,
+          "sha256": "aee47d00c384413d7e2e7eb43b6ecf96f4fff71f3f3417763f1fc31b771210a9",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "parent": {
+          "path": "race/33",
+          "rawSha256": "6e51d570accc43fb4d42da125c6268a80c1676b7af17f80b52ec0c16d2f5d5c0",
+          "header": {
+            "name": "矮人",
+            "ENG_name": "Dwarf",
+            "source": "PHB",
+            "page": 18
+          },
+          "fixedSourceTagsSha256": "82aaf540212cd040621e6dd22db2a1ccd2dd1b2d02b2405979b342f3e47375a4",
+          "normalizedId": "kiwee:race:phb:dwarf::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:dwarf::::::",
+            "kind": "race",
+            "name": "矮人",
+            "english": "Dwarf",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 18,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/11",
+      "id": "kiwee:race:erlw:dwarf%20(mark%20of%20warding)::::::%E7%9F%AE%E4%BA%BA",
+      "kind": "race",
+      "name": "矮人（警戒龙纹）",
+      "english": "Dwarf (Mark of Warding)",
+      "source": "ERLW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 51,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "d626cfee385f268dfd82357dd13ba9832e0e4605877da5c65dc4ad3343d42de2",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:erlw:dwarf%20(mark%20of%20warding)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d626cfee385f268dfd82357dd13ba9832e0e4605877da5c65dc4ad3343d42de2",
+          "completeSnapshotSha256": "d626cfee385f268dfd82357dd13ba9832e0e4605877da5c65dc4ad3343d42de2",
+          "canonicalReboundSnapshotSha256": "d626cfee385f268dfd82357dd13ba9832e0e4605877da5c65dc4ad3343d42de2"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:erlw:dwarf%20(mark%20of%20warding)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "d626cfee385f268dfd82357dd13ba9832e0e4605877da5c65dc4ad3343d42de2",
+          "completeSnapshotSha256": "d626cfee385f268dfd82357dd13ba9832e0e4605877da5c65dc4ad3343d42de2",
+          "canonicalReboundSnapshotSha256": "d626cfee385f268dfd82357dd13ba9832e0e4605877da5c65dc4ad3343d42de2"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "ERLW"
+      ],
+      "sourceProof": {
+        "path": "subrace/11",
+        "rawSha256": "7b27a27ada014a2fe9ea11d23aef057903713a43b88bbe0be6a20a3ca44884ff",
+        "rawHeader": {
+          "name": "警戒龙纹",
+          "ENG_name": "Mark of Warding",
+          "source": "ERLW",
+          "page": 51,
+          "raceName": "矮人",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/33/entries/4/entries/0",
+          "utf8Bytes": 87,
+          "sha256": "aee47d00c384413d7e2e7eb43b6ecf96f4fff71f3f3417763f1fc31b771210a9",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "parent": {
+          "path": "race/33",
+          "rawSha256": "6e51d570accc43fb4d42da125c6268a80c1676b7af17f80b52ec0c16d2f5d5c0",
+          "header": {
+            "name": "矮人",
+            "ENG_name": "Dwarf",
+            "source": "PHB",
+            "page": 18
+          },
+          "fixedSourceTagsSha256": "82aaf540212cd040621e6dd22db2a1ccd2dd1b2d02b2405979b342f3e47375a4",
+          "normalizedId": "kiwee:race:phb:dwarf::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:dwarf::::::",
+            "kind": "race",
+            "name": "矮人",
+            "english": "Dwarf",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 18,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/12",
+      "id": "kiwee:race:phb:dwarf%20(mountain)::::::%E7%9F%AE%E4%BA%BA",
+      "kind": "race",
+      "name": "矮人（山地）",
+      "english": "Dwarf (Mountain)",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 20,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "c9c9f111a5ecc61fec09770f86b5de7f47db549a0ab0ce13974a1ad159579ef0",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dwarf%20(mountain)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "c9c9f111a5ecc61fec09770f86b5de7f47db549a0ab0ce13974a1ad159579ef0",
+          "completeSnapshotSha256": "c9c9f111a5ecc61fec09770f86b5de7f47db549a0ab0ce13974a1ad159579ef0",
+          "canonicalReboundSnapshotSha256": "c9c9f111a5ecc61fec09770f86b5de7f47db549a0ab0ce13974a1ad159579ef0"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dwarf%20(mountain)::::::%E7%9F%AE%E4%BA%BA",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "c9c9f111a5ecc61fec09770f86b5de7f47db549a0ab0ce13974a1ad159579ef0",
+          "completeSnapshotSha256": "c9c9f111a5ecc61fec09770f86b5de7f47db549a0ab0ce13974a1ad159579ef0",
+          "canonicalReboundSnapshotSha256": "c9c9f111a5ecc61fec09770f86b5de7f47db549a0ab0ce13974a1ad159579ef0"
+        }
+      ],
+      "resistances": [
+        "poison"
+      ],
+      "requiredSources": [
+        "PHB"
+      ],
+      "sourceProof": {
+        "path": "subrace/12",
+        "rawSha256": "ba1f05ec39202f22f29506fc9bba3314b4e13fc92f5cbd8b6924c49eaf114774",
+        "rawHeader": {
+          "name": "山地",
+          "ENG_name": "Mountain",
+          "source": "PHB",
+          "page": 20,
+          "raceName": "矮人",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/33/entries/4/entries/0",
+          "utf8Bytes": 87,
+          "sha256": "aee47d00c384413d7e2e7eb43b6ecf96f4fff71f3f3417763f1fc31b771210a9",
+          "expectedCompleteEntryPath": "raw/entries/4/entries/0"
+        },
+        "parent": {
+          "path": "race/33",
+          "rawSha256": "6e51d570accc43fb4d42da125c6268a80c1676b7af17f80b52ec0c16d2f5d5c0",
+          "header": {
+            "name": "矮人",
+            "ENG_name": "Dwarf",
+            "source": "PHB",
+            "page": 18
+          },
+          "fixedSourceTagsSha256": "82aaf540212cd040621e6dd22db2a1ccd2dd1b2d02b2405979b342f3e47375a4",
+          "normalizedId": "kiwee:race:phb:dwarf::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:dwarf::::::",
+            "kind": "race",
+            "name": "矮人",
+            "english": "Dwarf",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 18,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:dwarf::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "71168d0da2de63f75982298d8f86f3a037fad7b08105679a3d7d34719f9b287e"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/43",
+      "id": "kiwee:race:psz:goblin%20(zendikar%3B%20grotag%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+      "kind": "race",
+      "name": "地精（赞迪卡; 葛塔部落）",
+      "english": "Goblin (Zendikar; Grotag Tribe)",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "aedda80e9c900088231cb0c10f44dafd01c5a00f5e0627bde527cb7c79d994bf",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psz:goblin%20(zendikar%3B%20grotag%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "aedda80e9c900088231cb0c10f44dafd01c5a00f5e0627bde527cb7c79d994bf",
+          "completeSnapshotSha256": "aedda80e9c900088231cb0c10f44dafd01c5a00f5e0627bde527cb7c79d994bf",
+          "canonicalReboundSnapshotSha256": "aedda80e9c900088231cb0c10f44dafd01c5a00f5e0627bde527cb7c79d994bf"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psz:goblin%20(zendikar%3B%20grotag%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "aedda80e9c900088231cb0c10f44dafd01c5a00f5e0627bde527cb7c79d994bf",
+          "completeSnapshotSha256": "aedda80e9c900088231cb0c10f44dafd01c5a00f5e0627bde527cb7c79d994bf",
+          "canonicalReboundSnapshotSha256": "aedda80e9c900088231cb0c10f44dafd01c5a00f5e0627bde527cb7c79d994bf"
+        }
+      ],
+      "resistances": [
+        "fire",
+        "psychic"
+      ],
+      "requiredSources": [
+        "PSZ"
+      ],
+      "sourceProof": {
+        "path": "subrace/43",
+        "rawSha256": "2b4e75ab822b33d9028c547d0822b6ac0427fb6879028c03619cb42c33ca00c2",
+        "rawHeader": {
+          "name": "赞迪卡; 葛塔部落",
+          "ENG_name": "Zendikar; Grotag Tribe",
+          "source": "PSZ",
+          "page": 17,
+          "raceName": "地精",
+          "raceSource": "PSZ"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/62/entries/5/entries/0",
+          "utf8Bytes": 137,
+          "sha256": "1ee23b5d69950ae2e39bb268b8324a399090fda750f18b843e78fdd6124955ef",
+          "expectedCompleteEntryPath": "raw/entries/5/entries/0"
+        },
+        "parent": {
+          "path": "race/62",
+          "rawSha256": "fb7e22cbce55a844f0be02948a76fdd16db02e507aca36152ccb45463fe23c5e",
+          "header": {
+            "name": "地精",
+            "ENG_name": "Goblin",
+            "source": "PSZ",
+            "page": 16
+          },
+          "fixedSourceTagsSha256": "b65316847d1949beb49a6dd323df85740b8eb818bc5ad9d199f971af16ab999f",
+          "normalizedId": "kiwee:race:psz:goblin::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:psz:goblin::::::",
+            "kind": "race",
+            "name": "地精",
+            "english": "Goblin",
+            "source": "PSZ",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 16,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:psz:goblin::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:psz:goblin::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/44",
+      "id": "kiwee:race:psz:goblin%20(zendikar%3B%20lavastep%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+      "kind": "race",
+      "name": "地精（赞迪卡; 熔足部落）",
+      "english": "Goblin (Zendikar; Lavastep Tribe)",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "c9eb609cec5025e66bc63dad02050e418f65edc68130b91cd1520951ed41c671",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psz:goblin%20(zendikar%3B%20lavastep%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "c9eb609cec5025e66bc63dad02050e418f65edc68130b91cd1520951ed41c671",
+          "completeSnapshotSha256": "c9eb609cec5025e66bc63dad02050e418f65edc68130b91cd1520951ed41c671",
+          "canonicalReboundSnapshotSha256": "c9eb609cec5025e66bc63dad02050e418f65edc68130b91cd1520951ed41c671"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psz:goblin%20(zendikar%3B%20lavastep%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "c9eb609cec5025e66bc63dad02050e418f65edc68130b91cd1520951ed41c671",
+          "completeSnapshotSha256": "c9eb609cec5025e66bc63dad02050e418f65edc68130b91cd1520951ed41c671",
+          "canonicalReboundSnapshotSha256": "c9eb609cec5025e66bc63dad02050e418f65edc68130b91cd1520951ed41c671"
+        }
+      ],
+      "resistances": [
+        "fire",
+        "psychic"
+      ],
+      "requiredSources": [
+        "PSZ"
+      ],
+      "sourceProof": {
+        "path": "subrace/44",
+        "rawSha256": "9e0dc5196ca12567a38bf3df976e1c5ab1109602e2b8c9aa97901e0647f03831",
+        "rawHeader": {
+          "name": "赞迪卡; 熔足部落",
+          "ENG_name": "Zendikar; Lavastep Tribe",
+          "source": "PSZ",
+          "page": 17,
+          "raceName": "地精",
+          "raceSource": "PSZ"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/62/entries/5/entries/0",
+          "utf8Bytes": 137,
+          "sha256": "1ee23b5d69950ae2e39bb268b8324a399090fda750f18b843e78fdd6124955ef",
+          "expectedCompleteEntryPath": "raw/entries/5/entries/0"
+        },
+        "parent": {
+          "path": "race/62",
+          "rawSha256": "fb7e22cbce55a844f0be02948a76fdd16db02e507aca36152ccb45463fe23c5e",
+          "header": {
+            "name": "地精",
+            "ENG_name": "Goblin",
+            "source": "PSZ",
+            "page": 16
+          },
+          "fixedSourceTagsSha256": "b65316847d1949beb49a6dd323df85740b8eb818bc5ad9d199f971af16ab999f",
+          "normalizedId": "kiwee:race:psz:goblin::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:psz:goblin::::::",
+            "kind": "race",
+            "name": "地精",
+            "english": "Goblin",
+            "source": "PSZ",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 16,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:psz:goblin::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:psz:goblin::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/45",
+      "id": "kiwee:race:psz:goblin%20(zendikar%3B%20tuktuk%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+      "kind": "race",
+      "name": "地精（赞迪卡; 图图部落）",
+      "english": "Goblin (Zendikar; Tuktuk Tribe)",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 17,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "43669f0ad96a9cd51b33944d3b6b6b32d6bcd2bea7bc0a4599f1e9447b74ae4c",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psz:goblin%20(zendikar%3B%20tuktuk%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "43669f0ad96a9cd51b33944d3b6b6b32d6bcd2bea7bc0a4599f1e9447b74ae4c",
+          "completeSnapshotSha256": "43669f0ad96a9cd51b33944d3b6b6b32d6bcd2bea7bc0a4599f1e9447b74ae4c",
+          "canonicalReboundSnapshotSha256": "43669f0ad96a9cd51b33944d3b6b6b32d6bcd2bea7bc0a4599f1e9447b74ae4c"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psz:goblin%20(zendikar%3B%20tuktuk%20tribe)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "43669f0ad96a9cd51b33944d3b6b6b32d6bcd2bea7bc0a4599f1e9447b74ae4c",
+          "completeSnapshotSha256": "43669f0ad96a9cd51b33944d3b6b6b32d6bcd2bea7bc0a4599f1e9447b74ae4c",
+          "canonicalReboundSnapshotSha256": "43669f0ad96a9cd51b33944d3b6b6b32d6bcd2bea7bc0a4599f1e9447b74ae4c"
+        }
+      ],
+      "resistances": [
+        "fire",
+        "psychic"
+      ],
+      "requiredSources": [
+        "PSZ"
+      ],
+      "sourceProof": {
+        "path": "subrace/45",
+        "rawSha256": "fa7caa9d21bde10aebbd5fce57f52c9eada6a96f29784dc1951a36cc69def8f5",
+        "rawHeader": {
+          "name": "赞迪卡; 图图部落",
+          "ENG_name": "Zendikar; Tuktuk Tribe",
+          "source": "PSZ",
+          "page": 17,
+          "raceName": "地精",
+          "raceSource": "PSZ"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/62/entries/5/entries/0",
+          "utf8Bytes": 137,
+          "sha256": "1ee23b5d69950ae2e39bb268b8324a399090fda750f18b843e78fdd6124955ef",
+          "expectedCompleteEntryPath": "raw/entries/5/entries/0"
+        },
+        "parent": {
+          "path": "race/62",
+          "rawSha256": "fb7e22cbce55a844f0be02948a76fdd16db02e507aca36152ccb45463fe23c5e",
+          "header": {
+            "name": "地精",
+            "ENG_name": "Goblin",
+            "source": "PSZ",
+            "page": 16
+          },
+          "fixedSourceTagsSha256": "b65316847d1949beb49a6dd323df85740b8eb818bc5ad9d199f971af16ab999f",
+          "normalizedId": "kiwee:race:psz:goblin::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:psz:goblin::::::",
+            "kind": "race",
+            "name": "地精",
+            "english": "Goblin",
+            "source": "PSZ",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 16,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:psz:goblin::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:psz:goblin::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b28015c699381fd00a9a5b9879593b8f5e8b7c79c3db694c855d7bc771c638eb"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/82",
+      "id": "kiwee:race:phb:tiefling::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林",
+      "english": "Tiefling",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 42,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "858fd55058bda3ace225cea9e5e711fed324495b4a301a0f5f1e2ba018fc0bcf",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:tiefling::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "858fd55058bda3ace225cea9e5e711fed324495b4a301a0f5f1e2ba018fc0bcf",
+          "completeSnapshotSha256": "858fd55058bda3ace225cea9e5e711fed324495b4a301a0f5f1e2ba018fc0bcf",
+          "canonicalReboundSnapshotSha256": "858fd55058bda3ace225cea9e5e711fed324495b4a301a0f5f1e2ba018fc0bcf"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:tiefling::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "858fd55058bda3ace225cea9e5e711fed324495b4a301a0f5f1e2ba018fc0bcf",
+          "completeSnapshotSha256": "858fd55058bda3ace225cea9e5e711fed324495b4a301a0f5f1e2ba018fc0bcf",
+          "canonicalReboundSnapshotSha256": "858fd55058bda3ace225cea9e5e711fed324495b4a301a0f5f1e2ba018fc0bcf"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "PHB"
+      ],
+      "sourceProof": {
+        "path": "subrace/82",
+        "rawSha256": "f5f8a53ce11651931986b6e80d9092a7d560e573567c3efb4470231d0b940b7b",
+        "rawHeader": {
+          "source": "PHB",
+          "page": 42,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-with-no-suffix",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/83",
+      "id": "kiwee:race:mtf:tiefling%20(asmodeus)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（阿斯蒙蒂斯）",
+      "english": "Tiefling (Asmodeus)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 21,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "254d0b5d1e473c355504de5c06255df45f48bb2aeb91ab0a37801616c53cb67f",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(asmodeus)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "254d0b5d1e473c355504de5c06255df45f48bb2aeb91ab0a37801616c53cb67f",
+          "completeSnapshotSha256": "254d0b5d1e473c355504de5c06255df45f48bb2aeb91ab0a37801616c53cb67f",
+          "canonicalReboundSnapshotSha256": "254d0b5d1e473c355504de5c06255df45f48bb2aeb91ab0a37801616c53cb67f"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(asmodeus)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "254d0b5d1e473c355504de5c06255df45f48bb2aeb91ab0a37801616c53cb67f",
+          "completeSnapshotSha256": "254d0b5d1e473c355504de5c06255df45f48bb2aeb91ab0a37801616c53cb67f",
+          "canonicalReboundSnapshotSha256": "254d0b5d1e473c355504de5c06255df45f48bb2aeb91ab0a37801616c53cb67f"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/83",
+        "rawSha256": "10e7635467e8fa6db10a73e6bb34ffd542192f1686e33fe91df62289b0a06e22",
+        "rawHeader": {
+          "name": "阿斯蒙蒂斯",
+          "ENG_name": "Asmodeus",
+          "source": "MTF",
+          "page": 21,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/84",
+      "id": "kiwee:race:mtf:tiefling%20(baalzebul)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（巴尔泽布）",
+      "english": "Tiefling (Baalzebul)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 21,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a2629a8df4c78e47c7167b5f0e4c1e0c9bc3b56b75c13902903bacd12d232835",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(baalzebul)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a2629a8df4c78e47c7167b5f0e4c1e0c9bc3b56b75c13902903bacd12d232835",
+          "completeSnapshotSha256": "a2629a8df4c78e47c7167b5f0e4c1e0c9bc3b56b75c13902903bacd12d232835",
+          "canonicalReboundSnapshotSha256": "a2629a8df4c78e47c7167b5f0e4c1e0c9bc3b56b75c13902903bacd12d232835"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(baalzebul)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a2629a8df4c78e47c7167b5f0e4c1e0c9bc3b56b75c13902903bacd12d232835",
+          "completeSnapshotSha256": "a2629a8df4c78e47c7167b5f0e4c1e0c9bc3b56b75c13902903bacd12d232835",
+          "canonicalReboundSnapshotSha256": "a2629a8df4c78e47c7167b5f0e4c1e0c9bc3b56b75c13902903bacd12d232835"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/84",
+        "rawSha256": "82f99ac114eb013c5861f53d806e890e4909305316b9291364df1a5c0b74de9b",
+        "rawHeader": {
+          "name": "巴尔泽布",
+          "ENG_name": "Baalzebul",
+          "source": "MTF",
+          "page": 21,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/85",
+      "id": "kiwee:race:mtf:tiefling%20(dispater)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（迪斯帕特）",
+      "english": "Tiefling (Dispater)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 21,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "91593711d7e9cc31c6108ffed1e04c1a299df4facf3cef53d481957c7213d3be",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(dispater)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "91593711d7e9cc31c6108ffed1e04c1a299df4facf3cef53d481957c7213d3be",
+          "completeSnapshotSha256": "91593711d7e9cc31c6108ffed1e04c1a299df4facf3cef53d481957c7213d3be",
+          "canonicalReboundSnapshotSha256": "91593711d7e9cc31c6108ffed1e04c1a299df4facf3cef53d481957c7213d3be"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(dispater)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "91593711d7e9cc31c6108ffed1e04c1a299df4facf3cef53d481957c7213d3be",
+          "completeSnapshotSha256": "91593711d7e9cc31c6108ffed1e04c1a299df4facf3cef53d481957c7213d3be",
+          "canonicalReboundSnapshotSha256": "91593711d7e9cc31c6108ffed1e04c1a299df4facf3cef53d481957c7213d3be"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/85",
+        "rawSha256": "89eb9ac16767d759216bd86dff742a8ea8bd474a461b46a2d8c8de4223115b1e",
+        "rawHeader": {
+          "name": "迪斯帕特",
+          "ENG_name": "Dispater",
+          "source": "MTF",
+          "page": 21,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/86",
+      "id": "kiwee:race:mtf:tiefling%20(fierna)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（菲尔娜）",
+      "english": "Tiefling (Fierna)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 21,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "7e87202d8937b1837f9a6245916d261d7dcbeef436b1d6cefc780f35d916213d",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(fierna)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "7e87202d8937b1837f9a6245916d261d7dcbeef436b1d6cefc780f35d916213d",
+          "completeSnapshotSha256": "7e87202d8937b1837f9a6245916d261d7dcbeef436b1d6cefc780f35d916213d",
+          "canonicalReboundSnapshotSha256": "7e87202d8937b1837f9a6245916d261d7dcbeef436b1d6cefc780f35d916213d"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(fierna)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "7e87202d8937b1837f9a6245916d261d7dcbeef436b1d6cefc780f35d916213d",
+          "completeSnapshotSha256": "7e87202d8937b1837f9a6245916d261d7dcbeef436b1d6cefc780f35d916213d",
+          "canonicalReboundSnapshotSha256": "7e87202d8937b1837f9a6245916d261d7dcbeef436b1d6cefc780f35d916213d"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/86",
+        "rawSha256": "fd1b4746996bd1d89bdc0f5a7a94c75b3ebdd1fb9cd7602a33b6adf038e27196",
+        "rawHeader": {
+          "name": "菲尔娜",
+          "ENG_name": "Fierna",
+          "source": "MTF",
+          "page": 21,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/87",
+      "id": "kiwee:race:mtf:tiefling%20(glasya)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（格莱西亚）",
+      "english": "Tiefling (Glasya)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 22,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "8302455d94aebca89b7fe1a255bb276b59ed9bc2a48b75ed9146956fc7aabbc5",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(glasya)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "8302455d94aebca89b7fe1a255bb276b59ed9bc2a48b75ed9146956fc7aabbc5",
+          "completeSnapshotSha256": "8302455d94aebca89b7fe1a255bb276b59ed9bc2a48b75ed9146956fc7aabbc5",
+          "canonicalReboundSnapshotSha256": "8302455d94aebca89b7fe1a255bb276b59ed9bc2a48b75ed9146956fc7aabbc5"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(glasya)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "8302455d94aebca89b7fe1a255bb276b59ed9bc2a48b75ed9146956fc7aabbc5",
+          "completeSnapshotSha256": "8302455d94aebca89b7fe1a255bb276b59ed9bc2a48b75ed9146956fc7aabbc5",
+          "canonicalReboundSnapshotSha256": "8302455d94aebca89b7fe1a255bb276b59ed9bc2a48b75ed9146956fc7aabbc5"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/87",
+        "rawSha256": "fe32038754caf1f8e1eb51d02417e03f74a6dd7c6d45e211faf39dc3a1ff90a7",
+        "rawHeader": {
+          "name": "格莱西亚",
+          "ENG_name": "Glasya",
+          "source": "MTF",
+          "page": 22,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/88",
+      "id": "kiwee:race:mtf:tiefling%20(levistus)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（莱维斯图斯）",
+      "english": "Tiefling (Levistus)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 22,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "600e9516e7aeeaac547fbb504b72d8d1ff63ede4d1a41ff530f78bc1debdc998",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(levistus)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "600e9516e7aeeaac547fbb504b72d8d1ff63ede4d1a41ff530f78bc1debdc998",
+          "completeSnapshotSha256": "600e9516e7aeeaac547fbb504b72d8d1ff63ede4d1a41ff530f78bc1debdc998",
+          "canonicalReboundSnapshotSha256": "600e9516e7aeeaac547fbb504b72d8d1ff63ede4d1a41ff530f78bc1debdc998"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(levistus)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "600e9516e7aeeaac547fbb504b72d8d1ff63ede4d1a41ff530f78bc1debdc998",
+          "completeSnapshotSha256": "600e9516e7aeeaac547fbb504b72d8d1ff63ede4d1a41ff530f78bc1debdc998",
+          "canonicalReboundSnapshotSha256": "600e9516e7aeeaac547fbb504b72d8d1ff63ede4d1a41ff530f78bc1debdc998"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/88",
+        "rawSha256": "0204ac736363373020d9edb5afdc5c1576ad956ba58837178da2da526c7fa023",
+        "rawHeader": {
+          "name": "莱维斯图斯",
+          "ENG_name": "Levistus",
+          "source": "MTF",
+          "page": 22,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/89",
+      "id": "kiwee:race:mtf:tiefling%20(mammon)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（玛门）",
+      "english": "Tiefling (Mammon)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 22,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "e3df3f5cd8ffb63f4efb306e853219a97e48b06e3a05135e5bf2e93e09070632",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(mammon)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "e3df3f5cd8ffb63f4efb306e853219a97e48b06e3a05135e5bf2e93e09070632",
+          "completeSnapshotSha256": "e3df3f5cd8ffb63f4efb306e853219a97e48b06e3a05135e5bf2e93e09070632",
+          "canonicalReboundSnapshotSha256": "e3df3f5cd8ffb63f4efb306e853219a97e48b06e3a05135e5bf2e93e09070632"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(mammon)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "e3df3f5cd8ffb63f4efb306e853219a97e48b06e3a05135e5bf2e93e09070632",
+          "completeSnapshotSha256": "e3df3f5cd8ffb63f4efb306e853219a97e48b06e3a05135e5bf2e93e09070632",
+          "canonicalReboundSnapshotSha256": "e3df3f5cd8ffb63f4efb306e853219a97e48b06e3a05135e5bf2e93e09070632"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/89",
+        "rawSha256": "33d9d61648e4b1793a3fe6acade6cee5318925ba3a2185798ac5afaba82c2197",
+        "rawHeader": {
+          "name": "玛门",
+          "ENG_name": "Mammon",
+          "source": "MTF",
+          "page": 22,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/90",
+      "id": "kiwee:race:mtf:tiefling%20(mephistopheles)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（墨菲斯托费利斯）",
+      "english": "Tiefling (Mephistopheles)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 23,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "b6b060ef1a54ee4dc6b1db5319447c26d293dcd2a2588934ff2b48b130a91429",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(mephistopheles)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b6b060ef1a54ee4dc6b1db5319447c26d293dcd2a2588934ff2b48b130a91429",
+          "completeSnapshotSha256": "b6b060ef1a54ee4dc6b1db5319447c26d293dcd2a2588934ff2b48b130a91429",
+          "canonicalReboundSnapshotSha256": "b6b060ef1a54ee4dc6b1db5319447c26d293dcd2a2588934ff2b48b130a91429"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(mephistopheles)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "b6b060ef1a54ee4dc6b1db5319447c26d293dcd2a2588934ff2b48b130a91429",
+          "completeSnapshotSha256": "b6b060ef1a54ee4dc6b1db5319447c26d293dcd2a2588934ff2b48b130a91429",
+          "canonicalReboundSnapshotSha256": "b6b060ef1a54ee4dc6b1db5319447c26d293dcd2a2588934ff2b48b130a91429"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/90",
+        "rawSha256": "da009a9455d40cfa6441dd8c56b7b70c2001005f9c53a73f02b13c426bf4857c",
+        "rawHeader": {
+          "name": "墨菲斯托费利斯",
+          "ENG_name": "Mephistopheles",
+          "source": "MTF",
+          "page": 23,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/91",
+      "id": "kiwee:race:scag:tiefling%20(variant%3B%20devil's%20tongue)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（变体; 魔鬼之舌）",
+      "english": "Tiefling (Variant; Devil's Tongue)",
+      "source": "SCAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 118,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "cb2dd89d50a66d4b5c2102ad01cd08f9e770b01689500909627e11c5dddeb0ca",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20devil's%20tongue)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cb2dd89d50a66d4b5c2102ad01cd08f9e770b01689500909627e11c5dddeb0ca",
+          "completeSnapshotSha256": "cb2dd89d50a66d4b5c2102ad01cd08f9e770b01689500909627e11c5dddeb0ca",
+          "canonicalReboundSnapshotSha256": "cb2dd89d50a66d4b5c2102ad01cd08f9e770b01689500909627e11c5dddeb0ca"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20devil's%20tongue)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "cb2dd89d50a66d4b5c2102ad01cd08f9e770b01689500909627e11c5dddeb0ca",
+          "completeSnapshotSha256": "cb2dd89d50a66d4b5c2102ad01cd08f9e770b01689500909627e11c5dddeb0ca",
+          "canonicalReboundSnapshotSha256": "cb2dd89d50a66d4b5c2102ad01cd08f9e770b01689500909627e11c5dddeb0ca"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "SCAG"
+      ],
+      "sourceProof": {
+        "path": "subrace/91",
+        "rawSha256": "a3bd4aaba419dda6bd821f3798f17054c34c8b21bab49d61f5c347abd55132a5",
+        "rawHeader": {
+          "name": "变体; 魔鬼之舌",
+          "ENG_name": "Variant; Devil's Tongue",
+          "source": "SCAG",
+          "page": 118,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/92",
+      "id": "kiwee:race:scag:tiefling%20(variant%3B%20hellfire)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（变体; 地狱火）",
+      "english": "Tiefling (Variant; Hellfire)",
+      "source": "SCAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 118,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "803a085ffc51a68bd6922c273651d02ce125d31dbe0a323e48bd0a7783d52746",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20hellfire)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "803a085ffc51a68bd6922c273651d02ce125d31dbe0a323e48bd0a7783d52746",
+          "completeSnapshotSha256": "803a085ffc51a68bd6922c273651d02ce125d31dbe0a323e48bd0a7783d52746",
+          "canonicalReboundSnapshotSha256": "803a085ffc51a68bd6922c273651d02ce125d31dbe0a323e48bd0a7783d52746"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20hellfire)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "803a085ffc51a68bd6922c273651d02ce125d31dbe0a323e48bd0a7783d52746",
+          "completeSnapshotSha256": "803a085ffc51a68bd6922c273651d02ce125d31dbe0a323e48bd0a7783d52746",
+          "canonicalReboundSnapshotSha256": "803a085ffc51a68bd6922c273651d02ce125d31dbe0a323e48bd0a7783d52746"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "SCAG"
+      ],
+      "sourceProof": {
+        "path": "subrace/92",
+        "rawSha256": "77d341629996e01dbc05c4693d6fdc54e2f9b5f036841300fdb08a658cfa5100",
+        "rawHeader": {
+          "name": "变体; 地狱火",
+          "ENG_name": "Variant; Hellfire",
+          "source": "SCAG",
+          "page": 118,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/93",
+      "id": "kiwee:race:scag:tiefling%20(variant%3B%20infernal%20legacy)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（变体; 地狱遗赠）",
+      "english": "Tiefling (Variant; Infernal Legacy)",
+      "source": "SCAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 118,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1f72cf139850fcc5cccd1786360e5da5969af394713c15c095fe456630fdf53d",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20infernal%20legacy)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1f72cf139850fcc5cccd1786360e5da5969af394713c15c095fe456630fdf53d",
+          "completeSnapshotSha256": "1f72cf139850fcc5cccd1786360e5da5969af394713c15c095fe456630fdf53d",
+          "canonicalReboundSnapshotSha256": "1f72cf139850fcc5cccd1786360e5da5969af394713c15c095fe456630fdf53d"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20infernal%20legacy)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1f72cf139850fcc5cccd1786360e5da5969af394713c15c095fe456630fdf53d",
+          "completeSnapshotSha256": "1f72cf139850fcc5cccd1786360e5da5969af394713c15c095fe456630fdf53d",
+          "canonicalReboundSnapshotSha256": "1f72cf139850fcc5cccd1786360e5da5969af394713c15c095fe456630fdf53d"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "SCAG"
+      ],
+      "sourceProof": {
+        "path": "subrace/93",
+        "rawSha256": "df7386ad8c6c447b094c9efe6b53a4b6d5a988689acd1c7037fbebc7eebba0fd",
+        "rawHeader": {
+          "name": "变体; 地狱遗赠",
+          "ENG_name": "Variant; Infernal Legacy",
+          "source": "SCAG",
+          "page": 118,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/94",
+      "id": "kiwee:race:scag:tiefling%20(variant%3B%20winged)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（变体; 飞翼）",
+      "english": "Tiefling (Variant; Winged)",
+      "source": "SCAG",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 118,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "0945a39634fac9166bb64340756fa267a887fa32f27ff236bc93e2d70aeebc39",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20winged)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "0945a39634fac9166bb64340756fa267a887fa32f27ff236bc93e2d70aeebc39",
+          "completeSnapshotSha256": "0945a39634fac9166bb64340756fa267a887fa32f27ff236bc93e2d70aeebc39",
+          "canonicalReboundSnapshotSha256": "0945a39634fac9166bb64340756fa267a887fa32f27ff236bc93e2d70aeebc39"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:scag:tiefling%20(variant%3B%20winged)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "0945a39634fac9166bb64340756fa267a887fa32f27ff236bc93e2d70aeebc39",
+          "completeSnapshotSha256": "0945a39634fac9166bb64340756fa267a887fa32f27ff236bc93e2d70aeebc39",
+          "canonicalReboundSnapshotSha256": "0945a39634fac9166bb64340756fa267a887fa32f27ff236bc93e2d70aeebc39"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "SCAG"
+      ],
+      "sourceProof": {
+        "path": "subrace/94",
+        "rawSha256": "78a177ee372819e8364e93c31339fd7ce1dc43ab5a7dc995f0f8fe06ba022018",
+        "rawHeader": {
+          "name": "变体; 飞翼",
+          "ENG_name": "Variant; Winged",
+          "source": "SCAG",
+          "page": 118,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/95",
+      "id": "kiwee:race:mtf:tiefling%20(zariel)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+      "kind": "race",
+      "name": "提夫林（扎瑞尔）",
+      "english": "Tiefling (Zariel)",
+      "source": "MTF",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 23,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "fb7b3fad81327ce3e0305a4a8eb0da45d9dbed2ea57440ce120f58168249b74d",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:mtf:tiefling%20(zariel)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "fb7b3fad81327ce3e0305a4a8eb0da45d9dbed2ea57440ce120f58168249b74d",
+          "completeSnapshotSha256": "fb7b3fad81327ce3e0305a4a8eb0da45d9dbed2ea57440ce120f58168249b74d",
+          "canonicalReboundSnapshotSha256": "fb7b3fad81327ce3e0305a4a8eb0da45d9dbed2ea57440ce120f58168249b74d"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:mtf:tiefling%20(zariel)::::::%E6%8F%90%E5%A4%AB%E6%9E%97",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "fb7b3fad81327ce3e0305a4a8eb0da45d9dbed2ea57440ce120f58168249b74d",
+          "completeSnapshotSha256": "fb7b3fad81327ce3e0305a4a8eb0da45d9dbed2ea57440ce120f58168249b74d",
+          "canonicalReboundSnapshotSha256": "fb7b3fad81327ce3e0305a4a8eb0da45d9dbed2ea57440ce120f58168249b74d"
+        }
+      ],
+      "resistances": [
+        "fire"
+      ],
+      "requiredSources": [
+        "MTF"
+      ],
+      "sourceProof": {
+        "path": "subrace/95",
+        "rawSha256": "4867422ffe4101b223de1df0a85388b4e6379e11516fe16b5d7079df06753aa0",
+        "rawHeader": {
+          "name": "扎瑞尔",
+          "ENG_name": "Zariel",
+          "source": "MTF",
+          "page": 23,
+          "raceName": "提夫林",
+          "raceSource": "PHB"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/143/entries/3/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "0c88388c1805c6d6bdee080d6728f2f45b1e89153cbb0d7dabc42f9645c314fc",
+          "expectedCompleteEntryPath": "raw/entries/3/entries/0"
+        },
+        "parent": {
+          "path": "race/143",
+          "rawSha256": "e9d347c21b6ceee4254a739d7c57792e4270630072b88f4d66cf926bb7a40a3f",
+          "header": {
+            "name": "提夫林",
+            "ENG_name": "Tiefling",
+            "source": "PHB",
+            "page": 42
+          },
+          "fixedSourceTagsSha256": "df82630b26f4e002184333d9f0492fa026af4f4c62902b947e7a147f43e01883",
+          "normalizedId": "kiwee:race:phb:tiefling::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:phb:tiefling::::::",
+            "kind": "race",
+            "name": "提夫林",
+            "english": "Tiefling",
+            "source": "PHB",
+            "edition": "2014",
+            "packId": "kiwee",
+            "page": 42,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:phb:tiefling::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "cbdbbe2cd946914c2b11d807ec4faa63a244f458e2fc0e6cff008e62f6c9e938"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/96",
+      "id": "kiwee:race:psx:vampire%20(ixalan)::::::%E5%90%B8%E8%A1%80%E9%AC%BC",
+      "kind": "race",
+      "name": "吸血鬼（依夏兰）",
+      "english": "Vampire (Ixalan)",
+      "source": "PSX",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 14,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "baafb11ed240b117347276d1229181bbde6eaaafcb0b83b4977ed50227fa4e4b",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psx:vampire%20(ixalan)::::::%E5%90%B8%E8%A1%80%E9%AC%BC",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "baafb11ed240b117347276d1229181bbde6eaaafcb0b83b4977ed50227fa4e4b",
+          "completeSnapshotSha256": "baafb11ed240b117347276d1229181bbde6eaaafcb0b83b4977ed50227fa4e4b",
+          "canonicalReboundSnapshotSha256": "baafb11ed240b117347276d1229181bbde6eaaafcb0b83b4977ed50227fa4e4b"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psx:vampire%20(ixalan)::::::%E5%90%B8%E8%A1%80%E9%AC%BC",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "baafb11ed240b117347276d1229181bbde6eaaafcb0b83b4977ed50227fa4e4b",
+          "completeSnapshotSha256": "baafb11ed240b117347276d1229181bbde6eaaafcb0b83b4977ed50227fa4e4b",
+          "canonicalReboundSnapshotSha256": "baafb11ed240b117347276d1229181bbde6eaaafcb0b83b4977ed50227fa4e4b"
+        }
+      ],
+      "resistances": [
+        "necrotic"
+      ],
+      "requiredSources": [
+        "PSX"
+      ],
+      "sourceProof": {
+        "path": "subrace/96",
+        "rawSha256": "bec7aea8025abf4ba92882048018bd14c712acd96ef92aa99b5f08d39fe48fd9",
+        "rawHeader": {
+          "name": "依夏兰",
+          "ENG_name": "Ixalan",
+          "source": "PSX",
+          "page": 14,
+          "raceName": "吸血鬼",
+          "raceSource": "PSZ"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/151/entries/6/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d73bbf01d8ebc67523c50bbcada7d93d59d71fcd6a377e4a40a3d61edd9b15c8",
+          "expectedCompleteEntryPath": "raw/entries/6/entries/0"
+        },
+        "parent": {
+          "path": "race/151",
+          "rawSha256": "64ede6a49962763969d026585747ed180bd9016b328c0fd3668b7f5fd110b636",
+          "header": {
+            "name": "吸血鬼",
+            "ENG_name": "Vampire",
+            "source": "PSZ",
+            "page": 14
+          },
+          "fixedSourceTagsSha256": "74fbb1d272407c7baa7515263211a21c6f85d21c1da67f78386b12ba2ec6320d",
+          "normalizedId": "kiwee:race:psz:vampire::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:psz:vampire::::::",
+            "kind": "race",
+            "name": "吸血鬼",
+            "english": "Vampire",
+            "source": "PSZ",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 14,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:psz:vampire::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:psz:vampire::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    },
+    {
+      "key": "subrace/97",
+      "id": "kiwee:race:psz:vampire%20(zendikar)::::::%E5%90%B8%E8%A1%80%E9%AC%BC",
+      "kind": "race",
+      "name": "吸血鬼（赞迪卡）",
+      "english": "Vampire (Zendikar)",
+      "source": "PSZ",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 14,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "4f95be747db4d6c49310a76de4134598731eb9e5383ec4d8f99318a2e14d0ae1",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psz:vampire%20(zendikar)::::::%E5%90%B8%E8%A1%80%E9%AC%BC",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "4f95be747db4d6c49310a76de4134598731eb9e5383ec4d8f99318a2e14d0ae1",
+          "completeSnapshotSha256": "4f95be747db4d6c49310a76de4134598731eb9e5383ec4d8f99318a2e14d0ae1",
+          "canonicalReboundSnapshotSha256": "4f95be747db4d6c49310a76de4134598731eb9e5383ec4d8f99318a2e14d0ae1"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psz:vampire%20(zendikar)::::::%E5%90%B8%E8%A1%80%E9%AC%BC",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "4f95be747db4d6c49310a76de4134598731eb9e5383ec4d8f99318a2e14d0ae1",
+          "completeSnapshotSha256": "4f95be747db4d6c49310a76de4134598731eb9e5383ec4d8f99318a2e14d0ae1",
+          "canonicalReboundSnapshotSha256": "4f95be747db4d6c49310a76de4134598731eb9e5383ec4d8f99318a2e14d0ae1"
+        }
+      ],
+      "resistances": [
+        "necrotic"
+      ],
+      "requiredSources": [
+        "PSZ"
+      ],
+      "sourceProof": {
+        "path": "subrace/97",
+        "rawSha256": "2fc8504825b316ee0dd702270a49cc3da3cd2a2ecad80a02181c6e291b19e345",
+        "rawHeader": {
+          "name": "赞迪卡",
+          "ENG_name": "Zendikar",
+          "source": "PSZ",
+          "page": 14,
+          "raceName": "吸血鬼",
+          "raceSource": "PSZ"
+        },
+        "childResistOwnProperty": false,
+        "namePolicy": "parent-name-plus-exact-child-name",
+        "clause": {
+          "origin": "parent-clause-preserved",
+          "path": "race/151/entries/6/entries/0",
+          "utf8Bytes": 33,
+          "sha256": "d73bbf01d8ebc67523c50bbcada7d93d59d71fcd6a377e4a40a3d61edd9b15c8",
+          "expectedCompleteEntryPath": "raw/entries/6/entries/0"
+        },
+        "parent": {
+          "path": "race/151",
+          "rawSha256": "64ede6a49962763969d026585747ed180bd9016b328c0fd3668b7f5fd110b636",
+          "header": {
+            "name": "吸血鬼",
+            "ENG_name": "Vampire",
+            "source": "PSZ",
+            "page": 14
+          },
+          "fixedSourceTagsSha256": "74fbb1d272407c7baa7515263211a21c6f85d21c1da67f78386b12ba2ec6320d",
+          "normalizedId": "kiwee:race:psz:vampire::::::",
+          "normalizedHeader": {
+            "id": "kiwee:race:psz:vampire::::::",
+            "kind": "race",
+            "name": "吸血鬼",
+            "english": "Vampire",
+            "source": "PSZ",
+            "edition": "both",
+            "packId": "kiwee",
+            "page": 14,
+            "category": "race"
+          },
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "fullNormalizedSnapshotSha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5",
+          "forms": [
+            {
+              "form": "canonical",
+              "id": "kiwee:race:psz:vampire::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5"
+            },
+            {
+              "form": "app",
+              "id": "kiwee:race:psz:vampire::::::",
+              "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+              "sha256": "b9954112156228c6ecef1d5de100aa8dc139de05c4afa5210fd7ed635688d9f5"
+            }
+          ]
+        }
+      },
+      "wholeEntryCompletionCredit": 0
+    }
+  ],
+  "held": [
+    {
+      "key": "race/27",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "rawSha256": "4495fc7c6fea0dbef2a3822a8011cdfcc6fbdeb9189bd29ff10d65bd7658b6cd",
+      "id": "kiwee:race:phb:dragonborn::::::",
+      "kind": "race",
+      "name": "龙裔",
+      "english": "Dragonborn",
+      "source": "PHB",
+      "edition": "2014",
+      "packId": "kiwee",
+      "page": 32,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:phb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "completeSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "canonicalReboundSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:phb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "completeSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b",
+          "canonicalReboundSnapshotSha256": "9d840c1deb369130070046cd75388e170fec68133a9112c9cfb4b3150b5d4c1b"
+        }
+      ]
+    },
+    {
+      "key": "race/28",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "rawSha256": "dcd92857702bc606c87be2d95e610e8dd25a13a5f05d4128d6afe1640defa2a5",
+      "id": "kiwee:race:xphb:dragonborn::::::",
+      "kind": "race",
+      "name": "龙裔",
+      "english": "Dragonborn",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 187,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "completeSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "canonicalReboundSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:dragonborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "completeSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4",
+          "canonicalReboundSnapshotSha256": "a840db40f58d1faea8789698b8722bd0ceafa3a9483bbd005071969b778004a4"
+        }
+      ]
+    },
+    {
+      "key": "race/29",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "rawSha256": "eef403fa14578bca2c37a6e8bd5f70705bb188c6846c06b66aaeec810f82a744",
+      "id": "kiwee:race:ftd:dragonborn%20(chromatic)::::::",
+      "kind": "race",
+      "name": "龙裔 (色彩)",
+      "english": "Dragonborn (Chromatic)",
+      "source": "FTD",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 10,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ftd:dragonborn%20(chromatic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "completeSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "canonicalReboundSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ftd:dragonborn%20(chromatic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "completeSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212",
+          "canonicalReboundSnapshotSha256": "140890389924525741609e67da7088c371371e921fe66d98cd584a66e197f212"
+        }
+      ]
+    },
+    {
+      "key": "race/30",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "rawSha256": "0881086f31350ef2cbb1f5b198d86fde72cce9d4ef15a7963f5337676ec43a3a",
+      "id": "kiwee:race:ftd:dragonborn%20(gem)::::::",
+      "kind": "race",
+      "name": "龙裔 (宝石)",
+      "english": "Dragonborn (Gem)",
+      "source": "FTD",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 11,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ftd:dragonborn%20(gem)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "completeSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "canonicalReboundSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ftd:dragonborn%20(gem)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "completeSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59",
+          "canonicalReboundSnapshotSha256": "a9d0fd4eecc52e3424c2abe37a06cc895527a17f0f1d6959bfb2c0a628c4bf59"
+        }
+      ]
+    },
+    {
+      "key": "race/31",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "rawSha256": "856a2b6390824d8bb4921252a058ae66ee20faf3248cbc3da4416afd23d0d707",
+      "id": "kiwee:race:ftd:dragonborn%20(metallic)::::::",
+      "kind": "race",
+      "name": "龙裔 (金属)",
+      "english": "Dragonborn (Metallic)",
+      "source": "FTD",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 12,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:ftd:dragonborn%20(metallic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "completeSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "canonicalReboundSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:ftd:dragonborn%20(metallic)::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "completeSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6",
+          "canonicalReboundSnapshotSha256": "5bbc63e61b40711726dbbb232981812ab87bcdc60f588bdb0b158bb9ea9f45c6"
+        }
+      ]
+    },
+    {
+      "key": "race/127",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "rawSha256": "038cf0d771a726c029213dda2b56663d4ef03c193c19d20819b7a6c8f8004cae",
+      "id": "kiwee:race:rhw:reborn::::::",
+      "kind": "race",
+      "name": "重生者",
+      "english": "Reborn",
+      "source": "RHW",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 31,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:rhw:reborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "completeSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "canonicalReboundSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:rhw:reborn::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "completeSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334",
+          "canonicalReboundSnapshotSha256": "434580d131ba9dd8d95662945deef95c323525f5b9ce30f0900c764a5e1bc334"
+        }
+      ]
+    },
+    {
+      "key": "race/144",
+      "reasonCode": "ancestry-or-damage-type-choice-not-executed",
+      "rawSha256": "847157775f0365c3a1deec98491c0c7da5526305fb4e7d5fd8737e1dc5dc028f",
+      "id": "kiwee:race:xphb:tiefling::::::",
+      "kind": "race",
+      "name": "提夫林",
+      "english": "Tiefling",
+      "source": "XPHB",
+      "edition": "2024",
+      "packId": "kiwee",
+      "page": 197,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:xphb:tiefling::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "completeSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "canonicalReboundSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:xphb:tiefling::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "completeSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6",
+          "canonicalReboundSnapshotSha256": "1037b6b32b3bb6a91f3af93e8d892fc1fba3c0e5e5a6183ec86a811483e4dbc6"
+        }
+      ]
+    },
+    {
+      "key": "subrace/7",
+      "reasonCode": "explicit-null-resist-override-no-parent-fallback",
+      "rawSha256": "4aae3822d6463af64efb49ebd76bc37d2b3d8e4ebb8e1ef8407c85105cf071b8",
+      "id": "kiwee:race:egw:dragonborn%20(draconblood)::::::%E9%BE%99%E8%A3%94",
+      "kind": "race",
+      "name": "龙裔（龙血裔）",
+      "english": "Dragonborn (Draconblood)",
+      "source": "EGW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 168,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:egw:dragonborn%20(draconblood)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "completeSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "canonicalReboundSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:egw:dragonborn%20(draconblood)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "completeSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508",
+          "canonicalReboundSnapshotSha256": "30dd741b16769e9c2569d0dc5683bc08f0fdc3620568e2d0a18aa81abb63b508"
+        }
+      ]
+    },
+    {
+      "key": "subrace/8",
+      "reasonCode": "explicit-null-resist-override-no-parent-fallback",
+      "rawSha256": "946f8129c12fcaebff909e08c71a563678884b87b2c2ebf66107f27a175dd8e1",
+      "id": "kiwee:race:egw:dragonborn%20(ravenite)::::::%E9%BE%99%E8%A3%94",
+      "kind": "race",
+      "name": "龙裔（峡谷裔）",
+      "english": "Dragonborn (Ravenite)",
+      "source": "EGW",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 168,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:egw:dragonborn%20(ravenite)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "completeSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "canonicalReboundSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:egw:dragonborn%20(ravenite)::::::%E9%BE%99%E8%A3%94",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "completeSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1",
+          "canonicalReboundSnapshotSha256": "23f25c6461d78ce214e6954edfe525c3ef9ece0ac1fb759538750f4150fbdcd1"
+        }
+      ]
+    },
+    {
+      "key": "subrace/42",
+      "reasonCode": "explicit-null-resist-override-no-parent-fallback",
+      "rawSha256": "9a3366a5b0ff75d4d2d9f5b081a7bbc4509389fa3eae328eaea5a4fbc6642720",
+      "id": "kiwee:race:psx:goblin%20(ixalan)::::::%E5%9C%B0%E7%B2%BE",
+      "kind": "race",
+      "name": "地精（依夏兰）",
+      "english": "Goblin (Ixalan)",
+      "source": "PSX",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": 16,
+      "category": "subrace",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:psx:goblin%20(ixalan)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "completeSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "canonicalReboundSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:psx:goblin%20(ixalan)::::::%E5%9C%B0%E7%B2%BE",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "completeSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139",
+          "canonicalReboundSnapshotSha256": "43c90b8ea2e846735337e4c2d9f2b3b7e6b029993fb8af3445acf5317876e139"
+        }
+      ]
+    },
+    {
+      "key": "race/47",
+      "reasonCode": "copied-source-outside-explicit-native-family",
+      "rawSha256": "7cac3f99f6d1e744bdb7f4e6df014158754a72e89ecf0ab33b88eaa26c464072",
+      "id": "kiwee:race:lfl:flamekin::::::",
+      "kind": "race",
+      "name": "炎身",
+      "english": "Flamekin",
+      "source": "LFL",
+      "edition": "both",
+      "packId": "kiwee",
+      "page": null,
+      "category": "race",
+      "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+      "fullNormalizedSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+      "forms": [
+        {
+          "form": "canonical",
+          "id": "kiwee:race:lfl:flamekin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "completeSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "canonicalReboundSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e"
+        },
+        {
+          "form": "app",
+          "id": "kiwee:race:lfl:flamekin::::::",
+          "revision": "a9289aaafcc24674d632b3daafc93eace5bf4496c66c9f5482a6baf304473712",
+          "sha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "completeSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e",
+          "canonicalReboundSnapshotSha256": "3faa675388c13b3255442e3ad3cd729a92d4fdc01e0d9907ac631ddaf4b1ea7e"
+        }
+      ]
+    }
+  ],
+  "normalizationHolds": [],
+  "unlocatedHeldOwners": [],
+  "excluded": {
+    "versions": {
+      "keys": [
+        "race/4/_versions/0",
+        "race/4/_versions/1",
+        "race/4/_versions/2",
+        "race/7/_versions/0"
+      ],
+      "count": 4,
+      "reasonCode": "expanded-version-remains-held"
+    },
+    "remainingInherited": {
+      "keys": [],
+      "count": 0
+    }
+  }
+}

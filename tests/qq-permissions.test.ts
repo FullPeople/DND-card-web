@@ -1,3 +1,4 @@
+import {loopbackFetch as fetch,registerLoopbackServer} from './helpers/loopbackHttp';
 import {afterEach,describe,expect,it} from 'vitest';
 import {createHash,randomInt} from 'node:crypto';
 import {request as httpRequest} from 'node:http';
@@ -11,6 +12,7 @@ async function setup(options:{accountPrivate?:boolean;temporaryUpload?:boolean}=
   for(let attempt=0;;attempt++)try{
     await new Promise<void>((resolve,reject)=>{const failed=(error:NodeJS.ErrnoException)=>{server.off('listening',ready);reject(error);};const ready=()=>{server.off('error',failed);resolve();};server.once('error',failed);server.once('listening',ready);server.listen(randomInt(49152,65536),'127.0.0.1');});break;
   }catch(error){if(attempt>=19||!['EADDRINUSE','EACCES'].includes((error as NodeJS.ErrnoException).code||''))throw error;}
+  registerLoopbackServer(server);
   cleanups.push(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));store.close();});
   const base='http://127.0.0.1:'+(server.address() as {port:number}).port;
   const headers=(s=issued)=>({Cookie:'dnd_cloud='+s.token,Origin:origin,'X-CSRF-Token':s.csrf,'Content-Type':'application/json'});

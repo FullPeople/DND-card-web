@@ -16,11 +16,11 @@ const restoreLabel='确认已长休，恢复本祈唤次数';
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{invocation:'class-dual-payment-invocation.json'}}));
- await page.route('**/data/class/class-dual-payment-invocation.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:data.optionalfeature}}));
- await page.route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-dual-payment-invocation.json'}}));
- await page.route('**/data/spells/spells-dual-payment-invocation.json',route=>route.fulfill({json:{spell:data.spell}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{invocation:'class-dual-payment-invocation.json'}}));
+ await page.context().route('**/data/class/class-dual-payment-invocation.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:data.optionalfeature}}));
+ await page.context().route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-dual-payment-invocation.json'}}));
+ await page.context().route('**/data/spells/spells-dual-payment-invocation.json',route=>route.fulfill({json:{spell:data.spell}}));
 }
 async function saved(page:Page):Promise<Character>{return page.evaluate(async()=>{
  const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;

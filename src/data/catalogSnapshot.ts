@@ -2,7 +2,7 @@ import type {Entry} from '../core/model';
 import type {SourceMeta} from '../core/sourceCatalog';
 import type {LoadProgress} from './catalog';
 
-export const CATALOG_SNAPSHOT_SCHEMA='wiki-normalized-296-v1';
+export const CATALOG_SNAPSHOT_SCHEMA='wiki-normalized-296-v2-spell-lookup';
 export type CatalogSnapshot={
  schema:string;scope:string;createdAt:number;entries:Entry[];
  sources:Record<string,SourceMeta>;progress:LoadProgress;

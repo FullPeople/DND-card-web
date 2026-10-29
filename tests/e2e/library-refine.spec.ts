@@ -3,13 +3,13 @@ import { mockSource, fillFromDetail } from './fixtures';
 
 test.beforeEach(async({page})=>{
  await mockSource(page);
- await page.route('**/data/optionalfeatures.json',r=>r.fulfill({json:{optionalfeature:[{name:'测试祈唤',ENG_name:'Test Invocation',source:'XPHB',featureType:['TEST'],entries:['祈唤正文。']}]}}));
- await page.route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'测试法师',ENG_name:'Test Mage',source:'XPHB',hd:{faces:6},proficiency:['int','wis'],classFeatures:['施法|测试法师|XPHB|1'],optionalfeatureProgression:[{name:'祈唤选项',featureType:['TEST']}],classTableGroups:[{colLabels:['使用次数','等级能力'],rows:Array.from({length:20},(_,i)=>[i<4?2:3,`能力${i+1}`])}]}],classFeature:[{name:'施法',source:'XPHB',className:'测试法师',classSource:'XPHB',level:1,entries:['可以查阅 {@spell 微光术|XPHB}。',...Array.from({length:30},(_,i)=>`长段落${i}。`)]}],subclass:[{name:'测试学派',source:'XPHB',className:'测试法师',classSource:'XPHB',entries:['子职正文']}]}}));
- await page.route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'微光术',ENG_name:'Test Glow',source:'XPHB',meta:{ritual:true},level:0,entries:['微光正文。']}]}}));
- await page.route('**/data/bestiary/index.json',r=>r.fulfill({json:{XMM:'bestiary-test.json'}}));
- await page.route('**/data/bestiary/bestiary-test.json',r=>r.fulfill({json:{monster:[{name:'测试魔像',source:'XMM',cr:'1/2',ac:[13],hp:{average:20,formula:'3d8+6'},speed:{walk:30},str:14,action:[{name:'重击',entries:['测试动作。']}],spellcasting:[{name:'魔法',headerEntries:['无需材料。'],will:['{@spell 微光术|XPHB}']}]}]}}));
- await page.route('**/data/items-base.json',r=>r.fulfill({json:{itemProperty:[{name:'轻型',abbreviation:'L',source:'XPHB',entries:['轻型词条。']}],itemMastery:[{name:'推离',source:'XPHB',entries:['推离词条。']}],baseitem:[{name:'测试刀',source:'XPHB',type:'M',entries:['装备正文。']}]}}));
- await page.route('**/data/languages.json',r=>r.fulfill({json:{language:[{name:'测试语',source:'XPHB',entries:['语言正文。']}]}}));
+ await page.context().route('**/data/optionalfeatures.json',r=>r.fulfill({json:{optionalfeature:[{name:'测试祈唤',ENG_name:'Test Invocation',source:'XPHB',featureType:['TEST'],entries:['祈唤正文。']}]}}));
+ await page.context().route('**/data/class/class-test.json',r=>r.fulfill({json:{class:[{name:'测试法师',ENG_name:'Test Mage',source:'XPHB',hd:{faces:6},proficiency:['int','wis'],classFeatures:['施法|测试法师|XPHB|1'],optionalfeatureProgression:[{name:'祈唤选项',featureType:['TEST']}],classTableGroups:[{colLabels:['使用次数','等级能力'],rows:Array.from({length:20},(_,i)=>[i<4?2:3,`能力${i+1}`])}]}],classFeature:[{name:'施法',source:'XPHB',className:'测试法师',classSource:'XPHB',level:1,entries:['可以查阅 {@spell 微光术|XPHB}。',...Array.from({length:30},(_,i)=>`长段落${i}。`)]}],subclass:[{name:'测试学派',source:'XPHB',className:'测试法师',classSource:'XPHB',entries:['子职正文']}]}}));
+ await page.context().route('**/data/spells/spells-test.json',r=>r.fulfill({json:{spell:[{name:'微光术',ENG_name:'Test Glow',source:'XPHB',meta:{ritual:true},level:0,entries:['微光正文。']}]}}));
+ await page.context().route('**/data/bestiary/index.json',r=>r.fulfill({json:{XMM:'bestiary-test.json'}}));
+ await page.context().route('**/data/bestiary/bestiary-test.json',r=>r.fulfill({json:{monster:[{name:'测试魔像',source:'XMM',cr:'1/2',ac:[13],hp:{average:20,formula:'3d8+6'},speed:{walk:30},str:14,action:[{name:'重击',entries:['测试动作。']}],spellcasting:[{name:'魔法',headerEntries:['无需材料。'],will:['{@spell 微光术|XPHB}']}]}]}}));
+ await page.context().route('**/data/items-base.json',r=>r.fulfill({json:{itemProperty:[{name:'轻型',abbreviation:'L',source:'XPHB',entries:['轻型词条。']}],itemMastery:[{name:'推离',source:'XPHB',entries:['推离词条。']}],baseitem:[{name:'测试刀',source:'XPHB',type:'M',entries:['装备正文。']}]}}));
+ await page.context().route('**/data/languages.json',r=>r.fulfill({json:{language:[{name:'测试语',source:'XPHB',entries:['语言正文。']}]}}));
  await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
 });
 

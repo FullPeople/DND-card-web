@@ -14,8 +14,8 @@ async function saved(page:Page):Promise<Character>{return page.evaluate(async()=
 async function ready(page:Page,edition:'2014'|'2024'){
  const {c,data}=armorFeatureFixture(edition,(data,revision)=>Object.entries(data).flatMap(([category,rows])=>rows.map((raw:any):Entry=>({id:`fixture:${category}:${raw.source}:${raw.ENG_name||raw.name}`,kind:['classFeature','optionalfeature'].includes(category)?'feature':category as Entry['kind'],name:raw.name,english:raw.ENG_name||raw.name,source:raw.source,edition,packId:'fixture',revision,entries:raw.entries||[],raw:{...raw,_category:category}}))));c.name=`护甲来源${edition}`;c.runtime.resources={spent:{current:0,max:2}};
  await mockSource(page);await suppressAnnouncement(page);
- await page.route('**/data/class/index.json',r=>r.fulfill({json:{fixture:'class-armor.json'},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/class/class-armor.json',r=>r.fulfill({json:data,headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/index.json',r=>r.fulfill({json:{fixture:'class-armor.json'},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/class-armor.json',r=>r.fulfill({json:data,headers:{'access-control-allow-origin':'*'}}));
  await page.goto('/',{waitUntil:'domcontentloaded'});await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'armor.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  if(edition==='2014'){
