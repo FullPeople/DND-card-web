@@ -86,6 +86,7 @@ on:
       - 'package*.json'
       - 'tsconfig*.json'
       - '.github/workflows/infusion-controls.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
