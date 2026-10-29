@@ -1,6 +1,6 @@
 import {mkdir,writeFile,link,unlink,lstat} from 'node:fs/promises';
 import {createHash,randomUUID} from 'node:crypto';
-import {resolve,dirname} from 'node:path';
+import {resolve,dirname,relative,isAbsolute,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 // One reviewed semantic side-source, NOT an extension of the229 runtime corpus.
@@ -29,7 +29,8 @@ async function noSymlink(path){
 }
 export async function validateDestinations(options){
  const output=resolve(options.output),receipt=resolve(options.receipt);
- if(output===receipt||output.startsWith(receipt+'/')||receipt.startsWith(output+'/'))fail('PATH_OVERLAP');
+ const contains=(parent,child)=>{const path=relative(parent,child);return !path||!isAbsolute(path)&&path!=='..'&&!path.startsWith('..'+sep);};
+ if(contains(output,receipt)||contains(receipt,output))fail('PATH_OVERLAP');
  for(const path of [output,receipt]){await noSymlink(path);try{await lstat(path);fail('OUTPUT_EXISTS');}catch(error){if(error.code!=='ENOENT')throw error;}}
  return {output,receipt};
 }

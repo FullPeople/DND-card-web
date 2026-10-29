@@ -1,4 +1,4 @@
-import {selectionAllowed,uid,type Character,type Entry,type Selection} from './model';
+import {selectionAllowed,uid,type Character,type Entry,type Selection,type SpellSettings} from './model';
 import {spellState} from './characterDetails';
 import {cantripCapacity,casterProfiles,spellOnCurrentClassList,spellUsesPreparation,type CasterProfile} from './spellcastingRules';
 import {sourceSpellEnabled} from './automation/sourceSpellState';
@@ -55,7 +55,7 @@ export function clearCantrip(c:Character,ownerId:string,index:number){
 }
 
 /** The overview and export use the exact same readiness as the spell page. */
-export function spellIsReady(c:Character,row:Selection):boolean{
+export function spellIsReady(c:Character,row:Selection,settings?:SpellSettings):boolean{
  if(row.entry.kind!=='spell'||!selectionAllowed(c,row.entry))return false;
  const special=c.spellSettings?.special?.[row.id];
  if(special){
@@ -66,7 +66,7 @@ export function spellIsReady(c:Character,row:Selection):boolean{
   const profiles=casterProfiles(c),scoped=profiles.some(profile=>{const access=optionalClassSpellListDecision(c,row.entry,profile.owner.id);return access.scoped&&!access.baseOverlap;});
   if(scoped&&!profiles.some(profile=>spellOnCurrentClassList(c,row.entry,profile)&&(Number(row.entry.raw.level)===0?c.spellSettings?.cantrips?.[profile.owner.id]?.includes(row.id):c.spellSettings?.classSpells?.[profile.owner.id]?.includes(row.id))))return false;
  }
- if(spellUsesPreparation(c,row.entry,row.id)){const state=spellState(c);return state.prepared.slice(0,state.capacity).includes(row.id);}
+ if(spellUsesPreparation(c,row.entry,row.id)){const state=settings??spellState(c);return state.prepared.slice(0,state.capacity).includes(row.id);}
  if(Number(row.entry.raw.level)===0&&cantripGroups(c).length)return cantripGroups(c).some(g=>g.slots.slice(0,g.capacity).includes(row.id));
  return knownActiveSpells(c).slice(0,knownSpellCapacity(c)).some(s=>s.id===row.id);
 }
@@ -84,8 +84,8 @@ export function chooseKnownSpell(c:Character,entry:Entry,ownerId?:string):{id?:s
  return learnActiveSpell(c,entry,ownerId);
 }
 
-export function ordinaryPrepared(c:Character):string[]{
- return spellState(c).prepared.map(id=>c.selections.some(s=>s.id===id&&s.entry.kind==='spell'&&spellUsesPreparation(c,s.entry,s.id))?id:'');
+export function ordinaryPrepared(c:Character,settings=spellState(c)):string[]{
+ return settings.prepared.map(id=>c.selections.some(s=>s.id===id&&s.entry.kind==='spell'&&spellUsesPreparation(c,s.entry,s.id))?id:'');
 }
 
 /** Reference allocation, like cantrip slots; opening old cards is still read-only. */

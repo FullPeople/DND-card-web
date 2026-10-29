@@ -68,7 +68,11 @@ test('first-visit libraries and used pages are retained for offline reopening',a
  await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
  await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
  await page.locator('[data-sheet-tab=法术]').click();await expect(page.locator('.header-法术')).toBeVisible();
- await expect.poll(()=>page.evaluate(async()=>{const names=await caches.keys(),cache=await caches.open(names.find(name=>name.startsWith('dnd-card-shell:'))!);const urls=(await cache.keys()).map(request=>request.url);return ['WikiUi','catalog','cardRuntime','SpellsPage'].every(tool=>urls.some(url=>new RegExp('/assets/'+tool+'-.*\\.js').test(url)));})).toBe(true);
+ // DetailHeader is a separate lazy entry used by the actual spell page. A
+ // pre-control request is backfilled asynchronously; wait for that used entry
+ // too before deliberately cutting off the network. Keep the reopened header
+ // assertion below so an incomplete cache cannot masquerade as offline support.
+ await expect.poll(()=>page.evaluate(async()=>{const names=await caches.keys(),cache=await caches.open(names.find(name=>name.startsWith('dnd-card-shell:'))!);const urls=(await cache.keys()).map(request=>request.url);return ['WikiUi','catalog','cardRuntime','SpellsPage','CharacterPages'].every(tool=>urls.some(url=>new RegExp('/assets/'+tool+'-.*\\.js').test(url)));})).toBe(true);
  await context.setOffline(true);await page.reload();await expect(page.locator('.paper')).toBeVisible();
  await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toBeEnabled();
  await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();

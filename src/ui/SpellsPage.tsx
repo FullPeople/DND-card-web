@@ -72,7 +72,7 @@ function OptionalClassChoiceWorkspace({c,ownerId,id,host,entries,edit,close,writ
 }
 
 export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:PageProps&{readOnly?:boolean}){
- const editing=useContext(SheetEditContext),preview=useSheetContext('reference',ReferenceContext),workspace=useChoiceWorkspace(),settings=spellState(c),capturing=useSheetCaptureActive(),active=useRetainedCardActive();
+ const editing=useContext(SheetEditContext),preview=useSheetContext('reference',ReferenceContext),workspace=useChoiceWorkspace(),settings=spellState(c,d),capturing=useSheetCaptureActive(),active=useRetainedCardActive();
  const spells=useMemo(()=>spellLibrary(c,entries),[c,entries]),groups=cantripGroups(c),profiles=casterProfiles(c);
  const optionalLists=optionalClassListOffers(c,entries,{canEdit:editing&&!readOnly});
  const optionalChoices=useMemo(()=>optionalLists.length?sheetChoices(c,entries).filter(choice=>choice.channel==='spells'&&optionalLists.some(offer=>offer.eligible&&offer.ownerId===choice.ownerId)):[],[c,entries,optionalLists.length]);
@@ -83,7 +83,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
  const [giftOwner,setGiftOwner]=useState('');const [collapsed,setCollapsed]=useState<Record<number,boolean>>({});const [preparedHeight,setPreparedHeight]=useState(0);const giftSources=cantripSources(c);
  const preparedRoot=useRef<HTMLDivElement>(null),libraryRoot=useRef<HTMLDivElement>(null);
  const change=(fn:(s:ReturnType<typeof spellState>)=>void)=>edit(draft=>{draft.spellSettings=structuredClone(settings);fn(draft.spellSettings);});
- const prepared=ordinaryPrepared(c),count=prepared.filter(Boolean).length;
+ const prepared=ordinaryPrepared(c,settings),count=prepared.filter(Boolean).length;
  const special=spells.filter(s=>settings.special?.[s.id]);
  const selectedClass=profiles.find(p=>p.owner.id===classFilter);
  const showLibrary=profiles.some(hasKnownLibrary)||!profiles.length||settings.modeOverride&&settings.mode==='prepared'||profiles.some(p=>p.mode==='prepared'&&p.pool==='learned');
@@ -130,7 +130,7 @@ export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:P
  function configure(row:Selection,config?:SpecialSpell){edit(draft=>{let stored=draft.selections.find(s=>s.id===row.id)||draft.selections.find(s=>s.entry.id===row.entry.id&&!draft.spellSettings?.special?.[s.id]);if(!stored){stored={...row,id:uid(),entry:structuredClone(row.entry)};draft.selections.push(stored);}setSpecialSpell(draft,stored.id,config);});setMenu(undefined);}
  function targetAt(hit:Element|null):Target|undefined{const node=hit?.closest<HTMLElement>('[data-spell-target]');if(!node||!preparedRoot.current?.contains(node))return;return {kind:node.dataset.spellTarget as Target['kind'],owner:node.dataset.spellOwner,index:node.dataset.spellIndex===undefined?undefined:Number(node.dataset.spellIndex)};}
  function tile(row:Selection,target?:Target){
-  const config=settings.special?.[row.id],level=Number(row.entry.raw.level)||0,ready=spellIsReady(c,row),enabled=selectionAllowed(c,row.entry)&&(!config||sourceSpellEnabled(c,row.id));
+  const config=settings.special?.[row.id],level=Number(row.entry.raw.level)||0,ready=spellIsReady(c,row,settings),enabled=selectionAllowed(c,row.entry)&&(!config||sourceSpellEnabled(c,row.id));
   return <Reference key={row.id} reference={`entry:${row.entry.id}`} entry={row.entry} commitOnClick={false}
    className={`stock-item spell-stock-tile ${target?'prepared-slot':'spell-choice'} ${!target&&!config&&ready?'is-prepared':''} ${row.entry.raw.meta?.ritual?'spell-ritual':''} ${row.entry.raw.duration?.some((v:any)=>v.concentration)?'spell-concentration':''}`}
    data-spell-id={row.id} data-entry-id={row.entry.id} data-drag-enabled={editing&&!config} data-entry-context-menu data-physical-frame="" data-restricted={!enabled} aria-label={row.entry.name} aria-pressed={!target&&!config?ready:undefined}

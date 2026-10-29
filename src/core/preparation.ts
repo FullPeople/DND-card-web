@@ -1,6 +1,6 @@
 import {evaluate} from './engine';
 import {casterProfiles,type CasterProfile} from './spellcastingRules';
-import {ABILITIES,type Character} from './model';
+import {ABILITIES,type Character,type Derived} from './model';
 
 /** Upstream arithmetic only. No eval, JavaScript property access or executable data. */
 export function preparationFormula(formula:string,variables:Record<string,number>):number|undefined{
@@ -13,9 +13,9 @@ export function preparationFormula(formula:string,variables:Record<string,number
  function sum():number{let n=product();while(['+','-'].includes(tokens[at])){const op=tokens[at++],v=product();n=op==='+'?n+v:n-v;}return n;}
  try{const n=sum();if(at===tokens.length&&Number.isFinite(n))return Math.max(1,Math.floor(n));}catch{}
 }
-export function preparationBase(c:Character):number|undefined{
+export function preparationBase(c:Character,derived?:Derived):number|undefined{
  const profiles=casterProfiles(c).filter(p=>p.mode==='prepared');if(!profiles.length)return;
- const d=evaluate(c);let total=0;
+ const d=derived??evaluate(c);let total=0;
  for(const p of profiles){const value=profilePreparation(c,p,d);if(value===undefined)return;total+=value;}
  return total;
 }
