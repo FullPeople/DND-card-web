@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {mockSource,suppressAnnouncement,waitForCatalog} from './fixtures';
 import {restoreAuthoredChoices} from './authoredChoicesFixture';
-import {waitForLinguistDraftReady} from './linguistReviewReadiness';
+import {waitForLinguistDraftReady} from './reviewedLinguistReviewReadiness';
 import {reviewedLinguistData as data,reviewedLinguistFixture,linguistValues,linguistRestrictedValues} from './reviewedLinguistFixture';
 import {exportCharacter} from '../../src/core/export';
 import type {Character} from '../../src/core/model';
