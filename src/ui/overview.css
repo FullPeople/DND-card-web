@@ -273,6 +273,8 @@
 .paper .overview-sheet :is(.ability-skill,.ability-save) input:is(.skill-extra-adjustment,.save-extra-adjustment){padding-inline:0}
 .paper .training-chips input{width:100%;min-width:0}
 
-/* Leave room for the full font glyph box in the fixed A4 initiative row. */
-.overview-vitals .initiative-cell .cell-heading{min-height:16px}
-.overview-vitals .initiative-cell [data-stat="initiative"]{line-height:26px}
+/* Leave room for the full numeric glyph box in the fixed A4 vital row.
+   The retained Observant cell owns its separate two-label composition. */
+.overview-vitals .sheet-cell:not(.observant-passive-cell) .cell-heading{min-height:16px}
+.overview-vitals .sheet-cell:not(.observant-passive-cell) [data-stat]{line-height:26px}
+.overview-vitals .sheet-cell:not(.observant-passive-cell) [data-stat] small{line-height:1}

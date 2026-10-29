@@ -5,6 +5,7 @@ on:
       - src/core/automation/featureResources.ts
       - tests/featureResourceRules.test.ts
       - .github/workflows/feature-resource-feedback.yml
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
