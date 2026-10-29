@@ -1,5 +1,10 @@
-import type { Page } from '@playwright/test';
+import {expect,type Page} from '@playwright/test';
 import { ANNOUNCEMENT_KEY, APP_VERSION, announcementVersionFor } from '../../src/platform/announcement';
+/** Wait for the requested sheet, including its actual mounted page identity. */
+export async function selectSheetPage(page:Page,name:'主要'|'特性'|'背景'|'法术'|'背包'){
+ const tab=page.getByRole('tab',{name,exact:true});await tab.click();await expect(tab).toHaveAttribute('aria-selected','true');
+ const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(name)}(?: |$)`));await expect(panel).toBeVisible();return panel;
+}
 // Authored fixtures: no copied publisher rules or personal character data.
 const core = (source: string) => ({ name: '测试法师', ENG_name: 'Test Mage', source, hd: { faces: 6 }, proficiency: ['int', 'wis'], startingProficiencies: { skills: [{ choose: { from: ['arcana', 'history', 'insight'], count: 2 } }] }, classFeatures: [`初始特性|测试法师|${source}|1`], cantripProgression: [1, 1, 1], classTableGroups: [{ rowsSpellProgression: [[2], [3], [4, 2]] }] });
 const classes = { class: [core('PHB'), core('XPHB')], subclass: ['PHB', 'XPHB'].map(source => ({ name: '测试学派', shortName: '测试学派', source, className: '测试法师', classSource: source, subclassFeatures: [], entries: ['自制测试子职。'] })), classFeature: ['PHB', 'XPHB'].map(source => ({ name: '初始特性', ENG_name: 'First Feature', source, className: '测试法师', classSource: source, level: 1, entries: ['这是一条为软件验收创作的测试规则。可以查阅 {@spell 微光术|XPHB}。', ...Array.from({ length: 28 }, (_, i) => `记录片段 ${i + 1}：供长正文、关键词提示与区域滚动验收使用。`)] })) };

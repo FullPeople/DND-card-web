@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Authored actual client createRoot/AutomationPanel/Overview/provider events.
-// NOT RUN locally: jsdom is absent. The real workbench receives its existing
+// Executed with jsdom. The real workbench receives its existing
 // host protocol; no workbench, authority, actor, engine or control is mocked.
 // Only these six unrelated Overview children are suppressed, as in native HP.
 import {act,createElement} from 'react';

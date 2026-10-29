@@ -5,9 +5,14 @@ export async function restoreAuthoredChoices(page:Page,database?:string,visibili
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
  // Stop the imported page before changing this fixture: late catalog hydration
  // can otherwise save its old presentation state over the authored setup.
+ // A production-preview service worker can serve the App shell for this blank
+ // navigation before Playwright's route sees it. Unregister only this isolated
+ // browser's registrations; retain every cache and saved document. The resumed
+ // real App registers its worker normally again.
+ await page.evaluate(async()=>{if('serviceWorker' in navigator)await Promise.all((await navigator.serviceWorker.getRegistrations()).filter(registration=>new URL(registration.scope).origin===location.origin).map(registration=>registration.unregister()));});
  const resume=page.url(),blank=new URL('/__authored-choice-fixture__',resume).href;
  await page.route(blank,route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Authored choice setup</title>'}));
- await page.goto(blank);await expect(page.locator('.paper')).toHaveCount(0);
+ await page.goto(blank);await expect(page).toHaveTitle('Authored choice setup');await expect(page.locator('.paper')).toHaveCount(0);
  await page.evaluate(async({database,visibility})=>{
   const name=database||(await indexedDB.databases()).find(row=>['dnd-card-standalone','dnd-card-workspace','dnd-card-automation-choices-20261001'].includes(row.name||''))?.name;
   if(!name)throw Error('Expected an existing saved authoring workspace');

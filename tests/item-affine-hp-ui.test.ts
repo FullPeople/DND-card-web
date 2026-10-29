@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Actual client createRoot coverage; no SSR of the client-only workbench hook.
-// Authored, NOT RUN locally: jsdom is absent. Only six unrelated Overview children are mocked.
+// Authored jsdom client checks. Only six unrelated Overview children are mocked.
 import {afterEach,beforeAll,beforeEach,expect,it,vi} from 'vitest';
 import {act,createElement,type ReactElement} from 'react';
 import {createRoot} from 'react-dom/client';
