@@ -1,3 +1,4 @@
+import {savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState';
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 import {pointerChoiceDrop} from './pointerChoiceDrop';
@@ -20,11 +21,6 @@ async function mock(page:Page){
  await page.context().route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-level9-invocation.json'}}));
  await page.context().route('**/data/spells/spells-level9-invocation.json',route=>route.fulfill({json:{spell:data.spell}}));
 }
-async function saved(page:Page):Promise<Character>{return page.evaluate(async()=>{
- const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;
- const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
- try{const workspace=await new Promise<any>((resolve,reject)=>{const r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});return workspace.characters.find((c:any)=>c.id===workspace.activeId);}finally{db.close();}
-});}
 async function tab(page:Page,name:string){
  const button=page.getByRole('tab',{name,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');
  const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toBeVisible();return panel;
@@ -161,8 +157,7 @@ async function manualCounter(page:Page){
  await expect.poll(async()=>(await saved(page)).spellSettings?.special?.[manualSpellId]).toMatchObject({mode:'uses',max:3});
 }
 async function source(page:Page,enabled:boolean){
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'PHB');const book=page.locator('.source-book').filter({has:page.locator('button[aria-label="设置来源 PHB"]')});
- await book.locator('input[type=checkbox]').first().setChecked(enabled);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ await setSiteSource(page,'PHB',enabled);
  await expect.poll(async()=>(await saved(page)).profile.enabledSources.includes('PHB')).toBe(enabled);
 }
 
@@ -206,7 +201,7 @@ test('source suspension restores the same level-nine grants and readonly learnin
  const records=readonly.locator(`[data-class-choice="${choiceId}"]`);for(const row of cases)await expect(records.getByRole('button',{name:row.name,exact:true})).toBeVisible();await expect(records.locator(`[data-choice-id="${choiceId}"]:not([disabled])`)).toHaveCount(0);await expect(readonly.getByRole('spinbutton',{name:'魔契师等级',exact:true})).toHaveAttribute('readonly','');
  const readonlyBefore=await saved(other);
  for(const row of cases){
-  const spells=await tab(other,'法术');await spells.getByRole('button',{name:`${row.spell}施放详情`,exact:true}).click();const detail=other.getByRole('dialog',{name:`${row.spell}施放详情`,exact:true});await expect(detail.getByRole('button',{name:'使用',exact:true})).toBeDisabled();await expect(detail.locator('.spell-action-feedback')).not.toHaveAttribute('data-phase','applied');expect(await saved(other)).toEqual(readonlyBefore);await detail.getByRole('button',{name:'关闭施放详情',exact:true}).click();
+  const spells=await tab(other,'法术');await spells.getByRole('button',{name:`${row.spell}施放详情`,exact:true}).click();const detail=other.getByRole('dialog',{name:`${row.spell}施放详情`,exact:true});await expect(detail.getByRole('button',{name:'使用',exact:true})).toBeDisabled();await expect(detail.locator('.spell-action-feedback')).toHaveCount(0);expect(await saved(other)).toEqual(readonlyBefore);await detail.getByRole('button',{name:'关闭施放详情',exact:true}).click();
  }
  await other.close();expect(await saved(page)).toEqual(active);
  await source(page,false);await expect.poll(async()=>(await saved(page)).selections.filter(row=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);let panel=await tab(page,'特性');await expect(panel.locator(`[data-class-choice="${choiceId}"]`)).toContainText('来源未启用，原记录保留');

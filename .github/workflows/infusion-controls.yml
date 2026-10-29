@@ -94,15 +94,18 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    name: verify (${{ matrix.project }})
+    name: verify (${{ matrix.project }}, ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
     # Retain all 74 existing App cases and add one real Worker fixture case per project.
     # Existing per-assertion and per-case budgets/retries are unchanged.
+    # Run the complete 150-case manifest in three shards per viewport. Keep
+    # the existing job, test and expectation budgets and all source gates.
     timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
         project: [desktop, narrow]
+        shard: [1, 2, 3]
     env:
       INFUSION_SOURCE_DIR: .local-evidence/infusion-upstream
       INFUSION_FROZEN_DIR: .local-evidence/infusion-upstream
@@ -315,11 +318,11 @@ jobs:
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone
       - run: npx playwright install --with-deps chromium
       - name: Real App target activation, reload, withdrawal, source restriction and read-only tabs
-        run: npx playwright test --config playwright.infusions.config.ts --project=${{ matrix.project }}
+        run: npx playwright test --config playwright.infusions.config.ts --project=${{ matrix.project }} --shard=${{ matrix.shard }}/3
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: infusion-control-evidence-${{ matrix.project }}
+          name: infusion-control-evidence-${{ matrix.project }}-${{ matrix.shard }}
           include-hidden-files: true
           path: |
             .local-evidence/rules-browser-safe/

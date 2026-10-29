@@ -1,3 +1,4 @@
+import {savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState';
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 import {pointerChoiceDrop} from './pointerChoiceDrop';
@@ -21,11 +22,6 @@ async function mock(page:Page){
  await page.context().route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-atwill-final-invocation.json'}}));
  await page.context().route('**/data/spells/spells-atwill-final-invocation.json',route=>route.fulfill({json:{spell:data.spell}}));
 }
-async function saved(page:Page):Promise<Character>{return page.evaluate(async()=>{
- const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;
- const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
- try{const workspace=await new Promise<any>((resolve,reject)=>{const r=db.transaction('documents').objectStore('documents').get('workspace');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});return workspace.characters.find((c:any)=>c.id===workspace.activeId);}finally{db.close();}
-});}
 async function tab(page:Page,name:string){
  const button=page.getByRole('tab',{name,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');
  const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(name)}(?: |$)`));await expect(panel).toBeVisible();return panel;
@@ -82,7 +78,7 @@ async function learning(page:Page){
 async function drag(page:Page,workspace:Locator,name:string,index:number,accepted=true){
  if((page.viewportSize()?.width||0)<=760)await workspace.getByRole('button',{name:'打开候选资料',exact:true}).click();
  const row=page.locator('.catalog-row').filter({has:page.locator('.entry-name').filter({hasText:new RegExp(`^${name}(?:\\s|$)`)})}).first();await pointerChoiceDrop(page,row,workspace.locator('.choice-slot').nth(index),accepted);
- if(!accepted)await expect(page.locator('.suite-toast')).toContainText((page.viewportSize()?.width||0)<=760?'尚未达到所需职业等级 15。':'此条目不属于当前可选内容');
+ if(!accepted)await expect(page.locator('.suite-toast')).toHaveText('此条目不属于当前可选内容，请从右侧 Wiki 候选中拖入。');
  // Explicitly return to the live narrow-screen sheet after a Wiki drag. The
  // stale pre-drop workspace must never stand in for visible player navigation.
  if((page.viewportSize()?.width||0)<=760)workspace=await learning(page);
@@ -181,8 +177,7 @@ async function manualCounter(page:Page){
  await expect.poll(async()=>(await saved(page)).spellSettings?.special?.[manualSpellId]).toMatchObject({mode:'uses',max:3});
 }
 async function source(page:Page,enabled:boolean){
- await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,'PHB');const book=page.locator('.source-book').filter({has:page.locator('button[aria-label="设置来源 PHB"]')});
- await book.locator('input[type=checkbox]').first().setChecked(enabled);await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
+ await setSiteSource(page,'PHB',enabled);
  await expect.poll(async()=>(await saved(page)).profile.enabledSources.includes('PHB')).toBe(enabled);
 }
 
@@ -199,9 +194,9 @@ test('level-two Vigor and level-fifteen Forms and Visions repeat free casts at t
 
 test('actual Warlock fifteen, not combined character level, gates Forms and Visions and exact grants survive downgrade and restore',async({page},info)=>{
  test.setTimeout(180000);const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await ready(page,{level:14,secondaryClass:true});
- const before=await saved(page);expect(before.selections.filter(row=>row.entry.kind==='class').reduce((sum,row)=>sum+row.level,0)).toBe(15);
+ const before=await saved(page);expect(before.selections.find(row=>row.id==='warlock')?.level).toBe(14);expect(before.selections.filter(row=>row.entry.kind==='class').reduce((sum,row)=>sum+row.level,0)).toBe(15);
  let workspace=await learning(page);for(const [index,row] of cases.slice(1).entries())workspace=await drag(page,workspace,row.name,index+1,false);await closeLearning(page,workspace);
- const refused=await saved(page);expect(refused.answers[choiceId]?.filter(Boolean)||[]).toEqual([]);expect(refused.selections.filter(row=>row.grantKey?.startsWith('choice:')||row.grantKey?.startsWith('source-spell:'))).toEqual([]);expect(refused.runtime.resources).toEqual(before.runtime.resources);protectedState(refused,before);
+ const refused=await saved(page);expect(refused).toEqual(before);expect(refused.answers[choiceId]?.filter(Boolean)||[]).toEqual([]);expect(refused.selections.filter(row=>row.grantKey?.startsWith('choice:')||row.grantKey?.startsWith('source-spell:'))).toEqual([]);expect(refused.runtime.resources).toEqual(before.runtime.resources);protectedState(refused,before);
  const vigor=await learn(page,[cases[0]]);await level(page,15);await learn(page,cases.slice(1),1);const ids=liveGrants(await saved(page));expect(ids[0]).toEqual(vigor[0]);await castAll(page,ids);const active=await saved(page);
  await level(page,14);await expect.poll(async()=>(await saved(page)).selections.filter(row=>row.grantKey?.startsWith('source-spell:')).length).toBe(1);
  const lowered=await saved(page);expect(liveGrants(lowered,[cases[0]])).toEqual(vigor);expect(lowered.answers[choiceId]).toEqual(active.answers[choiceId]);expect(lowered.runtime.automationActions).toEqual(active.runtime.automationActions);archived(lowered,active,ids.slice(1));protectedState(lowered,active);
@@ -233,7 +228,7 @@ test('source suspension preserves learned records and read-only viewing or casti
  const other=await context.newPage();other.on('pageerror',error=>errors.push(error.message));await mock(other);await other.goto('/card/?intro=0');const readonly=await tab(other,'特性');await expect(other.locator('.card-permission-banner')).toContainText('另一标签页正在编辑');await expect(other.getByRole('switch',{name:'编辑模式',exact:true})).toBeDisabled();
  const records=readonly.locator(`[data-class-choice="${choiceId}"]`);for(const row of cases)await expect(records.getByRole('button',{name:row.name,exact:true})).toBeVisible();await expect(records.locator(`[data-choice-id="${choiceId}"]:not([disabled])`)).toHaveCount(0);await expect(readonly.getByRole('spinbutton',{name:'魔契师等级',exact:true})).toHaveAttribute('readonly','');const readonlyBefore=await saved(other);
  for(const [index,row] of cases.entries()){
-  const dialog=await detail(other,row,ids[index]);await expect(dialog.getByRole('button',{name:'使用',exact:true})).toBeDisabled();await expect(dialog.locator('.spell-action-feedback')).not.toHaveAttribute('data-phase','applied');expect(await saved(other)).toEqual(readonlyBefore);await closeDetail(other);
+  const dialog=await detail(other,row,ids[index]);await expect(dialog.getByRole('button',{name:'使用',exact:true})).toBeDisabled();await expect(dialog.locator('.spell-action-feedback')).toHaveCount(0);expect(await saved(other)).toEqual(readonlyBefore);await closeDetail(other);
  }
  await other.close();expect(await saved(page)).toEqual(active);
  await source(page,false);await expect.poll(async()=>(await saved(page)).selections.filter(row=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);let panel=await tab(page,'特性');await expect(panel.locator(`[data-class-choice="${choiceId}"]`)).toContainText('来源未启用，原记录保留');
