@@ -5,7 +5,10 @@ export type CatalogOperation='normalize'|'monsters'|'magicItems';
 export function catalogNormalizer(signal:AbortSignal,fallback:(body:Raw,revision:string,packId?:string,operation?:CatalogOperation)=>Entry[]){
  let worker:Worker|undefined,sequence=0;
  const pending=new Map<number,{resolve:(value:Entry[])=>void;reject:(error:Error)=>void}>();
- try{if(typeof Worker!=='undefined')worker=new Worker(new URL('./catalog.worker.ts',import.meta.url),{type:'module'});}catch{/* Browser/CSP fallback keeps reading available. */}
+ // The catalog reader already runs off the UI thread. Starting another worker
+ // there duplicates the complete reader module graph on every refresh.
+ const alreadyOffThread=typeof window==='undefined'&&typeof self!=='undefined'&&typeof self.postMessage==='function';
+ try{if(!alreadyOffThread&&typeof Worker!=='undefined')worker=new Worker(new URL('./catalog.worker.ts',import.meta.url),{type:'module'});}catch{/* Browser/CSP fallback keeps reading available. */}
  const stop=()=>{worker?.terminate();worker=undefined;for(const job of pending.values())job.reject(new Error('资料处理已中止'));pending.clear();};
  if(worker){worker.onmessage=({data})=>{const job=pending.get(data.id);if(!job)return;pending.delete(data.id);if(data.error)job.reject(new Error(data.error));else job.resolve(data.entries);};worker.onerror=()=>{stop();};}
  signal.addEventListener('abort',stop,{once:true});

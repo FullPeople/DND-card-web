@@ -1,6 +1,6 @@
 import {mkdirSync} from 'node:fs';
 import {expect,type Page} from '@playwright/test';
-import {mockSource,suppressAnnouncement} from './fixtures';
+import {mockSource,suppressAnnouncement,waitForCatalog} from './fixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
@@ -12,7 +12,7 @@ export async function ready(page:Page,data:Record<string,any[]>=raw,options:{ski
  {await page.context().route('**/data/class/index.json',r=>r.fulfill({json:{real:'class-real.json'},headers:{'access-control-allow-origin':'*'}}));await page.context().route('**/data/class/class-real.json',r=>r.fulfill({json:data,headers:{'access-control-allow-origin':'*'}}));}
  if(data.spell){await page.context().route('**/data/spells/index.json',r=>r.fulfill({json:{XPHB:'spells-choices.json'},headers:{'access-control-allow-origin':'*'}}));await page.context().route('**/data/spells/spells-choices.json',r=>r.fulfill({json:{spell:data.spell},headers:{'access-control-allow-origin':'*'}}));}
  await page.context().route('**/data/skills.json',async r=>{await options.skillsGate;await r.fulfill({json:{skill:['XPHB','PHB'].flatMap(source=>[{name:'运动',ENG_name:'Athletics',source,entries:['原创运动技能概念。']},{name:'察觉',ENG_name:'Perception',source,entries:['原创察觉技能概念。']},{name:'历史',ENG_name:'History',source,entries:['原创历史技能概念。']}])},headers:{'access-control-allow-origin':'*'}});});
- await page.goto('/',{waitUntil:'domcontentloaded'});await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await page.goto('/',{waitUntil:'domcontentloaded'});await expect(page.locator('.save-status')).toContainText('已保存到本机');if(!options.skillsGate)await waitForCatalog(page);
  const entries:Entry[]=Object.entries(data).flatMap(([kind,values])=>Array.isArray(values)?values.map(r=>({id:`fixture:${kind}:${r.source}:${r.level||0}:${r.ENG_name||r.name}`,kind:kind==='classFeature'||kind==='subclassFeature'?'feature':kind as Entry['kind'],name:r.name,english:r.ENG_name||r.name,source:r.source,edition:r.source==='PHB'?'2014':'2024',packId:'fixture',revision:'1',choices:r.choices,entries:r.entries||[],raw:{...r,_category:kind}})):[]),c=newCharacter();c.name='选择与资源验收';c.automation=newAutomationState();const owner=entries.find(e=>e.kind==='class'&&e.source==='XPHB')!;c.selections=[{id:'class-owner',entry:owner,level:1,quantity:1,equipped:false}];
  for(const [i,value] of (owner.raw.classFeatures||[]).entries()){const ref=typeof value==='string'?value:value.classFeature,[name,cls,source,level,featureSource]=ref.split('|');if(Number(level)!==1)continue;const entry=entries.find(e=>e.kind==='feature'&&e.name===name&&e.raw.className===cls&&e.raw.classSource===source&&e.raw.level===1&&e.source===(featureSource||source));if(entry)c.selections.push({id:'feature-'+i,entry,level:1,quantity:1,equipped:false,parentId:'class-owner',grantKey:`ref:${ref}`});}
  if(options.savedSkills)c.answers['class-owner:skills:0']=options.savedSkills;
@@ -20,6 +20,7 @@ export async function ready(page:Page,data:Record<string,any[]>=raw,options:{ski
  // These fixtures exercise new-card authoring. Imported cards now intentionally
  // ignore empty choices, so restore only that presentation state in the fixture.
  if(!options.keepImportIgnored)await restoreAuthoredChoices(page);
+ if(!options.skillsGate)await waitForCatalog(page);
 }
 
 export async function openFeatures(page:Page){

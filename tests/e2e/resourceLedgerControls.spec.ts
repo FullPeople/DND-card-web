@@ -2,9 +2,9 @@ import {test,expect,type Page,type Locator} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import type {Character} from '../../src/core/model';
 import {exportCharacter} from '../../src/core/export';
-import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
+import {mockSource,suppressAnnouncement,expandSourceBook,waitForCatalog} from './fixtures';
 import {savedCharacter,setSiteSource} from './reviewedRuleBrowserState';
-import {assertOrdinaryReference,ordinaryCatalogRow,ordinaryCatalogReadyControl} from './ordinaryCastingLocators';
+import {assertOrdinaryReference,ordinaryCatalogRow} from './ordinaryCastingLocators';
 import {canonicalJsonSha256} from './reviewedObservantArtifactPrivacy';
 import {readResourceBrowserInputs,resourceBlankCharacter,resourceEntryIds,resourceAttunedProof,resourceInputSetSha256,resourceProductSetSha256,verifyResourceProductPins} from './resourceLedgerBrowserFixture';
 import {captureResourceControl,RESOURCE_INPUT_ANNOTATION,RESOURCE_PRODUCT_ANNOTATION} from './resourceLedgerArtifactPrivacy';
@@ -16,7 +16,7 @@ async function editor(page:Page){const toggle=page.getByRole('switch',{name:'编
 async function closeModal(page:Page){await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();}
 async function importNative(page:Page,buffer:Buffer){const old=(await saved(page)).id;await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'resource-ledger-authored.json',mimeType:'application/json',buffer});const review=page.getByRole('dialog',{name:'导入前核对',exact:true});await expect.poll(async()=>await review.isVisible()||(await saved(page)).id!==old).toBe(true);if(await review.isVisible())await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await expect.poll(async()=>(await saved(page)).id).not.toBe(old);await page.keyboard.press('Escape');await persisted(page);await editor(page);}
 async function book(page:Page,id:string){await page.getByRole('button',{name:'规则与扩展',exact:true}).click();await expandSourceBook(page,id);const row=page.locator('.source-book').filter({has:page.locator(`button[aria-label="设置来源 ${id}"]`)});await row.locator('input[type=checkbox]').first().check();await closeModal(page);await expect.poll(async()=>(await persisted(page)).profile.enabledSources.includes(id)).toBe(true);}
-async function ready(page:Page){await mock(page);await page.goto('/card/?intro=0');await persisted(page);await expect(ordinaryCatalogReadyControl(page)).toBeEnabled();await importNative(page,Buffer.from(JSON.stringify(exportCharacter(resourceBlankCharacter()))));for(const id of ['DMG','PHB','CRCOTN'])await book(page,id);const c=await persisted(page);expect(c.selections.map(row=>row.id)).toEqual([]);expect(c.runtime.limitedSourceUses).toBeUndefined();expect(c.runtime.itemChargeDebits).toBeUndefined();return c;}
+async function ready(page:Page){await mock(page);await page.goto('/card/?intro=0');await persisted(page);await waitForCatalog(page);await importNative(page,Buffer.from(JSON.stringify(exportCharacter(resourceBlankCharacter()))));for(const id of ['DMG','PHB','CRCOTN'])await book(page,id);const c=await persisted(page);expect(c.selections.map(row=>row.id)).toEqual([]);expect(c.runtime.limitedSourceUses).toBeUndefined();expect(c.runtime.itemChargeDebits).toBeUndefined();return c;}
 function manual(c:Character){return canonicalJsonSha256([c.abilities,c.baseHp,c.runtime.hp,c.runtime.tempHp,c.runtime.resources['resource-manual'],c.notes,c.proficiencies,c.training,c.adjustments]);}
 async function acquireEntry(page:Page,kind:'limited'|'item'|'attuned'){
  await editor(page);const wiki=page.getByRole('navigation',{name:'工作区',exact:true}).getByRole('button',{name:'Wiki',exact:true});if(await wiki.isVisible())await wiki.click();
