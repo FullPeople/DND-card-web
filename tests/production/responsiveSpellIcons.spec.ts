@@ -2,7 +2,7 @@ import {test,expect,type Page,type Locator} from '@playwright/test';
 import {writeFileSync} from 'node:fs';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {exportCharacter} from '../../src/core/export';
-import {mockSource,suppressAnnouncement} from '../e2e/fixtures';
+import {mockSource,suppressAnnouncement,waitForCatalog} from '../e2e/fixtures';
 
 const profiles=[
   {name:'spell-single',prefix:'spell',levels:1,classes:1},
@@ -42,6 +42,16 @@ async function ready(page:Page,profile:typeof profiles[number],imported=card(pro
   await page.getByTestId('character-file').setInputFiles({name:'authored-paint-fixture.json',mimeType:'application/json',
     buffer:Buffer.from(JSON.stringify(exportCharacter(imported)))});
   await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
+  await expect(page.locator('.save-status')).toContainText('已保存到本机');
+  await waitForCatalog(page);
+  // Import/catalog reconciliation owns these initial additions. Establish its
+  // actual persisted result before measuring display-only operations.
+  await expect.poll(async()=>{const saved=JSON.parse(await savedCharacter(page));return {
+    name:saved.name,sources:saved.profile.autoSourceDefaults,hitDie:saved.runtime.resources['hit-die:6'],packs:saved.rulePacks,
+  };}).toEqual({name:imported.name+'（导入）',sources:imported.profile.enabledSources,
+    hitDie:{name:'生命骰 d6',max:profile.classes,current:profile.classes,type:'count',icon:'gem',automatic:true},packs:[]});
+  const settled=JSON.parse(await savedCharacter(page));
+  for(const [id,resource] of Object.entries(imported.runtime.resources))expect(settled.runtime.resources[id]).toEqual(resource);
   await expect(page.locator('.save-status')).toContainText('已保存到本机');
 }
 
