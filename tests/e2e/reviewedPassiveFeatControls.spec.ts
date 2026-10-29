@@ -9,9 +9,9 @@ import {savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState'
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{passive:'class-passive-feats.json'}}));
- await page.route('**/data/class/class-passive-feats.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
- await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{passive:'class-passive-feats.json'}}));
+ await page.context().route('**/data/class/class-passive-feats.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
+ await page.context().route('**/data/feats.json',route=>route.fulfill({json:{feat:data.feat}}));
 }
 async function tab(page:Page,name:string){
  const button=page.getByRole('tab',{name,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');

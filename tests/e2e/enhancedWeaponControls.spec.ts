@@ -3,15 +3,16 @@ import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 import {enhancedWeaponFixture} from './enhancedWeaponFixture';
 import {infusionData} from './infusionFixture';
 import {exportCharacter} from '../../src/core/export';
+import {setSiteSource} from './reviewedRuleBrowserState';
 import {setInfusionTarget} from '../../src/core/automation/infusions';
 
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:infusionData.class,classFeature:infusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:infusionData.class,classFeature:infusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
  const entries=enhancedWeaponFixture().entries.filter(entry=>entry.raw._category==='optionalfeature').map(entry=>entry.raw);
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:entries},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:entries},headers:{'access-control-allow-origin':'*'}}));
 }
 async function saved(page:Page){return page.evaluate(async()=>{
  const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;
@@ -28,7 +29,7 @@ async function start(page:Page,active=false){
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'enhanced-weapon-authored.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  const review=page.getByRole('dialog',{name:'导入前核对',exact:true});await expect(review).toContainText('导入后保留该角色自己的规则版本');await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();
  await expect(page.getByRole('tab',{name:/增强武器交互验收（导入）/})).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');
- await expect(page.locator('.save-status')).toContainText('已保存到本机');return features(page);
+ await expect(page.locator('.save-status')).toContainText('已保存到本机');await setSiteSource(page,'TCE',true);return features(page);
 }
 async function assertSpear(page:Page,bonus:number,damage:number){
  await page.getByRole('button',{name:'自动化设置',exact:true}).click();const panel=page.locator('.automation-panel');

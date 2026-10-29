@@ -18,9 +18,9 @@ async function mock(page:Page){
  test.info().annotations.push({type:ORDINARY_INPUT_ANNOTATION,description:ordinaryBrowserInputSetSha256},{type:ORDINARY_PRODUCT_ANNOTATION,description:ORDINARY_PRODUCT_SHA256});
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'authored isolated local acceptance'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{wizard:'class-wizard.json',sorcerer:'class-sorcerer.json',warlock:'class-warlock.json'}}));
- for(const path of ['class/class-wizard.json','class/class-sorcerer.json','class/class-warlock.json','spells/spells-phb.json','spells/spells-xphb.json','generated/gendata-spell-source-lookup.json'])await page.route('**/data/'+path,route=>route.fulfill({json:bodies[path]}));
- await page.route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-phb.json',XPHB:'spells-xphb.json'}}));return bodies;
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{wizard:'class-wizard.json',sorcerer:'class-sorcerer.json',warlock:'class-warlock.json'}}));
+ for(const path of ['class/class-wizard.json','class/class-sorcerer.json','class/class-warlock.json','spells/spells-phb.json','spells/spells-xphb.json','generated/gendata-spell-source-lookup.json'])await page.context().route('**/data/'+path,route=>route.fulfill({json:bodies[path]}));
+ await page.context().route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-phb.json',XPHB:'spells-xphb.json'}}));return bodies;
 }
 async function tab(page:Page,name:'主要'|'特性'|'法术'){
  const mobile=page.getByRole('button',{name:'功能页',exact:true});if(await mobile.isVisible())await mobile.click();

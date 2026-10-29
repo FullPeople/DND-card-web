@@ -28,8 +28,9 @@ export async function mockSource(page: Page,options:{suiteAnnouncement?:boolean;
     await page.context().addInitScript(([key,version])=>{try{localStorage.setItem(key+':suite',version);}catch{}},[ANNOUNCEMENT_KEY,announcementVersionFor('suite')]);
     await page.evaluate(([key,version])=>{try{localStorage.setItem(key+':suite',version);}catch{}},[ANNOUNCEMENT_KEY,announcementVersionFor('suite')]).catch(()=>{});
   }
-  await page.route('https://homebrew.kiwee.top/**',route=>route.fulfill({json:{},headers:{'access-control-allow-origin':'*'}}));
-  await page.route('https://5e.kiwee.top/data/**', async route => {
+  // Context routing includes the real catalog Worker as well as page readers.
+  await page.context().route('https://homebrew.kiwee.top/**',route=>route.fulfill({json:{},headers:{'access-control-allow-origin':'*'}}));
+  await page.context().route('https://5e.kiwee.top/data/**', async route => {
     const key = new URL(route.request().url()).pathname.replace('/data/', '');
     await route.fulfill({ json: data[key] || {}, headers: { 'access-control-allow-origin': '*', etag: 'fixture-1' } });
   });

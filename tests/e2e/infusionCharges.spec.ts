@@ -16,10 +16,10 @@ const choiceId='artificer:class-optional:0',sourceKey='ref:物品注法|奇械�
 // Storage rejection is a failure-only fault, never an injected success state.
 async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{artificer:'class-infusion-charge.json'}}));
- await page.route('**/data/class/class-infusion-charge.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:data.optionalfeature}}));
- await page.route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:data.baseitem}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{artificer:'class-infusion-charge.json'}}));
+ await page.context().route('**/data/class/class-infusion-charge.json',route=>route.fulfill({json:{class:data.class,classFeature:data.classFeature}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:data.optionalfeature}}));
+ await page.context().route('**/data/items.json',route=>route.fulfill({json:{item:data.item}}));await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:data.baseitem}}));
 }
 async function tab(page:Page,label:string){
  const button=page.getByRole('tab',{name:label,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');const panel=page.locator('.paper[data-active-sheet="true"]');await expect(panel).toHaveClass(new RegExp(`(?:^| )page-${['主要','特性','背景','法术','背包'].indexOf(label)}(?: |$)`));await expect(panel).toBeVisible();return panel;
@@ -40,7 +40,7 @@ async function ready(page:Page,at=6){
  const database=await page.evaluate(async()=>{const path='/card/src/platform/workspaceIdentity.ts';return (await import(path)).workspaceIdentity.database;});await restoreAuthoredChoices(page,database,{artificer:true});await editor(page);
  // Level persistence precedes asynchronous catalog-grant persistence. Wait for
  // the actual canonical child, then retain every identity assertion below.
- await level(page,at);await expect.poll(async()=>(await saved(page)).selections.filter(row=>row.parentId==='artificer'&&row.grantKey===sourceKey).length).toBe(1);sourceGrant(await saved(page));expect((await saved(page)).runtime.infusionCharges).toBeUndefined();
+ await setSiteSource(page,'TCE',true);await level(page,at);await expect.poll(async()=>(await saved(page)).selections.filter(row=>row.parentId==='artificer'&&row.grantKey===sourceKey).length).toBe(1);sourceGrant(await saved(page));expect((await saved(page)).runtime.infusionCharges).toBeUndefined();
 }
 function sourceGrant(c:Character){
  const rows=c.selections.filter(row=>row.parentId==='artificer'&&row.grantKey===sourceKey);expect(rows).toHaveLength(1);const row=rows[0];

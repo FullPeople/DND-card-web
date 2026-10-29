@@ -13,9 +13,9 @@ async function tab(page:Page,name:string){const button=page.getByRole('tab',{nam
 async function ready(page:Page,learned=false){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{attuned:'class-attuned.json'},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/class/class-attuned.json',route=>route.fulfill({json:{class:attunedInfusionData.class,classFeature:attunedInfusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:attunedInfusionData.optionalfeature},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{attuned:'class-attuned.json'},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/class-attuned.json',route=>route.fulfill({json:{class:attunedInfusionData.class,classFeature:attunedInfusionData.classFeature},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:attunedInfusionData.optionalfeature},headers:{'access-control-allow-origin':'*'}}));
  await page.goto('/card/?intro=0');await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const {c}=attunedInfusionFixture(learned);
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'attuned-infusions-authored.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});

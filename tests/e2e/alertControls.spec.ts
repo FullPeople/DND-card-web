@@ -33,9 +33,9 @@ async function mock(page:Page){
  test.info().annotations.push({type:ALERT_FEAT_ANNOTATION,description:ALERT_FEAT_RAW_SHA256},{type:ALERT_SOURCE_ANNOTATION,description:ALERT_WIZARD_SHA256});
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{wizard:'class-wizard.json'}}));
- await page.route('**/data/class/class-wizard.json',route=>route.fulfill({json:source}));
- await page.route('**/data/feats.json',route=>route.fulfill({json:{feat:[...rules,...data.feat]}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{wizard:'class-wizard.json'}}));
+ await page.context().route('**/data/class/class-wizard.json',route=>route.fulfill({json:source}));
+ await page.context().route('**/data/feats.json',route=>route.fulfill({json:{feat:[...rules,...data.feat]}}));
 }
 async function tab(page:Page,name:string){
  const button=page.getByRole('tab',{name,exact:true});await button.click();await expect(button).toHaveAttribute('aria-selected','true');

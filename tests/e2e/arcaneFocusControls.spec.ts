@@ -18,11 +18,11 @@ async function mock(page:Page){
  await mockSource(page,{displayMode:'screen'});await suppressAnnouncement(page);
  await page.route('**/api/**',route=>route.fulfill({status:401,json:{error:'isolated local test'}}));
  const {entries,spell}=fixture();
- await page.route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:entries.filter(row=>row.kind==='class').map(row=>row.raw),classFeature:entries.filter(row=>row.raw._category==='classFeature').map(row=>row.raw)},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:entries.filter(row=>row.raw._category==='optionalfeature').map(row=>row.raw)},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-focus.json'},headers:{'access-control-allow-origin':'*'}}));
- await page.route('**/data/spells/spells-focus.json',route=>route.fulfill({json:{spell:[spell.raw]},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/index.json',route=>route.fulfill({json:{infusion:'class-infusion.json'},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/class/class-infusion.json',route=>route.fulfill({json:{class:entries.filter(row=>row.kind==='class').map(row=>row.raw),classFeature:entries.filter(row=>row.raw._category==='classFeature').map(row=>row.raw)},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/optionalfeatures.json',route=>route.fulfill({json:{optionalfeature:entries.filter(row=>row.raw._category==='optionalfeature').map(row=>row.raw)},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/spells/index.json',route=>route.fulfill({json:{PHB:'spells-focus.json'},headers:{'access-control-allow-origin':'*'}}));
+ await page.context().route('**/data/spells/spells-focus.json',route=>route.fulfill({json:{spell:[spell.raw]},headers:{'access-control-allow-origin':'*'}}));
 }
 async function saved(page:Page){return page.evaluate(async()=>{
  const path='/card/src/platform/workspaceIdentity.ts',name=(await import(path)).workspaceIdentity.database;

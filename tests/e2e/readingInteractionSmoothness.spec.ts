@@ -4,9 +4,9 @@ import {mockSource} from './fixtures';
 const key='dnd-wiki-reading-progress-v1:book';
 async function ready(page:Page){
   await mockSource(page);
-  await page.route('**/data/books.json',route=>route.fulfill({json:{book:[{id:'SMOOTH',name:'原创阅读手册',contents:[{name:'第一章'},{name:'第二章'}]}]}}));
-  await page.route('**/data/adventures.json',route=>route.fulfill({json:{adventure:[]}}));
-  await page.route('**/data/book/book-smooth.json',route=>route.fulfill({json:{bookData:[{id:'SMOOTH',data:[0,1].map(chapter=>({type:'section',name:chapter?'第二章':'第一章',entries:Array.from({length:100},(_,index)=>`原创阅读内容 ${chapter+1}－${index+1}。用于核对滚动位置和章节切换。`)}))}]}}));
+  await page.context().route('**/data/books.json',route=>route.fulfill({json:{book:[{id:'SMOOTH',name:'原创阅读手册',contents:[{name:'第一章'},{name:'第二章'}]}]}}));
+  await page.context().route('**/data/adventures.json',route=>route.fulfill({json:{adventure:[]}}));
+  await page.context().route('**/data/book/book-smooth.json',route=>route.fulfill({json:{bookData:[{id:'SMOOTH',data:[0,1].map(chapter=>({type:'section',name:chapter?'第二章':'第一章',entries:Array.from({length:100},(_,index)=>`原创阅读内容 ${chapter+1}－${index+1}。用于核对滚动位置和章节切换。`)}))}]}}));
   await page.goto('/?reading=book&book=SMOOTH&chapter=0');
   await expect(page.getByRole('region',{name:'章节正文'})).toContainText('原创阅读内容 1－1');
   await expect(page.locator('.reading-volume-content')).toHaveAttribute('aria-busy','false');
