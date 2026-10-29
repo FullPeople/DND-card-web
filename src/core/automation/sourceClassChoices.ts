@@ -74,6 +74,9 @@ function ownedFightingStylePrerequisite(c:Character,owner:Selection,known:Entry[
 }
 /** Unknown prerequisite shapes remain unavailable; a choice never repairs them. */
 export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[]=c.selections.map(row=>row.entry),choiceId?:string):string|undefined{
+ return sourceChoicePrerequisiteWithEvaluation(c,entry,owner,optional,known,choiceId,()=>evaluate(c));
+}
+function sourceChoicePrerequisiteWithEvaluation(c:Character,entry:Entry,owner:Selection,optional:boolean,known:Entry[],choiceId:string|undefined,derive:()=>ReturnType<typeof evaluate>):string|undefined{
  const alternatives=entry.raw.prerequisite;if(alternatives===undefined)return;
  // Only these exact reviewed invocations omit class.source in their frozen
  // prerequisite. Resolve that omission to their verified PHB owner, never to
@@ -98,7 +101,7 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
     if(!Number.isSafeInteger(required)||Number(required)<1)return '此等级前置结构尚未核对。';
     if(actual<Number(required))return `尚未达到所需${optional?'职业':''}等级 ${required}。`;
    }else if(field==='ability'){
-    evaluated??=evaluate(c);
+    evaluated??=derive();
     const groups=list(value) as Record<string,unknown>[];
     const meets=(current:ReturnType<typeof evaluate>['abilities'])=>groups.length>0&&groups.some(group=>group&&typeof group==='object'&&!Array.isArray(group)&&Object.keys(group).length>0&&Object.entries(group).every(([ability,minimum])=>Object.hasOwn(current,ability)&&typeof minimum==='number'&&Number.isFinite(minimum)&&current[ability as keyof typeof current]>=minimum));
     if(!meets(evaluated.abilities))return '尚未满足属性前置条件。';
@@ -135,6 +138,9 @@ export function sourceChoicePrerequisite(c:Character,entry:Entry,owner:Selection
 }
 
 export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
+ // Share only this unchanged call's pure derivation. A later call always
+ // recomputes, including mutations of the same saved character object.
+ let derived:ReturnType<typeof evaluate>|undefined;const derive=()=>derived??=evaluate(c);
  known=[...Object.values(c.classChoiceSnapshots||{}),...known];
  const out:SheetChoice[]=[];
  for(const owner of c.selections.filter(row=>row.entry.kind==='class')){
@@ -143,7 +149,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
   const add=(id:string,label:string,count:number,candidates:Entry[],optional:boolean,hint?:string,recordOnly=optional,support?:ClassChoiceSupport,duplicateChoiceIds:string[]=[])=>{
    candidates=candidates.filter((entry,index)=>candidates.findIndex(other=>other.id===entry.id)===index);
    const saved=c.answers[id]??duplicateChoiceIds.flatMap(alias=>c.answers[alias]||[]),options:ChoiceOption[]=candidates.map(entry=>({value:entry.id,label:entry.name,entry,
-    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||''))},entry)||sourceChoicePrerequisite(c,entry,owner,optional,known,id)}));
+    grant:recordOnly?undefined:entry,unavailable:candidateReason({...sourceCard,selections:c.selections.filter(s=>s.requirementId!==id&&!duplicateChoiceIds.includes(s.requirementId||''))},entry)||sourceChoicePrerequisiteWithEvaluation(c,entry,owner,optional,known,id,derive)}));
    const slots=Array.from({length:Math.max(count,saved.length)},(_,index)=>saved[index]||'');
    const selected=restricted?[]:saved.slice(0,count).filter((value,index,values)=>options.some(option=>option.value===value&&!option.unavailable)&&(values.indexOf(value)===index||options.find(option=>option.value===value)?.entry.raw.repeatable===true));
    out.push({id,ownerId:owner.id,label,count,options,slots,selected,complete:selected.length===count&&count>0,restricted,channel:'content',catalogKind:optional?'feature':'feat',sourceProgression:optional?'optional':'feat',ownerEdition:owner.entry.edition,support,duplicateChoiceIds,
@@ -161,7 +167,7 @@ export function sourceClassChoices(c:Character,known:Entry[]):SheetChoice[]{
     choice.support={rule:'verified',execution:'existing-grants',publication:'unverified',reason:invocationChoiceHint};
     for(const option of choice.options){
      const rule=invocationRule(option.entry);if(!rule)continue;
-     const active=activeSelections(c);option.unavailable=candidateReason({...sourceCard,selections:active.filter(row=>row.requirementId!==choice.id)},option.entry)||sourceChoicePrerequisite(c,option.entry,owner,true,known);
+     const active=activeSelections(c);option.unavailable=candidateReason({...sourceCard,selections:active.filter(row=>row.requirementId!==choice.id)},option.entry)||sourceChoicePrerequisiteWithEvaluation(c,option.entry,owner,true,known,undefined,derive);
      const manual=active.some(row=>row.requirementId!==choice.id&&!row.grantKey?.startsWith('choice:')&&invocationRule(row.entry)?.reference===rule.reference);
      if(manual)option.unavailable||='同来源祈唤已有手工条目，未重复授予；手工记录保留。';
      if(!source)option.unavailable||='魔能祈唤的来源职业特性当前不可用；学习记录保留。';

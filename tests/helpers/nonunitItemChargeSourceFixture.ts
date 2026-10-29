@@ -81,7 +81,7 @@ function bodies(){
  // Verify all seven exact original files before any normalization can start.
  for(const pin of nonunitItemChargeInputPins){
   const rows=index.rows.filter((row:any)=>row?.url===pin.url);if(rows.length!==1||rows[0].sha256!==pin.sha256||!/^files\/[a-f0-9]{64}\.json$/.test(rows[0].path))fail('INPUT_PIN');
-  const file=realpathSync(root+'/'+rows[0].path);if(!file.startsWith(root+'/'))fail('INPUT_PATH');const bytes=readFileSync(file);
+  const file=realpathSync(root+'/'+rows[0].path);if(!file.replaceAll('\\','/').startsWith(root.replaceAll('\\','/')+'/'))fail('INPUT_PATH');const bytes=readFileSync(file);
   if(bytes.length!==pin.bytes||createHash('sha256').update(bytes).digest('hex')!==pin.sha256)fail('INPUT_BYTES');const body=JSON.parse(bytes.toString('utf8'));if(digest(body)!==pin.sha256)fail('INPUT_CANONICAL');verified.set(pin.url,body);
  }
  originals=verified;return originals;

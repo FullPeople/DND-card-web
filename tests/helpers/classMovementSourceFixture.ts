@@ -51,7 +51,7 @@ function body(inputPath:InputPath):Record<string,any>{
  const root=realpathSync(directory),index=JSON.parse(readFileSync(root+'/index.json','utf8'));if(!Array.isArray(index.rows))fail('INDEX');
  const rows=index.rows.filter((row:any)=>row?.url===pin.url),expectedPath='files/'+pin.sha256+'.json';
  if(rows.length!==1||rows[0].sha256!==pin.sha256||rows[0].path!==expectedPath)fail('INPUT_PIN');
- const file=realpathSync(root+'/'+rows[0].path);if(!file.startsWith(root+'/'))fail('INPUT_PATH');
+ const file=realpathSync(root+'/'+rows[0].path);if(!file.replaceAll('\\','/').startsWith(root.replaceAll('\\','/')+'/'))fail('INPUT_PATH');
  const bytes=readFileSync(file);if(bytes.length!==pin.bytes||digest(bytes)!==pin.sha256)fail('INPUT_BYTES');
  const source=JSON.parse(bytes.toString('utf8'));if(digest(JSON.stringify(source))!==pin.sha256)fail('INPUT_CANONICAL');
  for(const spec of classMovementSpecs.filter(row=>row.inputPath===inputPath)){

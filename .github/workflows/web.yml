@@ -67,6 +67,15 @@ jobs:
             --receipt .local-evidence/optional-class-list-side-source/verification.json
           printf '%s\n' 'OPTIONAL_CLASS_LIST_SIDE_SOURCE_FILE=.local-evidence/optional-class-list-side-source/book-tce.json' >> "$GITHUB_ENV"
 
+      - name: Check out the complete immutable item-charge compatibility reader
+        uses: actions/checkout@v6
+        with:
+          repository: FullPeople/DND-card-web
+          ref: 4069886e1bfcab2fb7e2958eca8919601a13dd62
+          path: .local-evidence/nonunit-old-reader
+          persist-credentials: false
+      - name: Verify all nineteen family inputs and independent item-spell policy sources
+        run: node tools/prepareRuleIntegrationSources.mjs --corpus .local-evidence/ordinary-check-upstream --policies .local-evidence/item-spell-policy --old-reader .local-evidence/nonunit-old-reader
       - run: npm run verify:automation-progress
       - run: npm run check
       - run: npm run build:standalone

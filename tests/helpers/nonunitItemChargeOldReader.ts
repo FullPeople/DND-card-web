@@ -6,8 +6,16 @@ import {pathToFileURL} from 'node:url';
 import {rolldown} from 'rolldown';
 
 export const nonunitOldReaderPins={revision:'4069886e1bfcab2fb7e2958eca8919601a13dd62',sourceTree:'03d4ab4759597059e6d501a5dcec911f65c6ef30',sourceFiles:619,packageSha256:'dc7334404f7417cb469be7a1e86d0861431c228334d5971373dcab686a780faf',lockSha256:'e4eaa83a394c731a3772466be039cfe7742b144a4e3af8221ceb73e64a6e115f'}as const;
+// Retained main accb00f has release version 0.1.80 in its root lock metadata.
+// Keep an exact current-byte pin as well as the complete old-byte pin and the
+// dependency-graph comparison; release composition does not relax either lock.
+const currentMainLockSha256='217685a4362e524bea866f7172872f1d4b4f3afbc08d20501862f248f7a5be41';
 const fail:(code:string)=>never=code=>{throw Error('NONUNIT_ITEM_CHARGE_OLD_SOURCE_'+code);};
 const hash=(bytes:Uint8Array)=>createHash('sha256').update(bytes).digest('hex');
+export function nonunitReaderDependenciesMatch(oldBytes:Uint8Array,currentBytes:Uint8Array):boolean{
+ const graph=(bytes:Uint8Array)=>{const value=JSON.parse(Buffer.from(bytes).toString('utf8'));delete value.version;if(value.packages?.[''])delete value.packages[''].version;return JSON.stringify(value);};
+ return graph(oldBytes)===graph(currentBytes);
+}
 const gitObject=(type:string,bytes:Buffer)=>createHash('sha1').update(Buffer.concat([Buffer.from(type+' '+bytes.length+'\0'),bytes])).digest();
 /** Rebuild the complete Git src tree from actual bytes, names and modes. This
  * accepts an immutable checkout OR a verified Git-object export, never a mere
@@ -19,7 +27,8 @@ export function verifyNonunitOldReaderRoot():string{
   return gitObject('tree',Buffer.concat(entries.map(entry=>Buffer.concat([Buffer.from(entry.mode+' '+entry.name+'\0'),entry.object]))));
  }
  if(tree(join(root,'src')).toString('hex')!==nonunitOldReaderPins.sourceTree||files!==nonunitOldReaderPins.sourceFiles)fail('COMPLETE_SOURCE_TREE');
- if(hash(readFileSync(join(root,'package.json')))!==nonunitOldReaderPins.packageSha256||hash(readFileSync(join(root,'package-lock.json')))!==nonunitOldReaderPins.lockSha256||hash(readFileSync(new URL('../../package-lock.json',import.meta.url)))!==nonunitOldReaderPins.lockSha256)fail('LOCKED_PACKAGE');
+ const oldLock=readFileSync(join(root,'package-lock.json')),currentLock=readFileSync(new URL('../../package-lock.json',import.meta.url));
+ if(hash(readFileSync(join(root,'package.json')))!==nonunitOldReaderPins.packageSha256||hash(oldLock)!==nonunitOldReaderPins.lockSha256||hash(currentLock)!==currentMainLockSha256||!nonunitReaderDependenciesMatch(oldLock,currentLock))fail('LOCKED_PACKAGE');
  const guard=(globalThis as any)[Symbol.for('dnd.offlineCatalogFetch.v1')];if(!guard||globalThis.fetch!==guard.deny||guard.unexpected.length)fail('STARTUP_BOUNDARY');return root;
 }
 export async function loadNonunitOldReader(){

@@ -266,6 +266,15 @@ jobs:
             --output .local-evidence/optional-class-list-side-source/book-tce.json \
             --receipt .local-evidence/optional-class-list-side-source/verification.json
           printf '%s\n' 'OPTIONAL_CLASS_LIST_SIDE_SOURCE_FILE=.local-evidence/optional-class-list-side-source/book-tce.json' >> "$GITHUB_ENV"
+      - name: Check out the complete immutable item-charge compatibility reader
+        uses: actions/checkout@v6
+        with:
+          repository: FullPeople/DND-card-web
+          ref: 4069886e1bfcab2fb7e2958eca8919601a13dd62
+          path: .local-evidence/nonunit-old-reader
+          persist-credentials: false
+      - name: Verify all nineteen family inputs and independent item-spell policy sources
+        run: node tools/prepareRuleIntegrationSources.mjs --corpus .local-evidence/reviewed-alert-full-upstream --policies .local-evidence/item-spell-policy --old-reader .local-evidence/nonunit-old-reader
       - name: Fetch exact old consumer for charge-preservation verification
         run: git fetch --no-tags --depth=1 origin 70a9d58cdc4d7148a458704f4425de4b4cb91129
       - name: Fetch ninth-stage consumer for localized-v2 and ring preservation
@@ -294,6 +303,8 @@ jobs:
         run: node tools/runVitest.mjs run tests/item-atwill*.test.ts tests/racial-darkvision*.test.ts tests/item-ability-floors*.test.ts tests/racial-movement*.test.ts --maxWorkers=1
       - name: Explicit owned-class optional lists, paid workflows and rendered controls
         run: node tools/runVitest.mjs run tests/optional-class-list-*.test.ts --maxWorkers=1
+      - name: New source-qualified item, race, movement, AC and HP families with client interactions
+        run: node tools/runVitest.mjs run tests/charged-item-spell-*.test.ts tests/nonunit-item-charge-*.test.ts tests/item-passive-bonus-*.test.ts tests/item-casting-bonus-*.test.ts tests/item-resistance-bonus-*.test.ts tests/relative-racial-movement-*.test.ts tests/variant-item-resistance-bonus-*.test.ts tests/class-movement-*.test.ts tests/racial-resistance-*.test.ts tests/inherited-racial-resistance-*.test.ts tests/racial-carrying-*.test.ts tests/racial-natural-armor-*.test.ts tests/source-level-hp-*.test.ts tests/item-affine-hp-*.test.ts --maxWorkers=1
       - run: npx tsc -b
       - name: Formal standalone build with the required runtime coverage gate
         run: npx vite build --config vite.standalone-cloud.config.ts --mode standalone

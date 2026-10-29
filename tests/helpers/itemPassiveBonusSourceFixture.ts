@@ -359,7 +359,7 @@ function boundary(){const key=Symbol.for('dnd.offlineCatalogFetch.v1'),descripto
 let originals:Record<string,any>|undefined;
 function bodies():Record<string,any>{
  boundary();if(originals)return originals;const directory=process.env.ITEM_PASSIVE_BONUS_FROZEN_DIR;if(!directory)fail('FROZEN_DIRECTORY');const root=realpathSync(directory),index=JSON.parse(readFileSync(root+'/index.json','utf8')),out:Record<string,any>={};if(!Array.isArray(index.rows))fail('INDEX');
- for(const pin of itemPassiveBonusInputPins){const rows=index.rows.filter((r:any)=>r?.url==='https://5e.kiwee.top/data/'+pin.path);if(rows.length!==1||rows[0].sha256!==pin.sha256||!/^files\/[a-f0-9]{64}\.json$/.test(rows[0].path))fail('INPUT_PIN');const file=realpathSync(root+'/'+rows[0].path);if(!file.startsWith(root+'/'))fail('INPUT_PATH');const bytes=readFileSync(file);if(bytes.length!==pin.bytes||digest(bytes)!==pin.sha256)fail('INPUT_BYTES');const body=JSON.parse(bytes.toString('utf8'));if(digest(JSON.stringify(body))!==pin.sha256)fail('INPUT_CANONICAL');out[pin.path]=body;}
+ for(const pin of itemPassiveBonusInputPins){const rows=index.rows.filter((r:any)=>r?.url==='https://5e.kiwee.top/data/'+pin.path);if(rows.length!==1||rows[0].sha256!==pin.sha256||!/^files\/[a-f0-9]{64}\.json$/.test(rows[0].path))fail('INPUT_PIN');const file=realpathSync(root+'/'+rows[0].path);if(!file.replaceAll('\\','/').startsWith(root.replaceAll('\\','/')+'/'))fail('INPUT_PATH');const bytes=readFileSync(file);if(bytes.length!==pin.bytes||digest(bytes)!==pin.sha256)fail('INPUT_BYTES');const body=JSON.parse(bytes.toString('utf8'));if(digest(JSON.stringify(body))!==pin.sha256)fail('INPUT_CANONICAL');out[pin.path]=body;}
  return originals=out;
 }
 const cache:Partial<Record<'canonical'|'app',Entry[]>>={};

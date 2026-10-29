@@ -1,12 +1,20 @@
 import {afterAll,expect,it} from 'vitest';
+import {readFileSync} from 'node:fs';
 import evidence from '../src/core/automation/nonunitItemChargeEvidence.json';
 import {itemChargeOffers,itemChargeRequest,performItemChargeAction} from '../src/core/automation/itemChargeDebits';
 import {exportCharacter} from '../src/core/export';
 import {readCharacter} from '../src/core/validation';
 import {nonunitItemChargeFixture} from './helpers/nonunitItemChargeFlowFixture';
 import {nonunitItemChargeSnapshot as snapshot} from './helpers/nonunitItemChargeSourceFixture';
-import {loadNonunitOldReader,verifyNonunitOldReaderRoot} from './helpers/nonunitItemChargeOldReader';
+import {nonunitReaderDependenciesMatch,loadNonunitOldReader,verifyNonunitOldReaderRoot} from './helpers/nonunitItemChargeOldReader';
 
+it('retains the exact old reader lock and accepts only release metadata differences in current dependency verification',()=>{
+ const root=verifyNonunitOldReaderRoot(),old=readFileSync(root+'/package-lock.json'),current=readFileSync(new URL('../package-lock.json',import.meta.url));
+ expect(nonunitReaderDependenciesMatch(old,current)).toBe(true);
+ const changed=JSON.parse(current.toString()),name=Object.keys(changed.packages).find(key=>key&&changed.packages[key].integrity)!;
+ changed.packages[name].integrity='sha512-authored-tamper';expect(nonunitReaderDependenciesMatch(old,Buffer.from(JSON.stringify(changed)))).toBe(false);
+ const moved=JSON.parse(current.toString());moved.packages[name].version='0.0.0-authored-tamper';expect(nonunitReaderDependenciesMatch(old,Buffer.from(JSON.stringify(moved)))).toBe(false);
+});
 afterAll(()=>{verifyNonunitOldReaderRoot();});
 it('actual immutable 406 native reader preserves v2 opaquely, rejects old edits, and returns unchanged units to current reader',async()=>{
  const old=await loadNonunitOldReader(),p=evidence.owners[0],b=p.branches[0],f=nonunitItemChargeFixture(p.id),authority={canEdit:true,gm:false};

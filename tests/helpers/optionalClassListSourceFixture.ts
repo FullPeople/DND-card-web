@@ -37,7 +37,7 @@ export function optionalClassListOriginals():Record<string,any>{
  const root=process.env.OPTIONAL_CLASS_LIST_FROZEN_DIR;if(!root)fail('FROZEN_DIRECTORY');const realRoot=realpathSync(root),index=JSON.parse(readFileSync(`${root}/index.json`,'utf8')),out:Record<string,any>={};
  for(const [path,pin]of Object.entries(optionalClassListInputPins)){
   const rows=index.rows.filter((r:any)=>r.url==='https://5e.kiwee.top/data/'+path);if(rows.length!==1||rows[0].sha256!==pin.sha256||!/^files\/[a-f0-9]{64}\.json$/.test(rows[0].path))fail('INPUT_PIN');
-  const file=realpathSync(`${root}/${rows[0].path}`);if(!file.startsWith(realRoot+'/'))fail('INPUT_PATH');const bytes=readFileSync(file);if(bytes.length!==pin.bytes||bytesHash(bytes)!==pin.sha256)fail('INPUT_BYTES');const body=JSON.parse(bytes.toString('utf8'));if(optionalClassListDigest(body)!==pin.sha256)fail('INPUT_CANONICAL');out[path]=body;
+  const file=realpathSync(`${root}/${rows[0].path}`);if(!file.replaceAll('\\','/').startsWith(realRoot.replaceAll('\\','/')+'/'))fail('INPUT_PATH');const bytes=readFileSync(file);if(bytes.length!==pin.bytes||bytesHash(bytes)!==pin.sha256)fail('INPUT_BYTES');const body=JSON.parse(bytes.toString('utf8'));if(optionalClassListDigest(body)!==pin.sha256)fail('INPUT_CANONICAL');out[path]=body;
  }
  return originals=out;
 }
