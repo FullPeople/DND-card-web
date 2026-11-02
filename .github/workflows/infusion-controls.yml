@@ -305,6 +305,8 @@ jobs:
         run: node tools/runVitest.mjs run tests/reviewed-feats*.test.ts tests/reviewed-armor-*.test.ts tests/reviewed-modern-*.test.ts tests/reviewed-weapon-master*.test.ts tests/reviewed-skilled*.test.ts tests/reviewed-linguist*.test.ts tests/reviewed-observant*.test.ts tests/reviewed-alert*.test.ts tests/training-chips-editing.test.ts --maxWorkers=1
       - name: Actual-source ordinary casting and eight rendered control workflows
         run: node tools/runVitest.mjs run tests/ordinary-spell-*.test.ts tests/ordinary-catalog-hydration.test.ts tests/ordinary-casting-browser-contract.test.ts --maxWorkers=1
+      - name: Exact-source Arcane Grimoire checks with safe failure boundaries
+        run: node tools/runVitest.mjs run tests/arcane-grimoire-core.test.ts tests/arcane-grimoire-test-boundary.test.ts --maxWorkers=1
       - name: Grouped real-source finite and fixed-item accounting with rendered control guards
         run: node tools/runVitest.mjs run tests/limited-source*.test.ts tests/item-charge-*.test.ts tests/attuned-item-charge*.test.ts tests/vitest-runner*.test.ts tests/protected-resource-history*.test.ts tests/resource-evidence-native-imports.test.ts tests/resource-ledger-browser-contract.test.ts --maxWorkers=1
       - name: Owned item at-will and source-qualified racial darkvision guards
