@@ -1,3 +1,4 @@
+import {declaredSourceSpellKey,declaredSourceSpellOwnedChild} from './sourceSpellOwnership';
 import {itemAtWillGrantKey,itemAtWillSpell} from './itemAtWill';
 import {chargedItemSpellReserved,chargedItemSpellBinding,chargedItemSpellProtectedCollision} from './chargedItemSpells';
 import {ownedItemChargeResource} from './itemChargeDebits';
@@ -10,6 +11,9 @@ export function sourceSpellEnabled(c:Character,id:string):boolean{
  let row=c.selections.find(s=>s.id===id);if(!row)return false;
  const config=c.spellSettings?.special?.[id],grant=config?.sourceGrant;if(chargedItemSpellReserved(c,id))return !!chargedItemSpellBinding(c,id);if(!grant&&!config?.manualSource)return true;
  if(grant&&(!automationEnabled(c)||!grant.active))return false;
+ // Preserve opaque/manual records, but never treat an unknown declared grant
+ // as usable merely because its old cached active flag is still true.
+ if(grant&&(declaredSourceSpellKey(grant.key)||declaredSourceSpellKey(row.grantKey))&&!declaredSourceSpellOwnedChild(c,row))return false;
  if(itemAtWillGrantKey(grant?.key)||itemAtWillGrantKey(row.grantKey))return !!itemAtWillSpell(c,id);
  if(grant?.usage==='limited')return limitedSourceSpellOffer(c,id)?.offer.eligible===true;
  const seen=new Set<string>();
@@ -28,8 +32,8 @@ export function sourceOwnerIdentity(c:Character,row:Selection):string{
  return JSON.stringify(path);
 }
 // A zero counter may hide spent uses above a lowered maximum; only an explicit positive restoration clears that debt.
-export function rememberSourceSpellUses(c:Character,id?:string,preserveOverflow=true){
- const collisions=new Set(c.selections.filter(row=>chargedItemSpellProtectedCollision(c,row)).map(row=>row.id)),collisionKeys=new Set([...collisions].map(id=>specialSpellResource(id,c)));
+export function rememberSourceSpellUses(c:Character,id?:string,preserveOverflow=true,protectedIds:ReadonlySet<string>=new Set()){
+ const collisions=new Set([...protectedIds,...c.selections.filter(row=>chargedItemSpellProtectedCollision(c,row)||((declaredSourceSpellKey(row.grantKey)||declaredSourceSpellKey(c.spellSettings?.special?.[row.id]?.sourceGrant?.key))&&!declaredSourceSpellOwnedChild(c,row))).map(row=>row.id)]),collisionKeys=new Set([...collisions].map(id=>specialSpellResource(id,c)));
  // Canonical invocation pools survive aliases and inactive learning trees. Their
  // owned key, not mutable cached spell metadata, is the expenditure identity.
  for(const [key,r] of Object.entries(c.runtime.resources)){if(ownedItemChargeResource(c,key)||collisionKeys.has(key))continue;const usageKey=r.sourceSpellGrant?.usageKey;if(!usageKey||key!==`source-spell-pool:${encodeURIComponent(usageKey)}`||r.max!==1||!Number.isSafeInteger(r.current)||r.current<0||r.current>1||r.unlimited||id&&specialSpellResource(id,c)!==key)continue;(c.runtime.sourceSpellSpent||={})[usageKey]=1-r.current;}

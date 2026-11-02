@@ -1,3 +1,4 @@
+import {declaredSourceSpellKey,declaredSourceSpellOwnedChild,declaredSourceSpellCollision} from './sourceSpellOwnership';
 import {ownedItemChargeResource} from './itemChargeDebits';
 import {chargedItemSpellGrantKey,chargedItemSpellOwnedChild,chargedItemSpellProtectedCollision} from './chargedItemSpells';
 export {setChargedItemSpellIntent} from './chargedItemSpells';
@@ -14,10 +15,13 @@ export type {SourceSpellPlan,SourceSpellChoice} from './sourceSpellPlan';
 export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
  if(!supportedAutomation(c))return false;
  const fingerprint=()=>JSON.stringify([c.selections.filter(s=>sourceSpellKey(s.grantKey)).map(s=>[s.id,c.spellSettings?.special?.[s.id],c.runtime.resources[specialSpellResource(s.id,c)]]),c.spellSettings?.prepared,c.runtime.sourceSpellSpent]);
- const before=fingerprint();rememberSourceSpellUses(c,undefined,true);const plan=planSourceSpells(c,catalog),matched=new Set<string>();
+ const before=fingerprint(),plan=planSourceSpells(c,catalog),matched=new Set<string>();
+ const collisions=new Set(plan.grants.filter(grant=>declaredSourceSpellCollision(c,grant)).map(grant=>grant.id));
+ for(const row of c.selections)if(declaredSourceSpellKey(row.grantKey)&&!declaredSourceSpellOwnedChild(c,row))collisions.add(row.id);
+ rememberSourceSpellUses(c,undefined,true,collisions);
  // Explicit old-card review removals remain removed after a late catalog recovery.
  // Ordinary version retirement does not create this receipt.
- plan.grants=plan.grants.filter(grant=>!c.dismissedFeatures?.includes(grant.owner.id+'|'+grant.key));
+ plan.grants=plan.grants.filter(grant=>!collisions.has(grant.id)&&!c.dismissedFeatures?.includes(grant.owner.id+'|'+grant.key));
  const transfers=new Map<string,{max:number;old:Set<string>}>();
  for(const grant of plan.grants){if(grant.config.sourceGrant?.usage==='invocation-pact'||grant.config.sourceGrant?.usage==='limited')continue;const old=c.spellSettings?.special?.[grant.id];if(old?.mode!=='uses'||grant.config.mode!=='uses')continue;
   const previousKey=specialSpellResource(grant.id,c),nextKey=grant.config.sourceGrant?.resourceKey||`innate-spell:${grant.id}`;
@@ -43,10 +47,10 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
   }
  }
  for(const row of c.selections.filter(s=>sourceSpellKey(s.grantKey)&&!matched.has(s.id))){
-  if(chargedItemSpellProtectedCollision(c,row)||chargedItemSpellGrantKey(row.grantKey)&&!chargedItemSpellOwnedChild(c,row))continue;
+  if(collisions.has(row.id)||chargedItemSpellProtectedCollision(c,row)||chargedItemSpellGrantKey(row.grantKey)&&!chargedItemSpellOwnedChild(c,row))continue;
   const config=c.spellSettings?.special?.[row.id];if(config?.sourceGrant)config.sourceGrant={...config.sourceGrant,active:false,reason:'来源方案未启用或声明已变化，保留记录与消耗'};
  }
- rememberSourceSpellUses(c,undefined,true);return before!==fingerprint();
+ rememberSourceSpellUses(c,undefined,true,collisions);return before!==fingerprint();
 }
 
 /** Save freely chosen explicit references; unresolved declarations never acquire guessed choices. */

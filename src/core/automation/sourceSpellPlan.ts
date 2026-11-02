@@ -1,3 +1,4 @@
+import {declaredSourceSpellKey,declaredSourceSpellOwnedChild,declaredSourceSpellCollision} from './sourceSpellOwnership';
 import {itemAtWillOffers,itemAtWillRule,itemAtWillIdentity,itemAtWillTarget,itemAtWillStateIssue,itemAtWillChildCollision,itemAtWillChildKey,itemAtWillChildId} from './itemAtWill';
 import {itemChargeOffers,itemChargeStateIssue} from './itemChargeDebits';
 import {chargedItemSpellOffers,chargedItemSpellStateIssue,chargedItemSpellTarget,chargedItemSpellChildCollision,chargedItemSpellChildKey,chargedItemSpellChildId,chargedItemSpellConfig} from './chargedItemSpells';
@@ -170,6 +171,12 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  }
  for(const offer of limitedSourceUseOffers(c))if(!choices.some(q=>q.limitedUse?.ownerId===offer.ownerId&&q.limitedUse.poolId===offer.poolId))choices.push({ownerId:offer.ownerId,key:JSON.stringify(['limited-source',offer.ownerId,offer.poolId]),label:offer.ownerName+'的有限次数记录',limitedUse:{ownerId:offer.ownerId,poolId:offer.poolId}});
  for(const offer of itemChargeOffers(c))choices.push({ownerId:offer.ownerId,key:JSON.stringify(['item-charge',offer.ownerId]),label:offer.ownerName+'的充能记账',itemChargeUse:{ownerId:offer.ownerId}});
+ for(const grant of grants)if(declaredSourceSpellCollision(c,grant)){
+  const reason='生成法术身份与手工或其他来源记录冲突；保留原记录、设置与预备引用，暂停此项授予。';
+  issues.push({id:`source-spell-collision:${grant.id}`,selectionId:grant.owner.id,severity:'warning',message:reason});
+  if(grant.config.sourceGrant)grant.config.sourceGrant={...grant.config.sourceGrant,active:false,reason};
+ }
+ for(const row of c.selections)if(declaredSourceSpellKey(row.grantKey)&&!declaredSourceSpellOwnedChild(c,row)&&!issues.some(i=>i.id===`source-spell-collision:${row.id}`))issues.push({id:`source-spell-collision:${row.id}`,selectionId:row.parentId||row.id,severity:'warning',message:'保留的生成法术归属无法核实；保留原记录、设置与预备引用，不接管或改写。'});
  return {grants,issues,choices};
 }
 
