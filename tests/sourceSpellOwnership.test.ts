@@ -71,3 +71,25 @@ describe('declared source-spell generated IDs never authorize adoption',()=>{
   const {c,catalog,row}=setup();delete c.selections[0].entry.raw.additionalSpells;syncSourceSpells(c,catalog);expect(c.spellSettings!.special![row.id].sourceGrant!.active).toBe(false);expect(c.selections.find(s=>s.id===row.id)).toEqual(row);
  });
 });
+
+// Reviewed translated UIDs must use the existing canonical invocation proof,
+// never an arbitrary display/raw name or a weakened full-target comparison.
+describe('reviewed invocation display-label ownership bridge',()=>{
+ it.each(['valid','raw-english','raw-source','lookalike','wrong-uid','unknown-config','duplicate-owner'] as const)('preserves the canonical boundary for %s',async kind=>{
+  const {invocationFixture,learn}=await import('./fixtures/invocationFixture');
+  const {c,entries,find}=invocationFixture();find('Detect Magic').name='Authored renamed display';learn(c,entries,find('Eldritch Sight'));
+  const row=c.selections.find(s=>s.entry.english==='Detect Magic')!;
+  if(kind==='raw-english')row.entry.raw.ENG_name='Authored unrelated spell';
+  if(kind==='raw-source')row.entry.raw.source='XPHB';
+  if(kind==='lookalike'){row.entry.english='Authored unrelated spell';row.entry.raw.ENG_name=row.entry.english;}
+  if(kind==='unknown-config')(c.spellSettings!.special![row.id] as any).futureOwned={version:2};
+  if(kind==='duplicate-owner')c.selections.push(structuredClone(c.selections.find(s=>s.id===row.parentId)!));
+  if(kind==='wrong-uid'){
+   const previous=row.id,config=c.spellSettings!.special![previous];row.grantKey=row.grantKey!.replace(/[^/]+$/,'authored-other-uid');row.id=`auto-spell:${row.parentId}:${encodeURIComponent(row.grantKey)}`;config.sourceGrant!.key=row.grantKey;delete c.spellSettings!.special![previous];c.spellSettings!.special![row.id]=config;
+  }
+  const before=JSON.stringify(c);
+  expect(sourceSpellEnabled(c,row.id)).toBe(kind==='valid');
+  expect(spellPayments(c,row.id).options.map(o=>o.id)).toEqual(kind==='valid'?['free']:[]);
+  expect(JSON.stringify(c)).toBe(before);
+ });
+});
