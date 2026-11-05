@@ -34,7 +34,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'&&!reviewedAlertIdentity(s.entry)&&!limitedSourceIdentity(s.entry)&&!itemChargeIdentity(s.entry)),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
  // Saved snapshots win over a newly downloaded edition/revision of the same entry.
  const known=[...new Map([...c.selections.map(s=>s.entry),...catalog].map(e=>[e.id,e] as const).reverse()).values()].filter(e=>e.kind==='spell');
- let spellIdentity:ReturnType<typeof sourceSpellIdentities>|undefined;const identity=(ref:string)=>(spellIdentity??=sourceSpellIdentities(known))(ref),fixedGroups=new Map<string,string[]>();
+ let spellIdentity:ReturnType<typeof sourceSpellIdentities>|undefined;const identity=(ref:string)=>(spellIdentity??=sourceSpellIdentities(known,true))(ref),fixedGroups=new Map<string,string[]>();
  for(const owner of c.selections.filter(s=>s.entry.kind!=='spell'&&s.entry.raw.additionalSpells!=null)){
   // Alert's authenticated PHB adapter grants only initiative; edited family
   // copies cannot bypass it through generic additionalSpells or use pools.
@@ -78,8 +78,9 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
      if(!Array.isArray(list)){issue(path,'赠送列表格式未支持。');return [];}
      const hasFilters=list.some(ref=>object(ref)&&typeof ref.choose==='string'),distinctGroup=hasFilters?JSON.stringify([sourceOwnerIdentity(c,owner),`source-spell:${index}/${kind}/${gate}/${path}`]):undefined;
      if(distinctGroup)fixedGroups.set(distinctGroup,list.filter(ref=>typeof ref==='string'));
+     const contributions:{ref:string;fixed:boolean}[]=[];
      const resolved=list.flatMap((ref,node)=>{
-      if(typeof ref==='string')return [ref];
+      if(typeof ref==='string'){if(hasFilters)contributions.push({ref,fixed:true});return [ref];}
       let from:string[],count:number;
       if(object(ref)&&typeof ref.choose==='string'&&Object.keys(ref).every(key=>['choose','count'].includes(key))){
        count=ref.count??1;if(!Number.isInteger(count)||count<1||count>100){issue(path,'赠送法术的选择数量尚未支持，请按原文手动选择。');return [];}
@@ -99,9 +100,14 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       const selected=c.automation?.spellChoices?.[key]||[];
       if(selected.length>count||new Set(selected).size!==selected.length||selected.some(uid=>!from.includes(uid))){issue(path,'已保存的赠送法术选择与当前声明不符，请重新选择；记录保留。');return [];}
       if(selected.length<count)issue(path,`可记录 ${count} 项赠送法术，尚有 ${count-selected.length} 项未选。`);
+      if(hasFilters)contributions.push(...selected.map(ref=>({ref,fixed:false})));
       return selected;
      });
-     if(hasFilters&&new Set(resolved.map(identity)).size!==resolved.length){issue(path,'同一组赠送法术出现重复选择；保留原选择，修正后再授予。');return [];}
+     if(hasFilters){
+      const fixed=new Set(contributions.filter(row=>row.fixed).map(row=>identity(row.ref))),counts=new Map<string,number>();for(const row of contributions.filter(row=>!row.fixed)){const id=identity(row.ref);counts.set(id,(counts.get(id)||0)+1);}
+      const duplicates=new Set([...counts].filter(([id,count])=>count>1||fixed.has(id)).map(([id])=>id));
+      if(duplicates.size){issue(path,'同一组出现重复的自选施法；原选择保留，重复的自选授予暂停，固定法术和其他有效选择保持。');return contributions.filter(row=>row.fixed||!duplicates.has(identity(row.ref))).map(row=>row.ref);}
+     }
      return resolved;
     }
     function addList(list:unknown,path:string,usage:NonNullable<SpecialSpell['sourceGrant']>['usage'],count?:number,recovery?:SpecialSpell['recovery'],shared=false,resource?:{name:string;cost:number;key:string}){

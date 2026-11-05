@@ -12,9 +12,12 @@ function referenceIndex(entries:readonly Entry[]){
  return index;
 }
 /** Compare selected spells by their source-qualified identity, including aliases. */
-export function sourceSpellIdentities(entries:readonly Entry[]):(reference:string)=>string{
- const index=referenceIndex(entries);
- return reference=>{const [name,source='PHB']=reference.split('#')[0].split('|'),uid=referenceKey(name,source),ids=index.get(uid);return ids?.size===1?`entry:${ids.values().next().value}`:`uid:${uid}`;};
+export function sourceSpellIdentities(entries:readonly Entry[],includeCastLevel=false):(reference:string)=>string{
+ const index=referenceIndex(entries),byId=includeCastLevel?new Map(entries.map(entry=>[entry.id,entry])):undefined;
+ return reference=>{const [uidPart,suffix]=reference.split('#'),[name,source='PHB']=uidPart.split('|'),uid=referenceKey(name,source),ids=index.get(uid),id=ids?.size===1?ids.values().next().value:undefined,identity=id?`entry:${id}`:`uid:${uid}`;
+  if(!includeCastLevel)return identity;
+  const level=id?Number(byId?.get(id)?.raw.level):NaN,cast=suffix?(suffix.toLowerCase()==='c'?0:/^[1-9]$/.test(suffix)?Number(suffix):suffix):Number.isInteger(level)&&level>=0&&level<=9?level:'native';return JSON.stringify([identity,cast]);
+ };
 }
 /** Positive filter clauses are ANDed; semicolon alternatives are ORed.
  * Grammar: tjliqy/5etools-cn@5cc0bbe, render.js getFilterSubhashes and
