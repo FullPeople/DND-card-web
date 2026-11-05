@@ -194,8 +194,8 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  }
  for(const row of c.selections)if(declaredSourceSpellKey(row.grantKey)&&!declaredSourceSpellOwnedChild(c,row)&&!issues.some(i=>i.id===`source-spell-collision:${row.id}`))issues.push({id:`source-spell-collision:${row.id}`,selectionId:row.parentId||row.id,severity:'warning',message:'保留的生成法术归属无法核实；保留原记录、设置与预备引用，不接管或改写。'});
  for(const choice of choices)if(choice.distinctGroup){
-  const used=new Set([...(fixedGroups.get(choice.distinctGroup)||[]),...choices.filter(other=>other!==choice&&other.distinctGroup===choice.distinctGroup).flatMap(other=>c.automation?.spellChoices?.[other.key]||[])].map(identity));
-  choice.blockedSpells=choice.spells?.filter(ref=>used.has(identity(ref)));
+  const selected=c.automation?.spellChoices?.[choice.key]||[],used=new Set([...(fixedGroups.get(choice.distinctGroup)||[]),...choices.filter(other=>other.distinctGroup===choice.distinctGroup).flatMap(other=>c.automation?.spellChoices?.[other.key]||[])].map(identity));
+  choice.blockedSpells=choice.spells?.filter(ref=>!selected.includes(ref)&&used.has(identity(ref)));
  }
  return {grants,issues,choices};
 }

@@ -62,3 +62,8 @@ it('holds a retained choice after a declaration changes and restores its exhaust
  c.selections[0].entry.raw.additionalSpells[0].innate['_'].daily['1e'][0].choose='level=1|school=I';syncSourceSpells(c,catalog);expect(c.automation!.spellChoices![q.key]).toEqual(['Ash|PHB']);expect(c.spellSettings!.special![row.id].sourceGrant!.active).toBe(false);expect(planSourceSpells(c,catalog).issues.some(issue=>issue.message.includes('当前声明不符'))).toBe(true);
  const restored=readCharacter(JSON.parse(JSON.stringify(c))).character;restored.selections[0].entry.raw.additionalSpells[0].innate['_'].daily['1e'][0].choose='level=1|school=N;I';syncSourceSpells(restored,catalog);expect(restored.spellSettings!.special![row.id].sourceGrant!.active).toBe(true);expect(restored.runtime.resources[resource].current).toBe(0);expect(restored.runtime.resources.manual).toEqual({max:9,current:2});
 });
+it('marks an unchecked alias of an already selected spell unavailable inside the same filtered group',()=>{
+ const entries=[{...catalog[0],name:'原创灰烬'},catalog[1]],c=setup();c.selections[0].entry.raw.additionalSpells[0].innate['_'].daily['1e'].push({choose:{from:['Ash|PHB','原创灰烬|PHB','Mist|PHB'],count:2}});
+ const q=planSourceSpells(c,entries).choices.find(choice=>choice.spells&&choice.count===2)!;setSourceSpellChoices(c,q.key,['Ash|PHB'],entries);const fresh=planSourceSpells(c,entries).choices.find(choice=>choice.key===q.key)!;
+ expect(fresh.blockedSpells).toContain('原创灰烬|PHB');expect(fresh.blockedSpells).not.toContain('Ash|PHB');const before=JSON.stringify(c);expect(()=>setSourceSpellChoices(c,q.key,['Ash|PHB','原创灰烬|PHB'],entries)).toThrow();expect(JSON.stringify(c)).toBe(before);
+});
