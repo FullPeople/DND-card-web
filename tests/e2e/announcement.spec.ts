@@ -28,6 +28,7 @@ test('首次公告保留 Q&A，更新日志按日期展开并采用最新说明'
  await expect(dialog(page).locator('.announcement-faq')).toBeVisible();
  await expect(dialog(page).locator('.announcement-current')).toBeHidden();
  await expect(dialog(page).locator('.announcement-version')).toHaveText(`版本 v${APP_VERSION}`);
+ const archive=dialog(page).locator('.announcement-maintenance');await expect(archive).toBeVisible();expect(await archive.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);await archive.locator('summary').click();await expect(archive).toContainText('以下是碎碎念');await expect(archive).toContainText('10 月 10 日');await archive.locator('summary').click();expect(await archive.evaluate(node=>(node as HTMLDetailsElement).open)).toBe(false);await expect(dialog(page).locator('.announcement-cloud-poster')).not.toContainText('每天中午');
  await dialog(page).getByRole('tab',{name:'更新日志',exact:true}).click();
  const log=dialog(page).getByRole('tabpanel',{name:'更新日志',exact:true}),releases=releaseLogFor('standalone'),current=releases[0];
  await expect(log.locator('details,summary')).toHaveCount(0);

@@ -44,6 +44,19 @@ jobs:
           persist-credentials: false
       - name: Verify runtime ledger and current consumer module hashes
         run: npm run verify:automation-runtime -- --data-repository .local-evidence/runtime-authority
+      - name: Read pinned source-directory revision
+        id: directory-data
+        run: node -e 'const fs=require("fs"),l=JSON.parse(fs.readFileSync("docs/data/catalog-source-discovery.lock.json"));if(!/^[a-f0-9]{40}$/.test(l.revision))throw Error("Invalid source-directory Data revision");fs.appendFileSync(process.env.GITHUB_OUTPUT,"revision="+l.revision+"\n")'
+      - uses: actions/checkout@v6
+        with:
+          repository: FullPeople/dnd5e-automation-data
+          ref: ${{ steps.directory-data.outputs.revision }}
+          path: .local-evidence/source-directory-authority
+          sparse-checkout: reports/progress/catalog-source-discovery.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Compare source-directory metadata with its exact Data commit blob
+        run: npm run verify:catalog-directory -- --data-repository .local-evidence/source-directory-authority
       - run: npm ci
       - name: Materialize exact original sources privately for ordinary casting checks
         shell: bash
@@ -91,6 +104,7 @@ jobs:
             .local-evidence/automation-progress/unit-report.json
             .local-evidence/automation-progress/source-provenance.json
             .local-evidence/automation-progress/runtime-provenance.json
+            .local-evidence/automation-progress/source-directory-provenance.json
             .local-evidence/ordinary-full-source-verification.json
           if-no-files-found: error
           retention-days: 1
@@ -118,6 +132,8 @@ jobs:
               npm run build:cloud
               npx playwright test --config playwright.pr-issues.config.ts
               npx playwright test --config playwright.source-spell-ownership.config.ts
+              npx playwright test --config playwright.source-spell-filter.config.ts
+              npx playwright test --config playwright.palette-feedback.config.ts
           - group: automation-progress
             commands: |
               npx playwright test --config playwright.automation-progress.config.ts
@@ -300,9 +316,10 @@ jobs:
             .local-evidence/direct232-browser/
             .local-evidence/save-bonuses-browser/
             .local-evidence/automation-progress/
+            .local-evidence/workspace-feedback/
           retention-days: 7
       - uses: actions/upload-artifact@v4
-        if: always() && (matrix.group == 'next-feedback' || matrix.group == 'automation-progress' || matrix.group == 'transition-rest' || matrix.group == 'workbench-recovery' || matrix.group == 'owner-sync' || matrix.group == 'direct-232' || matrix.group == 'saving-throw-adjustments' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release' || matrix.group == 'portrait-frame' || matrix.group == 'card-fixes-235' || matrix.group == 'startup-integration' || matrix.group == 'startup-order' || matrix.group == 'armor-feature-followup' || matrix.group == 'dashboard-appearance' || matrix.group == 'monster-lifecycle')
+        if: always() && (matrix.group == 'next-feedback' || matrix.group == 'automation-progress' || matrix.group == 'transition-rest' || matrix.group == 'workbench-recovery' || matrix.group == 'owner-sync' || matrix.group == 'direct-232' || matrix.group == 'saving-throw-adjustments' || matrix.group == 'edit-profile-232' || matrix.group == 'class-drop-profile-232' || matrix.group == 'resources-sources' || matrix.group == 'screen-release' || matrix.group == 'portrait-frame' || matrix.group == 'card-fixes-235' || matrix.group == 'startup-integration' || matrix.group == 'startup-order' || matrix.group == 'armor-feature-followup' || matrix.group == 'dashboard-appearance' || matrix.group == 'monster-lifecycle' || matrix.group == 'latest-workspace-and-resources')
         with:
           name: direct232-evidence-${{ matrix.group }}
           include-hidden-files: true
@@ -316,6 +333,7 @@ jobs:
             .local-evidence/direct232-browser/
             .local-evidence/save-bonuses-browser/
             .local-evidence/automation-progress/
+            .local-evidence/workspace-feedback/
             .local-evidence/owner-sync/browser/
             .local-evidence/window-shell/results/
             .local-evidence/manager-recovery/

@@ -4,6 +4,9 @@
 .automation-progress-stages{display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 0 12px}
 .automation-progress-stages>span{white-space:nowrap}
 .automation-progress-coverage{margin:0 0 10px}
+.automation-progress-discovery{margin:0 0 12px}
+.automation-progress-search{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.automation-progress-search input{min-width:0;min-height:36px;flex:1;box-sizing:border-box}
 .automation-progress-books{list-style:none;padding:0;margin:0}
 .automation-progress-books li{display:grid;grid-template-columns:minmax(0,1fr) 90px 60px;align-items:center;gap:10px;min-height:22px;padding:2px 0;border-bottom:1px solid #e5e8dc;line-height:1.4}
 .automation-progress-book-name{min-width:0}

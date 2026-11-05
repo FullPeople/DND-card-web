@@ -1,4 +1,12 @@
-# 2026-10-25 · 角色卡、卡库与 Wiki 307 已发布并完成公网验收
+# 2026-11-06 · 长期推进接手状态：Data89 已合并，Web143 待完整检查
+
+公网角色卡、卡库与 Wiki 仍为 `standalone-1.0.307`，源码 `1aa35b537fd8c6bd1a850ebb55a6c5a7b43677a6`；11 月 1 日维护公告须完整保留。网站 main 已按依赖整合 PR139、140、141、142，当前为 `f5ce82fae695c2642f39a663a790630f97364a3b`，合并不等于上线。Data PR87、88、89 已合并，main 为 `d53baa3353e98b0dea1c6aa9eb80cdd60a94a320`，合并后检查通过。最新候选为 [Web PR143](https://github.com/FullPeople/DND-card-web/pull/143)，完整进度、原始失败及后续动作以 [STATUS](STATUS.md)、[筛选机制记录](SOURCE-SPELL-FILTER-CHOICES.md) 和[历史回归登记](REGRESSION-REGISTER.md) 为准。
+
+原桌面目录 `D:/Desktop/DND-card-web` 的未提交工作已清点并复制校验，本轮不在其中重置、清理或发布。隔离工作根为 `G:/CodexWork/2026-11-06/dnd-longterm`；最终网站候选在 `catalog-intake-web`，Data 候选在 `catalog-intake-data`。`source-filters` 的 `38af300c` 与 `filter-data` 的 `887242cb` 是完整回放冻结消费者／生产者，不能为接手方便切换或覆盖。私有原始资料与角色夹具不进入公开仓库。
+
+本轮用户授权持续修复、按检查与保护规则普通合并，并沿用已有流程部署和验证。禁止 OpenAI API、申请密钥或新增玩家 AI 功能；不自动 APPROVE，不绕过权限／审批。发布仅准备角色卡与卡库，Wiki、插件、后台和玩家数据库不随本批改动。真实玩家原卡、实体设备和独立 GM／玩家房间仍待对应验收。
+
+# 2026-10-25 · 角色卡、卡库与 Wiki 307 已发布并完成公网验收（历史发布基线）
 
 用户明确要求“部署”后，网站 `/card/`、`/library/`、`/wiki/` 已发布 `standalone-1.0.307`，实际源码 `1aa35b537fd8c6bd1a850ebb55a6c5a7b43677a6`，公告版本 `0.1.80`。角色卡／卡库于北京时间 15:48:43、Wiki 于 15:58:59 取得各自 `published` 回执。Web PR118、Data PR72 已普通合并；配对 Data 锁 `540370369e7cf439d76461c219b401871a1ad927` 在远端可访问。
 

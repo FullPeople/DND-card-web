@@ -3,6 +3,7 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {mockSource} from './fixtures';
 import {sourceRuleCounts,type ProgressManifest} from '../../src/platform/automationProgress';
+import {mergeSourceDirectoryBooks,type SourceDirectory} from '../../src/platform/sourceDirectory';
 const asset='dist-standalone/assets/'+readdirSync('dist-standalone/assets').find(n=>/^automation-progress-.*\.json$/.test(n))!;
 const content=readFileSync(asset),manifest:ProgressManifest=JSON.parse(content.toString());
 const manifestHash=createHash('sha256').update(content).digest('hex');
@@ -11,14 +12,20 @@ const panel=(page:Page)=>page.getByRole('tabpanel',{name:'自动化进度',exact
 async function noticeReady(page:Page){await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete',{timeout:12000});await expect(page.locator('.announcement')).toBeVisible();}
 async function open(page:Page){await mockSource(page);await page.goto('/');await noticeReady(page);await expect(page.locator('.paper')).toBeVisible();}
 async function readWorkspace(page:Page){return page.evaluate(async()=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open('dnd-card-standalone');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});try{return await new Promise<string>((resolve,reject)=>{const tx=db.transaction('documents','readonly'),r=tx.objectStore('documents').get('workspace');r.onsuccess=()=>resolve(JSON.stringify(r.result));r.onerror=()=>reject(r.error);});}finally{db.close();}});}
-const books=manifest.sources;
+const directoryAsset='dist-standalone/assets/'+readdirSync('dist-standalone/assets').find(n=>/^automation-source-directory-.*\.json$/.test(n))!;
+const directoryContent=readFileSync(directoryAsset),directory:SourceDirectory=JSON.parse(directoryContent.toString()),books=mergeSourceDirectoryBooks(manifest,directory);
 
 test('whole-catalog progress retains unknown sources and separates partial execution from complete acceptance',async({page})=>{
  await open(page);await tab(page).click();
- await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(manifest.sources.length);
- const unknown=manifest.sources.filter(source=>sourceRuleCounts(manifest,source.id,'all')===null);
+ await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(books.length);
+ const unknown=books.filter(source=>sourceRuleCounts(manifest,source.id,'all')===null);
  expect(unknown.length).toBeGreaterThan(0);
- for(const source of unknown){const row=panel(page).locator(`[data-source="${source.id}"]`);await expect(row).toContainText(source.name);await expect(row).toContainText('目录待建立');await expect(row).not.toContainText('0%');}
+ // One DOM snapshot keeps every per-source assertion within the original test budget.
+ const rendered=await panel(page).locator('.automation-progress-books li').evaluateAll(nodes=>nodes.map(node=>({id:node.getAttribute('data-source')||'',text:node.textContent||''})));
+ await test.info().attach('all-source-rows',{body:Buffer.from(JSON.stringify({sourceCommit:manifest.build.sourceCommit,manifestSha256:manifestHash,directorySha256:createHash('sha256').update(directoryContent).digest('hex'),sources:rendered})),contentType:'application/json'});
+ expect(rendered.map(row=>row.id).sort()).toEqual(books.map(source=>source.id).sort());
+ const textBySource=new Map(rendered.map(row=>[row.id,row.text]));
+ for(const source of unknown){const text=textBySource.get(source.id);expect(text,source.id).toContain(source.name);expect(text,source.id).toContain('目录待建立');expect(text,source.id).not.toContain('0%');}
  await expect(panel(page)).toContainText(`已登记：${manifest.audit.counts!.total}`);
  await expect(panel(page)).toContainText(`来源已核验：${manifest.audit.counts!.reviewed}`);
  for(const stage of ['完整建模','完整执行','已验收'])await expect(panel(page)).toContainText(`${stage}：待核实`);
@@ -28,7 +35,7 @@ test('whole-catalog progress retains unknown sources and separates partial execu
 
 test('player progress, lazy caching and character preservation',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));const requests:string[]=[];page.on('request',r=>requests.push(r.url()));
- await open(page);await expect(tab(page)).toHaveAttribute('aria-selected','false');expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(0);
+ await open(page);await expect(tab(page)).toHaveAttribute('aria-selected','false');expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(0);expect(requests.filter(u=>/automation-source-directory-.*\.json/.test(u))).toHaveLength(0);
  await page.getByRole('button',{name:'我知道了',exact:true}).click();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('dnd-card-standalone');r.onsuccess=()=>resolve(r.result);});const tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),request=store.get('workspace');request.onsuccess=()=>{const workspace=request.result,c=workspace.characters[0];c.story='原创验收手工记录';c.runtime.resources.manualProbe={name:'原创已消耗资源',max:4,current:1};c.automation={protocol:2,rulesVersion:'equipment.1',defaultsVersion:1,enabled:false};store.put(workspace,'workspace');};await new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();});
  await page.reload();await noticeReady(page);await expect(page.locator('.save-status')).toContainText('已保存到本机');
@@ -38,12 +45,13 @@ test('player progress, lazy caching and character preservation',async({page})=>{
  await expect(panel(page)).toContainText('局部机制可用不等于整条规则完成。');
  await expect(panel(page)).toContainText(`来源已核验：${manifest.audit.counts!.reviewed}`);await expect(panel(page)).toContainText(`至少一项机制已执行：${manifest.runtimeAudit!.implemented}/${manifest.audit.counts!.total}`);
  await expect(panel(page)).toContainText('最近更新时间：');await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(books.length);
+ await expect(panel(page)).toContainText(`${directory.summary.newCandidateIdentities.toLocaleString('zh-CN')} 个候选条目待登记`);const search=panel(page).getByRole('searchbox',{name:'查找来源书',exact:true});await search.fill('S5E');await expect(panel(page).locator('[data-source="S5E"]')).toBeVisible();await expect(panel(page)).toContainText(`已知目录：${books.length} 个来源`);await expect(panel(page)).toContainText(`已登记：${manifest.audit.counts!.total}`);await search.fill('');await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(books.length);
  await expect(panel(page).locator('select,details,button,a,[data-capability]')).toHaveCount(0);await expect(panel(page)).not.toContainText('逐条证据');await expect(panel(page)).not.toContainText('本地快照标记');
  await page.screenshot({path:test.info().outputPath('progress-desktop.png')});
  await page.getByRole('tab',{name:'公告内容',exact:true}).click();await expect(panel(page)).toBeHidden();await expect(page.locator('.announcement-faq')).toBeVisible();await tab(page).click();
  await tab(page).focus();await page.keyboard.press('ArrowLeft');await expect(page.getByRole('tab',{name:'公告内容',exact:true})).toBeFocused();await page.keyboard.press('End');await expect(page.getByRole('tab',{name:'更新日志',exact:true})).toBeFocused();await expect(panel(page)).toBeHidden();await page.keyboard.press('ArrowLeft');await expect(tab(page)).toBeFocused();
  await page.getByRole('button',{name:'我知道了',exact:true}).click();await page.getByRole('button',{name:'公告',exact:true}).click();await tab(page).click();await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(books.length);
- expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(1);expect(requests.filter(u=>/5e\.kiwee|homebrew\.kiwee|cardRuntime|sourceSpells|catalog|libraryData|automation-rule-status|automation-runtime-coverage/i.test(u))).toEqual([]);
+ expect(requests.filter(u=>/automation-progress-.*\.json/.test(u))).toHaveLength(1);expect(requests.filter(u=>/automation-source-directory-.*\.json/.test(u))).toHaveLength(1);expect(requests.filter(u=>/5e\.kiwee|homebrew\.kiwee|cardRuntime|sourceSpells|catalog|libraryData|automation-rule-status|automation-runtime-coverage/i.test(u))).toEqual([]);
  expect(await readWorkspace(page)).toBe(before);expect(errors).toEqual([]);
 });
 
@@ -72,4 +80,8 @@ test('corrupt manifest leaves progress unavailable and the card usable',async({p
  await page.route('**/automation-progress-*.json',r=>r.fulfill({json:{...manifest,runtimeAudit:{...manifest.runtimeAudit,implemented:999999}}}));await open(page);await tab(page).click();
  await expect(panel(page)).toContainText('进度暂时无法读取，请稍后重试。');await expect(panel(page).locator('.automation-progress-books')).toHaveCount(0);await expect(panel(page).getByRole('button')).toHaveCount(0);
  await page.getByRole('tab',{name:'公告内容',exact:true}).click();await expect(page.locator('.announcement-faq')).toBeVisible();await page.getByRole('button',{name:'我知道了',exact:true}).click();await expect(page.locator('.paper')).toBeVisible();
+});
+
+test('unreadable discovery directory keeps the old card and labels the incomplete source scope',async({page})=>{
+ await page.route('**/automation-source-directory-*.json',route=>route.fulfill({json:{...directory,creditAdded:{...directory.creditAdded,executed:1}}}));await open(page);await tab(page).click();await expect(panel(page)).toContainText('完整来源目录暂时无法读取');await expect(panel(page)).toContainText('完整目录范围待核实');await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(manifest.sources.length);await expect(panel(page)).not.toContainText(`已知目录：${books.length} 个来源`);await page.getByRole('tab',{name:'公告内容',exact:true}).click();await page.getByRole('button',{name:'我知道了',exact:true}).click();await expect(page.locator('.paper')).toBeVisible();
 });

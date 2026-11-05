@@ -7,6 +7,7 @@ import {useUiLanguage} from './UiLanguage';
 import {FeedbackSection} from './UiControls';
 import {AuthorSupport} from './AuthorSupport';
 import {SupporterMarquee} from './SupporterMarquee';
+import maintenanceNotice from '../data/maintenanceNotice20261101.json';
 import {ToolBoundary} from './ToolBoundary';
 const AutomationProgress=lazy(()=>import('./AutomationProgress'));
 
@@ -58,7 +59,8 @@ export function Announcement({close,mode='standalone'}:{close:()=>void;mode?:Ann
     <nav className="announcement-tabs" role="tablist" aria-label="公告、自动化进度与更新日志">{tabs.map((label,index)=><button key={label} ref={node=>{tabRefs.current[index]=node;}} id={`announcement-tab-${index}`} role="tab" aria-selected={tab===index} aria-controls={`announcement-panel-${index}`} tabIndex={tab===index?0:-1} onClick={()=>selectTab(index)} onKeyDown={event=>{let next:number|undefined;if(event.key==='ArrowLeft'||event.key==='ArrowRight')next=(tab+(event.key==='ArrowRight'?1:tabs.length-1))%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;if(next!==undefined){event.preventDefault();selectTab(next);tabRefs.current[next]?.focus();}}}>{language==='en'?englishTabs[index]:label}</button>)}</nav></header>
     <div className="announcement-body" ref={bodyRef}>
       <section id="announcement-panel-0" role="tabpanel" aria-labelledby="announcement-tab-0" hidden={tab!==0}>
-      <div className="announcement-cloud-poster"><strong>若有bug请发送到邮箱！</strong><small>每天中午都会处理邮件和issue！你的反馈能让该项目真的变得更好！</small></div>
+      <div className="announcement-cloud-poster"><strong>若有bug请发送到邮箱！</strong><small>请附页面网址、版本和复现步骤，方便核对。</small></div>
+      {mode==='standalone'&&<details className="announcement-maintenance announcement-owner" onToggle={reveal}><summary>2026-11-01 · 作者说明（历史公告）</summary><div className="maintenance-notice" dangerouslySetInnerHTML={{__html:maintenanceNotice.html}}/></details>}
       <FeedbackSection/><AuthorSupport/>
       {mode==='suite'&&<details className="announcement-owner" onToggle={reveal}><summary>{t('ownerTitle')}</summary><p>{t('ownerIntro')}</p><ol><li>{t('ownerStep1')}<img loading="lazy" fetchPriority="low" decoding="async" src="./owner-step1.png" alt={t('ownerImage1')}/><img loading="lazy" fetchPriority="low" decoding="async" src="./owner-step2.png" alt={t('ownerImage2')}/></li><li>{t('ownerStep2')}<img loading="lazy" fetchPriority="low" decoding="async" src="./owner-step3.png" alt={t('ownerImage3')}/></li></ol><p>{t('ownerFinish')}</p></details>}
       {mode==='suite'&&<p>{t('assignCard')}<a href="https://dnd.center/card/" target="_blank" rel="noreferrer">{t('independentSite')}</a></p>}

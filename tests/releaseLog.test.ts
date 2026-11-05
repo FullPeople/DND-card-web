@@ -1,5 +1,8 @@
 import {describe,it,expect} from 'vitest';
-import {RELEASE_DATE,releaseHistoryFor,releaseLogFor} from '../src/platform/releaseNotes';
+import {RELEASE_DATE,STANDALONE_RELEASE_DATE,releaseHistoryFor,releaseLogFor} from '../src/platform/releaseNotes';
+it('keeps the resumed standalone work current without presenting old completed releases as new',()=>{
+ const log=releaseLogFor('standalone');expect(log[0].title).toBe('2026-11-06');expect(log.some(day=>day.title==='2026-10-09')).toBe(true);
+});
 
 describe('date-grouped changelog',()=>{
  for(const mode of ['standalone','suite'] as const){
@@ -17,7 +20,7 @@ describe('date-grouped changelog',()=>{
   });
  }
  it('adds current history and framing fixes while retaining the previous palette and gallery day',()=>{
-  for(const mode of ['standalone','suite'] as const){const log=releaseLogFor(mode);expect(log[0].title).toBe(RELEASE_DATE);expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('撤回与重做');expect(JSON.stringify(log.find(day=>day.title==='2026-10-08'))).toContain('保存和导入配色文件');}
+  for(const mode of ['standalone','suite'] as const){const log=releaseLogFor(mode);expect(log[0].title).toBe(mode==='standalone'?STANDALONE_RELEASE_DATE:RELEASE_DATE);expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('撤回与重做');expect(JSON.stringify(log.find(day=>day.title==='2026-10-08'))).toContain('保存和导入配色文件');}
   expect(JSON.stringify(releaseLogFor('standalone').find(day=>day.title==='2026-10-08'))).toContain('点击旁边的卡只切换');
  });
  it('keeps Suite-only changes in the Suite changelog',()=>{
@@ -29,7 +32,7 @@ describe('date-grouped changelog',()=>{
  });
  it('shows the new standalone batch and supersedes the former cloud policy without rewriting history',()=>{
   const raw=JSON.stringify(releaseHistoryFor('standalone')),log=releaseLogFor('standalone');
-  expect(log[0].title).toBe(RELEASE_DATE);
+  expect(log[0].title).toBe(STANDALONE_RELEASE_DATE);
   expect(JSON.stringify(log.find(day=>day.title==='2026-10-10'))).toContain('资源次数与来源');
   expect(JSON.stringify(log.find(day=>day.title==='2026-10-09'))).toContain('赞助二维码');
   expect(JSON.stringify(log)).toContain('三个标签');

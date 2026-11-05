@@ -8,6 +8,7 @@ import {spellState} from '../characterDetails';
 import {specialSpellResource} from '../spellResourceKeys';
 import {supportedAutomation} from './state';
 import {planSourceSpells,sourceSpellKey} from './sourceSpellPlan';
+import {sourceSpellIdentities} from './sourceSpellFilter';
 export {planSourceSpells,sourceSpellKey} from './sourceSpellPlan';
 export type {SourceSpellPlan,SourceSpellChoice} from './sourceSpellPlan';
 
@@ -57,6 +58,8 @@ export function syncSourceSpells(c:Character,catalog:Entry[]):boolean{
 export function setSourceSpellChoices(c:Character,key:string,refs:string[],catalog:Entry[]=[]):void{
  const choice=planSourceSpells(c,catalog).choices.find(x=>x.key===key&&x.spells);
  if(!choice||refs.length>choice.count!||new Set(refs).size!==refs.length||refs.some(ref=>!choice.spells!.includes(ref)))throw Error('赠送法术选择与当前声明不符。');
+ if(refs.some(ref=>choice.blockedSpells?.includes(ref)))throw Error('这个法术已在本组其他位置选择，请选择不同的法术。');
+ if(choice.distinctGroup&&refs.length>1){const entries=[...new Map([...catalog,...c.selections.map(row=>row.entry)].map(entry=>[entry.id,entry] as const)).values()],identity=sourceSpellIdentities(entries,true);if(new Set(refs.map(identity)).size!==refs.length)throw Error('本组选项不能重复引用同一种施法。');}
  const choices=c.automation!.spellChoices||={};Object.defineProperty(choices,key,{value:[...refs],enumerable:true,writable:true,configurable:true});
 }
 
