@@ -11,7 +11,20 @@ const panel=(page:Page)=>page.getByRole('tabpanel',{name:'自动化进度',exact
 async function noticeReady(page:Page){await expect(page.locator('html')).toHaveAttribute('data-card-startup','complete',{timeout:12000});await expect(page.locator('.announcement')).toBeVisible();}
 async function open(page:Page){await mockSource(page);await page.goto('/');await noticeReady(page);await expect(page.locator('.paper')).toBeVisible();}
 async function readWorkspace(page:Page){return page.evaluate(async()=>{const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open('dnd-card-standalone');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});try{return await new Promise<string>((resolve,reject)=>{const tx=db.transaction('documents','readonly'),r=tx.objectStore('documents').get('workspace');r.onsuccess=()=>resolve(JSON.stringify(r.result));r.onerror=()=>reject(r.error);});}finally{db.close();}});}
-const books=manifest.sources.filter(s=>sourceRuleCounts(manifest,s.id,'all')?.total);
+const books=manifest.sources;
+
+test('whole-catalog progress retains unknown sources and separates partial execution from complete acceptance',async({page})=>{
+ await open(page);await tab(page).click();
+ await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(manifest.sources.length);
+ const unknown=manifest.sources.filter(source=>sourceRuleCounts(manifest,source.id,'all')===null);
+ expect(unknown.length).toBeGreaterThan(0);
+ for(const source of unknown){const row=panel(page).locator(`[data-source="${source.id}"]`);await expect(row).toContainText(source.name);await expect(row).toContainText('目录待建立');await expect(row).not.toContainText('0%');}
+ await expect(panel(page)).toContainText(`已登记：${manifest.audit.counts!.total}`);
+ await expect(panel(page)).toContainText(`来源已核验：${manifest.audit.counts!.reviewed}`);
+ for(const stage of ['完整建模','完整执行','已验收'])await expect(panel(page)).toContainText(`${stage}：待核实`);
+ await expect(panel(page)).toContainText(`至少一项机制已执行：${manifest.runtimeAudit!.implemented}/${manifest.audit.counts!.total}`);
+ await expect(panel(page)).not.toContainText('已实装');
+});
 
 test('player progress, lazy caching and character preservation',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));const requests:string[]=[];page.on('request',r=>requests.push(r.url()));
@@ -22,8 +35,8 @@ test('player progress, lazy caching and character preservation',async({page})=>{
  await expect(page.locator('.catalog-status > span').first()).toHaveText(/[\d,]+ 条资料 · \d+ 份缓存/);await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
  await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toBeEnabled();
  const before=await readWorkspace(page);requests.length=0;await tab(page).click();
- await expect(panel(page)).toContainText('大量条目目前放入角色卡不会有任何数据自动计算的功能，只会起一个可观测作用，因此自动化任重而道远。');
- await expect(panel(page)).toContainText(`规则条目（含第三方）已核对：${manifest.audit.counts!.reviewed}/${manifest.audit.counts!.total}，已实装${manifest.runtimeAudit!.implemented}/${manifest.audit.counts!.total}`);
+ await expect(panel(page)).toContainText('局部机制可用不等于整条规则完成。');
+ await expect(panel(page)).toContainText(`来源已核验：${manifest.audit.counts!.reviewed}`);await expect(panel(page)).toContainText(`至少一项机制已执行：${manifest.runtimeAudit!.implemented}/${manifest.audit.counts!.total}`);
  await expect(panel(page)).toContainText('最近更新时间：');await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(books.length);
  await expect(panel(page).locator('select,details,button,a,[data-capability]')).toHaveCount(0);await expect(panel(page)).not.toContainText('逐条证据');await expect(panel(page)).not.toContainText('本地快照标记');
  await page.screenshot({path:test.info().outputPath('progress-desktop.png')});
@@ -50,7 +63,7 @@ test('runtime counts and source percentages use the exact pinned artifact',async
  expect(manifest.audit.snapshot!.localMarkedComplete).toBe(162);expect(manifest.audit.counts!.implementedVerified).toBe(0);
  const requests:string[]=[];page.on('response',r=>{if(/automation-progress-.*\.json/.test(r.url()))requests.push(r.url());});await open(page);await tab(page).click();
  for(const id of ['PHB','XPHB','CROOKEDMOON24']){const s=manifest.sources.find(s=>s.id===id)!,total=sourceRuleCounts(manifest,id,'all')!.total,n=s.runtimeImplemented!,percent=n/total*100,label=percent===0?'0%':percent===100?'100%':percent.toFixed(1)+'%';
-  await expect(panel(page).locator(`[data-source="${id}"]`)).toContainText(s.name);await expect(panel(page).locator(`[data-source="${id}"] .automation-progress-percent`)).toHaveText(label);await expect(panel(page).locator(`[data-source="${id}"]`)).toHaveAttribute('title',`${n}/${total}`);
+  await expect(panel(page).locator(`[data-source="${id}"]`)).toContainText(s.name);await expect(panel(page).locator(`[data-source="${id}"] .automation-progress-percent`)).toHaveText(label);await expect(panel(page).locator(`[data-source="${id}"]`)).toHaveAttribute('title',`已登记 ${total} 项，来源已核验 ${sourceRuleCounts(manifest,id,'all')!.reviewed} 项；至少一项机制已执行 ${n} 项；完整建模、完整执行与验收待核实。`);
  }
  expect(requests).toHaveLength(1);expect(createHash('sha256').update(await (await page.request.get(requests[0])).body()).digest('hex')).toBe(manifestHash);
 });
