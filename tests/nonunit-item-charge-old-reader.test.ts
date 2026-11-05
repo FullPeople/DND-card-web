@@ -14,6 +14,8 @@ it('retains the exact old reader lock and accepts only release metadata differen
  const changed=JSON.parse(current.toString()),name=Object.keys(changed.packages).find(key=>key&&changed.packages[key].integrity)!;
  changed.packages[name].integrity='sha512-authored-tamper';expect(nonunitReaderDependenciesMatch(old,Buffer.from(JSON.stringify(changed)))).toBe(false);
  const moved=JSON.parse(current.toString());moved.packages[name].version='0.0.0-authored-tamper';expect(nonunitReaderDependenciesMatch(old,Buffer.from(JSON.stringify(moved)))).toBe(false);
+ const redirected=JSON.parse(current.toString());redirected.packages[name].resolved='https://example.invalid/authored-tamper.tgz';expect(nonunitReaderDependenciesMatch(old,Buffer.from(JSON.stringify(redirected)))).toBe(false);
+ const edge=JSON.parse(current.toString());edge.packages[''].dependencies['authored-new-dependency']='0.0.0';expect(nonunitReaderDependenciesMatch(old,Buffer.from(JSON.stringify(edge)))).toBe(false);
 });
 afterAll(()=>{verifyNonunitOldReaderRoot();});
 it('actual immutable 406 native reader preserves v2 opaquely, rejects old edits, and returns unchanged units to current reader',async()=>{
