@@ -29,7 +29,7 @@ export default function AutomationProgress(_props:{release:unknown;mode:Announce
    <span>完整建模：待核实</span><span>完整执行：待核实</span><span>已验收：待核实</span>
   </p>
   <p className="automation-progress-coverage">至少一项机制已执行：{manifest.runtimeAudit?`${manifest.runtimeAudit.implemented}/${total}`:'待核实'}（含数值计算或可用选择）。<br/>下方比例是局部覆盖率。未登记内容尚未计入分母；来源核验不代表完整验收。</p>
-  {directory&&<p className="automation-progress-discovery">另有 {directory.summary.newCandidateIdentities.toLocaleString('zh-CN')} 个新发现身份待登记，尚未计入上述规则分母。身份待核 {directory.summary.identityUnresolved} 项、内容冲突 {directory.summary.duplicateConflicts} 项；{directory.summary.unclassifiedFiles} 份资料仍待分类。不增加完整建模、执行或验收数。</p>}
+  {directory&&<p className="automation-progress-discovery">另有 {directory.summary.newCandidateIdentities.toLocaleString('zh-CN')} 个候选条目待登记，未计入当前分母。尚有 {directory.summary.identityUnresolved} 项无法唯一确认、{directory.summary.duplicateConflicts} 项内容冲突、{directory.summary.unclassifiedFiles} 份资料待分类。</p>}
   <label className="automation-progress-search">查找来源书<input type="search" aria-label="查找来源书" placeholder="书名或来源代码" value={query} onChange={event=>setQuery(event.target.value)}/></label>
   {term&&<p role="status">匹配 {visible.length} 个来源；当前已知目录共 {books.length} 个。</p>}
   <ul className="automation-progress-books" aria-label="各扩展机制覆盖">{visible.map(book=>{
