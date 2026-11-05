@@ -12,6 +12,7 @@
     "verify:automation-progress": "node tools/verifyAutomationProgress.mjs",
     "verify:automation-source": "node tools/checkAutomationRuleStatus.mjs",
     "verify:automation-runtime": "node tools/checkAutomationRuntimeCoverage.mjs",
+    "verify:catalog-directory": "node tools/checkCatalogSourceDiscovery.mjs",
     "test:e2e": "playwright test",
     "check": "npm run test && npm run build",
     "dev:sync-prototype": "vite --config prototype/vite.config.ts",

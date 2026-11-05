@@ -5,6 +5,7 @@ import {join,resolve,relative} from 'node:path';
 import type {ProgressManifest,ProgressCategory,ProgressCounts,ProgressCapability} from '../src/platform/automationProgress.ts';
 import {RULE_STATUS_LOCK,validateRuleSnapshot,validateSnapshotLock} from './automationRuleSnapshot.ts';
 import {RUNTIME_COVERAGE,RUNTIME_LOCK,runtimeCoverage} from './automationRuntimeCoverage.ts';
+import {SOURCE_DISCOVERY_PATH,SOURCE_DISCOVERY_LOCK} from './catalogSourceDiscovery.ts';
 export const PROGRESS_SOURCE='docs/data/automation-progress.json';
 export const VERIFICATION_PATH='.local-evidence/automation-progress/verification.json';
 export const VERIFICATION_SCHEMA=2;
@@ -24,6 +25,7 @@ export function progressInputs(root:string){
  if(existsSync(safePath(root,input.auditPath)))files.push(input.auditPath);
  if(existsSync(safePath(root,RULE_STATUS_LOCK)))files.push(RULE_STATUS_LOCK);
  for(const path of [RUNTIME_COVERAGE,RUNTIME_LOCK])if(existsSync(safePath(root,path)))files.push(path);
+ for(const path of [SOURCE_DISCOVERY_PATH,SOURCE_DISCOVERY_LOCK])if(existsSync(safePath(root,path)))files.push(path);
  const hash=createHash('sha256');for(const path of [...new Set(files)].sort())hash.update(path+'\0').update(readFileSync(safePath(root,path))).update('\0');
  return {input,tests,fingerprint:hash.digest('hex')};
 }

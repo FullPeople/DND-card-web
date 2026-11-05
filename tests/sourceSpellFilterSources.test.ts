@@ -29,14 +29,14 @@ it.skipIf(!frozen)('checks all frozen input pins and every positive filter decla
     if(!value||typeof value!=='object')return;
     if(typeof value.choose==='string'){
      declared++;
-     if(owner&&value.choose&&value.choose.split('|').every((clause:string)=>['level','school','subschool','components & miscellaneous','spell attack'].includes(clause.split('=')[0])))declarations.push({owner,filter:value.choose,path,block});
+     if(owner&&value.choose&&value.choose.split('|').every((clause:string)=>['level','school','subschool','components & miscellaneous','spell attack'].includes(clause.split('=')[0].trim().toLowerCase())))declarations.push({owner,filter:value.choose,path,block});
     }
     for(const [key,child] of Object.entries(value))walk(child,`${path}/${key}`,block);
    };
    raw.additionalSpells.forEach((block:any,i:number)=>walk(block,`additionalSpells/${i}`,i));
   }
  }
- expect(declared).toBe(253);expect(declarations).toHaveLength(57);expect(new Set(declarations.map(row=>row.owner.source)).size).toBe(11);expect(spells.size).toBeGreaterThan(1000);
+ expect(declared).toBe(253);expect(declarations).toHaveLength(58);expect(declarations.filter(row=>row.filter.startsWith('Components'))).toHaveLength(1);expect(new Set(declarations.map(row=>row.owner.source)).size).toBe(11);expect(spells.size).toBeGreaterThan(1000);
  const entries=[...spells.values()];let projected=0,explicitUsageChoices=0;
  for(const declaration of declarations){
   const edition=entryEdition(declaration.owner)==='2024'?'2024':'2014',result=sourceSpellFilter(declaration.filter,entries,edition);
@@ -54,5 +54,5 @@ it.skipIf(!frozen)('checks all frozen input pins and every positive filter decla
  }
  // This count is visibility of explicit selection controls, never a grant,
  // verified spell effect, accepted feature, or completed book count.
- expect(projected).toBe(57);expect(explicitUsageChoices).toBe(1);
+ expect(projected).toBe(58);expect(explicitUsageChoices).toBe(1);
 });
