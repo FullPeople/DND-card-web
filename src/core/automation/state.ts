@@ -1,3 +1,4 @@
+import {validateGrimoireHolding} from './arcaneGrimoireHolding';
 import {validateItemAtWillState,type ItemAtWillState} from './itemAtWill';
 import {validateOptionalClassListState,type OptionalClassListState} from './optionalClassSpellLists';
 import {validateChargedItemSpellState,type ChargedItemSpellState} from './chargedItemSpells';
@@ -28,6 +29,7 @@ export function validateAutomation(value:unknown):void{
  if(!Number.isSafeInteger(state.protocol)||state.protocol<1)throw Error('自动化协议版本无效。');
  // Preserve unfamiliar protocols verbatim, but never execute or rewrite them.
  if(state.protocol!==AUTOMATION_PROTOCOL)return;
+ validateGrimoireHolding(state.arcaneGrimoireHolding);
  validateItemAtWillState(state.itemAtWill);
  validateChargedItemSpellState(state.chargedItemSpells);
   validateOptionalClassListState(state.optionalClassSpellLists);

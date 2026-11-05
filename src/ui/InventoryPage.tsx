@@ -1,3 +1,4 @@
+import {ArcaneGrimoireHoldingControls} from './ArcaneGrimoireHoldingControls';
 import {type Character} from '../core/model';
 import {inventoryState} from '../core/characterDetails';
 import {applyInventory,previewInventory,type StockContainer,type Stock} from '../core/inventory';
@@ -20,5 +21,5 @@ export function InventoryPage({c,d,edit,browse}:PageProps){
   applyInventory(draft,next,removedIds);
   draft.inventory!.positions=Object.fromEntries(next.items.map(row=>[row.id,row.slot]));
  });};
- return <><StockBoard key={c.id} container={containerFor(c)} capacity={<CarryCapacity c={c} d={d} edit={edit}/>} operation={operation}/><button className="feature-browse" onClick={()=>browse('item')}>＋ 查阅装备</button></>;
+ return <><StockBoard key={c.id} container={containerFor(c)} capacity={<CarryCapacity c={c} d={d} edit={edit}/>} operation={operation}/><ArcaneGrimoireHoldingControls c={c} edit={edit}/><button className="feature-browse" onClick={()=>browse('item')}>＋ 查阅装备</button></>;
 }

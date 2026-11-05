@@ -1,3 +1,9 @@
+# 2026-11-04 · PR139 的准确回放证据配对候选（未合并、未部署）
+
+本候选仅将已成功从零回放的报告和 assembly 原字节同步到 Web 副本，并将锁指向 Data Draft PR87 的不可变提交 `d066362bbb6d095e467ee00384a61071985fa11c`。报告 SHA-256 为 `9d1233a434ab58e71119e50bd4d85064925972b89330c24ea1cf6ba541bc9602`，绑定 PR139 的准确源码及 source tree。229 个冻结输入与 18,789 条规则记录逐项保持不变；没有更改判定、计数或门禁，也没有增加整条规则完成声明。
+
+实际验证：`checkAutomationRuntimeCoverage --data-repository` 核对远端来源提交、完整 blob、散列及消费者模块通过；automationProgress、catalog-progress、automationRuleProvenance 三个文件共 46 项测试通过；`npm run build` 通过。Node 24 本地验证不替代远端锁定 Node 22 的完整 CI；构建体积与动态导入警告保留。候选应作为 PR139 原开发分支之上的独立 Draft PR 审阅，PR140 的既有堆叠不变，不自动合并或部署。
+
 # 2026-10-30 · 规则整批整合的源码、配对与验收回执
 
 本批 Data #77–84、Web #120、#122–136 共 24 个原始远端 head 均保留在整合历史中，main 的交互、隐私和依赖锁保持。整合入口 Data #85、Web #137；最终 main SHA、准确提交检查及合并状态以其回执为准。

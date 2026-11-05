@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "wholeEntryCredit": 0,
+  "rules": [
+    {
+      "id": "kiwee:item:tce:%2B1%20arcane%20grimoire::::::",
+      "name": "+1 奥法秘典",
+      "english": "+1 Arcane Grimoire",
+      "source": "TCE",
+      "page": 120,
+      "edition": "both",
+      "packId": "kiwee",
+      "rank": 1,
+      "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 2,
+      "nodeSortedSha256": "aa6f4cbcb347409d8d36668a7a1209c41962ecac17e4a49afceadd41011449e6",
+      "clauses": [
+        {
+          "path": "item/2/entries/0",
+          "sha256": "2d2d49f83f62908e1203d002f007b45ef30974ba1c966cd32440b0e365e1010f"
+        },
+        {
+          "path": "item/2/entries/1",
+          "sha256": "9589f967a7f68e8a8a5dc94d65133f352f07ff8e1d80020a6b383e5bf30c690d"
+        }
+      ],
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "snapshotSha256": "1f64589ab13b01ebc2155a2efc3b81e91b19a3ced70a1159ca2f45ace6f31027"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "snapshotSha256": "7fd469a74dc00fbd3cc3fda6f724e44b8a0f485638a4fa753c6e90c1b7e04b24"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:tce:%2B2%20arcane%20grimoire::::::",
+      "name": "+2 奥法秘典",
+      "english": "+2 Arcane Grimoire",
+      "source": "TCE",
+      "page": 120,
+      "edition": "both",
+      "packId": "kiwee",
+      "rank": 2,
+      "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 16,
+      "nodeSortedSha256": "1f118bd29e07a8939aa70b5487b092d0c67a6fa77e8032ffa1ec8348fabda9ec",
+      "clauses": [
+        {
+          "path": "item/16/entries/0",
+          "sha256": "11be4bbea3460d0ba796badbe1ed24b1503a4c3947db0ddb174b457af3160c66"
+        },
+        {
+          "path": "item/16/entries/1",
+          "sha256": "9589f967a7f68e8a8a5dc94d65133f352f07ff8e1d80020a6b383e5bf30c690d"
+        }
+      ],
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "snapshotSha256": "b684af6a8a07afb95b453a144d65e819152ef7bda7fd6998f85c41729926f500"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "snapshotSha256": "b1107032b63ec12408cf82c3dafdd0833d72400f6d314dff1f642ac796c5d92e"
+        }
+      ]
+    },
+    {
+      "id": "kiwee:item:tce:%2B3%20arcane%20grimoire::::::",
+      "name": "+3 奥法秘典",
+      "english": "+3 Arcane Grimoire",
+      "source": "TCE",
+      "page": 120,
+      "edition": "both",
+      "packId": "kiwee",
+      "rank": 3,
+      "inputSha256": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+      "sourceIndex": 30,
+      "nodeSortedSha256": "e680912e84eeb1a1e1bf1db32ee60fad58d55c084d0c038ed89e02252d09ac00",
+      "clauses": [
+        {
+          "path": "item/30/entries/0",
+          "sha256": "3fae9e78613289ee55506d70640367d5de2f047dca6b306da11a27695abdd11a"
+        },
+        {
+          "path": "item/30/entries/1",
+          "sha256": "9589f967a7f68e8a8a5dc94d65133f352f07ff8e1d80020a6b383e5bf30c690d"
+        }
+      ],
+      "forms": [
+        {
+          "form": "canonical",
+          "revision": "883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488",
+          "snapshotSha256": "7f5a7abc5c02b99e5cc10026af680892810d2b2faf6f776ed7125716956c8276"
+        },
+        {
+          "form": "app",
+          "revision": "data/items-base.json:8933a3e70e47aa4fd6196bd7f1f2e3a57d6d8dbe7e781d37bb6a0519d7c4ffff|data/items.json:883f7bb4df2eb35fb37e7caa3a8765e0209014caa360d1c0358daa6f4b2da488|data/magicvariants.json:4a4b0f3c8b268d8b134386f16e705df9b14d60419b2f2fa160da45b78bd4967d",
+          "snapshotSha256": "b6a3e1894755144259fa29a294ff0f80f1d4ff82e04020832805e43bc0806d8f"
+        }
+      ]
+    }
+  ]
+}
