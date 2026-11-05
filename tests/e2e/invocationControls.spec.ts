@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {savedCharacter as saved,setSiteSource} from './reviewedRuleBrowserState';
+import {savedCharacter as saved,setSiteSource,storedWorkspace} from './reviewedRuleBrowserState';
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {mockSource,suppressAnnouncement,expandSourceBook} from './fixtures';
 import {pointerChoiceDrop} from './pointerChoiceDrop';
@@ -8,6 +8,7 @@ import {invocationData} from '../fixtures/invocationData';
 import {newCharacter,type Entry} from '../../src/core/model';
 import {newAutomationState} from '../../src/core/automation/state';
 import {exportCharacter} from '../../src/core/export';
+import {withSiteSources} from '../../src/core/siteSources';
 
 // Original metadata-only PHB fixtures. Browser tests exercise real App edits,
 // drag/drop, IndexedDB persistence and payment UI, not injected rule mutations.
@@ -121,7 +122,12 @@ async function manualSpellCounter(page:Page){
 }
 async function source(page:Page,enabled:boolean){
  await setSiteSource(page,'PHB',enabled);
- await expect.poll(async()=>(await saved(page)).profile.enabledSources.includes('PHB')).toBe(enabled);
+ await expect.poll(async()=>{
+  const workspace=await storedWorkspace(page);
+  const card=workspace.characters.find(row=>row.id===workspace.activeId);
+  assert(card,'Expected the durable active character');
+  return withSiteSources(card,workspace.siteSources,workspace.packs).profile.enabledSources.includes('PHB');
+ }).toBe(enabled);
 }
 function manualStatePreserved(card:any,before:any){
  expect(card.selections.find((row:any)=>row.id==='manual-silent-image')).toEqual(before.selections.find((row:any)=>row.id==='manual-silent-image'));
