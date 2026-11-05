@@ -118,6 +118,7 @@ jobs:
               npm run build:cloud
               npx playwright test --config playwright.pr-issues.config.ts
               npx playwright test --config playwright.source-spell-ownership.config.ts
+              npx playwright test --config playwright.source-spell-filter.config.ts
           - group: automation-progress
             commands: |
               npx playwright test --config playwright.automation-progress.config.ts

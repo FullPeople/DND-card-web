@@ -18,10 +18,11 @@ import {activeSelections} from './active';
 import {automationEnabled,supportedAutomation} from './state';
 import {planFeatureResources} from './featureResources';
 import {sourceResourcePool,validResourceCost,type ResourceColumn} from './sourceResourcePools';
+import {sourceSpellFilter,sourceSpellIdentities} from './sourceSpellFilter';
 
 export const sourceSpellKey=(key?:string)=>!!key?.startsWith('source-spell:');
 export interface SourceSpellPlan {id:string;owner:Selection;key:string;entry:Entry;eligible:boolean;config:SpecialSpell}
-export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string};itemChargeUse?:{ownerId:string};itemAtWill?:{ownerId:string};chargedItemSpell?:{ownerId:string}}
+export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;distinctGroup?:string;blockedSpells?:string[];resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string};itemChargeUse?:{ownerId:string};itemAtWill?:{ownerId:string};chargedItemSpell?:{ownerId:string}}
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 /** Interpret declared data, never rule prose. Unresolved choices and shapes are visible. */
 export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceSpellPlan[];issues:Issue[];choices:SourceSpellChoice[]}{
@@ -33,6 +34,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'&&!reviewedAlertIdentity(s.entry)&&!limitedSourceIdentity(s.entry)&&!itemChargeIdentity(s.entry)),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
  // Saved snapshots win over a newly downloaded edition/revision of the same entry.
  const known=[...new Map([...c.selections.map(s=>s.entry),...catalog].map(e=>[e.id,e] as const).reverse()).values()].filter(e=>e.kind==='spell');
+ let spellIdentity:ReturnType<typeof sourceSpellIdentities>|undefined;const identity=(ref:string)=>(spellIdentity??=sourceSpellIdentities(known))(ref),fixedGroups=new Map<string,string[]>();
  for(const owner of c.selections.filter(s=>s.entry.kind!=='spell'&&s.entry.raw.additionalSpells!=null)){
   // Alert's authenticated PHB adapter grants only initiative; edited family
   // copies cannot bypass it through generic additionalSpells or use pools.
@@ -74,19 +76,33 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
     else {issue(`${kind}/${gate}`,'等级门槛尚未支持，未自动赠送。');continue;}
     function resolveList(list:unknown,path:string):string[]{
      if(!Array.isArray(list)){issue(path,'赠送列表格式未支持。');return [];}
-     return list.flatMap((ref,node)=>{
+     const hasFilters=list.some(ref=>object(ref)&&typeof ref.choose==='string'),distinctGroup=hasFilters?JSON.stringify([sourceOwnerIdentity(c,owner),`source-spell:${index}/${kind}/${gate}/${path}`]):undefined;
+     if(distinctGroup)fixedGroups.set(distinctGroup,list.filter(ref=>typeof ref==='string'));
+     const resolved=list.flatMap((ref,node)=>{
       if(typeof ref==='string')return [ref];
-      const from=ref?.choose?.from,count=ref?.choose?.count??1;
-      if(!object(ref)||Object.keys(ref).some(k=>k!=='choose')||!object(ref.choose)||Object.keys(ref.choose).some(k=>!['from','count'].includes(k))||!Array.isArray(from)||from.length<2||from.some(x=>typeof x!=='string')||new Set(from).size!==from.length||!Number.isInteger(count)||count<1||count>Math.min(100,from.length)){
-       issue(path,'有需要选择或筛选的法术；当前仅支持明确 UID 的 choose.from 列表，其他条件请按原文手动选择。');return [];
+      let from:string[],count:number;
+      if(object(ref)&&typeof ref.choose==='string'&&Object.keys(ref).every(key=>['choose','count'].includes(key))){
+       count=ref.count??1;if(!Number.isInteger(count)||count<1||count>100){issue(path,'赠送法术的选择数量尚未支持，请按原文手动选择。');return [];}
+       const filtered=sourceSpellFilter(ref.choose,known,c.edition,c.profile.optional.legacy);
+       if(!filtered.supported){issue(path,filtered.reason);return [];}
+       from=filtered.references;
+       if(filtered.ambiguous)issue(path,'部分筛选候选存在多个身份或无法唯一引用，未自动任选一条。');
+       if(!from.length)issue(path,'当前资料尚无唯一匹配的筛选候选；请加载资料或按原文手动选择。');
+      }else{
+       from=ref?.choose?.from;count=ref?.choose?.count??1;
+       if(!object(ref)||Object.keys(ref).some(k=>k!=='choose')||!object(ref.choose)||Object.keys(ref.choose).some(k=>!['from','count'].includes(k))||!Array.isArray(from)||from.length<2||from.some(x=>typeof x!=='string')||new Set(from).size!==from.length||!Number.isInteger(count)||count<1||count>Math.min(100,from.length)){
+        issue(path,'赠送法术的选择声明尚未支持，请按原文手动选择。');return [];
+       }
       }
       const key=JSON.stringify([sourceOwnerIdentity(c,owner),`source-spell:${index}/${kind}/${gate}/${path}/choose:${node}`]);
-      choices.push({ownerId:owner.id,key,label:owner.entry.name+'的赠送法术',spells:from,count});
+      choices.push({ownerId:owner.id,key,label:owner.entry.name+'的赠送法术',spells:from,count,...(distinctGroup?{distinctGroup}:{})});
       const selected=c.automation?.spellChoices?.[key]||[];
       if(selected.length>count||new Set(selected).size!==selected.length||selected.some(uid=>!from.includes(uid))){issue(path,'已保存的赠送法术选择与当前声明不符，请重新选择；记录保留。');return [];}
       if(selected.length<count)issue(path,`可记录 ${count} 项赠送法术，尚有 ${count-selected.length} 项未选。`);
       return selected;
      });
+     if(hasFilters&&new Set(resolved.map(identity)).size!==resolved.length){issue(path,'同一组赠送法术出现重复选择；保留原选择，修正后再授予。');return [];}
+     return resolved;
     }
     function addList(list:unknown,path:string,usage:NonNullable<SpecialSpell['sourceGrant']>['usage'],count?:number,recovery?:SpecialSpell['recovery'],shared=false,resource?:{name:string;cost:number;key:string}){
      if(!Array.isArray(list)){issue(path,'赠送列表格式未支持。');return;}
@@ -140,7 +156,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       const maximum=count==='pb'||count==='pbe'?evaluate(c).proficiency:Number(count.replace('e',''));
       if(!Number.isSafeInteger(maximum)||maximum<1||maximum>100){issue(`${schedule}/${count}`,'次数计算超出支持范围，请人工核对。');continue;}
       let shared=false;
-      if(refs.reduce((sum,ref)=>sum+(typeof ref==='string'?1:Math.max(1,Number(ref?.choose?.count)||1)),0)>1&&!count.endsWith('e')){
+      if(refs.reduce((sum,ref)=>sum+(typeof ref==='string'?1:Math.max(1,Number(typeof ref?.choose==='string'?ref.count:ref?.choose?.count)||1)),0)>1&&!count.endsWith('e')){
        const choiceKey=JSON.stringify([sourceOwnerIdentity(c,owner),`source-spell:${index}/${kind}/${gate}/${schedule}/${count}`]);
        choices.push({ownerId:owner.id,key:choiceKey,label:`${owner.entry.name}的次数归属：${refs.map(ref=>typeof ref==='string'?ref.split('|')[0]:'待选法术').join('、')}`,usageModes:true});
        const mode=c.automation?.spellUsageModes?.[choiceKey];
@@ -177,6 +193,10 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
   if(grant.config.sourceGrant)grant.config.sourceGrant={...grant.config.sourceGrant,active:false,reason};
  }
  for(const row of c.selections)if(declaredSourceSpellKey(row.grantKey)&&!declaredSourceSpellOwnedChild(c,row)&&!issues.some(i=>i.id===`source-spell-collision:${row.id}`))issues.push({id:`source-spell-collision:${row.id}`,selectionId:row.parentId||row.id,severity:'warning',message:'保留的生成法术归属无法核实；保留原记录、设置与预备引用，不接管或改写。'});
+ for(const choice of choices)if(choice.distinctGroup){
+  const used=new Set([...(fixedGroups.get(choice.distinctGroup)||[]),...choices.filter(other=>other!==choice&&other.distinctGroup===choice.distinctGroup).flatMap(other=>c.automation?.spellChoices?.[other.key]||[])].map(identity));
+  choice.blockedSpells=choice.spells?.filter(ref=>used.has(identity(ref)));
+ }
  return {grants,issues,choices};
 }
 
