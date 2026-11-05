@@ -20,7 +20,12 @@ test('whole-catalog progress retains unknown sources and separates partial execu
  await expect(panel(page).locator('.automation-progress-books li')).toHaveCount(books.length);
  const unknown=books.filter(source=>sourceRuleCounts(manifest,source.id,'all')===null);
  expect(unknown.length).toBeGreaterThan(0);
- for(const source of unknown){const row=panel(page).locator(`[data-source="${source.id}"]`);await expect(row).toContainText(source.name);await expect(row).toContainText('目录待建立');await expect(row).not.toContainText('0%');}
+ // One DOM snapshot keeps every per-source assertion within the original test budget.
+ const rendered=await panel(page).locator('.automation-progress-books li').evaluateAll(nodes=>nodes.map(node=>({id:node.getAttribute('data-source')||'',text:node.textContent||''})));
+ await test.info().attach('all-source-rows',{body:Buffer.from(JSON.stringify({sourceCommit:manifest.build.sourceCommit,manifestSha256:manifestHash,directorySha256:createHash('sha256').update(directoryContent).digest('hex'),sources:rendered})),contentType:'application/json'});
+ expect(rendered.map(row=>row.id).sort()).toEqual(books.map(source=>source.id).sort());
+ const textBySource=new Map(rendered.map(row=>[row.id,row.text]));
+ for(const source of unknown){const text=textBySource.get(source.id);expect(text,source.id).toContain(source.name);expect(text,source.id).toContain('目录待建立');expect(text,source.id).not.toContain('0%');}
  await expect(panel(page)).toContainText(`已登记：${manifest.audit.counts!.total}`);
  await expect(panel(page)).toContainText(`来源已核验：${manifest.audit.counts!.reviewed}`);
  for(const stage of ['完整建模','完整执行','已验收'])await expect(panel(page)).toContainText(`${stage}：待核实`);
