@@ -117,7 +117,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       const key=choiceKey;
       choices.push({ownerId:owner.id,key,label:owner.entry.name+'的赠送法术',spells:from,count,...(filterContext?{filterContext}:{}),...(distinctGroup?{distinctGroup}:{})});
       const selected=c.automation?.spellChoices?.[key]||[];
-      if(selected.length&&filterContext&&!contextReady){issue(path,contextReason||'已保存选择尚缺法表上下文，请重新选择；原记录与消耗保留。');return [];}
+      if(selected.length&&filterContext&&!contextReady){issue(path,contextReason||'已保存选择尚缺法表来源资料，请重新选择；原记录与消耗保留。');return [];}
       if(selected.length>count||new Set(selected).size!==selected.length||selected.some(uid=>!from.includes(uid))){issue(path,'已保存的赠送法术选择与当前声明不符，请重新选择；记录保留。');return [];}
       if(selected.length<count)issue(path,`可记录 ${count} 项赠送法术，尚有 ${count-selected.length} 项未选。`);
       if(hasFilters)contributions.push(...selected.map(ref=>({ref,fixed:false})));

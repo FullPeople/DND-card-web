@@ -13,7 +13,7 @@ export interface SourceSpellChoiceContextDraft {expression:string;entries:Entry[
 const plain=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value)&&[Object.prototype,null].includes(Object.getPrototypeOf(value));
 const text=(value:unknown,max:number):value is string=>typeof value==='string'&&!!value.trim()&&value.length<=max;
 const hash=(value:unknown)=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
-function fail():never{throw Error('来源法表上下文记录无效，原资料保留。');}
+function fail():never{throw Error('法表来源记录无法核对，原资料保留。');}
 function normalized(value:unknown,depth=0,budget={left:60000}):unknown{
  if(depth>35||--budget.left<0)fail();
  if(value===undefined||value===null)return null;
@@ -43,8 +43,8 @@ export function validateSourceSpellChoiceContexts(value:unknown,checkEntry?:(ent
 }
 export function sourceSpellChoiceContext(c:Character,key:string,owner:Selection,expression:string):{entries:Entry[];ready:boolean;unavailable?:boolean;reason?:string}{
  const value=c.sourceSpellChoiceContexts;if(value===undefined)return {entries:[],ready:false};
- try{validateSourceSpellChoiceContexts(value);}catch{return {entries:[],ready:false,unavailable:true,reason:'来源法表上下文损坏，未执行或改写原记录。'};}
- if(value.version!==1)return {entries:[],ready:false,unavailable:true,reason:'来源法表上下文版本未知，未执行或改写原记录。'};
+ try{validateSourceSpellChoiceContexts(value);}catch{return {entries:[],ready:false,unavailable:true,reason:'法表来源记录无法核对，相关自动施法暂停；原记录保留。'};}
+ if(value.version!==1)return {entries:[],ready:false,unavailable:true,reason:'法表来源记录版本未知，相关自动施法暂停；原记录保留。'};
  const record=value.records?.[key];if(!record)return {entries:[],ready:false};
  if(record.expression!==expression||record.ownerEntryId!==owner.entry.id||record.ownerSnapshotSha256!==sourceSpellChoiceContextDigest(owner.entry))return {entries:[],ready:false,reason:'来源声明已变化，请重新选择以核对法表；原选择与消耗保留。'};
  return {entries:record.entries,ready:true};
@@ -52,7 +52,7 @@ export function sourceSpellChoiceContext(c:Character,key:string,owner:Selection,
 /** Prepare the complete replacement before the explicit choice setter mutates character state. */
 export function nextSourceSpellChoiceContext(c:Character,key:string,owner:Selection,draft:SourceSpellChoiceContextDraft):SourceSpellChoiceContexts{
  validateSourceSpellChoiceContexts(c.sourceSpellChoiceContexts);
- if(c.sourceSpellChoiceContexts&&c.sourceSpellChoiceContexts.version!==1)throw Error('来源法表上下文版本未知，不能覆盖原记录。');
+ if(c.sourceSpellChoiceContexts&&c.sourceSpellChoiceContexts.version!==1)throw Error('法表来源记录版本未知，不能覆盖原记录。');
  const entries=structuredClone(draft.entries),record={expression:draft.expression,ownerEntryId:owner.entry.id,ownerSnapshotSha256:sourceSpellChoiceContextDigest(owner.entry),entriesSha256:sourceSpellChoiceContextDigest(entries),entries};
  const records={...c.sourceSpellChoiceContexts?.records};Object.defineProperty(records,key,{value:record,enumerable:true,writable:true,configurable:true});
  const next={version:1,records};validateSourceSpellChoiceContexts(next);return next;

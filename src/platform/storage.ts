@@ -23,11 +23,20 @@ export async function loadWorkspace(navigation=false): Promise<Workspace | undef
 export async function saveWorkspace(workspace: Workspace): Promise<void> {
   const operation=qqRoom?beginRoomWrite(roomState()?.revision??0):undefined;
   const database = await db(); const tx = database.transaction('documents', 'readwrite');
-  if(await tx.store.get(workspaceRecoveryKey)){await tx.done;throw Error('请先从 JSON 备份恢复角色簿；现有记录未覆盖。');}
-  const previous = await tx.store.get('workspace');
-  if (previous) await tx.store.put(previous, 'backup');
-  await tx.store.delete('workspace-active-id');
-  await tx.store.put(workspace, 'workspace'); await tx.done;
+  // Observe the transaction as soon as it exists: a failed request can reject
+  // before control reaches its completion await. Preserve the original error.
+  const completed=tx.done.then(()=>({ok:true as const}),error=>({ok:false as const,error}));
+  try{
+    if(await tx.store.get(workspaceRecoveryKey))throw Error('请先从 JSON 备份恢复角色簿；现有记录未覆盖。');
+    const previous = await tx.store.get('workspace');
+    if (previous) await tx.store.put(previous, 'backup');
+    await tx.store.delete('workspace-active-id');
+    await tx.store.put(workspace, 'workspace');
+    const result=await completed;if(!result.ok)throw result.error;
+  }catch(error){
+    try{tx.abort();}catch{/* The transaction may already have finished aborting. */}
+    await completed;throw error;
+  }
   if(standalone&&!qqRoom&&typeof BroadcastChannel!=='undefined'){const channel=new BroadcastChannel('dnd-card-workspace');channel.postMessage({saved:true});channel.close();}
   if(qqRoom){
     if(workspace.characters.length!==1||workspace.activeId!==operation!.characterId)throw Error('房间卡不能创建、替换或删除云端原卡。');

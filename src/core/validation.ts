@@ -157,9 +157,9 @@ export function validateCharacter(value: unknown): Character {
     }
   }
   validateSourceSpellChoiceContexts(c.sourceSpellChoiceContexts,entry=>{
-    assert(validEntry(entry),'来源法表上下文快照无效。');validateEntryContent(entry.entries);
+    assert(validEntry(entry),'法表来源资料无效。');validateEntryContent(entry.entries);
     if(entry.effects)validateEffects(entry.effects);if(entry.choices)validateChoices(entry.choices);
-    assert(!entry.dependencies||Array.isArray(entry.dependencies)&&entry.dependencies.every(source=>typeof source==='string'),'来源法表上下文依赖无效。');
+    assert(!entry.dependencies||Array.isArray(entry.dependencies)&&entry.dependencies.every(source=>typeof source==='string'),'法表来源依赖无效。');
   });
   assert(c.proficiencies === undefined || plain(c.proficiencies) && Object.entries(c.proficiencies).every(([key, value]) => [...Object.keys(SKILLS), ...ABILITIES.map(a => `save:${a}`)].includes(key) && typeof value === 'boolean'), '熟练记录无效。');
   assert(c.training === undefined || plain(c.training) && Object.entries(c.training).every(([key, value]) => ['armor', 'weapons', 'tools', 'languages'].includes(key) && typeof value === 'string' && value.length <= 10000), '装备训练记录无效。');
