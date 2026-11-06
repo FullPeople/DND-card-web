@@ -67,3 +67,8 @@ it('does not claim a complete result for a class-list copy cycle',()=>{
  const result=sourceSpellFilter('class=Authored one (LLMag)',[one,two,spell('Authored unrelated spell')],'2014');
  if(result.supported){expect(result.references).toEqual([]);expect(result).toMatchObject({incomplete:true,reason:expect.any(String)});}else expect(result.reason).toBeTruthy();
 });
+it('does not borrow a conflicting class definition from another pack with the same source and aliases',()=>{
+ const original=base(),conflict={...original,id:'authored:conflicting-pack-class',packId:'different-authored-pack',raw:{classSpells:['Authored injected spell|PHB']}},injected=spell('Authored injected spell');
+ const result=sourceSpellFilter('class=Wizard',[original,conflict,injected],'2014');
+ if(result.supported){expect(result.references).toEqual([]);expect(result).toMatchObject({incomplete:true,reason:expect.any(String)});}else expect(result.reason).toBeTruthy();
+});

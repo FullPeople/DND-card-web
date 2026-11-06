@@ -2,7 +2,7 @@ import {editionAllows,type Edition,type Entry} from '../model';
 import {projectClassSpellFilter,type ClassSpellFilterContext} from './classSpellFilter';
 
 const key=(value:string)=>value.trim().toLowerCase();
-type Result={supported:false;reason:string}|{supported:true;references:string[];ambiguous:boolean;incomplete?:boolean;reason?:string};
+type Result={supported:false;reason:string}|{supported:true;references:string[];ambiguous:boolean;contextEntries?:Entry[];incomplete?:boolean;reason?:string};
 const referenceKey=(name:string,source:string)=>JSON.stringify([key(name),key(source||'PHB')]);
 // Preserve legacy UID codes and the canonical declared sources validated by Data90.
 const referenceSource=(source:string)=>source.length<=80&&(/^[a-z0-9_.-]+$/i.test(source)||/^[a-z0-9][a-z0-9_:&-]*(?: [a-z0-9_:&-]+)*$/i.test(source));
@@ -60,5 +60,5 @@ export function sourceSpellFilter(expression:unknown,entries:readonly Entry[],ed
   if(!name?.trim()||name.length>512||/[|#\r\n]/.test(name)||!referenceSource(entry.source)||identities.get(referenceKey(name,entry.source))?.size!==1){ambiguous=true;continue;}
   if(!used.has(key(uid))){references.push(uid);used.add(key(uid));}
  }
- return {supported:true,references:references.sort((a,b)=>a.localeCompare(b,'zh-CN')),ambiguous,...(projection?.supported&&projection.incomplete?{incomplete:true,reason:projection.reason}:{})};
+ return {supported:true,references:references.sort((a,b)=>a.localeCompare(b,'zh-CN')),ambiguous,...(projection?.supported?{contextEntries:projection.contextEntries,...(projection.incomplete?{incomplete:true,reason:projection.reason}:{})}:{})};
 }

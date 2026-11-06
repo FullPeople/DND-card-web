@@ -7,7 +7,7 @@ export interface ClassSpellFilterContext {
  sourceMetadata?:Readonly<Record<string,ClassSpellFilterSource>>;
  optionalMembership?:(spell:Entry,owner:Entry,definedInSources:readonly string[])=>{allowed:boolean;reason?:string};
 }
-type Projection={supported:false;reason:string}|{supported:true;ids:Set<string>;incomplete:boolean;reason?:string};
+type Projection={supported:false;reason:string}|{supported:true;ids:Set<string>;contextEntries:Entry[];incomplete:boolean;reason?:string};
 const key=(value:string)=>value.trim().toLowerCase();
 const plain=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const names=(entry:Entry)=>[...new Set([entry.name,entry.english,entry.raw.name,entry.raw.ENG_name].filter((name):name is string=>typeof name==='string'&&!!name.trim()).map(key))];
@@ -27,10 +27,19 @@ export function projectClassSpellFilter(terms:readonly string[],entries:readonly
    if(!rows.some(row=>row.id===owner.id))rows.push(owner);labels.set(label,rows);
   }
  }
- const roots:Entry[]=[];
- for(const term of terms){const rows=labels.get(key(term));if(!rows?.length)return {supported:false,reason:'职业法表条件无法匹配当前版本、来源或已加载目录；请核对原文，原选择保留。'};roots.push(...rows);}
+ const roots:Entry[]=[],ambiguousRoots=new Set<string>();
+ for(const term of terms){
+  const rows=labels.get(key(term));if(!rows?.length)return {supported:false,reason:'职业法表条件无法匹配当前版本、来源或已加载目录；请核对原文，原选择保留。'};
+  for(const row of rows)if(rows.some(other=>other.id!==row.id&&key(other.source)===key(row.source)))ambiguousRoots.add(row.id);
+  roots.push(...rows);
+ }
  for(const spell of spells)for(const name of names(spell)){const id=tuple(name,spell.source),ids=spellIds.get(id)||new Set<string>();ids.add(spell.id);spellIds.set(id,ids);}
  const sourceEnabled=(source:string)=>context.sourceEnabled?.(source.toUpperCase())!==false;
+ function matchesAlias(name:string,source:string,owner:Entry):boolean{
+  if(key(source)!==key(owner.source)||!names(owner).includes(key(name)))return false;
+  const rows=aliases.get(tuple(name,source));if(rows?.length===1&&rows[0].id===owner.id)return true;
+  note('职业法表关联的来源身份不唯一，未按同名资料自动合并。');return false;
+ }
  function definition(value:unknown):boolean{
   if(value===true)return true;
   if(!plain(value)||Object.keys(value).some(field=>field!=='definedInSources')||!Array.isArray(value.definedInSources)||!value.definedInSources.length||value.definedInSources.some(source=>typeof source!=='string'||!source.trim())){note('部分职业法表关联格式尚待核验，未自动加入这些候选。');return false;}
@@ -38,7 +47,7 @@ export function projectClassSpellFilter(terms:readonly string[],entries:readonly
   note('部分职业法表关联的来源当前停用，原选择保留。');return false;
  }
  function directMembership(spell:Entry,owner:Entry):boolean{
-  const ownerNames=names(owner),matches=(row:Record<string,unknown>)=>typeof row.name==='string'&&ownerNames.includes(key(row.name))&&key(typeof row.source==='string'?row.source:'PHB')===key(owner.source);
+  const ownerNames=names(owner),matches=(row:Record<string,unknown>)=>typeof row.name==='string'&&matchesAlias(row.name,typeof row.source==='string'?row.source:'PHB',owner);
   let base=false;const optionalSources=new Set<string>();let hasOptional=false;
   const rawLists=spell.raw.classes;
   if(plain(rawLists)){
@@ -60,7 +69,7 @@ export function projectClassSpellFilter(terms:readonly string[],entries:readonly
    for(const [source,rows] of Object.entries(value)){
     if(key(source)!==key(owner.source)||!plain(rows))continue;
     for(const [name,relationship] of Object.entries(rows)){
-     if(!ownerNames.includes(key(name)))continue;
+     if(!ownerNames.includes(key(name))||!matchesAlias(name,source,owner))continue;
      if(!variant){base=definition(relationship)||base;continue;}
      hasOptional=true;
      if(plain(relationship)&&Array.isArray(relationship.definedInSources))for(const book of relationship.definedInSources)if(typeof book==='string')optionalSources.add(book);
@@ -84,11 +93,13 @@ export function projectClassSpellFilter(terms:readonly string[],entries:readonly
   const ids=spellIds.get(tuple(name,source));if(!ids?.size){note('部分法表引用尚未加载或无法匹配，原选择保留。');return new Set();}
   return ids;
  }
- const memo=new Map<string,Set<string>>(),visiting=new Set<string>();
+ const memo=new Map<string,Set<string>>(),visiting=new Set<string>(),contextEntries=new Map<string,Entry>();
  function resolve(owner:Entry):Set<string>{
+  contextEntries.set(owner.id,owner);
   if(visiting.has(owner.id)){note('职业法表继承出现循环，未把循环分支视为完整法表。');return new Set();}
   const cached=memo.get(owner.id);if(cached)return cached;
   const result=new Set<string>();memo.set(owner.id,result);visiting.add(owner.id);
+  if(ambiguousRoots.has(owner.id)){note('职业法表来源存在互相冲突的身份，未自动任选一份。');visiting.delete(owner.id);return result;}
   if(owner.raw._copy||owner.raw._unresolvedParent){note('职业来源继承尚未完成，未按同名条目补全。');visiting.delete(owner.id);return result;}
   for(const spell of candidateSpells)if(directMembership(spell,owner))result.add(spell.id);
   const additions=owner.raw.classSpells;
@@ -105,12 +116,12 @@ export function projectClassSpellFilter(terms:readonly string[],entries:readonly
     for(const spell of candidateSpells)if(Array.isArray(spell.raw.groups)&&spell.raw.groups.some((row:unknown)=>plain(row)&&typeof row.name==='string'&&tuple(row.name,typeof row.source==='string'?row.source:'')===group)){result.add(spell.id);found=true;}
     const groups=entries.filter(entry=>entry.raw._category==='spellList'&&allowed(entry)&&names(entry).some(name=>tuple(name,entry.raw.source||'')===group));
     if(groups.length>1)note('法术组存在多个来源身份，未自动任选一份。');
-    else if(groups.length===1){found=true;if(!Array.isArray(groups[0].raw.spells))note('法术组的内容格式尚待核验。');else for(const reference of groups[0].raw.spells)for(const id of uid(reference))result.add(id);}
+    else if(groups.length===1){found=true;contextEntries.set(groups[0].id,groups[0]);if(!Array.isArray(groups[0].raw.spells))note('法术组的内容格式尚待核验。');else for(const reference of groups[0].raw.spells)for(const id of uid(reference))result.add(id);}
     if(!found)note('扩展法术组尚未加载或无法匹配来源。');
    }else note('职业扩展法表的条件尚未核验，未省略附加条件。');
   }
   visiting.delete(owner.id);return result;
  }
  const ids=new Set<string>();for(const owner of roots)for(const id of resolve(owner))ids.add(id);
- return {supported:true,ids,incomplete:reasons.size>0,...(reasons.size?{reason:[...reasons].join(' ')}:{})};
+ return {supported:true,ids,contextEntries:[...contextEntries.values()],incomplete:reasons.size>0,...(reasons.size?{reason:[...reasons].join(' ')}:{})};
 }

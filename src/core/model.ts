@@ -69,6 +69,8 @@ export interface Character {
   selections: Selection[]; answers: Record<string, string[]>; reviewed: string[];
   /** Saved choice snapshots. Reviewed explicit intents authenticate their source; snapshots alone never authorize effects. */
   classChoiceSnapshots?: Record<string,Entry>;
+  /** Read-only class/group context saved only with an explicit source-spell choice. */
+  sourceSpellChoiceContexts?:import('./automation/sourceSpellChoiceContext').SourceSpellChoiceContexts;
   /** Inactive class-grant trees retain identities, manual children and references. */
   classChoiceArchive?: Record<string,{choiceId:string;kind?:'legacy-asi';parent?:Selection;selections:Selection[]}>;
   hpProgression?: {mode:'average'|'rolled';rolls:Record<string,(number|null)[]>};

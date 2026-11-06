@@ -20,10 +20,11 @@ import {planFeatureResources} from './featureResources';
 import {sourceResourcePool,validResourceCost,type ResourceColumn} from './sourceResourcePools';
 import {sourceSpellFilter,sourceSpellIdentities} from './sourceSpellFilter';
 import {optionalClassSpellListDecision} from './optionalClassSpellLists';
+import {sourceSpellChoiceContext,type SourceSpellChoiceContextDraft} from './sourceSpellChoiceContext';
 
 export const sourceSpellKey=(key?:string)=>!!key?.startsWith('source-spell:');
 export interface SourceSpellPlan {id:string;owner:Selection;key:string;entry:Entry;eligible:boolean;config:SpecialSpell}
-export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;distinctGroup?:string;blockedSpells?:string[];resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string};itemChargeUse?:{ownerId:string};itemAtWill?:{ownerId:string};chargedItemSpell?:{ownerId:string}}
+export interface SourceSpellChoice {ownerId:string;key:string;label:string;sets?:string[];abilities?:Ability[];usageModes?:boolean;spells?:string[];count?:number;distinctGroup?:string;blockedSpells?:string[];filterContext?:SourceSpellChoiceContextDraft;resourceColumns?:ResourceColumn[];limitedUse?:{ownerId:string;poolId:string};itemChargeUse?:{ownerId:string};itemAtWill?:{ownerId:string};chargedItemSpell?:{ownerId:string}}
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 /** Interpret declared data, never rule prose. Unresolved choices and shapes are visible. */
 export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceSpellPlan[];issues:Issue[];choices:SourceSpellChoice[]}{
@@ -83,10 +84,15 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
      const contributions:{ref:string;fixed:boolean}[]=[];
      const resolved=list.flatMap((ref,node)=>{
       if(typeof ref==='string'){if(hasFilters)contributions.push({ref,fixed:true});return [ref];}
-      let from:string[],count:number;
+      const choiceKey=JSON.stringify([sourceOwnerIdentity(c,owner),`source-spell:${index}/${kind}/${gate}/${path}/choose:${node}`]);
+      let from:string[],count:number,filterContext:SourceSpellChoiceContextDraft|undefined,contextReady=true,contextReason:string|undefined;
       if(object(ref)&&typeof ref.choose==='string'&&Object.keys(ref).every(key=>['choose','count'].includes(key))){
        count=ref.count??1;if(!Number.isInteger(count)||count<1||count>100){issue(path,'赠送法术的选择数量尚未支持，请按原文手动选择。');return [];}
-       const filtered=sourceSpellFilter(ref.choose,knownEntries,c.edition,c.profile.optional.legacy,{
+       const classQuery=ref.choose.split('|').some(clause=>clause.split('=')[0]?.trim().toLowerCase()==='class');
+       const savedContext=classQuery?sourceSpellChoiceContext(c,choiceKey,owner,ref.choose):undefined;
+       if(savedContext?.unavailable){issue(path,savedContext.reason!);return [];}
+       const filterEntries=savedContext?.entries.length?[...new Map([...c.selections.map(row=>row.entry),...savedContext.entries,...catalog].map(entry=>[entry.id,entry] as const).reverse()).values()]:knownEntries;
+       const filtered=sourceSpellFilter(ref.choose,filterEntries,c.edition,c.profile.optional.legacy,{
         entryAllowed:entry=>selectionAllowed(c,entry),
         sourceEnabled:source=>c.profile.enabledSources.includes(source),
         optionalMembership:(spell,entry)=>{
@@ -98,6 +104,7 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
        });
        if(!filtered.supported){issue(path,filtered.reason);return [];}
        from=filtered.references;
+       if(filtered.contextEntries){filterContext={expression:ref.choose,entries:filtered.contextEntries};contextReady=savedContext?.ready===true;contextReason=savedContext?.reason;}
        if(filtered.incomplete)issue(path,filtered.reason||'部分职业法表条件仍待核验，原选择保留。');
        if(filtered.ambiguous)issue(path,'部分筛选候选存在多个身份或无法唯一引用，未自动任选一条。');
        if(!from.length)issue(path,'当前资料尚无唯一匹配的筛选候选；请加载资料或按原文手动选择。');
@@ -107,9 +114,10 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
         issue(path,'赠送法术的选择声明尚未支持，请按原文手动选择。');return [];
        }
       }
-      const key=JSON.stringify([sourceOwnerIdentity(c,owner),`source-spell:${index}/${kind}/${gate}/${path}/choose:${node}`]);
-      choices.push({ownerId:owner.id,key,label:owner.entry.name+'的赠送法术',spells:from,count,...(distinctGroup?{distinctGroup}:{})});
+      const key=choiceKey;
+      choices.push({ownerId:owner.id,key,label:owner.entry.name+'的赠送法术',spells:from,count,...(filterContext?{filterContext}:{}),...(distinctGroup?{distinctGroup}:{})});
       const selected=c.automation?.spellChoices?.[key]||[];
+      if(selected.length&&filterContext&&!contextReady){issue(path,contextReason||'已保存选择尚缺法表上下文，请重新选择；原记录与消耗保留。');return [];}
       if(selected.length>count||new Set(selected).size!==selected.length||selected.some(uid=>!from.includes(uid))){issue(path,'已保存的赠送法术选择与当前声明不符，请重新选择；记录保留。');return [];}
       if(selected.length<count)issue(path,`可记录 ${count} 项赠送法术，尚有 ${count-selected.length} 项未选。`);
       if(hasFilters)contributions.push(...selected.map(ref=>({ref,fixed:false})));
