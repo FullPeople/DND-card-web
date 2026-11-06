@@ -120,7 +120,14 @@ export function planFeatureResources(c:Character):{grants:ResourceGrant[];issues
    const existing=grants.findIndex(g=>g.key===grant.key);if(existing<0)grants.push(grant);else if(grant.max>=grants[existing].max)grants[existing]=grant;
   }catch(error){issues.push({id:`resource:${row.id}:${index}`,selectionId:row.id,severity:'warning',message:`${row.entry.name}：${error instanceof Error?error.message:String(error)}，未执行资源规则。`});}
  }
- grants.push(...planClassResourcePools(c,grants));return {grants,issues};
+ grants.push(...planClassResourcePools(c,grants));
+ const available=grants.filter(grant=>{
+  const existing=c.runtime.resources[grant.key];
+  if(!existing||existing.featureGrant)return true;
+  issues.push({id:`resource-ownership:${grant.key}`,selectionId:grant.ownerId,severity:'warning',message:`${grant.name}：已有其他资源记录，自动资源已暂停；原记录和余额保留。`});
+  return false;
+ });
+ return {grants:available,issues};
 }
 export function rememberFeatureResources(c:Character){for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id)&&!ownedItemChargeResource(c,id)){const spent=Math.max(0,r.max-r.current),old=c.runtime.featureResourceArchive?.[id];r.featureGrant.spent=r.featureGrant.spent===undefined?spent:old&&r.current===old.current&&r.max===old.max?Math.max(spent,r.featureGrant.spent):spent;(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);}}
 /** Own lifecycle and recovery only; preserve player-owned presentation and overrides. */
