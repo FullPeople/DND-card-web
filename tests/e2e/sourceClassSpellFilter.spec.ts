@@ -35,7 +35,7 @@ async function importFixture(page:Page,f:ReturnType<typeof fixture>){
  const edit=page.getByRole('switch',{name:'编辑模式',exact:true});if(await edit.getAttribute('aria-checked')!=='true')await edit.click();
 }
 async function chooseAndCast(page:Page,f:ReturnType<typeof fixture>){
- await page.getByRole('button',{name:'自动化设置',exact:true}).click();const choice=page.locator('.source-spell-choice').filter({has:page.getByRole('searchbox')});await expect(choice).toHaveCount(1);
+ await page.getByRole('button',{name:'自动化设置',exact:true}).click();const choice=page.getByRole('group',{name:'原创法表来源的赠送法术',exact:true});await expect(choice).toHaveCount(1);
  await expect(choice.getByRole('checkbox')).toHaveCount(1);await choice.getByRole('checkbox',{name:/原创候选法术/}).check();
  await expect.poll(async()=>Object.values((await savedCharacter(page)).automation!.spellChoices||{}).flat()).toEqual(['Authored wanted spell|'+f.source]);
  const selected=await savedCharacter(page);expect(selected.selections.some(row=>row.entry.kind==='class')).toBe(false);
@@ -50,7 +50,7 @@ async function chooseAndCast(page:Page,f:ReturnType<typeof fixture>){
 for(const edition of ['2014','2024'] as const)test('actual App saves the '+edition+' class identity, casts after reopening and rejects a damaged context import',async({page})=>{
  const f=fixture(edition),errors:string[]=[];page.on('pageerror',()=>errors.push('page-error'));await sources(page,f);await importFixture(page,f);const spent=await chooseAndCast(page,f);await page.reload();await waitForCatalog(page);
  const reopened=await savedCharacter(page);expect(reopened.sourceSpellChoiceContexts).toEqual(spent.sourceSpellChoiceContexts);expect(reopened.runtime.resources).toEqual(spent.runtime.resources);expect(reopened.notes).toBe(f.c.notes);expect(reopened.selections.some(row=>row.entry.kind==='class')).toBe(false);
- await page.getByRole('button',{name:'自动化设置',exact:true}).click();const choice=page.locator('.source-spell-choice').filter({has:page.getByRole('searchbox')});await expect(choice.getByRole('checkbox',{name:/原创候选法术/})).toBeChecked();await expect(choice.getByRole('checkbox')).toHaveCount(1);await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'自动化设置',exact:true}).click();const choice=page.getByRole('group',{name:'原创法表来源的赠送法术',exact:true});await expect(choice.getByRole('checkbox',{name:/原创候选法术/})).toBeChecked();await expect(choice.getByRole('checkbox')).toHaveCount(1);await page.keyboard.press('Escape');
  const before=await storedWorkspace(page),damaged=structuredClone(reopened);Object.values(damaged.sourceSpellChoiceContexts!.records!)[0].entries[0].raw.classSpells=['Authored injected spell|'+f.source];
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'authored-damaged-query.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(damaged)))});
  await expect(page.getByRole('alert').filter({hasText:'法表来源记录'})).toBeVisible();expect(await storedWorkspace(page)).toEqual(before);expect(errors).toEqual([]);
@@ -67,7 +67,7 @@ test('actual App preserves a spent gift while its independent class-list source 
 test('actual App fills the complete two-spell class query and keeps each explicitly separate use after reopening',async({page})=>{
  const f=fixture('2014');f.owner.raw.additionalSpells[0].innate['_'].daily['1e'][0].count=2;
  f.spells.push({...structuredClone(f.spells[0]),name:'原创第二法术',ENG_name:'Authored second wanted spell'});await sources(page,f);await importFixture(page,f);
- await page.getByRole('button',{name:'自动化设置',exact:true}).click();const choice=page.locator('.source-spell-choice').filter({has:page.getByRole('searchbox')});await expect(choice).toHaveCount(1);await expect(choice.getByRole('checkbox')).toHaveCount(2);
+ await page.getByRole('button',{name:'自动化设置',exact:true}).click();const choice=page.getByRole('group',{name:'原创法表来源的赠送法术',exact:true});await expect(choice).toHaveCount(1);await expect(choice.getByRole('checkbox')).toHaveCount(2);
  await choice.getByRole('checkbox',{name:/原创候选法术/}).check();await choice.getByRole('checkbox',{name:/原创第二法术/}).check();
  await expect.poll(async()=>Object.values((await savedCharacter(page)).automation!.spellChoices||{}).flat().sort()).toEqual(['Authored second wanted spell|PHB','Authored wanted spell|PHB']);
  const selected=await savedCharacter(page);expect(Object.values(selected.sourceSpellChoiceContexts!.records!)).toHaveLength(1);expect(selected.selections.filter(row=>row.entry.kind==='spell')).toHaveLength(2);expect(selected.selections.some(row=>row.entry.kind==='class')).toBe(false);await page.keyboard.press('Escape');
