@@ -9,6 +9,7 @@ import {specialSpellResource} from '../spellResourceKeys';
 import {supportedAutomation} from './state';
 import {planSourceSpells,sourceSpellKey} from './sourceSpellPlan';
 import {sourceSpellIdentities} from './sourceSpellFilter';
+import {nextSourceSpellChoiceContext} from './sourceSpellChoiceContext';
 export {planSourceSpells,sourceSpellKey} from './sourceSpellPlan';
 export type {SourceSpellPlan,SourceSpellChoice} from './sourceSpellPlan';
 
@@ -60,7 +61,11 @@ export function setSourceSpellChoices(c:Character,key:string,refs:string[],catal
  if(!choice||refs.length>choice.count!||new Set(refs).size!==refs.length||refs.some(ref=>!choice.spells!.includes(ref)))throw Error('赠送法术选择与当前声明不符。');
  if(refs.some(ref=>choice.blockedSpells?.includes(ref)))throw Error('这个法术已在本组其他位置选择，请选择不同的法术。');
  if(choice.distinctGroup&&refs.length>1){const entries=[...new Map([...catalog,...c.selections.map(row=>row.entry)].map(entry=>[entry.id,entry] as const)).values()],identity=sourceSpellIdentities(entries,true);if(new Set(refs.map(identity)).size!==refs.length)throw Error('本组选项不能重复引用同一种施法。');}
+ const owners=c.selections.filter(row=>row.id===choice.ownerId);
+ if(choice.filterContext&&owners.length!==1)throw Error('赠送法术的来源归属不唯一，未修改选择。');
+ const nextContext=choice.filterContext?nextSourceSpellChoiceContext(c,key,owners[0],choice.filterContext):undefined;
  const choices=c.automation!.spellChoices||={};Object.defineProperty(choices,key,{value:[...refs],enumerable:true,writable:true,configurable:true});
+ if(nextContext)c.sourceSpellChoiceContexts=nextContext;
 }
 
 export function setSourceResourceColumn(c:Character,key:string,column:string,catalog:Entry[]=[]):void{

@@ -10,6 +10,10 @@
   "sourcesNotice": "书目来自既有来源登记与版本锁定的本地逐条快照。快照包含主库（含官方与 UA）及第三方；书目、核对和本地载荷均不代表当前发布可用。机制来源标签仍只表示原创软件夹具覆盖的身份。",
   "changes": [
     {
+      "date": "2026-11-06",
+      "summary": "来源赠送法术可按已核验条件筛选，职业法表按来源与版本区分；保存重开和停用恢复保留选择与消耗。完整建模、执行与验收仍待逐条核实。"
+    },
+    {
       "date": "2026-10-10",
       "summary": "增加职业点数资源与来源声明扣费，资源列可明确选择；重复操作、升级、刷新和导入保留消耗。完整重审仍为 6,535 项见证，不把新增支付能力计作更多规则身份。"
     },
@@ -191,30 +195,48 @@
       "category": "spells",
       "state": "partial",
       "playerAvailable": true,
-      "reviewedAt": "2026-10-05",
+      "reviewedAt": "2026-11-06",
       "sampleSources": [
-        "XPHB"
+        "PHB",
+        "XPHB",
+        "LLMC"
       ],
-      "does": "支持明确 UID 的固定法术、choose.from 选择、方案 / 施法属性选择，以及固定数值或 PB 次数；来源法术与普通学会法术分开。",
-      "trigger": "明确选择来源方案和法术；有歧义的次数归属由玩家选择。施法时明确选择次数或法术位付费。",
-      "conditions": "来源、等级、法术身份和次数声明可解析，歧义已经确认；操作校验通过后才扣费。",
-      "boundary": "choose.filter / all、扩展法表、属性动态次数及外部职业资源尚未统一适配；次数耗尽不自动改用法术位。切换或刷新不补次数。 明确的正整数资源消耗可绑定同职业、同版本的唯一资源；名称不同需玩家选择实际次数表列。未知恢复、充能和特殊消耗仍需人工处理。",
+      "does": "支持固定授予、明确列表和已核验条件的法术选择，方案／施法属性选择，以及固定或 PB 次数。职业法表按来源与版本区分，已选法表资料随角色保存。",
+      "trigger": "在来源法术选项中确认方案、施法属性和法术；有歧义的次数归属需明确选择。施法时确认实际支付方式。",
+      "conditions": "来源、等级、法术身份、次数及完整筛选条件可核对；可选法表与职业资源有实际授权，歧义由玩家确认。",
+      "boundary": "未知筛选、法表关联、恢复与特殊消耗保留提示，不省略条件。明确的正整数消耗按同职业、同版本绑定已确认资源列；名称不同需玩家确认实际次数表列。其他扩展与动态次数仍待逐项核验。次数耗尽不自动改用其他付费方式，切换或刷新不补次数。",
       "modules": [
         "src/core/automation/sourceSpells.ts",
         "src/core/automation/actions.ts",
-        "src/core/automation/sourceResourcePools.ts"
+        "src/core/automation/sourceResourcePools.ts",
+        "src/core/automation/sourceSpellPlan.ts",
+        "src/core/automation/sourceSpellFilter.ts",
+        "src/core/automation/classSpellFilter.ts",
+        "src/core/automation/sourceSpellChoiceContext.ts",
+        "src/core/automation/sourceTextSha256.ts",
+        "src/data/classSpellCatalog.ts",
+        "src/data/classSpellFilterSources.json"
       ],
       "tests": [
         "tests/automation209-spells.test.ts",
         "tests/automation209-actions.test.ts",
         "tests/sourceSpellMechanics217.test.ts",
         "tests/sourceResourcePools.test.ts",
-        "tests/sourceResourcePayments.test.ts"
+        "tests/sourceResourcePayments.test.ts",
+        "tests/sourceSpellFilterChoices.test.ts",
+        "tests/source-class-spell-filter.test.ts",
+        "tests/source-class-spell-plan.test.ts",
+        "tests/source-class-spell-storage.test.ts",
+        "tests/class-filter-native-import.test.ts",
+        "tests/class-filter-source-metadata.test.ts"
       ],
       "browserTests": [
         "tests/e2e/automation209.spec.ts",
         "tests/e2e/sourceSpellMechanics217.spec.ts",
-        "tests/e2e/sourceResourcePayments.spec.ts"
+        "tests/e2e/sourceResourcePayments.spec.ts",
+        "tests/e2e/sourceSpellFilterChoices.spec.ts",
+        "tests/e2e/sourceSpellOwnership.spec.ts",
+        "tests/e2e/sourceClassSpellFilter.spec.ts"
       ]
     },
     {

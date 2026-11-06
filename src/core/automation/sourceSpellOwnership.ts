@@ -14,6 +14,11 @@ const onlyKnown=(value:object,fields:ReadonlySet<string>)=>Reflect.ownKeys(value
 const itemOnlyFields=['itemChargedSpell','targetScope','targetEntryId','sourceActionTiming'];
 const normalized=(value:unknown):unknown=>Array.isArray(value)?value.map(normalized):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).filter(([,v])=>v!==undefined).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([k,v])=>[k,normalized(v)])):value;
 const sameTarget=(a:Entry,b:Entry)=>JSON.stringify(normalized(a))===JSON.stringify(normalized(b));
+/** Schedule paths end before the UID; a literal slash may belong to the spell name. */
+function declaredReference(key:string):string|undefined{
+ const match=/^source-spell:\d+\/(?:known|prepared|innate)\/(?:_|s[1-9]|\d+)\/(?:_|will|ritual|(?:daily|rest|limited)\/(?:\d+e?|pbe?)|resource\/\d+)\/(.+)$/.exec(key);
+ return match?.[1].split('#')[0];
+}
 // The reviewed at-will planner resolves translated UIDs through its canonical
 // invocation proof, not the editable display label. Reuse that exact narrow
 // proof and grant path; arbitrary raw names are not an ownership fallback.
@@ -32,7 +37,7 @@ export function declaredSourceSpellOwnedChild(c:Character,row:Selection,binding?
  if(!declaredSourceSpellKey(key)||!row.parentId||row.entry.kind!=='spell'||c.selections.filter(s=>s.id===row.id).length!==1||row.id!==`auto-spell:${row.parentId}:${encodeURIComponent(key!)}`||!config||config.manualSource!==undefined||!['locked','uses'].includes(config.mode)||!g||g.ownerId!==row.parentId||g.key!==key||typeof g.active!=='boolean'||!onlyKnown(config,specialFields)||!onlyKnown(g,grantFields)||itemOnlyFields.some(field=>Object.hasOwn(g,field)))return false;
  // Withdrawal may no longer have a live plan, but its original UID must still
  // identify this saved target. Never deactivate another spell's configuration.
- const reference=key!.slice(key!.lastIndexOf('/')+1).split('#')[0],parts=reference.split('|');
+ const reference=declaredReference(key!);if(!reference)return false;const parts=reference.split('|');
  if(!parts[0]||!matchesReference(row.entry,`${parts[0]}|${parts[1]||'PHB'}`)&&!reviewedInvocationTarget(c,row))return false;
  return !binding||c.selections.filter(s=>s.id===binding.owner.id).length===1&&row.id===binding.id&&row.parentId===binding.owner.id&&key===binding.key&&sameTarget(row.entry,binding.entry);
 }
