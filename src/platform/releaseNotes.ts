@@ -1,6 +1,10 @@
 import {cloudFeaturesEnabled} from '../cloud/availability';
 export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-25':'2026-10-19';
-export const STANDALONE_RELEASE_DATE='2026-11-06';
+export const STANDALONE_RELEASE_DATE='2026-11-07';
+const release311=():ReleaseSection[]=>[
+ {title:'手工次数保护',items:['自动次数与已有手工记录重合时，保留原来的上限和剩余次数，暂停这项自动次数并提示核对。','停用、恢复来源或保存重开后，手工记录继续保留；原有自动次数仍保留已消耗的余额。']},
+ ...release310(),
+];
 const release310=():ReleaseSection[]=>[
  {title:'按职业法表选法术',items:['来源允许从职业法表选择法术时，可按已核验的法表列出候选。不同版本与第三方同名职业分别判断；尚未核实的条件仍会提示。','选择后保存所需法表记录，重开后仍可核对和施法；停用、恢复来源保留选择和已消耗次数。']},
  {title:'保存与来源目录',items:['保存失败时保留原存档、备份和恢复草稿。补齐四个已发现来源，尚未建立规则清单的扩展继续显示待建立；局部生效不代表整条规则完成。']},
@@ -508,8 +512,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'?release310():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='standalone'?[{title:STANDALONE_RELEASE_DATE,sections:release310()},{title:'2026-11-06-309',sections:release309()},{title:'2026-11-06-308',sections:release308()}]:[]),
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'?release311():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'?[{title:STANDALONE_RELEASE_DATE,sections:release311()},{title:'2026-11-06-310',sections:release310()},{title:'2026-11-06-309',sections:release309()},{title:'2026-11-06-308',sections:release308()}]:[]),
  ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release307()},{title:'2026-10-23',sections:release306()},{title:'2026-10-22',sections:release305()},{title:'2026-10-20',sections:release303()}]:[]),
  {title:'2026-10-19',sections:release302(mode)},
  {title:'2026-10-18',sections:release301(mode)},
