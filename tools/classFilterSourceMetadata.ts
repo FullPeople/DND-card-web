@@ -6,6 +6,26 @@ export interface ClassFilterSourceMetadata {
  nonstandardSources:string[];
  nonstandardPrefixes:string[];
 }
+export interface DeclaredClassFilterSource {abbreviations:string[]}
+/** Retain source registrations and conflicts separately from every rule snapshot. */
+export function extractDeclaredClassFilterSources(bodies:readonly unknown[]):Record<string,DeclaredClassFilterSource>{
+ const plain=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value);
+ const sources=new Map<string,Set<string>>();
+ for(const body of bodies){
+  if(!plain(body)||!plain(body._meta)||body._meta.sources===undefined)continue;
+  if(!Array.isArray(body._meta.sources))throw Error('Invalid source registration metadata');
+  for(const row of body._meta.sources){
+   if(!plain(row)||typeof row.json!=='string'||row.json.length>80||!/^[a-z0-9][a-z0-9_.:&-]*(?: [a-z0-9_.:&-]+)*$/i.test(row.json))throw Error('Invalid source registration ID');
+   const id=row.json.toUpperCase(),values=sources.get(id)||new Set<string>();
+   if(row.abbreviation!==undefined){
+    if(typeof row.abbreviation!=='string'||!row.abbreviation.trim()||row.abbreviation.length>80||/[\r\n\0]/.test(row.abbreviation))throw Error('Invalid source registration abbreviation');
+    values.add(row.abbreviation);
+   }
+   sources.set(id,values);
+  }
+ }
+ return Object.fromEntries([...sources].sort(([a],[b])=>a.localeCompare(b,'en')).map(([id,values])=>[id,{abbreviations:[...values].sort((a,b)=>a.localeCompare(b,'en'))}]));
+}
 type AstNode={type:string;[key:string]:unknown};
 const kind=(value:unknown,type:string):value is AstNode=>!!value&&typeof value==='object'&&(value as AstNode).type===type;
 const identifier=(value:unknown,name:string)=>kind(value,'Identifier')&&value.name===name;

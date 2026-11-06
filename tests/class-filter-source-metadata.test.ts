@@ -1,5 +1,5 @@
 import {expect,it} from 'vitest';
-import {extractClassFilterSourceMetadata} from '../tools/classFilterSourceMetadata';
+import {extractClassFilterSourceMetadata,extractDeclaredClassFilterSources} from '../tools/classFilterSourceMetadata';
 const fixture=()=>`throw new Error('must never execute');
 Parser.SRC_A='ABOOK'; Parser.SRC_B='BBOOK';
 Parser.SRC_UA_PREFIX='UA'; Parser.SRC_UA_ONE_PREFIX='XUA'; Parser.SRC_PS_PREFIX='PS'; Parser.SRC_MCVX_PREFIX='MCV';
@@ -19,4 +19,18 @@ it('rejects ambiguous abbreviations, missing source metadata and unclassified no
 it('keeps separate source IDs even when they have the same display abbreviation and rejects case collisions',()=>{
  expect(Object.keys(extractClassFilterSourceMetadata(fixture()).abbreviations)).toEqual(['ABOOK','BBOOK']);
  expect(()=>extractClassFilterSourceMetadata(fixture()+"Parser.SOURCE_JSON_TO_ABV['abook']='Conflict';")).toThrow('Case-colliding');
+});
+it('extracts only declared source IDs and abbreviations, preserving inputs and excluding private fields and rule bodies',()=>{
+ const bodies=[{_meta:{sources:[{json:'ABOOK',full:'Authored title',abbreviation:'Declared abv',private:'AUTHORED_PRIVATE_FIELD'}]},class:[{name:'Authored caster',entries:['AUTHORED_RULE_BODY']}]}],before=JSON.stringify(bodies);
+ expect(extractDeclaredClassFilterSources(bodies)).toEqual({ABOOK:{abbreviations:['Declared abv']}});expect(JSON.stringify(bodies)).toBe(before);
+});
+it('retains conflicting declarations instead of selecting a convenient abbreviation',()=>{
+ expect(extractDeclaredClassFilterSources([{_meta:{sources:[{json:'abook',abbreviation:'One'}]}},{_meta:{sources:[{json:'ABOOK',abbreviation:'Other'}]}}])).toEqual({ABOOK:{abbreviations:['One','Other']}});
+});
+it('distinguishes a registered source with unknown abbreviation from an undeclared source',()=>{
+ expect(extractDeclaredClassFilterSources([{_meta:{sources:[{json:'ABOOK',full:'Not an abbreviation'}]}}])).toEqual({ABOOK:{abbreviations:[]}});
+});
+it('rejects malformed source registrations without executing or guessing values',()=>{
+ for(const row of [{json:'A|B',abbreviation:'A'},{json:'ABOOK',abbreviation:'A\nB'},{json:'ABOOK',abbreviation:9}])expect(()=>extractDeclaredClassFilterSources([{_meta:{sources:[row]}}])).toThrow();
+ expect(()=>extractDeclaredClassFilterSources([{_meta:{sources:'unknown'}}])).toThrow();
 });
