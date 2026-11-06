@@ -8,7 +8,7 @@ import {automationEnabled} from './state';
 import {candidateReason} from '../engine';
 import {removeSelection} from '../sheet';
 import {backgroundAbilityOptions,backgroundAbilityValue} from './backgroundAbilities';
-import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem} from './sourceEquipment';
+import {equipmentBlocks,sourceEquipmentChoices,sourceEquipmentParts,sourceEquipmentAlreadyReceived,recordSourceEquipmentClaim,sourceEquipmentShapeSupported,validateEquipmentItem,validateEquipmentReference} from './sourceEquipment';
 export {equipmentBlocks} from './sourceEquipment';
 import {classSpellChoices,chooseClassSpell,setClassSpellSlot,type ClassSpellChoiceKind} from './classSpellChoices';
 import {sourceClassChoices,sourceFeatFilterCategory} from './sourceClassChoices';
@@ -337,7 +337,7 @@ export function claimStartingEquipment(c:Character,id:string,value:string,catalo
   const quantity=Number(item.quantity??1);if(!Number.isSafeInteger(quantity)||quantity<1||quantity>3000)throw Error('装备数量无效。');
   if(item.equipmentType){for(let n=0;n<quantity;n++){const entry=equipmentCandidates(item.equipmentType,owner.entry,catalog).find(e=>e.id===picks[`${index}:${n}`]);if(!entry)throw Error(`请先选择 ${equipmentTypeLabel(item.equipmentType)} 的具体装备。`);grants.push({entry,quantity:1});}continue;}
   const ref=typeof item==='string'?item:item.item;
-  if(ref||item.special){const found=ref?resolveEntryReference(ref,[...c.selections.map(s=>s.entry),...catalog],'item'):undefined;const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||item.special}`,kind:'item' as const,name:item.special||String(ref).split('|')[0],english:item.special||String(ref).split('|')[0],entries:[`起始装备记录：${ref||item.special}`],raw:{_equipmentRef:ref},effects:undefined,choices:undefined};grants.push({entry,quantity});}
+  if(ref||item.special){const found=ref?resolveEntryReference(ref,[...c.selections.map(s=>s.entry),...catalog],'item'):undefined;if(ref)validateEquipmentReference(owner.entry,ref,found);const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||item.special}`,kind:'item' as const,name:item.special||String(ref).split('|')[0],english:item.special||String(ref).split('|')[0],entries:[`起始装备记录：${ref||item.special}`],raw:{_equipmentRef:ref},effects:undefined,choices:undefined};grants.push({entry,quantity});}
   if(item.value!==undefined||item.containsValue!==undefined){const coins=Number(item.value??item.containsValue??0)/100;if(!Number.isFinite(coins)||coins<0||coins>1000000)throw Error('起始金币数值无效。');money+=coins;}
   else if(!ref&&!item.special)throw Error('起始装备结构尚未支持，请查阅来源资料。');
  }

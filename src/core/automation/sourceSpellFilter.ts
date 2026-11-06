@@ -3,6 +3,8 @@ import {editionAllows,type Edition,type Entry} from '../model';
 const key=(value:string)=>value.trim().toLowerCase();
 type Result={supported:false;reason:string}|{supported:true;references:string[];ambiguous:boolean};
 const referenceKey=(name:string,source:string)=>JSON.stringify([key(name),key(source||'PHB')]);
+// Preserve legacy UID codes and the canonical declared sources validated by Data90.
+const referenceSource=(source:string)=>source.length<=80&&(/^[a-z0-9_.-]+$/i.test(source)||/^[a-z0-9][a-z0-9_:&-]*(?: [a-z0-9_:&-]+)*$/i.test(source));
 function referenceIndex(entries:readonly Entry[]){
  const index=new Map<string,Set<string>>();
  for(const entry of entries.filter(entry=>entry.kind==='spell'))for(const name of [entry.name,entry.english]){
@@ -52,7 +54,7 @@ export function sourceSpellFilter(expression:unknown,entries:readonly Entry[],ed
  for(const entry of spells){
   if(!editionAllows(entry,edition,legacy)||!predicates.every(matches=>matches(entry)))continue;
   const name=entry.english||entry.name,uid=`${name}|${entry.source}`;
-  if(!name?.trim()||name.length>512||/[|#\r\n]/.test(name)||!(/^[a-z0-9_.-]{1,80}$/i.test(entry.source))||identities.get(referenceKey(name,entry.source))?.size!==1){ambiguous=true;continue;}
+  if(!name?.trim()||name.length>512||/[|#\r\n]/.test(name)||!referenceSource(entry.source)||identities.get(referenceKey(name,entry.source))?.size!==1){ambiguous=true;continue;}
   if(!used.has(key(uid))){references.push(uid);used.add(key(uid));}
  }
  return {supported:true,references:references.sort((a,b)=>a.localeCompare(b,'zh-CN')),ambiguous};

@@ -1,0 +1,23 @@
+# Current-corpus compatibility candidate
+
+Published card/library 308 remains source `81b602402b62991114325428f560b5d217c5cdd4`. This local candidate prepares notice/package `0.1.82` for the next card/library milestone. It has not been published. The original November 1 author notice and Suite, Wiki, backend and database scope are unchanged.
+
+Data PR92 merged normally as `4c756dd255cb6d66ec56cff9416b6aed0f7f557a` after its exact head passed both normal CI runs, including 1,169 Linux unit tests, 15 native tests, six Python tests and existing actual-source gates. Two existing event-conditional pipeline jobs were skipped. Its private 469-input derive passed schema and semantic checks with 47,674 annotation drafts; none of that is a whole-rule acceptance or execution claim.
+
+## Actual consumer boundary
+
+The current website executes entry snapshots through its own pure functions. It does not import the Data browser SDK. This candidate addresses the actual equipment transaction and source-qualified spell reference functions. The larger cumulative book-capacity helper remains separate pending work: merely increasing its number would create up to 2,000 blank drag targets, so that change requires an appropriate bounded player flow and validation.
+
+Starting-equipment claims now validate source edition compatibility before mutating possessions, coins or receipts. Automatic background/race delivery and explicit package confirmation share the guard. A core source UID keeps its edition even before its item loads. Extension sources use declared entry editions; explicit both-edition sources remain compatible and keep distinct identities. Legacy-source consent does not convert a source kit into the character's other edition. An incompatible package remains pending with a player-facing explanation; it is never replaced with same-name equipment. Previously delivered or spent property is preserved.
+
+The spell filter accepts the canonical ASCII source identifiers already validated by Data90, including single ASCII spaces and ampersands, while retaining legacy dotted UID codes. Reference delimiters, path separators, control characters, repeated or non-ASCII whitespace and encoded delimiter replacements remain rejected. No source identifier, saved choice or resource is rewritten. This does not add a new filter clause or waive the still-pending class-list conditions.
+
+## Evidence retained so far
+
+The initial synthetic run had eight failures, including one invalid inventory fixture. With a valid existing inventory shape, the original product reproduced seven failures and one pass. The first repaired four-suite run passed 32 cases. The expanded ten-suite run passed 91 cases and skipped one unrelated external-source fixture; the complete 229-input hash check and all 58 prior positive filter declarations actually ran. Strict TypeScript passed. The ten new cases cover both edition directions, atomic kit rejection, core UIDs without loaded data, compatible alternatives, legacy consent, explicit both-edition sources, save/reopen, consumed uses and manual values.
+
+A separate private probe used the four actual current-source conflicts, original hash-verified files, the normal homebrew edition adapter and the actual Web functions. In the old code, three claims issued the incompatible kit and one was already stopped by a separate unresolved category. The candidate stopped all four with the edition explanation and zero character mutation. Those are synthetic transactions against real source inputs, not real player cards or browser acceptance. The probe records each actual module hash; the initial missing helper dependency and missing standalone environment setup failures are retained separately.
+
+The existing runtime publication gate correctly rejects the old report as stale. No guard, report hash or denominator is weakened to make the candidate build. A fresh complete local and remote 18,789-record replay, exact consumer/producer pairing, full App tests, remaining historical regressions and exact-commit CI are required before merge or publication. The two additional App scenarios are registered for desktop and narrow width but have not run yet. They check the rejected package, compatible alternative, save/reopen and an exhausted ampersand-source spell.
+
+Known-source discovery stays 509 with 364 directories pending. The published runtime inventory stays 18,789 registered, 4,561 source-reviewed and 7,868 partial observations. New whole-rule modeling, execution and acceptance credit from this compatibility work is zero. Original cards, independent GM/player rooms and physical devices remain outside these checks.
