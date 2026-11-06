@@ -1,5 +1,6 @@
 import type {Raw} from '../core/model';
-import {abbreviations,nonstandardSources,nonstandardPrefixes,homebrewSources} from './classSpellFilterSources.json';
+import metadata from './classSpellFilterSources.json' with {type:'json'};
+const {abbreviations,nonstandardSources,nonstandardPrefixes,homebrewSources}=metadata;
 
 export type ClassSpellFilterSource={source:string;abbreviation:string;nonstandard:boolean;registeredHomebrew:boolean}|{source:string;unresolved:true};
 const text=(value:unknown):value is string=>typeof value==='string'&&!!value.trim()&&value.length<=80&&!/[\r\n\0]/.test(value);
