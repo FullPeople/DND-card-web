@@ -9,6 +9,7 @@ import {performSpellAction,spellActionRequest} from '../src/core/automation/acti
 import {specialSpellResource} from '../src/core/specialSpells';
 import {readCharacter} from '../src/core/validation';
 import {inventoryState} from '../src/core/characterDetails';
+import {syncFeatures} from '../src/core/sheet';
 
 const entry=(name:string,kind:Entry['kind'],source:string,edition:Entry['edition'],raw:Entry['raw']={}):Entry=>({
  id:JSON.stringify([source,name,kind]),name,english:name,kind,source,edition,raw,packId:'authored-boundaries',revision:'1',entries:[],
@@ -66,6 +67,16 @@ it('compatible kits survive reopen and source refresh without reissuing spent po
  const replacement=f.catalog.map(row=>({...row,edition:'2024' as const,revision:'2'}));
  syncSourceEquipment(restored,replacement);syncSourceEquipment(restored,replacement);expect(restored).toEqual(before);
  expect(restored.runtime.resources.manual).toEqual({max:7,current:2});expect(restored.inventory!.capacityAdjustment).toBe('10');expect(restored.notes).toBe('保留手工角色备注');
+});
+
+it('late resolution of a claimed unloaded item fills only its source snapshot and preserves spent quantity, money and receipt through reopen',()=>{
+ const f=equipmentFixture('2014','class');f.owner.entry.raw.startingEquipment.defaultData[0].B=[{item:'Authored Rope|PHB',quantity:3}];f.rope.source='PHB';
+ claimStartingEquipment(f.c,equipmentChoice(f.c,[]).id,'B',[]);
+ const row=f.c.selections.find(value=>value.entry.kind==='item')!;expect(row.entry.raw._equipmentRef).toBe('Authored Rope|PHB');
+ row.quantity=1;f.c.inventory!.coins.gp=3;
+ const expected=structuredClone(f.c);expected.selections.find(value=>value.id===row.id)!.entry=structuredClone(f.rope);
+ syncFeatures(f.c,[f.rope]);expect(f.c).toEqual(expected);syncFeatures(f.c,[f.rope]);expect(f.c).toEqual(expected);
+ const reopened=readCharacter(JSON.parse(JSON.stringify(f.c))).character;syncFeatures(reopened,[f.rope]);expect(reopened).toEqual(expected);
 });
 
 it('filtered source-qualified spell UIDs preserve canonical spaces and ampersands without combining distinct sources',()=>{

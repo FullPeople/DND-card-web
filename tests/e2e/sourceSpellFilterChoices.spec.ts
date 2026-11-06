@@ -70,13 +70,19 @@ test('actual App blocks a cross-edition kit atomically and saves a compatible al
  const f=fixture();f.c.name='装备版本完整界面验收';delete f.owner.raw.additionalSpells;
  f.owner.raw.startingEquipment={defaultData:[{A:[{item:'Authored Other Blade|XPHB',quantity:5},{value:700}],B:[{item:'Authored Rope|PHB',quantity:3}]}]};
  f.c.inventory=structuredClone(inventoryState(f.c));f.c.inventory.coins.gp=11;await sources(page,f);
- await page.route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:[{name:'异版装备',ENG_name:'Authored Other Blade',source:'XPHB',type:'M'},{name:'原创绳索',ENG_name:'Authored Rope',source:'PHB',type:'G'}]}}));
- await importAuthoredFixture(page,f);await restoreAuthoredChoices(page,'dnd-card-standalone');const menu=page.getByRole('button',{name:'功能页',exact:true});if(await menu.isVisible())await menu.click();await selectSheetPage(page,'特性');
+ await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:[{name:'异版装备',ENG_name:'Authored Other Blade',source:'XPHB',type:'M'},{name:'原创绳索',ENG_name:'Authored Rope',source:'PHB',type:'G'}]}}));
+ await importAuthoredFixture(page,f);await restoreAuthoredChoices(page,'dnd-card-standalone');
+ // This snapshot-reopen scenario starts with concrete item data. Otherwise the
+ // existing lazy placeholder resolution can legitimately hydrate it on reload.
+ const wiki=page.getByRole('button',{name:'Wiki',exact:true});if(await wiki.isVisible())await wiki.click();
+ await page.getByRole('navigation',{name:'资料分类',exact:true}).getByRole('button',{name:'装备',exact:true}).click();
+ await expect(page.locator('.catalog-row').filter({hasText:'原创绳索'})).toBeVisible();
+ const menu=page.getByRole('button',{name:'功能页',exact:true});if(await menu.isVisible())await menu.click();await selectSheetPage(page,'特性');
  await page.getByRole('button',{name:'起始装备 0/1',exact:true}).click();const equipment=page.getByRole('region',{name:'选择起始装备',exact:true});await equipment.getByRole('button',{name:'方案 A',exact:true}).click();
  const before=await savedCharacter(page);await equipment.getByRole('button',{name:'领取装备',exact:true}).click();await expect(equipment.getByRole('alert')).toContainText('另一版规则');
  const blocked=await savedCharacter(page);expect(blocked.selections).toEqual(before.selections);expect(blocked.inventory).toEqual(before.inventory);expect(blocked.backgroundChoices).toEqual(before.backgroundChoices);await page.screenshot({path:test.info().outputPath('current-equipment-held.png')});
  await equipment.getByRole('button',{name:'方案 B',exact:true}).click();await equipment.getByRole('button',{name:'领取装备',exact:true}).click();
  await expect.poll(async()=>{const saved=await savedCharacter(page);return saved.selections.filter(row=>row.entry.kind==='item').map(row=>[row.entry.english,row.entry.source,row.quantity]);}).toEqual([['Authored Rope','PHB',3]]);
- const granted=await savedCharacter(page);expect(granted.inventory?.coins.gp).toBe(11);await page.reload();await waitForCatalog(page);const reopened=await savedCharacter(page);
+ const granted=await savedCharacter(page);expect(granted.selections.find(row=>row.entry.kind==='item')?.entry.raw._equipmentRef).toBeUndefined();expect(granted.inventory?.coins.gp).toBe(11);await page.reload();await waitForCatalog(page);const reopened=await savedCharacter(page);
  expect(reopened.selections).toEqual(granted.selections);expect(reopened.inventory).toEqual(granted.inventory);expect(reopened.runtime.resources.manual).toEqual(f.c.runtime.resources.manual);expect(reopened.notes).toBe(f.c.notes);
 });
