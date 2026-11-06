@@ -32,6 +32,7 @@ export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:E
  return <section className="automation-panel"><fieldset disabled={!writable} style={{border:0,padding:0,margin:0,minWidth:0}}>
   <p>自动化支持装备、职业与特性选择、可适配的次数资源和休息恢复；未支持的规则会列出。</p>
   {supported?<><p>新建、导入和旧角色默认开启自动化。手写内容、修正和已消耗资源保留；可在此手动关闭。</p><label><input type="checkbox" aria-label="启用自动计算" checked={enabled} onChange={e=>edit(draft=>setAutomationEnabled(draft,e.target.checked))}/>启用自动计算</label></>:<p role="alert">这张卡使用尚未支持的自动化协议或规则版本。原始记录已保留，暂不执行或转换。</p>}
+  {d.issues.filter(issue=>issue.id.startsWith('resource-ownership:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}
   <h3>护甲与盾牌</h3><p>当前 AC：<strong data-testid="automation-ac">{d.ac}</strong>。卸下后恢复适用方案，卡面调整值保留。</p>
   <ArmorAdjustmentReview c={c} edit={edit}/>
   {enabled&&c.selections.filter(row=>armorType(row.entry)).map(row=><label key={row.id} style={{display:'block'}}><input type="checkbox" aria-label={`装备 ${row.entry.name}`} checked={row.equipped} onChange={e=>edit(draft=>equipSelection(draft,row.id,e.target.checked))}/>{row.entry.name} · {row.entry.source}</label>)}
