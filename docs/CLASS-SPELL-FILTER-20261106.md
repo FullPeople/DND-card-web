@@ -1,3 +1,7 @@
+# 2026-11-07 · 已随 310 发布，公网专项七通过、一失败
+
+Web148 已普通合并；Web149 的部署诊断不改执行源码，本次准确发布 `149169f32e7567167171b7927a1722d988299b8f` 的产品源码树仍为 `eaeedbcbb646e8e5eb4428b6bf7c0c27c34bb853`。Data96、完整双端 18,789 条与最终 150 来源 App 的证据保持。公网额外八项完整轮次七通过、一失败，失败是桌面独立来源停用后刷新、资料就绪十秒超时，未进入后续恢复断言。不能声称公网八项全部通过，详见 [310 发布记录](CARD-RELEASE310-20261107.md) 及 R32。原公告夹具错误、启动下载超时、中止后未执行项目和完整失败轮次均保留。以下待发布语句为历史检查点。
+
 # Source-qualified class spell choices — 2026-11-06
 
 Candidate only: published card/library 309 is unchanged. The current paired producer is merged [Data PR96](https://github.com/FullPeople/dnd5e-automation-data/pull/96), immutable report commit `29a3d95b287bcc2288fb49a483b69fc81afab86b`, actual merge `17a179633072b53017b6f3d5fa97273066a09e1b`. Its merged-main CI `42218457207` passed. The canonical Linux report SHA-256 is `90d43ca61fc50abf4a632eaea4f4d49b9c65ce46513758766eb33f3b9ca25438`; the independent local report is `007f37323c3026580182d53461c2e2ae7004eda72a09de1ffd0e28e6a968e936`. Both full records, source counts and 229 inputs match each other and Data95. Independent from-zero verification covers 18,789 receipts, all 312 immutable modules and both styles, with no digest override. The native-repaired frozen consumer is `2deda6a4a15a3e6f463da5329da85587f7fddb0a`, source tree `eaeedbcbb646e8e5eb4428b6bf7c0c27c34bb853`; current Web `874f986` has the same audited bytes.
