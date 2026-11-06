@@ -1,3 +1,13 @@
+# Final release receipt — 2026-11-06
+
+Web145 merged normally as `08882213a368f3e3b7f002f3761d00d769793894`, with the complete tree equal to final head `46a1e08794d116a02824c2f808beb20357012b48`. All 48 final PR checks and 38 exact-main checks succeeded. Linux passed 6,845 with 982 existing conditional skips; authored verification passed 362 with 20 conditional skips, fingerprint `7f3cbb2dfcd61e012a5b2226337fb4beafea7096f35df7e9c85479d28332cae2`. Production builds and private-cloud checks passed. Implementation source `81904006a341fea8cbae56e54c3b90e4cfafa936` and the exact Data93 replay pairing remain unchanged.
+
+Card/library 309 is published and independently verified through three public viewport flows, the saved 308 browser upgrade, all public file hashes, protected backend/Wiki state and the original 469 workspace files. See [309 release receipt](CARD-RELEASE309-20261106.md). The first public verifier selected the wrong announcement tab; its original failure is retained, and all unchanged assertions passed in three fresh contexts after selecting the actual release-log tab.
+
+The first narrow infusion shard failed one saved-choice assertion; the same original case and three private diagnostic repetitions passed locally. One bounded failed-jobs-only recheck passed all 26 cases without changing product, assertions, timeouts or retry settings. Its root cause remains unestablished, and R22 stays open. Original raw failure screenshots/traces were deliberately not uploaded by that workflow's privacy policy; only the original log and safe receipt are available. Do not call it fixed or loosen artifact privacy.
+
+All following pending/open descriptions are retained historical checkpoints, superseded by this receipt. Physical devices, original player cards and independent multiplayer rooms remain unverified.
+
 # Current-corpus compatibility candidate
 
 Published card/library 308 remains source `81b602402b62991114325428f560b5d217c5cdd4`. This local candidate prepares notice/package `0.1.82` for the next card/library milestone. It has not been published. The original November 1 author notice and Suite, Wiki, backend and database scope are unchanged.

@@ -49,10 +49,11 @@ test('a failed deferred page leaves the saved card and navigation available',asy
 
 test.describe('offline cache',()=>{
  test.use({serviceWorkers:'allow'});
- test('offline installation excludes unused dictionary and editing tools',async({page})=>{
+ test('offline installation excludes unused dictionary and editing tools',async({page,context})=>{
  let release!:()=>void;const held=new Promise<void>(resolve=>release=resolve);
  // Inspect installation separately from the intentional post-opening prefetch.
- await page.route(/\/assets\/(?:search|sheetImage|AutomationPanel|ResourceDashboard|SpellsPage|CardMigration)-[^/]+\.js$/,async route=>{await held;await route.continue().catch(()=>{});});
+ // The context also holds worker-owned fetches after the worker takes control.
+ await context.route(/\/assets\/(?:search|sheetImage|AutomationPanel|ResourceDashboard|SpellsPage|CardMigration)-[^/]+\.js$/,async route=>{await held;await route.continue().catch(()=>{});});
  try{
  await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
  await page.evaluate(async()=>{const registration=await navigator.serviceWorker.ready;if(registration.active?.state!=='activated')await new Promise<void>(done=>registration.active?.addEventListener('statechange',()=>done(),{once:true}));});
