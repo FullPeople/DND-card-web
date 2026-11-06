@@ -19,6 +19,7 @@ import {automationEnabled,supportedAutomation} from './state';
 import {planFeatureResources} from './featureResources';
 import {sourceResourcePool,validResourceCost,type ResourceColumn} from './sourceResourcePools';
 import {sourceSpellFilter,sourceSpellIdentities} from './sourceSpellFilter';
+import {optionalClassSpellListDecision} from './optionalClassSpellLists';
 
 export const sourceSpellKey=(key?:string)=>!!key?.startsWith('source-spell:');
 export interface SourceSpellPlan {id:string;owner:Selection;key:string;entry:Entry;eligible:boolean;config:SpecialSpell}
@@ -33,7 +34,8 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
  if(!supportedAutomation(c))return {grants,issues,choices};
  const active=new Set(activeSelections(c).map(s=>s.id)),classes=c.selections.filter(s=>s.entry.kind==='class'&&!reviewedAlertIdentity(s.entry)&&!limitedSourceIdentity(s.entry)&&!itemChargeIdentity(s.entry)),total=Math.max(1,classes.reduce((sum,s)=>sum+s.level,0));
  // Saved snapshots win over a newly downloaded edition/revision of the same entry.
- const known=[...new Map([...c.selections.map(s=>s.entry),...catalog].map(e=>[e.id,e] as const).reverse()).values()].filter(e=>e.kind==='spell');
+ const knownEntries=[...new Map([...c.selections.map(s=>s.entry),...catalog].map(e=>[e.id,e] as const).reverse()).values()];
+ const known=knownEntries.filter(e=>e.kind==='spell');
  let spellIdentity:ReturnType<typeof sourceSpellIdentities>|undefined;const identity=(ref:string)=>(spellIdentity??=sourceSpellIdentities(known,true))(ref),fixedGroups=new Map<string,string[]>();
  for(const owner of c.selections.filter(s=>s.entry.kind!=='spell'&&s.entry.raw.additionalSpells!=null)){
   // Alert's authenticated PHB adapter grants only initiative; edited family
@@ -84,9 +86,19 @@ export function planSourceSpells(c:Character,catalog:Entry[]=[]):{grants:SourceS
       let from:string[],count:number;
       if(object(ref)&&typeof ref.choose==='string'&&Object.keys(ref).every(key=>['choose','count'].includes(key))){
        count=ref.count??1;if(!Number.isInteger(count)||count<1||count>100){issue(path,'赠送法术的选择数量尚未支持，请按原文手动选择。');return [];}
-       const filtered=sourceSpellFilter(ref.choose,known,c.edition,c.profile.optional.legacy);
+       const filtered=sourceSpellFilter(ref.choose,knownEntries,c.edition,c.profile.optional.legacy,{
+        entryAllowed:entry=>selectionAllowed(c,entry),
+        sourceEnabled:source=>c.profile.enabledSources.includes(source),
+        optionalMembership:(spell,entry)=>{
+         const owners=c.selections.filter(row=>row.entry.kind==='class'&&row.entry.id===entry.id&&selectionAllowed(c,row.entry));
+         if(owners.length!==1)return {allowed:false,reason:'部分候选仅属于可选职业法表，当前没有可核对的有效授权；基础法表和手工记录保留。'};
+         const decision=optionalClassSpellListDecision(c,spell,owners[0].id);
+         return {allowed:decision.scoped&&decision.allowed,reason:decision.reason||'部分可选职业法表关联仍待核对，未自动加入候选。'};
+        },
+       });
        if(!filtered.supported){issue(path,filtered.reason);return [];}
        from=filtered.references;
+       if(filtered.incomplete)issue(path,filtered.reason||'部分职业法表条件仍待核验，原选择保留。');
        if(filtered.ambiguous)issue(path,'部分筛选候选存在多个身份或无法唯一引用，未自动任选一条。');
        if(!from.length)issue(path,'当前资料尚无唯一匹配的筛选候选；请加载资料或按原文手动选择。');
       }else{

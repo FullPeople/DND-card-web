@@ -1,0 +1,3593 @@
+{
+  "schemaVersion": 1,
+  "abbreviations": {
+    "AAG": "AAG",
+    "AATM": "AATM",
+    "ABH": "ABH",
+    "AI": "AI",
+    "AITFR": "AitFR",
+    "AITFR-AVT": "AitFR-AVT",
+    "AITFR-DN": "AitFR-DN",
+    "AITFR-FCD": "AitFR-FCD",
+    "AITFR-ISF": "AitFR-ISF",
+    "AITFR-THP": "AitFR-THP",
+    "AL": "AL",
+    "AU": "AU",
+    "AUD": "AUD",
+    "AWM": "AWM",
+    "AZFYT": "AZfyT",
+    "BAM": "BAM",
+    "BGDIA": "BGDIA",
+    "BGG": "BGG",
+    "BMT": "BMT",
+    "BQDD": "BQDD",
+    "BQGT": "BQGT",
+    "CABOMP": "CaBoMP",
+    "CM": "CM",
+    "COA": "CoA",
+    "COS": "CoS",
+    "CRCOTN": "CRCotN",
+    "DC": "DC",
+    "DD": "DD",
+    "DIP": "DIP",
+    "DITLCOT": "DitLCoT",
+    "DMG": "DMG'14",
+    "DMTCRG": "DMTCRG",
+    "DOD": "DoD",
+    "DOSI": "DoSI",
+    "DRDE": "DrDe",
+    "DRDE-ACFAS": "DrDe-ACfaS",
+    "DRDE-BD": "DrDe-BD",
+    "DRDE-BTS": "DrDe-BtS",
+    "DRDE-DAS": "DrDe-DaS",
+    "DRDE-DOTSC": "DrDe-DotSC",
+    "DRDE-FWTVC": "DrDe-FWtVC",
+    "DRDE-SD": "DrDe-SD",
+    "DRDE-TDON": "DrDe-TDoN",
+    "DRDE-TFV": "DrDe-TFV",
+    "DRDE-TWOO": "DrDe-TWoO",
+    "DSOTDQ": "DSotDQ",
+    "EEPC": "EEPC",
+    "EET": "EET",
+    "EFA": "EFA",
+    "EFR": "EFR",
+    "EGW": "EGW",
+    "ERLW": "ERLW",
+    "ESK": "ESK",
+    "FFOTR": "FFotR",
+    "FRAIF": "FRAiF",
+    "FRHOF": "FRHoF",
+    "FS": "FS",
+    "FTD": "FTD",
+    "GGR": "GGR",
+    "GOS": "GoS",
+    "GOTSF": "GotSF",
+    "HAT-LMI": "HAT-LMI",
+    "HAT-TG": "HAT-TG",
+    "HBTD": "HBTD",
+    "HF": "HF",
+    "HFDOMM": "HFDoMM",
+    "HFFOTM": "HFFotM",
+    "HFLOTT": "HFLotT",
+    "HFSTCM": "HFStCM",
+    "HFTT": "HftT",
+    "HOL": "HoL",
+    "HOTB": "HotB",
+    "HOTDQ": "HotDQ",
+    "IDROTF": "IDRotF",
+    "IMR": "IMR",
+    "JTTRC": "JttRC",
+    "KFTGV": "KftGV",
+    "KKW": "KKW",
+    "LFL": "LFL",
+    "LK": "LK",
+    "LLK": "LLK",
+    "LMOP": "LMoP",
+    "LOX": "LoX",
+    "LR": "LR",
+    "LRDT": "LRDT",
+    "MABJOV": "MaBJoV",
+    "MCV1SC": "MCV1SC",
+    "MCV2DC": "MCV2DC",
+    "MCV3MC": "MCV3MC",
+    "MCV4EC": "MCV4EC",
+    "MFF": "MFF",
+    "MGELFT": "MGELFT",
+    "MISMV1": "MisMV1",
+    "MM": "MM'14",
+    "MOT": "MOT",
+    "MPMM": "MPMM",
+    "MPP": "MPP",
+    "MTF": "MTF",
+    "NF": "NF",
+    "NRH": "NRH",
+    "NRH-ASS": "NRH-ASS",
+    "NRH-AT": "NRH-AT",
+    "NRH-AVITW": "NRH-AVitW",
+    "NRH-AWOL": "NRH-AWoL",
+    "NRH-COI": "NRH-CoI",
+    "NRH-TCMC": "NRH-TCMC",
+    "NRH-TLT": "NRH-TLT",
+    "OGA": "OGA",
+    "OOTA": "OotA",
+    "OOW": "OoW",
+    "PABTSO": "PaBTSO",
+    "PAF": "PaF",
+    "PAITM": "PAitM",
+    "PHB": "PHB'14",
+    "PIP": "PiP",
+    "PL": "PL",
+    "POTA": "PotA",
+    "PSA": "PSA",
+    "PSD": "PSD",
+    "PSI": "PSI",
+    "PSK": "PSK",
+    "PSX": "PSX",
+    "PSZ": "PSZ",
+    "QFTIS": "QftIS",
+    "RHW": "RHW",
+    "RMBRE": "RMBRE",
+    "RMR": "RMR",
+    "ROT": "RoT",
+    "ROTOS": "RoTOS",
+    "RTG": "RtG",
+    "RWG": "RWG",
+    "SAC": "SAC'14",
+    "SADS": "SADS",
+    "SAIS": "SAiS",
+    "SATO": "SatO",
+    "SCAG": "SCAG",
+    "SCC": "SCC",
+    "SCC-ARIR": "SCC-ARiR",
+    "SCC-CK": "SCC-CK",
+    "SCC-HFMT": "SCC-HfMT",
+    "SCC-TMM": "SCC-TMM",
+    "SCOEE": "ScoEE",
+    "SCREEN": "Scr'14",
+    "SCREENDUNGEONKIT": "ScrDun",
+    "SCREENSPELLJAMMER": "ScrSJ",
+    "SCREENWILDERNESSKIT": "ScrWild",
+    "SDW": "SDW",
+    "SJA": "SjA",
+    "SKT": "SKT",
+    "SLW": "SLW",
+    "SOS": "SoS",
+    "TCE": "TCE",
+    "TD": "TD",
+    "TFTYP": "TftYP",
+    "TFTYP-ATG": "TftYP",
+    "TFTYP-DIT": "TftYP",
+    "TFTYP-TFOF": "TftYP",
+    "TFTYP-THSOT": "TftYP",
+    "TFTYP-TOH": "TftYP",
+    "TFTYP-TSC": "TftYP",
+    "TFTYP-WPM": "TftYP",
+    "TLK": "TLK",
+    "TOA": "ToA",
+    "TOD": "ToD",
+    "TOFW": "ToFW",
+    "TOR": "ToR",
+    "TTP": "TTP",
+    "UATHEMYSTICCLASS": "UAMy",
+    "US": "US",
+    "UTHFTLH": "UHftLH",
+    "VD": "VD",
+    "VEOR": "VEoR",
+    "VGM": "VGM",
+    "VNOTEE": "VNotEE",
+    "VRGR": "VRGR",
+    "WBTW": "WBtW",
+    "WDH": "WDH",
+    "WDMM": "WDMM",
+    "WTTHC": "WttHC",
+    "XDMG": "DMG'24",
+    "XGE": "XGE",
+    "XMM": "MM'25",
+    "XMTS": "XMtS",
+    "XPHB": "PHB'24",
+    "XSAC": "SAC'25",
+    "XSCREEN": "Scr'24",
+    "XSCREENRHW": "ScrRHW"
+  },
+  "nonstandardSources": [
+    "AATM",
+    "AITFR",
+    "AITFR-AVT",
+    "AITFR-DN",
+    "AITFR-FCD",
+    "AITFR-ISF",
+    "AITFR-THP",
+    "AWM",
+    "AZFYT",
+    "BQGT",
+    "COA",
+    "DOD",
+    "GOTSF",
+    "HAT-LMI",
+    "HAT-TG",
+    "HBTD",
+    "HFSTCM",
+    "IMR",
+    "LK",
+    "LLK",
+    "LR",
+    "MABJOV",
+    "MCV3MC",
+    "MCV4EC",
+    "MFF",
+    "MGELFT",
+    "MISMV1",
+    "NRH",
+    "NRH-ASS",
+    "NRH-AT",
+    "NRH-AVITW",
+    "NRH-AWOL",
+    "NRH-COI",
+    "NRH-TCMC",
+    "NRH-TLT",
+    "OGA",
+    "PIP",
+    "PL",
+    "RTG",
+    "RWG",
+    "SADS",
+    "SCOEE",
+    "SJA",
+    "SOS",
+    "TLK",
+    "TTP",
+    "UTHFTLH",
+    "VD",
+    "XMTS"
+  ],
+  "nonstandardPrefixes": [
+    "MCV",
+    "PS",
+    "UA",
+    "XUA"
+  ],
+  "provenance": {
+    "repository": "tjliqy/5etools-cn",
+    "revision": "774a320e4a92d71d100673bc0df965661d9e8c1b",
+    "path": "js/parser.js",
+    "gitBlob": "6e77ec858f2878a173d4d57ee4b7c63aa7978b6f",
+    "sha256": "62471bc02e090de6ff6f967610fcfb5add66506c273b3520e43f46ffeb10060c"
+  },
+  "producerRevision": "cc8216d29e5a48c99a79eefdfdcdffd41d2d4bb8",
+  "homebrewSources": {
+    "2024 PHB BACKGROUNDS WITH FLUFF": {
+      "abbreviations": [
+        "PHB'24"
+      ]
+    },
+    "2024CUSTOMBACKGROUND": {
+      "abbreviations": [
+        "CB'24"
+      ]
+    },
+    "5EPOTION MAKING": {
+      "abbreviations": [
+        "5EPotion Making"
+      ]
+    },
+    "AACC": {
+      "abbreviations": [
+        "AACC"
+      ]
+    },
+    "ABIDALZIMS": {
+      "abbreviations": [
+        "AAA"
+      ]
+    },
+    "ADMESMER": {
+      "abbreviations": [
+        "MESM"
+      ]
+    },
+    "AFAMILIARSQUANDARY": {
+      "abbreviations": [
+        "AFQ"
+      ]
+    },
+    "ALCURSEOFSTRAHDCN": {
+      "abbreviations": [
+        "ALCoS"
+      ]
+    },
+    "ALELEMENTALEVILCN": {
+      "abbreviations": [
+        "ALEE"
+      ]
+    },
+    "ALRAGEOFDEMONSCN": {
+      "abbreviations": [
+        "ALRoD"
+      ]
+    },
+    "ALSEASON10": {
+      "abbreviations": [
+        "AL10"
+      ]
+    },
+    "ALSEASON4": {
+      "abbreviations": [
+        "AL4"
+      ]
+    },
+    "ALSEASON8": {
+      "abbreviations": [
+        "AL8"
+      ]
+    },
+    "ANWE": {
+      "abbreviations": [
+        "AnWe"
+      ]
+    },
+    "AOQ": {
+      "abbreviations": [
+        "AoQ"
+      ]
+    },
+    "AR2": {
+      "abbreviations": [
+        "Ar2"
+      ]
+    },
+    "AR20": {
+      "abbreviations": [
+        "Ar20"
+      ]
+    },
+    "AR3": {
+      "abbreviations": [
+        "Ar3"
+      ]
+    },
+    "AR6": {
+      "abbreviations": [
+        "Ar6"
+      ]
+    },
+    "AR7": {
+      "abbreviations": [
+        "Ar7"
+      ]
+    },
+    "AR8": {
+      "abbreviations": [
+        "Ar8"
+      ]
+    },
+    "ARCADIA19": {
+      "abbreviations": [
+        "Ar19"
+      ]
+    },
+    "ARCADIA21": {
+      "abbreviations": [
+        "Ar21"
+      ]
+    },
+    "ARCADIA27": {
+      "abbreviations": [
+        "Ar27"
+      ]
+    },
+    "ARCADIA9": {
+      "abbreviations": [
+        "Ar9"
+      ]
+    },
+    "ARCHEB": {
+      "abbreviations": [
+        "ArchEb"
+      ]
+    },
+    "ARCHFEST": {
+      "abbreviations": [
+        "Arch"
+      ]
+    },
+    "ARKADIA": {
+      "abbreviations": [
+        "Arka"
+      ]
+    },
+    "ASOS": {
+      "abbreviations": [
+        "ASoS"
+      ]
+    },
+    "ATBOH": {
+      "abbreviations": [
+        "ATBOH"
+      ]
+    },
+    "AVAHOTV": {
+      "abbreviations": [
+        "HotV"
+      ]
+    },
+    "AVENGER": {
+      "abbreviations": [
+        "AVGR"
+      ]
+    },
+    "BA": {
+      "abbreviations": [
+        "BA"
+      ]
+    },
+    "BBNINJA": {
+      "abbreviations": [
+        "Ninja"
+      ]
+    },
+    "BGO": {
+      "abbreviations": [
+        "BGO"
+      ]
+    },
+    "BH:SC": {
+      "abbreviations": [
+        "BH:SC"
+      ]
+    },
+    "BH:SP": {
+      "abbreviations": [
+        "BH:SP"
+      ]
+    },
+    "BH2022": {
+      "abbreviations": [
+        "BH2022"
+      ]
+    },
+    "BHBB": {
+      "abbreviations": [
+        "FFBHBB"
+      ]
+    },
+    "BHMAGUS": {
+      "abbreviations": [
+        "BH:M"
+      ]
+    },
+    "BLOODHUNTER2024": {
+      "abbreviations": [
+        "BH2024"
+      ]
+    },
+    "BLOODINTHECOMPANY": {
+      "abbreviations": [
+        "BITC"
+      ]
+    },
+    "BLOODSS": {
+      "abbreviations": [
+        "BSS"
+      ]
+    },
+    "BOMBSGADGETSGUNS": {
+      "abbreviations": [
+        "BoGaGu"
+      ]
+    },
+    "BOOKOFCHALLENGES": {
+      "abbreviations": [
+        "BoC🪤"
+      ]
+    },
+    "BOOKOFEBONTIDES": {
+      "abbreviations": [
+        "BoET"
+      ]
+    },
+    "BREWSKII": {
+      "abbreviations": [
+        "YGtT"
+      ]
+    },
+    "BST": {
+      "abbreviations": [
+        "BST"
+      ]
+    },
+    "CASTELIAD": {
+      "abbreviations": [
+        "Cld"
+      ]
+    },
+    "CC": {
+      "abbreviations": [
+        "CC"
+      ]
+    },
+    "CHNLR": {
+      "abbreviations": [
+        "CHNLR"
+      ]
+    },
+    "COFSA": {
+      "abbreviations": [
+        "CoFS:A"
+      ]
+    },
+    "COH-WEAVEKNIGHT": {
+      "abbreviations": [
+        "Wvknght"
+      ]
+    },
+    "COH-WEAVEKNIGHT-V2-5": {
+      "abbreviations": [
+        "Wvknght"
+      ]
+    },
+    "COOK": {
+      "abbreviations": [
+        "Cook"
+      ]
+    },
+    "CROOKEDMOON14": {
+      "abbreviations": [
+        "TCM'14"
+      ]
+    },
+    "CROOKEDMOON24": {
+      "abbreviations": [
+        "TCM'24"
+      ]
+    },
+    "CRYOMANCER": {
+      "abbreviations": [
+        "Cryo"
+      ]
+    },
+    "CTHULHUTORCHLIGHT": {
+      "abbreviations": [
+        "CBT"
+      ]
+    },
+    "DA:GIC": {
+      "abbreviations": [
+        "DA:GIC"
+      ]
+    },
+    "DANDANCER": {
+      "abbreviations": [
+        "DaDS"
+      ]
+    },
+    "DANDWIKI-YOU-SICK-FUGG": {
+      "abbreviations": [
+        "D&DW"
+      ]
+    },
+    "DANDWIKIWARPRIEST": {
+      "abbreviations": [
+        "D&DW"
+      ]
+    },
+    "DARKSOULSIIILORDSEEKERSCOMPENDIUM": {
+      "abbreviations": [
+        "DS3:LSC"
+      ]
+    },
+    "DDEX1-01": {
+      "abbreviations": [
+        "DDEX1-01"
+      ]
+    },
+    "DDEX1-02": {
+      "abbreviations": [
+        "DDEX1-02"
+      ]
+    },
+    "DLRG": {
+      "abbreviations": [
+        "DLRG"
+      ]
+    },
+    "DMHAVUHKWITCH": {
+      "abbreviations": [
+        "DMHW"
+      ]
+    },
+    "DMPG": {
+      "abbreviations": [
+        "DMPG"
+      ]
+    },
+    "DNDWIKI-BESTBACKGROUNDS": {
+      "abbreviations": [
+        "D&D Wiki"
+      ]
+    },
+    "DODKSEARCHSMUGGLERSSECRETS": {
+      "abbreviations": [
+        "ISotSS"
+      ]
+    },
+    "DOGGOSIDEKICK": {
+      "abbreviations": [
+        "Doggo"
+      ]
+    },
+    "DONTSAYVECNA": {
+      "abbreviations": [
+        "DSV"
+      ]
+    },
+    "DRAGONHORSE2026": {
+      "abbreviations": [
+        "DragonHorse2026"
+      ]
+    },
+    "DRAGOON REVISITED": {
+      "abbreviations": [
+        "DragR"
+      ]
+    },
+    "DUNGEONSDRAKKENHEIM": {
+      "abbreviations": [
+        "DoDk"
+      ]
+    },
+    "DXMARKSMAN": {
+      "abbreviations": [
+        "DXM"
+      ]
+    },
+    "DZC:ANA:B": {
+      "abbreviations": [
+        "DZC:ANA"
+      ]
+    },
+    "DZC:ANA:F": {
+      "abbreviations": [
+        "DZC:ANA"
+      ]
+    },
+    "DZC:ANA:M": {
+      "abbreviations": [
+        "DZC:ANA"
+      ]
+    },
+    "DZC:ANA:RO": {
+      "abbreviations": [
+        "DZC:ANA"
+      ]
+    },
+    "EBFATEWEAVER": {
+      "abbreviations": [
+        "FW"
+      ]
+    },
+    "EDRUID": {
+      "abbreviations": [
+        "EDruid"
+      ]
+    },
+    "EMPERRORSNEWGROOVE": {
+      "abbreviations": [
+        "ENG"
+      ]
+    },
+    "ERICNELLPLAGUEDOCTOR": {
+      "abbreviations": [
+        "PD"
+      ]
+    },
+    "FEST:TG": {
+      "abbreviations": [
+        "Fest:TG"
+      ]
+    },
+    "FESTIVAL": {
+      "abbreviations": [
+        "festival"
+      ]
+    },
+    "FESTIVALACT": {
+      "abbreviations": [
+        "FESTiV"
+      ]
+    },
+    "FIRSTBLUSH": {
+      "abbreviations": [
+        "FBlu"
+      ]
+    },
+    "FLEEMORTALS": {
+      "abbreviations": [
+        "FM!"
+      ]
+    },
+    "FOXFIREASTARTESINITIATE": {
+      "abbreviations": [
+        "FFAstartes"
+      ]
+    },
+    "FOXFIREINQUISITOR": {
+      "abbreviations": [
+        "FFINQ"
+      ]
+    },
+    "FOXFIRELYCAN": {
+      "abbreviations": [
+        "FFLycan"
+      ]
+    },
+    "FOXFIRESPELLBLADE": {
+      "abbreviations": [
+        "FFSplBld"
+      ]
+    },
+    "FOXFIREVAMP": {
+      "abbreviations": [
+        "FFVamp"
+      ]
+    },
+    "FRAGSAUCESBR": {
+      "abbreviations": [
+        "SBR"
+      ]
+    },
+    "FT&S": {
+      "abbreviations": [
+        "FT&S"
+      ]
+    },
+    "GALDEVEERTANKSANDFLANKS": {
+      "abbreviations": [
+        "T&F"
+      ]
+    },
+    "GCC": {
+      "abbreviations": [
+        "GCC"
+      ]
+    },
+    "GENERIC OVERSIZED LONGBOW": {
+      "abbreviations": [
+        "WDH-GOL"
+      ]
+    },
+    "GFGMH": {
+      "abbreviations": [
+        "MH"
+      ]
+    },
+    "GFW:MOM": {
+      "abbreviations": [
+        "GfW:MoM"
+      ]
+    },
+    "GIDDYACTION": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYADVENTURE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYBACKGROUND": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYBOON": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYCHAROPTION": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYCONDITION": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYCREATURE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYCULT": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYDEITY": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYDISEASE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYFACILITY": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYFEAT": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYHAZARD": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYITEM": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYLANGUAGE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYOBJECT": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYOPTIONALFEATURE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYPSIONIC": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYRACE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYRECIPE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYREWARD": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYSPELL": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYSPELLCOPY": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYTABLE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYTRAP": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYVARIANT": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYVARIANTRULE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GIDDYVEHICLE": {
+      "abbreviations": [
+        "Brew"
+      ]
+    },
+    "GMBOLD": {
+      "abbreviations": [
+        "GMBoLD"
+      ]
+    },
+    "GRIFFONSSADDLEBAG2": {
+      "abbreviations": [
+        "TGS2"
+      ]
+    },
+    "GRIMHOLLOWPG24": {
+      "abbreviations": [
+        "GH:PG'24"
+      ]
+    },
+    "GUIDEDRAKKENHEIM": {
+      "abbreviations": [
+        "SCGtD"
+      ]
+    },
+    "HA:GS": {
+      "abbreviations": [
+        "HA"
+      ]
+    },
+    "HA:GS-UACLASSFEATUREVARIANTS": {
+      "abbreviations": [
+        "UACFV"
+      ]
+    },
+    "HELIANASGUIDETOMONSTERHUNTING": {
+      "abbreviations": [
+        "HGtMH"
+      ]
+    },
+    "HELODINN-NECROMANCER": {
+      "abbreviations": [
+        "Necro"
+      ]
+    },
+    "HIPPOCAMPERSCOMPLETECOOKBOOK": {
+      "abbreviations": [
+        "HCC"
+      ]
+    },
+    "HOBGCN": {
+      "abbreviations": [
+        "HoBGCN"
+      ]
+    },
+    "HONKONOMICON": {
+      "abbreviations": [
+        "HONK"
+      ]
+    },
+    "HUMBLEWOODCAMPAIGNSETTING": {
+      "abbreviations": [
+        "HWCS"
+      ]
+    },
+    "HUMBLEWOODTALES": {
+      "abbreviations": [
+        "HWT"
+      ]
+    },
+    "ILL": {
+      "abbreviations": [
+        "ILL"
+      ]
+    },
+    "ILLRIGGERREVISED": {
+      "abbreviations": [
+        "IllR"
+      ]
+    },
+    "INFKORE:DISCIPLE": {
+      "abbreviations": [
+        "Disc"
+      ]
+    },
+    "IZZY:INCARNATE": {
+      "abbreviations": [
+        "INC"
+      ]
+    },
+    "IZZY:INCARNATE-UACLASSFEATUREVARIANTS": {
+      "abbreviations": [
+        "UACFV"
+      ]
+    },
+    "JEFF IBACH": {
+      "abbreviations": [
+        "BatB"
+      ]
+    },
+    "JONOMANPLANESHIFTER": {
+      "abbreviations": [
+        "JP"
+      ]
+    },
+    "JRRTG": {
+      "abbreviations": [
+        "JRRTG"
+      ]
+    },
+    "JWL": {
+      "abbreviations": [
+        "JWL"
+      ]
+    },
+    "KCAA": {
+      "abbreviations": [
+        "KCAA"
+      ]
+    },
+    "KCAA-UACLASSFEATUREVARIANTS": {
+      "abbreviations": [
+        "UACFV"
+      ]
+    },
+    "KG": {
+      "abbreviations": [
+        "KG"
+      ]
+    },
+    "KIBBLEINVENTOR": {
+      "abbreviations": [
+        "KT:I"
+      ]
+    },
+    "KIBBLESTASTY:BMS": {
+      "abbreviations": [
+        "KBMS"
+      ]
+    },
+    "KIBBLESTASTY:CC": {
+      "abbreviations": [
+        "KCC"
+      ]
+    },
+    "KNOWLEDGEISPOWER": {
+      "abbreviations": [
+        "kip"
+      ]
+    },
+    "KSB": {
+      "abbreviations": [
+        "KT:SB"
+      ]
+    },
+    "KSNOWBELLAPOTHECARY": {
+      "abbreviations": [
+        "APO"
+      ]
+    },
+    "KT:O": {
+      "abbreviations": [
+        "KT:O"
+      ]
+    },
+    "KTP": {
+      "abbreviations": [
+        "KT:P"
+      ]
+    },
+    "KTW": {
+      "abbreviations": [
+        "KT:W"
+      ]
+    },
+    "KTWE": {
+      "abbreviations": [
+        "KT:WE"
+      ]
+    },
+    "LIMITLESSADVENTURES": {
+      "abbreviations": [
+        "LAS"
+      ]
+    },
+    "LITMCN": {
+      "abbreviations": [
+        "LitmCN"
+      ]
+    },
+    "LLAART": {
+      "abbreviations": [
+        "LLAART"
+      ]
+    },
+    "LLAART:E": {
+      "abbreviations": [
+        "LLAART:E"
+      ]
+    },
+    "LLAB": {
+      "abbreviations": [
+        "LLAB"
+      ]
+    },
+    "LLABE": {
+      "abbreviations": [
+        "LLABE"
+      ]
+    },
+    "LLABH": {
+      "abbreviations": [
+        "LLABH"
+      ]
+    },
+    "LLABRD": {
+      "abbreviations": [
+        "LLABrd"
+      ]
+    },
+    "LLACLR": {
+      "abbreviations": [
+        "LLAClr"
+      ]
+    },
+    "LLADRU": {
+      "abbreviations": [
+        "LLADru"
+      ]
+    },
+    "LLAF": {
+      "abbreviations": [
+        "LLAF"
+      ]
+    },
+    "LLAF:E": {
+      "abbreviations": [
+        "LLAF:E"
+      ]
+    },
+    "LLAM": {
+      "abbreviations": [
+        "LLAM"
+      ]
+    },
+    "LLAM:E": {
+      "abbreviations": [
+        "LLAM:E"
+      ]
+    },
+    "LLAPAL": {
+      "abbreviations": [
+        "LLAPal"
+      ]
+    },
+    "LLAR": {
+      "abbreviations": [
+        "LLAR"
+      ]
+    },
+    "LLAR:E": {
+      "abbreviations": [
+        "LLAR:E"
+      ]
+    },
+    "LLARO": {
+      "abbreviations": [
+        "LLARo"
+      ]
+    },
+    "LLAROE": {
+      "abbreviations": [
+        "LLARoE"
+      ]
+    },
+    "LLASORC": {
+      "abbreviations": [
+        "LLASorc"
+      ]
+    },
+    "LLASORCORC:E": {
+      "abbreviations": [
+        "LLASorc:E"
+      ]
+    },
+    "LLAW": {
+      "abbreviations": [
+        "LLWar"
+      ]
+    },
+    "LLAW:E": {
+      "abbreviations": [
+        "LLAWarE"
+      ]
+    },
+    "LLAWIZ": {
+      "abbreviations": [
+        "LLAWiz"
+      ]
+    },
+    "LLC": {
+      "abbreviations": [
+        "LLC"
+      ]
+    },
+    "LLCOMPENDIUMOFBEASTS": {
+      "abbreviations": [
+        "LLCoB"
+      ]
+    },
+    "LLCOMPENDIUMOFBEASTSDINOSAURS": {
+      "abbreviations": [
+        "LLCoB:D"
+      ]
+    },
+    "LLEXPLOITS": {
+      "abbreviations": [
+        "LLCE"
+      ]
+    },
+    "LLFEAT": {
+      "abbreviations": [
+        "LLCF"
+      ]
+    },
+    "LLMC": {
+      "abbreviations": [
+        "LLMag"
+      ]
+    },
+    "LLMC:E": {
+      "abbreviations": [
+        "LLMagE"
+      ]
+    },
+    "LLPS": {
+      "abbreviations": [
+        "LLPs"
+      ]
+    },
+    "LLSAV": {
+      "abbreviations": [
+        "LLSav"
+      ]
+    },
+    "LLSAVE": {
+      "abbreviations": [
+        "LLSavE"
+      ]
+    },
+    "LLSH": {
+      "abbreviations": [
+        "LLSha"
+      ]
+    },
+    "LLSH:E": {
+      "abbreviations": [
+        "LLShaE"
+      ]
+    },
+    "LLSHIFTER": {
+      "abbreviations": [
+        "LLShi"
+      ]
+    },
+    "LLSPELL": {
+      "abbreviations": [
+        "LLCS"
+      ]
+    },
+    "LLSTYLES": {
+      "abbreviations": [
+        "LLFS"
+      ]
+    },
+    "LLVESSEL": {
+      "abbreviations": [
+        "LLVes"
+      ]
+    },
+    "LLWRC": {
+      "abbreviations": [
+        "LLWrc"
+      ]
+    },
+    "LORDTOB": {
+      "abbreviations": [
+        "DToB"
+      ]
+    },
+    "LUCHADOR": {
+      "abbreviations": [
+        "Luch"
+      ]
+    },
+    "MAGEHANDPRESSCOMPLETEBINDER": {
+      "abbreviations": [
+        "MHP:CB"
+      ]
+    },
+    "MAGICALBINDTATTOOS": {
+      "abbreviations": [
+        "TATnB"
+      ]
+    },
+    "MALADYOFMINARRH": {
+      "abbreviations": [
+        "TMoM"
+      ]
+    },
+    "MAPLIBRARY": {
+      "abbreviations": [
+        "TML"
+      ]
+    },
+    "MFOVBINDER": {
+      "abbreviations": [
+        "MFoV-B"
+      ]
+    },
+    "MFOVBINDERFOUNDRY": {
+      "abbreviations": [
+        "MFoV-B"
+      ]
+    },
+    "MFOVLOVECRAFTIANBACKGROUNDS": {
+      "abbreviations": [
+        "MFoV"
+      ]
+    },
+    "MH": {
+      "abbreviations": [
+        "MH"
+      ]
+    },
+    "MHMM": {
+      "abbreviations": [
+        "MHMM"
+      ]
+    },
+    "MLPCM&D": {
+      "abbreviations": [
+        "MLPCM&D"
+      ]
+    },
+    "MONSTERSOFDRAKKENHEIM": {
+      "abbreviations": [
+        "MoDk"
+      ]
+    },
+    "MTGB": {
+      "abbreviations": [
+        "MtG:b"
+      ]
+    },
+    "MTGITEMS": {
+      "abbreviations": [
+        "MtG:m"
+      ]
+    },
+    "NERDHERD": {
+      "abbreviations": [
+        "AB"
+      ]
+    },
+    "NERDLY": {
+      "abbreviations": [
+        "NH"
+      ]
+    },
+    "NMD": {
+      "abbreviations": [
+        "NMD"
+      ]
+    },
+    "NMD:BN": {
+      "abbreviations": [
+        "NMD:BN"
+      ]
+    },
+    "NOBLE": {
+      "abbreviations": [
+        "Noble"
+      ]
+    },
+    "NORTHLANDSSAGAS": {
+      "abbreviations": [
+        "NS"
+      ]
+    },
+    "NORTHLANDSWORLDBOOK": {
+      "abbreviations": [
+        "NWB"
+      ]
+    },
+    "OATHOFTHEUNCONQUERED2": {
+      "abbreviations": [
+        "OOtU"
+      ]
+    },
+    "OBOJIMATALESYATAMON": {
+      "abbreviations": [
+        "O:TFY"
+      ]
+    },
+    "OBOJIMATALLGRASS": {
+      "abbreviations": [
+        "O:TTG"
+      ]
+    },
+    "ONESHOTWONDERS10FOREST": {
+      "abbreviations": [
+        "OSW:F"
+      ]
+    },
+    "ORCHARDSORCREFLOURISHED": {
+      "abbreviations": [
+        "RDOOSR"
+      ]
+    },
+    "OSH2024": {
+      "abbreviations": [
+        "OSH"
+      ]
+    },
+    "PLANESHIFTTARKIR": {
+      "abbreviations": [
+        "PS-Tk"
+      ]
+    },
+    "PLANETTARRASQUES": {
+      "abbreviations": [
+        "PotTarr"
+      ]
+    },
+    "PS-KG": {
+      "abbreviations": [
+        "PS-Kg"
+      ]
+    },
+    "PSIONS PRIMER": {
+      "abbreviations": [
+        "PsPr"
+      ]
+    },
+    "PSIONS PRIMER-UACLASSFEATUREVARIANTS": {
+      "abbreviations": [
+        "UACFV"
+      ]
+    },
+    "PUGILIST2024": {
+      "abbreviations": [
+        "TPC'24"
+      ]
+    },
+    "QUESTIONABLEARCANA": {
+      "abbreviations": [
+        "QAMMM"
+      ]
+    },
+    "RA2018": {
+      "abbreviations": [
+        "RA'18"
+      ]
+    },
+    "RATSOFWATERDEEP": {
+      "abbreviations": [
+        "RoW"
+      ]
+    },
+    "RCG": {
+      "abbreviations": [
+        "RCG"
+      ]
+    },
+    "REDDIT": {
+      "abbreviations": [
+        "r/UA"
+      ]
+    },
+    "RETURNOFTHELAZYDM": {
+      "abbreviations": [
+        "RotLDM"
+      ]
+    },
+    "RIND": {
+      "abbreviations": [
+        "RInD"
+      ]
+    },
+    "ROTR1": {
+      "abbreviations": [
+        "RotR1"
+      ]
+    },
+    "ROTR2": {
+      "abbreviations": [
+        "RotR2"
+      ]
+    },
+    "ROTR3": {
+      "abbreviations": [
+        "RotR3"
+      ]
+    },
+    "ROTR4": {
+      "abbreviations": [
+        "RotR4"
+      ]
+    },
+    "ROTR5": {
+      "abbreviations": [
+        "RotR5"
+      ]
+    },
+    "ROTR6": {
+      "abbreviations": [
+        "RotR6"
+      ]
+    },
+    "ROTSSPGF": {
+      "abbreviations": [
+        "ROTSSPGF"
+      ]
+    },
+    "RR": {
+      "abbreviations": [
+        "RR"
+      ]
+    },
+    "RUINSOFSYMBAROUMSETTINGHANDBOOK": {
+      "abbreviations": [
+        "RoS:SH"
+      ]
+    },
+    "S5E": {
+      "abbreviations": [
+        "S5E"
+      ]
+    },
+    "SAIDORO": {
+      "abbreviations": [
+        "SMIP"
+      ]
+    },
+    "SANEMAGICITEMPRICESEXPANDED": {
+      "abbreviations": [
+        "SMIP2"
+      ]
+    },
+    "SC": {
+      "abbreviations": [
+        "SC"
+      ]
+    },
+    "SCARTHEY": {
+      "abbreviations": [
+        "scarthey"
+      ]
+    },
+    "SCHOLAR": {
+      "abbreviations": [
+        "Scholar"
+      ]
+    },
+    "SCOC": {
+      "abbreviations": [
+        "SCoC"
+      ]
+    },
+    "SELERIM HOMEBREW BACKGROUNDS": {
+      "abbreviations": [
+        "Homebrew"
+      ]
+    },
+    "SI": {
+      "abbreviations": [
+        "SI"
+      ]
+    },
+    "SIEGE": {
+      "abbreviations": [
+        "Siege"
+      ]
+    },
+    "SIELCN": {
+      "abbreviations": [
+        "SiElCN"
+      ]
+    },
+    "SOD": {
+      "abbreviations": [
+        "SOD"
+      ]
+    },
+    "SOI": {
+      "abbreviations": [
+        "SoI"
+      ]
+    },
+    "SORCERERREVITALIZED": {
+      "abbreviations": [
+        "SRv"
+      ]
+    },
+    "SORCERERREVITALIZED-TCE": {
+      "abbreviations": [
+        "TCE"
+      ]
+    },
+    "SORCERERREVITALIZED-XGE": {
+      "abbreviations": [
+        "XGE"
+      ]
+    },
+    "SOULBINDERFRAGSAUCE": {
+      "abbreviations": [
+        "SBFS"
+      ]
+    },
+    "STERLINGVERMIN": {
+      "abbreviations": [
+        "BH:P"
+      ]
+    },
+    "STERLINGVERMIN:PATREON": {
+      "abbreviations": [
+        "SVP"
+      ]
+    },
+    "TALDOREICAMPAIGNSETTINGREBORN": {
+      "abbreviations": [
+        "TDCSR"
+      ]
+    },
+    "TALPSI": {
+      "abbreviations": [
+        "TAP"
+      ]
+    },
+    "TARONPOUNDSR": {
+      "abbreviations": [
+        "TPR"
+      ]
+    },
+    "TATTOOS": {
+      "abbreviations": [
+        "Tats"
+      ]
+    },
+    "TCEE2": {
+      "abbreviations": [
+        "TCEE2"
+      ]
+    },
+    "TEASANDTISANES": {
+      "abbreviations": [
+        "TT"
+      ]
+    },
+    "TEB": {
+      "abbreviations": [
+        "TEB"
+      ]
+    },
+    "TEB:SR": {
+      "abbreviations": [
+        "TEB"
+      ]
+    },
+    "TEB:SV": {
+      "abbreviations": [
+        "TEB"
+      ]
+    },
+    "TGD": {
+      "abbreviations": [
+        "TGD"
+      ]
+    },
+    "THEARMIGERCLASS": {
+      "abbreviations": [
+        "AMGR"
+      ]
+    },
+    "THEDELIANTOMB": {
+      "abbreviations": [
+        "tDT"
+      ]
+    },
+    "THEDEMIDRAGON": {
+      "abbreviations": [
+        "TDD"
+      ]
+    },
+    "THEFLYINGMISFORTUNE": {
+      "abbreviations": [
+        "TFM"
+      ]
+    },
+    "THEHANGOVER": {
+      "abbreviations": [
+        "Hngvr"
+      ]
+    },
+    "THIRDTIMESTHECHARM": {
+      "abbreviations": [
+        "TCha"
+      ]
+    },
+    "THV": {
+      "abbreviations": [
+        "HiVE"
+      ]
+    },
+    "TLOTRW": {
+      "abbreviations": [
+        "TLotRW"
+      ]
+    },
+    "TMMMOFVW": {
+      "abbreviations": [
+        "TMMMoFvW"
+      ]
+    },
+    "TMR": {
+      "abbreviations": [
+        "TMR"
+      ]
+    },
+    "TNAOJ": {
+      "abbreviations": [
+        "tnaoj"
+      ]
+    },
+    "TOB": {
+      "abbreviations": [
+        "ToB"
+      ]
+    },
+    "TOB1-2023": {
+      "abbreviations": [
+        "ToB1'23"
+      ]
+    },
+    "TOB2": {
+      "abbreviations": [
+        "ToB2"
+      ]
+    },
+    "TOB2-LAIRS": {
+      "abbreviations": [
+        "ToB2"
+      ]
+    },
+    "TOB3": {
+      "abbreviations": [
+        "ToB3"
+      ]
+    },
+    "TOTBC": {
+      "abbreviations": [
+        "TotBC"
+      ]
+    },
+    "TOURNEY": {
+      "abbreviations": [
+        "Tourney"
+      ]
+    },
+    "TPK": {
+      "abbreviations": [
+        "TPK"
+      ]
+    },
+    "TRADERSANDMERCHANTS": {
+      "abbreviations": [
+        "TaM"
+      ]
+    },
+    "TSGTTT": {
+      "abbreviations": [
+        "TSGtTT"
+      ]
+    },
+    "TSSL": {
+      "abbreviations": [
+        "TSSL"
+      ]
+    },
+    "TTNSP": {
+      "abbreviations": [
+        "TTNSP"
+      ]
+    },
+    "TWSAGU": {
+      "abbreviations": [
+        "TWSAGU"
+      ]
+    },
+    "ULTIMATEADVENTURER": {
+      "abbreviations": [
+        "UAH"
+      ]
+    },
+    "UW": {
+      "abbreviations": [
+        "UW"
+      ]
+    },
+    "VALDAGUNSLINGER": {
+      "abbreviations": [
+        "GC:VSS'24"
+      ]
+    },
+    "VIGHTER": {
+      "abbreviations": [
+        "Vighter"
+      ]
+    },
+    "VRGRBEES": {
+      "abbreviations": [
+        "VRGR:Bees"
+      ]
+    },
+    "WAGADUCHRONICLES": {
+      "abbreviations": [
+        "TWC"
+      ]
+    },
+    "WCE": {
+      "abbreviations": [
+        "WCE"
+      ]
+    },
+    "WDMMC": {
+      "abbreviations": [
+        "WDMMC"
+      ]
+    },
+    "WIZCON": {
+      "abbreviations": [
+        "WizCon"
+      ]
+    },
+    "WL50": {
+      "abbreviations": [
+        "WL50"
+      ]
+    },
+    "WOKIWI": {
+      "abbreviations": [
+        "WoKiWi"
+      ]
+    },
+    "XLNEE": {
+      "abbreviations": [
+        "XLNEE"
+      ]
+    },
+    "ZGTTEOT": {
+      "abbreviations": [
+        "ZGttEoT"
+      ]
+    }
+  },
+  "catalogProvenance": {
+    "manifestSha256": "f8ded94ec3a948b9459afa2ef3ce6ddf93062fe9cf1509392c2a6790bac4f6ed",
+    "verifiedInputs": 469,
+    "totalBytes": 131035829,
+    "metadataInputs": [
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "action/Sample%20-%20Giddy%3B%20%E7%86%84%E7%81%AD.json",
+        "bytes": 725,
+        "sha256": "de75b80929aa9c801d110abb3f51e9f9a4aa7adb71ea3343c88b06ec3b37c133"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Sample%20-%20Giddy%3B%20%E7%81%BE%E5%8E%84%E6%B4%9E%E7%A9%B4.json",
+        "bytes": 1668,
+        "sha256": "5afb31b98183d07ce041582944adfe56345a90b7aef26ed589b4d8e717b73454"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/Sample%20-%20Giddy%3B%20%E5%86%9C%E6%B0%91.json",
+        "bytes": 6601,
+        "sha256": "8f3c742d126d5049115f0529ce074a6d91ae0bb77cdc41ad96160089f1874260"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "boon/Sample%20-%20Giddy%3B%20%E5%8F%AF%E7%96%91%E7%9A%84%E8%B5%A0%E7%A4%BC.json",
+        "bytes": 2323,
+        "sha256": "103d177700dded285fdf76262e5852bf8e489be9ab5d8efd6d82bc0833f55fa7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "charoption/Sample%20-%20Giddy%3B%20%E7%A7%98%E5%AF%86%E5%AF%B9%E6%89%8B.json",
+        "bytes": 2642,
+        "sha256": "0223d5de35a7b054e8de5f0831082605af4b7bac7862dc93424e696ee0c21cce"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202014.json",
+        "bytes": 148499,
+        "sha256": "96488bcdaa7eb01c18ef9bcf73730e5408cef69d886533f032f68b4eb5a0d69b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Benjamin%20Huffman%3B%20%E6%8B%B3%E6%96%97%E5%A3%ABPugilist%20-%202024.json",
+        "bytes": 161908,
+        "sha256": "933e51ca9f90037d35dd1337107b99cd01417c802c9b6770a8a82f8611ee4d82"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Mage%20Hand%20Press%3B%20%E9%93%B3%E5%A3%ABGunslinger.json",
+        "bytes": 158657,
+        "sha256": "a3d99d757f7fc3d3fe4f38af160a4230467639e3c83153f79cdecef8e5f0604a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/MCDM%20Productions%3B%20%E9%82%AA%E7%8B%B1%E4%BD%BF%E4%BF%AE%E8%AE%A2%E7%89%88.json",
+        "bytes": 202283,
+        "sha256": "f4dabfe0a501418c63746c3b89dc02d945e4994bceaeeb735734fa7927c79229"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Sam%20Grierson%3B%20%E5%8E%A8%E5%B8%88The%20Cook%20Class.json",
+        "bytes": 71999,
+        "sha256": "50b885c18bf1340364221d735493488c033a953c25808a98bc8e3b3f7f80e1f4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/SnowWolf%3B%20%E8%A1%80%E7%8C%8E%E6%89%8B%20(2024).json",
+        "bytes": 88686,
+        "sha256": "1ba88b45db6e41493ee46c489e8d389eba3f71427e69be970ac952570c94dd5c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/%E5%B0%8F%E9%B8%9F%3B%20%E5%90%91%E9%95%9C%E4%B8%AD%E7%9C%8B.json",
+        "bytes": 50274,
+        "sha256": "3a66d28d62e3456744fa2bb7322f5a062de95eba5664870c81841bd0f8a01c09"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/1985%20Games%3B%20%E8%83%A7%E5%BF%86%E5%B2%9B%EF%BC%9A%E8%92%BF%E9%87%8E%E7%89%A9%E8%AF%AD.json",
+        "bytes": 2343561,
+        "sha256": "6b54ff9691898aebdbb5826abc767ed2de11b8b7cd7c57506f1303302634ddcc"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Avantris%3B%20%E6%AD%AA%E6%9B%B2%E4%B9%8B%E6%9C%88.json",
+        "bytes": 4258541,
+        "sha256": "2e7c2d45dfbb9f7b43029958e590272a94239294a77062bea91d2066ba3de090"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Chaosium%20Inc.%3B%20%E7%81%AB%E7%82%AC%E5%85%89%E4%B8%8B%E7%9A%84%E5%85%8B%E8%8B%8F%E9%B2%81.json",
+        "bytes": 453907,
+        "sha256": "e0052df93553b0fe66bc63ff7e6a71b1307080ef6d057e0a4542c353701dc9a0"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Darrington%20Press%3B%20%E5%A1%94%E5%B0%94%E5%A4%9A%E9%9B%B7%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "bytes": 1917024,
+        "sha256": "060e402997b9c561c5c138a90a72a80bd230c35f85811bac4663d9be20798dc5"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Ghostfire%20Gaming%3B%20%E5%A1%9E%E5%B7%B4%E6%96%AF%E8%92%82%E5%AE%89%C2%B7%E5%85%8B%E5%8A%B3%E7%9A%84%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E6%8C%87%E5%8D%97.json",
+        "bytes": 730658,
+        "sha256": "5998cc49c8772966fdb0a792faa1ed01449b64b4201496969681784bf2610dd2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E4%B9%8B%E5%A2%9F.json",
+        "bytes": 2049063,
+        "sha256": "d45e93d1e43de763558ecb1c824d21eab325b2ecf909a0544ba3a98ec107203a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E7%9A%84%E6%80%AA%E7%89%A9.json",
+        "bytes": 2890091,
+        "sha256": "525201db96f61f0ef15a8c7dacc1d799103201688fa7e91b8a6d058653f9f193"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Ghostfire%20Gaming%3B%20%E9%AC%BC%E9%AD%85%E5%B9%BD%E8%B0%B7%20-%20%E7%8E%A9%E5%AE%B6%E6%8C%87%E5%8D%97%20-%202024.json",
+        "bytes": 1771609,
+        "sha256": "7cffe97768f1a4b405d83ae718e55198dd150daf5c99ac8d8d6f852122f216de"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Griffin%20Macaulay%3B%20%E7%8B%AE%E9%B9%AB%E7%9A%84%E9%9E%8D%E4%B8%AD%E7%8F%8D%E5%AE%9D%E2%85%A1.json",
+        "bytes": 2742721,
+        "sha256": "11f6a90ed3dce139c692ab7e9286c446a76a5376095035ea382fd4d9407c06b9"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%88%98%E5%BD%B9%E8%AE%BE%E5%AE%9A%E9%9B%86.json",
+        "bytes": 1245894,
+        "sha256": "0fb034ccb8775b0d185d5054db83d16d97553fa8eb044af80b820e5f47383942"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Hit%20Point%20Press%3B%20%E8%B0%A6%E5%8D%91%E6%9E%97%E6%95%85%E4%BA%8B%E9%9B%86.json",
+        "bytes": 1480555,
+        "sha256": "9a8c664cd03e50e61845e19bc22972f7922b97ad81c624e224cb09fe2a77bfaa"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/James%20Ohlen%3B%20%E5%8D%9A%E5%BE%B7%E4%B9%8B%E9%97%A8%E7%9A%84%E8%8B%B1%E9%9B%84%E4%BB%AC.json",
+        "bytes": 685246,
+        "sha256": "e01247e7110bce3d7de378d02321d50d970507c4df116ea0d4db5b195a289a64"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Kobold%20Press%3B%20%E9%BB%AF%E6%BD%AE%E4%B9%8B%E4%B9%A6.json",
+        "bytes": 1370508,
+        "sha256": "76be90e7f600f6d36acfae3c5b564d522f3842669599ed937eb170148cbe1cd3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Scichopath%3B%20%E5%AF%82%E9%9D%99%E6%8C%BD%E6%AD%8C.json",
+        "bytes": 96568,
+        "sha256": "0034b2e3c4735b72d78a1aefe0693903a07f1adeb20104afd9d65ceeb80b2c9d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "condition/Sample%20-%20Giddy%3B%20%E7%9D%80%E7%81%AB.json",
+        "bytes": 881,
+        "sha256": "2a0a3802b0baf155b16312663ad8a6158127abf4ad231832117432bb276d3fc1"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97.json",
+        "bytes": 2529174,
+        "sha256": "b532476fe20cd5e7d44567784b4137dacf0f32535f5e9b7fce94f872d280e549"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97%202.json",
+        "bytes": 2539760,
+        "sha256": "9e0008dc5fd3606df463b9cc761d57823e349d01d04b458692e55b7952f9b90e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%97%203.json",
+        "bytes": 2701513,
+        "sha256": "1eeab2833f322f02ef0d4d4bb1c4ea0f7bc2036c5767f09593cc00a9598a7951"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "creature/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%971%EF%BC%882023%E7%89%88%EF%BC%89.json",
+        "bytes": 2623055,
+        "sha256": "00d544fa2f59978740f2b756cce1331b3f677a4930a101dec33982732cb7493c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "creature/MCDM%20Productions%3B%20%E5%87%A1%E4%BA%BA%EF%BC%8C%E5%BF%AB%E9%80%83%EF%BC%81.json",
+        "bytes": 1991037,
+        "sha256": "dac6a0f646815208afe1281132f14c8ec644819d71710ca4ca81b209cca22f43"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "creature/Sample%20-%20Giddy%3B%20%E6%A9%A1%E6%9C%A8%E6%8A%95%E5%B0%84%E6%9C%BA.json",
+        "bytes": 5624,
+        "sha256": "64e5655d10d3b9d3f563468fc80448fd04ba299df99fd49bd496ce57ed71019f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "cult/Sample%20-%20Giddy%3B%20%E7%9C%9F%E5%AE%9E%E7%81%AB%E7%84%B0%E9%82%AA%E6%95%99.json",
+        "bytes": 1161,
+        "sha256": "13135c31fff19a300bf2803dd025ee48194d4a8409f2078bd0e76edd928ad6b2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "deity/Sample%20-%20Giddy%3B%20%E8%90%8E%E7%BC%A9.json",
+        "bytes": 909,
+        "sha256": "8d847fa083c35a85a354c46814fbc85c6de64c26755bb9bbc5fc5e586ef9f2a9"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "disease/Sample%20-%20Giddy%3B%20%E9%A2%A4%E6%8A%96%E7%97%87.json",
+        "bytes": 1715,
+        "sha256": "afd690b164384427e0160e398a78a3abf654c1393703ebe4b3a1792da886458d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "facility/Sample%20-%20Giddy%3B%20%E8%B6%8A%E9%87%8E%E5%9E%83%E5%9C%BE%E5%A0%86.json",
+        "bytes": 1473,
+        "sha256": "0eb39aee7c4770fb09cf0dbba57fb38963c5f3411c02a4d41193e949abda3c1b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "feat/Sample%20-%20Giddy%3B%20%E9%AD%94%E6%B3%95%E5%A4%A9%E8%B5%8B%EF%BC%8C%E9%9E%AD%E5%AD%90%E7%88%B1%E5%A5%BD%E8%80%85.json",
+        "bytes": 2183,
+        "sha256": "6890301e8122737cb574338603c8cb214c5cd0eab8bc2eaa453d0bf86dcee6c9"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "hazard/Sample%20-%20Giddy%3B%20%E6%B5%81%E6%B2%99.json",
+        "bytes": 1282,
+        "sha256": "63afea4b477608172f2c0242441795db15c3f9438424601ac2e9aac001f60a06"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "item/Sample%20-%20Giddy%3B%20%E9%92%A9%E7%88%AA%E5%B1%A0%E6%88%AE.json",
+        "bytes": 4315,
+        "sha256": "1dbff2d020a3af8150eda59f16bd5d9f1173eccdd5ccf9d3de6a410730d19273"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "language/Sample%20-%20Giddy%3B%20%E6%97%97%E8%AF%AD.json",
+        "bytes": 578,
+        "sha256": "aa62bace7440761dc92f8cadcb09874f74d836db686cb0bbf81f7d28ec12f21f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "magicvariant/Sample%20-%20Giddy%3B%20%E6%AD%A6%E5%99%A8%20%2B4.json",
+        "bytes": 1498,
+        "sha256": "c7a0ce46d2037b56ffe4b1bd8e35775e85f7d01ed21a057e777093a2b8feb973"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "object/Sample%20-%20Giddy%3B%20%E9%AB%98%E7%AD%89%E7%88%86%E7%82%B8%E7%89%A9.json",
+        "bytes": 1658,
+        "sha256": "7f6b70773e16e61eae28a2c2b1a0b5f0af4607e134e5de5492427ef3a8c3f694"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "optionalfeature/Sample%20-%20Giddy%3B%20%E8%8B%A6%E7%97%9B%E6%A0%87%E8%AE%B0%EF%BC%8C%E8%BF%9C%E5%8F%A4%E6%95%8C%E6%84%8F.json",
+        "bytes": 1463,
+        "sha256": "53a0ce261c49c301d4a9491c476592705ee834cd4d784514e8bc13b02be0acdd"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "psionic/Sample%20-%20Giddy%3B%20%E9%BB%91%E8%8E%89%E8%8E%89%E6%8A%80%E5%B7%A7.json",
+        "bytes": 1610,
+        "sha256": "6a6738558a2bdcda9d113c11a20ef7bcec56cef828128a27832503ac0fc5b3e5"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "race/Sample%20-%20Giddy%3B%20%E8%A7%89%E9%86%92%E9%AA%B7%E9%AB%85.json",
+        "bytes": 2083,
+        "sha256": "47530b899c4bf0f1d78942b77901bceae27a0b972fc51c6c066325674b535a39"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "recipe/Sample%20-%20Giddy%3B%20%E5%90%90%E5%8F%B8%E4%B8%89%E6%98%8E%E6%B2%BB.json",
+        "bytes": 1487,
+        "sha256": "cf672e120178d9cd1dccd24dcdcfe49cb953d94dee69357323bb25b708e602b2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "reward/Sample%20-%20Giddy%3B%20%E6%B4%BB%E5%8A%9B%E6%81%A9%E6%83%A0.json",
+        "bytes": 853,
+        "sha256": "6adff6ef8932c406891983f8164713a774f87bee17bf26c2c30e9e378f18c245"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "spell/Sample%20-%20Giddy%3B%20%E3%80%8A%E4%B9%8F%E5%91%B3%E5%B7%AB%E5%B8%88%E6%8C%87%E5%8D%97%E3%80%8B.json",
+        "bytes": 1442,
+        "sha256": "0da4c74eb64038b4e11d337ca0c5721a89fecf6621f48c056d0bc998d98ec7f6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "spell/Sample%20-%20Giddy%3B%20%E6%9D%82%E9%A1%B9%E6%97%81%E6%B3%A8.json",
+        "bytes": 3382,
+        "sha256": "7905d972fa00360ed9218a9891ce27fc4d075b1080cc49a53ff4c9f209c14f11"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "table/Sample%20-%20Giddy%3B%20%E8%B0%8B%E6%9D%80%E8%AF%81%E6%8D%AE.json",
+        "bytes": 1523,
+        "sha256": "2cad52692613f85367e79f3426bae8554e9c583a200517290bbd0adb85f18ad3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "trap/Sample%20-%20Giddy%3B%20%E9%AA%91%E4%B9%98%E7%9F%B3%E5%8C%96%E8%9C%A5%E8%9C%B4%E5%A4%B4%E9%83%A8.json",
+        "bytes": 1410,
+        "sha256": "f2dfc7c2b73b8f1d053a3c36a15633f4de0dd01350ba3cb5de8cd62c9055d479"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "variantrule/Sample%20-%20Giddy%3B%20%E6%88%BF%E8%A7%84.json",
+        "bytes": 2153,
+        "sha256": "8825d270e0a9217367c1a822e10a1d79216c69ba31a7726e2cba58a68d611b71"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "vehicle/Sample%20-%20Giddy%3B%20%E7%A7%91%E6%8B%89%E7%A7%91%E5%B0%94.json",
+        "bytes": 1594,
+        "sha256": "fe4043685f3b4edf173e30de9bbb98a6e363f360bd38c19121aca3f9b67f28c7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Adult%20Swim%3B%20Tigtone%E4%B8%8E%E6%B0%B8%E4%B8%8D%E5%81%9C%E6%AD%87%E7%9A%84%E9%A2%84%E8%A8%80.json",
+        "bytes": 207165,
+        "sha256": "5739fe266a9706e7104af22cac7eaf206d35d396598ab009dd144e31a83b304c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Adventurers%20League%3B%20DDEX1-01%20-%20%E8%8F%B2%E5%85%B0%E7%9A%84%E6%8A%97%E5%91%BD.json",
+        "bytes": 116908,
+        "sha256": "eb49d9342bb9a23e05d6ed09dea9badbf44ff823c24a7994a8216b9a780542d6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Adventurers%20League%3B%20DDEX1-02%20-%20%E7%B4%A2%E7%A7%91%E5%B0%94%E8%A6%81%E5%A1%9E%E7%9A%84%E7%A7%98%E5%AF%86.json",
+        "bytes": 100011,
+        "sha256": "06fcedfbc8ef9c4955b99c9b925fe627af148f3e9203bd4eaa1c97363a18c119"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/arcanist%3B%20%E5%BE%B7%E5%88%A9%E5%AE%89%E4%B9%8B%E5%A2%93.json",
+        "bytes": 27087,
+        "sha256": "0674e60773ad621e2becf4de685bdc20d9e63fd9ec833e2676a4c8254125be58"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/D%26D%20Beyond%3B%20%E5%88%AB%E6%8F%90%E7%BB%B4%E5%85%8B%E9%82%A3.json",
+        "bytes": 44383,
+        "sha256": "be6b0bfa5625710dafd4309d55ed073d82732a8e44c6d5b661c4d9705657e87a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/D%26D%20Duet%3B%20%E4%BA%8B%E4%B8%8D%E8%BF%87%E4%B8%89.json",
+        "bytes": 70799,
+        "sha256": "f551d4bdda1b557a7a51a5830c3b82b64ff47a0d967ef9b045d6db3401b8b59e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/D%26D%20Duet%3B%20%E5%88%9D%E8%A7%81%E5%80%BE%E5%BF%83.json",
+        "bytes": 41239,
+        "sha256": "3cfa6771a31293587aaaa05e4f7d963bcc7cabfd59e1c5d55dc2b246462d66ca"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/DMDave%3B%20%E7%AA%81%E8%A2%AD%E5%A4%B8%E5%B7%B4%E6%96%AF.json",
+        "bytes": 73318,
+        "sha256": "917c9ab553c390d7730c71f960b10f375e5e414a6c2d6106962e441fc68096e3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/DMsGuild%3B%20%E6%B7%B1%E6%B0%B4%E5%9F%8E%E4%B9%8B%E9%BC%A0.json",
+        "bytes": 89400,
+        "sha256": "70889e96a3b63265f989293fc021cb50bdb8eb140fe7b084dc9ea226d502a3a5"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Eventyr%20Games%3B%20%E4%BC%9A%E9%A3%9E%E7%9A%84%E7%81%BE%E6%98%9F.json",
+        "bytes": 46651,
+        "sha256": "f878b334cea89220110a341d903b0e5cd2d7d6656afe1933e71cc359a13d2ab7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Eventyr%20Games%3B%20%E5%85%8B%E6%8B%89%E8%82%AF%E7%9A%84%E8%B5%8C%E5%B1%80.json",
+        "bytes": 105510,
+        "sha256": "46bacf37846aff21059a66dd6d38c18ffe7504864ee6dcb00897b2f633f5812b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Ghostfire%20Gaming%3B%20%E5%BE%B7%E6%8B%89%E8%82%AF%E6%B5%B7%E5%A7%86%E4%B9%8B%E5%A2%9F%EF%BC%9A%E5%AF%BB%E6%89%BE%E8%B5%B0%E7%A7%81%E8%80%85%E7%9A%84%E7%A7%98%E5%AF%86.json",
+        "bytes": 162302,
+        "sha256": "99f6942d81e2537b110761bf5fc5fe92d45660ac86efa6766c9cc1a6d6b26bbb"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/James%20Introcaso%3B%20%E6%B3%B0%E6%8B%89%E6%96%AF%E5%A5%8E%E6%98%9F%E7%90%83%E5%85%A5%E4%BE%B5.json",
+        "bytes": 94917,
+        "sha256": "044ef5c37c33d24a3606117e0324960ceb0dd71e1e29b4779e23457c061fbe41"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Kelsey%20Dionne%3B%20%E6%96%AF%E5%87%AF%E9%9C%8D%E6%81%A9%E7%81%AF%E5%A1%94%E7%9A%84%E7%A7%98%E5%AF%86.json",
+        "bytes": 68265,
+        "sha256": "cfa1cb4a20aabb70fa0d60cf282f4ce58d993b685e96fbea5f58f4d7b4566d45"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Kelsey%20Dionne%3B%20%E7%9F%B3%E5%8C%96%E8%9C%A5%E8%9C%B4%E9%82%AA%E6%95%99%E7%A5%9E%E6%AE%BF.json",
+        "bytes": 64904,
+        "sha256": "2a62df6c3bd01dfb4c2be97522800f0cefc17442bb8ab88ab70a8f2c1bcd4d51"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Kobold%20Press%3B%20%E4%B8%87%E5%85%BD%E5%9B%BE%E5%BF%972%E5%B7%A2%E7%A9%B4.json",
+        "bytes": 293026,
+        "sha256": "8edb83ca501eb1c34e08abe88f1f43b414fe5d9c6fe681f25ca8bfbe61f3be67"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Kobold%20Press%3B%20%E5%8C%97%E5%9C%B0%E8%90%A8%E8%BF%A6.json",
+        "bytes": 1285271,
+        "sha256": "045806b78a0c27a1e5fdbc884b45807b7222acf454d8767ded158b380775da26"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Kobold%20Press%3B%20%E9%82%AA%E6%9C%AF%E5%B8%88%E5%B7%A2%E7%A9%B450%EF%BC%9A%E6%A2%85%E8%8E%AB%E9%87%8C%E4%BA%9A%E4%B9%8B%E5%85%89.json",
+        "bytes": 120636,
+        "sha256": "cd138a73124eb1b5365aae300886d89a280728c1553275eecd2b9888693b0c42"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Kurtis%20J%20Wiebe%3B%20%E5%AE%BF%E9%86%89.json",
+        "bytes": 37857,
+        "sha256": "81dfbf2ded21ab09f4f8e407dc2425e485bde24fce66d7e680aea4495e15c9c1"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Limitless%20Adventures%3B%20%E6%97%A0%E5%B0%BD%E5%86%92%E9%99%A9.json",
+        "bytes": 11082,
+        "sha256": "6c3c8cb4d932b5161c96fccee680994263a1e521edb734c0d4d832602f7591c3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Loot%20Tavern%3B%20%E6%97%A5%E4%B8%8E%E5%BD%B1%E4%B9%8B%E8%A1%80.json",
+        "bytes": 275910,
+        "sha256": "26e6cc80d4cab41bcc8d8671ce92960055764c87076f1429134393ce6c8652dd"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Michael%20Galvis%3B%20%E9%AD%94%E5%AE%A0%E7%9A%84%E5%9B%B0%E5%A2%83.json",
+        "bytes": 34026,
+        "sha256": "32541e9ffc58ed2e834b6cfb07575ae8316bf8b536b772f871dc1a668ecf8085"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Nerd%20Herd%3B%20%E5%86%92%E9%99%A9%E6%89%8B%E5%86%8C%20-%201.json",
+        "bytes": 14807,
+        "sha256": "0649b878b70b408b5dc0a11f93871caec238b61ace06413c547175bc7bd417e5"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Poison%20Potion%20Press%3B%20%E6%A2%A6%E6%83%B3%E4%B9%8B%E6%BB%A8.json",
+        "bytes": 89044,
+        "sha256": "56667edd432dc72ddc247c71a399c9b957c888c57637da2c7c1c57251b7cd70b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Road%20to%20Ithaka%20Press%3B%20%E7%B1%B3%E7%BA%B3%E5%B0%94%E4%B9%8B%E7%96%BE.json",
+        "bytes": 116566,
+        "sha256": "4e61dd1a3de8edda8758c8ec059b336f5589e868c286cb49593d439543802c9d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Roll%20%26%20Play%20Press%3B%20%E6%83%8A%E5%A5%87%E4%B8%80%E5%8F%91%EF%BC%9A10%E4%B8%AA%E6%A3%AE%E6%9E%97%E5%8D%95%E6%AC%A1%E5%86%92%E9%99%A9.json",
+        "bytes": 161823,
+        "sha256": "94b7b0d35a9e9a772949f75633c1175b259afe07560abbb270b0a811a85733c2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/The%20Aciduous%20Adventurer%3B%20%E5%BC%97%E9%87%8C%E8%8C%A8%C2%B7%E5%86%AF%C2%B7%E7%BB%B4%E5%B0%94%E6%A0%BC%E7%9A%84%E5%A5%87%E5%A6%99%E6%9C%BA%E6%A2%B0%E5%AE%85%E9%82%B8.json",
+        "bytes": 133474,
+        "sha256": "4e8aeff51e39e7faef429446558353bde6a640eb94d87b68d7bc9dc403824cda"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/TragicMissile%3B%20%E6%97%A0%E8%BE%9C%E8%80%85%E7%9A%84%E7%8C%AE%E7%A5%AD.json",
+        "bytes": 54351,
+        "sha256": "7706c4ee724e86e63958fcc4740cfc9c78000174bee4c3996a33ad507a65dbb0"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "adventure/Wyatt%20Trull%3B%20%E7%96%AF%E6%B3%95%E5%B8%88%E7%9A%84%E5%9C%B0%E5%9F%8E%E4%BC%B4%E4%BE%A3%E4%B9%A6%20-%20%E5%AE%8C%E6%95%B4%E7%89%88.json",
+        "bytes": 2475694,
+        "sha256": "7a54c9675e2cf1bb868eba409c84e50ea2ceeeb1bc7436e464014d87242566de"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/alterNERDtive%3B%202024%20%E8%87%AA%E5%AE%9A%E4%B9%89%E8%83%8C%E6%99%AF.json",
+        "bytes": 3887,
+        "sha256": "f4bb2283cf9d91f434356683f471dfd2282c609dc3cbc0243a00b709a70fdc4b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/Brewskii%3B%20%E9%93%B6%E8%8D%86%E6%A3%98%E8%83%8C%E6%99%AF.json",
+        "bytes": 5712,
+        "sha256": "db5337a37f5ee9814d2bd9a3cc7491ef126d74bde4f3d7bf58e3f10810e4d29a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/D%26D%20Wiki%3B%20%E5%8D%93%E5%B0%94%E7%B9%81%E6%AE%96%E5%A5%B4%E9%9A%B6.json",
+        "bytes": 10608,
+        "sha256": "546f04bd2e67bf780139a98313d612cf2a0e73d9860d4096b89cf259ff38bd05"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/D%26D%20Wiki%3B%20%E7%B2%BE%E9%80%89%E4%BC%98%E8%B4%A8%E8%83%8C%E6%99%AF.json",
+        "bytes": 100024,
+        "sha256": "81fd688795ea3bc73d549676a07fcbe23ec5c5f038ce00b12cfcc33501c32946"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/DaveParkinglot%3B%20Selerim%E8%83%8C%E6%99%AF%E4%BF%AE%E6%94%B9.json",
+        "bytes": 175151,
+        "sha256": "8bd290be8cbf925b84a7397e0721dc2da12a6bfa1fcc2a0087aad091843d273b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/Middle%20Finger%20of%20Vecna%3B%20%E5%85%8B%E8%8B%8F%E9%B2%81%E5%BC%8F%E8%83%8C%E6%99%AF.json",
+        "bytes": 23232,
+        "sha256": "c8f57af29f6aee796f2be578d1efd99cc781b33fd70c2c14b975ae3ded9fd635"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/Nerd%20Herd%3B%20%E8%B4%B5%E6%97%8F%E8%83%8C%E6%99%AF.json",
+        "bytes": 5400,
+        "sha256": "141dcfe1c4a0149cab244b3bde88a86c3fb35dcc0b4d63d3f08a81e50951a491"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/Wizards%20of%20the%20Coast%3B%20%E5%86%92%E9%99%A9%E8%80%85%E8%81%94%E7%9B%9F%EF%BC%9A%E6%81%B6%E9%AD%94%E4%B9%8B%E6%80%92%E8%BF%9C%E5%B1%B1%E5%9F%8E%E5%8C%BA%E5%9F%9F%E8%A7%92%E8%89%B2%E9%80%89%E9%A1%B9.json",
+        "bytes": 57313,
+        "sha256": "d751524f638b0785fe14717dac43b5465c1bc6a96c81ee3c8fed0fbb2adcc8cc"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/Wizards%20of%20the%20Coast%3B%20%E5%86%92%E9%99%A9%E8%80%85%E8%81%94%E7%9B%9F%EF%BC%9A%E6%96%BD%E7%89%B9%E6%8B%89%E5%BE%B7%E7%9A%84%E8%AF%85%E5%92%92%E8%A7%92%E8%89%B2%E9%80%89%E9%A1%B9.json",
+        "bytes": 58258,
+        "sha256": "3dbf3d59251860114dd326df30c0da27fd1467c105ebdc6e04141f1fe78180ab"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/Wizards%20of%20the%20Coast%3B%20%E5%86%92%E9%99%A9%E8%80%85%E8%81%94%E7%9B%9F%EF%BC%9A%E9%82%AA%E6%81%B6%E5%85%83%E7%B4%A0%E7%A9%86%E5%B0%94%E7%8E%9B%E6%96%AF%E7%89%B9%E7%BE%81%E7%BB%8A%E4%B8%8E%E8%83%8C%E6%99%AF.json",
+        "bytes": 40624,
+        "sha256": "b0938f7903fa42c5270cdcca431862ebc7d09c68b3aafb2517bf61576e79956b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "background/zeek0%3B%20%E8%83%8C%E6%99%AF%E5%A4%A7%E5%85%A8.json",
+        "bytes": 145193,
+        "sha256": "c6268c7c874b1c935a65d6e919f45f02eabe4c173334cde64c95cf2e808eaddf"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "baseitem/enders%3B%20%E8%B6%85%E5%A4%A7%E9%95%BF%E5%BC%93.json",
+        "bytes": 1527,
+        "sha256": "01aef75261e0aa29c3e169b9cecc679fa7fc9d15decfe26d50823d0021df51ab"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/2CGaming%3B%20%E5%9B%A2%E7%81%AD%E6%80%AA%E7%89%A9%E5%9B%BE%E9%89%B4%20-%20%E7%AC%AC%E4%B8%80%E5%8D%B7.json",
+        "bytes": 1724755,
+        "sha256": "1eb878d5a5ef30b6aeab082b43252649fe73e493e37ca67475e8faefcf3e1050"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/aeyana%3B%20%E9%83%A8%E8%90%BD%E4%B9%8B%E4%B9%A6.json",
+        "bytes": 104631,
+        "sha256": "8ce125e52f9b9c8c4906cdd16e921166868c407e5471804153d90649ec51cfd3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Bob%20Starrar%3B%20%E6%AC%A2%E8%BF%8E%E6%9D%A5%E5%88%B0%E6%96%AF%E5%8D%A1%E8%A5%BF%20-%20%E5%A5%A5%E6%9C%AF%E5%A4%A7%E5%AD%A6.json",
+        "bytes": 6395,
+        "sha256": "c708abe44695f0affb0e4a3094d522dc1eb2898b9ce350e6ba42f37f3916e1fc"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Curio%20Solus%3B%20%E8%8A%82%E6%97%A5%E6%B4%BB%E5%8A%A8.json",
+        "bytes": 38358,
+        "sha256": "a16d4b17f60d60ffd1242435cfb550ca1f390126c7c0322712a9950a02d29ba3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/D.%20Larson%3B%20%E4%BB%AA%E5%BC%8F%E5%AB%81%E6%8E%A5.json",
+        "bytes": 60374,
+        "sha256": "68e4824ebc9293d4dccf91b16a5caba7f1bd2396b9830089cec20e99464da14a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Dave%20Eisinger%3B%20%E8%AF%86%E8%B4%A7%E5%95%86%E4%BA%BA%E7%9A%84%E4%BB%B7%E6%A0%BC%E6%8C%87%E5%8D%97.json",
+        "bytes": 386637,
+        "sha256": "af4ec30a68d13c52eb301878589a8371d9c2ade7cd2d52ba3e6f301eda33d121"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Dungeon%20Rollers%3B%20%E5%85%88%E7%A5%96%E6%AD%A6%E5%99%A8.json",
+        "bytes": 212149,
+        "sha256": "9ad0d74460caacf7d12a76ade608e2615dbc7a4509fa60f3c4cc8604e750034b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Free%20League%3B%20%E8%BE%9B%E5%B7%B4%E9%B2%81%E5%A7%86%E9%81%97%E8%BF%B9%EF%BC%9A%E8%AE%BE%E5%AE%9A%E6%89%8B%E5%86%8C.json",
+        "bytes": 1201403,
+        "sha256": "b1ee9a5fd9884ef8f33f4236c8675b72b41d39bdc6472f75dbebedacdfbd007f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Ghostfire%20Gaming%3B%20%E6%8E%A2%E5%AF%BB%E8%80%85%E7%9A%84%E6%89%AD%E6%9B%B2%E9%85%92%E9%A6%86%E6%8C%87%E5%8D%97.json",
+        "bytes": 97536,
+        "sha256": "5d253f44ca26430bf307156ad0bd1c526f832016a52d58b0791dddd25bbd0125"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Ghostfire%20Gaming%3B%20%E6%96%AF%E8%92%82%E5%B8%83%E7%9A%84%E4%BC%99%E4%BC%B4%E5%9C%A3%E5%85%B8.json",
+        "bytes": 801696,
+        "sha256": "1376e447ea896dc48aec587c226131707df184659942b95eba5341b6334ded71"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Giddy%3B%20%E5%90%88%E7%90%86%E7%9A%84%E9%AD%94%E6%B3%95%E7%89%A9%E5%93%81%E4%BB%B7%E6%A0%BC%EF%BC%88%E6%89%A9%E5%85%85%E7%89%88%EF%BC%89.json",
+        "bytes": 330315,
+        "sha256": "af6ddf27717fd8c17bb7d28536f5a9684a0eb7127ac095f36eab5112fd4e1e10"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Goob%20the%20Goblin%3B%20%E9%AD%94%E5%A5%91%E5%B8%88%E6%8C%87%E5%8D%97%EF%BC%9A%E9%AD%94%E6%B3%95%E5%A5%A5%E7%A7%98.json",
+        "bytes": 33317,
+        "sha256": "2f0c357fdc88df3a69ec40d98a06240d447fb1d8df35a87a6c582460840e9fef"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/grzart%3B%20%E7%A5%9E%E6%B2%B3%E5%BC%82%E7%95%8C%E4%BC%A0%E9%80%81%E6%8C%87%E5%8D%97.json",
+        "bytes": 398734,
+        "sha256": "0a874dc85a0c63a3a28d4d382477edf4198ad3e52bad3f9fded08929df6fbcd6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/grzart%3B%20%E9%9E%91%E5%A5%91%E5%BC%82%E7%95%8C%E4%BC%A0%E9%80%81%E6%8C%87%E5%8D%97.json",
+        "bytes": 161073,
+        "sha256": "0db4a017df88442e96865ff9d513bb5f6a039a95ce213080c7ce42642d95a311"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/HapHazred%3B%20%E5%85%AC%E5%8F%B8%E4%B9%8B%E8%A1%80%20-%20%E7%8E%A9%E5%AE%B6%E5%AF%BC%E8%A8%80.json",
+        "bytes": 179974,
+        "sha256": "a0796b00915dfba60231bea4c09ac99371c64e98a023a096e3fe9110331c5133"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Hasbro%3B%20%E5%8F%AF%E7%88%B1%E6%A0%87%E5%BF%97%E4%B8%8E%E9%BE%99%C2%B7%E5%9F%8E%E4%B8%BB%E5%B8%B7%E5%B9%95.json",
+        "bytes": 4786,
+        "sha256": "4fa177d10928f057a03206180de7b73fd4a797f419f963dbe915d7945e3cdabb"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Hipsters%20%26%20Dragons%3B%20%E7%99%BD%E8%9D%8E%E5%88%BA%E5%AE%A2%E5%85%AC%E4%BC%9A.json",
+        "bytes": 105203,
+        "sha256": "a85410f86135c7adbfd84c82eb3dbf9e8119aaa4e81231cb51016bd36dce5e0c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Jean%20Lorber%3B%20%E7%9F%A5%E8%AF%86%E5%B0%B1%E6%98%AF%E5%8A%9B%E9%87%8F.json",
+        "bytes": 121719,
+        "sha256": "b0b0967f04b7f453635bc9cb4eeb56d4907287f8376407d4f66f344846948eff"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Jeff%20Gomez%3B%20%E5%A6%82%E4%BD%95%E6%88%90%E5%8A%9F%E4%B8%BE%E5%8A%9E%E4%B8%80%E5%9C%BA%E8%8A%82%E6%97%A5%E5%BA%86%E5%85%B8.json",
+        "bytes": 13923,
+        "sha256": "804430ee5be4101f1b488aab02003d124d0abffa4ce3f71a142be69819f2540f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Jeff%20Ibach%3B%20%E7%BE%8E%E5%A5%B3%E4%B8%8E%E9%BA%BB%E7%83%A6.json",
+        "bytes": 20152,
+        "sha256": "2f62cfc8d9d3b0a0ff3beee250bf64d617320128b12e30c6b0332b3d0d6faeee"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Justice%20Arman%3B%20%E9%AD%94%E9%AC%BC%E4%BB%A3%E8%A8%80%E4%BA%BA%EF%BC%9A%E7%82%BC%E7%8B%B1%E5%A5%91%E7%BA%A6%E6%8C%87%E5%8D%97.json",
+        "bytes": 111005,
+        "sha256": "f9c45c6c144eebd59b8984d6dc87fe8b68088df10a26b144f4deb23ed30dc441"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Loresmyth%3B%20%E9%9D%9E%E5%87%A1%E6%97%85%E9%A6%86%E4%B8%8E%E5%85%B6%E4%BD%B3%E9%85%BF.json",
+        "bytes": 22698,
+        "sha256": "0062c769ab37fbf2aa52c372ad5f4b6c1cd2b2fe5031931ad0a65bd16f8925ab"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC19%E6%9C%9F.json",
+        "bytes": 383338,
+        "sha256": "9ef07af47f392c18ad0fde1460ad1823143baa7e3e88bf47c14be971905d1a1a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC2%E6%9C%9F.json",
+        "bytes": 431554,
+        "sha256": "0aa39907e6fee8a826de29713ce97561cba8c461f6f87e147bc1a7ab2c0c1634"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC20%E6%9C%9F.json",
+        "bytes": 451965,
+        "sha256": "2671d12ac3ccaf822b2f55c6bcfefbb4e8f0f5dd5cf6d800fc379746e4837766"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC21%E6%9C%9F.json",
+        "bytes": 251172,
+        "sha256": "3503bc33a3d432a713a3491b487ceeea12023c14cda0269c72f5b3867891fe19"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC27%E6%9C%9F.json",
+        "bytes": 190343,
+        "sha256": "939cd4f7918d1296760ae70391aa14af5c5c542c8b75cd83292f0e3fc2f635c4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC3%E6%9C%9F.json",
+        "bytes": 429609,
+        "sha256": "98e7899aa3b58b2c9557b707d13e6bea538ab501f3bd7d0a49afe8646bb7d839"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC6%E6%9C%9F.json",
+        "bytes": 226366,
+        "sha256": "a8f88ccb1275dff1c172e7b584c29750ff54fb9ceba284b9c9f8893aaeb3ca63"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC7%E6%9C%9F.json",
+        "bytes": 210387,
+        "sha256": "42572ef75d23a482ae364b7718c5c138c492e82ba6e798ffa8044f84726540d7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC8%E6%9C%9F.json",
+        "bytes": 253489,
+        "sha256": "ec509185960de08e3c82cf841863c25223e8db0123ad760db66c2f420a96f3af"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/MCDM%20Productions%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A%20%E7%AC%AC9%E6%9C%9F.json",
+        "bytes": 267644,
+        "sha256": "f057b38c114e18c6b38475090fc314d5646f49f244757f57611f68585fd21e9f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Michael%20E%20Shea%3B%20%E6%87%92%E6%83%B0%E5%9C%B0%E4%B8%8B%E5%9F%8E%E4%B8%BB%E7%9A%84%E5%9B%9E%E5%BD%92.json",
+        "bytes": 253722,
+        "sha256": "4b68f20f86eee353e60291b1006c6db1e07dd417be59ef58c70de290808ea420"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Middle%20Finger%20of%20Vecna%3B%20%E6%94%BB%E5%9F%8E%E7%90%83.json",
+        "bytes": 34666,
+        "sha256": "f878293a1130e6cf211b2925e64dc420597372910c8fdc19dec062ecaccf2c83"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Middle%20Finger%20of%20Vecna%3B%20%E6%AF%94%E6%AD%A6%E5%A4%A7%E4%BC%9A%E8%A7%84%E5%88%99.json",
+        "bytes": 23596,
+        "sha256": "02a0b76026b75805afeb18a9ababb67500d877c68abda0345c10d4e3b6f53092"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Middle%20Finger%20of%20Vecna%3B%20%E6%B3%95%E5%B8%88%E6%AF%94%E6%AD%A6%E5%A4%A7%E4%BC%9A.json",
+        "bytes": 7865,
+        "sha256": "b196594900664c17d885a4359250afba7a0c0a12be1b52a7384b52960e2c0d13"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Modiphius%3B%20%E8%9B%87%E6%B5%B7%E6%8E%A0%E5%A4%BA%E8%80%85%EF%BC%9A%E7%8E%A9%E5%AE%B6%E6%8C%87%E5%8D%97%EF%BC%88%E5%85%8D%E8%B4%B9%E7%89%88%EF%BC%89.json",
+        "bytes": 228530,
+        "sha256": "7ae0a63a70d18104fc236baac451137c412d5bb63772ba628ded768fa9bff5d2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Richard%20Bastow%3B%20%E9%A9%AC%E4%B8%8A%E9%95%BF%E7%9F%9B%E6%AF%94%E6%AD%A6%E7%9A%84%E9%AB%98%E8%B4%B5%E8%89%BA%E6%9C%AF.json",
+        "bytes": 39117,
+        "sha256": "0f2a47fbb3c07266bab24456ba35257d53d9d5af868cb096c486e454cf5ea72b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Roll%20%26%20Play%20Press%3B%20%E5%9C%B0%E5%9B%BE%E5%9B%BE%E4%B9%A6%E9%A6%86.json",
+        "bytes": 175166,
+        "sha256": "0d9acd2156fe9b7b1b37b20fdb6c8cbeee723d4d5fca447134666010d402f65a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Russ%20Morrissey%3B%20%E7%AE%AD%E6%9C%AF%E6%AF%94%E8%B5%9B.json",
+        "bytes": 11255,
+        "sha256": "3b91f5726e1893db16289e23644a31254bb6184eea00517ea81861c7e6dc2911"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Saidoro%3B%20%E5%90%88%E7%90%86%E7%9A%84%E9%AD%94%E6%B3%95%E7%89%A9%E5%93%81%E4%BB%B7%E6%A0%BC.json",
+        "bytes": 32195,
+        "sha256": "726ddb632c713d3a54720c4c8c0305499d380fd5b61dadd704237ed782c49175"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Skip%20Wiliams%3B%20%E6%8C%91%E6%88%98%E4%B9%8B%E4%B9%A6.json",
+        "bytes": 89931,
+        "sha256": "e100cd7d712adcbf3251549998de4c07ac8b7fcb4acb974f00bca98f89b18764"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Summer%20Brook%3B%20%E5%88%BA%E9%9D%92%EF%BC%9A%E4%BA%94%E7%89%88%E8%B5%84%E6%96%99%E4%B9%A6.json",
+        "bytes": 48776,
+        "sha256": "e3d6ac259ad2cb3fa2dc2de7cdca09ab5968751d3d8cdeb37bdc015a68719485"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/ukyo%3B%20%E9%AD%94%E6%B3%95%E6%9D%9F%E7%BC%9A%E7%BA%B9%E8%BA%AB.json",
+        "bytes": 39062,
+        "sha256": "018362a357f61be8b7e92fc2c9a3fff293e1ef4f6f64ca68f8dfd6fa2c960de8"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Unknown%3B%20%E8%B0%A2%E5%B0%94%E6%89%8E%C2%B7%E4%BC%8A%E5%B0%94%EF%BC%88%E5%8D%93%E5%B0%94%E8%B1%A1%E6%A3%8B%EF%BC%89.json",
+        "bytes": 5851,
+        "sha256": "a4b4cc7c1c52254c6ad73163a6fe3901950b29c271bdb79ab14ed8dade641ab6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Vincent%20Betternfeld%3B%20%E7%AC%A6%E6%96%87%E8%BD%AE%E7%9B%98%E8%B5%8C.json",
+        "bytes": 9632,
+        "sha256": "0c20115cfc9ec9b4e69e5165405ffa5150f168ac9514b9353d34dcf70a4a3ac8"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Walrock%20Homebrew%3B%20%E5%A0%A1%E5%9E%92%E3%80%81%E7%A5%9E%E6%AE%BF%E4%B8%8E%E8%A6%81%E5%A1%9E.json",
+        "bytes": 219371,
+        "sha256": "51d6142ab2509d09578bad22250be08a43eeb60495a70b39892fc9a411654d9f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Walrock%20Homebrew%3B%20%E8%8C%B6%E4%B8%8E%E8%8A%B1%E8%8D%89%E8%8C%B6.json",
+        "bytes": 3620,
+        "sha256": "a42291725ffa8ab5e4285903c5cf7fd0d34b75becc25c84693c10d67d9651291"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Walrock%20Homebrew%3B%20%E8%A1%8C%E5%95%86%E4%B8%8E%E5%95%86%E4%BA%BA.json",
+        "bytes": 464958,
+        "sha256": "230878a11e4756b125d276323da8edaf8d699e3437a5411b772c8dddf638527a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Weems%3B%20%E5%87%A1%E7%89%A9%E4%B8%8E%E9%AD%94%E6%B3%95%E9%80%A0%E7%89%A9.json",
+        "bytes": 17888,
+        "sha256": "3adbaa897636a0a05a9876d9326b05d2543eec6a98c7cb56dff4ae35ca40b910"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Will%20Doyle%3B%20%E6%B7%B1%E6%B0%B4%E5%9F%8E%E5%9F%8E%E5%B8%82%E9%81%AD%E9%81%87.json",
+        "bytes": 241178,
+        "sha256": "db795a0646a5c3c7d129eb6d7c176af08222c407caa954ae99ff66787cf73d6f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Wizards%20of%20the%20Coast%3B%20%E5%86%92%E9%99%A9%E8%80%85%E8%81%94%E7%9B%9F%E7%AC%AC%E5%85%AB%E5%AD%A3.json",
+        "bytes": 105775,
+        "sha256": "c90c91ef22ba56a8b030ea63558297d80cae7298be01bf2da0784d0e8d7a8111"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Wizards%20of%20the%20Coast%3B%20%E5%86%92%E9%99%A9%E8%80%85%E8%81%94%E7%9B%9F%E7%AC%AC%E5%8D%81%E5%AD%A3.json",
+        "bytes": 42420,
+        "sha256": "3ddaab59ba5781cb64a43f440c3e41871ea64e23b5060320d17783bd5534de76"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Wizards%20of%20the%20Coast%3B%20%E5%86%92%E9%99%A9%E8%80%85%E8%81%94%E7%9B%9F%E7%AC%AC%E5%9B%9B%E5%AD%A3%EF%BC%9A%E9%BB%91%E6%9A%97%E8%B5%A0%E7%A4%BC.json",
+        "bytes": 13650,
+        "sha256": "1e28dbeabbd2010561cba5cee396d73479aa3fd9128b2a6c873a5520b2e97bbe"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Zachary%20Truscott%2C%20Nelson%20DeMeester%3B%20%E6%A0%BC%E7%BD%97%E5%A7%86%E7%9A%84%E8%8D%AF%E6%B0%B4%E9%85%BF%E9%80%A0%E6%8C%87%E5%8D%97.json",
+        "bytes": 46055,
+        "sha256": "0a6a706539a49bd8fae756d229fd5e33e5f2fb8d8ac8d85b387af4c676827bf4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "book/Zeke%20Gonzalez%3B%20%E9%85%92%E9%A6%86%E6%B8%B8%E6%88%8F.json",
+        "bytes": 14492,
+        "sha256": "d0e1e4f5b6188b355cfb896bcafbdeaf1311f97d662048000d92031355407bbe"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "charoption/CarbonPioxide%3B%20%E5%AE%88%E6%9C%9B%EF%BC%88%E8%9C%9C%E8%9C%82%EF%BC%89.json",
+        "bytes": 2367,
+        "sha256": "227d61f68dc3cdc7d15c9c50c68614dd8e9dec2f610f4a1d8a0a3255c8a7a0fb"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Aeron%20Drake%3B%20%E5%B9%BB%E6%9C%AF%E5%B8%88.json",
+        "bytes": 49709,
+        "sha256": "3a97fd38c7d1a75648d791e90c96f3b7446109031ac277522e2ba93616eaf983"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/AgenderArcee%3B%20%E6%AD%A6%E8%89%BA%E6%B8%B8%E4%BE%A0.json",
+        "bytes": 270290,
+        "sha256": "a5c49024888bb89caba92feee9e1556cf4ba80b222162df83ee0d968cf1feaaf"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Aron%3B%20%E5%8D%8A%E9%BE%99.json",
+        "bytes": 293987,
+        "sha256": "c1b90c9e62df59a117783cfece6f055f5d8a46a5c8c82f3733c17e220f5f489b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Aussifer%3B%20%E8%A7%A3%E7%BC%9A%E9%AD%94%E5%A5%91%E5%B8%88.json",
+        "bytes": 147491,
+        "sha256": "90bda01837fe3b5edde44b56ae46c728a3de143ff7ec047f1b8d8540a43c5b70"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Avaricium%3B%20%E7%A9%BA%E4%B9%8B%E5%BE%8B%E8%80%85.json",
+        "bytes": 69919,
+        "sha256": "3f6d02187ff5d6db2546786b3f411e4479720109af96431962e598d6438b739a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Benjamin%20Huffman%3B%20%E5%AD%A6%E8%80%85Scholar.json",
+        "bytes": 81434,
+        "sha256": "ee1d2a4b23d72846f2f2f6dc6df2d9a996bc6ada25a3f7adde90d56c12e3412a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Benjamin%20Huffman%3B%20%E7%81%B5%E5%AA%92Spiritualist.json",
+        "bytes": 64986,
+        "sha256": "0f77992963f3cdd699ebf2683a6ed3493ef5fe0fe1260a4b9a4b9cc080302446"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Benjamin%20Huffman%3B%20%E9%AD%94%E6%88%98%E5%A3%ABMagus.json",
+        "bytes": 124666,
+        "sha256": "a2ebf7c3e5fc5c6bb0a7679d62a3034f1e48fb9c50e80047da7ee331b1c71e28"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Blackbando%3B%20%E5%BF%8D%E8%80%85.json",
+        "bytes": 78591,
+        "sha256": "0f783ed1b689bfe889f1537ede5f43bffbc09b9ac301abe10d1a4c4e400e7e25"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Blake%20and%20Kevin%20(Blurhy)%3B%20%E6%89%88%E4%BB%8EArmiger.json",
+        "bytes": 165166,
+        "sha256": "b0f586615e5935badce783155ec6f6727a58d9621cec62ed8e4ccef977f4b987"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Blubber%20Nibble%3B%20%E8%AF%BA%E4%BC%8A%E5%BE%B7%E6%9E%97%E7%9A%84%E4%B8%87%E4%BA%8B%E5%BD%95.json",
+        "bytes": 45248,
+        "sha256": "9615f9724dcf553a3ba5111b27dd3146819872baff9565128f4bf8a574f3fd5c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/CaelReader%3B%20%E4%BC%98%E9%9B%85%E5%BE%B7%E9%B2%81%E4%BC%8A.json",
+        "bytes": 75055,
+        "sha256": "49e32f53e5d68f6d5a591979be1bc88da97c689508f4c892a610b97669a709f5"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Casteliad%3B%20%E5%B9%BD%E5%BD%B1%E5%88%BA%E5%AE%A2.json",
+        "bytes": 54644,
+        "sha256": "8894470779c1c02e31bda61d50a0f1034a1b2abb3a8142ee65167c7e7a813d8b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Chronicle%20of%20Heroes%3B%20%E9%AD%94%E7%BD%91%E9%AA%91%E5%A3%AB%20(v2.5).json",
+        "bytes": 94435,
+        "sha256": "ac043925185ccf1567cb27f22d7e1078365e01d26aa128997a304e5f2a90ee93"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Chronicle%20of%20Heroes%3B%20%E9%AD%94%E7%BD%91%E9%AA%91%E5%A3%AB%20(v4.0).json",
+        "bytes": 262361,
+        "sha256": "306e7485585cdd0ea1bef8f543cd085d8d9a65df43476cbbf2397ef7bd1eb9d3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/CJ%20Leung%3B%20%E9%80%9A%E7%81%B5%E5%B8%88.json",
+        "bytes": 74884,
+        "sha256": "ce72d7df966ded70fa3ebf5d923f564f6f644aef57282c1c92af5c2ee37305e5"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/D'Artagnan%3B%20%E5%8F%AC%E5%94%A4%E5%B8%88.json",
+        "bytes": 75245,
+        "sha256": "c5b40267c75ca52ab3803147893abfef0f9c35e3e1322814126ba03c68c3cc09"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/D%26D%20Wiki%3B%20%E5%89%91%E5%AE%A2.json",
+        "bytes": 49390,
+        "sha256": "6a8d17125787180f04253bb3f8a50fe3048379ff6ce1f02925da4abbc91db4f9"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/D%26D%20Wiki%3B%20%E6%88%98%E4%BA%89%E7%A5%AD%E5%8F%B8.json",
+        "bytes": 27468,
+        "sha256": "d5b46e447acace18d8a890d5cf840f150514839f4e7d309a9fdcee413eadc266"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Dan_UwU%3B%20%E8%88%9E%E8%80%85.json",
+        "bytes": 56730,
+        "sha256": "292a9b1d91a0ac74cee0f1a13166af088e7f83e15d6ac9c045788571d3bbd7d2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/DanDWiki%3B%20%E8%92%99%E9%9D%A2%E6%91%94%E8%A7%92%E6%89%8B.json",
+        "bytes": 50471,
+        "sha256": "e4c533d51333b347087595fe2c436590c11a7115e95713f22f324f197c03fb99"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Deakin%20Bennett%3B%20%E8%B4%B5%E6%97%8F.json",
+        "bytes": 65412,
+        "sha256": "ada0bd7cf78fc756c86613a241bc20bff357406e5bd51315a2dd6125e6b0403e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Devikyn%3B%20%E9%BE%99%E9%AA%91%E5%A3%AB%E4%BF%AE%E8%AE%A2%E7%89%88.json",
+        "bytes": 64903,
+        "sha256": "bfa293c8e294a6ea9b8b1a51c50a520a4b94ce451cc4e46aff15c345c270545d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Dillon%2C%20Haeck%2C%20H%C3%BCbrich%2C%20Lewis%2C%20Pinto%3B%20%E5%9F%8E%E4%B8%BB%E7%9A%84%E4%BC%A0%E5%A5%87%E5%B7%A8%E9%BE%99%E4%B9%8B%E4%B9%A6.json",
+        "bytes": 99656,
+        "sha256": "56f5401a2269be8c67ed322718409fb5b7099fc723c55c7c415ad63d4cfbf752"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/DM_Havuhk%3B%20%E5%A5%B3%E5%B7%AB.json",
+        "bytes": 103104,
+        "sha256": "f1fcbbc3f35df88d3371c7508a0c625a080fb12b39759732e15c2268c028de3a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Dusk%20Zargoth%3B%20%E6%88%98%E5%A3%AB%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "bytes": 92838,
+        "sha256": "610b2d5933d51c5206df6e3134d0f40832f72fba7fd001c9a786529fe32b58b6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Dusk%20Zargoth%3B%20%E6%AD%A6%E5%83%A7%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "bytes": 130705,
+        "sha256": "4519b7cbf7888ae0046447551a1f76b4fbe03a730d1c60302a52d029b5a95731"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Dusk%20Zargoth%3B%20%E6%B8%B8%E8%8D%A1%E8%80%85%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "bytes": 80969,
+        "sha256": "5785db32146d0419851ea99c1cc8568413809885cb1bfac825cf09078b9ab76a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Dusk%20Zargoth%3B%20%E9%87%8E%E8%9B%AE%E4%BA%BA%E9%87%8D%E5%88%B6%E7%89%88.json",
+        "bytes": 56778,
+        "sha256": "f803f0a9b604193876fc7b883d1ec92862a06feafba6fa33ab62ea2e8917e9ce"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/DXHHH101%2C%20Sinder%2C%20Superxavman%3B%20%E9%87%8D%E6%8C%AF%E6%9C%AF%E5%A3%AB.json",
+        "bytes": 40202,
+        "sha256": "90a4ac43479ffbbbbed51bc52cd053d474ad73f889438a0fc38c723ef1fef9e0"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/DXHHH101%3B%20%E7%A5%9E%E5%B0%84%E6%89%8B.json",
+        "bytes": 61200,
+        "sha256": "1cba85c4f2c101059d13e829ed71672a0dff43dc5d1f8e7956caff5b84439879"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Eric%20Nell%3B%20%E7%98%9F%E7%96%AB%E5%8C%BB%E7%94%9F.json",
+        "bytes": 44069,
+        "sha256": "681a3a5a4da41d56cd11bc947aee8e8214e51fcd57da69bdc5d47a9659351d59"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Erikku%20Blade%3B%20%E5%91%BD%E8%BF%90%E7%BC%96%E7%BB%87%E8%80%85.json",
+        "bytes": 133301,
+        "sha256": "f9bd2138abbefb8aec92152a88e696d6e467069ce1a0ff3f7678ced2cfceca0e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/FaultyGlyph%3B%20%E5%86%B0%E9%9C%9C%E6%B3%95%E5%B8%88.json",
+        "bytes": 28701,
+        "sha256": "b0028062544ff063c477d2ae0111413ceb79318750a33e8259f8e76a39095b7b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Fenrir-Hati-Skoll%3B%20%E5%A4%8D%E4%BB%87%E8%80%85.json",
+        "bytes": 45708,
+        "sha256": "b692c4e648068c6e80f1a7b6421129a440d2e2760376407cede2a11d4f95512e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Fiddlestics%3B%20%E4%BF%AE%E7%82%BC%E8%80%85.json",
+        "bytes": 86545,
+        "sha256": "4a873adc49c45038ed646da08b659e6055a94bb93e653e0cad00b92ec25ae16b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Foxfire94%3B%20%E5%85%BD%E5%8C%96%E4%BA%BA.json",
+        "bytes": 147520,
+        "sha256": "44de81bfdb6fc8f82b74ba9fa3e1d94a68b8a9346995359273c577a83018ac7e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Foxfire94%3B%20%E5%90%B8%E8%A1%80%E9%AC%BC.json",
+        "bytes": 325345,
+        "sha256": "8ebec966c370e9eb146caf4bb75f67fe9f39b8de1b6a5347cfd68f928f8453b7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Foxfire94%3B%20%E5%AE%A1%E5%88%A4%E5%AE%98.json",
+        "bytes": 154001,
+        "sha256": "ab65c8cf8b96e897a27a8eebf23b478885a26d0b01d230526320cc0e84cf3921"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Foxfire94%3B%20%E6%B3%95%E5%89%91%E5%A3%AB.json",
+        "bytes": 34343,
+        "sha256": "4acdf402f178c6ea7501af2a8c9b86ec2549ded7d6b8c28d7eaa11153168b5ec"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Foxfire94%3B%20%E8%A1%80%E7%8C%8E%E6%89%8B%E5%86%8D%E5%B9%B3%E8%A1%A1%E7%89%88.json",
+        "bytes": 139370,
+        "sha256": "a7868cebcf8045e6bde1625b0f95dcf54196dd67986493f648381169c089df26"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Foxfire94%3B%20%E9%98%BF%E6%96%AF%E5%A1%94%E7%89%B9%E6%96%B0%E5%85%B5.json",
+        "bytes": 193324,
+        "sha256": "0f13132a6de1d8de4d9d8db2557bb078838b2b539bc892fb21a4cde5ffb07753"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/FragSauce%3B%20%E7%BC%9A%E9%AD%82%E8%80%85.json",
+        "bytes": 175415,
+        "sha256": "4a162996d5c98d746032f2a274606b518bd57fbe09bf6950f5c1a2ce64f803da"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Fragsauce%3B%20%E7%BC%9A%E9%AD%82%E8%80%85%EF%BC%88%E9%87%8D%E5%88%B6%E7%89%88%EF%BC%89.json",
+        "bytes": 127630,
+        "sha256": "c1e6d3b57d7b1782157f7d357738b4af7d6a27cabaae08ab05f621d1e3af112d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Ghostfire%20Gaming%3B%20%E6%80%AA%E7%89%A9%E7%8C%8E%E4%BA%BA.json",
+        "bytes": 75623,
+        "sha256": "5c617691bebb51eec4c1cd424bc57ea8023980459fb2d555df29396130734bab"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Giffyglyph%3B%20%E8%81%8C%E4%B8%9A%E5%90%88%E9%9B%86.json",
+        "bytes": 724500,
+        "sha256": "9c514c1500ae7d1ec09fc68bfa973efccd09f861537e44cdd74d4f5b2f64ac93"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Heavyarms%3B%20%E9%93%B3%E5%A3%AB.json",
+        "bytes": 87357,
+        "sha256": "5e8ca2be6b7d214bdccc7b2e99623a7d432135ec738ee1eabc918a8024a89e4a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Helodinn%3B%20%E6%AD%BB%E7%81%B5%E5%B8%88%EF%BC%88maarlebw%E4%BF%AE%E8%AE%A2%E7%89%88%EF%BC%89.json",
+        "bytes": 68193,
+        "sha256": "2039f28d87b58c3372f3009006710b62be0bdae742c129565e9705df33eb3f67"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Hukuna%20Dentata%3B%20%E5%B9%B3%E6%B0%91.json",
+        "bytes": 14581,
+        "sha256": "dc44817ca0d94fd9cca54d8c00a5ec848bcc5568f3eee91e040da202bfae3da7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/InfKore%3B%20%E9%97%A8%E5%BE%92.json",
+        "bytes": 74397,
+        "sha256": "02318abe6460b69f9fe236776dad37635c1dc98e774dd8f103097fff0ebce91a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Izzy%3B%20%E5%8C%96%E8%BA%AB.json",
+        "bytes": 79208,
+        "sha256": "acbf2846cb0fc8b7d2cc27285812e97c3d8c7bd0e61ec54ff96de1d4be0d3510"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/J.R.%20Raffles%3B%20%E5%B9%BD%E9%AD%82.json",
+        "bytes": 95984,
+        "sha256": "262914f2ccd531e9d9cf49dc0d562a3dd2913918014e8c5576bfc52fcbe52514"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/JK%20Colyer%3B%20%E5%B7%A5%E7%A8%8B%E5%B8%88.json",
+        "bytes": 172473,
+        "sha256": "ae42ab2b30355a7d2d5e3ea01d22aa93c0f8b579a41351e022c5f61eed1209d8"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Jonoman3000%3B%20%E4%BD%8D%E9%9D%A2%E8%A1%8C%E8%80%85.json",
+        "bytes": 94057,
+        "sha256": "121de1cc84ff095ef25b37a38b8bfd02e00597c08d163026aa278f10ee671789"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/KibblesTasty%3B%20%E5%8F%91%E6%98%8E%E5%AE%B6.json",
+        "bytes": 467139,
+        "sha256": "55dfb0f0f711fdf4d9f8f0cc4dcc4eaff41a9a1a125b634052b2db3c53ed0e96"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/KibblesTasty%3B%20%E6%B3%95%E5%89%91%E5%A3%AB.json",
+        "bytes": 76038,
+        "sha256": "b6c649c8871c2ecc471d0a64313329aa2739e7f2b26803f5d7aaad933e828ee6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/KibblesTasty%3B%20%E7%81%B5%E8%83%BD%E4%BD%BF.json",
+        "bytes": 219770,
+        "sha256": "2a626e1b5adb8ae4aaa3f04aacec82873cc7594708129f8c92d96ea10c47d23d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/KibblesTasty%3B%20%E7%8B%97%E7%8B%97%E5%8D%8F%E5%8A%9B%E8%80%85.json",
+        "bytes": 10178,
+        "sha256": "5835057c05dec7d87fcfce855726f839400045044f876471b38519e6bb25b901"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/KibblesTasty%3B%20%E7%9D%A3%E5%86%9B.json",
+        "bytes": 86409,
+        "sha256": "c54ee4a132e23582afb366817082a05836826c25aa84aaed60aba621488be584"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/KibblesTasty%3B%20%E7%A5%9E%E7%A7%98%E5%AD%A6%E8%80%85.json",
+        "bytes": 174352,
+        "sha256": "815aebfdf2d9f00f979231e8398f8f4e1004c21f6dc24b37689fc54046f43ec2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/KieruSnowbell%3B%20%E8%8D%AF%E5%89%82%E5%B8%88.json",
+        "bytes": 69351,
+        "sha256": "24a82ea7a56595109ff610912f8244fbafc8e9e31d285227c39b1dc2a12ea783"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Kyle%20Grant%3B%20%E5%AD%A6%E8%80%85.json",
+        "bytes": 117995,
+        "sha256": "13a89c4d7ee23bcf5580170cae3b284d081237a4a7bbcbcb668f1b3456275dbe"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E5%8C%96%E5%85%BD%E8%80%85.json",
+        "bytes": 82557,
+        "sha256": "ce12efbc6a182dfebf6c410c143c16c29186ece038fbf2955ba5666ae5510f7a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E5%8D%9A%E5%AD%A6%E8%80%85.json",
+        "bytes": 225463,
+        "sha256": "0f078dfb39e26cd2567991f94fc81c44cbae77c82207bf7e288815ce5c9251cc"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E5%AE%B9%E5%99%A8.json",
+        "bytes": 172381,
+        "sha256": "15295d7e91df7999bcea9bccfb44e8f86256da3ee11ad6a0e7f7b6da37a4b7b4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E5%B9%B3%E6%B0%91.json",
+        "bytes": 45192,
+        "sha256": "ac7d311f9eba9c2cf0439af11849a2d2361b3d53857d792c1d987f73d240f1dc"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E5%90%9F%E6%B8%B8%E8%AF%97%E4%BA%BA.json",
+        "bytes": 114251,
+        "sha256": "4dd795f225a2f4b4a05454a293ccd8a2fefb829318cb4570cc07f8b9c2949708"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E5%9C%A3%E6%AD%A6%E5%A3%AB.json",
+        "bytes": 117418,
+        "sha256": "67fa40f0db5909ddaa2bddfedd164b9f2d815a31cfa0e25286413227e86998d8"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E5%A5%87%E6%A2%B0%E5%B8%88.json",
+        "bytes": 279125,
+        "sha256": "0dcd49f493b0d20967fa13b92c6822bea3c32cb16c277edf8ea4cb146405850c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E5%BE%B7%E9%B2%81%E4%BC%8A.json",
+        "bytes": 73634,
+        "sha256": "ae9a586dacfda6a05cd79a90054ec9c85937530c9ccd179c525678f94fe13ff2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E6%88%98%E5%A3%AB.json",
+        "bytes": 439220,
+        "sha256": "2a29c70c20f1b7364e6cbffcf87847a91002a3ff1a53fab338d1ce0c4d7d2d38"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E6%9C%AF%E5%A3%AB.json",
+        "bytes": 216722,
+        "sha256": "5592de9018d005c802a1c283565b6900300706031e841b960c3ae32f3d573b5a"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E6%AD%A6%E5%83%A7.json",
+        "bytes": 217813,
+        "sha256": "e6780868b52765cef2e98ddb78b0cabf41e771f0456abcd9a3afcf8902b5f57b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E6%B3%95%E5%B8%88.json",
+        "bytes": 111362,
+        "sha256": "59ba9b0e60042affb519b11e95218cec51d762f402d8259f7dd88fb41e5da9cf"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E6%B8%B8%E4%BE%A0.json",
+        "bytes": 267961,
+        "sha256": "2e58a8ad0125005c84d3d7cb6073b969525102529da009fe44a7430a5f2675e6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E6%B8%B8%E8%8D%A1%E8%80%85.json",
+        "bytes": 231405,
+        "sha256": "4dbe565acfbaaa20a07d36ccbc777f9f4082ed8ff624e1930e0df457109da4f2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E7%89%A7%E5%B8%88.json",
+        "bytes": 109419,
+        "sha256": "a6480dd1a25abc0b066ac4836e2bf9107fdbc0b4c2ccfaab0c9cfa2647a542b2"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E8%A1%80%E7%8C%8E%E6%89%8B.json",
+        "bytes": 152785,
+        "sha256": "8e8ed4b14d5b8fcccb05e1e076d92186d8ea77e2682efafa702a3f231c74bc58"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E9%87%8E%E8%9B%AE%E4%BA%BA.json",
+        "bytes": 213868,
+        "sha256": "98111aca028d2f21135566f6cf9af1d4ed0f2b3074d7401ebd949b7007db033d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E6%9B%BF%E4%BB%A3%E9%AD%94%E5%A5%91%E5%B8%88.json",
+        "bytes": 143404,
+        "sha256": "f853e58ffdc680ad68da8ad6ce204fb4dde7924fe79dc25d63bb55a5895b3dea"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E7%81%B5%E8%83%BD%E4%BD%BF.json",
+        "bytes": 92087,
+        "sha256": "956a9a857523ca425d6301eb6d803468482cbd74dd21fd21075f487d283d4294"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E7%9D%A3%E5%86%9B.json",
+        "bytes": 190642,
+        "sha256": "dd33b80b497d878f6554f7120904a7e82c9dbf0a6b3f77f56e531e608d9bc759"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E8%90%A8%E6%BB%A1.json",
+        "bytes": 194523,
+        "sha256": "ee692cc53653a22d33624aeecc5672aae576ed130ef74b18eb4585284331ecc3"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/LaserLlama%3B%20%E9%AD%94%E6%88%98%E5%A3%AB.json",
+        "bytes": 148381,
+        "sha256": "c602e674178069cb3e958afc6de5b6d00f988e4ebfaf3d8f978c26f111eeb152"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Layhnet%3B%20%E5%8F%98%E4%BD%93%E6%88%98%E5%A3%AB.json",
+        "bytes": 109318,
+        "sha256": "bc645a432475ee5a1b61b1a267bf0e4a870afce1dfdeebb87c190af313bcfd49"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Loot%20Tavern%3B%20%E6%9E%AA%E6%89%8B.json",
+        "bytes": 74366,
+        "sha256": "92f0a773e3070d5f62f25e2d8c350fed9e50bcd46253a4629e1e32fafa3b9ae5"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Lord%20Woolfy%3B%20Woolfy%E7%9A%84%E7%8B%90%E5%A6%96%E5%A5%B3%E5%B7%AB.json",
+        "bytes": 199103,
+        "sha256": "eee0e206bc3b9b9e6082980cc007dc4f5b8d7859c60274a61eab4e0998242c69"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Maeglad%20Olofir%3B%20%E6%AD%A6%E5%A3%AB.json",
+        "bytes": 52812,
+        "sha256": "3be7b478b1706c69c6e93b26a2184cef24fe69f6c57071906a990bc48fc49a77"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Mage%20Hand%20Press%3B%20%E7%BC%9A%E9%AD%94%E8%80%85%E5%85%A8%E4%B9%A6.json",
+        "bytes": 225589,
+        "sha256": "6e9f33773936c543838b8fd72d705569e7ea1efec32f1ce435d197be2b2333b9"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Matthew%20Mercer%3B%20%E8%A1%80%E7%8C%8E%E6%89%8B%20(2022).json",
+        "bytes": 95402,
+        "sha256": "6e7f0b9c3e1fcce3786946ce2618be22b92850aa90eb2c452e1f7ff5981057f4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/MCDM%20Productions%3B%20%E5%A4%A9%E8%B5%8B%E8%80%85%E4%B8%8E%E7%81%B5%E8%83%BD.json",
+        "bytes": 467160,
+        "sha256": "c86f243cf3c2140076858d73bf76ea07e8ed338c85a057eeed0bb2657ba01289"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/MCDM%20Productions%3B%20%E9%82%AA%E7%8B%B1%E4%BD%BF%E8%81%8C%E4%B8%9A.json",
+        "bytes": 72619,
+        "sha256": "73d3401754cf2112969aa1092bc7bf89d8451ee5218590c65ad445518c6916e6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/MCDM%20Productions%3B%20%E9%87%8E%E5%85%BD%E4%B9%8B%E5%BF%83%E4%B8%8E%E6%80%AA%E7%89%A9%E5%90%8C%E4%BC%B4.json",
+        "bytes": 215080,
+        "sha256": "1a635a473b600c3151f70cde3fbff2c0a0ce73c6c2d90249239898d5fe0dd2e4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Middle%20Finger%20of%20Vecna%3B%20%E7%BC%9A%E9%AD%94%E8%80%85.json",
+        "bytes": 261806,
+        "sha256": "eaee9732894545e00a89a953056d750be11696be7f229cd33b3d87f57ff52e5b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Middle%20Finger%20of%20Vecna%3B%20%E7%BC%9A%E9%AD%94%E8%80%85%EF%BC%88Foundry%E5%8F%8B%E5%A5%BD%E7%89%88%EF%BC%89.json",
+        "bytes": 356610,
+        "sha256": "7ad7893fd57f9f3a041a0f7bf9d88750cec55aab1f0f320cde2fe655a5f497f7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Taron%20Pounds%3B%20%E7%AC%A6%E6%96%87%E5%AE%88%E6%8A%A4%E8%80%85.json",
+        "bytes": 348507,
+        "sha256": "f408ebd83e080dd35085a39dfce49116399ab325cacd62436cf0ee807858b472"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "class/Vincent%20Girgenti%3B%20%E6%BC%AB%E6%B8%B8%E8%80%85.json",
+        "bytes": 72181,
+        "sha256": "b9639473bbed8c4812d104afb0c166317d5d69c1c01dc03e5662d9f20150985b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/1985%20Games%3B%20%E8%83%A7%E5%BF%86%E5%B2%9B%EF%BC%9A%E7%9F%A2%E7%94%B0%E9%97%A8%E7%89%A9%E8%AF%AD.json",
+        "bytes": 754118,
+        "sha256": "d263051df52a67efa51951b4f5022a8b1c6b7e02a9e775ad499791e829350416"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Aeron%20Drake%3B%20%E7%8E%B0%E4%BB%A3%E6%89%8B%E5%86%8C.json",
+        "bytes": 436797,
+        "sha256": "9abd2848b0e9b7295a8040efcd4ce1f56e0bd1e3d827bf2c05d6abef41a6c55e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Allan%20Cudicio%3B%20%E7%93%A6%E5%8A%A0%E6%9D%9C%E7%BC%96%E5%B9%B4%E5%8F%B2.json",
+        "bytes": 419308,
+        "sha256": "9e4c1eb3f780f37f02cb8987846e368cc932cd62061665aa9159ab898bf852f4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Amellwind%3B%20%E6%80%AA%E7%89%A9%E7%8C%8E%E4%BA%BA%E6%80%AA%E7%89%A9%E5%9B%BE%E9%89%B4.json",
+        "bytes": 3072497,
+        "sha256": "ca0bed474325ea62c0ba001d783907eae40502864fa57bbf393f4c5705c76c44"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Amratat%3B%20%E9%BB%91%E6%9A%97%E4%B9%8B%E9%AD%823%EF%BC%9A%E5%AF%BB%E7%8E%8B%E8%80%85%E6%8C%87%E5%8D%97.json",
+        "bytes": 484672,
+        "sha256": "3eb27f015093ae365bd5fe50e2425eddb4640861fe54e84c79dfee42ec2fcae6"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Andrew%20Welker%3B%20%E5%A1%94%E8%8E%8E%E7%9A%84%E5%85%B6%E4%BD%99%E4%B8%87%E4%BA%8B%E5%9D%A9%E5%9F%9A%EF%BC%88%E7%AC%AC%E4%BA%8C%E5%8D%B7%EF%BC%89.json",
+        "bytes": 577321,
+        "sha256": "650419b897400dabf2b577b836838877d3345ea16ac8d5d91f1e2f1bbc8effe4"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Anthony%20Turco%3B%20%E6%9F%AF%E5%85%B0%E5%A0%A1%E6%96%87%E6%91%98%EF%BC%9A%E5%86%92%E9%99%A9%E8%80%85%E5%B9%B4%E9%89%B4.json",
+        "bytes": 838966,
+        "sha256": "bb035bf82f27f8572c0695b67f0ae100ca62c63fc012a61ab03ecbad150be9e9"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Anthony%20Turco%3B%20%E6%9F%AF%E5%85%B0%E5%A0%A1%E6%96%87%E6%91%98%EF%BC%9A%E7%81%B5%E8%83%BD%E4%BD%BF%E5%85%A5%E9%97%A8.json",
+        "bytes": 1216129,
+        "sha256": "44f905d923c661cdaffb34a86fa7b3cbe3d143af2edc96abd638851577211a17"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Arcana%20Games%3B%20%E9%98%BF%E5%8D%A1%E8%BF%AA%E4%BA%9A.json",
+        "bytes": 454342,
+        "sha256": "426579204cf826e918c88f6c43ab7b1c42c98e068439874264e7dde334678a02"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Benevolent%20Evil%3B%20%E5%85%83%E7%B4%A0%E4%B8%8E%E5%BD%BC%E7%95%8C.json",
+        "bytes": 2110838,
+        "sha256": "6c0c62928593385acaca7bad0c7770a2d9fc4e60861a38fb0172704624491a8f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Black%20Pudding%20Press%3B%20%E6%B5%B7%E9%A9%AC%E9%9C%B2%E8%90%A5%E8%80%85%E7%9A%84%E5%AE%8C%E5%85%A8%E9%A3%9F%E8%B0%B1.json",
+        "bytes": 480228,
+        "sha256": "59b013b984a7d186872c4f58860c9ff54ba4cf9e8c5b6bb08cd8612e2a34490f"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Bonus%20Action%3B%20%E9%99%84%E8%B5%A0%E5%8A%A8%E4%BD%9C.json",
+        "bytes": 689399,
+        "sha256": "b4ab97ff081a5ec248f34e31d70cb8fcee9c83df9b773f056fbe25f07c2178ba"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/D%26D%20Beyond%3B%20%E7%AC%A6%E6%96%87%E4%B9%8B%E5%9C%B0%E4%BC%A0%E8%AF%B4%EF%BC%9A%E6%AF%94%E5%B0%94%E5%90%89%E6%B2%83%E7%89%B9%E6%9A%97%E6%BD%AE.json",
+        "bytes": 288166,
+        "sha256": "51d7b2d048dd13cf9ddba5c73e244cc3ddf13b3e444bf88313d35f85a413a13e"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Daniel%20Nnorth%3B%20MTG%20%E8%A3%82%E7%89%87%E5%A6%96%E4%B8%8E%E9%AD%94%E6%B3%95%E7%89%A9%E5%93%81.json",
+        "bytes": 310970,
+        "sha256": "9a75612e7cedf3111adb9d75bb4e7a068130b99851dd48f58bf6edf1920b6c0b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/DianaDM%3B%20%E7%BE%A4%E6%98%9F%E7%B3%BB%E5%88%97.json",
+        "bytes": 393047,
+        "sha256": "a01be42371ad5e151642a262acd0f0d9626f90a04030a7f99158e61461ea648c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/DMs%20Guild%3B%20%E8%89%BE%E4%BC%AF%E4%BC%A6%E8%8C%83%E5%9E%8B.json",
+        "bytes": 301663,
+        "sha256": "4e425d5236cbeb726e50553f13af3c166cac49db3505cf565e4b47dd07540295"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/DMsGuild%3B%20%E5%A4%A7%E6%88%B4%E5%B0%94.json",
+        "bytes": 323544,
+        "sha256": "10ac789fb818d878578ffa7f2795e6a899991d77b328ac5680169a89ea74aba0"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/DMsGuild%3B%20%E7%8F%8A%E5%A8%9C%E8%90%A8%E7%9A%84%E5%85%B6%E4%BD%99%E4%B8%87%E4%BA%8B%E9%81%97%E5%A4%B1%E7%AC%94%E8%AE%B0.json",
+        "bytes": 544729,
+        "sha256": "1fdded011935d5ffa1f531579a8b614241ab9bfe3a634bf443b969d1147a682c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/DMsGuild%3B%20%E8%8E%B1%E7%91%9F%E6%9B%BC%EF%BC%9A%E6%97%A0%E6%B3%95%E6%8E%A5%E8%BF%91%E7%9A%84%E4%B8%9C%E6%96%B9%E6%88%98%E5%BD%B9%E6%8C%87%E5%8D%97.json",
+        "bytes": 342584,
+        "sha256": "16fe60afd3b52276341dba072bf7b5d3df6aa015da48231e5ad8eb6eefce9c49"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Echidna%20Design%3B%20%E5%98%8E%E5%98%8E%E6%AD%BB%E7%81%B5%E4%B9%A6.json",
+        "bytes": 549151,
+        "sha256": "ec5c2a1d5ed4c65a3294bccb28c3ba6e300abacfeb124205cbd6ca3882f410f0"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Ed%20Greenwood%3B%20%E8%B5%9B%E5%B0%94%EF%BC%9A%E7%BA%A2%E8%A2%8D%E5%B7%AB%E5%B8%88%E4%B9%8B%E5%9C%B0.json",
+        "bytes": 648800,
+        "sha256": "5d91de8dcca086f8f658d3902c64c61eecf91b6a142be7354a6998dca3a7e1fb"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Emperror%3B%20%E6%81%A9%E4%BD%A9%E7%BD%97%E7%9A%84%E6%96%B0%E8%8A%82%E5%A5%8F.json",
+        "bytes": 425481,
+        "sha256": "b01b5bb398652d432724746353fdb398bf1fa315c1fefacb804242d7f10dd941"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Frog%20God%20Games%3B%20%E6%8B%89%E6%BD%98%C2%B7%E9%98%BF%E5%9B%BE%E5%85%8B%202018.json",
+        "bytes": 1741106,
+        "sha256": "62e0e566c853a7675c22e69620bb7bad699ea703e9c1ad6b1366f85d6500946b"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/FungusAmongUs%3B%20%E4%BA%9A%E6%AF%94%E8%BE%BE%E5%A5%87%E7%9A%84%E5%8F%AF%E6%86%8E%E5%86%92%E9%99%A9%E8%80%85.json",
+        "bytes": 912286,
+        "sha256": "f33ec46deadb620a593ce91dbc7122537b6107c60efbef590497415ff6c049f7"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Galdeveer%3B%20%E5%9D%A6%E5%85%8B%E4%B8%8E%E4%BE%A7%E7%BF%BC.json",
+        "bytes": 797915,
+        "sha256": "22423baea5833bc4d6d4b6950b681dd62b088d5019317a1890cbc07f8d09829d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Genuine%20Fantasy%20Press%3B%20%E8%A2%AB%E9%81%97%E5%BF%98%E7%9A%84%E7%A7%98%E5%AF%86%E5%90%88%E9%9B%86%EF%BC%9A%E8%A7%89%E9%86%92.json",
+        "bytes": 702042,
+        "sha256": "7ead50768521053db69dc322047961f8a40d56a15c88882d147a56970cbb970c"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Kobold%20Press%3B%20%E5%8C%97%E5%9C%B0%E4%B8%96%E7%95%8C%E4%B9%A6.json",
+        "bytes": 1974772,
+        "sha256": "de7b42c29e48d37046553270dd3f11ff155e42115511014a32f8d6011a66b020"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Loot%20Tavern%3B%20%E8%B5%AB%E8%8E%89%E5%AE%89%E5%A8%9C%E7%9A%84%E6%80%AA%E7%89%A9%E7%8B%A9%E7%8C%8E%E6%8C%87%E5%8D%97.json",
+        "bytes": 4068501,
+        "sha256": "813887502ff1d3ad11712a99a5d8413ff179045b6e05dcc98b35d69cd75dc409"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "collection/Sterling%20Vermin%20Adventuring%20Co.%3B%20%E7%BB%88%E6%9E%81%E5%86%92%E9%99%A9%E8%80%85%E6%89%8B%E5%86%8C.json",
+        "bytes": 1984163,
+        "sha256": "e3719fd78c5bc6622a6aa0fb728e405ba5f03e1a88669ef22665377b87204b77"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "creature/LaserLlama%3B%20%E9%87%8E%E5%85%BD%E5%90%88%E9%9B%86.json",
+        "bytes": 527104,
+        "sha256": "ef48282c88db7321447cde10e2066741eb2c829d99cd7b5a97c3f64255005354"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "feat/Laserllama%3B%20%E4%B8%93%E9%95%BF%E5%90%88%E9%9B%86.json",
+        "bytes": 70521,
+        "sha256": "bd2f486c432ea3e6df94e7a89cad574b7f736665c17f8ab75f68bf94f173de4d"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "item/Giffyglyph%3B%20%E5%A5%A5%E6%9C%AF%E5%AE%9D%E7%8F%A0.json",
+        "bytes": 283571,
+        "sha256": "9fd9b6797c63ff421d5aa7ded5c5b4dd4da8533700ff321e3720e958e3db3b16"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "optionalfeature/LaserLlama%3B%20%E6%88%98%E6%8A%80%E5%90%88%E9%9B%86.json",
+        "bytes": 326347,
+        "sha256": "916142b3410ec9bf01e83dc7c929de5962f3d862aad0088309da8cd4a8fdb242"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "spell/KibblesTasty%3B%20Kibbles%20%E7%9A%84%E6%96%BD%E6%B3%95%E6%B1%87%E7%BC%96.json",
+        "bytes": 492698,
+        "sha256": "3ef4dd440d9a2c64ca70dc2e2aa8509d410c92456ef282b5b3b2df5d95e70087"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "spell/LaserLlama%3B%20%E6%B3%95%E6%9C%AF%E5%90%88%E9%9B%86.json",
+        "bytes": 369444,
+        "sha256": "3c9a46148f732ab525493ab142599e42f6841a48d29c7bf62cd8b71bb38f4043"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "subclass/AluStar%3B%20%E9%BE%99%E9%A9%AC%E8%BF%8E%E6%98%A5.json",
+        "bytes": 19098,
+        "sha256": "8500c626218f36e58cc661f5ee61d30d296ae81b368ea104ae0b98f277c3eda1"
+      },
+      {
+        "namespace": "kiwee-homebrew",
+        "path": "subclass/Rain-Junkie%2C%20DXHHH101%3B%20%E6%9E%9C%E5%9B%AD%E8%B5%B7%E6%BA%90%E6%9C%AF%E5%A3%AB%EF%BC%88%E9%87%8D%E7%BB%BD%EF%BC%89.json",
+        "bytes": 12439,
+        "sha256": "fe3c2b4836a673b07c8656fc49d0a0aaa81d0a308df818dde0492eacc02fe40c"
+      }
+    ]
+  },
+  "scope": "source labels and classification only; no rule bodies, entitlement or completion credit"
+}
