@@ -187,7 +187,10 @@ test('three at-will grants suspend with their source and restore exact ownership
  const readonlyBefore=await saved(other),spells=await tab(other,'法术');await spells.getByRole('button',{name:'无声幻影施放详情',exact:true}).click();const detail=other.getByRole('dialog',{name:'无声幻影施放详情',exact:true});await expect(detail.getByRole('button',{name:'使用',exact:true})).toBeDisabled();await expect(detail.locator('.spell-action-feedback')).toHaveCount(0);expect(await saved(other)).toEqual(readonlyBefore);await other.close();
  await source(page,false);await expect.poll(async()=>(await saved(page)).selections.filter((row:any)=>row.grantKey?.startsWith('source-spell:')).length).toBe(0);
  let panel=await tab(page,'特性');await expect(panel.locator('[data-class-choice="warlock:class-optional:0"]')).toContainText('来源未启用，原记录保留');
- await page.reload();panel=await tab(page,'法术');for(const row of spellInvocations)await expect(panel.getByRole('button',{name:`${row.spell}施放详情`,exact:true})).toHaveCount(0);
+ await page.reload();
+ // Source restoration reconciles only after the real cached catalog is ready.
+ await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();
+ panel=await tab(page,'法术');for(const row of spellInvocations)await expect(panel.getByRole('button',{name:`${row.spell}施放详情`,exact:true})).toHaveCount(0);
  const suspended=await saved(page);expect(suspended.answers['warlock:class-optional:0']).toEqual(answers);expect(suspended.runtime.resources).toEqual(active.runtime.resources);expect(suspended.runtime.automationActions).toEqual(active.runtime.automationActions);
  assert(suspended.classChoiceArchive,'Expected the suspended grant archives');for(const id of ids)expect(suspended.classChoiceArchive[id.ownerId].selections.some((row:any)=>row.id===id.spellId)).toBe(true);
  await page.screenshot({path:info.outputPath('invocation-three-spells-source-suspended.png'),fullPage:true});
