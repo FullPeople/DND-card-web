@@ -19,6 +19,27 @@ USER = 'obr-deploy'
 FINGERPRINT = 'SHA256:bS1JRj3+1zJntm+ZOKtjlRhK7MjAAOEdKOdnKq+2yco'
 
 
+def diagnostic(phase, operation, code, **metrics):
+    # Only fixed codes and numeric/boolean transport facts reach the CI log.
+    # Never include exception text, commands, tokens or either raw stream.
+    phases = {'transport', 'initial', 'status-query'}
+    codes = {'ssh-transfer-timeout', 'ssh-transfer-failed', 'ssh-transfer-result', 'invalid-server-response',
+             'deployment-unavailable', 'publisher-lock-busy', 'attempt-binding-unavailable', 'deployment-runtime-error'}
+    phase = phase if phase in phases else 'unknown'
+    operation = operation if operation in ('preflight', 'publish', 'status', 'recover', 'inventory') else 'unknown'
+    code = code if code in codes else 'deployment-runtime-error'
+    facts = {key: value for key, value in metrics.items()
+             if key in ('attempt', 'sshExitCode', 'responseBytes') and type(value) is int
+             or key in ('writerFailed', 'writerAlive') and type(value) is bool}
+    print(json.dumps({'deploymentDiagnostic': {'phase': phase, 'operation': operation, 'code': code, **facts}}))
+
+
+def diagnostic_error(error):
+    known = {'ssh-transfer-timeout', 'ssh-transfer-failed', 'invalid-server-response',
+             'deployment-unavailable', 'publisher-lock-busy', 'attempt-binding-unavailable'}
+    return str(error) if type(error).__name__ == 'Denied' and str(error) in known else 'deployment-runtime-error'
+
+
 def transfer(command, envelope, archive=None, timeout=600):
     process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     sink = process.stdin
@@ -43,11 +64,20 @@ def transfer(command, envelope, archive=None, timeout=600):
     except subprocess.TimeoutExpired:
         process.kill()
         process.communicate()
+        diagnostic('transport', envelope.get('operation'), 'ssh-transfer-timeout', sshExitCode=process.returncode)
         raise c.Denied('ssh-transfer-timeout')
     finally:
         writer.join(timeout=5)
+    if process.returncode != 0 or failures or len(stdout) > 16384 or writer.is_alive():
+        diagnostic('transport', envelope.get('operation'), 'ssh-transfer-result', sshExitCode=process.returncode,
+                   responseBytes=len(stdout), writerFailed=bool(failures), writerAlive=writer.is_alive())
     c.require(len(stdout) <= 16384 and not writer.is_alive(), 'invalid-server-response')
-    report = c.json_unique(stdout)
+    try:
+        report = c.json_unique(stdout)
+    except Exception:
+        diagnostic('transport', envelope.get('operation'), 'invalid-server-response',
+                   sshExitCode=process.returncode, responseBytes=len(stdout))
+        raise
     if process.returncode != 0 or report.get('ok') is not True or failures:
         error = report.get('error', 'ssh-transfer-failed')
         if not isinstance(error, str) or not re.fullmatch(r'[a-z-]{1,90}', error):
@@ -65,13 +95,15 @@ def reconcile(command, envelope, archive):
         # Only ambiguous transport/runtime failures justify a status query.
         ambiguous = {'ssh-transfer-timeout', 'ssh-transfer-failed', 'invalid-server-response', 'deployment-unavailable'}
         if type(error).__name__ == 'Denied' and str(error) not in ambiguous: raise
+        diagnostic('initial', envelope['operation'], diagnostic_error(error))
     query = {**envelope, 'operation': 'status'}
     # An SSH exit/timeout is not proof of a failed publication. Read physical
     # target hashes with a fresh short-lived token; never retry a write here.
     for attempt in range(3):
         query['oidc'] = fresh_token()
         try: return transfer(command, query, timeout=45)
-        except Exception: pass
+        except Exception as error:
+            diagnostic('status-query', 'status', diagnostic_error(error), attempt=attempt + 1)
     raise c.Denied('deployment-result-unknown-status-required')
 
 
