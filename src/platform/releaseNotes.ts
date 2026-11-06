@@ -1,6 +1,10 @@
 import {cloudFeaturesEnabled} from '../cloud/availability';
 export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-25':'2026-10-19';
 export const STANDALONE_RELEASE_DATE='2026-11-06';
+const release309=():ReleaseSection[]=>[
+ {title:'起始装备',items:['来源装备指向另一版规则时，领取前会提示核对，不会只发放同一方案里的部分物品或金币。已领取或已花费的记录保留，重开不会再次发放。']},
+ {title:'来源法术',items:['修复来源编号包含空格或“&”时，赠送法术的筛选候选可能遗漏的问题。不同来源保持独立，已选法术和已消耗次数保留。']},
+];
 const release308=():ReleaseSection[]=>[
  {title:'角色与法术保护',items:['修复来源法术同步可能改写手工记录或未知设置的问题，保留预备引用和已消耗次数。','加入按已核验环阶、学派等条件选择赠送法术的入口。同组不能重复选择，已选内容可以保存重开；未知条件仍保留手工操作。']},
  {title:'自动化进度与公告',items:['目录保留全部已知来源；尚未建立规则清单的扩展明确标注。分别显示登记、来源核验、完整建模、完整执行和验收，局部覆盖不等于整条规则完成。','保留 11 月 1 日作者说明为默认折叠的历史公告。后续处理不承诺固定时刻，反馈请附页面网址、版本和复现步骤。']},
@@ -500,8 +504,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'?release308():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='standalone'?[{title:STANDALONE_RELEASE_DATE,sections:release308()}]:[]),
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'?release309():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'?[{title:STANDALONE_RELEASE_DATE,sections:release309()},{title:'2026-11-06-308',sections:release308()}]:[]),
  ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release307()},{title:'2026-10-23',sections:release306()},{title:'2026-10-22',sections:release305()},{title:'2026-10-20',sections:release303()}]:[]),
  {title:'2026-10-19',sections:release302(mode)},
  {title:'2026-10-18',sections:release301(mode)},

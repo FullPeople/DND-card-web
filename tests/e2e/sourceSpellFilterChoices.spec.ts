@@ -5,6 +5,8 @@ import {exportCharacter} from '../../src/core/export';
 import {specialSpellResource} from '../../src/core/specialSpells';
 import {mockSource,suppressAnnouncement,selectSheetPage,waitForCatalog} from './fixtures';
 import {savedCharacter} from './reviewedRuleBrowserState';
+import {inventoryState} from '../../src/core/characterDetails';
+import {restoreAuthoredChoices} from './authoredChoicesFixture';
 
 // Entirely authored source data; no publisher text, original cards or rooms.
 function fixture(){
@@ -43,4 +45,44 @@ test('actual App preserves two explicitly declared casting levels beside a filte
  const edit=page.getByRole('switch',{name:'编辑模式',exact:true});if(await edit.getAttribute('aria-checked')!=='true')await edit.click();await page.getByRole('button',{name:'自动化设置',exact:true}).click();const variants=page.locator('.source-spell-choice').filter({hasNot:page.getByRole('searchbox')});await variants.getByRole('checkbox',{name:/按 1 环施放/}).check();await variants.getByRole('checkbox',{name:/按 2 环施放/}).check();const filtered=page.locator('.source-spell-choice').filter({has:page.getByRole('searchbox')});await filtered.getByRole('searchbox').fill('AuthoredSpell050');await filtered.getByRole('checkbox',{name:/原创法术50/}).check();await page.keyboard.press('Escape');
  const projection=async()=>{const c=await savedCharacter(page),rows=c.selections.filter(row=>row.entry.english==='AuthoredSpell047'&&row.grantKey?.startsWith('source-spell:'));return rows.map(row=>({level:c.spellSettings?.special?.[row.id]?.sourceGrant?.castLevel,active:c.spellSettings?.special?.[row.id]?.sourceGrant?.active,current:c.runtime.resources[specialSpellResource(row.id,c)]?.current})).sort((a,b)=>(a.level||0)-(b.level||0));};
  const expected=[{level:1,active:true,current:1},{level:2,active:true,current:1}];await expect.poll(projection).toEqual(expected);await page.reload();await expect.poll(projection).toEqual(expected);const saved=await savedCharacter(page);expect(saved.runtime.resources.manual).toEqual(f.c.runtime.resources.manual);expect(saved.notes).toBe(f.c.notes);
+});
+
+async function importAuthoredFixture(page:Page,f:ReturnType<typeof fixture>){
+ await page.goto('/card/?intro=0');await waitForCatalog(page);await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();
+ await page.getByTestId('character-file').setInputFiles({name:'authored-current-boundaries.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(f.c)))});
+ const review=page.getByRole('dialog',{name:'导入前核对',exact:true}),imported=page.getByRole('tab',{name:f.c.name+'（导入）',exact:true});await expect(review.or(imported)).toBeVisible();
+ if(await review.isVisible())await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();await expect(imported).toHaveAttribute('aria-selected','true');await page.keyboard.press('Escape');
+ const edit=page.getByRole('switch',{name:'编辑模式',exact:true});if(await edit.getAttribute('aria-checked')!=='true')await edit.click();
+}
+
+test('actual App retains an ampersand-source choice and exhausted use after saving and reopening',async({page})=>{
+ const f=fixture();f.c.profile.enabledSources=['PHB','FT&S'];for(const spell of f.spells)spell.source='FT&S';
+ f.owner.raw.additionalSpells[0].innate['_'].daily['1e']=[{choose:'level=1|school=N'}];await sources(page,f);await importAuthoredFixture(page,f);
+ await page.getByRole('button',{name:'自动化设置',exact:true}).click();const group=page.locator('.source-spell-choice').filter({has:page.getByRole('searchbox')});
+ await group.getByRole('searchbox').fill('AuthoredSpell047');await group.getByRole('checkbox',{name:/原创法术47/}).check();
+ await expect.poll(async()=>Object.values((await savedCharacter(page)).automation!.spellChoices||{}).flat()).toEqual(['AuthoredSpell047|FT&S']);await page.screenshot({path:test.info().outputPath('current-source-uid.png')});await page.keyboard.press('Escape');
+ await spellsPage(page);await page.getByRole('button',{name:'原创法术47施放详情',exact:true}).click();const detail=page.getByRole('dialog',{name:'原创法术47施放详情',exact:true});await detail.getByRole('button',{name:'使用',exact:true}).click();
+ await expect(detail.getByRole('spinbutton',{name:'原创法术47剩余次数',exact:true})).toHaveValue('0');await page.keyboard.press('Escape');await spent(page);await page.reload();await spent(page);
+ const saved=await savedCharacter(page);expect(saved.selections.find(row=>row.entry.english==='AuthoredSpell047')?.entry.source).toBe('FT&S');expect(saved.notes).toBe(f.c.notes);expect(saved.runtime.resources.manual).toEqual(f.c.runtime.resources.manual);
+});
+
+test('actual App blocks a cross-edition kit atomically and saves a compatible alternative without reissuing it',async({page})=>{
+ const f=fixture();f.c.name='装备版本完整界面验收';delete f.owner.raw.additionalSpells;
+ f.owner.raw.startingEquipment={defaultData:[{A:[{item:'Authored Other Blade|XPHB',quantity:5},{value:700}],B:[{item:'Authored Rope|PHB',quantity:3}]}]};
+ f.c.inventory=structuredClone(inventoryState(f.c));f.c.inventory.coins.gp=11;await sources(page,f);
+ await page.context().route('**/data/items-base.json',route=>route.fulfill({json:{baseitem:[{name:'异版装备',ENG_name:'Authored Other Blade',source:'XPHB',type:'M'},{name:'原创绳索',ENG_name:'Authored Rope',source:'PHB',type:'G'}]}}));
+ await importAuthoredFixture(page,f);await restoreAuthoredChoices(page,'dnd-card-standalone');
+ // This snapshot-reopen scenario starts with concrete item data. Otherwise the
+ // existing lazy placeholder resolution can legitimately hydrate it on reload.
+ const wiki=page.getByRole('button',{name:'Wiki',exact:true});if(await wiki.isVisible())await wiki.click();
+ await page.getByRole('navigation',{name:'资料分类',exact:true}).getByRole('button',{name:'装备',exact:true}).click();
+ await expect(page.locator('.catalog-row').filter({hasText:'原创绳索'})).toBeVisible();
+ const menu=page.getByRole('button',{name:'功能页',exact:true});if(await menu.isVisible())await menu.click();await selectSheetPage(page,'特性');
+ await page.getByRole('button',{name:'起始装备 0/1',exact:true}).click();const equipment=page.getByRole('region',{name:'选择起始装备',exact:true});await equipment.getByRole('button',{name:'方案 A',exact:true}).click();
+ const before=await savedCharacter(page);await equipment.getByRole('button',{name:'领取装备',exact:true}).click();await expect(equipment.getByRole('alert')).toContainText('另一版规则');
+ const blocked=await savedCharacter(page);expect(blocked.selections).toEqual(before.selections);expect(blocked.inventory).toEqual(before.inventory);expect(blocked.backgroundChoices).toEqual(before.backgroundChoices);await page.screenshot({path:test.info().outputPath('current-equipment-held.png')});
+ await equipment.getByRole('button',{name:'方案 B',exact:true}).click();await equipment.getByRole('button',{name:'领取装备',exact:true}).click();
+ await expect.poll(async()=>{const saved=await savedCharacter(page);return saved.selections.filter(row=>row.entry.kind==='item').map(row=>[row.entry.english,row.entry.source,row.quantity]);}).toEqual([['Authored Rope','PHB',3]]);
+ const granted=await savedCharacter(page);expect(granted.selections.find(row=>row.entry.kind==='item')?.entry.raw._equipmentRef).toBeUndefined();expect(granted.inventory?.coins.gp).toBe(11);await page.reload();await waitForCatalog(page);const reopened=await savedCharacter(page);
+ expect(reopened.selections).toEqual(granted.selections);expect(reopened.inventory).toEqual(granted.inventory);expect(reopened.runtime.resources.manual).toEqual(f.c.runtime.resources.manual);expect(reopened.notes).toBe(f.c.notes);
 });

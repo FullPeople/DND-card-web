@@ -49,6 +49,13 @@ export function validateEquipmentItem(item:any):void{
  if(!item.item&&!item.special&&!item.equipmentType&&item.value===undefined&&item.containsValue===undefined)throw Error('起始装备结构尚未支持，请查阅来源资料。');
 }
 
+const coreEdition=(source:string)=>['PHB','DMG','MM'].includes(source.trim().toUpperCase())?'2014':['XPHB','XDMG','XMM'].includes(source.trim().toUpperCase())?'2024':undefined;
+/** An authored UID keeps its source edition even before its catalog item loads. */
+export function validateEquipmentReference(owner:Entry,reference:string,target?:Entry):void{
+ const from=coreEdition(owner.source)||owner.edition,to=coreEdition(reference.split('|')[1]||target?.source||'')||target?.edition;
+ if(from!=='both'&&to&&to!=='both'&&from!==to)throw Error('起始装备引用属于另一版规则，尚未核验兼容性；请核对来源资料。');
+}
+
 /** Only validated, concrete items/coins are automatic. Category placeholders
  * still require the existing explicit equipment chooser. */
 function grantParts(c:Character,owner:Selection,parts:EquipmentPart[],catalog:Entry[],receipt:SourceEquipmentReceipt):void{
@@ -59,7 +66,7 @@ function grantParts(c:Character,owner:Selection,parts:EquipmentPart[],catalog:En
   const quantity=Number(item.quantity??1);if(!Number.isSafeInteger(quantity)||quantity<1||quantity>3000)throw Error('装备数量无效。');
   if(item.equipmentType)throw Error('此装备类别需要先在选择工作区指定具体装备。');
   const ref=typeof item==='string'?item:item.item;
-  if(ref||item.special){const found=ref?resolveEntryReference(ref,[...c.selections.map(row=>row.entry),...catalog],'item'):undefined;const name=item.special||String(ref).split('|')[0];const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||name}`,kind:'item' as const,name,english:name,entries:[`起始装备记录：${ref||name}`],raw:ref?{_equipmentRef:ref}:{},effects:undefined,choices:undefined};grants.push({entry,quantity});}
+  if(ref||item.special){const found=ref?resolveEntryReference(ref,[...c.selections.map(row=>row.entry),...catalog],'item'):undefined;if(ref)validateEquipmentReference(owner.entry,ref,found);const name=item.special||String(ref).split('|')[0];const entry=found||{...owner.entry,id:`${owner.entry.id}#claimed:${ref||name}`,kind:'item' as const,name,english:name,entries:[`起始装备记录：${ref||name}`],raw:ref?{_equipmentRef:ref}:{},effects:undefined,choices:undefined};grants.push({entry,quantity});}
   if(item.value!==undefined||item.containsValue!==undefined){const amount=Number(item.value??item.containsValue)/100;if(!Number.isFinite(amount)||amount<0||amount>1000000)throw Error('起始金币数值无效。');money+=amount;}
   else if(!ref&&!item.special)throw Error('起始装备结构尚未支持，请查阅来源资料。');
  }
