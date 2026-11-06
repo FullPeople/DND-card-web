@@ -22,6 +22,7 @@ import server_entry as entry
 import build_production as build
 import admin_install_production as admin
 import runner_production as runner
+from test_runner_diagnostics import RunnerDiagnosticsTests
 
 NOW = 1000000
 
