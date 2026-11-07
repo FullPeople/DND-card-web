@@ -4,7 +4,7 @@
 
 | 症状或危险做法 | 决策 | 证据入口 |
 |---|---|---|
-| 打字、改背景或添物资就卡 | 通用编辑深拷贝并同步整卡，新对象又触发读取核对。展示字段须有明确变更意图，不能靠回调名字或历史 key 猜它不影响规则 | [本轮方案](../docs/STANDALONE-PERFORMANCE-PLAN.md) |
+| 打字、改背景或添物资就卡 | 通用编辑深拷贝并同步整卡，新对象又触发读取核对。展示字段须有明确变更意图，不能靠回调名字或历史 key 猜它不影响规则 | [逐功能审查](../docs/STANDALONE-FUNCTION-REVIEW.md)、[本轮方案](../docs/STANDALONE-PERFORMANCE-PLAN.md) |
 | “有缓存”但仍重算 | 整卡克隆让未变条目、选择、配置也换身份，破坏对象缓存。先数真实计算和失效对象 | `src/platform/snapshotMemo.ts`、`src/core/runtimeCharacterEdit.ts`、`src/core/displayCharacterEdit.ts`；本轮方案 |
 | 缓存全读完仍在加载 | 下载、解析、准备角色与建索引是不同阶段；36/36 不等于可交互。空闲回调仍可造成长任务 | R32；本轮方案 |
 | 改一张卡却读写整本 | 当前保存读整本、备份整本、写整本；40 ms 合并队列不是按卡存储。不能直接删备份或改格式求快 | `src/platform/storage.ts:saveWorkspace`、`src/platform/snapshotSaveQueue.ts`；R25 |
