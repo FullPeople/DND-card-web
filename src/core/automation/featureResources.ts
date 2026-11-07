@@ -10,6 +10,7 @@ import {selectionActive} from './choices';
 import {sourceOwnerIdentity,rememberSourceSpellUses,sourceSpellResourceEnabled} from './sourceSpellState';
 import {specialSpellResource} from '../spellResourceKeys';
 import {planClassResourcePools} from './sourceResourcePools';
+import {slotBalanceHeld,rememberKnownSlotBalance} from './slotCapacityReview';
 
 type Recovery={short?:number|'all';long?:number|'all'};
 export type ResourceGrant={key:string;ownerId:string;name:string;max:number;formula?:string;recovery:Recovery;origin:string;classPool?:import('../model').ClassPoolMetadata};
@@ -143,7 +144,7 @@ export function syncFeatureResources(c:Character){
  for(const [id,r] of Object.entries(c.runtime.resources))if(r.featureGrant&&!ownedLimitedSourceResource(c,id)&&!ownedItemChargeResource(c,id))(c.runtime.featureResourceArchive||={})[id]=structuredClone(r);return before!==JSON.stringify([c.runtime.resources,c.runtime.featureResourceArchive]);
 }
 export function resourceRestRecovery(c:Character,key:string,kind:'short'|'long'):number|'all'|undefined{
- if(ownedLimitedSourceResource(c,key)||ownedItemChargeResource(c,key))return;
+ if(ownedLimitedSourceResource(c,key)||ownedItemChargeResource(c,key)||slotBalanceHeld(c,key))return;
  const r=c.runtime.resources[key];if(!r)return undefined;
   let recovery:number|'all'|undefined=r.featureGrant?.recovery[kind];
   if(!r.featureGrant){if(key.startsWith('pact-slot:')||kind==='long'&&key.startsWith('spell-slot:'))recovery='all';
@@ -158,7 +159,7 @@ export function restedResourceValue(c:Character,key:string,kind:'short'|'long'){
 export function restResources(c:Character,kind:'short'|'long'){
  for(const [key,r] of Object.entries(c.runtime.resources)){
   const recovery=resourceRestRecovery(c,key,kind);
-  if(recovery!==undefined){const spent=r.featureGrant?.spent??r.max-r.current;r.current=restedResourceValue(c,key,kind);if(r.featureGrant)r.featureGrant.spent=recovery==='all'?0:Math.max(0,spent-recovery);if(key.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[key.split(':')[1]]={max:r.max,used:r.max-r.current};}
+  if(recovery!==undefined){const spent=r.featureGrant?.spent??r.max-r.current;r.current=restedResourceValue(c,key,kind);if(r.featureGrant)r.featureGrant.spent=recovery==='all'?0:Math.max(0,spent-recovery);if(key.startsWith('spell-slot:')&&c.spellSettings)c.spellSettings.slots[key.split(':')[1]]={max:r.max,used:r.max-r.current};rememberKnownSlotBalance(c,key);}
  }
  rememberFeatureResources(c);rememberSourceSpellUses(c);
 }

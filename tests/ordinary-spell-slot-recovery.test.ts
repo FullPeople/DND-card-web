@@ -9,6 +9,8 @@ import {spellState} from '../src/core/characterDetails';
 import {ordinarySpellFixture} from './helpers/ordinarySpellCastingFixture';
 import {spellPayments,spellActionRequest,performSpellAction} from '../src/core/automation/actions';
 import {spellActionAuthorityReason} from '../src/core/automation/spellActionAuthority';
+import {slotBalanceRecoveryFixture} from './helpers/slotBalanceRecoveryFixture';
+import {slotBalanceRecoveryRequest,performSlotBalanceRecovery} from '../src/core/automation/slotBalanceRecovery';
 
 let index=0;
 function it(name:string,run:()=>unknown){const i=++index;return privateSourceIt(name,()=>runMulticlassSourceCheck(i,run));}
@@ -68,4 +70,21 @@ it('a pending balance cannot be laundered by inserting an otherwise coherent aut
  expect(spellPayments(restored,row.id,{canEdit:true,gm:true}).options.some(p=>p.id==='ordinary:spell-slot:2')).toBe(false);
  const request=spellActionRequest(restored,row.id,'ordinary:spell-slot:2','pending-counter-held');expect(performSpellAction(restored,request,{canEdit:true,gm:true}).status).toBe('rejected');expect(restored).toEqual(before);
  expect(spellActionAuthorityReason(restored,{canEdit:true,gm:true},['spell-slot:2'])).toBeDefined();expect(()=>setResource(restored,'spell-slot:2',0)).toThrow();syncAutoResources(restored);expect(restored).toEqual(before);
+});
+it('a known spent balance remains known through rank withdrawal, native reopening and re-adding the exact class level',()=>{
+ const {c,key}=slotBalanceRecoveryFixture();expect(performSlotBalanceRecovery(c,slotBalanceRecoveryRequest(c,key,0,'known-before-withdrawal')).status).toBe('applied');
+ const before=structuredClone(c);c.selections[0].level=4;syncAutoResources(c,before);expect(c.runtime.resources[key]).toBeUndefined();
+ const restored=readCharacter(exportCharacter(c)).character,lower=structuredClone(restored);restored.selections[0].level=5;syncAutoResources(restored,lower);
+ expect(restored.runtime.resources[key]).toMatchObject({max:2,current:0});expect((restored.runtime.slotCapacityReview as any).pending[key]).toBeUndefined();
+});
+it('temporarily reducing a capacity below prior spent uses never forgets that history on repeated sync or native reopen',()=>{
+ const {c,key}=slotBalanceRecoveryFixture();expect(performSlotBalanceRecovery(c,slotBalanceRecoveryRequest(c,key,0,'known-capacity-clamp')).status).toBe('applied');
+ let before=structuredClone(c);c.selections[0].level=7;syncAutoResources(c,before);setResource(c,key,0);expect(c.runtime.resources[key]).toMatchObject({max:3,current:0});
+ before=structuredClone(c);c.selections[0].level=5;syncAutoResources(c,before);syncAutoResources(c);syncAutoResources(c);expect(c.runtime.resources[key]).toMatchObject({max:2,current:0});
+ const restored=readCharacter(exportCharacter(c)).character,lower=structuredClone(restored);restored.selections[0].level=7;syncAutoResources(restored,lower);
+ expect(restored.runtime.resources[key]).toMatchObject({max:3,current:0});
+});
+it('an opaque future automatic balance record never adopts or prevents an unrelated explicitly manual slot-shaped counter',()=>{
+ const {c}=slotBalanceRecoveryFixture();c.runtime.slotCapacityReview={version:2,authoredOpaque:true};c.runtime.resources['spell-slot:9']={name:'Authored manual counter',max:3,current:1};const state=structuredClone(c.runtime.slotCapacityReview);
+ setResource(c,'spell-slot:9',2);expect(c.runtime.resources['spell-slot:9']).toEqual({name:'Authored manual counter',max:3,current:2});expect(c.runtime.slotCapacityReview).toEqual(state);
 });

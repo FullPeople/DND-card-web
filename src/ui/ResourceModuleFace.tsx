@@ -34,16 +34,16 @@ function IconCount({resource,icon,columns}:{resource:Resource;icon?:string;colum
 }
 
 /** One pool per real resource row. Countable rows draw exact units; others read as numbers. */
-function GroupFace({module,style,icon}:{module:ResourceModule;style:string;icon?:string}) {
+function GroupFace({module,style,icon,held}:{module:ResourceModule;style:string;icon?:string;held?:ReadonlySet<string>}) {
  const rows=module.rows.length,bars=style==='poolbars'||style==='poolpips';
  // Preferred column count; the grid still wraps to fewer columns in a narrow box.
  const cols=bars?(rows<=4?1:rows<=8?2:3):rows<=3?rows:rows===4?2:rows<=6?3:rows===9?3:4;
  return <><span className="rm-head"><span className="rm-name resource-group-title" title={module.name}>{module.name}</span></span>
   <span className={`rm-body rm-pools rm-pools-${style} ${module.slots?'is-spell-pool':''} ${rows>3?'has-many-pools':''}`} style={{'--rm-pool-count':rows,'--rm-pool-rows':Math.ceil(rows/3),'--rm-pool-cols':cols} as CSSProperties}>
-   {module.rows.map(([id,r])=>{const icons=style==='poolpips'&&countableValue(r);return <span key={id} className="rm-pool resource-subvalue" data-subresource-id={id} data-resource-current={r.current} data-unlimited={r.unlimited||undefined} data-icon-count={icons||undefined} data-large-values={digitsOf(r)>8||undefined} title={`${r.name||id}：${summary(r)}`} aria-label={`${r.name||id}：${summary(r)}`} style={{'--rm-part':ratio(r),'--rm-pool-digits':digitsOf(r)} as CSSProperties}>
+   {module.rows.map(([id,r])=>{const pending=held?.has(id),icons=!pending&&style==='poolpips'&&countableValue(r);return <span key={id} className="rm-pool resource-subvalue" data-subresource-id={id} data-resource-current={pending?undefined:r.current} data-unlimited={r.unlimited||undefined} data-icon-count={icons||undefined} data-large-values={digitsOf(r)>8||undefined} title={`${r.name||id}：${pending?'待核对':summary(r)}`} aria-label={`${r.name||id}：${pending?'待核对':summary(r)}`} style={{'--rm-part':pending?0:ratio(r),'--rm-pool-digits':digitsOf(r)} as CSSProperties}>
     <b className="rm-pool-label">{module.slots?romanLevel(id):r.name||id}</b>
-    {icons?<IconCount resource={r} icon={icon} columns={r.max}/>:<span className="rm-pool-values"><strong className="rm-pool-current">{format(r.current)}</strong>{!r.unlimited&&<small className="rm-pool-max"> / {maxText(r)}</small>}</span>}
-    {(style==='poolbars'||style==='poolpips'&&!icons)&&!r.unlimited&&<span className="rm-mini-rail" aria-hidden="true"><i/></span>}
+    {icons?<IconCount resource={r} icon={icon} columns={r.max}/>:<span className="rm-pool-values"><strong className="rm-pool-current">{pending?'待核对':format(r.current)}</strong>{!pending&&!r.unlimited&&<small className="rm-pool-max"> / {maxText(r)}</small>}</span>}
+    {!pending&&(style==='poolbars'||style==='poolpips'&&!icons)&&!r.unlimited&&<span className="rm-mini-rail" aria-hidden="true"><i/></span>}
    </span>;})}
   </span></>;
 }
@@ -51,7 +51,7 @@ function GroupFace({module,style,icon}:{module:ResourceModule;style:string;icon?
 /** Presentation only. Capacity updates never replace a player's chosen artwork.
  * Every face shares one composition: a gray title band, then a body whose
  * numbers and units are fitted to the actual box by container queries. */
-export function ResourceModuleFace({module,style,layout}:{module:ResourceModule;style:ResourceWidgetLayout['style'];layout?:ResourceWidgetLayout}) {
+export function ResourceModuleFace({module,style,layout,held}:{module:ResourceModule;style:ResourceWidgetLayout['style'];layout?:ResourceWidgetLayout;held?:ReadonlySet<string>}) {
  if(!module.rows.length)return <span className="resource-module-art rm-empty">{module.name}</span>;
  const [id,r]=module.rows[0],face=canonicalWidgetStyle(style),multiple=module.rows.length>1||module.slots,countable=countableValue(r);
  const value=summary(r),name=<span className="rm-head"><span className="rm-name" title={module.name||r.name||id}>{module.name||r.name||id}</span></span>;
@@ -59,7 +59,8 @@ export function ResourceModuleFace({module,style,layout}:{module:ResourceModule;
  const inlineValue=<strong className="rm-inline-value">{format(r.current)}{!r.unlimited&&<small> / {maxText(r)}</small>}</strong>;
  const gauge=(body:ReactNode,viewBox='0 0 60 60')=><>{name}<span className="rm-body"><span className="rm-shape"><svg viewBox={viewBox} aria-hidden="true">{body}</svg>{readout}</span></span></>;
  let content:ReactNode;
- if(multiple||groupedStyles.has(face))content=<GroupFace module={module} style={groupedStyles.has(face)?face:'pool'} icon={layout?.icon}/>;
+ if(!multiple&&held?.has(id))content=<>{name}<span className="rm-body"><strong>待核对</strong></span></>;
+ else if(multiple||groupedStyles.has(face))content=<GroupFace module={module} style={groupedStyles.has(face)?face:'pool'} icon={layout?.icon} held={held}/>;
  else if(face==='ring')content=gauge(<><circle className="rm-track" cx="30" cy="30" r="25"/>{!r.unlimited&&<circle className="rm-arc" cx="30" cy="30" r="25" pathLength="100"/>}</>);
  else if(face==='orbit')content=gauge(countable?<>{Array.from({length:r.max},(_,i)=>{const length=100/r.max,offset=i*length,dash=length*.76;return <g key={i} className={`rm-orbit-unit ${i<r.current?'is-filled':'is-empty'}`} data-resource-unit={i+1}><circle className="rm-track rm-orbit-section" cx="30" cy="30" r="25" pathLength="100" strokeDasharray={`${dash} ${100-dash}`} strokeDashoffset={-offset}/>{i<r.current&&<circle className="rm-orbit-on" cx="30" cy="30" r="25" pathLength="100" strokeDasharray={`${dash} ${100-dash}`} strokeDashoffset={-offset}/>}</g>;})}</>:<circle className="rm-track rm-orbit-section" cx="30" cy="30" r="25" pathLength="100" strokeDasharray="18 7"/>);
  else if(face==='square')content=gauge(<><rect className="rm-track" x="6" y="6" width="48" height="48" rx="4"/>{!r.unlimited&&<rect className="rm-arc" x="6" y="6" width="48" height="48" rx="4" pathLength="100"/>}</>);

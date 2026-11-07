@@ -36,6 +36,7 @@ on:
       - 'tests/helpers/ordinarySpellCastingFixture.ts'
       - 'tests/helpers/multiclassSlotSources.ts'
       - 'tests/e2e/ordinaryCasting*.ts'
+      - 'tests/e2e/ordinaryMulticlass*.ts'
       - 'tests/e2e/resourceLedger*.ts'
       - 'tests/resource-ledger*.test.ts'
       - 'tests/limited-source*.test.ts'
@@ -339,6 +340,7 @@ jobs:
             !.local-evidence/infusion-browser/alertControls-*/**
             .local-evidence/alert-browser-safe/
             !.local-evidence/infusion-browser/ordinaryCasting-*/**
+            !.local-evidence/infusion-browser/ordinaryMulticlassCasting-*/**
             .local-evidence/ordinary-casting-browser-safe/
             !.local-evidence/infusion-browser/resourceLedgerControls-*/**
             .local-evidence/resource-ledger-browser-safe/

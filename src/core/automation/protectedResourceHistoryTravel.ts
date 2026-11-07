@@ -5,11 +5,13 @@ import type {Character,RuntimeResource} from '../model';
 import {validateLimitedSourceUseState,ownedLimitedSourceResource} from './limitedSourceUses';
 import {validateItemChargeDebitState,ownedItemChargeResource,itemChargeHasVariableHistory,itemChargeVariableAuthorityReason} from './itemChargeDebits';
 import {liveSpellActionAuthority,spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
+import {assertSlotBalanceHistoryTravel} from './slotBalanceHistory';
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 const mechanics=(r:RuntimeResource|undefined)=>r&&[r.current,r.max,r.unlimited,r.automatic,r.featureGrant,r.sourceSpellGrant,r.limitedSourceUseGrant,r.itemChargeDebitGrant,(r as any).recovery,r.locked];
 /** Explicit authorized Undo/redo may reverse bookkeeping. This guard neither
  * projects irreversible history nor repairs a damaged/unknown ledger. */
 export function assertProtectedResourceHistoryTravel(live:Character,candidate:Character,authority?:SpellActionAuthority):void{
+ assertSlotBalanceHistoryTravel(live,candidate,authority);
  if(!same(live.automation?.chargedItemSpells,candidate.automation?.chargedItemSpells)){
   const pools=[live,candidate].flatMap(card=>{const rows=card.automation?.chargedItemSpells?.records;return Array.isArray(rows)?rows.map(row=>row.poolKey).filter((key):key is string=>typeof key==='string'):[];}),issue=chargedItemSpellAuthorityReason(live,authority,[...new Set(pools)]);if(issue)throw Error(issue);
   for(const card of [live,candidate]){const value=card.automation?.chargedItemSpells;validateChargedItemSpellState(value);if(value&&value.version!==1)throw Error('未知版本的物品施法确认不能通过撤销或重做修改。');}

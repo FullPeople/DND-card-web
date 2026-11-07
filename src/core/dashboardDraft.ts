@@ -4,6 +4,8 @@ import type {Character} from './model';
 import {applyPatch,sameValue} from './merge';
 import {dashboardOverlaps,freeDashboardLayout,resourceCanvasRows,resourceModules,migrateDashboardWidgets} from './resourceWidgets';
 import {validateCharacter} from './validation';
+import {acceptExplicitSlotEdits} from './automation/slotCapacityReview';
+import {assertSlotBalanceHistoryTravel} from './automation/slotBalanceHistory';
 
 /** A detached editing snapshot. Missing geometry is materialized once without
  * spending resources, choosing random appearances or repacking neighbours. */
@@ -31,6 +33,8 @@ export function commitDashboardDraft(live:Character,base:Character,draft:Charact
  // overwrite a layout another client saved while the editor was open.
  const previous=createDashboardDraft(base),remote=createDashboardDraft(live);
  const merged:Character=applyPatch(remote,previous,draft);
+ acceptExplicitSlotEdits(merged,live);
+ assertSlotBalanceHistoryTravel(live,merged,{canEdit:true,gm:Object.hasOwn(options,'gm')&&options.gm===true});
  assertLimitedSourceResourcesPreserved(live,merged);
  assertItemChargeResourcesPreserved(live,merged);
  merged.revision=live.revision;merged.updatedAt=live.updatedAt;

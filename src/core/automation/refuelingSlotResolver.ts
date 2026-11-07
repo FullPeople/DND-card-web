@@ -2,6 +2,7 @@ import type {Character,Entry,RuntimeResource,Selection} from '../model';
 import {matchesReference} from '../entryReferences';
 import {activeSelections} from './active';
 import {automationEnabled} from './state';
+import {slotBalanceHeld} from './slotCapacityReview';
 
 export interface RefuelingSlot {key:string;kind:'ordinary'|'pact';level:number;current:number;max:number;mirrorUsed?:number}
 
@@ -94,7 +95,7 @@ function validSubclasses(c:Character,owners:Selection[],active:Set<string>):bool
 }
 function usablePool(pool:RuntimeResource|undefined,max:number):pool is RuntimeResource{
  return !!pool&&pool.automatic===true&&(pool.locked===undefined||pool.locked===false)&&(pool.unlimited===undefined||pool.unlimited===false)&&pool.featureGrant===undefined&&pool.sourceSpellGrant===undefined&&
-  Number.isSafeInteger(pool.current)&&Number.isSafeInteger(pool.max)&&pool.max===max&&pool.current>=0&&pool.current<pool.max;
+  pool.limitedSourceUseGrant===undefined&&pool.itemChargeDebitGrant===undefined&&Number.isSafeInteger(pool.current)&&Number.isSafeInteger(pool.max)&&pool.max===max&&pool.current>=0&&pool.current<pool.max;
 }
 
 /** Enumerate current eligible pools without hydration, resource synchronization,
@@ -113,7 +114,7 @@ export function resolveRefuelingSlots(c:Character,ownerId:string):{slots:Refueli
  if(actualFeature(c,owner,classRules.artificer,active)){
   for(const [index,max] of artificerSlots[owner.level-1].entries()){
    const level=index+1,key=`spell-slot:${level}`,pool=c.runtime.resources[key],mirror=c.spellSettings?.slots?.[String(level)];
-   if(level>3||!max||!usablePool(pool,max)||!mirror||!Number.isSafeInteger(mirror.max)||!Number.isSafeInteger(mirror.used)||mirror.max!==max||mirror.used!==max-pool.current)continue;
+   if(level>3||!max||slotBalanceHeld(c,key)||!usablePool(pool,max)||!mirror||!Number.isSafeInteger(mirror.max)||!Number.isSafeInteger(mirror.used)||mirror.max!==max||mirror.used!==max-pool.current)continue;
    slots.push({key,kind:'ordinary',level,current:pool.current,max,mirrorUsed:mirror.used});
   }
  }

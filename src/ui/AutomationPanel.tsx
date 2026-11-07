@@ -9,6 +9,7 @@ import {sourceLevelHpOffers} from '../core/automation/sourceLevelHp';
 import {ItemAffineHpControl} from './ItemAffineHpControl';
 import {itemAffineHpOffers} from '../core/automation/itemAffineHp';
 import {SourceSpellChoiceControl,SourceResourceColumnControl} from './SourceSpellControls';
+import {SlotBalanceRecoveryControl} from './SlotBalanceRecoveryControl';
 import {LimitedSourceUseControl} from './LimitedSourceUseControl';
 import {ItemChargeUseControl} from './ItemChargeUseControl';
 import {ItemAtWillSpellControl} from './ItemAtWillSpellControl';
@@ -30,6 +31,7 @@ import type {Edit} from './CharacterPages';
 export function AutomationPanel({c,d,entries,edit,copy,writable=true}:{entries:Entry[];c:Character;d:Derived;edit:Edit;copy?:()=>void;writable?:boolean}){
  const supported=!c.automation||supportedAutomation(c),enabled=automationEnabled(c),weapons=automaticWeaponAttacks(c,d),spells=planSourceSpells(c,entries),limited=limitedSourceUseOffers(c),itemCharges=itemChargeOffers(c),itemAtWill=itemAtWillOffers(c,entries),chargedSpells=chargedItemSpellOffers(c,entries);
  return <section className="automation-panel"><fieldset disabled={!writable} style={{border:0,padding:0,margin:0,minWidth:0}}>
+  <SlotBalanceRecoveryControl c={c} edit={edit} writable={writable}/>
   <p>自动化支持装备、职业与特性选择、可适配的次数资源和休息恢复；未支持的规则会列出。</p>
   {supported?<><p>新建、导入和旧角色默认开启自动化。手写内容、修正和已消耗资源保留；可在此手动关闭。</p><label><input type="checkbox" aria-label="启用自动计算" checked={enabled} onChange={e=>edit(draft=>setAutomationEnabled(draft,e.target.checked))}/>启用自动计算</label></>:<p role="alert">这张卡使用尚未支持的自动化协议或规则版本。原始记录已保留，暂不执行或转换。</p>}
   {d.issues.filter(issue=>issue.id.startsWith('resource-ownership:')).map(issue=><p key={issue.id} role="alert">{issue.message}</p>)}

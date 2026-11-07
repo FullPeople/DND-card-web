@@ -1,6 +1,7 @@
 import type {Character,Entry} from '../model';
 import {infusionRule,resolveInfusionBinding,validateInfusions,type InfusionResolution} from './infusions';
 import {resolveRefuelingSlots,type RefuelingSlot} from './refuelingSlotResolver';
+import {rememberKnownSlotBalance} from './slotCapacityReview';
 export type {RefuelingSlot} from './refuelingSlotResolver';
 
 export type RefuelingRingAction={kind:'initialize';initial:0|1}|{kind:'use';slotKey:string;actionConfirmed:boolean}|{kind:'dawn';dawnConfirmed:boolean};
@@ -72,7 +73,7 @@ export function refuelingRingOffer(c:Character,choiceId:string,entryId:string):R
 function entryBasis(entry:Entry){const {entries,...raw}=entry.raw;return {...entry,entries:undefined,choices:undefined,raw};}
 function actionBasis(c:Character,choiceId:string,entryId:string){
  const ids=new Set([entryId,...(c.infusions?.version===1&&Array.isArray(c.infusions.bindings)?c.infusions.bindings.map(row=>row?.entryId):[])]);
- return JSON.stringify([c.id,c.edition,c.automation,c.profile,c.dismissedFeatures,c.selections.map(row=>({...row,entry:entryBasis(row.entry)})),c.answers,[...ids].map(id=>[id,c.classChoiceSnapshots?.[id]&&entryBasis(c.classChoiceSnapshots[id])]),c.infusions,c.runtime.refuelingRing?.version,c.runtime.refuelingRing?.sequence,c.runtime.refuelingRing?.records,c.runtime.resources,c.spellSettings,choiceId,entryId]);
+ return JSON.stringify([c.id,c.edition,c.automation,c.profile,c.dismissedFeatures,c.selections.map(row=>({...row,entry:entryBasis(row.entry)})),c.answers,[...ids].map(id=>[id,c.classChoiceSnapshots?.[id]&&entryBasis(c.classChoiceSnapshots[id])]),c.infusions,c.runtime.refuelingRing?.version,c.runtime.refuelingRing?.sequence,c.runtime.refuelingRing?.records,c.runtime.resources,c.spellSettings,c.runtime.slotCapacityReview,choiceId,entryId]);
 }
 export function refuelingRingActionRequest(c:Character,choiceId:string,entryId:string,id:string,action:RefuelingRingAction):RefuelingRingRequest{
  return {id,revision:c.revision,sequence:c.runtime.refuelingRing?.sequence??0,basis:actionBasis(c,choiceId,entryId),choiceId,entryId,key:refuelingRingOffer(c,choiceId,entryId).key||'',action:{...action}};
@@ -105,5 +106,6 @@ export function performRefuelingRingAction(c:Character,request:RefuelingRingRequ
  const runtime={...c.runtime,refuelingRing:next,...(slot?{resources:{...c.runtime.resources,[slot.key]:{...c.runtime.resources[slot.key],current:slot.current+1}}}:{})};
  const spellSettings=slot?.kind==='ordinary'?{...c.spellSettings!,slots:{...c.spellSettings!.slots,[String(slot.level)]:{...c.spellSettings!.slots[String(slot.level)],used:slot.mirrorUsed!-1}}}:c.spellSettings;
  c.runtime=runtime;if(slot?.kind==='ordinary')c.spellSettings=spellSettings;
+ if(slot?.kind==='ordinary')rememberKnownSlotBalance(c,slot.key);
  return {status:'applied',receipt,message:action.kind==='initialize'?`已记录戒指当前${after?'可用':'已用'}。`:action.kind==='dawn'?'已按确认的次日黎明恢复戒指使用资格，未改变法术位。':`已记录动作及戒指一次使用，恢复 1 个 ${slot!.level} 环${slot!.kind==='pact'?'契约位':'普通法术位'}。`};
 }
