@@ -34,6 +34,7 @@ on:
       - 'tests/helpers/itemChargeMergedFixture.ts'
       - 'tools/runVitest.mjs'
       - 'tests/helpers/ordinarySpellCastingFixture.ts'
+      - 'tests/helpers/multiclassSlotSources.ts'
       - 'tests/e2e/ordinaryCasting*.ts'
       - 'tests/e2e/resourceLedger*.ts'
       - 'tests/resource-ledger*.test.ts'
