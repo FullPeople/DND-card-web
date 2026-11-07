@@ -3,13 +3,14 @@ import {activeSheet} from '../platform/activeSheet';
 import {sourceEquipmentChoices} from '../core/automation/sourceEquipment';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import type {Character,Entry} from '../core/model';
-import {sheetChoices,sheetChoiceIgnored,setSheetChoiceIgnored,choiceSource,claimStartingEquipment,equipmentBlocks,equipmentCandidates,equipmentTypeLabel,equipmentOptionConcept,equipmentPackage,type ChoiceOption,type SheetChoice} from '../core/automation/choices';
+import {sheetChoiceIgnored,setSheetChoiceIgnored,choiceSource,claimStartingEquipment,equipmentBlocks,equipmentCandidates,equipmentTypeLabel,equipmentOptionConcept,equipmentPackage,type ChoiceOption,type SheetChoice} from '../core/automation/choices';
 import {Reference} from './Reference';
 import {SheetCell} from './SheetCell';
 import {DragContext,DropZone} from './DragEntry';
 import {choiceCatalog,choiceEntryMatcher} from './choiceCatalog';
 import {classSkillWarnings} from './skillChoiceWarnings';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
+import {useSheetChoices,useSheetMechanics} from './SheetChoicesContext';
 import './automationChoices.css';
 import {refuelingAwareChoiceSlotEdit,refuelingAwareChooseOptionEdit} from './refuelingRingSubmission';
 
@@ -21,10 +22,10 @@ function DraggableChoice({option}:{option:ChoiceOption}){
 }
 
 export function ChoiceWorkspace({c,id,catalog,edit,close,embedded=false,height,navigationScope}:{c:Character;id:string;catalog:Entry[];edit:(action:(c:Character)=>void)=>void;close:()=>void;embedded?:boolean;height?:number;navigationScope?:{host:string;ownerId:string;channel:SheetChoice['channel']}}){
- const choices=useMemo(()=>sheetChoices(c,catalog),[c,catalog]),choice=choices.find(r=>r.id===id),workspace=useChoiceWorkspace(),[error,setError]=useState(''),[equipment,setEquipment]=useState(''),[picks,setPicks]=useState<Record<string,string>>(()=>{const owner=c.selections.find(row=>row.id===(navigationScope?.ownerId??id.split(':equipment')[0]));return owner?sourceEquipmentChoices(c,owner):{};}),confirmed=useRef(false);
- const scope=useMemo(()=>choice?choiceCatalog(c,choice,catalog):undefined,[c,choice,catalog]);
- const skillWarnings=useMemo(()=>choice?classSkillWarnings(c,choice):{},[c,choice]);
- const matchEntry=useMemo(()=>choice?choiceEntryMatcher(c,choice):()=>undefined,[c,choice]);
+ const mechanics=useSheetMechanics(c),choices=useSheetChoices(c,catalog),choice=choices.find(r=>r.id===id),workspace=useChoiceWorkspace(),[error,setError]=useState(''),[equipment,setEquipment]=useState(''),[picks,setPicks]=useState<Record<string,string>>(()=>{const owner=c.selections.find(row=>row.id===(navigationScope?.ownerId??id.split(':equipment')[0]));return owner?sourceEquipmentChoices(c,owner):{};}),confirmed=useRef(false);
+ const scope=useMemo(()=>choice?choiceCatalog(c,choice,catalog):undefined,[mechanics,choice,catalog]);
+ const skillWarnings=useMemo(()=>choice?classSkillWarnings(c,choice):{},[mechanics,choice]);
+ const matchEntry=useMemo(()=>choice?choiceEntryMatcher(c,choice):()=>undefined,[mechanics,choice]);
  const exit=()=>{window.dispatchEvent(new Event('sheet-gesture'));close();requestAnimationFrame(()=>activeSheet()?.querySelector<HTMLElement>(`[data-choice-id="${CSS.escape(id)}"]`)?.focus({preventScroll:true}));};
  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape'&&!e.defaultPrevented&&!document.body.classList.contains('pointer-dragging')){e.preventDefault();exit();}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[close,id]);
  if(!choice||!scope||navigationScope&&(choice.ownerId!==navigationScope.ownerId||choice.channel!==navigationScope.channel||workspace.canEdit===false))return null;

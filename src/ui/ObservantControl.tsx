@@ -1,3 +1,4 @@
+import {useSheetDerived} from './SheetChoicesContext';
 import {useEffect,useRef,useState} from 'react';
 import {RetainedCardHideEffect,useRetainedCardActive} from './RetainedCardVisibility';
 import {useInteractionStatus} from './InteractionFeedback';
@@ -9,9 +10,10 @@ type Props={c:Character;catalog:Entry[];choiceId:string;entry:Entry;unavailable:
  * inside the actual delayed edit. Consuming unrelated runtime resources is safe. */
 const confirmationBasis=(c:Character)=>JSON.stringify([c.id,c.abilities,c.proficiencies,c.expertise,c.skillBonuses,c.jackOfAllTrades,c.adjustments,c.sheetBonuses?.passive,c.profile,c.automation,c.asiAllocations,c.reviewedFeats,c.reviewedWeaponMaster,c.reviewedSkilled,c.reviewedLinguist,c.reviewedObservant,c.racialAbilityMode,c.answers,c.classChoiceSnapshots,c.classChoiceArchive,c.selections.map(row=>[row.id,row.parentId,row.requirementId,row.grantKey,row.level,row.entry])]);
 export function ObservantControl({c,catalog,choiceId,entry,unavailable,writable,edit}:Props){
+ const sheetDerived=useSheetDerived(c);
  const active=useRetainedCardActive(),persistence=useInteractionStatus(),consumed=useRef(false),draftEpoch=useRef(0),stored=reviewedObservantBindings(c).find(row=>row.choiceId===choiceId&&row.entryId===entry.id)?.intent,saved=JSON.stringify(stored||{});
  const [ability,setAbility]=useState<'int'|'wis'|''>(stored?.ability||''),[manual,setManual]=useState(false),[passives,setPassives]=useState(false),[error,setError]=useState('');
- const status=reviewedObservantStatus(c,choiceId,entry.id,ability||undefined),derived=evaluate(c),characterBasis=confirmationBasis(c),catalogBasis=JSON.stringify(catalog.filter(row=>row.kind==='feat'&&(row.english==='Observant'||row.id===entry.id))),basis=JSON.stringify([characterBasis,catalogBasis]);
+ const status=reviewedObservantStatus(c,choiceId,entry.id,ability||undefined),derived=(sheetDerived??evaluate(c)),characterBasis=confirmationBasis(c),catalogBasis=JSON.stringify(catalog.filter(row=>row.kind==='feat'&&(row.english==='Observant'||row.id===entry.id))),basis=JSON.stringify([characterBasis,catalogBasis]);
  function clearConsent(){draftEpoch.current++;setManual(false);setPassives(false);consumed.current=false;}
  function reset(){setAbility(stored?.ability||'');clearConsent();setError('');}
  useEffect(()=>()=>{draftEpoch.current++;},[]);
