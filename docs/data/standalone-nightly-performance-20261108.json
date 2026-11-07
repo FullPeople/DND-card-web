@@ -7,13 +7,13 @@
     "deployed": false,
     "publiclyVerified": false
   },
-  "frozenConsumer": "d0701905bc1cc4797a20dcc94699137821c816e6",
-  "consumerSourceTree": "3d9cd0edb82930315ccef867f8bd60f82fee66da",
-  "dataReportCommit": "392dc4c0d1f62d855949f9cf1005f7cd5e54487d",
-  "dataPr": 98,
-  "producer": "2d5e240e8ad88bdf5059c700d72c039cdaa1f67e",
-  "runtimeReportSha256": "ffa355719efd451da391cd9d180e54a8c388ecc7bd9e62ff3581041766d8da6a",
-  "receiptsSha256": "98135cfa18815987da7528686ab371e2b353583233eb43be9d11f1a12effd0cf",
+  "frozenConsumer": "17abd1aee57ded1e8c82d7b611b70a7e48b96f11",
+  "consumerSourceTree": "c0f38455a824f77c18c003e994fac3e4215f0fec",
+  "dataReportCommit": "e4c771349d20925c50898303abccf2ca08035a8c",
+  "dataPr": 99,
+  "producer": "fc8b719b8332ab5aff83c38f4cfeeff4dfebbb52",
+  "runtimeReportSha256": "b0798b645fbbcc1d844ed92724a0c55fef17c3077392dae4d9af90f3efa74c0a",
+  "receiptsSha256": "d04e101ca2050e688d711e68cdc84203a0aaee3ccbf16b767b62197a26a2d258",
   "runtimeReplay": {
     "fromZero": true,
     "observations": 18789,
@@ -32,8 +32,8 @@
     "importReviewChangesCoverage": false
   },
   "targeted": {
-    "total": 35,
-    "passed": 35,
+    "total": 42,
+    "passed": 42,
     "failed": 0
   },
   "strictTypecheck": true,
@@ -56,5 +56,38 @@
     "failures": "Windows symlink and file mode; preserved, not counted as pass"
   },
   "originalWorkspaceFinalVerification": "pending",
-  "physicalDevicesAndRealMultiplayerAccepted": false
+  "physicalDevicesAndRealMultiplayerAccepted": false,
+  "webPr": 153,
+  "linuxFreshReplay": 42415976081,
+  "intermediateReplays": [
+    {
+      "sourceTree": "3d9cd0edb82930315ccef867f8bd60f82fee66da",
+      "windowsAndLinuxVerified": true,
+      "finalSource": false
+    },
+    {
+      "sourceTree": "8303de485f85490d351b4d3ccaddcc6fb5229442",
+      "windowsAndLinuxVerified": true,
+      "linuxRun": 42413555117,
+      "finalSource": false
+    }
+  ],
+  "preservedFailures": {
+    "manualIgnoreScope": "Two original CI browser groups failed; new unit red2 with1failure; original browser cases subsequently passed without expectation changes.",
+    "preparationRead": "First test preparation3failures; corrected preparation leaves2genuine failures and1pass. With5/45spells both actual consumers evaluated6/46times. Same-read state reused; no live actor/authority checks changed.",
+    "previousSourceFullUnit": {
+      "sourceTree": "3d9cd0edb82930315ccef867f8bd60f82fee66da",
+      "total": 7941,
+      "passed": 7775,
+      "failed": 4,
+      "pending": 162,
+      "causes": [
+        "Windows symlinkEPERM",
+        "Windows POSIX0600 mode mismatch",
+        "lock invalidation60s timeout",
+        "oldreader5s timeout"
+      ]
+    },
+    "diagnosticServer": "First source3d9 counter-only control served404 due private Windows path comparison; normalized private server only, all assertions and deadlines retained. Retry passed, latency under replay not controlled."
+  }
 }
