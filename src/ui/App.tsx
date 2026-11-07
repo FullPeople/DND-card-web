@@ -31,7 +31,7 @@ import {classEditionSuffix} from '../core/classEdition';
 import {wikiEditionAllows} from './wikiEdition';
 import {LibraryDisplaySettings} from './LibraryDisplaySettings';
 import {CharacterTabs} from './CharacterTabs';
-import {applyDisplayCharacterEdit,sameCharacterMechanics} from '../core/displayCharacterEdit';
+import {applyDisplayCharacterEdit,sameCharacterMechanics,displayCharacterView} from '../core/displayCharacterEdit';
 import {applyRuntimeCharacterEdit,runtimeCharacterBase} from '../core/runtimeCharacterEdit';
 import {applyRefuelingRingEdit,refuelingAwareChoiceSlotEdit} from './refuelingRingSubmission';
 import {workbenchDerived} from '../platform/workbenchDerivation';
@@ -337,7 +337,7 @@ export default function App() {
     });
   },[storedBuild,roomRules,roomProfile,localProfile,activePacks,allEntries,rememberView,localCardViews]);
   // Explicit runtime forks share their construction review; retain the latest balances.
-  const c=useMemo(()=>!storedCharacter||!buildView?undefined:rememberView('display',storedCharacter,()=>storedCharacter===storedBuild?buildView:{...buildView,runtime:storedCharacter.runtime,spellSettings:storedCharacter.spellSettings,revision:storedCharacter.revision,updatedAt:storedCharacter.updatedAt}),[storedCharacter,storedBuild,buildView,rememberView]);
+  const c=useMemo(()=>!storedCharacter||!buildView?undefined:rememberView('display',storedCharacter,()=>displayCharacterView(buildView,storedCharacter)),[storedCharacter,storedBuild,buildView,rememberView]);
   const buildChoices=useMemo(()=>buildView?rememberView('choices',buildView,()=>sheetChoices(buildView,allEntries)):[],[buildView,allEntries,rememberView]);
   const mechanicsRef=useRef<Character|undefined>(undefined);
   if(c&&!sameCharacterMechanics(mechanicsRef.current,c))mechanicsRef.current=c;
@@ -777,7 +777,7 @@ export default function App() {
     return Promise.resolve(patchWorkbenchStats(before,after,()=>workbenchDerived(before,projectedBefore),()=>workbenchDerived(after,projectedAfter),target,{before:projectedBefore,after:projectedAfter})).then(()=>{workbenchFailed.current.delete(id);}).catch(e=>{workbenchFailed.current.add(id);if(e?.uncertain&&!e?.queueBlocked){const old=workbenchUncertain.current.get(id);workbenchUncertain.current.set(id,{requestId:e.requestId,before:old?.before||before,after:old&&old.after.revision>after.revision?old.after:after});}void saveRecovery(after).catch(()=>{});setSyncDiagnostic(diagnosticText(e));setNotice(`同步失败，已保留本地备份：${e instanceof Error?e.message:String(e)}`);throw e;}).finally(()=>{const pending=Math.max(0,(workbenchPending.current.get(id)||1)-1);workbenchPending.current.set(id,pending);if(!pending&&!workbenchUncertain.current.has(id))workbenchDirty.current.delete(id);appliedWorkbench.current='';setHistoryTick(x=>x+1);});
   }
   function rememberCharacter(before:Character,after:Character){const target=wb.target;
-    const restore=async(from:Character,to:Character)=>{const w=workspaceRef.current!;const live=w.characters.find(c=>c.id===before.id);if(!live)throw Error('角色已经删除');if(inWorkbench){const currentAccess=getWorkbench();if(!target||!currentAccess.online||!currentAccess.cards.some(card=>card.id===target.cardId&&card.write))throw Error('当前角色的写入权限已改变，不能撤销或重做');}const canonical=(value:Character)=>{const result=structuredClone(value);for(const row of result.selections)delete row.entry.raw._suiteStatusId;return result;};const normalize=(value:Character)=>canonical(localSources?withSiteSources(value,w.siteSources,w.packs):value);const restored=applyCharacterHistoryPatch(normalize(live),normalize(from),normalize(to),()=>{const currentAccess=getWorkbench(),room=qqRoom?roomState():undefined;return {canEdit:writable.current&&!cloudAccessRef.current[live.id]&&(!inWorkbench||!!target&&currentAccess.online&&currentAccess.cards.some(card=>card.id===target.cardId&&card.write===true))&&(!qqRoom||room?.write===true&&room.character.id===live.id),gm:inWorkbench?currentAccess.role==='GM':localGm()};});for(const row of restored.selections){const previous=live.selections.find(s=>s.id===row.id);if(previous?.entry.raw._suiteStatusId)row.entry.raw._suiteStatusId=previous.entry.raw._suiteStatusId;}restored.revision=live.revision+1;restored.updatedAt=new Date().toISOString();persist({...w,characters:w.characters.map(c=>c.id===restored.id?restored:c)});await sendCharacter(live,restored,target);};
+    const restore=async(from:Character,to:Character)=>{const w=workspaceRef.current!;const live=w.characters.find(c=>c.id===before.id);if(!live)throw Error('角色已经删除');if(inWorkbench){const currentAccess=getWorkbench();if(!target||!currentAccess.online||!currentAccess.cards.some(card=>card.id===target.cardId&&card.write))throw Error('当前角色的写入权限已改变，不能撤销或重做');}const canonical=(value:Character)=>{const result=structuredClone(value);for(const row of result.selections)delete row.entry.raw._suiteStatusId;return result;};const normalize=(value:Character)=>canonical(localSources?withSiteSources(value,w.siteSources,w.packs):value);const restored=applyCharacterHistoryPatch(live,from,to,()=>{const currentAccess=getWorkbench(),room=qqRoom?roomState():undefined;return {canEdit:writable.current&&!cloudAccessRef.current[live.id]&&(!inWorkbench||!!target&&currentAccess.online&&currentAccess.cards.some(card=>card.id===target.cardId&&card.write===true))&&(!qqRoom||room?.write===true&&room.character.id===live.id),gm:inWorkbench?currentAccess.role==='GM':localGm()};},{normalize,displayOnly:!inWorkbench&&!qqRoom});if(restored===live)return;if(restored.selections!==live.selections)for(const row of restored.selections){const previous=live.selections.find(s=>s.id===row.id);if(previous?.entry.raw._suiteStatusId)row.entry.raw._suiteStatusId=previous.entry.raw._suiteStatusId;}restored.revision=live.revision+1;restored.updatedAt=new Date().toISOString();persist({...w,characters:w.characters.map(c=>c.id===restored.id?restored:c)});await sendCharacter(live,restored,target);};
     recordAction({label:after.name,undo:()=>restore(after,before),redo:()=>restore(before,after)});
   }
   const edit: Edit = (action, key) => {
@@ -792,6 +792,7 @@ export default function App() {
     const runtimeDraft=displayDraft?undefined:applyRuntimeCharacterEdit(character,action);
     const ringDraft=displayDraft||runtimeDraft?undefined:applyRefuelingRingEdit(effective,action);
     const holdingDraft=displayDraft||runtimeDraft||ringDraft?undefined:applyGrimoireHoldingEdit(effective,action);
+    if(displayDraft===character||runtimeDraft===character)return;
     if(ringDraft===effective)return;
     if(holdingDraft===effective)return;
     if(!automationRuntime&&!displayDraft&&!runtimeDraft&&!ringDraft&&!holdingDraft){pendingRuntimeEdits.current.push({id:character.id,target:wb.target?.key,action,key});setRuntimeInteractionRequested(true);return;}
