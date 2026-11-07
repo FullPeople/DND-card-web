@@ -1,0 +1,388 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-07T12:27:08.091629+00:00",
+  "scope": "Local first batch:15 presentation fields; no publication, storage-format or sync-protocol migration.",
+  "baselineSource": "8fb3815ba4dbb72d8901be3f6b723ca447d4d5ea",
+  "consumerSource": "584eeb33485fcb7a83f49573d72d83893241ff19",
+  "sourceTree": "c0b05c24383a927c1dc1cbe8954256a27a9cf36a",
+  "dataProducer": "87c3eba61c3a1062f3b52afccb33cd1844be6dfd",
+  "dataReportCommit": "9eddc587e2766c4f7567e30840b315dcc7bb9756",
+  "reportSha256": "042e88c88aa1bbbbae9c005530328e9e30b2fba4bb473bd97b55adf52b645001",
+  "firstBatchLocalChecksPassed": true,
+  "allRegressionChecksGreen": false,
+  "targeted": {
+    "total": 120,
+    "passed": 120,
+    "failed": 0,
+    "skipped": 0
+  },
+  "productionBrowser": {
+    "total": 28,
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "retries": 0,
+    "projects": [
+      "desktop-chromium",
+      "narrow-chromium"
+    ]
+  },
+  "realSourceResourceBrowser": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "retries": 0,
+    "originalTestsAndPrivacyReportersPreserved": true,
+    "receiptHashes": [
+      "c78b9bcd3e4a747cdd19f929e9399eab884fbebe042bd5739133b9ed00323fc4",
+      "570830d43228275b66194c00ff1cdf6544e906fc71a2b0793d71f48b3c64ee05",
+      "bf8309c3c1a945be2368a404178d4f31f96bc6160a22cb43c747896fe0b4e67d",
+      "b426338636b15462b098d4c439058c03d26923cd338787dc90a9f9721b8c9a5a",
+      "d5e2340a5f8604952a3f663d01548d947d3c32c347a2f54db7c2c783c0c29dff",
+      "811afd27092b0d0c80cea04e7cd8023f554c1beb1146e59a9b0ec7b50c328592"
+    ]
+  },
+  "fullUnit": {
+    "total": 7922,
+    "passed": 7757,
+    "failed": 3,
+    "skipped": 162,
+    "failures": [
+      {
+        "file": "charged-item-spell-interactions.test.ts",
+        "test": "ignored edits time out honestly and forged/future source or linked physical-payment receipts never acknowledge pending activation/cast",
+        "classification": "combined-receipt-protection-five-second-timeout-root-cause-open",
+        "passed": false
+      },
+      {
+        "file": "optional-class-list-source-fetch.test.ts",
+        "test": "rejects overlapping/existing outputs and symlinked files or parents before invoking the injected transport",
+        "classification": "windows-symlink-permission-denied",
+        "passed": false
+      },
+      {
+        "file": "optional-class-list-source-fetch.test.ts",
+        "test": "positive byte proof uses only the existing private immutable book and writes identical0600raw bytes plus closed metadata atomically",
+        "classification": "windows-file-mode-differs-from-unix0600",
+        "passed": false
+      }
+    ]
+  },
+  "chargedInteractionIsolated": {
+    "total": 27,
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0,
+    "originalFiveSecondLimitPreserved": true,
+    "fullRunTimeoutStillOpen": true,
+    "fullRunCountNotRewritten": true
+  },
+  "mainTextProbe": {
+    "fields": [
+      "name",
+      "player"
+    ],
+    "inputEventsPerField": 10,
+    "eachFieldSaved": true,
+    "wholeCardClones": 0,
+    "fiveRuleFunctionsEachZero": true,
+    "scope": "Additional main-page counter proof; not the background timing comparison. Whole-workspace storage cost remains."
+  },
+  "runtimeReplay": {
+    "fromZero": true,
+    "total": 18789,
+    "reviewed": 4561,
+    "partialObserved": 7934,
+    "identitiesReviewsAndStatusesUnchanged": true,
+    "allObservationRecordsUnchanged": true,
+    "completeRulesAccepted": null,
+    "runtimeModules": 316,
+    "styles": 2
+  },
+  "performance": {
+    "passed": true,
+    "method": "Same pinned229 inputs, actual App UI, native imported authored150 rows plus actual catalog Wizard12 and inventory add ->163 selections; each build five equal ten-character rounds, fresh isolated browsers, local-only compiled observers. No other validation workloads during either measurement. Not original players or devices; frame latency is a proxy and nested costs are not added.",
+    "scope": "This batch changes card presentation text only; no cold-load or inventory improvement claim.",
+    "results": {
+      "baseline": {
+        "sourceCommit": "8fb3815ba4dbb72d8901be3f6b723ca447d4d5ea",
+        "sourceTree": "2b905d57f9f3cf1304230ab6053571fe7e302cc1",
+        "rounds": 5,
+        "charactersPerRound": 10,
+        "wallToDurableSaveMs": {
+          "count": 5,
+          "median": 4219,
+          "p95NearestRank": 4368,
+          "max": 4368
+        },
+        "perInputToSecondAnimationFrameMs": {
+          "count": 50,
+          "median": 407.9,
+          "p95NearestRank": 424.4,
+          "max": 442
+        },
+        "wholeCardClonesPerRound": [
+          20,
+          20,
+          20,
+          20,
+          20
+        ],
+        "callsPerRound": {
+          "evaluate": [
+            101,
+            102,
+            101,
+            101,
+            101
+          ],
+          "sheetChoices": [
+            91,
+            92,
+            91,
+            91,
+            91
+          ],
+          "syncFeatures": [
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "syncSourceSpells": [
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "syncAutoResources": [
+            20,
+            20,
+            20,
+            20,
+            20
+          ]
+        },
+        "mechanicalLevelChangePositiveControl": {
+          "evaluate": 111,
+          "sheetChoices": 10,
+          "syncFeatures": 2,
+          "syncSourceSpells": 2,
+          "syncAutoResources": 2
+        },
+        "maxLongTaskMs": 436,
+        "rawReportSha256": "5b2f10d67cec7dee0a2f3f1f1d2e0695b26227c4dc25c0127b58af3a64ba7004"
+      },
+      "candidate-final": {
+        "sourceCommit": "584eeb33485fcb7a83f49573d72d83893241ff19",
+        "sourceTree": "c0b05c24383a927c1dc1cbe8954256a27a9cf36a",
+        "rounds": 5,
+        "charactersPerRound": 10,
+        "wallToDurableSaveMs": {
+          "count": 5,
+          "median": 268,
+          "p95NearestRank": 283,
+          "max": 283
+        },
+        "perInputToSecondAnimationFrameMs": {
+          "count": 50,
+          "median": 31.9,
+          "p95NearestRank": 55.4,
+          "max": 80.8
+        },
+        "wholeCardClonesPerRound": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "callsPerRound": {
+          "evaluate": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sheetChoices": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "syncFeatures": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "syncSourceSpells": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "syncAutoResources": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "mechanicalLevelChangePositiveControl": {
+          "evaluate": 109,
+          "sheetChoices": 8,
+          "syncFeatures": 2,
+          "syncSourceSpells": 2,
+          "syncAutoResources": 2
+        },
+        "maxLongTaskMs": 0,
+        "rawReportSha256": "0950f4b228f02146d8585479f8c816dfc5e10ff42ac9548b5932a899e87216db"
+      }
+    }
+  },
+  "originals": {
+    "filesAndBackupsChecked": 469,
+    "changed": 0,
+    "missing": 0
+  },
+  "publication": {
+    "pushed": false,
+    "prCreated": false,
+    "merged": false,
+    "deployed": false,
+    "ciExecuted": false
+  },
+  "notAccepted": [
+    "original player cards",
+    "physical phones/tablets",
+    "Firefox/WebKit",
+    "real account or multiplayer room",
+    "cold-load performance",
+    "inventory edit performance",
+    "per-card durable storage/broadcast migration",
+    "remaining conditional and failed full-unit checks"
+  ],
+  "retainedHistory": [
+    "initial browser environment failure before assertions",
+    "original19 cases:18 red,1 green",
+    "missing fixture and policy preparation failures",
+    "phase1 full-suite failures and pending cases",
+    "phase1 browser19passed/9failed then whole28passed",
+    "phase1 strict observer failed with11 evaluate/choices per10chars despite zero clones/syncs",
+    "phase2 reader red2/4, type-only test prop failure, initial22 conditional skips then120/120",
+    "private config module-mode and report reader UTF8 preparation errors"
+  ],
+  "privateRawEvidence": [
+    {
+      "file": "read-reuse-attempt3.json",
+      "sha256": "837b47f83addd79a0e08fab83e10e247c1b857d425b8cb9027b42a104c674bc5"
+    },
+    {
+      "file": "final-replay-verification.json",
+      "sha256": "fffc183d0b31e04df59af7e1b44459c54fc12c65f04b2580db2729734d15e1a8"
+    },
+    {
+      "file": "final-report-binding.json",
+      "sha256": "53e31966b2521089cb64d3567d82e3ed92ebe99823f47a99427639c1fc39c476"
+    },
+    {
+      "file": "full-unit-final.json",
+      "sha256": "9144cee405aa103246987f474b68ce7609bf427e0536c383d5c59dd8e56255c4"
+    },
+    {
+      "file": "browser-final/report.json",
+      "sha256": "4fbe1e56860c8495d51d2993d4192e97cb5c8e6885c736dead0b450dcf0fa073"
+    },
+    {
+      "file": "final-performance-comparison.json",
+      "sha256": "c00154092e7bf273e65fb7d92cc5b7b8493dc7b0c0f37f2b91197ec06db288ee"
+    },
+    {
+      "file": "original-workspace-verification.json",
+      "sha256": "434b3be534a2a1cea0345b779f3c53417c69d9ea7c9d7ef232fe889421eede66"
+    },
+    {
+      "file": "typecheck-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "build-production-final.log",
+      "sha256": "1686efacbd47b6bee461b7ed16335351eb944174b13c6a6771062724bad13aec"
+    },
+    {
+      "file": "build-observed-final.log",
+      "sha256": "86071d979b78006935e054e3f8bc35e4ac6ea96d2fae2ebe44598dd34bf52a1d"
+    },
+    {
+      "file": "runtime-provenance-final.log",
+      "sha256": "ce1f35b5a38ddd9adf9bd5c0dfe89bfa830d006d57d82fc9d0216e0a9ce46377"
+    },
+    {
+      "file": "resource-browser-attempt2.log",
+      "sha256": "a7d5b83333955efee22ce0beebb655c824b8fda08f21bb7893a676358e1a4c5e"
+    },
+    {
+      "file": "production-identity-proof.json",
+      "sha256": "30404512e6eac83367dd8ba64dfe9854f89ffd6494685adbcf8b07cf35f5e13e"
+    },
+    {
+      "file": "charged-interaction-isolated.json",
+      "sha256": "61fb88b9f06adc45ac1c416b06557960600b2686f173a21c3e5c46aa48254b3f"
+    },
+    {
+      "file": "main-fields-final-result.json",
+      "sha256": "1959ed6b830dd9df9846592acfe79c88180a8ae9d8c7bf7678e94ef7d62f9f93"
+    },
+    {
+      "file": "initial-red.json",
+      "sha256": "e100789145697c8f90703b5632ba14af4aa3302704bf5bb057129ef0febe3609"
+    },
+    {
+      "file": "red-reproduction.json",
+      "sha256": "69290064c1851a545b1078d82c4b6175c6ee95db70775c0855ac4a5cfe8ddbb9"
+    },
+    {
+      "file": "browser-attempt1/report.json",
+      "sha256": "1302fcf55e1d52977403b651927c0ff665a6b665e79ff293b3ea166d4bc4fff5"
+    },
+    {
+      "file": "candidate-five-rounds-result.json",
+      "sha256": "30f2db0db600b53ce9124d95567f3ae6db66596c76991e3e044067074e954d83"
+    },
+    {
+      "file": "read-reuse-red.json",
+      "sha256": "1c53bcadc473aa87d5ebed1e2cb1e06a6ff714f8209c3c7f4e283e5d7bfb877d"
+    },
+    {
+      "file": "resource-browser-final.log",
+      "sha256": "bf3ea53b127799925b77b5f0f125805f8dfefe5d51788ff66288f875dec97b0d"
+    },
+    {
+      "file": "full-unit-attempt1.json",
+      "sha256": "f0b71be2962c4824a66e9a8bd0002e14c2d2a4db7515d44afad1acfd6041097f"
+    },
+    {
+      "file": "full-unit-attempt3-serial.json",
+      "sha256": "a39641f1e1424f01d49bc02ea532b1d5b5e1e0687994323dc57e10dd9aa62bea"
+    },
+    {
+      "file": "runtime-provenance-after-docs.log",
+      "sha256": "ce1f35b5a38ddd9adf9bd5c0dfe89bfa830d006d57d82fc9d0216e0a9ce46377"
+    },
+    {
+      "file": "original-workspace-verification-final.json",
+      "sha256": "434b3be534a2a1cea0345b779f3c53417c69d9ea7c9d7ef232fe889421eede66"
+    }
+  ],
+  "rawSourceBodiesPlayerDataAndSecretsPublished": false,
+  "performanceComparisonField": "biography.story on the background page; main-name/player proof is separate"
+}
