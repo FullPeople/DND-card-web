@@ -59,7 +59,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const editing = useContext(SheetEditContext),screen=useSheetRenderMode()==='screen';
   const mechanics=useSheetMechanics(c);
   const spells = useReadViewMemo(cloudFeaturesEnabled,()=>spellState(c,d),[mechanics,d]);
-  const readySpells=useReadViewMemo(cloudFeaturesEnabled,()=>c.selections.filter(row=>row.entry.kind==='spell'&&spellIsReady(c,row)),[mechanics]);
+  const readySpells=useReadViewMemo(cloudFeaturesEnabled,()=>c.selections.filter(row=>row.entry.kind==='spell'&&spellIsReady(c,row,spells)),[mechanics,spells]);
   const choices=useSheetChoices(c,catalog);
   const trainingNames=useMemo(()=>catalogTrainingIndex(catalog),[catalog]);
   const [trainingEditor, setTrainingEditor] = useState(false);
