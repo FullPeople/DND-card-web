@@ -23,6 +23,7 @@ function card(mainName='Paladin',subclass?:string):Character{
  c.runtime.resources.manual={name:'Authored retained balance',max:9,current:2,locked:true};return c;
 }
 function legacyShape(c:Character){
+ delete c.runtime.slotCapacityReview;
  // Actual old sync produced this shape after an exhausted second-level pool
  // was removed on adding a noncaster. Its missing balance is unknowable here.
  c.runtime.resources['spell-slot:1']={name:'Authored existing automatic pool',max:3,current:1,automatic:true};

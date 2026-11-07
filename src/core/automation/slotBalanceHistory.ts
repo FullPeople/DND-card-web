@@ -3,6 +3,7 @@ import {automaticSlotCounter,currentSlotCapacityReview,validateSlotCapacityRevie
 import {liveSpellActionAuthority,spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
 const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
 const mechanics=(r:RuntimeResource|undefined)=>r&&[r.current,r.max,r.automatic,r.unlimited,r.locked,r.featureGrant,r.sourceSpellGrant,r.limitedSourceUseGrant,r.itemChargeDebitGrant];
+const balanceMechanics=(r:RuntimeResource|undefined)=>r&&[r.current,r.max,r.automatic,r.unlimited,r.featureGrant,r.sourceSpellGrant,r.limitedSourceUseGrant,r.itemChargeDebitGrant];
 /** Guard explicit history/edit transactions. Ordinary projections remain pure;
  * opaque or torn accounting is never repaired by Undo, redo or a generic form. */
 export function assertSlotBalanceHistoryTravel(live:Character,candidate:Character,authority?:SpellActionAuthority):void{
@@ -21,7 +22,7 @@ export function assertSlotBalanceHistoryTravel(live:Character,candidate:Characte
  for(const id of changed){
   const a=live.runtime.resources[id],b=candidate.runtime.resources[id],level=id.split(':')[1];
   if((a?.locked||!!a?.locked!==!!b?.locked)&&!access.gm)throw Error('法术位已锁定，需要当前主持人权限。');
-  if(before?.pending[id]&&after?.pending[id]&&(!same(mechanics(a),mechanics(b))||!same(live.spellSettings?.slots[level],candidate.spellSettings?.slots[level])))throw Error('该法术位余额尚待核对，不能通过资源设置或历史修改。');
+  if(before?.pending[id]&&after?.pending[id]&&(!same(balanceMechanics(a),balanceMechanics(b))||!same(live.spellSettings?.slots[level],candidate.spellSettings?.slots[level])))throw Error('该法术位余额尚待核对，不能通过资源设置或历史修改。');
   if(before?.pending[id]&&after&&!after.pending[id]){
    const receipt=after.lastConfirmation;
    if(!receipt||receipt.resourceId!==id||receipt.max!==b?.max||receipt.remaining!==b?.current)throw Error('缺少对应的法术位余量确认，原记录保留。');

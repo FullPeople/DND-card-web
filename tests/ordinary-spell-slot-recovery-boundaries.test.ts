@@ -9,6 +9,7 @@ import {evaluate} from '../src/core/engine';
 import {syncAutoResources,setResource} from '../src/core/resources';
 import {applyCharacterHistoryPatch} from '../src/ui/characterHistoryPatch';
 import {createDashboardDraft,commitDashboardDraft} from '../src/core/dashboardDraft';
+import {assertSlotBalanceHistoryTravel} from '../src/core/automation/slotBalanceHistory';
 let index=0;
 function it(name:string,run:()=>unknown){const n=++index;return privateSourceIt(name,()=>runMulticlassSourceCheck(n,run));}
 function states(){const f=slotBalanceRecoveryFixture(),before=structuredClone(f.c);expect(performSlotBalanceRecovery(f.c,slotBalanceRecoveryRequest(f.c,f.key,0,'boundary-known-zero')).status).toBe('applied');return {...f,before,after:structuredClone(f.c)};}
@@ -65,4 +66,13 @@ it('dashboard commit refuses pending or opaque automatic balance changes, includ
 it('a normal dashboard balance edit updates counter, mirror and known history together before persistence',()=>{
  const f=states(),base=createDashboardDraft(f.c),draft=structuredClone(base);draft.runtime.resources[f.key].current=1;
  const saved=commitDashboardDraft(f.c,base,draft,{gm:false});expect(saved.runtime.resources[f.key].current).toBe(1);expect(saved.spellSettings!.slots['2']).toEqual({max:2,used:1});expect(currentSlotCapacityReview(saved)?.balances?.[f.key]).toEqual({spent:1,max:2,current:1});expect(slotBalanceHeld(saved,f.key)).toBe(false);
+});
+it('a writable current GM can change only a pending automatic pool lock while preserving all unknown accounting, but cannot use that permission to change its balance',()=>{
+ for(const locked of [false,true]){
+  const {c,key}=slotBalanceRecoveryFixture();c.runtime.resources[key]={name:'Authored pending lock',max:3,current:1,automatic:true,locked};c.spellSettings!.slots['2']={max:3,used:2};
+  const next=structuredClone(c);next.runtime.resources[key].locked=!locked;
+  expect(()=>assertSlotBalanceHistoryTravel(c,next,{canEdit:true,gm:true})).not.toThrow();expect(next.runtime.slotCapacityReview).toEqual(c.runtime.slotCapacityReview);expect(next.spellSettings).toEqual(c.spellSettings);
+  for(const authority of [{canEdit:false,gm:true},{canEdit:true,gm:false}])expect(()=>assertSlotBalanceHistoryTravel(c,next,authority)).toThrow();
+  const changed=structuredClone(next);changed.runtime.resources[key].current=0;expect(()=>assertSlotBalanceHistoryTravel(c,changed,{canEdit:true,gm:true})).toThrow();
+ }
 });

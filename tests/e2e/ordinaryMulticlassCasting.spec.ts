@@ -42,7 +42,7 @@ async function ready(page:Page,mainName:'Paladin'|'Ranger',legacy=false){
  c.runtime.resources['spell-slot:9']={name:'手工九环记录',max:3,current:1};
  c.selections=classes.map((entry,i)=>({id:i===0?mainId:'multiclass-companion',entry,level:i===0?5:1,quantity:1,equipped:false}));
  expect(c.selections.every(row=>row.entry.kind==='class')).toBe(true);expect(c.spellSettings).toBeUndefined();expect(c.runtime.resources['spell-slot:2']).toBeUndefined();
- if(legacy){c.runtime.resources['spell-slot:1']={name:'Authored old automatic pool',max:3,current:1,automatic:true};c.spellSettings=structuredClone(spellState(c));c.spellSettings.slots={'1':{max:3,used:2}};}
+ if(legacy){delete c.runtime.slotCapacityReview;c.runtime.resources['spell-slot:1']={name:'Authored old automatic pool',max:3,current:1,automatic:true};c.spellSettings=structuredClone(spellState(c));c.spellSettings.slots={'1':{max:3,used:2}};}
  await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'authored-multiclass.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exportCharacter(c)))});
  const review=page.getByRole('dialog',{name:'导入前核对',exact:true}),imported=page.getByRole('tab',{name:/普通多职业验收（导入）/});
  await expect(review.or(imported)).toBeVisible();if(await review.isVisible())await review.getByRole('button',{name:'保留全部记录并导入',exact:true}).click();

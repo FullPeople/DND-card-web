@@ -8,9 +8,13 @@ export interface SlotCapacityReviewV1 {
  previous:Record<string,number>;
  pending:Record<string,{max:number}>;
  balances?:Record<string,SlotBalanceProjection>;
- lastConfirmation?:{id:string;fingerprint:string;resourceId:string;max:number;remaining:number};
+ lastConfirmation?:{id:string;fingerprint:string;resourceId:string;max:number;remaining:number;preservedManualAs?:string};
 }
 export type SlotCapacityReviewState=SlotCapacityReviewV1|{version:number;[key:string]:unknown};
+export const manualSlotDestination=(value:unknown):value is string=>typeof value==='string'&&/^manual-slot:[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(value);
+/** Only a newly created card has an observed empty starting capacity. Legacy
+ * imports without this state keep that absence; validation never invents it. */
+export function newSlotCapacityReview():SlotCapacityReviewV1{return {version:1,seen:[],previous:Object.fromEntries(Array.from({length:9},(_,i)=>[`spell-slot:${i+1}`,0])),pending:{}};}
 const slot=(id:string)=>/^spell-slot:[1-9]$/.test(id);
 const plain=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v)&&[Object.prototype,null].includes(Object.getPrototypeOf(v));
 const exact=(v:Record<string,unknown>,keys:string[])=>Object.keys(v).length===keys.length&&keys.every(k=>Object.hasOwn(v,k));
@@ -28,7 +32,7 @@ export function validateSlotCapacityReview(value:unknown):void{
   for(const [id,row] of Object.entries(value.balances))if(!slot(id)||!value.seen.includes(id)||!plain(row)||!exact(row,['spent','max','current'])||!count(row.spent)||!count(row.max)||!count(row.current)||row.current>row.max||row.current!==Math.max(0,row.max-row.spent))throw Error('法术位消耗历史无效。');
  }
  const last=value.lastConfirmation;
- if(last!==undefined&&(!plain(last)||!exact(last,['id','fingerprint','resourceId','max','remaining'])||typeof last.id!=='string'||!last.id.trim()||last.id.length>128||typeof last.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(last.fingerprint)||typeof last.resourceId!=='string'||!slot(last.resourceId)||!count(last.max)||last.max<1||!count(last.remaining)||last.remaining>last.max||!value.seen.includes(last.resourceId)))throw Error('法术位余量确认记录无效。');
+ if(last!==undefined&&(!plain(last)||!exact(last,['id','fingerprint','resourceId','max','remaining',...(last.preservedManualAs!==undefined?['preservedManualAs']:[])])||typeof last.id!=='string'||!last.id.trim()||last.id.length>128||typeof last.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(last.fingerprint)||typeof last.resourceId!=='string'||!slot(last.resourceId)||!count(last.max)||last.max<1||!count(last.remaining)||last.remaining>last.max||!value.seen.includes(last.resourceId)||last.preservedManualAs!==undefined&&!manualSlotDestination(last.preservedManualAs)))throw Error('法术位余量确认记录无效。');
 }
 export function currentSlotCapacityReview(c:Character):SlotCapacityReviewV1|undefined{
  const state=c.runtime.slotCapacityReview;if(!state||state.version!==1)return;
@@ -89,10 +93,10 @@ export function syncSlotCapacityReview(c:Character,slots:readonly number[],befor
   if(!old){if(!next.seen.includes(id))next.seen.push(id);(next.balances||={})[id]={spent:r.max-r.current,max:r.max,current:r.current};}
  }
  for(const row of required){
-  const alreadySeen=next.seen.includes(row.id),missing=!Object.hasOwn(c.runtime.resources,row.id)&&!knownMirror(c,row.level);
+  const alreadySeen=next.seen.includes(row.id),existing=c.runtime.resources[row.id],missing=!existing&&!knownMirror(c,row.level);
   const previous=state?.previous[row.id]??beforeSlots?.[Number(row.level)-1];
   const actualNewUnlock=previous===0&&!alreadySeen;
-  if(missing&&!next.balances?.[row.id]&&(alreadySeen||priorPools.length>0&&!actualNewUnlock))next.pending[row.id]={max:row.max};
+  if(existing&&!automaticSlotCounter(existing)||missing&&!next.balances?.[row.id]&&!actualNewUnlock)next.pending[row.id]={max:row.max};
   else if(Object.hasOwn(next.pending,row.id))next.pending[row.id].max=row.max;
   if(!alreadySeen)next.seen.push(row.id);
  }

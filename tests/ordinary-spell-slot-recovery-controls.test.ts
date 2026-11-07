@@ -75,6 +75,15 @@ it('the real resource settings form can change a known ordinary balance without 
   expect(close).toHaveBeenCalledTimes(1);expect(s.c.runtime.resources[key].current).toBe(1);expect(s.c.spellSettings!.slots['2']).toEqual({max:2,used:1});expect((s.c.runtime.slotCapacityReview as any).balances[key]).toEqual({spent:1,max:2,current:1});
  }finally{await act(()=>root.unmount());host.remove();}
 });
+it('the actual resource settings form lets the live GM unlock a pending automatic pool without changing or confirming its balance',async()=>{
+ const s=await setup(),key='spell-slot:2';s.c.runtime.resources[key]={name:'Authored pending locked pool',max:3,current:1,automatic:true,locked:true};s.c.spellSettings!.slots['2']={max:3,used:2};const before=structuredClone(s.c),host=document.createElement('div');document.body.append(host);const root=createRoot(host),close=vi.fn();
+ try{
+  await act(()=>root.render(createElement(ResourceModuleEditor,{c:s.c,id:key,disabled:false,gm:true,close,edit:(fn:(c:Character)=>void)=>{const next=structuredClone(s.c);fn(next);s.replace(next);}})));
+  const unlock=host.querySelector<HTMLButtonElement>('button[aria-label="解锁资源"]')!;expect(unlock.disabled).toBe(false);await act(()=>unlock.click());
+  await act(async()=>{host.querySelector('form')!.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});
+  expect(close).toHaveBeenCalledTimes(1);expect(s.c.runtime.resources[key]).toEqual({...before.runtime.resources[key],locked:false});expect(s.c.runtime.slotCapacityReview).toEqual(before.runtime.slotCapacityReview);expect(s.c.spellSettings).toEqual(before.spellSettings);expect(s.c.runtime.resources.manual).toEqual(before.runtime.resources.manual);
+ }finally{await act(()=>root.unmount());host.remove();}
+});
 it('recounting an existing automatic balance requires the visible acknowledgement, preserves its style and clears that acknowledgement on a changed record',async()=>{
  const s=await setup(),key='spell-slot:2';s.c.runtime.resources[key]={name:'Authored existing automatic style',max:3,current:1,automatic:true,type:'bar',icon:'bottle'};s.c.spellSettings!.slots['2']={max:3,used:2};await s.render();
  const check=()=>s.host.querySelector<HTMLInputElement>('input[aria-label="已核对2环已有法术位记录"]')!;expect(check()).not.toBeNull();expect(s.input().disabled).toBe(true);await s.click(check());expect(s.input().disabled).toBe(false);
@@ -94,4 +103,17 @@ it('the actual resource row presents a pending-review status and offers no spend
   await act(()=>root.render(createElement(ResourceRow,{resource:{id:'spell-slot:2',name:'Authored held slot',max:2,current:1,type:'bar',automatic:true},enabled:true,gm:true,balancePending:true,change} as any)));
   expect(host.textContent).toContain('余量待核对');expect(host.querySelector('button[aria-label="消耗Authored held slot"]')).toBeNull();expect(host.querySelector('button[aria-label="恢复Authored held slot"]')).toBeNull();expect(change).not.toHaveBeenCalled();
  }finally{await act(()=>root.unmount());host.remove();}
+});
+it('the actual form preserves a named manual record only after explicit acknowledgement, then confirms a separate zero automatic balance',async()=>{
+ const s=await setup(),key='spell-slot:2',manual={name:'Authored retained player counter',max:9,current:2,type:'bar',icon:'bottle',automatic:false};s.c.runtime.resources[key]=manual;s.c.spellSettings!.slots['2']={max:9,used:7};await s.render();
+ const preserve=s.host.querySelector<HTMLInputElement>('input[aria-label="保留2环位置的手工资源"]')!;expect(preserve).not.toBeNull();expect(preserve.checked).toBe(false);expect(s.input().disabled).toBe(true);await s.click(preserve);expect(s.input().disabled).toBe(false);await s.fill('0');await s.click(s.button());
+ const destination=(s.c.runtime.slotCapacityReview as any).lastConfirmation.preservedManualAs;expect(destination).toMatch(/^manual-slot:/);expect(s.c.runtime.resources[destination]).toEqual(manual);expect(s.c.runtime.resources[key]).toMatchObject({max:2,current:0,automatic:true});expect(s.host.textContent).toContain('手工记录已独立保留');
+});
+it('confirming one ring preserves the typed value and acknowledgement for another unchanged pending ring',async()=>{
+ for(const occupied of [false,true]){const s=await setup(),state=s.c.runtime.slotCapacityReview as any;delete s.c.runtime.resources['spell-slot:1'];delete s.c.spellSettings!.slots['1'];delete state.balances['spell-slot:1'];state.pending['spell-slot:1']={max:4};
+  if(occupied){s.c.runtime.resources['spell-slot:2']={name:'Authored existing automatic counter',max:2,current:1,automatic:true};s.c.spellSettings!.slots['2']={max:2,used:1};}await s.render();
+  if(occupied)await s.click(s.host.querySelector<HTMLInputElement>('input[aria-label="已核对2环已有法术位记录"]')!);await s.fill('1');
+  const first=s.host.querySelector<HTMLInputElement>('input[aria-label="1环法术位剩余次数"]')!;await act(()=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(first,'0');first.dispatchEvent(new Event('input',{bubbles:true}));});await s.click(s.host.querySelector<HTMLButtonElement>('button[aria-label="确认1环法术位余量"]')!);
+  expect(s.c.runtime.resources['spell-slot:1'].current).toBe(0);expect(s.input().value).toBe('1');if(occupied)expect(s.host.querySelector<HTMLInputElement>('input[aria-label="已核对2环已有法术位记录"]')!.checked).toBe(true);expect(s.button().disabled).toBe(false);await s.click(s.button());expect(s.c.runtime.resources['spell-slot:2'].current).toBe(1);
+ }
 });

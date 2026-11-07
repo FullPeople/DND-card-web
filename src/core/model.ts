@@ -2,6 +2,7 @@ import {itemChargeIdentity,itemChargeRule} from './automation/itemChargeDebitSou
 import {limitedSourceIdentity,limitedSourceRule} from './automation/limitedSourceUseSource';
 import {reviewedAlertIdentity} from './automation/reviewedAlertSource';
 import type {CardComponent,CardPalette} from './palette';
+import {newSlotCapacityReview} from './automation/slotCapacityReview';
 export type Edition = '2014' | '2024';
 export type Kind = 'class' | 'subclass' | 'race' | 'background' | 'feat' | 'spell' | 'item' | 'feature' | 'condition' | 'rule' | 'monster';
 export const KIND_LABELS: Record<Kind, string> = { class: '职业', subclass: '子职', race: '种族', background: '背景', feat: '专长', spell: '法术', item: '装备', feature: '特性', condition: '状态', rule: '规则', monster: '怪物' };
@@ -125,7 +126,7 @@ export function newCharacter(edition: Edition = '2024'): Character {
     abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, racialAbilityMode:'separate-v1', baseHp: 0,
     identity: { gender: '', alignment: '', age: '', description: '' }, selections: [], answers: {}, reviewed: [], notes: '',
     profile: { enabledSources: ['PHB', 'XPHB'], optional: { feats: true, multiclass: false, legacy: false }, exceptions: {} },
-    runtime: { hp: 0, tempHp: 0, inspiration: 0, resources: {} } };
+    runtime: { hp: 0, tempHp: 0, inspiration: 0, resources: {}, slotCapacityReview:newSlotCapacityReview() } };
 }
 /** Edition switches govern core handbooks, not expansion provenance. A source
  * can provide a separate subclass adaptation for the other parent class. */

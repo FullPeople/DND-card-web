@@ -4,7 +4,7 @@ import {profilePreparation} from '../preparation';
 import {spellState} from '../characterDetails';
 import {activeEffectSelections} from './active';
 import {automationEnabled} from './state';
-import {syncAutoResources} from '../resources';
+import {classResourcePlan,pactSlotCapacity} from '../classResources';
 import {sourceTextSha256} from './sourceTextSha256';
 import {ordinaryCastingSnapshot,ordinaryCastingRule,ordinaryCastingClassContextMalformed} from './ordinaryCastingIdentity';
 export {ordinaryCastingSnapshot,ordinaryCastingRule,ordinaryCastingClassContextMalformed} from './ordinaryCastingIdentity';
@@ -33,15 +33,16 @@ function ready(c:Character,row:Selection,p:CasterProfile):boolean{
  const n=profilePreparation(c,p),state=spellState(c);if(n===undefined||!exactlyAllocated(state.prepared,row.id,state.capacity))return false;
  const ownPrepared=state.prepared.slice(0,state.capacity).filter(id=>ids.includes(id));return exactlyAllocated(ownPrepared,row.id,n);
 }
-/** Computes source-declared current capacities on a disposable class-only card.
- * Never adopts or repairs the real pools; all unknown class contexts hold payment. */
+/** Read the pure class-capacity plan. Capacity evaluation must not initialize
+ * even a disposable runtime balance. Unknown class contexts hold payment. */
 function slotPlan(c:Character,eligible:CasterProfile[]):Map<string,number>{
  const classes=c.selections.filter(s=>s.entry.kind==='class'),activeIds=new Set(activeEffectSelections(c).map(s=>s.id));
  const noncaster=(s:Selection)=>s.entry.packId==='kiwee'&&activeIds.has(s.id)&&allowed(c,s.entry)&&Number.isSafeInteger(s.level)&&s.level>=1&&s.level<=20&&classes.filter(other=>ordinaryCastingRule(other.entry)?.id===ordinaryCastingRule(s.entry)?.id).length===1&&!s.entry.raw.casterProgression&&!s.entry.raw.spellcastingAbility&&!s.entry.raw.preparedSpells&&!s.entry.raw.preparedSpellsProgression&&!s.entry.raw.spellsKnownProgression&&!s.entry.raw.classTableGroups?.some((g:any)=>g.rowsSpellProgression);
  if(classes.some(s=>!eligible.some(p=>p.owner.id===s.id)&&!noncaster(s))||eligible.filter(p=>p.casting.entry.raw.casterProgression==='pact').length>1)return new Map();
- const disposable=structuredClone(c);disposable.selections=[...classes,...eligible.filter(p=>p.casting.id!==p.owner.id).map(p=>p.casting)].map(s=>structuredClone(s));disposable.runtime={hp:0,tempHp:0,inspiration:0,resources:{}};delete disposable.spellSettings;syncAutoResources(disposable);
- const hasOrdinary=eligible.some(p=>p.casting.entry.raw.casterProgression!=='pact');
- return new Map(Object.entries(disposable.runtime.resources).filter(([id])=>/^(?:spell|pact)-slot:[1-9]$/.test(id)&&(hasOrdinary||!id.startsWith('spell-slot:'))).map(([id,r])=>[id,r.max]));
+ const view={...c,selections:[...classes,...eligible.filter(p=>p.casting.id!==p.owner.id).map(p=>p.casting)]},plan=classResourcePlan(view),capacities=new Map<string,number>();
+ if(eligible.some(p=>p.casting.entry.raw.casterProgression!=='pact'))for(const [i,max] of plan.slots.entries())if(max>0)capacities.set(`spell-slot:${i+1}`,max);
+ if(plan.pact){const {level,max}=pactSlotCapacity(plan.pact);capacities.set(`pact-slot:${level}`,max);}
+ return capacities;
 }
 function ownedPool(c:Character,id:string,r:RuntimeResource|undefined,max:number){if(slotBalanceHeld(c,id)||!r||r.automatic!==true||r.unlimited||r.featureGrant||r.sourceSpellGrant||!Number.isSafeInteger(r.max)||r.max!==max||!Number.isSafeInteger(r.current)||r.current<0||r.current>max)return false;if(id.startsWith('spell-slot:')){const mirror=c.spellSettings?.slots[id.split(':')[1]];if(!mirror||mirror.max!==r.max||mirror.used!==r.max-r.current)return false;}return true;}
 export interface OrdinarySpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;debits?:{resourceId:string;cost:number}[]}

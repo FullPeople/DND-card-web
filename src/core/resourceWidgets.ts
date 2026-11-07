@@ -222,16 +222,20 @@ export function setResourceWidgetStyle(c:Character,id:string,style:WidgetStyle){
  layout.widgets={...Object.fromEntries(Object.entries(migrateDashboardWidgets(layout.widgets,layout.attacks)).filter(([key])=>Object.hasOwn(c.runtime.resources,key))),...next.widgets};layout.attacks=next.attacks;
 }
 /** Persist a chosen default once. Reading/rendering a card never consumes randomness. */
-export function ensureResourceWidget(c:Character,id:string,rng:()=>number=Math.random){
+export function ensureResourceWidget(c:Character,id:string,rng:()=>number=Math.random,presentation?:Partial<ResourceWidgetLayout>){
  if(!Object.hasOwn(c.runtime.resources,id))return;
  const layout=c.quickbarLayout||={order:[],hidden:[]};
  if(Object.hasOwn(layout.widgets||{},id))return;
  const modules=resourceModules(resourceCanvasRows(c),layout.widgets,c.selections),module=modules.find(m=>m.rows.some(([key])=>key===id));
  if(!module||Object.hasOwn(layout.widgets||{},module.id))return;
- const style=module.slots?'poolpips':chooseDefaultWidgetStyle(c.runtime.resources[id],rng),template=RESOURCE_TEMPLATES.find(t=>t.id===style)!;
+ // A newly restored lower rank changes the group's anchor, not its chosen
+ // presentation. Keep the higher-rank entry parked for later withdrawal too.
+ const priorAnchor=module.slots&&module.rows.find(([key])=>Object.hasOwn(layout.widgets||{},key))?.[0];
+ if(priorAnchor){layout.widgets={...layout.widgets,[module.id]:structuredClone(layout.widgets![priorAnchor])};return;}
+ const style=module.slots?'poolpips':presentation?.style||chooseDefaultWidgetStyle(c.runtime.resources[id],rng),template=RESOURCE_TEMPLATES.find(t=>t.id===canonicalWidgetStyle(style))!;
  const current=freeDashboardLayout(modules.filter(m=>m.id!==module.id),layout.widgets,layout.attacks);
  const minimum=resourceModuleMinimum(module,style);
- const defaults=moduleDefaults([module],{[module.id]:normalizeWidget({style,w:module.slots?minimum.w:template.w,h:module.slots?minimum.h:template.h})});
+ const defaults=moduleDefaults([module],{[module.id]:normalizeWidget({...presentation,style,w:module.slots?minimum.w:template.w,h:module.slots?minimum.h:template.h})});
  const widget=place(defaults[module.id],Object.values(current.widgets));
  layout.widgets={...migrateDashboardWidgets(layout.widgets,layout.attacks),...current.widgets,[module.id]:widget};layout.attacks=current.attacks;
 }

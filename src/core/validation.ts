@@ -288,6 +288,8 @@ export function importOwlbear(value: unknown): Character {
   assert(plain(value) && value.schema_version === '0.3' && plain(value.identity) && plain(value.abilities), '需要枭熊 schema_version 0.3 的角色 JSON。');
   if(value.dnd_card_web!==undefined)return validateCharacter(normalizeEmptySaveExpertise(value.dnd_card_web));
   const c = newCharacter(value.meta?.ruleset === '2014' ? '2014' : '2024');
+  // This is an existing legacy record, not a newly created empty character.
+  delete c.runtime.slotCapacityReview;
   // Legacy exchange carries total scores, not independently owned race bases.
   delete c.racialAbilityMode;
   c.name = String(value.identity.character_name || value.identity.display_name || '导入的冒险者'); c.player = String(value.identity.player || '');

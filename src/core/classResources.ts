@@ -5,6 +5,7 @@ import {limitedSourceIdentity} from './automation/limitedSourceUseSource';
 import {itemChargeIdentity} from './automation/itemChargeDebitSource';
 // Standard multiclass caster progression, indexed by effective caster level.
 const fullSlots=[[],[2],[3],[4,2],[4,3],[4,3,2],[4,3,3],[4,3,3,1],[4,3,3,2],[4,3,3,3,1],[4,3,3,3,2],[4,3,3,3,2,1],[4,3,3,3,2,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1,1],[4,3,3,3,3,1,1,1,1],[4,3,3,3,3,2,1,1,1],[4,3,3,3,3,2,2,1,1]];
+export function pactSlotCapacity(level:number){return {level:Math.min(5,Math.ceil(level/2)),max:level===1?1:level<11?2:level<17?3:4};}
 export const hasClassCasting=(card:Character)=>card.selections.some(s=>['class','subclass'].includes(s.entry.kind)&&!reviewedAlertIdentity(s.entry)&&!limitedSourceIdentity(s.entry)&&!itemChargeIdentity(s.entry)&&(s.entry.raw.casterProgression||[...(s.entry.raw.classTableGroups||[]),...(s.entry.raw.subclassTableGroups||[])].some(group=>group.rowsSpellProgression)));
 
 /** Source-declared automatic capacities only. Never reads or mutates balances. */
