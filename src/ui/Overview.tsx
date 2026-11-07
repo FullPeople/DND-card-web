@@ -5,7 +5,7 @@ import {catalogTrainingIndex} from './catalogTrainingIndex';
 import {OverviewChoiceOverlay} from './OverviewChoiceOverlay';
 import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {ObservantPassiveInvestigation} from './ObservantPassiveInvestigation';
-import {useSheetChoices} from './SheetChoicesContext';
+import {useSheetChoices,useSheetMechanics} from './SheetChoicesContext';
 import {displayCharacterEdit} from '../core/displayCharacterEdit';
 import {ScreenAbilities} from './ScreenAbilities';
 import {ProficiencyStatus} from './ProficiencyStatus';
@@ -56,8 +56,9 @@ const sizes: Record<string, string> = { T: '微型', S: '小型', M: '中型', L
 
 export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openResources, openQuickbar, openHp, pinDrop }: Props) {
   const editing = useContext(SheetEditContext),screen=useSheetRenderMode()==='screen';
-  const spells = useReadViewMemo(cloudFeaturesEnabled,()=>spellState(c),[c]);
-  const readySpells=useReadViewMemo(cloudFeaturesEnabled,()=>c.selections.filter(row=>row.entry.kind==='spell'&&spellIsReady(c,row)),[c]);
+  const mechanics=useSheetMechanics(c);
+  const spells = useReadViewMemo(cloudFeaturesEnabled,()=>spellState(c,d),[mechanics,d]);
+  const readySpells=useReadViewMemo(cloudFeaturesEnabled,()=>c.selections.filter(row=>row.entry.kind==='spell'&&spellIsReady(c,row)),[mechanics]);
   const choices=useSheetChoices(c,catalog);
   const trainingNames=useMemo(()=>catalogTrainingIndex(catalog),[catalog]);
   const [trainingEditor, setTrainingEditor] = useState(false);

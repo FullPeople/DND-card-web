@@ -1,4 +1,4 @@
-import {useSheetChoices} from './SheetChoicesContext';
+import {useSheetChoices,useSheetDerived,useSheetMechanics} from './SheetChoicesContext';
 import {cloudFeaturesEnabled} from '../cloud/availability';
 import {useReadViewMemo} from './useReadViewMemo';
 import {useEntryMenu} from './EntrySharing';
@@ -42,12 +42,12 @@ export function FeaturePanel({ headingInline, catalog=[], owners=[], detailed = 
   const screen=useSheetRenderMode()==='screen';
   const capturing=useSheetCaptureActive();
   const menu=useEntryMenu();
-  const choices=useSheetChoices(c,catalog),workspace=useChoiceWorkspace(),setChoiceId=(id:string)=>workspace.open(id,className);
+  const mechanics=useSheetMechanics(c),derived=useSheetDerived(c),choices=useSheetChoices(c,catalog),workspace=useChoiceWorkspace(),setChoiceId=(id:string)=>workspace.open(id,className);
   const activeChoice=workspace.id&&(workspace.host||'class-features')===className?workspace.id:undefined;
   const byOwner=useMemo(()=>{const result=new Map<string,typeof choices>();for(const choice of choices)result.set(choice.ownerId,[...(result.get(choice.ownerId)||[]),choice]);return result;},[choices]);
   const choicesFor=(id:string)=>byOwner.get(id)||[];
   const spells = kinds.length === 1 && kinds[0] === 'spell';
-  const spellMode=useReadViewMemo(cloudFeaturesEnabled,()=>spells?spellState(c).mode:undefined,[c,spells]);
+  const spellMode=useReadViewMemo(cloudFeaturesEnabled,()=>spells?spellState(c,derived).mode:undefined,[mechanics,derived,spells]);
   const features: Feature[] = rows.filter(s=>!s.grantKey?.startsWith('choice:')||s.requirementId?.includes(':class-')).map(s => {
     const owner = featureOwner(c,s);
     return { id: s.id, group: spells ? String(s.entry.raw.level ?? 0) : grouped ? owner?.id || 'other' : 'all', origin: owner ? `${KIND_LABELS[owner.entry.kind]} ${owner.entry.name}${['class', 'subclass'].includes(owner.entry.kind) ? ` Lv.${selectionLevel(c,owner)}` : ''}` : '其他特性', name: entryLabel(s.entry), entry: s.entry, body: s.entry.entries, restricted: !selectionEffectsAllowed(c, s.entry) || !!owner && !selectionEffectsAllowed(c, owner.entry) };
