@@ -1,4 +1,5 @@
 import {displayCharacterEdit,displayBiographyEdit,displayIdentityEdit} from '../core/displayCharacterEdit';
+import {sheetFillingReviewed} from '../core/automation/choices';
 import {InventoryMarks} from './InventoryMarks';
 import {NumberInput} from './NumberInput';
 import {useContext} from 'react';
@@ -15,7 +16,7 @@ export type PageProps={c:Character;d:Derived;edit:Edit;browse:(kind:Kind)=>void;
 export const number=(v:string,max=9999)=>Math.max(0,Math.min(max,Math.trunc(Number(v)||0)));
 function Identity({kind,label,c,edit,inspect,browse,plain}:{kind:Kind;label:string;plain?:boolean}&Pick<PageProps,'c'|'edit'|'inspect'|'browse'>){
  if(plain){const picked=c.selections.filter(s=>s.entry.kind===kind).map(s=>s.entry.name).join('、');return <label className="biography-field"><span>{label}</span><div className="biography-text">{picked}</div></label>;}
- return <SheetCell label={label} className={`identity-field detail-identity identity-${kind}`} dropKinds={kind==='class'?['class','subclass']:[kind]}>{c.selections.filter(s=>s.entry.kind===kind||(kind==='class'&&s.entry.kind==='subclass')).map(s=><IdentityToken key={s.id} row={s} c={c} edit={edit} inspect={inspect}/>)}{!c.selections.some(s=>s.entry.kind===kind)&&<button className="cell-fill" onClick={()=>browse(kind)}>点击并拖拽填写</button>}</SheetCell>;}
+ return <SheetCell label={label} className={`identity-field detail-identity identity-${kind}`} dropKinds={kind==='class'?['class','subclass']:[kind]}>{c.selections.filter(s=>s.entry.kind===kind||(kind==='class'&&s.entry.kind==='subclass')).map(s=><IdentityToken key={s.id} row={s} c={c} edit={edit} inspect={inspect}/>)}{!sheetFillingReviewed(c)&&!c.selections.some(s=>s.entry.kind===kind)&&<button className="cell-fill" onClick={()=>browse(kind)}>点击并拖拽填写</button>}</SheetCell>;}
 export function DetailHeader(props:PageProps&{page:string;openSpellAbility?:()=>void}){
  const {c,d,edit,page}=props,editing=useContext(SheetEditContext);
  // 背景页的页头只剩一个「背景」条目格，与下方形制重复，整条页头省掉、高度全给网格。

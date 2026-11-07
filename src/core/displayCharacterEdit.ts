@@ -1,6 +1,7 @@
 import type {Character} from './model';
 import {characterConstructionBase,forkCharacterConstruction} from './characterConstruction';
 import {applyPatch,sameValue} from './merge';
+import {applyInventoryLayoutEdit,inventoryLayoutHistory} from './inventoryLayoutEdit';
 
 type EditAction=(draft:Character)=>void;
 type DisplayField='name'|'player'|'portraitFrameHidden'|'tokenPortraitTransform'|'portraitPageFraming'|'overviewSpellsHidden'|'palette'|'componentPalette';
@@ -29,7 +30,7 @@ export function displayCharacterPaletteEdit(value:Pick<Character,'palette'|'comp
  displayEdits.set(action,{patch:{palette:value.palette,componentPalette:value.componentPalette}});return action;
 }
 export function applyDisplayCharacterEdit(character:Character,action:EditAction):Character|undefined{
- const intent=displayEdits.get(action);if(!intent)return;
+ const intent=displayEdits.get(action);if(!intent)return applyInventoryLayoutEdit(character,action);
  if('patch' in intent){
   if(Object.entries(intent.patch).every(([field,value])=>character[field as DisplayField]===value))return character;
   return forkCharacterConstruction(character,{...character,...intent.patch});
@@ -52,7 +53,7 @@ export function sameCharacterMechanics(before:Character|undefined,after:Characte
  const keys=new Set([...Object.keys(before),...Object.keys(after)]);
  return [...keys].every(key=>displayKeys.has(key)||
   (key==='identity'?(!before.identity||!after.identity?before.identity===after.identity:sameTextMechanics(before.identity,after.identity,identityFields)):
-   key==='biography'?sameTextMechanics(before.biography,after.biography,biographyFields):before[key as keyof Character]===after[key as keyof Character]));
+   key==='biography'?sameTextMechanics(before.biography,after.biography,biographyFields):key==='inventory'&&before.inventory&&after.inventory?sameTextMechanics(before.inventory,after.inventory,new Set(['positions'])):before[key as keyof Character]===after[key as keyof Character]));
 }
 
 /** Overlay current presentation and changed balances; never replace initialized view resources with an unchanged legacy snapshot. */
@@ -61,6 +62,7 @@ export function displayCharacterView(view:Character,character:Character):Charact
  const display=Object.fromEntries(displayFields.map(field=>[field,character[field]]));
  return {...view,...display,identity:character.identity,biography:character.biography,
   ...(character.runtime!==base.runtime?{runtime:character.runtime}:{}),
+  ...(character.inventory?.positions!==base.inventory?.positions?{inventory:{...view.inventory!,positions:character.inventory?.positions}}:{}),
   ...(character.spellSettings!==base.spellSettings?{spellSettings:character.spellSettings}:{}),revision:character.revision,updatedAt:character.updatedAt};
 }
 
@@ -68,6 +70,7 @@ export function displayCharacterView(view:Character,character:Character):Charact
 export function displayCharacterHistoryPatch(live:Character,from:Character,to:Character):Character|undefined{
  if(!sameCharacterMechanics(from,to))return;
  const next={...live};let changed=false;
+ if(!sameValue(from.inventory?.positions,to.inventory?.positions)){next.inventory=inventoryLayoutHistory(live,from,to);changed=true;}
  for(const field of displayFields)if(!sameValue(from[field],to[field])){
   const value=applyPatch(live[field],from[field],to[field]);
   if(value===undefined)delete next[field];else (next as Record<string,unknown>)[field]=value;changed=true;

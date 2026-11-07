@@ -2,7 +2,7 @@ import {FieldHelp,CustomFormatReference,AUTHORING_GUIDE} from './CustomFieldHelp
 import {CustomEntryCanvas} from './CustomEntryCanvas';
 import {customEntryExample,customCreationPrompt,parseCustomEntryJson,validateCustomFields} from '../core/customEntrySchema';
 import {parseFile,validateEntryContent} from '../core/validation';
-import {useEffect,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {createCustomEntry} from '../core/customEntries';
 import type {Entry} from '../core/model';
 import {EntryDraggable} from './DragEntry';
@@ -16,7 +16,7 @@ export function CustomEntryEditor({entry,draft,busy,save,remove,newEntry}:{entry
  const [price,setPrice]=useState(''),[weight,setWeight]=useState(''),[mode,setMode]=useState<'fields'|'json'>('fields'),[undoExample,setUndoExample]=useState<{draft:Draft;json:string;mode:'fields'|'json'}>(),[prompt,setPrompt]=useState('');
  const [originalEntries,setOriginalEntries]=useState<unknown[]>([]),[bodyBaseline,setBodyBaseline]=useState('');
  const [canvasError,setCanvasError]=useState(''),[canvasGeneration,setCanvasGeneration]=useState(0);
- const fields=(()=>{try{const value=parseFile(raw);return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:undefined;}catch{return undefined;}})();
+ const fields=useMemo(()=>{try{const value=parseFile(raw);return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,any>:undefined;}catch{return undefined;}},[raw]);
  function applyDraft(d:Draft){setCanvasGeneration(value=>value+1);setCanvasError('');setName(d.name);setEnglish(d.english);setType(d.type);setBody(d.body);setRaw(d.raw);setEdition(d.edition);setPrice(d.price);setWeight(d.weight);setOriginalEntries(d.entries);setBodyBaseline(d.bodyBaseline);}
  function fromEntry(e?:Entry):Draft{e=e||parseCustomEntryJson(JSON.stringify(customEntryExample('item')));const body=e?.entries.map(v=>typeof v==='string'?v:JSON.stringify(v)).join('\n\n')||'';return {entries:structuredClone(e?.entries||[]),bodyBaseline:body,name:e?.name||'',english:e?.english||'',type:e?.raw._customType||'item',body,raw:JSON.stringify(Object.fromEntries(Object.entries(e?.raw||{}).filter(([key])=>!key.startsWith('_')||key==='_legendaryGroup')),null,2),edition:e?.edition||'both',price:typeof e?.raw.value==='number'?String(e.raw.value/100):'',weight:typeof e?.raw.weight==='number'?String(e.raw.weight):''};}
  function jsonDraft(){const fields=parseFile(raw) as Record<string,any>;if(!fields||typeof fields!=='object'||Array.isArray(fields))throw Error('结构字段必须是对象');const entries=body===bodyBaseline?originalEntries:body.split(/\n\s*\n/).filter(v=>v.trim()).map(v=>{try{const node=JSON.parse(v);return node&&typeof node==='object'?node:v;}catch{return v;}});return JSON.stringify({name,english,edition,type,entries,raw:fields},null,2);}
@@ -26,7 +26,6 @@ export function CustomEntryEditor({entry,draft,busy,save,remove,newEntry}:{entry
  function changeItemNumber(key:'value'|'weight',text:string){if(!fields)return;if(key==='value')setPrice(text);else setWeight(text);const next={...fields};if(text.trim())next[key]=Number(text)*(key==='value'?100:1);else delete next[key];setRaw(JSON.stringify(next,null,2));}
  function readJson(text:string){const value=parseCustomEntryJson(text,type);applyDraft(fromEntry(value));setError('');return value;}
  useEffect(()=>{setExpanded(!!draft);applyDraft(fromEntry(entry||draft));setCanvasError('');setJsonText('');setMessage('');setError('');setMode('fields');setUndoExample(undefined);setPrompt('');},[entry?.id,entry?.revision,draft?.id]);
- useEffect(()=>{if(mode==='fields')try{setJsonText(jsonDraft());}catch{/* Keep invalid field text intact until the user repairs it. */}},[mode,name,english,type,body,raw,edition,price,weight,originalEntries,bodyBaseline]);
  function toggle(next:'fields'|'json'){if(next===mode)return;if(canvasError){setError(canvasError);return;}try{if(next==='json')setJsonText(jsonDraft());else readJson(jsonText);setMode(next);setError('');}catch(e){setError(String(e));}}
  function fillExample(){setUndoExample({draft:{name,english,type,body,raw,edition,price,weight,entries:originalEntries,bodyBaseline},json:jsonText,mode});const text=JSON.stringify(customEntryExample(type),null,2);readJson(text);setJsonText(text);setMessage('示例已填入所有字段，可直接修改；撤回可恢复填写前的内容。');}
  async function submit(){try{let next:Entry;if(mode==='json'){next=readJson(jsonText);next.id=entry?.id||next.id;next.revision=String(Number(entry?.revision||0)+1);}else{const fields=parseFile(raw) as Record<string,any>;if(!fields||typeof fields!=='object'||Array.isArray(fields))throw Error('结构字段必须是对象');next=createCustomEntry({id:entry?.id,name,english,type,body,entries:body===bodyBaseline?originalEntries:undefined,raw:fields,edition,revision:String(Number(entry?.revision||0)+1)});validateCustomFields(type,next.raw,next.entries);validateEntryContent(next.entries);}await save(next);setError('');}catch(e){setError(String(e));}}

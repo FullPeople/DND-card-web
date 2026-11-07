@@ -154,6 +154,9 @@ export function sheetChoiceIgnored(c:Character,id:string,choice?:SheetChoice):bo
  return !!owner&&!!scope&&owner.entry.id===scope.entryId&&choice.grantLevel<=scope.level;
 }
 export const sheetChoicePending=(c:Character,choice:SheetChoice)=>!choice.complete&&!sheetChoiceIgnored(c,choice.id,choice);
+/** Import/explicit legacy review affects filling presentation only. Old reviewed
+ * root scopes remain readable without rewriting existing stored cards. */
+export const sheetFillingReviewed=(c:Character)=>c.featureLayout?.fillingReviewed===true||!!c.featureLayout?.ignoredClassGrants&&Object.keys(c.featureLayout.ignoredClassGrants).length>0;
 function resumeSheetChoice(c:Character,id:string){
  const layout=c.featureLayout;if(!layout)return;
  if(layout.ignoredChoices)layout.ignoredChoices=layout.ignoredChoices.filter(key=>key!==id);
@@ -172,10 +175,11 @@ export function ignoreUnfilledSheetChoices(c:Character,catalog:Entry[]=[]){
  const view=c.automation?{...c,automation:{...c.automation,enabled:true}}:c;
  const choices=sheetChoices(view,catalog),pending=choices.filter(choice=>!choice.complete);
  const layout=c.featureLayout||={order:[],expanded:[]};
+ layout.fillingReviewed=true;
  layout.ignoredClassGrants=Object.fromEntries(c.selections.filter(row=>row.entry.kind==='class').map(row=>[row.id,{entryId:row.entry.id,level:row.level}]));
  delete layout.resumedChoices;
  layout.ignoredChoices=[...new Set([...(layout.ignoredChoices||[]),...pending.map(choice=>choice.id)])];
- if(layout.optionsVisible)for(const source of new Set(choices.map(choice=>choiceSource(view,choice))))delete layout.optionsVisible[source];
+ if(layout.optionsVisible)layout.optionsVisible={};
 }
 export function builtinChoices(c:Character,ownerId:string,choices=sheetChoices(c)):SheetChoice[]{
  const firstLevel=c.selections.filter(s=>s.entry.kind==='class').reduce((n,s)=>n+s.level,0)===1;

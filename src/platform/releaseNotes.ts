@@ -1,6 +1,10 @@
 import {cloudFeaturesEnabled} from '../cloud/availability';
 export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-25':'2026-10-19';
-export const STANDALONE_RELEASE_DATE='2026-11-07';
+export const STANDALONE_RELEASE_DATE='2026-11-08';
+const release312=():ReleaseSection[]=>[
+ {title:'文字与背包操作',items:['编辑故事、描述和其他文字时，只更新对应内容，减少整卡重复计算。移动背包格子只调整位置，保留物品和已消耗次数。','减少一般修改后的重复核对，以及法术页和自定义条目编辑时的无关计算。保存、撤销、冲突检查和权限保护继续保留。']},
+ {title:'导入角色卡',items:['从外部导入的角色卡按已完成填写处理，隐藏待填写提示和已忽略选项。保留原有选择、手工内容和资源；之后升级产生的新选项仍可正常填写。']},
+];
 const release311=():ReleaseSection[]=>[
  {title:'手工次数保护',items:['自动次数与已有手工记录重合时，保留原来的上限和剩余次数，暂停这项自动次数并提示核对。','停用、恢复来源或保存重开后，手工记录继续保留；原有自动次数仍保留已消耗的余额。']},
  ...release310(),
@@ -512,8 +516,8 @@ const STANDALONE_268_SECTIONS:ReleaseSection[]=[
  {title:'职业资源与点数施法',items:['来源明确声明消耗职业点数的法术，现在可以绑定所属职业资源，按声明扣费。','资源名称与职业次数表不一致时，可在自动化设置中明确选择资源列；无法核实的消耗仍需人工处理。','升级、刷新和 JSON 导入保留已消耗点数。余额不足时拒绝施法，不会改用免费次数或其他法术位。']},
  {title:'自动化进度',items:['补充资源支付与保存验证。现有覆盖数字表示至少一项计算或选择可用，不代表整条规则全部自动执行。','尚未核实的资源恢复周期保持人工处理，玩家休息执行入口仍未开放。']}
 ];
-export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'?release311():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
- ...(mode==='standalone'?[{title:STANDALONE_RELEASE_DATE,sections:release311()},{title:'2026-11-06-310',sections:release310()},{title:'2026-11-06-309',sections:release309()},{title:'2026-11-06-308',sections:release308()}]:[]),
+export const releaseSectionsFor=(mode:'standalone'|'suite'):ReleaseSection[]=>mode==='standalone'?release312():release302(mode);export const releaseHistoryFor=(mode:'standalone'|'suite')=>[
+ ...(mode==='standalone'?[{title:STANDALONE_RELEASE_DATE,sections:release312()},{title:'2026-11-07-311',sections:release311()},{title:'2026-11-06-310',sections:release310()},{title:'2026-11-06-309',sections:release309()},{title:'2026-11-06-308',sections:release308()}]:[]),
  ...(mode==='standalone'&&cloudFeaturesEnabled?[{title:RELEASE_DATE,sections:release307()},{title:'2026-10-23',sections:release306()},{title:'2026-10-22',sections:release305()},{title:'2026-10-20',sections:release303()}]:[]),
  {title:'2026-10-19',sections:release302(mode)},
  {title:'2026-10-18',sections:release301(mode)},

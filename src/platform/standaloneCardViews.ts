@@ -46,6 +46,9 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
  };
  return {build,display,nameIndex,warning,ready:(card:Character)=>ready.has(runtimeCharacterBase(card)),reconcile,
   reconciliationReady:(card:Character)=>reconciliationReady.has(runtimeCharacterBase(card)),
+  // Only the completed synchronous edit transaction calls this. A fresh
+  // catalog/source context owns a different set and must reconcile again.
+  acceptReconciled:(card:Character)=>{reconciliationReady.add(runtimeCharacterBase(card));},
   warmReconciliation:(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
    const base=runtimeCharacterBase(card);if(reconciliationReady.has(base))return;
    reconcile(card,syncSourceSpells);reconciliationReady.add(base);
