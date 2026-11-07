@@ -13,6 +13,7 @@ async function seed(page:Page,card:Character){
   open.onsuccess=()=>{const db=open.result,tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),get=store.get('workspace');get.onsuccess=()=>{if(!get.result)store.put({schemaVersion:1,characters:[card],activeId:card.id,packs:[]},'workspace');};tx.oncomplete=()=>db.close();};
  },card);
 }
+async function showWorkspace(page:Page,view:'sheet'|'wiki'){const button=page.locator('.mobile-tabs').getByRole('button',{name:view==='wiki'?'Wiki':'功能页',exact:true});if(await button.isVisible())await button.click();}
 const savedCard=()=>{const card=newCharacter();card.name='恢复验收角色';card.notes='保留笔记';card.runtime.resources.manual={name:'保留次数',current:2,max:5};return card;};
 
 test('a failed editing library exposes recovery and preserves the saved card after reconnecting',async({page,context})=>{
@@ -60,18 +61,18 @@ test.describe('physical server outage',()=>{
   try{
    await seed(page,savedCard());await page.goto(`http://127.0.0.1:${address.port}/`);
    await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toBeEnabled();
-   await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
+   await showWorkspace(page,'wiki');await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
    await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
-   await page.locator('[data-sheet-tab=法术]').click();await expect(page.locator('.header-法术')).toBeVisible();
+   await showWorkspace(page,'sheet');await page.locator('[data-sheet-tab=法术]').click();await expect(page.locator('.header-法术')).toBeVisible();
    await expect.poll(()=>page.evaluate(async()=>{const names=await caches.keys(),cache=await caches.open(names.find(n=>n.startsWith('dnd-card-shell:'))!),urls=(await cache.keys()).map(r=>r.url);return ['WikiUi','catalog','cardRuntime','SpellsPage'].every(tool=>urls.some(url=>url.includes('/assets/'+tool+'-')));})).toBe(true);
    await stop();
    await page.context().unroute('https://5e.kiwee.top/data/**');await page.context().route('https://5e.kiwee.top/data/**',route=>route.abort('connectionrefused'));
    await page.reload();await expect(page.locator('.paper')).toBeVisible();
    await expect(page.getByRole('switch',{name:'编辑模式',exact:true})).toBeEnabled();
-   await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
-   await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await page.getByRole('textbox',{name:'角色姓名',exact:true}).fill('源站断线仍能保存');
+   await showWorkspace(page,'wiki');await expect(page.locator('.catalog-row').filter({hasText:'测试法师'}).first()).toBeVisible();
+   await showWorkspace(page,'sheet');await page.getByRole('switch',{name:'编辑模式',exact:true}).click();await page.getByRole('textbox',{name:'角色姓名',exact:true}).fill('源站断线仍能保存');
    await expect(page.locator('.save-status')).toContainText('已保存到本机');
-   await page.locator('[data-sheet-tab=法术]').click();await expect(page.locator('.header-法术')).toBeVisible();
+   await showWorkspace(page,'sheet');await page.locator('[data-sheet-tab=法术]').click();await expect(page.locator('.header-法术')).toBeVisible();
    await page.screenshot({path:test.info().outputPath('cached-card-real-server-offline.png'),fullPage:true});
   }finally{await stop();}
  });
@@ -81,7 +82,7 @@ test('class warnings are yellow before settings load and custom non-class entrie
  const card=savedCard();
  const entry:Entry={id:'old:class',name:'测试法师',english:'Test Mage',kind:'class',source:'IMPORTED',packId:'imported',edition:'both',revision:'1',entries:[],raw:{}};
  card.selections=[{id:'old-class',entry,quantity:1,level:1,equipped:false}];
- await seed(page,card);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
+ await seed(page,card);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();
  const banner=page.locator('.class-compatibility-banner'),icon=page.locator('.character-tabs .class-warning-icon');
  await expect(banner).toContainText('当前角色的职业尚未关联资料库，或与当前 2024 职业规则不同。可以核对并同步；其他自定义内容不会触发此提醒。');
  expect(await banner.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(255, 240, 189)');
@@ -92,6 +93,6 @@ test('class warnings are yellow before settings load and custom non-class entrie
 test('an editable card with only custom non-class content has no class warning',async({page})=>{
  const card=savedCard();
  card.selections=(['race','background','feature','feat','item','spell'] as const).map((kind,i)=>({id:'custom-'+i,entry:{id:'personal:'+kind,name:'自定义'+kind,english:'Personal '+kind,kind,source:'CUSTOM',packId:'custom',edition:'both',revision:'1',entries:[],raw:{_custom:true}},quantity:1,level:1,equipped:false}));
- await seed(page,card);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();
+ await seed(page,card);await page.goto('/');await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();
  await expect(page.locator('.class-compatibility-banner')).toHaveCount(0);await expect(page.locator('.class-warning-icon')).toHaveCount(0);
 });

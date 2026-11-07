@@ -2,6 +2,8 @@ import {describe,it,expect} from 'vitest';
 import {newCharacter} from '../src/core/model';
 import {characterHash,createCloudSync,type SyncDependencies,type SyncReceipt,type SyncState} from '../src/cloud/sync';
 import {CloudRequestError,type CloudCard} from '../src/cloud/api';
+import {applyDisplayCharacterEdit,displayBiographyEdit} from '../src/core/displayCharacterEdit';
+import {snapshotHasher} from '../src/cloud/saveScheduler';
 
 function setup(){
  let character=newCharacter('2024');character.name='本机草稿';
@@ -11,9 +13,29 @@ function setup(){
   if(method==='PUT'&&body.revision!==remote!.revision)throw new CloudRequestError(409,'revision_conflict','本机草稿保留。');
   remote={id:'ABCDEF',revision:(remote?.revision||0)+1,character:structuredClone(body.character),updatedAt:'now',role:'owner'};return structuredClone(remote) as T;
  },receive:async(_,incoming,expected)=>{if(await characterHash(character)!==expected)return false;character=structuredClone(incoming);return true;},hash:characterHash,lock:async(_,fn)=>fn(),changed:(_,row)=>states.push(row)};
- return {deps,engine:createCloudSync(deps),states,writes,get character(){return character;},get receipt(){return receipt;},get remote(){return remote!;},set receipt(row:SyncReceipt){receipt=row;}};
+ return {deps,engine:createCloudSync(deps),states,writes,get character(){return character;},set character(value:ReturnType<typeof newCharacter>){character=value;},get receipt(){return receipt;},get remote(){return remote!;},set receipt(row:SyncReceipt){receipt=row;}};
 }
 describe('cloud draft synchronization',()=>{
+ it('a display fork gets its own content hash and uploads new story text without changing mechanics',async()=>{
+  const s=setup();s.character.runtime.resources.manual={current:2,max:9};await s.engine.run(s.character.id,'owner');
+  const before=s.character,hash=snapshotHasher(characterHash),oldHash=await hash(before);
+  s.character=applyDisplayCharacterEdit(before,displayBiographyEdit('story','New authored story'))!;
+  expect(s.character.selections).toBe(before.selections);expect(s.character.runtime).toBe(before.runtime);expect(await hash(s.character)).not.toBe(oldHash);
+  await s.engine.run(s.character.id);expect(s.writes).toHaveLength(2);expect(s.remote.character.biography?.story).toBe('New authored story');expect(s.remote.character.runtime).toEqual(before.runtime);expect(before.biography).toBeUndefined();
+ });
+ it('a denied text-fork upload keeps the local draft, spent resources and previous remote baseline',async()=>{
+  const s=setup();s.character.runtime.resources.manual={current:1,max:9};await s.engine.run(s.character.id,'owner');const revision=s.receipt.binding!.revision;
+  s.character=applyDisplayCharacterEdit(s.character,displayBiographyEdit('story','Keep the denied draft'))!;
+  s.deps.mutation=async()=>{throw new CloudRequestError(403,'forbidden','Authored permission revocation');};await s.engine.run(s.character.id);
+  expect(s.character.biography?.story).toBe('Keep the denied draft');expect(s.character.runtime.resources.manual.current).toBe(1);expect(s.receipt.binding!.revision).toBe(revision);expect(s.remote.character.biography).toBeUndefined();expect(s.writes).toHaveLength(1);expect(s.states.at(-1)?.phase).toBe('error');
+ });
+ it('a delayed text ACK cannot replace a newer immutable story fork',async()=>{
+  const s=setup();await s.engine.run(s.character.id,'owner');const original=s.deps.mutation;let release!:()=>void,started!:()=>void;const gate=new Promise<void>(resolve=>release=resolve),ready=new Promise<void>(resolve=>started=resolve);
+  s.deps.mutation=async<T>(...args:Parameters<SyncDependencies['mutation']>)=>{started();await gate;return original<T>(...args);};
+  s.character=applyDisplayCharacterEdit(s.character,displayBiographyEdit('story','First text'))!;const first=s.engine.run(s.character.id);await ready;
+  s.character=applyDisplayCharacterEdit(s.character,displayBiographyEdit('story','Latest text'))!;const second=s.engine.run(s.character.id);release();await Promise.all([first,second]);
+  expect(s.character.biography?.story).toBe('Latest text');expect(s.remote.character.biography?.story).toBe('Latest text');expect(s.writes.map(row=>row.method)).toEqual(['POST','PUT','PUT']);expect(s.states.at(-1)?.phase).toBe('saved');
+ });
  it('does not upload without initial consent, then retains one independent ID',async()=>{
   const s=setup();await s.engine.run(s.character.id);expect(s.writes).toHaveLength(0);expect(s.states.at(-1)?.phase).toBe('local');
   await s.engine.run(s.character.id,'owner');expect(s.writes).toHaveLength(1);expect(s.remote.character.runtime).toEqual(s.character.runtime);expect(s.receipt.binding?.cloudId).toBe('ABCDEF');

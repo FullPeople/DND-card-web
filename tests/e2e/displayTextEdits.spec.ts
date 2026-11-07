@@ -33,9 +33,11 @@ const active=(page:Page)=>page.locator('.paper[data-active-sheet="true"]');
 
 test('all background text fields save and reopen without changing resources, selections, sources or another card',async({page})=>{
  const {cards,before}=await setup(page),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.evaluate(()=>(window as any).originalStoryInput=document.querySelector('.paper[data-active-sheet="true"] textarea[aria-label="背景故事"]'));
  for(const label of labels)await active(page).getByRole('textbox',{name:label,exact:true}).fill('新填的'+label);
  await expect(page.locator('.save-status')).toContainText('已保存到本机');
  expect(await page.evaluate(()=>(window as any).textCardClones)).toEqual([]);
+ expect(await page.evaluate(()=>(window as any).originalStoryInput===document.querySelector('.paper[data-active-sheet="true"] textarea[aria-label="背景故事"]'))).toBe(true);
  const saved=await records(page),first=saved.characters.find((c:Character)=>c.id===cards[0].id),original=before.characters.find((c:Character)=>c.id===cards[0].id);
  for(const field of ['selections','runtime','profile','automation','notes','answers','futurePrivateField'])expect(first[field]).toEqual(original[field]);
  expect(saved.characters.find((c:Character)=>c.id===cards[1].id)).toEqual(before.characters.find((c:Character)=>c.id===cards[1].id));

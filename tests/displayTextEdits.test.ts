@@ -13,6 +13,8 @@ import {applyCharacterHistoryPatch} from '../src/ui/characterHistoryPatch';
 import {readCharacter} from '../src/core/validation';
 import {exportCharacter} from '../src/core/export';
 import {displayBiographyEdit,displayIdentityEdit,displayCharacterEdit} from '../src/core/displayCharacterEdit';
+import {syncFeatures} from '../src/core/sheet';
+import {syncAutoResources} from '../src/core/resources';
 
 function card(){
  const c=newCharacter();c.automation=newAutomationState();c.notes='Original fallback story';
@@ -102,4 +104,16 @@ it('text undo preserves a concurrently added biography field and uses no whole-c
  const c=card(),after=applyDisplayCharacterEdit(c,displayBiographyEdit('story','Story'))!,live=applyDisplayCharacterEdit(after,displayBiographyEdit('hometown','Concurrent town'))!;
  const normalize=vi.fn(()=>{throw Error('Text history must not normalize unrelated sources');}),clone=vi.spyOn(globalThis,'structuredClone');
  try{const undone=applyCharacterHistoryPatch(live,after,c,()=>({canEdit:true}),{normalize});expect(undone.biography).toEqual({hometown:'Concurrent town'});expect(undone.runtime).toBe(live.runtime);expect(normalize).not.toHaveBeenCalled();expect(clone).not.toHaveBeenCalled();}finally{clone.mockRestore();}
+});
+
+it('a genuine level change after text still invalidates construction and grants features without restoring spent uses',()=>{
+ const c=card(),owner={id:'authored-class',entry:{...c.selections[0].entry,id:'authored-class',kind:'class' as const,name:'Authored class',english:'Authored class',raw:{classFeatures:['Later|Authored class|XPHB|2'],casterProgression:'full',hd:{faces:8}}},level:1,quantity:1,equipped:false};
+ const feature={...c.selections[0].entry,id:'later-feature',name:'Later',english:'Later',raw:{className:'Authored class',classSource:'XPHB',level:2}},entries=[owner.entry,feature];
+ c.selections.push(owner);syncFeatures(c,entries);syncAutoResources(c);c.runtime.resources['spell-slot:1'].current=1;
+ const text=applyDisplayCharacterEdit(c,displayBiographyEdit('story','Keep this story'))!,views=standaloneCardViews(entries,undefined,[],snapshotMemo()),built=views.build(text);
+ const changed=structuredClone(text);changed.selections.find(row=>row.id===owner.id)!.level=2;syncFeatures(changed,entries);syncAutoResources(changed,text);
+ expect(runtimeCharacterBase(changed)).toBe(changed);expect(views.build(changed)).not.toBe(built);expect(changed.selections.some(row=>row.entry.id===feature.id)).toBe(true);
+ const slots=changed.runtime.resources['spell-slot:1'];expect(slots.max).toBe(3);expect(slots.max-slots.current).toBe(c.runtime.resources['spell-slot:1'].max-c.runtime.resources['spell-slot:1'].current);
+ const reference=structuredClone(c);reference.selections.find(row=>row.id===owner.id)!.level=2;syncFeatures(reference,entries);syncAutoResources(reference,c);expect(changed.runtime).toEqual(reference.runtime);
+ expect(changed.runtime.resources.manual.current).toBe(2);expect(changed.biography?.story).toBe('Keep this story');expect(c.selections.find(row=>row.id===owner.id)!.level).toBe(1);
 });
