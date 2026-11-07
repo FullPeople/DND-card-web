@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "producerRevision": "87c3eba61c3a1062f3b52afccb33cd1844be6dfd",
-  "observationProducerRevision": "87c3eba61c3a1062f3b52afccb33cd1844be6dfd",
-  "consumerRevision": "584eeb33485fcb7a83f49573d72d83893241ff19",
-  "consumerSourceTree": "c0b05c24383a927c1dc1cbe8954256a27a9cf36a",
-  "observationBinding": "8aa53cb7d1f75018fb81cfae3412c98089b3f1182efe711c5698e1b38bf2996e",
+  "producerRevision": "a0d1771f00241b014c126be2028a22607873f599",
+  "observationProducerRevision": "a0d1771f00241b014c126be2028a22607873f599",
+  "consumerRevision": "bb8f9c7d075eda526d449015aaa6c39070cc28b6",
+  "consumerSourceTree": "6d9c60ae15866c2805687953cb5d172b3b72759c",
+  "observationBinding": "bddab84cc21f234656bb183af257e7871d74ab89f11495ecc1be44378363d6d8",
   "observations": 18789,
-  "observationsSha256": "fdb243a1e454ab285020a8cbbb23750dbde25489559a8d9a6e0582332cdef36f",
+  "observationsSha256": "df74cd85ff14c35236553e2209573a243c926ca0fef3ea0e336de85c24da0367",
   "reassembledCompleteUnchangedSource": false,
-  "runtimeModules": 316,
+  "runtimeModules": 323,
   "styles": [
     {
       "path": "src/ui/overview.css",
@@ -19,6 +19,6 @@
       "sha256": "abf7c440dacc77fd5802588c80722a24c8565900235b591e953980e27de344a8"
     }
   ],
-  "reportSha256": "042e88c88aa1bbbbae9c005530328e9e30b2fba4bb473bd97b55adf52b645001",
+  "reportSha256": "1e80278a4cdfd024dfdc0528339eb3ebb975bb1f2079b7841cb831c4e7e13bd1",
   "sourceBodiesPublished": false
 }

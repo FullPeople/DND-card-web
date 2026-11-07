@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {RELEASE_DATE,STANDALONE_RELEASE_DATE,releaseHistoryFor,releaseLogFor} from '../src/platform/releaseNotes';
 it('keeps the resumed standalone work current without presenting old completed releases as new',()=>{
- const log=releaseLogFor('standalone');expect(log[0].title).toBe('2026-11-07');expect(log.some(day=>day.title==='2026-10-09')).toBe(true);
+ const log=releaseLogFor('standalone');expect(log[0].title).toBe('2026-11-08');expect(log.some(day=>day.title==='2026-11-07')).toBe(true);expect(JSON.stringify(log[0])).toContain('从外部导入的角色卡');expect(log.some(day=>day.title==='2026-10-09')).toBe(true);
 });
 
 describe('date-grouped changelog',()=>{

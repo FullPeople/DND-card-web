@@ -6,10 +6,10 @@ import {pathToFileURL} from 'node:url';
 import {rolldown} from 'rolldown';
 
 export const nonunitOldReaderPins={revision:'4069886e1bfcab2fb7e2958eca8919601a13dd62',sourceTree:'03d4ab4759597059e6d501a5dcec911f65c6ef30',sourceFiles:619,packageSha256:'dc7334404f7417cb469be7a1e86d0861431c228334d5971373dcab686a780faf',lockSha256:'e4eaa83a394c731a3772466be039cfe7742b144a4e3af8221ceb73e64a6e115f'}as const;
-// Release 0.1.84 changes only the two root release-version fields from 0.1.79.
+// Release 0.1.85 changes only the two root release-version fields from 0.1.79.
 // Keep an exact current-byte pin as well as the complete old-byte pin and the
 // dependency-graph comparison; release composition does not relax either lock.
-const currentMainLockSha256='4c15ae0bd3254206d14da5854851cee47a478c837c046bb4282bae1138c6cd1d';
+const currentMainLockSha256='7e2b0f73dacfd077a05d351b9783046438d1b75a25c1a2bc731cf99a0b036521';
 const fail:(code:string)=>never=code=>{throw Error('NONUNIT_ITEM_CHARGE_OLD_SOURCE_'+code);};
 const hash=(bytes:Uint8Array)=>createHash('sha256').update(bytes).digest('hex');
 export function nonunitReaderDependenciesMatch(oldBytes:Uint8Array,currentBytes:Uint8Array):boolean{
