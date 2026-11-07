@@ -48,7 +48,12 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
   reconciliationReady:(card:Character)=>reconciliationReady.has(runtimeCharacterBase(card)),
   // Only the completed synchronous edit transaction calls this. A fresh
   // catalog/source context owns a different set and must reconcile again.
-  acceptReconciled:(card:Character)=>{reconciliationReady.add(runtimeCharacterBase(card));},
+  acceptReconciled:(card:Character)=>{
+   const base=runtimeCharacterBase(card);
+   // The active-card effect shares this checker. A warmed changing view is
+   // still only a preview; only a completed edit transaction settles it.
+   checkReconciliation(base,()=>false);reconciliationReady.add(base);
+  },
   warmReconciliation:(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
    const base=runtimeCharacterBase(card);if(reconciliationReady.has(base))return;
    reconcile(card,syncSourceSpells);reconciliationReady.add(base);
