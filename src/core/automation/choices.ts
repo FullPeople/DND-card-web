@@ -166,7 +166,10 @@ export function setSheetChoiceIgnored(c:Character,id:string,ignored:boolean,cata
  const before=sheetChoices(c,catalog);if(!before.some(choice=>choice.id===id))throw Error('此选择已不适用，请重新打开特性。');
  const layout=c.featureLayout||={order:[],expanded:[]};
  layout.ignoredChoices=[...new Set([...(layout.ignoredChoices||[]).filter(key=>key!==id),...(ignored?[id]:[])])];
- if(ignored)layout.resumedChoices=layout.resumedChoices?.filter(key=>key!==id);else resumeSheetChoice(c,id);
+ // An explicit action after import stays discoverable. The explicit ignore
+ // still wins in sheetChoiceIgnored; this marker only exempts it from the
+ // import's presentation suppression, including after saving and reopening.
+ if(ignored){if(sheetFillingReviewed(c))layout.resumedChoices=[...new Set([...(layout.resumedChoices||[]),id])];else layout.resumedChoices=layout.resumedChoices?.filter(key=>key!==id);}else resumeSheetChoice(c,id);
  if(ignored)finishBuiltinChoices(c,before,catalog);
  else setBuiltinOptionsVisible(c,choiceSource(c,before.find(choice=>choice.id===id)!),true);
 }
