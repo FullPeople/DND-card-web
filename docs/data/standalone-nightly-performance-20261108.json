@@ -7,13 +7,13 @@
     "deployed": false,
     "publiclyVerified": false
   },
-  "frozenConsumer": "17abd1aee57ded1e8c82d7b611b70a7e48b96f11",
-  "consumerSourceTree": "c0f38455a824f77c18c003e994fac3e4215f0fec",
-  "dataReportCommit": "e4c771349d20925c50898303abccf2ca08035a8c",
-  "dataPr": 99,
-  "producer": "fc8b719b8332ab5aff83c38f4cfeeff4dfebbb52",
-  "runtimeReportSha256": "b0798b645fbbcc1d844ed92724a0c55fef17c3077392dae4d9af90f3efa74c0a",
-  "receiptsSha256": "d04e101ca2050e688d711e68cdc84203a0aaee3ccbf16b767b62197a26a2d258",
+  "frozenConsumer": "ac2e729efe00a77d6ff66820d228b4ec299aa77e",
+  "consumerSourceTree": "a2500e730b2530d80d3266d0993e90be174bb3fb",
+  "dataReportCommit": "b90503777d96d42e43f55b6502ef38e4a03f0907",
+  "dataPr": 100,
+  "producer": "198e5985ed525ed6f8cba8e1eb32ef6c917da15e",
+  "runtimeReportSha256": "ca7684a32a435789b642a742db3f82bcf9b515850f7558d30d69aafd0ca9b9da",
+  "receiptsSha256": "29a82f9c2f4e7fa45d6c73849d15b4a504683c563bbd6c30be8b99f2ca655528",
   "runtimeReplay": {
     "fromZero": true,
     "observations": 18789,
@@ -32,8 +32,8 @@
     "importReviewChangesCoverage": false
   },
   "targeted": {
-    "total": 42,
-    "passed": 42,
+    "total": 44,
+    "passed": 44,
     "failed": 0
   },
   "strictTypecheck": true,
@@ -58,7 +58,7 @@
   "originalWorkspaceFinalVerification": "pending",
   "physicalDevicesAndRealMultiplayerAccepted": false,
   "webPr": 153,
-  "linuxFreshReplay": 42415976081,
+  "linuxFreshReplay": 42421288284,
   "intermediateReplays": [
     {
       "sourceTree": "3d9cd0edb82930315ccef867f8bd60f82fee66da",
@@ -69,6 +69,12 @@
       "sourceTree": "8303de485f85490d351b4d3ccaddcc6fb5229442",
       "windowsAndLinuxVerified": true,
       "linuxRun": 42413555117,
+      "finalSource": false
+    },
+    {
+      "sourceTree": "c0f38455a824f77c18c003e994fac3e4215f0fec",
+      "windowsAndLinuxVerified": true,
+      "linuxRun": 42415976081,
       "finalSource": false
     }
   ],
@@ -88,6 +94,39 @@
         "oldreader5s timeout"
       ]
     },
-    "diagnosticServer": "First source3d9 counter-only control served404 due private Windows path comparison; normalized private server only, all assertions and deadlines retained. Retry passed, latency under replay not controlled."
+    "diagnosticServer": "First source3d9 counter-only control served404 due private Windows path comparison; normalized private server only, all assertions and deadlines retained. Retry passed, latency under replay not controlled.",
+    "c0fFullUnit": {
+      "total": 7948,
+      "passed": 7784,
+      "failed": 2,
+      "pending": 162,
+      "former5And60SecondTimeoutsPassed": true,
+      "timeoutRootCauseProved": false
+    },
+    "retainedPageFeedback": {
+      "sourceTree": "c0f38455a824f77c18c003e994fac3e4215f0fec",
+      "wallMs": [
+        6090,
+        6032,
+        6022
+      ],
+      "buttonClickWaitMs": 5399,
+      "blockingElement": "field-change-feedback",
+      "timeoutMs": 5500,
+      "realOriginalBrowserRed": {
+        "failed": 1,
+        "expectedOldFeedbackAfterNavigation": 0,
+        "actual": 1,
+        "sameViewUndoAndClosePassedBeforeFailure": true
+      },
+      "fix": "Independent visual viewKey; canonical FeedbackContext.scope remains card.id; no blanket pointer passthrough or card remount",
+      "finalBrowserAcceptance": "pending"
+    }
+  },
+  "expectedFinalFlows": {
+    "retained": 30,
+    "productionDesktopPhoneTablet": 36,
+    "realSourceResource": 6,
+    "publicPlayerDesktopPhoneTablet": 18
   }
 }
