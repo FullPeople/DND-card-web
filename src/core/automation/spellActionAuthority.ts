@@ -1,4 +1,5 @@
 import type {Character} from '../model';
+import {slotBalanceHeld} from './slotCapacityReview';
 /** Transient application authority, never read from saved cards or requests. */
 export interface SpellActionAuthority {canEdit?:boolean;gm?:boolean}
 export function liveSpellActionAuthority(value?:SpellActionAuthority):{canEdit:boolean;gm:boolean;valid:boolean}{
@@ -11,5 +12,5 @@ export function spellActionAuthorityReason(c:Character,authority?:SpellActionAut
  const live=liveSpellActionAuthority(authority);
  if(!live.valid||!live.canEdit)return '当前角色卡只读或编辑权限无效，未执行。';
  if(c.locked!==undefined&&typeof c.locked!=='boolean'||c.locked===true&&!live.gm)return '角色卡已锁定，需要当前主持人权限。';
- for(const id of resources){const r=c.runtime.resources[id];if(r&&(r.locked!==undefined&&typeof r.locked!=='boolean'||r.locked===true&&!live.gm))return '所需资源已锁定，需要当前主持人权限。';}
+ for(const id of resources){if(slotBalanceHeld(c,id))return '该法术位的原余额尚未确认，请先核对实际余量。';const r=c.runtime.resources[id];if(r&&(r.locked!==undefined&&typeof r.locked!=='boolean'||r.locked===true&&!live.gm))return '所需资源已锁定，需要当前主持人权限。';}
 }

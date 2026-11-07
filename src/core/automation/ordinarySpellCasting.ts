@@ -11,6 +11,7 @@ export {ordinaryCastingSnapshot,ordinaryCastingRule,ordinaryCastingClassContextM
 import {spellActionAuthorityReason,type SpellActionAuthority} from './spellActionAuthority';
 import {directBaseClassList} from '../classSpellLists';
 import {optionalClassSpellListAccess} from './optionalClassSpellLists';
+import {slotBalanceHeld} from './slotCapacityReview';
 const sorted=(v:any):any=>Array.isArray(v)?v.map(sorted):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==undefined).map(k=>[k,sorted(v[k])])):v;
 /** Direct base-class access only: variant/optional and expanded lists remain held. */
 export function ordinaryDirectBaseClassList(entry:Entry,profile:CasterProfile):boolean{
@@ -42,7 +43,7 @@ function slotPlan(c:Character,eligible:CasterProfile[]):Map<string,number>{
  const hasOrdinary=eligible.some(p=>p.casting.entry.raw.casterProgression!=='pact');
  return new Map(Object.entries(disposable.runtime.resources).filter(([id])=>/^(?:spell|pact)-slot:[1-9]$/.test(id)&&(hasOrdinary||!id.startsWith('spell-slot:'))).map(([id,r])=>[id,r.max]));
 }
-function ownedPool(c:Character,id:string,r:RuntimeResource|undefined,max:number){if(!r||r.automatic!==true||r.unlimited||r.featureGrant||r.sourceSpellGrant||!Number.isSafeInteger(r.max)||r.max!==max||!Number.isSafeInteger(r.current)||r.current<0||r.current>max)return false;if(id.startsWith('spell-slot:')){const mirror=c.spellSettings?.slots[id.split(':')[1]];if(!mirror||mirror.max!==r.max||mirror.used!==r.max-r.current)return false;}return true;}
+function ownedPool(c:Character,id:string,r:RuntimeResource|undefined,max:number){if(slotBalanceHeld(c,id)||!r||r.automatic!==true||r.unlimited||r.featureGrant||r.sourceSpellGrant||!Number.isSafeInteger(r.max)||r.max!==max||!Number.isSafeInteger(r.current)||r.current<0||r.current>max)return false;if(id.startsWith('spell-slot:')){const mirror=c.spellSettings?.slots[id.split(':')[1]];if(!mirror||mirror.max!==r.max||mirror.used!==r.max-r.current)return false;}return true;}
 export interface OrdinarySpellPayment {id:string;label:string;level:number;resourceId?:string;cost:number;available:boolean;reason?:string;debits?:{resourceId:string;cost:number}[]}
 export interface OrdinarySpellOffer {options:OrdinarySpellPayment[];casters:{id:string;name:string;ability:string}[];casterId?:string;requiresCaster?:boolean;reason?:string}
 export function ordinarySpellOffer(c:Character,id:string,casterId?:string,authority?:SpellActionAuthority):OrdinarySpellOffer{
@@ -60,5 +61,5 @@ export function ordinarySpellOffer(c:Character,id:string,casterId?:string,author
  return {...result,...(!result.options.length?{reason:'没有当前已核实的原生主职业自动法术位，或镜像不一致；子职／其他职业模型和手工池不会被接管。'}:{})};
 }
 export function ordinarySpellActionBasis(c:Character,id:string,casterId?:string):string{
- return sourceTextSha256(JSON.stringify(sorted([c.id,c.revision,c.edition,c.profile,c.automation,c.spellSettings,c.selections.map(s=>[s.id,s.entry.id,s.entry.kind,s.entry.source,s.entry.edition,s.entry.packId,s.entry.name,s.entry.english,ordinaryCastingSnapshot(s.entry),s.level,s.parentId,s.grantKey,s.requirementId]),Object.entries(c.runtime.resources).filter(([id])=>/^(?:spell|pact)-slot:[1-9]$/.test(id)),id,casterId])));
+ return sourceTextSha256(JSON.stringify(sorted([c.id,c.revision,c.edition,c.profile,c.automation,c.spellSettings,c.runtime.slotCapacityReview,c.selections.map(s=>[s.id,s.entry.id,s.entry.kind,s.entry.source,s.entry.edition,s.entry.packId,s.entry.name,s.entry.english,ordinaryCastingSnapshot(s.entry),s.level,s.parentId,s.grantKey,s.requirementId]),Object.entries(c.runtime.resources).filter(([id])=>/^(?:spell|pact)-slot:[1-9]$/.test(id)),id,casterId])));
 }

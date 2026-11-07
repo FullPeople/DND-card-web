@@ -1,6 +1,7 @@
 import {validateItemChargeDebitState} from './automation/itemChargeDebits';
 import {validateChargedItemSpellMarker,chargedItemSpellGrantKey} from './automation/chargedItemSpells';
 import {validateLimitedSourceUseState} from './automation/limitedSourceUses';
+import {validateSlotCapacityReview} from './automation/slotCapacityReview';
 import {validateReviewedAlert} from './automation/reviewedAlert';
 import {validateReviewedObservant} from './automation/reviewedObservant';
 import {validateReviewedLinguist} from './automation/reviewedLinguist';
@@ -184,6 +185,7 @@ export function validateCharacter(value: unknown): Character {
   assert(c.profile.autoSourceDefaults === undefined || Array.isArray(c.profile.autoSourceDefaults) && c.profile.autoSourceDefaults.length <= 10000 && c.profile.autoSourceDefaults.every((id:unknown) => typeof id === 'string' && id.length <= 4000), '默认资料来源列表无效。');
   assert(plain(c.runtime) && ['hp', 'tempHp', 'inspiration'].every(k => Number.isFinite(c.runtime[k])) && plain(c.runtime.resources), '角色当前资源数据不正确。');
   validateActionState(c.runtime.automationActions);
+  validateSlotCapacityReview(c.runtime.slotCapacityReview);
   validateLimitedSourceUseState(c.runtime.limitedSourceUses);
   validateItemChargeDebitState(c.runtime.itemChargeDebits);
   for(const r of Object.values(c.runtime.resources) as any[])if(r.itemChargeDebitGrant!==undefined)assert(plain(r.itemChargeDebitGrant)&&typeof r.itemChargeDebitGrant.key==='string'&&r.itemChargeDebitGrant.key.length>0&&r.itemChargeDebitGrant.key.length<=20000,'物品充能计数标记无效。');
