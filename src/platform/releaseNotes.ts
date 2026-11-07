@@ -2,7 +2,7 @@ import {cloudFeaturesEnabled} from '../cloud/availability';
 export const RELEASE_DATE=cloudFeaturesEnabled?'2026-10-25':'2026-10-19';
 export const STANDALONE_RELEASE_DATE='2026-11-08';
 const release312=():ReleaseSection[]=>[
- {title:'文字与背包操作',items:['编辑故事、描述和其他文字时，只更新对应内容，减少整卡重复计算。移动背包格子只调整位置，保留物品和已消耗次数。','减少一般修改后的重复核对，以及法术页和自定义条目编辑时的无关计算。保存、撤销、冲突检查和权限保护继续保留。']},
+ {title:'文字与背包操作',items:['编辑故事、描述和其他文字时，只更新对应内容，减少整卡重复计算。移动背包格子只调整位置，保留物品和已消耗次数。','减少一般修改后的重复核对，以及法术页和自定义条目编辑时的无关计算。保存、撤销、冲突检查和权限保护继续保留。','切页后收起上一页的数值提示，避免遮住背包等操作；当前页仍可撤销修改。']},
  {title:'导入角色卡',items:['从外部导入的角色卡按已完成填写处理，隐藏待填写提示和已忽略选项。保留原有选择、手工内容和资源；之后升级产生的新选项仍可正常填写。']},
 ];
 const release311=():ReleaseSection[]=>[
