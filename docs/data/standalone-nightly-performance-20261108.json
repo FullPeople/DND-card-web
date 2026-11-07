@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-validation",
+  "publication": {
+    "pushed": true,
+    "merged": false,
+    "deployed": false,
+    "publiclyVerified": false
+  },
+  "frozenConsumer": "d0701905bc1cc4797a20dcc94699137821c816e6",
+  "consumerSourceTree": "3d9cd0edb82930315ccef867f8bd60f82fee66da",
+  "dataReportCommit": "392dc4c0d1f62d855949f9cf1005f7cd5e54487d",
+  "dataPr": 98,
+  "producer": "2d5e240e8ad88bdf5059c700d72c039cdaa1f67e",
+  "runtimeReportSha256": "ffa355719efd451da391cd9d180e54a8c388ecc7bd9e62ff3581041766d8da6a",
+  "receiptsSha256": "98135cfa18815987da7528686ab371e2b353583233eb43be9d11f1a12effd0cf",
+  "runtimeReplay": {
+    "fromZero": true,
+    "observations": 18789,
+    "unchangedRecords": 18789,
+    "inputs": 229,
+    "modules": 323,
+    "styles": 2,
+    "allOldGatesRetained": true,
+    "rawSourcePublished": false
+  },
+  "coverage": {
+    "registered": 18789,
+    "sourceVerified": 4561,
+    "partialObservations": 7934,
+    "fullRuleOrBookCompletionClaimed": false,
+    "importReviewChangesCoverage": false
+  },
+  "targeted": {
+    "total": 35,
+    "passed": 35,
+    "failed": 0
+  },
+  "strictTypecheck": true,
+  "finalFullUnit": "pending",
+  "finalProductionBrowser": "pending",
+  "finalResourceBrowser": "pending",
+  "finalPerformanceMeasurement": "pending",
+  "finalCI": "pending",
+  "independentLinuxReplay": {
+    "run": 42407398865,
+    "consumer": "d0701905bc1cc4797a20dcc94699137821c816e6",
+    "status": "pending"
+  },
+  "priorSourceWholeRun": {
+    "sourceTree": "6d9c60ae15866c2805687953cb5d172b3b72759c",
+    "total": 7938,
+    "passed": 7774,
+    "failed": 2,
+    "pending": 162,
+    "failures": "Windows symlink and file mode; preserved, not counted as pass"
+  },
+  "originalWorkspaceFinalVerification": "pending",
+  "physicalDevicesAndRealMultiplayerAccepted": false
+}

@@ -5,14 +5,14 @@
 | 症状或危险做法 | 决策 | 证据入口 |
 |---|---|---|
 | 打字、改背景或添物资就卡 | 通用编辑深拷贝并同步整卡，新对象又触发读取核对。展示字段须有明确变更意图，不能靠回调名字或历史 key 猜它不影响规则 | [逐功能审查](../docs/STANDALONE-FUNCTION-REVIEW.md)、[本轮方案](../docs/STANDALONE-PERFORMANCE-PLAN.md) |
-| “有缓存”但仍重算 | 整卡克隆让未变条目、选择、配置也换身份，破坏对象缓存。先数真实计算和失效对象 | `src/platform/snapshotMemo.ts`、`src/core/runtimeCharacterEdit.ts`、`src/core/displayCharacterEdit.ts`；本轮方案 |
+| “有缓存”但仍重算 | 整卡克隆破坏对象身份；后台预热也不是事务完成。先数实际失效对象，确认当前卡与后台共用相同上下文的完成记录 | `src/platform/snapshotMemo.ts`、`src/platform/standaloneCardViews.ts`；[夜间实测](../docs/STANDALONE-NIGHTLY-PERFORMANCE-20261108.md) |
 | 缓存全读完仍在加载 | 下载、解析、准备角色与建索引是不同阶段；36/36 不等于可交互。空闲回调仍可造成长任务 | R32；本轮方案 |
 | 改一张卡却读写整本 | 当前保存读整本、备份整本、写整本；40 ms 合并队列不是按卡存储。不能直接删备份或改格式求快 | `src/platform/storage.ts:saveWorkspace`、`src/platform/snapshotSaveQueue.ts`；R25 |
 | 手工次数被接管、未知配置被清理 | ID 相似不等于自动归属；停用保留意图，恢复不重领一次性内容、不补满次数 | [R01／R31](../docs/REGRESSION-REGISTER.md)、[归属历史](../docs/RESOURCE-OWNERSHIP-20261107.md) |
 | “已同步”却回弹、改完读取失败 | 草稿、持久正文、运行视图、投影不能并列做权威。核对迟到 ACK 与授权代次；缓存不赋予权限。缺原现场证据时保持开放 | [同步教训](../docs/PROJECT_LESSONS.md)、R02／R04；`src/cloud/authorizationLease.ts` |
 | 库存重复发放、失败后重试丢物资 | 起始装备先整包校验，物品／金币／回执一起提交；未知结果先对账，不重放，不按同名合并物品 | R20／R12；`src/core/inventory.ts`、`src/core/automation/sourceEquipment.ts` |
 | 构建绿、局部绿就说全部完成 | JSON 能读不等于选择、生效、保存重开通过；全目录不缩分母。发布、真机、多人分开验收，不拼接分散通过 | R13／R15／R17／R18；[311 回执](../docs/CARD-RELEASE311-20261107.md) |
-| CI 失败后改散列或加等待 | 区分准备失败、产品失败、绑定过期和测试自身过重。新代码用新证据，保留原断言、时限与失败。旧读取器本机加载修正不等于 Linux 全链通过 | R18／R19／R23／R27／R28／R29；[候选状态](CURRENT.md) |
+| CI 失败后改散列或加等待 | 分清准备、产品和过期绑定；回放期间连仅测试提交也须等待，冻结双方 HEAD。新代码用新证据，保留时限与原失败；过时预期先对真实发布基线核实，再加强验收。正式与默认停用云端档位分开测量 | R18／R19／R23／R27／R28／R29；[候选状态](CURRENT.md)、夜间实测 |
 | 查询超时就重发部署 | 先查已有任务、封签与终态；预检、上传、合并不等于上线。只改授权目标，保护数据库和其他入口 | R30；`DND-CENTER-PRODUCTION-DEPLOY.md` |
 | 长交接把旧版本当现在 | 旧入口要求顺读五份约 687 KB 文档。本轮改成短核心与症状索引，历史保留，不继续逐轮堆进核心 | [CURRENT.md](CURRENT.md) |
 
