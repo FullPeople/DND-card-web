@@ -1,11 +1,23 @@
 {
   "schemaVersion": 1,
-  "status": "candidate-validation",
+  "status": "published-publicly-verified",
   "publication": {
     "pushed": true,
-    "merged": false,
-    "deployed": false,
-    "publiclyVerified": false
+    "merged": true,
+    "deployed": true,
+    "publiclyVerified": true,
+    "version": "standalone-1.0.312",
+    "source": "e8c3785772a97b2e8aea0cbcb8d87e9ac797413f",
+    "sourceTree": "a2500e730b2530d80d3266d0993e90be174bb3fb",
+    "observedBothOnlineAt": "2026-11-08T01:00:24.973875+00:00",
+    "before10Beijing": true,
+    "preflightRun": 42430897456,
+    "publishRun": 42431626288,
+    "manifestSha256": "d40b472e02ae79625afb2b9af91ebca4500889aa22823f96393a7651ae262d3e",
+    "archiveSha256": "5b8e784a0b0975261b7d3e42e5f0ffaddb2ebbb021c89ad2ce1a11141b98537b",
+    "databasePreserved": true,
+    "protectedMatches": true,
+    "backendChanged": false
   },
   "frozenConsumer": "ac2e729efe00a77d6ff66820d228b4ec299aa77e",
   "consumerSourceTree": "a2500e730b2530d80d3266d0993e90be174bb3fb",
@@ -37,15 +49,110 @@
     "failed": 0
   },
   "strictTypecheck": true,
-  "finalFullUnit": "pending",
-  "finalProductionBrowser": "pending",
-  "finalResourceBrowser": "pending",
-  "finalPerformanceMeasurement": "pending",
-  "finalCI": "pending",
+  "finalFullUnit": {
+    "total": 7950,
+    "windowsPassed": 7786,
+    "windowsFailed": 2,
+    "windowsPending": 162,
+    "windowsFailures": [
+      "symlink EPERM",
+      "POSIX0600 mode mismatch"
+    ],
+    "linuxExactMainPassed": 6968,
+    "linuxExactMainFailed": 0,
+    "linuxConditionalSkipped": 982,
+    "correspondingFilesystemFilePassed": 6
+  },
+  "finalProductionBrowser": {
+    "passed": 36,
+    "viewports": 3,
+    "retainedCardCasesPassed": 30,
+    "publicUniqueCasesPassed": 24,
+    "publicFirstRunPassed": 21,
+    "publicFirstRunFailed": 3,
+    "publicOnlyThreeFailedCasesCorrectedAndPassed": true,
+    "sourceTree": "a2500e730b2530d80d3266d0993e90be174bb3fb",
+    "normalBuildSource": "551094815b8ba05d7d8b6ad1c475be4f06f66da4",
+    "budgetsAndAssertionsUnchanged": true
+  },
+  "finalResourceBrowser": {
+    "passed": 6,
+    "actualSourceData": true,
+    "realPlayerDataUsed": false,
+    "physicalDevicesAccepted": false
+  },
+  "finalPerformanceMeasurement": {
+    "localSourceTree": "a2500e730b2530d80d3266d0993e90be174bb3fb",
+    "localFixedQuantityMsBefore": 6032,
+    "localFixedQuantityMsAfter": 740,
+    "localClickWaitMsBefore": 5399,
+    "localClickWaitMsAfter": 78,
+    "localDisplayAndLayoutWholeCardCloneEvaluateSync": 0,
+    "testedNormalMechanicalSyncCallsEach": 1,
+    "publicFixedQuantityMs": 741,
+    "publicRuleFunctionCountersAvailable": false,
+    "publicColdStartupMs": 5189,
+    "publicColdCatalogMs": 30457,
+    "coldPerformanceAccepted": false,
+    "old311ColdStartupMs": 5121,
+    "old311ColdCatalogMs": 37981
+  },
+  "finalCI": {
+    "pr": 153,
+    "head": "c862ccd687caea25503b6542401d0bc48eea3f77",
+    "prPassedChecks": 45,
+    "mainSource": "e8c3785772a97b2e8aea0cbcb8d87e9ac797413f",
+    "mainPassedChecks": 38,
+    "requiredRuns": [
+      {
+        "runId": 42429039463,
+        "workflow": ".github/workflows/web.yml",
+        "headSha": "e8c3785772a97b2e8aea0cbcb8d87e9ac797413f",
+        "branch": "main",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": 30,
+        "allJobsSuccess": true,
+        "completedAt": "2026-11-08T00:38:56Z"
+      },
+      {
+        "runId": 42429147954,
+        "workflow": ".github/workflows/cloud-migration.yml",
+        "headSha": "e8c3785772a97b2e8aea0cbcb8d87e9ac797413f",
+        "branch": "main",
+        "event": "workflow_dispatch",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": 1,
+        "allJobsSuccess": true,
+        "completedAt": "2026-11-08T00:23:31Z"
+      },
+      {
+        "runId": 42429151753,
+        "workflow": ".github/workflows/dot-deploy-contract.yml",
+        "headSha": "e8c3785772a97b2e8aea0cbcb8d87e9ac797413f",
+        "branch": "main",
+        "event": "workflow_dispatch",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": 1,
+        "allJobsSuccess": true,
+        "completedAt": "2026-11-08T00:18:41Z"
+      }
+    ],
+    "requiredSkippedCancelledOrFailedJobs": 0
+  },
   "independentLinuxReplay": {
-    "run": 42407398865,
-    "consumer": "d0701905bc1cc4797a20dcc94699137821c816e6",
-    "status": "pending"
+    "run": 42421288284,
+    "consumer": "ac2e729efe00a77d6ff66820d228b4ec299aa77e",
+    "sourceTree": "a2500e730b2530d80d3266d0993e90be174bb3fb",
+    "producer": "198e5985ed525ed6f8cba8e1eb32ef6c917da15e",
+    "status": "success",
+    "unchangedRecords": 18789,
+    "inputs": 229,
+    "modules": 323,
+    "styles": 2
   },
   "priorSourceWholeRun": {
     "sourceTree": "6d9c60ae15866c2805687953cb5d172b3b72759c",
@@ -55,7 +162,31 @@
     "pending": 162,
     "failures": "Windows symlink and file mode; preserved, not counted as pass"
   },
-  "originalWorkspaceFinalVerification": "pending",
+  "originalWorkspaceFinalVerification": {
+    "verifiedAt": "2026-11-08T00:31:32.108584+00:00",
+    "preservationRecords": 469,
+    "uniqueFileCount": 468,
+    "duplicateRecordCount": 1,
+    "unchangedRecords": 469,
+    "allSourceFilesUnchanged": true,
+    "archives": [
+      {
+        "name": "original-authored-files.zip",
+        "sha256": "94dfb287078bb547d9144b2be250b240ac26867870330988c12fff4b4c50bc5a",
+        "verifiedEntries": 441,
+        "errors": []
+      },
+      {
+        "name": "original-other-untracked-files.zip",
+        "sha256": "9484481b398390ae8f40fb8dc727790dac2d7633eb856eeae6857824aa96c225",
+        "verifiedEntries": 28,
+        "errors": []
+      }
+    ],
+    "allArchiveEntriesVerified": true,
+    "originalHeadUnchanged": true,
+    "differences": []
+  },
   "physicalDevicesAndRealMultiplayerAccepted": false,
   "webPr": 153,
   "linuxFreshReplay": 42421288284,
@@ -127,6 +258,72 @@
     "retained": 30,
     "productionDesktopPhoneTablet": 36,
     "realSourceResource": 6,
-    "publicPlayerDesktopPhoneTablet": 18
+    "publicPlayerDesktopPhoneTablet": 24
+  },
+  "historicalIndependentLinuxCandidate": {
+    "run": 42407398865,
+    "consumer": "d0701905bc1cc4797a20dcc94699137821c816e6",
+    "status": "pending",
+    "adoptedAsFinal": false
+  },
+  "publicPayload": {
+    "passed": 212,
+    "initialPassed": 190,
+    "initialUnrequestedUnicodeFiles": 22,
+    "remaining22ActuallyRequestedAndPassed": true,
+    "firstReportRetained": true,
+    "hashStandardsUnchanged": true
+  },
+  "publicPrivateLibrary": {
+    "cardActuallyMounted": true,
+    "libraryActuallyMounted": true,
+    "privateUi": true,
+    "anonymousDirectoryStatus": 401,
+    "accountMutations": 0,
+    "actualLoggedInWritesAccepted": false
+  },
+  "rawEvidenceSha256": {
+    "final-local-acceptance-bound-to-release.json": "81c33b7b98db289f625bb5aa990d53e4af25532941e7c7779bcc2782c85cd937",
+    "public-player-feedback-browser.log": "c722e8908d34b2fd3ba17545e1901e473a091302f4a605028e8ec0a6cc1abcfb",
+    "public-player-feedback-browser-attempt2.json": "4a8f7fb3423c8daa36de2763a658b200a233b56d99c18b45f772a7c3b791627b",
+    "public-player-feedback-browser-attempt3.json": "4b4e25d49992a4fd00c1ee2b4f7a9c6d9a7c48a750d47953920a36893397968d",
+    "public-312-all-payloads.json": "8954a63ea0934ad70423d1a23c7c7b0f5f93e81af0439e1a516738ba1cf4d245",
+    "public-312-all-payloads-final.json": "43086b73ec3b7f66fc5ee22a3e2ab499c81512889c0743ca5a180eec95d442ca",
+    "public-312-pair-result.json": "e0873f2e6301be337349927b0da2c94b76ebe8f576efdd85b76ac35ae7b67df4",
+    "public-cold-312-20261108-result.json": "0c730305c6d70524a579de4653b26c02ca8d722727e15a1e42ee6a9306c66a30",
+    "public-312-fixed-sample-result.json": "7d965b8f37591644424cce38d31938cc11c811c32973834deacfd280dce60c47",
+    "feedback-final-performance-verified.json": "a12048989aff73019e0a4a9f028e33ad85e0593f5c1c842977fb7a42b7772f7f",
+    "publish312-42431626288-receipt/receipt.json": "c04d1bab37d2143e5a8adedf4cd59bff8434fdac821d5c0f6ee30d0699866130",
+    "public-312-acceptance-summary.json": "542df0f130f98630f7476bb66f026a70ee9174bc7a3164e4742ae3d0c5ce0168"
+  },
+  "additionalPreservedFailures": [
+    {
+      "phase": "normal production final first36",
+      "result": "33pass3 fixture old imported-ID lookups failed; import intentionally assigns newID/name suffix. Capture actual ID, retain all resource/answer assertions; full36 rerun passed. Product source unchanged."
+    },
+    {
+      "phase": "PR exact663 Firefox installation",
+      "result": "44checks pass1failed because App warmup mixed into installation inspection; inert same-origin fixture now registers unmodified worker before actual App opens; original exclusions retained. Exactc86245checks and mergedmain38checks passed."
+    },
+    {
+      "phase": "public helper preparation",
+      "result": "Original no-tests collection failure and 190pass22unrequested Chinese-URL result retained. Dependency paths and URI quoting only corrected; all original assertions and budgets kept."
+    },
+    {
+      "phase": "public actual24 first attempt",
+      "result": "21passed3failed: second tab wrongly opened DND.CENTER homepage; error-context proves homepage, no character app. Correct only second.goto to real /card/, then only failed3 viewports rerun and pass; no test removed or relaxed."
+    }
+  ],
+  "initialPlannedPublicPlayerCases": 18,
+  "publicOperationAcceptance": {
+    "source": "e8c3785772a97b2e8aea0cbcb8d87e9ac797413f",
+    "uniqueCasesActuallyPassed": 24,
+    "firstActualRunPassed": 21,
+    "firstActualRunFailed": 3,
+    "failedOnlyRetryPassed": 3,
+    "allOriginalAssertionsAndBudgetsRetained": true,
+    "initialNoTestsCollectionAndWrongSecondUrlEvidenceRetained": true,
+    "publicScriptActuallyContained8CasesPerViewport": true,
+    "initialPlan18CorrectedToActual24": true
   }
 }
