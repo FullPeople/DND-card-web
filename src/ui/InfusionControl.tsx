@@ -1,3 +1,4 @@
+import {useSheetDerived} from './SheetChoicesContext';
 import {useEffect,useState} from 'react';
 import {selectionEffectsAllowed,type Character,type Entry} from '../core/model';
 import {selectionActive} from '../core/automation/choices';
@@ -14,6 +15,7 @@ type Props={c:Character;choiceId:string;ownerId:string;entry:Entry;unavailable:b
 
 /** Learning, choosing a target and equipping it are separate player actions. */
 export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,edit}:Props){
+ const sheetDerived=useSheetDerived(c);
  const supportedState=!c.infusions||c.infusions.version===1;
  const binding=supportedState?c.infusions?.bindings.find(row=>row.choiceId===choiceId&&row.entryId===entry.id):undefined;
  const [targetId,setTargetId]=useState(binding?.targetId||''),[damageType,setDamageType]=useState(binding?.damageType||''),[error,setError]=useState('');
@@ -32,7 +34,7 @@ export function InfusionControl({c,choiceId,ownerId,entry,unavailable,writable,e
  // Read the actual attack projection: an accepted custom ammunition target
  // can still have only melee or thrown modes, neither supported by this rule.
  const rangedEffect=binding&&rule.rangedOnly?evaluation.weapons.get(binding.targetId):undefined;
- const supportedRangedMode=!binding||!rule.rangedOnly||!!rangedEffect&&automaticWeaponAttacks(c,evaluate(c)).attacks.some(attack=>attack.origin.selectionId===binding.targetId&&attack.modeLabel==='远程'&&attack.trace.includes(rangedEffect.trace[0]));
+ const supportedRangedMode=!binding||!rule.rangedOnly||!!rangedEffect&&automaticWeaponAttacks(c,(sheetDerived??evaluate(c))).attacks.some(attack=>attack.origin.selectionId===binding.targetId&&attack.modeLabel==='远程'&&attack.trace.includes(rangedEffect.trace[0]));
  const currentMissing=unavailableReason||issue?.message||(!target?.equipped?'未装备':rule.requiresAttunement&&!target?.attuned?'未同调':heldRequired&&!radiant&&!binding?.held?'未确认当前持握':!supportedRangedMode?'当前目标没有受支持的远程攻击模式，未追加自动命中与伤害加值':resistance&&!binding?.damageType?'尚未选择抗性伤害类型':resistance&&!evaluation.resistances.includes(binding?.damageType||'')?'当前护甲配置不满足生效条件':heldRequired&&!focus&&!radiant&&!evaluation.trace.some(line=>line.startsWith(`${entry.name} ·`))?'当前盾牌配置不满足生效条件':'');
  const holdLabel=focus?'确认当前持握此法器':radiant?'确认当前持握此武器':'确认当前持握此盾牌';
  const targetStatus=ring?(unavailableReason||issue?.message?'当前不可用，不能恢复法术位':!target?.equipped?'未穿戴，不能恢复法术位':!target.attuned?'未同调，不能恢复法术位':'已穿戴并同调，可核对法术位恢复'):mind?(unavailableReason||issue?.message?'当前不可用，不能使用反应充能':target?.equipped?'已穿戴，可核对反应触发':'未穿戴，不能使用反应充能'):focus?(!target?.equipped?'未装备，法术攻击加值未生效':!target.attuned?'未同调，法术攻击加值未生效':!binding?.held?'未确认当前持握，法术攻击加值未生效':'已装备、已同调并确认持握'):target?.equipped?'已装备':rule.mechanism==='weapon-bonus'?'未装备，不生成自动攻击':'未装备，不计 AC';

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-11-07T08:45:22.767532+00:00",
+  "scope": "Standalone functional entry points and shared paths; read-only source review and documentation. No product changes, deployment or real player inputs.",
+  "publicRelease": {
+    "backendVersion": "1.0.303",
+    "cloudMode": "account-private",
+    "qqLogin": "ready",
+    "sourceCommit": "8fb3815ba4dbb72d8901be3f6b723ca447d4d5ea",
+    "sourceRepository": "FullPeople/DND-card-web",
+    "targets": [
+      "card",
+      "library"
+    ],
+    "version": "standalone-1.0.311"
+  },
+  "releaseObservedAtUtc": "2026-11-07T08:23:50.913336+00:00",
+  "releaseReceiptSha256": "23692ab6e08a7d694724d0d3005b4b00d8cbce38fdc33f326b2c83789fbf0f02",
+  "sourceCommit": "8fb3815ba4dbb72d8901be3f6b723ca447d4d5ea",
+  "sourceTree": "2b905d57f9f3cf1304230ab6053571fe7e302cc1",
+  "documentationBaseCommit": "5d85685130ff53adb3545bbcfbd6376131304369",
+  "candidateDiscovery": {
+    "trackedTsTsxFiles": 518,
+    "candidateCalls": 5972,
+    "jsxKeySites": 436,
+    "caveat": "Candidate counts are not defect counts or full line-by-line semantic review."
+  },
+  "findings": {
+    "ids": [
+      "S01",
+      "S02",
+      "S03",
+      "S04",
+      "S05",
+      "S06",
+      "S07",
+      "S08",
+      "S09",
+      "S10",
+      "S11",
+      "S12",
+      "S13",
+      "S14",
+      "S15",
+      "S16",
+      "S17",
+      "S18",
+      "S19",
+      "S20",
+      "S21"
+    ],
+    "count": 21,
+    "status": "review findings and profile candidates, none implemented"
+  },
+  "inventoryPureFunctionWitness": {
+    "passed": true,
+    "sourceCommit": "8fb3815ba4dbb72d8901be3f6b723ca447d4d5ea",
+    "scope": "Actual pure inventory functions bundled without source changes; authored local inputs only. Reference churn and canonical serialization counts, not browser latency or permission acceptance.",
+    "rows": [
+      {
+        "items": 2,
+        "addingOneNewItemCanonicalSerializations": 4,
+        "serializedCharacters": 2136,
+        "originalInventoryUnchanged": true,
+        "unmovedItemWrapperReplaced": true,
+        "unmovedItemEntryReplaced": true,
+        "unmovedItemSemanticContentPreserved": true
+      },
+      {
+        "items": 50,
+        "addingOneNewItemCanonicalSerializations": 100,
+        "serializedCharacters": 53760,
+        "originalInventoryUnchanged": true,
+        "unmovedItemWrapperReplaced": true,
+        "unmovedItemEntryReplaced": true,
+        "unmovedItemSemanticContentPreserved": true
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "file": "baseline.json",
+      "sha256": "3e272287d3daa1768ad42a4ae6b39f48ba2c0a8fa94a53258934fb7d3ee9077f",
+      "scope": "fresh public release and exact source tree",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "source-index.json",
+      "sha256": "4a3e4fc6b6d32cc052c9855c7762750fac86cfbf04e0cb7ac1853585a2967b35",
+      "scope": "bounded candidate discovery; not full semantic acceptance",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "inventory-witness-result.json",
+      "sha256": "7c97f9fcdf09fe7f63468be05a1090ff794d5051797e4e06ce0113d83d24c235",
+      "scope": "current audit actual pure functions, authored inputs",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "inventory-witness.mjs",
+      "sha256": "1044eb4c517d7f13d1402f49288139e19bca78e0499f391373764d8db741387b",
+      "scope": "private diagnostic script; not application source",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "inventory-witness-preparation-failure.json",
+      "sha256": "4e5e307c3ecaa175a101291033fed883a1f1b961f603acafff0f254ea29dba2a",
+      "scope": "initial preparation failure retained",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "public-controls-attempt5-result.json",
+      "sha256": "6c99c6ab9453a8ece60d32f3e44d25df410c8202932d0a1817a886e28e5f5259",
+      "scope": "prior same-source public run; not rerun during this code audit",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "observed-attempt4-result.json",
+      "sha256": "0644ad4026be38fa048d9baef3449c212cfb3c8396401fa545f3da54fa5dc48e",
+      "scope": "prior same-source observer run; distinct from public counter claim",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "public-cold-paper-ready.json",
+      "sha256": "09e19a984ba69da9f1603c663c3a9bf557cd92c000e7ba0537cfad4c6dc9af3c",
+      "scope": "prior public single-network cold sample",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "static-first-card-graph.json",
+      "sha256": "cb6a70e8ac2679afd106dc34271be2fb0706023c8f0e632e12447763cc09d30d",
+      "scope": "source graph bytes, not network bytes",
+      "rawReportPrivate": true
+    },
+    {
+      "file": "public311-sealed-inputs.json",
+      "sha256": "f4bf8d62171a21a3556e5842aebed98601338093a90118291f2d6e29d3373845",
+      "scope": "qualified production payload file sizes",
+      "rawReportPrivate": true
+    }
+  ],
+  "checks": {
+    "applicationSourceUnchanged": true,
+    "testSourceAndStandardsUnchanged": true,
+    "privatePlayerFilesAccessed": false,
+    "ruleTextOrPrivateFixturesPublished": false,
+    "implementationOrDeployment": false,
+    "fullTestsCIAndNewBrowserAcceptance": "not run for documentation-only review",
+    "deviceMultiplayerAndServerAcceptance": "not performed"
+  },
+  "preparationFailure": {
+    "phase": "inventory diagnostic preparation",
+    "result": "failed",
+    "errorCode": "ERR_UNSUPPORTED_ESM_URL_SCHEME",
+    "cause": "Node ESM cannot import a Windows drive path as an import specifier.",
+    "correction": "Use a file URL relative to import.meta.url for the generated private diagnostic bundle.",
+    "provenance": "Retained from the observed initial tool result in this audit; no product code or assertion changed.",
+    "classification": "diagnostic harness preparation failure, not a product assertion failure"
+  },
+  "nextAuthorizationBoundary": "Wait for implementation direction; do not resume long-term goal, edit product code, push, merge or deploy based on this audit."
+}

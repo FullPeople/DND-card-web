@@ -1,3 +1,4 @@
+import {useSheetDerived} from './SheetChoicesContext';
 import {useEffect,useRef,useState} from 'react';
 import {RetainedCardHideEffect,useRetainedCardActive} from './RetainedCardVisibility';
 import {useInteractionStatus} from './InteractionFeedback';
@@ -15,9 +16,10 @@ const confirmationBasis=(c:Character)=>JSON.stringify([c.id,c.edition,c.abilitie
 const catalogBasis=(catalog:Entry[],entryId:string)=>JSON.stringify(catalog.filter(row=>row.id===entryId||row.id==='kiwee:feat:phb:alert::::::'||row.id==='kiwee:feat:xphb:alert::::::'||row.english==='Alert'||row.raw?.ENG_name==='Alert'));
 
 export function AlertControl({c,catalog,choiceId,entry,unavailable,writable,edit}:Props){
+ const sheetDerived=useSheetDerived(c);
  const active=useRetainedCardActive(),persistence=useInteractionStatus(),consumed=useRef(false),draftEpoch=useRef(0);
  const [manual,setManual]=useState(false),[error,setError]=useState('');
- const status=reviewedAlertStatus(c,choiceId,entry.id),derived=evaluate(c),saved=JSON.stringify(c.reviewedAlert),characterBasis=confirmationBasis(c),familyBasis=catalogBasis(catalog,entry.id),basis=JSON.stringify([characterBasis,familyBasis]);
+ const status=reviewedAlertStatus(c,choiceId,entry.id),derived=(sheetDerived??evaluate(c)),saved=JSON.stringify(c.reviewedAlert),characterBasis=confirmationBasis(c),familyBasis=catalogBasis(catalog,entry.id),basis=JSON.stringify([characterBasis,familyBasis]);
  const known=!c.reviewedAlert||c.reviewedAlert.version===1,canEdit=known&&writable&&!!edit&&active;
  const live=useRef({basis,canEdit,unavailable,characterId:c.id});live.current={basis,canEdit,unavailable,characterId:c.id};
  function clearConsent(){draftEpoch.current++;setManual(false);consumed.current=false;}

@@ -50,17 +50,16 @@ test('a failed deferred page leaves the saved card and navigation available',asy
 test.describe('offline cache',()=>{
  test.use({serviceWorkers:'allow'});
  test('offline installation excludes unused dictionary and editing tools',async({page,context})=>{
- let release!:()=>void;const held=new Promise<void>(resolve=>release=resolve);
- // Inspect installation separately from the intentional post-opening prefetch.
- // The context also holds worker-owned fetches after the worker takes control.
- await context.route(/\/assets\/(?:search|sheetImage|AutomationPanel|ResourceDashboard|SpellsPage|CardMigration)-[^/]+\.js$/,async route=>{await held;await route.continue().catch(()=>{});});
- try{
- await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
- await page.evaluate(async()=>{const registration=await navigator.serviceWorker.ready;if(registration.active?.state!=='activated')await new Promise<void>(done=>registration.active?.addEventListener('statechange',()=>done(),{once:true}));});
+ // Register the real built worker from an inert same-origin document. This
+ // observes installation before App can intentionally warm deferred tools;
+ // browser routing cannot reliably hold worker-owned fetches in Firefox.
+ await context.route('**/offline-installation-probe.html',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Offline installation probe</title>'}));
+ await page.goto('/offline-installation-probe.html');
+ await page.evaluate(async()=>{await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready;});
  const cached=await page.evaluate(async()=>{const names=await caches.keys(),name=names.find(name=>name.startsWith('dnd-card-shell:'));return (await (await caches.open(name!)).keys()).map(request=>request.url);});
  expect(cached.some(url=>/\/assets\/App-.*\.js/.test(url))).toBe(true);
  for(const tool of ['search','sheetImage','AutomationPanel','ResourceDashboard','SpellsPage','CardMigration'])expect(cached.some(url=>new RegExp('/assets/'+tool+'-.*\\.js').test(url)),tool).toBe(false);
- }finally{release();}
+ await mockSource(page);await suppressAnnouncement(page);await page.goto('/');await expect(page.locator('.paper')).toBeVisible();
 });
 
 test('first-visit libraries and used pages are retained for offline reopening',async({page,context,browserName})=>{

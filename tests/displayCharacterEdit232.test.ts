@@ -17,7 +17,11 @@ describe('explicit display edits',()=>{
  });
  it('ordinary callbacks cannot opt out, even if they set a display field',()=>{const c=newCharacter();expect(applyDisplayCharacterEdit(c,d=>{d.name='changed';})).toBeUndefined();expect(applyDisplayCharacterEdit(c,d=>{d.baseHp=99;})).toBeUndefined();});
  it('every non-display key including unknown future data invalidates the rules view',()=>{
-  const c=newCharacter();for(const key of Object.keys(c).filter(key=>!['name','player','revision','updatedAt'].includes(key))){const value=c[key as keyof Character];const changed=typeof value==='object'?structuredClone(value):typeof value==='number'?value+1:typeof value==='boolean'?!value:String(value)+'changed';expect(sameCharacterMechanics(c,{...c,[key]:changed})).toBe(false);}
+  const c=newCharacter();for(const key of Object.keys(c).filter(key=>!['name','player','identity','biography','revision','updatedAt'].includes(key))){const value=c[key as keyof Character];const changed=typeof value==='object'?structuredClone(value):typeof value==='number'?value+1:typeof value==='boolean'?!value:String(value)+'changed';expect(sameCharacterMechanics(c,{...c,[key]:changed})).toBe(false);}
+  expect(sameCharacterMechanics(c,{...c,identity:{...c.identity,age:'99'}})).toBe(true);
+  expect(sameCharacterMechanics(c,{...c,identity:{...c.identity,futureMechanic:1}} as Character)).toBe(false);
+  expect(sameCharacterMechanics(c,{...c,biography:{story:'Display text'}})).toBe(true);
+  expect(sameCharacterMechanics(c,{...c,biography:{futureMechanic:1}} as Character)).toBe(false);
   expect(sameCharacterMechanics(c,{...c,futureRule:1} as Character)).toBe(false);expect(sameCharacterMechanics(undefined,c)).toBe(false);expect(sameCharacterMechanics(c,{...c,revision:100,updatedAt:'new'})).toBe(true);
  });
  it('initialization predicate exactly matches the existing migration behavior including opt-outs and unknown versions',()=>{

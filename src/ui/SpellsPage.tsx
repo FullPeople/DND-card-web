@@ -3,7 +3,7 @@ import {spellPayments} from '../core/automation/actions';
 import {itemAtWillGrantKey} from '../core/automation/itemAtWill';
 import {optionalClassListOffer,optionalClassListOffers,optionalClassSpellListAccess} from '../core/automation/optionalClassSpellLists';
 import {spellActionAuthorityReason} from '../core/automation/spellActionAuthority';
-import {sheetChoices} from '../core/automation/choices';
+import {SheetChoicesContext,choicesForSnapshot,useSheetMechanics} from './SheetChoicesContext';
 import {OptionalClassSpellListControl} from './OptionalClassSpellListControl';
 import {useChoiceWorkspace} from './ChoiceWorkspaceContext';
 import {ChoiceWorkspace} from './ChoiceWorkspace';
@@ -73,12 +73,13 @@ function OptionalClassChoiceWorkspace({c,ownerId,id,host,entries,edit,close,writ
 
 export function SpellsPage({c,d,edit,browse,entries=[],inspect,readOnly=false}:PageProps&{readOnly?:boolean}){
  const editing=useContext(SheetEditContext),preview=useSheetContext('reference',ReferenceContext),workspace=useChoiceWorkspace(),settings=spellState(c,d),capturing=useSheetCaptureActive(),active=useRetainedCardActive();
- const spells=useMemo(()=>spellLibrary(c,entries),[c,entries]),groups=cantripGroups(c),profiles=casterProfiles(c);
- const optionalLists=optionalClassListOffers(c,entries,{canEdit:editing&&!readOnly});
- const optionalChoices=useMemo(()=>optionalLists.length?sheetChoices(c,entries).filter(choice=>choice.channel==='spells'&&optionalLists.some(offer=>offer.eligible&&offer.ownerId===choice.ownerId)):[],[c,entries,optionalLists.length]);
+ const mechanics=useSheetMechanics(c),choicesSnapshot=useSheetContext('choices',SheetChoicesContext);
+ const spells=useMemo(()=>spellLibrary(mechanics,entries),[mechanics,entries]),groups=useMemo(()=>cantripGroups(mechanics),[mechanics]),profiles=useMemo(()=>casterProfiles(mechanics),[mechanics]);
+ const optionalLists=useMemo(()=>optionalClassListOffers(mechanics,entries,{canEdit:editing&&!readOnly}),[mechanics,entries,editing,readOnly]);
+ const optionalChoices=useMemo(()=>optionalLists.length?choicesForSnapshot(choicesSnapshot,mechanics,entries).filter(choice=>choice.channel==='spells'&&optionalLists.some(offer=>offer.eligible&&offer.ownerId===choice.ownerId)):[],[mechanics,entries,choicesSnapshot,optionalLists]);
  const optionalHost=`optional-class-list:${c.id}:spells`,optionalChoice=optionalChoices.find(choice=>choice.id===workspace.id),optionalProfile=profiles.find(profile=>profile.owner.id===optionalChoice?.ownerId);
  const optionalChoiceId=editing&&!readOnly&&active&&workspace.canEdit!==false&&workspace.host===optionalHost&&optionalProfile?optionalChoice?.id:undefined;
- const sourceIssues=useMemo(()=>planSourceSpells(c,entries).issues,[c,entries]);
+ const sourceIssues=useMemo(()=>planSourceSpells(mechanics,entries).issues,[mechanics,entries]);
  const [focused,setFocused]=useState<Target>(),[menu,setMenu]=useState<{row:Selection;target?:Target;x:number;y:number}>(),[detail,setDetail]=useState<string>(),[classFilter,setClassFilter]=useState('');
  const [giftOwner,setGiftOwner]=useState('');const [collapsed,setCollapsed]=useState<Record<number,boolean>>({});const [preparedHeight,setPreparedHeight]=useState(0);const giftSources=cantripSources(c);
  const preparedRoot=useRef<HTMLDivElement>(null),libraryRoot=useRef<HTMLDivElement>(null);

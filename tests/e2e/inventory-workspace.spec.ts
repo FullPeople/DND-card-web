@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
-import {mockSource} from './fixtures';
+import {mockSource,suppressAnnouncement} from './fixtures';
 import {newCharacter,type Entry} from '../../src/core/model';
 test('local inventory preserves grid positions, quantities, marquee selection and export layout',async({page})=>{
- await mockSource(page);const c=newCharacter();c.name='背包测试';
+ await mockSource(page);await suppressAnnouncement(page);const c=newCharacter();c.name='背包测试';
  c.inventory={view:'grid',order:[],attunementLimit:3,coins:{cp:0,sp:0,ep:0,gp:10,pp:0}};
  for(let i=0;i<2;i++){const entry:Entry={id:'pack:'+i,name:'测试物品'+i,english:'Test'+i,source:'XPHB',kind:'item',edition:'2024',packId:'test',revision:'1',entries:['自制说明'],raw:{weight:2}};c.selections.push({id:entry.id,entry,quantity:2,level:1,equipped:false});}
  await page.goto('/');await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'inventory.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('tab',{name:'背包',exact:true}).click();
@@ -14,15 +14,15 @@ test('local inventory preserves grid positions, quantities, marquee selection an
  await page.locator('.paper').evaluate(el=>el.classList.add('sheet-export'));await expect(stock.locator('.stock-empty').first()).toBeHidden();await expect(stock.locator('.stock-collection')).toHaveCSS('display','flex');await page.locator('.paper').evaluate(el=>el.classList.remove('sheet-export'));
 });
 test('narrow Wiki drag switches to the character and restores Wiki on release',async({page})=>{
- await mockSource(page);await page.setViewportSize({width:800,height:1000});await page.goto('/');await page.getByRole('tab',{name:'背包',exact:true}).click();await page.getByRole('navigation',{name:'工作区'}).getByRole('button',{name:'Wiki',exact:true}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备',exact:true}).click();await page.locator('.catalog-row').first().click();
+ await mockSource(page);await suppressAnnouncement(page);await page.setViewportSize({width:800,height:1000});await page.goto('/');await page.getByRole('tab',{name:'背包',exact:true}).click();await page.getByRole('navigation',{name:'工作区'}).getByRole('button',{name:'Wiki',exact:true}).click();await page.getByRole('navigation',{name:'资料分类'}).getByRole('button',{name:'装备',exact:true}).click();await page.locator('.catalog-row').first().click();
  const source=page.locator('.detail-title'),a=(await source.boundingBox())!;await page.mouse.move(a.x+9,a.y+8);await page.mouse.down();await page.mouse.move(a.x-15,a.y-15,{steps:4});await expect(page.locator('.sheet-pane')).toHaveClass(/mobile-active/);const box=(await page.locator('.stock-collection').boundingBox())!;await page.mouse.move(box.x+20,box.y+20,{steps:8});await page.mouse.up();await expect(page.locator('.wiki-pane')).toHaveClass(/mobile-active/);await page.getByRole('navigation',{name:'工作区'}).getByRole('button',{name:'功能页',exact:true}).click();await expect(page.locator('.stock-item.stock-item')).toHaveCount(6);
 });
 
 test('inventory frames share state art and gravity, retain hit boxes and restore in edit mode',async({page})=>{
- await mockSource(page);const c=newCharacter();c.name='背包状态测试';
+ await mockSource(page);await suppressAnnouncement(page);const c=newCharacter();c.name='背包状态测试';
  for(const [id,name] of [['poisoned','中毒'],['petrified','石化'],['invisible','隐形'],['frightened','恐慌'],['exhaustion','力竭']])c.selections.push({id,entry:{id,kind:'condition',name,english:id,source:'XPHB',edition:'2024',packId:'test',revision:'1',entries:[],raw:{}},quantity:1,level:id==='exhaustion'?4:1,equipped:false});
  await page.goto('/');await page.getByRole('button',{name:'导入 / 导出',exact:true}).click();await page.getByTestId('character-file').setInputFiles({name:'stock-states.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(c))});await page.getByRole('button',{name:'关闭弹窗'}).click();await page.getByRole('tab',{name:'背包',exact:true}).click();
- const board=page.locator('.paper .stock-board'),cells=board.locator('[data-physical-frame=stock]');await expect(board).toHaveAttribute('data-fallen','true');await expect(cells).toHaveCount(24);await page.waitForTimeout(3200);
+ const board=page.locator('.paper .stock-board'),cells=board.locator('[data-physical-frame=stock]');await expect(board).toHaveAttribute('data-fallen','true');await expect(cells).toHaveCount(25);expect(await cells.evaluateAll(nodes=>nodes.map(n=>Number(n.getAttribute('data-stock-slot'))).sort((a,b)=>a-b))).toEqual(Array.from({length:25},(_,i)=>i));await expect(board.locator('.stock-collection')).toHaveCSS('--stock-columns','5');await page.waitForTimeout(3200);
  expect(await cells.evaluateAll(nodes=>nodes.every(n=>n.getAttribute('data-fallen')==='true'))).toBe(true);
  expect(await cells.evaluateAll(nodes=>nodes.some(n=>parseFloat((n as HTMLElement).style.translate.split(' ')[1])>1))).toBe(true);
  expect(await cells.evaluateAll(nodes=>{const boxes=nodes.map(n=>n.getBoundingClientRect());return boxes.every((a,i)=>boxes.slice(i+1).every(b=>Math.min(a.right,b.right)-Math.max(a.left,b.left)<1||Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)<1));})).toBe(true);

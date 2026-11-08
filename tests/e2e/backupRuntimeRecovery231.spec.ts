@@ -15,7 +15,7 @@ async function fixture(page:Page){
  await mockSource(page,{displayMode:'default'});await suppressAnnouncement(page);
  await page.addInitScript(cards=>{const request=indexedDB.open('dnd-card-standalone',1);request.onupgradeneeded=()=>{request.result.createObjectStore('documents');request.result.createObjectStore('cache');};request.onsuccess=()=>{const db=request.result,tx=db.transaction('documents','readwrite'),store=tx.objectStore('documents'),get=store.get('workspace');get.onsuccess=()=>{if(!get.result)store.put({schemaVersion:1,characters:cards,activeId:cards[0].id,packs:[]},'workspace');};tx.oncomplete=()=>db.close();};},[active,other]);
  await page.route('**/assets/cardRuntime-*.js',route=>route.abort('connectionreset'));
- await page.goto('/');await expect(page.locator('.editing-load-error')).toBeVisible();await expect(page.getByRole('button',{name:'更新资料',exact:true})).toBeEnabled();await expect(page.locator('.save-status')).toContainText('已保存到本机');
+ await page.goto('/');await expect(page.locator('.editing-load-error')).toBeVisible();await expect(page.getByRole('button',{name:'更新资料',exact:true,includeHidden:true})).toBeEnabled();await expect(page.locator('.save-status')).toContainText('已保存到本机');
  const current=(await records(page)).workspace,backup=structuredClone(current),restored=backup.characters.find(card=>card.id===backup.activeId)!;
  restored.name='已读取的旧备份';restored.notes='旧版本不同笔记';restored.revision=4;restored.abilities.dex=14;restored.runtime.tempHp=6;restored.runtime.resources.manual={name:'旧版本次数',current:4,max:9};
  const draft=structuredClone(current.characters.find(card=>card.id===other.id)!);draft.notes='独立恢复草稿，不能被覆盖';draft.revision=13;

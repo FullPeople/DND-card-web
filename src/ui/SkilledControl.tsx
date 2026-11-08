@@ -1,3 +1,4 @@
+import {useSheetDerived} from './SheetChoicesContext';
 import {useEffect,useState} from 'react';
 import {RetainedCardHideEffect,useRetainedCardActive} from './RetainedCardVisibility';
 import {useInteractionStatus} from './InteractionFeedback';
@@ -10,6 +11,7 @@ const empty=()=>['','',''];
 const manualState=(c:Character)=>JSON.stringify([c.abilities,c.proficiencies,c.expertise,c.skillBonuses,c.adjustments,c.training?.tools]);
 /** One shared quota: skill and tool kinds are not equipment or manual bonuses. */
 export function SkilledControl({c,catalog,choiceId,entry,unavailable,writable,edit}:Props){
+ const sheetDerived=useSheetDerived(c);
  const active=useRetainedCardActive(),persistence=useInteractionStatus();
  const status=reviewedSkilledStatus(c,choiceId,entry.id),stored=status.binding?.intent,saved=JSON.stringify(stored||{}),options=reviewedSkilledOptions(c,catalog);
  const storedValues=()=>stored?stored.choices.map(choice=>`${choice.kind}:${choice.reference}`):empty();
@@ -21,7 +23,7 @@ export function SkilledControl({c,catalog,choiceId,entry,unavailable,writable,ed
  const blocked=!known?'此熟习记录版本尚未支持，原数据保留且不能修改。':!canEdit?'当前角色卡只读，不能修改熟习。':unavailable||!status.eligible?(status.reason||'此职业选择、等级或来源当前不可用，原记录保留。'):'';
  const selected=values.filter(Boolean),distinct=new Set(selected).size,duplicate=distinct!==selected.length;
  const valid=selected.length===3&&distinct===3&&selected.every(value=>options.some(option=>option.value===value&&!option.unavailable));
- const skills=evaluate(c).skills,label=(value:string)=>options.find(option=>option.value===value)?.label||value;
+ const skills=(sheetDerived??evaluate(c)).skills,label=(value:string)=>options.find(option=>option.value===value)?.label||value;
  function reset(){setValues(storedValues());setConfirmed(false);setError('');}
  function save(remove=false){
   if(!canEdit||!remove&&(!!blocked||!valid||!confirmed))return;

@@ -1,5 +1,6 @@
 import type {Character,Entry,RulePack} from '../core/model';
 import {runtimeCharacterBase} from '../core/runtimeCharacterEdit';
+import {displayCharacterView} from '../core/displayCharacterEdit';
 import {withSiteSources,type SiteSources} from '../core/siteSources';
 import {automationNeedsInitialization,initializeAutomation} from '../core/automation/state';
 import {syncAutoResources} from '../core/resources';
@@ -33,7 +34,7 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
  };
  const display=(character:Character):Character=>remember('display',character,()=>{
   const view=build(character);
-  return character===runtimeCharacterBase(character)?view:{...view,runtime:character.runtime,spellSettings:character.spellSettings,revision:character.revision,updatedAt:character.updatedAt};
+  return displayCharacterView(view,character);
  });
  const warning=(card:Character)=>remember('navigation-review',runtimeCharacterBase(card),()=>cardMigrationIssues(withSiteSources(card,sources,packs),entries).length>0);
  const reconcile=(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
@@ -43,11 +44,19 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
   });
   return draft;
  };
- return {build,display,nameIndex,warning,ready:(card:Character)=>ready.has(card),reconcile,
-  reconciliationReady:(card:Character)=>reconciliationReady.has(card),
+ return {build,display,nameIndex,warning,ready:(card:Character)=>ready.has(runtimeCharacterBase(card)),reconcile,
+  reconciliationReady:(card:Character)=>reconciliationReady.has(runtimeCharacterBase(card)),
+  // Only the completed synchronous edit transaction calls this. A fresh
+  // catalog/source context owns a different set and must reconcile again.
+  acceptReconciled:(card:Character)=>{
+   const base=runtimeCharacterBase(card);
+   // The active-card effect shares this checker. A warmed changing view is
+   // still only a preview; only a completed edit transaction settles it.
+   checkReconciliation(base,()=>false);reconciliationReady.add(base);
+  },
   warmReconciliation:(card:Character,syncSourceSpells:(character:Character,entries:Entry[])=>boolean)=>{
-   if(reconciliationReady.has(card))return;
-   reconcile(card,syncSourceSpells);reconciliationReady.add(card);
+   const base=runtimeCharacterBase(card);if(reconciliationReady.has(base))return;
+   reconcile(card,syncSourceSpells);reconciliationReady.add(base);
   },
   steps:(card:Character)=>[
    ()=>{build(card);display(card);},
@@ -56,7 +65,7 @@ export function standaloneCardViews(entries:Entry[],sources:SiteSources|undefine
    ()=>warning(card),
    ()=>remember('derived',display(card),()=>evaluate(display(card))),
   ],
-  complete:(card:Character)=>{ready.add(card);},
+  complete:(card:Character)=>{ready.add(runtimeCharacterBase(card));},
  };
 }
 export type StandaloneCardViews=ReturnType<typeof standaloneCardViews>;

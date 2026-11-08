@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-07T08:04:57.189Z",
+  "sourceCommit": "8fb3815ba4dbb72d8901be3f6b723ca447d4d5ea",
+  "version": "standalone-1.0.311",
+  "productModified": false,
+  "deployed": false,
+  "scope": {
+    "actualPublicApplication": true,
+    "anonymousIsolatedBrowser": true,
+    "originalPlayerData": false,
+    "accountWrites": false,
+    "physicalDeviceAccepted": false,
+    "multiplayerAccepted": false,
+    "controlledInputFiles": 229,
+    "normalizedCatalogRowsObserved": 29505,
+    "privateInputIndexSha256": "0a67c9dcce2749a898f07478b7ebd7698dad6c9d90ad4569fcf0195781c41b2a",
+    "fixture": "Authored150 entries:30items20features100spells, then actual catalog Wizard12 via normal UI; resulting163selections. Original source prose omitted.",
+    "timingLimits": "One run per indicated fixture/build; diagnostic counts separately from public timings. Includes user gesture automation, durable save and two animation-frame waiting. No population percentile claim; nested durations are not additive."
+  },
+  "cases": [
+    {
+      "case": "heavy-name",
+      "public": {
+        "operationThroughSaveMs": 134,
+        "inputToSecondAnimationFrameMs": [
+          34.9
+        ],
+        "wholeCharacterClones": 1,
+        "longTasksMs": [],
+        "wholeBookPuts": [
+          {
+            "key": "backup",
+            "characters": 2
+          },
+          {
+            "key": "workspace",
+            "characters": 2
+          }
+        ]
+      },
+      "separateDiagnosticBuild": {
+        "functionCounts": {
+          "src/core/siteSources.ts:withSiteSources": 2,
+          "src/ui/App.tsx:edit": 1,
+          "src/core/automation/choices.ts:sheetChoices": 4,
+          "src/core/displayCharacterEdit.ts:sameCharacterMechanics": 6,
+          "src/core/classMigrationQuery.ts:classCompatibilityIssues": 2,
+          "src/core/cardMigrationIssues.ts:cardMigrationIssues": 2,
+          "src/ui/App.tsx:App": 3,
+          "src/platform/storage.ts:saveWorkspace": 1
+        },
+        "wholeCharacterClones": 0
+      }
+    },
+    {
+      "case": "heavy-item-quantity",
+      "public": {
+        "operationThroughSaveMs": 508,
+        "inputToSecondAnimationFrameMs": [
+          129.1
+        ],
+        "wholeCharacterClones": 2,
+        "longTasksMs": [
+          123,
+          107
+        ],
+        "wholeBookPuts": [
+          {
+            "key": "backup",
+            "characters": 2
+          },
+          {
+            "key": "workspace",
+            "characters": 2
+          }
+        ]
+      },
+      "separateDiagnosticBuild": {
+        "functionCounts": {
+          "src/core/displayCharacterEdit.ts:sameCharacterMechanics": 8,
+          "src/ui/App.tsx:App": 4,
+          "src/core/automation/choices.ts:sheetChoices": 12,
+          "src/core/siteSources.ts:withSiteSources": 3,
+          "src/core/entryNameIndex.ts:entryNameIndex": 2,
+          "src/core/sheet.ts:syncFeatures": 2,
+          "src/core/automation/sourceSpellPlan.ts:planSourceSpells": 2,
+          "src/core/automation/sourceSpells.ts:syncSourceSpells": 2,
+          "src/core/resources.ts:syncAutoResources": 2,
+          "src/ui/App.tsx:edit": 1,
+          "src/core/classMigrationQuery.ts:classCompatibilityIssues": 2,
+          "src/core/cardMigrationIssues.ts:cardMigrationIssues": 2,
+          "src/core/engine.ts:evaluate": 1,
+          "src/platform/cardViewReconciliation.ts:reconciledCardView": 1,
+          "src/platform/storage.ts:saveWorkspace": 1
+        },
+        "wholeCharacterClones": 2
+      }
+    },
+    {
+      "case": "heavy-add-item",
+      "public": {
+        "operationThroughSaveMs": 450,
+        "inputToSecondAnimationFrameMs": [],
+        "wholeCharacterClones": 2,
+        "longTasksMs": [
+          50,
+          121
+        ],
+        "wholeBookPuts": [
+          {
+            "key": "backup",
+            "characters": 2
+          },
+          {
+            "key": "workspace",
+            "characters": 2
+          }
+        ]
+      },
+      "separateDiagnosticBuild": {
+        "functionCounts": {
+          "src/core/siteSources.ts:withSiteSources": 3,
+          "src/core/automation/choices.ts:sheetChoices": 10,
+          "src/core/entryNameIndex.ts:entryNameIndex": 2,
+          "src/core/sheet.ts:syncFeatures": 2,
+          "src/core/automation/sourceSpellPlan.ts:planSourceSpells": 2,
+          "src/core/automation/sourceSpells.ts:syncSourceSpells": 2,
+          "src/core/resources.ts:syncAutoResources": 2,
+          "src/ui/App.tsx:edit": 1,
+          "src/core/displayCharacterEdit.ts:sameCharacterMechanics": 4,
+          "src/core/classMigrationQuery.ts:classCompatibilityIssues": 2,
+          "src/core/cardMigrationIssues.ts:cardMigrationIssues": 2,
+          "src/core/engine.ts:evaluate": 1,
+          "src/ui/App.tsx:App": 2,
+          "src/platform/cardViewReconciliation.ts:reconciledCardView": 1,
+          "src/platform/storage.ts:saveWorkspace": 1
+        },
+        "wholeCharacterClones": 2
+      }
+    },
+    {
+      "case": "wizard150-story",
+      "public": {
+        "operationThroughSaveMs": 798,
+        "inputToSecondAnimationFrameMs": [
+          740.9
+        ],
+        "wholeCharacterClones": 2,
+        "longTasksMs": [
+          684
+        ],
+        "wholeBookPuts": [
+          {
+            "key": "backup",
+            "characters": 2
+          },
+          {
+            "key": "workspace",
+            "characters": 2
+          }
+        ]
+      },
+      "separateDiagnosticBuild": {
+        "functionCounts": {
+          "src/core/siteSources.ts:withSiteSources": 3,
+          "src/core/engine.ts:evaluate": 11,
+          "src/core/automation/choices.ts:sheetChoices": 11,
+          "src/core/entryNameIndex.ts:entryNameIndex": 2,
+          "src/core/sheet.ts:syncFeatures": 2,
+          "src/core/automation/sourceSpellPlan.ts:planSourceSpells": 2,
+          "src/core/automation/sourceSpells.ts:syncSourceSpells": 2,
+          "src/core/resources.ts:syncAutoResources": 2,
+          "src/ui/App.tsx:edit": 1,
+          "src/core/displayCharacterEdit.ts:sameCharacterMechanics": 4,
+          "src/core/classMigrationQuery.ts:classCompatibilityIssues": 2,
+          "src/core/cardMigrationIssues.ts:cardMigrationIssues": 2,
+          "src/ui/App.tsx:App": 2,
+          "src/platform/cardViewReconciliation.ts:reconciledCardView": 1,
+          "src/platform/storage.ts:saveWorkspace": 1
+        },
+        "wholeCharacterClones": 2
+      }
+    },
+    {
+      "case": "wizard150-ten-keystrokes",
+      "public": {
+        "operationThroughSaveMs": 6031,
+        "inputToSecondAnimationFrameMs": [
+          625.1,
+          618.4,
+          605.7,
+          610.8,
+          575.2,
+          564.7,
+          582.3,
+          576.7,
+          560.9,
+          559.7
+        ],
+        "wholeCharacterClones": 20,
+        "longTasksMs": [
+          617,
+          613,
+          601,
+          606,
+          571,
+          559,
+          577,
+          571,
+          556,
+          555
+        ],
+        "wholeBookPuts": [
+          {
+            "key": "backup",
+            "characters": 2
+          },
+          {
+            "key": "workspace",
+            "characters": 2
+          },
+          {
+            "key": "backup",
+            "characters": 2
+          },
+          {
+            "key": "workspace",
+            "characters": 2
+          },
+          {
+            "key": "backup",
+            "characters": 2
+          },
+          {
+            "key": "workspace",
+            "characters": 2
+          }
+        ]
+      },
+      "separateDiagnosticBuild": {
+        "functionCounts": {
+          "src/core/siteSources.ts:withSiteSources": 30,
+          "src/core/engine.ts:evaluate": 101,
+          "src/core/automation/choices.ts:sheetChoices": 91,
+          "src/core/entryNameIndex.ts:entryNameIndex": 20,
+          "src/core/sheet.ts:syncFeatures": 20,
+          "src/core/automation/sourceSpellPlan.ts:planSourceSpells": 20,
+          "src/core/automation/sourceSpells.ts:syncSourceSpells": 20,
+          "src/core/resources.ts:syncAutoResources": 20,
+          "src/ui/App.tsx:edit": 10,
+          "src/core/displayCharacterEdit.ts:sameCharacterMechanics": 22,
+          "src/core/classMigrationQuery.ts:classCompatibilityIssues": 20,
+          "src/core/cardMigrationIssues.ts:cardMigrationIssues": 20,
+          "src/ui/App.tsx:App": 11,
+          "src/platform/cardViewReconciliation.ts:reconciledCardView": 10,
+          "src/platform/storage.ts:saveWorkspace": 3
+        },
+        "wholeCharacterClones": 20
+      }
+    }
+  ],
+  "separateColdPublicRun": {
+    "paperReadyMs": 30743.29999999702,
+    "coreResource": {
+      "path": "/card/assets/card-core-CV9aIHT4.js",
+      "ms": 27756.60000000894,
+      "bytes": 1298659,
+      "decoded": 7481358
+    },
+    "scope": "Fresh anonymous blank local card, actual public network. A single observation, separate from controlled catalog runs."
+  },
+  "staticSourceGraph": {
+    "modules": 499,
+    "jsonModules": 41,
+    "jsonSourceBytes": 7878953,
+    "largestJson": [
+      {
+        "path": "src/core/automation/ordinarySpellCastingEvidence.json",
+        "sourceBytes": 3517369,
+        "chain": [
+          "src/ui/App.tsx",
+          "src/core/resources.ts",
+          "src/core/automation/itemChargeDebitSource.ts",
+          "src/core/automation/ordinarySpellCastingEvidence.json"
+        ]
+      },
+      {
+        "path": "src/core/automation/variantItemResistanceBonusEvidence.json",
+        "sourceBytes": 1442248,
+        "chain": [
+          "src/ui/App.tsx",
+          "src/core/engine.ts",
+          "src/core/automation/variantItemResistanceBonuses.ts",
+          "src/core/automation/variantItemResistanceBonusEvidence.json"
+        ]
+      },
+      {
+        "path": "src/core/automation/attunedItemChargeDebitEvidence.json",
+        "sourceBytes": 798320,
+        "chain": [
+          "src/ui/App.tsx",
+          "src/core/resources.ts",
+          "src/core/automation/itemChargeDebitSource.ts",
+          "src/core/automation/attunedItemChargeDebitEvidence.json"
+        ]
+      },
+      {
+        "path": "src/core/automation/racialDarkvisionEvidence.json",
+        "sourceBytes": 494644,
+        "chain": [
+          "src/ui/App.tsx",
+          "src/core/engine.ts",
+          "src/core/automation/racialDarkvision.ts",
+          "src/core/automation/racialDarkvisionEvidence.json"
+        ]
+      }
+    ],
+    "scope": "Static local source import graph for exact public311 source. Includes possible first-card dependency closure; source bytes are not minified/transfer bytes. Dynamic imports and external dependency bytes excluded."
+  },
+  "preparationFailures": {
+    "count": 2,
+    "cause": "Audit harness expected imported native character ID to remain unchanged; product correctly creates a new ID. Replaced wrong precondition with new-copy and150entry checks. Original60000ms unchanged. Not a product failure."
+  },
+  "pageErrors": [],
+  "unmatchedControlledInputRequests": [],
+  "evidenceDigests": [
+    {
+      "privateReceiptName": "source-provenance.json",
+      "sha256": "4499ef77659aee887751a41f80e1c2b578f1d9156bd885f90ceade3b83985131"
+    },
+    {
+      "privateReceiptName": "public-cold-paper-ready.json",
+      "sha256": "09e19a984ba69da9f1603c663c3a9bf557cd92c000e7ba0537cfad4c6dc9af3c"
+    },
+    {
+      "privateReceiptName": "public-interaction-result.json",
+      "sha256": "49fb8b5b6537b8504cf3d8c957bdba9d41cd7d57167ff26d9c602a4a9edef005"
+    },
+    {
+      "privateReceiptName": "observed-attempt1-failure.json",
+      "sha256": "6f65bc0df00b17f1575f632a08189c715c50b7cd03f72406d95fb5a76cb0fe23"
+    },
+    {
+      "privateReceiptName": "observed-attempt2-failure.json",
+      "sha256": "16845c8a70c864196ac70e32082e9131bc59697f67a5412b12534ecaddb67f9e"
+    },
+    {
+      "privateReceiptName": "observed-attempt3-result.json",
+      "sha256": "dce4e590339da7723d500637df431cd5b2c39e3db2ff37bde8ef93f5e273321e"
+    },
+    {
+      "privateReceiptName": "observed-attempt4-result.json",
+      "sha256": "0644ad4026be38fa048d9baef3449c212cfb3c8396401fa545f3da54fa5dc48e"
+    },
+    {
+      "privateReceiptName": "public-controls-attempt5-result.json",
+      "sha256": "6c99c6ab9453a8ece60d32f3e44d25df410c8202932d0a1817a886e28e5f5259"
+    },
+    {
+      "privateReceiptName": "public-controls-attempt5-release-before.json",
+      "sha256": "324be05465c018da1cd4c52c840a96e364bee32816fccec17b906e5dd7b33634"
+    },
+    {
+      "privateReceiptName": "public-controls-attempt5-release-after.json",
+      "sha256": "324be05465c018da1cd4c52c840a96e364bee32816fccec17b906e5dd7b33634"
+    },
+    {
+      "privateReceiptName": "static-first-card-graph.json",
+      "sha256": "cb6a70e8ac2679afd106dc34271be2fb0706023c8f0e632e12447763cc09d30d"
+    }
+  ]
+}

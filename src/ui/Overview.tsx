@@ -1,11 +1,12 @@
 import {runtimeValueEdit} from '../core/runtimeCharacterEdit';
+import {sheetFillingReviewed} from '../core/automation/choices';
 import {cloudFeaturesEnabled} from '../cloud/availability';
 import {useReadViewMemo} from './useReadViewMemo';
 import {catalogTrainingIndex} from './catalogTrainingIndex';
 import {OverviewChoiceOverlay} from './OverviewChoiceOverlay';
 import {ClassChoiceRecords} from './ClassChoiceRecords';
 import {ObservantPassiveInvestigation} from './ObservantPassiveInvestigation';
-import {useSheetChoices} from './SheetChoicesContext';
+import {useSheetChoices,useSheetMechanics} from './SheetChoicesContext';
 import {displayCharacterEdit} from '../core/displayCharacterEdit';
 import {ScreenAbilities} from './ScreenAbilities';
 import {ProficiencyStatus} from './ProficiencyStatus';
@@ -56,8 +57,9 @@ const sizes: Record<string, string> = { T: '微型', S: '小型', M: '中型', L
 
 export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, browse, inspect, onLink, openResources, openQuickbar, openHp, pinDrop }: Props) {
   const editing = useContext(SheetEditContext),screen=useSheetRenderMode()==='screen';
-  const spells = useReadViewMemo(cloudFeaturesEnabled,()=>spellState(c),[c]);
-  const readySpells=useReadViewMemo(cloudFeaturesEnabled,()=>c.selections.filter(row=>row.entry.kind==='spell'&&spellIsReady(c,row)),[c]);
+  const mechanics=useSheetMechanics(c);
+  const spells = useReadViewMemo(cloudFeaturesEnabled,()=>spellState(c,d),[mechanics,d]);
+  const readySpells=useReadViewMemo(cloudFeaturesEnabled,()=>c.selections.filter(row=>row.entry.kind==='spell'&&spellIsReady(c,row,spells)),[mechanics,spells]);
   const choices=useSheetChoices(c,catalog);
   const trainingNames=useMemo(()=>catalogTrainingIndex(catalog),[catalog]);
   const [trainingEditor, setTrainingEditor] = useState(false);
@@ -79,7 +81,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   function identityCell(kind: 'class' | 'subclass' | 'race' | 'background', label: string) {
     const rows = selected([kind]);
     const showRows = kind === 'subclass' && classes.length === 1 ? rows.filter(s => belongsToClass(s, classes[0])) : rows;
-    return <SheetCell label={label} className={`identity-field identity-${kind} ${kind === 'class' && multi ? 'identity-multiclass' : ''}`} flashKey={showRows.map(s => s.id).join(',')} dashed missing={!showRows.length} onFill={() => browse(kind)} dropKinds={kind === 'class' ? ['class', 'subclass'] : kind === 'subclass' ? ['subclass', 'class'] : [kind]}>
+    return <SheetCell label={label} className={`identity-field identity-${kind} ${kind === 'class' && multi ? 'identity-multiclass' : ''}`} flashKey={showRows.map(s => s.id).join(',')} dashed missing={!showRows.length&&!sheetFillingReviewed(c)} onFill={() => browse(kind)} dropKinds={kind === 'class' ? ['class', 'subclass'] : kind === 'subclass' ? ['subclass', 'class'] : [kind]}>
       {showRows.map(row => <DropZone className="identity-record" key={row.id} kinds={kind==='class'?['subclass']:[kind]} accepts={entry=>kind!=='class'||classMatches(entry,row.entry)} onReceive={entry=>addEntry(entry)}><IdentityToken row={row} c={c} edit={edit} inspect={inspect}/>{kind === 'class' && multi && selected(['subclass']).filter(sub => belongsToClass(sub, row)).map(sub => <IdentityToken key={sub.id} row={sub} c={c} edit={edit} inspect={inspect}/>)}{kind==='class'&&editing&&<button className="subclass-fill" aria-label={`为${row.entry.name}选择子职`} onClick={()=>browse('subclass',row.entry)} title="选择此职业的子职">＋</button>}</DropZone>)}
     </SheetCell>;
   }
@@ -132,7 +134,7 @@ export function Overview({ catalog=[], statusRibbon, addEntry, c, d, edit, brows
   const trainingCell = <SheetCell label="装备训练与其他熟练" className="training-cell" training dropKinds={['rule', 'item', 'feature']} wholePaper accepts={entry => !!trainingCategory(entry)} allowExisting onReceive={entry => receiveTraining(entry,trainingCategory(entry)!)} onHeadingClick={editing ? () => setTrainingEditor(v => !v) : undefined} headingActionLabel="编辑装备训练与其他熟练" headingExpanded={editing && trainingEditor}><dl>{training.map(t => <DropZone key={t.key} className="training-row" training kinds={['item','rule','feature']} accepts={entry=>trainingCategory(entry)===t.key} allowExisting onReceive={entry=>receiveTraining(entry,t.key)}><dt>{t.label}</dt><dd><TrainingChips key={`${c.id}:${t.key}`} group={t.key} source={c.edition==='2024'?'XPHB':'PHB'} editAll={trainingEditor} label={t.label} value={c.training?.[t.key] ?? t.values.join('、')} onChange={value => edit(draft => { (draft.training ||= {})[t.key] = value; })}/></dd></DropZone>)}</dl></SheetCell>;
   const initiative = <SheetCell label="先攻" className="initiative-cell"><AdjustedValue c={c} value={d.initiative} target="initiative" label="先攻" sign edit={edit}/></SheetCell>;
   const speed = <SheetCell label="速度" className="speed-cell"><AdjustedValue c={c} value={d.speed} target="speed" label="速度" unit="尺" edit={edit}/></SheetCell>;
-  const sizeCell = <SheetCell label="体型" className="size-cell" dropKinds={['rule']} accepts={entry => entry.raw._category === 'size'} onReceive={entry => edit(draft => { draft.size = entry.raw.size; })} dashed missing={!sizeCode} onFill={() => browse('size')} onHeadingClick={() => { if (sizeInfo) inspect(sizeInfo); }}>
+  const sizeCell = <SheetCell label="体型" className="size-cell" dropKinds={['rule']} accepts={entry => entry.raw._category === 'size'} onReceive={entry => edit(draft => { draft.size = entry.raw.size; })} dashed missing={!sizeCode&&!sheetFillingReviewed(c)} onFill={() => browse('size')} onHeadingClick={() => { if (sizeInfo) inspect(sizeInfo); }}>
           {editing ? <select aria-label="体型" value={c.size || ''} onChange={e => edit(draft => { draft.size = e.target.value ? e.target.value as Size : undefined; })}><option value="">{race ? `种族 · ${size}` : '—'}</option>{Object.entries(SIZE_LABELS).map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select> : sizeInfo ? <Reference className="size-value" reference={`entry:${sizeInfo.id}`} entry={sizeInfo} onClick={() => inspect(sizeInfo)}>{size}</Reference> : null}
         </SheetCell>;
   const passive = <SheetCell label="被动察觉" className={d.passiveInvestigation!==undefined?'observant-passive-cell':''} headingInline={<ObservantPassiveInvestigation d={d}/>}><AdjustedValue c={c} value={d.passive} target="passive" label="被动察觉" edit={edit}/></SheetCell>;

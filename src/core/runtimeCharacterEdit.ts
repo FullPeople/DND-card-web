@@ -2,13 +2,13 @@ import type {Character} from './model';
 import {setResource} from './resources';
 import {rememberSourceSpellUses} from './automation/sourceSpellState';
 import {automationNeedsInitialization,supportedAutomation} from './automation/state';
+import {forkCharacterConstruction} from './characterConstruction';
+export {characterConstructionBase as runtimeCharacterBase} from './characterConstruction';
 
 type Action=(draft:Character)=>void;
 type Intent={field:'hp'|'tempHp';value:number}|{field:'resource';id:string;value:number};
 const intents=new WeakMap<Action,Intent>();
-const construction=new WeakMap<Character,Character>();
-export const runtimeCharacterBase=(character:Character)=>construction.get(character)||character;
-function fork(character:Character,next:Character){construction.set(next,runtimeCharacterBase(character));return next;}
+const fork=forkCharacterConstruction;
 function apply(draft:Character,intent:Intent){
  if(intent.field==='resource')setResource(draft,intent.id,intent.value);
  else draft.runtime[intent.field]=intent.value;
